@@ -3,9 +3,9 @@ docker run -d --name db -e POSTGRES_PASSWORD=pass -e POSTGRES_USER=user -e POSTG
 docker run -d --name app --link postgres -p 8080:8080 -e DATABASE_URL="postgres://user:pass@db:5432/mydb?sslmode=disable" app
 
 docker compose up -d
-psql "postgres://app:app@localhost:5432/appdb?sslmode=disable" -f schema.sql
+psql "postgres://user:pass@localhost:5432/db?sslmode=disable" -f schema.sql
 
-export DATABASE_URL="postgres://app:app@localhost:5432/appdb?sslmode=disable"
+export DATABASE_URL="postgres://user:pass@localhost:5432/db?sslmode=disable"
 export ACCESS_SECRET="super-secret-access-please-change"
 export REFRESH_SECRET="super-secret-refresh-please-change"
 go mod tidy
