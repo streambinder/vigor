@@ -33,3 +33,4 @@ go.work.sum
 .venv
 models
 .gitignore
+.DS_Store
