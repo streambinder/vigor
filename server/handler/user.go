@@ -25,7 +25,6 @@ func init() {
 		if err := database.DB.Create(&user).Error; err != nil {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "email already exists"})
 		}
-
 		return c.JSON(fiber.Map{"message": "user created"})
 	})
 	APP.Post("/unregister", middleware.Authorized(), func(c *fiber.Ctx) error {

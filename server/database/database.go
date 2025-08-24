@@ -23,6 +23,10 @@ func init() {
 		log.Fatal("Failed to connect to database:", err)
 	}
 
+	if err := DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";").Error; err != nil {
+		log.Fatal("Failed to create extension:", err)
+	}
+
 	if err := DB.AutoMigrate(&model.User{}, &model.RefreshToken{}); err != nil {
 		log.Fatal("Failed to migrate database:", err)
 	}

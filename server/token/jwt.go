@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/streambinder/vigor/model"
 	"gorm.io/gorm"
 )
@@ -13,11 +14,11 @@ import (
 var jwtKey = []byte(os.Getenv("JWT_SECRET"))
 
 type Claims struct {
-	UserID uint `json:"user_id"`
+	UserID uuid.UUID `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
-func GenerateTokens(db *gorm.DB, userID uint) (string, string, error) {
+func GenerateTokens(db *gorm.DB, userID uuid.UUID) (string, string, error) {
 	accessClaims := Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
