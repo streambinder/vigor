@@ -11,14 +11,26 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: pg_isready -q -U user -d db
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -q -U user -d db"]
+      # interval: 10s
+      # timeout: 5s
+      # retries: 5
+      # start_period: 10s
+  llm:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    command: -m /models/Llama-3.2-1B-Instruct-Q4_0.gguf --port 8000
+    volumes:
+      - ../models:/models:ro
+    ports:
+      - 8000:8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
   app:
     build: .
     depends_on:
       db:
+        condition: service_healthy
+      llm:
         condition: service_healthy
     environment:
       DATABASE_URL: postgres://user:pass@db:5432/db?sslmode=disable
