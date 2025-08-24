@@ -89,7 +89,7 @@ func main() {
 
 	f.Post("/register", app.handleRegister)
 	f.Post("/login", app.handleLogin)
-	f.Post("/refresh", app.handleRefresh) // rotazione sicura
+	f.Post("/refresh", app.handleRefresh)
 	f.Post("/logout", app.handleLogout)
 	f.Get("/me", app.jwtMiddleware, app.handleMe)
 
@@ -150,7 +150,7 @@ func (a *App) handleLogin(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "jwt error")
 	}
-	// persist refresh
+
 	if err := a.saveRefresh(c.Context(), jti, id, refresh, exp, clientIP(c), c.Get("User-Agent")); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "db error")
 	}
@@ -169,7 +169,6 @@ func (a *App) handleRefresh(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusUnauthorized, "invalid refresh")
 	}
 
-	// check DB: token esiste, non revocato e non scaduto
 	var userID uuid.UUID
 	var revokedAt *time.Time
 	var expiresAt time.Time
@@ -180,14 +179,12 @@ func (a *App) handleRefresh(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusUnauthorized, "refresh not valid")
 	}
 
-	// rotate: revoca il vecchio e crea nuovo
 	now := time.Now().UTC()
 	if _, err := a.DB.Exec(c.Context(),
 		`UPDATE refresh_tokens SET revoked_at=$2 WHERE jti=$1`, claims.ID, now); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "db revoke error")
 	}
 
-	// emetti nuovo pair
 	var email string
 	if err := a.DB.QueryRow(c.Context(), `SELECT email FROM users WHERE id=$1`, userID).Scan(&email); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "db error")
@@ -235,8 +232,6 @@ func (a *App) handleMe(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"user_id": userID, "email": email, "exp": exp})
 }
 
-// ===== JWT helpers =====
-
 func (a *App) issueAccess(userID uuid.UUID, email string) (string, error) {
 	claims := jwt.RegisteredClaims{
 		Subject:   userID.String(),
@@ -252,7 +247,7 @@ func (a *App) issueAccess(userID uuid.UUID, email string) (string, error) {
 	return token.SignedString(a.AccessSecret)
 }
 
-func (a *App) issueRefresh(c *fiber.Ctx, userID uuid.UUID) (tokenStr string, jti uuid.UUID, exp time.Time, err error) {
+func (a *App) issueRefresh(_ *fiber.Ctx, userID uuid.UUID) (tokenStr string, jti uuid.UUID, exp time.Time, err error) {
 	jti = uuid.New()
 	exp = time.Now().Add(a.RefreshTTL)
 	claims := jwt.RegisteredClaims{
@@ -280,7 +275,6 @@ func (a *App) verifyRefresh(token string) (*jwt.RegisteredClaims, error) {
 	return rc, nil
 }
 
-// salva refresh hashato
 func (a *App) saveRefresh(ctx context.Context, jti uuid.UUID, userID uuid.UUID, tokenPlain string, expiresAt time.Time, ip, ua string) error {
 	h := sha256.Sum256([]byte(tokenPlain))
 	hashHex := hex.EncodeToString(h[:])
@@ -290,8 +284,6 @@ func (a *App) saveRefresh(ctx context.Context, jti uuid.UUID, userID uuid.UUID, 
 	`, jti, userID, hashHex, time.Now().UTC(), expiresAt.UTC(), ua, ip)
 	return err
 }
-
-// ===== Middleware protezione access =====
 
 func (a *App) jwtMiddleware(c *fiber.Ctx) error {
 	auth := c.Get("Authorization")
@@ -318,8 +310,6 @@ func (a *App) jwtMiddleware(c *fiber.Ctx) error {
 	c.Locals("exp", exp)
 	return c.Next()
 }
-
-// ===== util =====
 
 func clientIP(c *fiber.Ctx) string {
 	ip := c.IP()
