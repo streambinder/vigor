@@ -25,17 +25,17 @@ services:
       - 8000:8000
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-  app:
-    build: .
-    depends_on:
-      db:
-        condition: service_healthy
-      llm:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: postgres://user:pass@db:5432/db?sslmode=disable
-    ports:
-      - 8080:8080
+  # app:
+  #   build: .
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     llm:
+  #       condition: service_healthy
+  #   environment:
+  #     DATABASE_URL: postgres://user:pass@db:5432/db?sslmode=disable
+  #   ports:
+  #     - 8080:8080
 
 volumes:
   db_data:

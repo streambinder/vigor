@@ -1,0 +1,88 @@
+package handler
+
+import (
+	"net/http"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/streambinder/vigor/model"
+	"github.com/streambinder/vigor/token"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+)
+
+func SetupRoutes(app *fiber.App, db *gorm.DB) {
+	app.Post("/register", func(c *fiber.Ctx) error {
+		var body struct {
+			Email    string `json:"email"`
+			Password string `json:"password"`
+		}
+		if err := c.BodyParser(&body); err != nil {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse JSON"})
+		}
+
+		hash, _ := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
+		user := model.User{Email: body.Email, Password: string(hash)}
+		if err := db.Create(&user).Error; err != nil {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "email already exists"})
+		}
+
+		return c.JSON(fiber.Map{"message": "user created"})
+	})
+
+	app.Post("/login", func(c *fiber.Ctx) error {
+		var body struct {
+			Email    string `json:"email"`
+			Password string `json:"password"`
+		}
+		if err := c.BodyParser(&body); err != nil {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse JSON"})
+		}
+
+		var user model.User
+		if err := db.First(&user, "email = ?", body.Email).Error; err != nil {
+			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid credentials"})
+		}
+
+		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password)); err != nil {
+			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid credentials"})
+		}
+
+		accessToken, refreshToken, err := token.GenerateTokens(db, user.ID)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "could not generate tokens"})
+		}
+
+		return c.JSON(fiber.Map{"access_token": accessToken, "refresh_token": refreshToken})
+	})
+
+	app.Post("/refresh", func(c *fiber.Ctx) error {
+		var body struct {
+			RefreshToken string `json:"refresh_token"`
+		}
+		if err := c.BodyParser(&body); err != nil {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse JSON"})
+		}
+
+		accessToken, refreshToken, err := token.RefreshTokens(db, body.RefreshToken)
+		if err != nil {
+			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid refresh token"})
+		}
+
+		return c.JSON(fiber.Map{"access_token": accessToken, "refresh_token": refreshToken})
+	})
+
+	app.Post("/logout", func(c *fiber.Ctx) error {
+		var body struct {
+			RefreshToken string `json:"refresh_token"`
+		}
+		if err := c.BodyParser(&body); err != nil {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse JSON"})
+		}
+
+		if err := token.RevokeToken(db, body.RefreshToken); err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "could not revoke token"})
+		}
+
+		return c.JSON(fiber.Map{"message": "logged out"})
+	})
+}
