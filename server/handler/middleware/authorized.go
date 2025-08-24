@@ -5,7 +5,7 @@ import (
 	"github.com/streambinder/vigor/token"
 )
 
-func Protected() fiber.Handler {
+func Authorized() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		bearer := c.Get("Authorization")
 		if bearer == "" || len(bearer) <= 7 || bearer[:7] != "Bearer " {

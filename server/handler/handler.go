@@ -5,15 +5,17 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/streambinder/vigor/middleware"
+	"github.com/streambinder/vigor/database"
+	"github.com/streambinder/vigor/handler/middleware"
 	"github.com/streambinder/vigor/model"
 	"github.com/streambinder/vigor/token"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
-func SetupRoutes(app *fiber.App, db *gorm.DB) {
-	app.Post("/register", func(c *fiber.Ctx) error {
+var APP = fiber.New()
+
+func init() {
+	APP.Post("/register", func(c *fiber.Ctx) error {
 		var body struct {
 			Email    string `json:"email"`
 			Password string `json:"password"`
@@ -24,14 +26,14 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 
 		hash, _ := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
 		user := model.User{Email: body.Email, Password: string(hash)}
-		if err := db.Create(&user).Error; err != nil {
+		if err := database.DB.Create(&user).Error; err != nil {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "email already exists"})
 		}
 
 		return c.JSON(fiber.Map{"message": "user created"})
 	})
 
-	app.Post("/login", func(c *fiber.Ctx) error {
+	APP.Post("/login", func(c *fiber.Ctx) error {
 		var body struct {
 			Email    string `json:"email"`
 			Password string `json:"password"`
@@ -41,7 +43,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 		}
 
 		var user model.User
-		if err := db.First(&user, "email = ?", body.Email).Error; err != nil {
+		if err := database.DB.First(&user, "email = ?", body.Email).Error; err != nil {
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid credentials"})
 		}
 
@@ -49,7 +51,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid credentials"})
 		}
 
-		accessToken, refreshToken, err := token.GenerateTokens(db, user.ID)
+		accessToken, refreshToken, err := token.GenerateTokens(database.DB, user.ID)
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "could not generate tokens"})
 		}
@@ -57,7 +59,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 		return c.JSON(fiber.Map{"access_token": accessToken, "refresh_token": refreshToken})
 	})
 
-	app.Post("/refresh", func(c *fiber.Ctx) error {
+	APP.Post("/refresh", func(c *fiber.Ctx) error {
 		var body struct {
 			RefreshToken string `json:"refresh_token"`
 		}
@@ -66,7 +68,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse JSON"})
 		}
 
-		accessToken, refreshToken, err := token.RefreshTokens(db, body.RefreshToken)
+		accessToken, refreshToken, err := token.RefreshTokens(database.DB, body.RefreshToken)
 		if err != nil {
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid refresh token"})
 		}
@@ -74,7 +76,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 		return c.JSON(fiber.Map{"access_token": accessToken, "refresh_token": refreshToken})
 	})
 
-	app.Post("/logout", func(c *fiber.Ctx) error {
+	APP.Post("/logout", func(c *fiber.Ctx) error {
 		var body struct {
 			RefreshToken string `json:"refresh_token"`
 		}
@@ -82,15 +84,16 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse JSON"})
 		}
 
-		if err := token.RevokeToken(db, body.RefreshToken); err != nil {
+		if err := token.RevokeToken(database.DB, body.RefreshToken); err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "could not revoke token"})
 		}
 
 		return c.JSON(fiber.Map{"message": "logged out"})
 	})
-	app.Get("/profile", middleware.Protected(), func(c *fiber.Ctx) error {
+	APP.Use(middleware.Authorized())
+	APP.Get("/profile", func(c *fiber.Ctx) error {
 		var user model.User
-		if err := db.First(&user, "id = ?", c.Locals("userID")).Error; err != nil {
+		if err := database.DB.First(&user, "id = ?", c.Locals("userID")).Error; err != nil {
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
 		}
 
