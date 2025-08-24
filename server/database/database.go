@@ -22,5 +22,8 @@ func init() {
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
-	DB.AutoMigrate(&model.User{}, &model.RefreshToken{})
+
+	if err := DB.AutoMigrate(&model.User{}, &model.RefreshToken{}); err != nil {
+		log.Fatal("Failed to migrate database:", err)
+	}
 }
