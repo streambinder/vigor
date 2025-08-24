@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/streambinder/vigor/middleware"
 	"github.com/streambinder/vigor/model"
 	"github.com/streambinder/vigor/token"
 	"golang.org/x/crypto/bcrypt"
@@ -59,6 +61,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 		var body struct {
 			RefreshToken string `json:"refresh_token"`
 		}
+		log.Println(body)
 		if err := c.BodyParser(&body); err != nil {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse JSON"})
 		}
@@ -84,5 +87,13 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 		}
 
 		return c.JSON(fiber.Map{"message": "logged out"})
+	})
+	app.Get("/profile", middleware.Protected(), func(c *fiber.Ctx) error {
+		var user model.User
+		if err := db.First(&user, "id = ?", c.Locals("userID")).Error; err != nil {
+			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
+		}
+
+		return c.JSON(fiber.Map{"user": user})
 	})
 }
