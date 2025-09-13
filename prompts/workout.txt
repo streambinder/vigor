@@ -62,3 +62,120 @@ Your response should be ONLY a JSON object with the following fields:
 }
 
 Don't include any text before or after the JSON object.
+
+
+--- struct
+
+{
+  "workout_name": "Nome dell'allenamento",
+  "description": "Descrizione dell'allenamento",
+  "category": "HIIT, CrossFit, etc.",
+  "duration_minutes": 30,
+  "difficulty": "Beginner, Intermediate, Advanced",
+  "equipment": [
+    "manubri",
+    "tappetino"
+  ],
+  "routines": [
+    {
+      "routine_name": "Riscaldamento",
+      "routine_description": "Prepara il corpo per l'allenamento",
+      "blocks": [
+        {
+          "block_name": "Mobilità",
+          "block_type": "warmup",
+          "repeats": 1,
+          "activities": [
+            {
+              "activity_name": "Jumping jacks",
+              "activity_type": "exercise",
+              "duration_seconds": 60,
+              "reps": null,
+              "weight_kg": null,
+              "rest_after_seconds": 30,
+              "notes": "Muovi braccia e gambe in maniera coordinata"
+            },
+            {
+              "activity_name": "Stretching dinamico",
+              "activity_type": "stretch",
+              "duration_seconds": 90,
+              "reps": null,
+              "weight_kg": null,
+              "rest_after_seconds": 0,
+              "notes": "Concentrati sulla schiena e sulle gambe"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "routine_name": "Circuito Principale",
+      "routine_description": "Esercizi ad alta intensità",
+      "blocks": [
+        {
+          "block_name": "Circuito 1",
+          "block_type": "circuit",
+          "repeats": 3,
+          "activities": [
+            {
+              "activity_name": "Burpees",
+              "activity_type": "exercise",
+              "duration_seconds": 45,
+              "reps": null,
+              "weight_kg": null,
+              "rest_after_seconds": 15,
+              "notes": "Esegui il movimento in modo esplosivo"
+            },
+            {
+              "activity_name": "Plank",
+              "activity_type": "exercise",
+              "duration_seconds": 60,
+              "reps": null,
+              "weight_kg": null,
+              "rest_after_seconds": 15,
+              "notes": "Mantieni la schiena dritta e gli addominali contratti"
+            }
+          ]
+        },
+        {
+          "block_name": "Riposo tra i circuiti",
+          "block_type": "rest",
+          "repeats": 1,
+          "activities": [
+            {
+              "activity_name": "Pausa",
+              "activity_type": "rest",
+              "duration_seconds": 120,
+              "reps": null,
+              "weight_kg": null,
+              "rest_after_seconds": 0,
+              "notes": "Bevi acqua e recupera"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "routine_name": "Defaticamento",
+      "routine_description": "Stretching finale",
+      "blocks": [
+        {
+          "block_name": "Stretching Statico",
+          "block_type": "cooldown",
+          "repeats": 1,
+          "activities": [
+            {
+              "activity_name": "Stretching quadricipiti",
+              "activity_type": "stretch",
+              "duration_seconds": 30,
+              "reps": null,
+              "weight_kg": null,
+              "rest_after_seconds": 0,
+              "notes": "Mantieni la posizione per 30 secondi per gamba"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
