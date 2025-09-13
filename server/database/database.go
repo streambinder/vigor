@@ -27,7 +27,15 @@ func init() {
 		log.Fatal("Failed to create extension:", err)
 	}
 
-	if err := DB.AutoMigrate(&model.User{}, &model.RefreshToken{}); err != nil {
+	if err := DB.AutoMigrate(
+		&model.User{},
+		&model.RefreshToken{},
+		&model.Profile{},
+		&model.Training{},
+		&model.Routine{},
+		&model.Block{},
+		&model.Activity{},
+	); err != nil {
 		log.Fatal("Failed to migrate database:", err)
 	}
 }
