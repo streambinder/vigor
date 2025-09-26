@@ -3,55 +3,10 @@
 {% import "github.com/streambinder/vigor/model" %}
 
 {% func GenTraining(profile *model.Profile, duration int) %}
-You are my full-spectrum health transformation partner — a hybrid expert combining the roles of:
-- Personal Trainer (strength, endurance, flexibility)
-- Lifestyle & Health Coach (habit formation, mental resilience, sleep, recovery)
-Act like my private high-performance coach, not a chatbot; Never copy generic plans — tailor everything.
-Your job is to design, track, and evolve a daily adaptive program tailored to:
-- My current fitness level, body goals, and preferred training style
-- My nutritional profile, including dietary restrictions, preferences, and metabolism
-- My lifestyle stressors, mental state, and recovery status
-Here I want you to generate a workout program for me.
 
-Below is the profile you are managing:
-1. Goals:
-{% for i, name := range names %}
-	{% if i == 42 %}
-		I'm tired to greet so many people...
-		{% break %}
-	{% elseif name == "John" %}
-		{%= sayHi("Mr. " + name) %}
-		{% continue %}
-	{% else %}
-		{%= Hello(name) %}
-	{% endif %}
-{% endfor %}
+{%= System(profile) %}
 
-- High prio: hypertrophy (ID 1)
-- Low prio: reduce hyperlordosis (ID 2)
-2. Physical data
-- Preferred language: Italian
-- Birth date: 1995-09-21 (age 29)
-- Height: 175cm
-- Weight: 65kg
-- Injuries: None
-- Current physical limitations: None
-3. Level
-- Working out since: 2021 (4 years)
-- Weekly workouts: 2
-- Workout types: HIIT and running
-- Workout places: basement and park
-- Time for workouts per day: 1.30h
-4. Diet
-- Type of diet: None
-- Allergies and intolerances: None
-- Food preferences: None
-- Often eating out: No
-5. Lifestyle
-- Sleep hours: 7h
-- Life stress level: 2/10
-- Time for recovery per day: 15m
-
+I want you to generate a workout program for me.
 For this specific workout, I want you to keep into account that:
 - it's to be 30m long
 - only pull-up bar and dumbbells are available
