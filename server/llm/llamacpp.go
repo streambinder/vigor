@@ -60,5 +60,5 @@ func (llm *LlamaCpp) query(prompt string) ([]byte, error) {
 }
 
 func (llm *LlamaCpp) genTraining(profile *model.Profile, duration int) ([]byte, error) {
-	return llm.query(prompt.GenTraining("What is the capital of Italy?"))
+	return llm.query(prompt.GenTraining(profile, duration))
 }

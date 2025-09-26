@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -23,6 +24,17 @@ type Profile struct {
 	User   *User     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
 }
 
+type profileData struct {
+	Goals       []string `json:"goals"`
+	Injuries    []Injury `json:"injuries"`
+	Limitations []string `json:"limitations"`
+}
+
+type Injury struct {
+	Description string `json:"description"`
+	Year        int    `json:"year"`
+}
+
 func (p *Profile) Age() int {
 	now := time.Now()
 	years := now.Year() - p.Birthdate.Year()
@@ -30,4 +42,34 @@ func (p *Profile) Age() int {
 		years--
 	}
 	return years
+}
+
+func (p *Profile) data() (profileData, error) {
+	var data profileData
+	err := json.Unmarshal(p.Data, &data)
+	return data, err
+}
+
+func (p *Profile) Goals() []string {
+	data, err := p.data()
+	if err != nil {
+		return nil
+	}
+	return data.Goals
+}
+
+func (p *Profile) Injuries() []Injury {
+	data, err := p.data()
+	if err != nil {
+		return nil
+	}
+	return data.Injuries
+}
+
+func (p *Profile) Limitations() []string {
+	data, err := p.data()
+	if err != nil {
+		return nil
+	}
+	return data.Limitations
 }
