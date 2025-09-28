@@ -18,4 +18,6 @@ echo "$NEW" | jq
 ACCESS=$(echo "$NEW" | jq -r .access_token)
 REFRESH=$(echo "$NEW" | jq -r .refresh_token)
 
-curl -s -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $ACCESS" http://localhost:8080/unregister | jq
+curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $ACCESS" http://localhost:8080/training | jq
+
+# curl -s -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $ACCESS" http://localhost:8080/unregister | jq

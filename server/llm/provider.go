@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/streambinder/vigor/llm/prompt"
 	"github.com/streambinder/vigor/model"
 )
 
 var openLLMs = []LLM{}
 
 type LLM interface {
-	genTraining(profile *model.Profile, duration int) ([]byte, error)
+	query(prompt string) ([]byte, error)
 }
 
 func getLLM(_ *model.Profile) LLM {
@@ -26,9 +27,11 @@ func getLLM(_ *model.Profile) LLM {
 	return openLLMs[0]
 }
 
-func GenTraining(profile *model.Profile, duration int) (*model.Training, error) {
+func GenTraining(profile *model.Profile, equipments []string, duration int) (*model.Training, error) {
 	llm := getLLM(profile)
-	response, err := llm.genTraining(profile, duration)
+	schema, _ := json.MarshalIndent(model.TrainingSchema, "", "  ")
+	prompt := prompt.GenTraining(profile, equipments, duration, string(schema))
+	response, err := llm.query(prompt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate training: %s", err)
 	}

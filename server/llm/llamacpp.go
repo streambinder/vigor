@@ -10,8 +10,6 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
-	"github.com/streambinder/vigor/llm/prompt"
-	"github.com/streambinder/vigor/model"
 )
 
 type LlamaCpp struct {
@@ -57,8 +55,4 @@ func (llm *LlamaCpp) query(prompt string) ([]byte, error) {
 	}
 
 	return bytes, err
-}
-
-func (llm *LlamaCpp) genTraining(profile *model.Profile, duration int) ([]byte, error) {
-	return llm.query(prompt.GenTraining(profile, duration))
 }
