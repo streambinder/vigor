@@ -1,154 +1,17 @@
 {% package prompt %}
-{% import "fmt" %}
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func GenTraining(profile *model.Profile, duration int) %}
+{% func GenTraining(profile *model.Profile, equipments []string, duration int, schema string) %}
 
 {%= System(profile) %}
 
-I want you to generate a workout program for me.
+I want you to generate a workout program for me and produce a JSON object that matches the JSON Schema below. Output only valid JSON.
+
 For this specific workout, I want you to keep into account that:
-- it's to be 30m long
-- only pull-up bar and dumbbells are available
+- it's to be {%d duration %} long
+- equipment available: {% for _, equipment := range equipments %}{%s equipment %}{% endfor %}
 
-Your response should be ONLY a JSON object with the following fields:
-{
-  "name": "Generate a workout name based on targeted goals and exercises",
-  "date": "today's date in ISO format YYYY-MM-DD",
-  "durationInMinutes": 60,
-  "notes": "Description on how this workout is going to impact based on the given goals.",
-  "routine": [
-    {
-      "exerciseName": "Exercise Name",
-      "goal": "Goal ID 1|2 this exercise is trying to achieve",
-      "sets": [
-        {
-          "reps": 8, # if not time based, this is the number of reps
-          "seconds": 60, # if not reps based, this is the number of seconds
-          "weightInKg": 30
-        }
-      ]
-    },
-    ...
-  ]
-}
+JSON schema:
+{%s schema %}
 
-Don't include any text before or after the JSON object.
-
-
---- struct
-
-{
-  "workout_name": "Nome dell'allenamento",
-  "description": "Descrizione dell'allenamento",
-  "category": "HIIT, CrossFit, etc.",
-  "duration_minutes": 30,
-  "difficulty": "Beginner, Intermediate, Advanced",
-  "equipment": [
-    "manubri",
-    "tappetino"
-  ],
-  "routines": [
-    {
-      "routine_name": "Riscaldamento",
-      "routine_description": "Prepara il corpo per l'allenamento",
-      "blocks": [
-        {
-          "block_name": "Mobilità",
-          "block_type": "warmup",
-          "repeats": 1,
-          "activities": [
-            {
-              "activity_name": "Jumping jacks",
-              "activity_type": "exercise",
-              "duration_seconds": 60,
-              "reps": null,
-              "weight_kg": null,
-              "rest_after_seconds": 30,
-              "notes": "Muovi braccia e gambe in maniera coordinata"
-            },
-            {
-              "activity_name": "Stretching dinamico",
-              "activity_type": "stretch",
-              "duration_seconds": 90,
-              "reps": null,
-              "weight_kg": null,
-              "rest_after_seconds": 0,
-              "notes": "Concentrati sulla schiena e sulle gambe"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "routine_name": "Circuito Principale",
-      "routine_description": "Esercizi ad alta intensità",
-      "blocks": [
-        {
-          "block_name": "Circuito 1",
-          "block_type": "circuit",
-          "repeats": 3,
-          "activities": [
-            {
-              "activity_name": "Burpees",
-              "activity_type": "exercise",
-              "duration_seconds": 45,
-              "reps": null,
-              "weight_kg": null,
-              "rest_after_seconds": 15,
-              "notes": "Esegui il movimento in modo esplosivo"
-            },
-            {
-              "activity_name": "Plank",
-              "activity_type": "exercise",
-              "duration_seconds": 60,
-              "reps": null,
-              "weight_kg": null,
-              "rest_after_seconds": 15,
-              "notes": "Mantieni la schiena dritta e gli addominali contratti"
-            }
-          ]
-        },
-        {
-          "block_name": "Riposo tra i circuiti",
-          "block_type": "rest",
-          "repeats": 1,
-          "activities": [
-            {
-              "activity_name": "Pausa",
-              "activity_type": "rest",
-              "duration_seconds": 120,
-              "reps": null,
-              "weight_kg": null,
-              "rest_after_seconds": 0,
-              "notes": "Bevi acqua e recupera"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "routine_name": "Defaticamento",
-      "routine_description": "Stretching finale",
-      "blocks": [
-        {
-          "block_name": "Stretching Statico",
-          "block_type": "cooldown",
-          "repeats": 1,
-          "activities": [
-            {
-              "activity_name": "Stretching quadricipiti",
-              "activity_type": "stretch",
-              "duration_seconds": 30,
-              "reps": null,
-              "weight_kg": null,
-              "rest_after_seconds": 0,
-              "notes": "Mantieni la posizione per 30 secondi per gamba"
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}
 {% endfunc %}
