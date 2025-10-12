@@ -12,7 +12,7 @@ import (
 var openLLMs = []LLM{}
 
 type LLM interface {
-	query(prompt string) ([]byte, error)
+	query(system, user string) ([]byte, error)
 }
 
 func getLLM(_ *model.Profile) LLM {
@@ -28,17 +28,17 @@ func getLLM(_ *model.Profile) LLM {
 }
 
 func GenTraining(profile *model.Profile, equipments []string, duration int) (*model.Training, error) {
-	llm := getLLM(profile)
-	schema, _ := json.MarshalIndent(model.TrainingSchema, "", "  ")
-	prompt := prompt.GenTraining(profile, equipments, duration, string(schema))
-	response, err := llm.query(prompt)
+	response, err := getLLM(profile).query(
+		prompt.System(profile, model.TrainingSchema),
+		prompt.GenTraining(profile, equipments, duration),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate training: %s", err)
 	}
 
 	training := &model.Training{}
 	if err := json.Unmarshal(response, &training); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal training: %s", err)
+		return nil, fmt.Errorf("unable to generate training: %s", string(response))
 	}
 
 	return training, nil

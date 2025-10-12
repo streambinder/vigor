@@ -2,6 +2,7 @@ package llm
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -15,6 +16,42 @@ import (
 type LlamaCpp struct {
 	LLM
 	uri string
+}
+
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type ResponseFormat struct {
+	Type string `json:"type"` // Must be "json_object" for JSON mode
+}
+
+type ChatCompletionRequest struct {
+	Model          string         `json:"model"`
+	Messages       []Message      `json:"messages"`
+	Temperature    float64        `json:"temperature"`
+	ResponseFormat ResponseFormat `json:"response_format"`
+	MaxTokens      int            `json:"max_tokens"`
+}
+
+type ChatCompletionResponseMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"` // This content will be a JSON string
+}
+
+type ChatCompletionChoice struct {
+	Index        int                           `json:"index"`
+	Message      ChatCompletionResponseMessage `json:"message"`
+	FinishReason string                        `json:"finish_reason"`
+}
+
+type ChatCompletionResponse struct {
+	ID      string                 `json:"id"`
+	Object  string                 `json:"object"`
+	Created int64                  `json:"created"`
+	Model   string                 `json:"model"`
+	Choices []ChatCompletionChoice `json:"choices"`
 }
 
 func init() {
@@ -32,27 +69,64 @@ func init() {
 	}
 }
 
-func (llm *LlamaCpp) query(prompt string) ([]byte, error) {
-	request, err := http.NewRequest(
-		"POST",
-		fmt.Sprintf("%s/completion", llm.uri),
-		bytes.NewBuffer([]byte(fmt.Sprintf(`{"prompt": "%s","n_predict": 128}`, prompt))),
-	)
+func (llm *LlamaCpp) query(system, user string) ([]byte, error) {
+	requestPayload := ChatCompletionRequest{
+		Model: "Llama-3.2-1B-Instruct-Q4_0.gguf",
+		Messages: []Message{
+			{Role: "system", Content: system},
+			{Role: "user", Content: user},
+		},
+		ResponseFormat: ResponseFormat{Type: "json_object"},
+		Temperature:    0.6,
+		MaxTokens:      2000,
+	}
+	jsonPayload, err := json.Marshal(requestPayload)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create llama.cpp payload: %s", err)
+	}
+	fmt.Println("--- Request Sent ---")
+	fmt.Printf("Endpoint: %s\n", fmt.Sprintf("%s/v1/chat/completions", llm.uri))
+	fmt.Printf("Payload:\n%s\n\n", string(jsonPayload))
+
+	request, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/chat/completions", llm.uri), bytes.NewBuffer(jsonPayload))
 	if err != nil {
 		return nil, fmt.Errorf("unable to create llama.cpp request: %s", err)
 	}
 	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer NO_KEY")
 
-	response, err := (&http.Client{}).Do(request)
+	client := &http.Client{}
+	resp, err := client.Do(request)
 	if err != nil {
 		return nil, fmt.Errorf("unable to send request to llama.cpp: %s", err)
 	}
-	defer response.Body.Close()
+	defer resp.Body.Close()
 
-	bytes, err := io.ReadAll(response.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read response from llama.cpp: %s", err)
 	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("bad response from llama.cpp: status %d", resp.StatusCode)
+	}
 
-	return bytes, err
+	var chatResponse ChatCompletionResponse
+	if err := json.Unmarshal(body, &chatResponse); err != nil {
+		return nil, fmt.Errorf("unable to unmarshal llama.cpp response: %s", err)
+	}
+
+	if len(chatResponse.Choices) == 0 {
+		return nil, fmt.Errorf("no choices in llama.cpp response")
+	}
+
+	llmContent := chatResponse.Choices[0].Message.Content
+	fmt.Println("--- Raw LLM Content (Expected JSON String) ---")
+	fmt.Println(llmContent)
+
+	var parsedJSON map[string]interface{}
+	if err := json.Unmarshal([]byte(llmContent), &parsedJSON); err != nil {
+		return nil, fmt.Errorf("invalid response from llama.cpp: %s", err)
+	}
+
+	return []byte(llmContent), nil
 }

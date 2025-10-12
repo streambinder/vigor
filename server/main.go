@@ -1,5 +1,5 @@
 //go:generate go get -u github.com/valyala/quicktemplate/qtc
-//go:generate qtc -dir=llm/prompts
+//go:generate qtc -dir=llm/prompt
 package main
 
 import (
