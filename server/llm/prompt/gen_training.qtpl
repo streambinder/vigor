@@ -1,17 +1,21 @@
 {% package prompt %}
+
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func GenTraining(profile *model.Profile, equipments []string, duration int, schema string) %}
+{% func GenTraining(profile *model.Profile, equipments []string, duration int) -%}
+{% collapsespace %}
 
-{%= System(profile) %}
+Generate a {%d duration %} minutes long training
 
-I want you to generate a workout program for me and produce a JSON object that matches the JSON Schema below. Output only valid JSON.
+{% if len(equipments) > 0 %}
+with
+    {% for _, equipment := range equipments %}
+        {%s equipment %},
+    {% endfor %}
+equipment available
+{% else %}
+with no equipment available
+{% endif %}
 
-For this specific workout, I want you to keep into account that:
-- it's to be {%d duration %} long
-- equipment available: {% for _, equipment := range equipments %}{%s equipment %}{% endfor %}
-
-JSON schema:
-{%s schema %}
-
+{% endcollapsespace -%}
 {% endfunc %}

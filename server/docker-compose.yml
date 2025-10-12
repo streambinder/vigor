@@ -19,13 +19,26 @@ services:
   llm:
     image: ghcr.io/ggml-org/llama.cpp:server
     platform: linux/amd64
-    command: -m /models/Llama-3.2-1B-Instruct-Q4_0.gguf --port 8000
+    command:
+      - --model
+      - /models/Llama-3.2-1B-Instruct-Q4_0.gguf
+      - --port
+      - "8000"
+      - --ctx-size
+      - "32768"
     volumes:
       - ../models:/models:ro
     ports:
       - 8000:8000
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
   # app:
   #   build: .
   #   depends_on:
