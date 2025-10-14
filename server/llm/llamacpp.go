@@ -33,6 +33,9 @@ type ChatCompletionRequest struct {
 	Temperature    float64        `json:"temperature"`
 	ResponseFormat ResponseFormat `json:"response_format"`
 	MaxTokens      int            `json:"max_tokens"`
+	TopP           float64        `json:"top_p,omitempty"`
+	RepeatPenalty  float64        `json:"repeat_penalty,omitempty"`
+	MinP           float64        `json:"min_p,omitempty"`
 }
 
 type ChatCompletionResponseMessage struct {
@@ -71,14 +74,18 @@ func init() {
 
 func (llm *LlamaCpp) query(system, user string) ([]byte, error) {
 	requestPayload := ChatCompletionRequest{
-		Model: "Llama-3.2-1B-Instruct-Q4_0.gguf",
+		// Model: "Llama-3.2-1B-Instruct-Q4_0.gguf",
+		// Model: "Mistral-Nemo-Instruct-2407-Q5_K_M.gguf",
 		Messages: []Message{
 			{Role: "system", Content: system},
 			{Role: "user", Content: user},
 		},
 		ResponseFormat: ResponseFormat{Type: "json_object"},
-		Temperature:    0.6,
-		MaxTokens:      2000,
+		Temperature:    0.2,
+		MaxTokens:      4000,
+		TopP:           0.9,
+		RepeatPenalty:  1.15,
+		MinP:           0.05,
 	}
 	jsonPayload, err := json.Marshal(requestPayload)
 	if err != nil {

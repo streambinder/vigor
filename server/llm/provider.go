@@ -38,7 +38,7 @@ func GenTraining(profile *model.Profile, equipments []string, duration int) (*mo
 
 	training := &model.Training{}
 	if err := json.Unmarshal(response, &training); err != nil {
-		return nil, fmt.Errorf("unable to generate training: %s", string(response))
+		return nil, fmt.Errorf("unable to generate training for %s: %s", string(response), err)
 	}
 
 	return training, nil
