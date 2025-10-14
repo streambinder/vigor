@@ -22,7 +22,7 @@ func init() {
 // Training represents the entire training session with a UUID ID
 type Training struct {
 	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
-	Date        time.Time `gorm:"not null" json:"date" prompt:"Today's date in ISO format YYYY-MM-DD"`
+	Date        time.Time `gorm:"not null" json:"date" prompt:"Today's date in RFC3339 format"`
 	Name        string    `gorm:"not null" json:"name" prompt:"Catchy name for my training based on targeted goals and training type"`
 	Description string    `gorm:"not null" json:"description" prompt:"Relatively short description on how this training is going to impact based on the given goals"`
 	Category    string    `gorm:"not null" json:"category" prompt:"Training category"`

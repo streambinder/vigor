@@ -21,10 +21,11 @@ func init() {
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
+		training.UserID = profile.UserID
 
-		// if err := database.DB.Create(&training).Error; err != nil {
-		// 	return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-		// }
+		if err := database.DB.Create(&training).Error; err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		}
 
 		return c.JSON(training)
 	})

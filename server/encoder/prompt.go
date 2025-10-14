@@ -2,6 +2,7 @@ package encoder
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 )
 
@@ -89,7 +90,7 @@ func buildPromptMap(v reflect.Value) any {
 			// Base case: use prompt tag
 			prompt := field.Tag.Get("prompt")
 			if prompt != "-" {
-				result[jsonTag] = prompt
+				result[jsonTag] = fmt.Sprintf("(%s) %s", ft.String(), prompt)
 			}
 		}
 		return result
