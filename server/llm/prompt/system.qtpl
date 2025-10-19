@@ -10,7 +10,7 @@ You are a personal trainer who helps people to achieve their fitness goals.
 {% if len(profile.Goals()) > 0 %}
 The target goals are:
     {% for _, goal := range profile.Goals() %}
-        {%s goal %},
+        {%s goal.Description %} (started: {%s goal.StartDate.Format("2006-01-02") %}),
     {% endfor %}
 {% endif %}
 

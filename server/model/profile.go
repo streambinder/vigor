@@ -25,9 +25,14 @@ type Profile struct {
 }
 
 type profileData struct {
-	Goals       []string `json:"goals"`
+	Goals       []Goal `json:"goals"`
 	Injuries    []Injury `json:"injuries"`
 	Limitations []string `json:"limitations"`
+}
+
+type Goal struct {
+	Description string `json:"description"`
+	StartDate time.Time `json:"start_date"`
 }
 
 type Injury struct {
@@ -50,7 +55,7 @@ func (p *Profile) data() (profileData, error) {
 	return data, err
 }
 
-func (p *Profile) Goals() []string {
+func (p *Profile) Goals() []Goal {
 	data, err := p.data()
 	if err != nil {
 		return nil
