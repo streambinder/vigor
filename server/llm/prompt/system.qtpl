@@ -31,6 +31,7 @@ Profile details include:
     {% endfor %}
 {% endif %}
 
+You must always speak the profile language.
 You must always respond with a JSON with this structure: {%s= schema %}
 
 {% endcollapsespace -%}
