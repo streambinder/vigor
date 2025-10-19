@@ -40,7 +40,7 @@ type ChatCompletionRequest struct {
 
 type ChatCompletionResponseMessage struct {
 	Role    string `json:"role"`
-	Content string `json:"content"` // This content will be a JSON string
+	Content string `json:"content"`
 }
 
 type ChatCompletionChoice struct {
@@ -67,7 +67,7 @@ func init() {
 		return
 	}
 
-	for _, tier := range strings.Split(tiers, ",") {
+	for tier := range strings.SplitSeq(tiers, ",") {
 		openLLMs = append(openLLMs, &LlamaCpp{uri: tier})
 	}
 }
@@ -130,7 +130,7 @@ func (llm *LlamaCpp) query(system, user string) ([]byte, error) {
 	fmt.Println("--- Raw LLM Content (Expected JSON String) ---")
 	fmt.Println(llmContent)
 
-	var parsedJSON map[string]interface{}
+	var parsedJSON map[string]any
 	if err := json.Unmarshal([]byte(llmContent), &parsedJSON); err != nil {
 		return nil, fmt.Errorf("invalid response from llama.cpp: %s", err)
 	}

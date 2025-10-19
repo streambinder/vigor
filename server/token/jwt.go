@@ -62,7 +62,7 @@ func RevokeToken(db *gorm.DB, tokenStr string) error {
 }
 
 func VerifyAccessToken(tokenStr string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (any, error) {
 		return jwtKey, nil
 	})
 	if err != nil {

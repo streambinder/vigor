@@ -60,11 +60,11 @@ func init() {
 		}
 
 		var body struct {
-			Birthdate string                 `json:"birthdate"`
-			Language  string                 `json:"language"`
-			Height    float64                `json:"height"`
-			Weight    float64                `json:"weight"`
-			Data      map[string]interface{} `json:"data"`
+			Birthdate string         `json:"birthdate"`
+			Language  string         `json:"language"`
+			Height    float64        `json:"height"`
+			Weight    float64        `json:"weight"`
+			Data      map[string]any `json:"data"`
 		}
 		if err := c.BodyParser(&body); err != nil {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse JSON"})
