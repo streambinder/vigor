@@ -106,7 +106,11 @@ func (llm *LlamaCpp) query(system, user string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to send request to llama.cpp: %s", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Printf("failed to close response body: %s", closeErr)
+		}
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

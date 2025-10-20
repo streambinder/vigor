@@ -33,85 +33,113 @@ func buildPromptMap(v reflect.Value) any {
 
 	switch v.Kind() {
 	case reflect.Struct:
-		t := v.Type()
-		result := make(map[string]any)
-		for i := 0; i < t.NumField(); i++ {
-			field := t.Field(i)
-			if field.PkgPath != "" { // skip unexported
-				continue
-			}
-
-			jsonTag := field.Tag.Get("json")
-			if jsonTag == "" {
-				jsonTag = field.Name
-			} else {
-				if comma := indexComma(jsonTag); comma >= 0 {
-					jsonTag = jsonTag[:comma]
-				}
-			}
-			if jsonTag == "-" {
-				continue
-			}
-
-			fv := v.Field(i)
-			ft := fv.Type()
-
-			// Handle slice of structs
-			if ft.Kind() == reflect.Slice {
-				prompt := field.Tag.Get("prompt")
-				if prompt == "-" {
-					result[jsonTag] = []any{}
-				} else if prompt != "" {
-					result[jsonTag] = []any{prompt}
-				} else {
-					result[jsonTag] = []any{
-						buildPromptMap(reflect.New(ft.Elem())),
-					}
-				}
-				continue
-			}
-
-			// Handle nested struct
-			if ft.Kind() == reflect.Struct && ft.String() != "time.Time" {
-				result[jsonTag] = buildPromptMap(fv)
-				continue
-			}
-
-			// Handle pointer to struct
-			if ft.Kind() == reflect.Pointer && ft.Elem().Kind() == reflect.Struct {
-				if fv.IsNil() {
-					result[jsonTag] = buildPromptMap(reflect.New(ft.Elem()).Elem())
-				} else {
-					result[jsonTag] = buildPromptMap(fv)
-				}
-				continue
-			}
-
-			// Base case: use prompt tag
-			prompt := field.Tag.Get("prompt")
-			if prompt != "-" {
-				result[jsonTag] = fmt.Sprintf("(%s) %s", ft.String(), prompt)
-			}
-		}
-		return result
+		return buildStructPromptMap(v)
 	case reflect.Slice:
-		if v.Len() == 0 {
-			return []any{}
-		}
-		elemType := v.Type().Elem()
-		if elemType.Kind() == reflect.Pointer {
-			elemType = elemType.Elem()
-		}
-		if elemType.Kind() == reflect.Struct {
-			elem := reflect.New(elemType).Elem()
-			return []any{buildPromptMap(elem)}
-		} else if elemType.Kind() == reflect.String {
-			return []string{"<string>"}
-		}
-		return []any{}
+		return buildSlicePromptMap(v)
 	default:
 		return nil
 	}
+}
+
+func buildStructPromptMap(v reflect.Value) map[string]any {
+	t := v.Type()
+	result := make(map[string]any)
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		if field.PkgPath != "" { // skip unexported
+			continue
+		}
+
+		jsonTag := parseJSONTag(field)
+		if jsonTag == "" {
+			continue
+		}
+
+		fv := v.Field(i)
+		ft := fv.Type()
+
+		value := buildFieldPromptValue(field, fv, ft)
+		if value != nil {
+			result[jsonTag] = value
+		}
+	}
+	return result
+}
+
+func parseJSONTag(field reflect.StructField) string {
+	jsonTag := field.Tag.Get("json")
+	if jsonTag == "" {
+		return field.Name
+	}
+	if comma := indexComma(jsonTag); comma >= 0 {
+		jsonTag = jsonTag[:comma]
+	}
+	if jsonTag == "-" {
+		return ""
+	}
+	return jsonTag
+}
+
+func buildFieldPromptValue(field reflect.StructField, fv reflect.Value, ft reflect.Type) any {
+	// Handle slice of structs
+	if ft.Kind() == reflect.Slice {
+		return buildSliceFieldPromptValue(field, ft)
+	}
+
+	// Handle nested struct
+	if ft.Kind() == reflect.Struct && ft.String() != "time.Time" {
+		return buildPromptMap(fv)
+	}
+
+	// Handle pointer to struct
+	if ft.Kind() == reflect.Pointer && ft.Elem().Kind() == reflect.Struct {
+		return buildPointerFieldPromptValue(fv, ft)
+	}
+
+	// Base case: use prompt tag
+	prompt := field.Tag.Get("prompt")
+	if prompt != "-" {
+		return fmt.Sprintf("(%s) %s", ft.String(), prompt)
+	}
+	return nil
+}
+
+func buildSliceFieldPromptValue(field reflect.StructField, ft reflect.Type) any {
+	prompt := field.Tag.Get("prompt")
+	switch {
+	case prompt == "-":
+		return []any{}
+	case prompt != "":
+		return []any{prompt}
+	default:
+		return []any{
+			buildPromptMap(reflect.New(ft.Elem())),
+		}
+	}
+}
+
+func buildPointerFieldPromptValue(fv reflect.Value, ft reflect.Type) any {
+	if fv.IsNil() {
+		return buildPromptMap(reflect.New(ft.Elem()).Elem())
+	}
+	return buildPromptMap(fv)
+}
+
+func buildSlicePromptMap(v reflect.Value) any {
+	if v.Len() == 0 {
+		return []any{}
+	}
+	elemType := v.Type().Elem()
+	if elemType.Kind() == reflect.Pointer {
+		elemType = elemType.Elem()
+	}
+	if elemType.Kind() == reflect.Struct {
+		elem := reflect.New(elemType).Elem()
+		return []any{buildPromptMap(elem)}
+	} else if elemType.Kind() == reflect.String {
+		return []string{"<string>"}
+	}
+	return []any{}
 }
 
 func indexComma(s string) int {

@@ -3,7 +3,7 @@ FROM node:20-slim AS builder
 
 # Install git and PostgreSQL client tools
 RUN apt-get update && \
-    apt-get install -y git postgresql-client && \
+    apt-get install -y --no-install-recommends git postgresql-client && \
     rm -rf /var/lib/apt/lists/*
 
 # Set working directory
@@ -24,10 +24,16 @@ FROM postgres:16-alpine
 # Set environment variables for PostgreSQL
 ENV POSTGRES_DB=db
 ENV POSTGRES_USER=user
-ENV POSTGRES_PASSWORD=pass
 
 # Copy the generated SQL file from builder
 COPY --from=builder /build/exercises-psql.sql /docker-entrypoint-initdb.d/
+
+# Use postgres user (default for postgres image, but making it explicit)
+USER postgres
+
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD pg_isready -U user -d db || exit 1
 
 # Expose PostgreSQL port
 EXPOSE 5432
