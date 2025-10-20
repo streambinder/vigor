@@ -1,3 +1,4 @@
+---
 name: push
 
 on: # yamllint disable-line rule:truthy
@@ -79,36 +80,6 @@ jobs:
         with:
           persist-credentials: false
       - run: cd server && test "$(grep -cr 'defer gomonkey\.')" = "$(grep -cr 'Reset()$')"
-  docker-exercisedb:
-    runs-on: ubuntu-latest
-    needs:
-      [
-        codespell,
-        super-linter,
-        gofumpt,
-        go-channel-closure,
-        go-http-body-closure,
-        go-monkey-unpatch,
-      ]
-    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
-    permissions:
-      packages: write
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          persist-credentials: false
-      - uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392
-      - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
-      - uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
-        with:
-          platforms: linux/amd64,linux/arm/v7,linux/arm64/v8
-          tags: ghcr.io/streambinder/vigor/exercisedb:latest
-          push: ${{ github.event_name != 'pull_request' }}
   test:
     runs-on: ubuntu-latest
     needs:
@@ -139,7 +110,14 @@ jobs:
     needs: [test]
     if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
     permissions:
+      contents: read
       packages: write
+    strategy:
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm/v7
+          - linux/arm64/v8
     steps:
       - uses: actions/checkout@v5
         with:
@@ -153,6 +131,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
-          platforms: linux/amd64,linux/arm/v7,linux/arm64/v8
+          context: server
+          platforms: ${{ matrix.platform }}
           tags: ghcr.io/streambinder/vigor:latest
           push: ${{ github.event_name != 'pull_request' }}
