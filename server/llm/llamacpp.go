@@ -102,8 +102,7 @@ func (llm *LlamaCpp) query(system, user string) ([]byte, error) {
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Authorization", "Bearer NO_KEY")
 
-	client := &http.Client{}
-	resp, err := client.Do(request)
+	resp, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return nil, fmt.Errorf("unable to send request to llama.cpp: %s", err)
 	}

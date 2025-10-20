@@ -27,10 +27,10 @@ func getLLM(_ *model.Profile) LLM {
 	return openLLMs[0]
 }
 
-func GenTraining(profile *model.Profile, equipments []string, duration int) (*model.Training, error) {
+func GenTraining(profile *model.Profile, equipment []string, duration int) (*model.Training, error) {
 	response, err := getLLM(profile).query(
 		prompt.System(profile, model.TrainingSchema),
-		prompt.GenTraining(profile, equipments, duration),
+		prompt.GenTraining(profile, equipment, duration),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate training: %s", err)
