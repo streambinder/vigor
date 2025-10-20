@@ -30,7 +30,8 @@ func init() {
 			Password: string(hash),
 			Profile: model.Profile{
 				Data: datatypes.JSON([]byte("{}")),
-			}}
+			},
+		}
 		if err := database.DB.Create(&user).Error; err != nil {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "email already exists"})
 		}
