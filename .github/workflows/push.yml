@@ -33,6 +33,7 @@ jobs:
   super-linter:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       statuses: write
     steps:
       - uses: actions/checkout@v5
