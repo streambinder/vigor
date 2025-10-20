@@ -15,7 +15,8 @@ RUN git clone https://github.com/wrkout/exercises.json .
 # Install dependencies and build PostgreSQL data
 RUN npm install && \
     npm run build:psql && \
-    npm run build:psql -- exercises
+    npm run build:psql -- exercises && \
+    sed -i 's/connect exercises-db/connect db/g' /build/exercises-psql.sql
 
 # Stage 2: Final PostgreSQL image with seeded data
 FROM postgres:16-alpine
