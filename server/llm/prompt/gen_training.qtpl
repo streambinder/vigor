@@ -2,14 +2,14 @@
 
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func GenTraining(profile *model.Profile, equipments []string, duration int) -%}
+{% func GenTraining(profile *model.Profile, equipment []string, duration int) -%}
 {% collapsespace %}
 
 Generate a {%d duration %} minutes long training
 
-{% if len(equipments) > 0 %}
+{% if len(equipment) > 0 %}
 with
-    {% for _, equipment := range equipments %}
+    {% for _, equipment := range equipment %}
         {%s equipment %},
     {% endfor %}
 equipment available
