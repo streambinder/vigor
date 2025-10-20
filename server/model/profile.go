@@ -25,14 +25,14 @@ type Profile struct {
 }
 
 type profileData struct {
-	Goals       []Goal `json:"goals"`
+	Goals       []Goal   `json:"goals"`
 	Injuries    []Injury `json:"injuries"`
 	Limitations []string `json:"limitations"`
 }
 
 type Goal struct {
-	Description string `json:"description"`
-	StartDate time.Time `json:"start_date"`
+	Description string    `json:"description"`
+	StartDate   time.Time `json:"start_date"`
 }
 
 type Injury struct {
