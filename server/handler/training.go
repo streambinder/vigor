@@ -14,13 +14,7 @@ import (
 
 func init() {
 	APP.Get("/training", middleware.Authorized(), func(c *fiber.Ctx) error {
-		var (
-			equipment     = []string{}
-			gymQuery      = strings.ToLower(c.Query("gym"))
-			durationQuery = c.Query("duration")
-			gym           *model.Gym
-			profile       model.Profile
-		)
+		durationQuery := c.Query("duration")
 		if durationQuery == "" {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "duration is required"})
 		}
@@ -29,15 +23,21 @@ func init() {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid duration format"})
 		}
 
+		var equipment []string
 		if c.Query("equipment") != "" {
 			equipment = strings.Split(c.Query("equipment"), ",")
 		}
 
+		var profile model.Profile
 		if err = database.DB.First(&profile, "user_id = ?", c.Locals("userID")).Error; err != nil {
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
 		}
 
-		if err = database.DB.First(&gym, "(name ilike ? or id = ?) and user_id = ?", gymQuery, gymQuery, c.Locals("userID")).Error; err != nil {
+		var (
+			gymQuery = strings.ToLower(c.Query("gym"))
+			gym      *model.Gym
+		)
+		if err = database.DB.First(&gym, "name ilike ? and user_id = ?", gymQuery, c.Locals("userID")).Error; err != nil {
 			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "gym not found"})
 		}
 
