@@ -35,6 +35,7 @@ func init() {
 		&model.Routine{},
 		&model.Block{},
 		&model.Activity{},
+		&model.Gym{},
 	); err != nil {
 		log.Fatal("Failed to migrate database:", err)
 	}
