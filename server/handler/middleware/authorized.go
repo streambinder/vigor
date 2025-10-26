@@ -5,6 +5,7 @@ import (
 	"github.com/streambinder/vigor/token"
 )
 
+// Authorized returns a middleware that validates JWT access tokens.
 func Authorized() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		bearer := c.Get("Authorization")

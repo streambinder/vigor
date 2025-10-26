@@ -13,11 +13,13 @@ import (
 
 var jwtKey = []byte(os.Getenv("JWT_SECRET"))
 
+// Claims represents JWT token claims with user identification.
 type Claims struct {
 	UserID uuid.UUID `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
+// GenerateTokens creates a new access and refresh token pair for a user.
 func GenerateTokens(db *gorm.DB, userID uuid.UUID) (string, string, error) {
 	accessClaims := Claims{
 		UserID: userID,
@@ -41,6 +43,7 @@ func GenerateTokens(db *gorm.DB, userID uuid.UUID) (string, string, error) {
 	return accessStr, refreshStr, nil
 }
 
+// RefreshTokens generates new tokens using a valid refresh token.
 func RefreshTokens(db *gorm.DB, oldRefresh string) (string, string, error) {
 	var rt model.RefreshToken
 	if err := db.First(&rt, "token = ? AND revoked = false", oldRefresh).Error; err != nil {
@@ -57,10 +60,12 @@ func RefreshTokens(db *gorm.DB, oldRefresh string) (string, string, error) {
 	return GenerateTokens(db, rt.UserID)
 }
 
+// RevokeToken marks a refresh token as revoked in the database.
 func RevokeToken(db *gorm.DB, tokenStr string) error {
 	return db.Model(&model.RefreshToken{}).Where("token = ?", tokenStr).Update("revoked", true).Error
 }
 
+// VerifyAccessToken validates an access token and extracts its claims.
 func VerifyAccessToken(tokenStr string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(_ *jwt.Token) (any, error) {
 		return jwtKey, nil

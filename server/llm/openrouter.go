@@ -12,6 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// OpenRouter provides LLM capabilities via the OpenRouter API.
 type OpenRouter struct {
 	LLM
 	apiKey string

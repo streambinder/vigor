@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// User represents a system user with authentication credentials and profile.
 type User struct {
 	ID       uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
 	Email    string    `gorm:"uniqueIndex;not null" json:"email"`

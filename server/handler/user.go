@@ -14,6 +14,7 @@ import (
 	"gorm.io/datatypes"
 )
 
+// handleRegister creates a new user account with email and password.
 func handleRegister(c *fiber.Ctx) error {
 	var body struct {
 		Email    string `json:"email"`
@@ -44,6 +45,7 @@ func handleRegister(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "user created"})
 }
 
+// handleUnregister deletes the authenticated user's account and revokes tokens.
 func handleUnregister(c *fiber.Ctx) error {
 	if err := database.DB.Model(&model.User{}).Where("id = ?", c.Locals("userID")).Delete(&model.User{}).Error; err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
@@ -54,6 +56,7 @@ func handleUnregister(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "user deleted"})
 }
 
+// handleGetUser retrieves the authenticated user's profile information.
 func handleGetUser(c *fiber.Ctx) error {
 	var user model.User
 	if err := database.DB.Preload("Profile").First(&user, "id = ?", c.Locals("userID")).Error; err != nil {
@@ -62,6 +65,7 @@ func handleGetUser(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
+// handleUpdateUser updates the authenticated user's profile data.
 func handleUpdateUser(c *fiber.Ctx) error {
 	var profile model.Profile
 	if err := database.DB.First(&profile, "user_id = ?", c.Locals("userID")).Error; err != nil {
