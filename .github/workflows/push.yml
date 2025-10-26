@@ -93,7 +93,7 @@ jobs:
           go install github.com/valyala/quicktemplate/qtc@latest
           cd server/llm/prompt
           qtc
-          if git diff --exit-code *.qtpl.go; then
+          if git diff --exit-code -- *.qtpl.go; then
             echo "Generated qtpl files match repository"
           else
             echo "ERROR: Generated qtpl files differ from repository. Please run 'qtc' in server/llm/prompt and commit the changes."
