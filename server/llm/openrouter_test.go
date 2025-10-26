@@ -37,9 +37,12 @@ func TestOpenRouterQuery_Success(t *testing.T) {
 		},
 	}
 
-	responseJSON, _ := json.Marshal(response)
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		t.Fatalf("Failed to marshal response: %v", err)
+	}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(client *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader(responseJSON)),
@@ -124,7 +127,7 @@ func TestOpenRouterQuery_NonOKStatus(t *testing.T) {
 		model:  "test-model",
 	}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(client *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusBadRequest,
 			Body:       io.NopCloser(bytes.NewReader([]byte("error message"))),
@@ -142,7 +145,7 @@ type errorReader struct {
 	err error
 }
 
-func (e *errorReader) Read(p []byte) (n int, err error) {
+func (e *errorReader) Read(_ []byte) (n int, err error) {
 	return 0, e.err
 }
 
@@ -156,7 +159,7 @@ func TestOpenRouterQuery_ReadBodyError(t *testing.T) {
 
 	errorReader := &errorReader{err: errors.New("read error")}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(client *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(errorReader),
@@ -178,7 +181,7 @@ func TestOpenRouterQuery_UnmarshalResponseError(t *testing.T) {
 		model:  "test-model",
 	}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(client *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte("invalid json"))),
@@ -208,9 +211,12 @@ func TestOpenRouterQuery_NoChoices(t *testing.T) {
 		Choices: []ChatCompletionChoice{},
 	}
 
-	responseJSON, _ := json.Marshal(response)
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		t.Fatalf("Failed to marshal response: %v", err)
+	}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(client *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader(responseJSON)),
@@ -218,7 +224,7 @@ func TestOpenRouterQuery_NoChoices(t *testing.T) {
 	}).Build()
 	defer mockHTTP.UnPatch()
 
-	_, err := llm.query("system prompt", "user prompt")
+	_, err = llm.query("system prompt", "user prompt")
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -249,9 +255,12 @@ func TestOpenRouterQuery_InvalidContentJSON(t *testing.T) {
 		},
 	}
 
-	responseJSON, _ := json.Marshal(response)
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		t.Fatalf("Failed to marshal response: %v", err)
+	}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(client *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader(responseJSON)),
@@ -259,7 +268,7 @@ func TestOpenRouterQuery_InvalidContentJSON(t *testing.T) {
 	}).Build()
 	defer mockHTTP.UnPatch()
 
-	_, err := llm.query("system prompt", "user prompt")
+	_, err = llm.query("system prompt", "user prompt")
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -277,7 +286,7 @@ func TestOpenRouterInit_WithAPIKey(t *testing.T) {
 	model := "custom-model"
 	if apiKey != "" {
 		if model == "" {
-			model = "openai/gpt-oss-20b:free"
+			model = defaultOpenRouterModel
 		}
 		openLLMs = append(openLLMs, &OpenRouter{
 			apiKey: apiKey,
@@ -315,7 +324,7 @@ func TestOpenRouterInit_WithoutAPIKey(t *testing.T) {
 	if apiKey != "" {
 		model := ""
 		if model == "" {
-			model = "openai/gpt-oss-20b:free"
+			model = defaultOpenRouterModel
 		}
 		openLLMs = append(openLLMs, &OpenRouter{
 			apiKey: apiKey,
@@ -339,7 +348,7 @@ func TestOpenRouterInit_DefaultModel(t *testing.T) {
 	apiKey := "test-api-key"
 	model := ""
 	if model == "" {
-		model = "openai/gpt-oss-20b:free"
+		model = defaultOpenRouterModel
 	}
 	openLLMs = append(openLLMs, &OpenRouter{
 		apiKey: apiKey,
@@ -355,7 +364,7 @@ func TestOpenRouterInit_DefaultModel(t *testing.T) {
 		t.Fatal("Expected OpenRouter LLM")
 	}
 
-	if or.model != "openai/gpt-oss-20b:free" {
-		t.Errorf("Expected default model 'openai/gpt-oss-20b:free', got: %s", or.model)
+	if or.model != defaultOpenRouterModel {
+		t.Errorf("Expected default model '%s', got: %s", defaultOpenRouterModel, or.model)
 	}
 }

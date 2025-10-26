@@ -499,7 +499,7 @@ func TestBuildPromptMap_Pointer(t *testing.T) {
 }
 
 func TestBuildPromptMap_NilPointer(t *testing.T) {
-	var testObj *TestStruct = nil
+	var testObj *TestStruct
 
 	result := buildPromptMap(reflect.ValueOf(testObj))
 	if result != nil {

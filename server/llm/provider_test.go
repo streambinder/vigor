@@ -41,7 +41,7 @@ func TestGetLLM_EmptyList(t *testing.T) {
 
 	// Mock os.Exit to prevent actual exit
 	exitCalled := false
-	mockExit := mockey.Mock(os.Exit).To(func(code int) {
+	mockExit := mockey.Mock(os.Exit).To(func(_ int) {
 		exitCalled = true
 		// Don't actually exit, just panic to stop execution
 		panic("os.Exit called")
@@ -49,9 +49,7 @@ func TestGetLLM_EmptyList(t *testing.T) {
 	defer mockExit.UnPatch()
 
 	defer func() {
-		if r := recover(); r != nil {
-			// Expected panic from mocked os.Exit
-		}
+		_ = recover() // Expected panic from mocked os.Exit
 	}()
 
 	_ = getLLM(&model.Profile{})
@@ -100,7 +98,7 @@ func TestGenTraining_Success(t *testing.T) {
 	}
 
 	mock := &mockLLM{
-		queryFunc: func(system, user string) ([]byte, error) {
+		queryFunc: func(_, _ string) ([]byte, error) {
 			return trainingJSON, nil
 		},
 	}
@@ -120,7 +118,7 @@ func TestGenTraining_Success(t *testing.T) {
 	}
 
 	if result == nil {
-		t.Error("Expected result to not be nil")
+		t.Fatal("Expected result to not be nil")
 	}
 
 	if result.Name != "Test Training" {
@@ -135,7 +133,7 @@ func TestGenTraining_QueryError(t *testing.T) {
 
 	expectedErr := errors.New("query error")
 	mock := &mockLLM{
-		queryFunc: func(system, user string) ([]byte, error) {
+		queryFunc: func(_, _ string) ([]byte, error) {
 			return nil, expectedErr
 		},
 	}
@@ -169,7 +167,7 @@ func TestGenTraining_InvalidJSON(t *testing.T) {
 	defer func() { openLLMs = originalOpenLLMs }()
 
 	mock := &mockLLM{
-		queryFunc: func(system, user string) ([]byte, error) {
+		queryFunc: func(_, _ string) ([]byte, error) {
 			return []byte("invalid json"), nil
 		},
 	}
