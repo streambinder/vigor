@@ -18,45 +18,6 @@ type LlamaCpp struct {
 	uri string
 }
 
-type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
-type ResponseFormat struct {
-	Type string `json:"type"` // Must be "json_object" for JSON mode
-}
-
-type ChatCompletionRequest struct {
-	Model          string         `json:"model"`
-	Messages       []Message      `json:"messages"`
-	Temperature    float64        `json:"temperature"`
-	ResponseFormat ResponseFormat `json:"response_format"`
-	MaxTokens      int            `json:"max_tokens"`
-	TopP           float64        `json:"top_p,omitempty"`
-	RepeatPenalty  float64        `json:"repeat_penalty,omitempty"`
-	MinP           float64        `json:"min_p,omitempty"`
-}
-
-type ChatCompletionResponseMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
-type ChatCompletionChoice struct {
-	Index        int                           `json:"index"`
-	Message      ChatCompletionResponseMessage `json:"message"`
-	FinishReason string                        `json:"finish_reason"`
-}
-
-type ChatCompletionResponse struct {
-	ID      string                 `json:"id"`
-	Object  string                 `json:"object"`
-	Created int64                  `json:"created"`
-	Model   string                 `json:"model"`
-	Choices []ChatCompletionChoice `json:"choices"`
-}
-
 func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
