@@ -1,10 +1,10 @@
 package database
 
 import (
-	"log"
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -14,17 +14,18 @@ var DB *gorm.DB
 
 func init() {
 	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
+		log.Debug().Msg("No .env file found")
 	}
 
 	var err error
-	DB, err = gorm.Open(postgres.Open(os.Getenv("DATABASE_URL")), &gorm.Config{})
+	dbURL := os.Getenv("DATABASE_URL")
+	DB, err = gorm.Open(postgres.Open(dbURL), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		log.Fatal().Err(err).Str("database_url", dbURL).Msg("Failed to connect to database")
 	}
 
 	if err := DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";").Error; err != nil {
-		log.Fatal("Failed to create extension:", err)
+		log.Fatal().Err(err).Msg("Failed to create extension")
 	}
 
 	if err := DB.AutoMigrate(
@@ -37,6 +38,6 @@ func init() {
 		&model.Activity{},
 		&model.Gym{},
 	); err != nil {
-		log.Fatal("Failed to migrate database:", err)
+		log.Fatal().Err(err).Msg("Failed to migrate database")
 	}
 }

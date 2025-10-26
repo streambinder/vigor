@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog/log"
 )
 
 type OpenRouter struct {
@@ -20,7 +20,7 @@ type OpenRouter struct {
 
 func init() {
 	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
+		log.Debug().Msg("No .env file found")
 	}
 
 	apiKey := os.Getenv("OPENROUTER_API_KEY")
@@ -58,10 +58,11 @@ func (llm *OpenRouter) query(system, user string) ([]byte, error) {
 		return nil, fmt.Errorf("unable to create OpenRouter payload: %s", err)
 	}
 
-	fmt.Println("--- Request Sent ---")
-	fmt.Printf("Endpoint: %s\n", "https://openrouter.ai/api/v1/chat/completions")
-	fmt.Printf("Model: %s\n", llm.model)
-	fmt.Printf("Payload:\n%s\n\n", string(jsonPayload))
+	log.Debug().
+		Str("endpoint", "https://openrouter.ai/api/v1/chat/completions").
+		Str("model", llm.model).
+		Str("payload", string(jsonPayload)).
+		Msg("Sending request to OpenRouter")
 
 	request, err := http.NewRequest("POST", "https://openrouter.ai/api/v1/chat/completions", bytes.NewBuffer(jsonPayload))
 	if err != nil {
@@ -79,7 +80,7 @@ func (llm *OpenRouter) query(system, user string) ([]byte, error) {
 	}
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
-			log.Printf("failed to close response body: %s", closeErr)
+			log.Error().Err(closeErr).Msg("Failed to close response body")
 		}
 	}()
 
@@ -102,8 +103,9 @@ func (llm *OpenRouter) query(system, user string) ([]byte, error) {
 	}
 
 	llmContent := chatResponse.Choices[0].Message.Content
-	fmt.Println("--- Raw LLM Content (Expected JSON String) ---")
-	fmt.Println(llmContent)
+	log.Debug().
+		Str("content", llmContent).
+		Msg("Received LLM response")
 
 	var parsedJSON map[string]any
 	if err := json.Unmarshal([]byte(llmContent), &parsedJSON); err != nil {
