@@ -3,8 +3,8 @@ package llm
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
+	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/llm/prompt"
 	"github.com/streambinder/vigor/model"
 )
@@ -62,7 +62,7 @@ func getLLM(_ *model.Profile) LLM {
 	// to use for a given profile, if they have specific
 	// settings, e.g. a personal token
 	if len(openLLMs) == 0 {
-		log.Fatalln("No LLMs available")
+		log.Fatal().Msg("No LLMs available")
 	}
 
 	return openLLMs[0]

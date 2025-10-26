@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog/log"
 )
 
 type LlamaCpp struct {
@@ -20,7 +20,7 @@ type LlamaCpp struct {
 
 func init() {
 	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
+		log.Debug().Msg("No .env file found")
 	}
 
 	tiers := os.Getenv("LLAMACPP_TIERS")
@@ -52,9 +52,12 @@ func (llm *LlamaCpp) query(system, user string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to create llama.cpp payload: %s", err)
 	}
-	fmt.Println("--- Request Sent ---")
-	fmt.Printf("Endpoint: %s\n", fmt.Sprintf("%s/v1/chat/completions", llm.uri))
-	fmt.Printf("Payload:\n%s\n\n", string(jsonPayload))
+
+	endpoint := fmt.Sprintf("%s/v1/chat/completions", llm.uri)
+	log.Debug().
+		Str("endpoint", endpoint).
+		Str("payload", string(jsonPayload)).
+		Msg("Sending request to llama.cpp")
 
 	request, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/chat/completions", llm.uri), bytes.NewBuffer(jsonPayload))
 	if err != nil {
@@ -69,7 +72,7 @@ func (llm *LlamaCpp) query(system, user string) ([]byte, error) {
 	}
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
-			log.Printf("failed to close response body: %s", closeErr)
+			log.Error().Err(closeErr).Msg("Failed to close response body")
 		}
 	}()
 
@@ -91,8 +94,9 @@ func (llm *LlamaCpp) query(system, user string) ([]byte, error) {
 	}
 
 	llmContent := chatResponse.Choices[0].Message.Content
-	fmt.Println("--- Raw LLM Content (Expected JSON String) ---")
-	fmt.Println(llmContent)
+	log.Debug().
+		Str("content", llmContent).
+		Msg("Received LLM response")
 
 	var parsedJSON map[string]any
 	if err := json.Unmarshal([]byte(llmContent), &parsedJSON); err != nil {
