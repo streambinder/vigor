@@ -54,6 +54,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: actions/setup-go@v6
+        with:
+          cache-dependency-path: server/go.sum
       - run: |
           PATH="$PATH:$(go env GOPATH)/bin"
           export PATH
@@ -87,6 +89,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: actions/setup-go@v6
+        with:
+          cache-dependency-path: server/go.sum
       - run: |
           PATH="$PATH:$(go env GOPATH)/bin"
           export PATH
@@ -117,6 +121,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: actions/setup-go@v6
+        with:
+          cache-dependency-path: server/go.sum
       - run: |
           cd server
           echo "Running tests with coverage collection..."
@@ -153,6 +159,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: actions/setup-go@v6
+        with:
+          cache-dependency-path: server/go.sum
       - name: Download coverage artifacts
         uses: actions/download-artifact@v4
         with:
