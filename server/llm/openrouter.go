@@ -11,6 +11,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const defaultOpenRouterModel = "openai/gpt-oss-20b:free"
+
 // OpenRouter provides LLM capabilities via the OpenRouter API.
 type OpenRouter struct {
 	LLM
@@ -27,7 +29,7 @@ func init() {
 	// Default to a good model, but can be configured via env var
 	model := os.Getenv("OPENROUTER_MODEL")
 	if model == "" {
-		model = "openai/gpt-oss-20b:free"
+		model = defaultOpenRouterModel
 	}
 
 	openLLMs = append(openLLMs, &OpenRouter{
