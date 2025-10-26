@@ -9,7 +9,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 )
 
@@ -20,10 +19,6 @@ type LlamaCpp struct {
 }
 
 func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Debug().Msg("No .env file found")
-	}
-
 	tiers := os.Getenv("LLAMACPP_TIERS")
 	if tiers == "" {
 		return

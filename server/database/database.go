@@ -3,7 +3,6 @@ package database
 import (
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/model"
 	"gorm.io/driver/postgres"
@@ -13,10 +12,6 @@ import (
 var DB *gorm.DB
 
 func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Debug().Msg("No .env file found")
-	}
-
 	var err error
 	dbURL := os.Getenv("DATABASE_URL")
 	DB, err = gorm.Open(postgres.Open(dbURL), &gorm.Config{})
