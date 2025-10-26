@@ -1,3 +1,0 @@
-[codespell]
-# Ignore "equipments" as it's the correct plural form used in ExerciseDB API schema
-ignore-words-list = equipments
