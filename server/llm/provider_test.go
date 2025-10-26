@@ -49,7 +49,8 @@ func TestGetLLM_EmptyList(t *testing.T) {
 	defer mockExit.UnPatch()
 
 	defer func() {
-		_ = recover() // Expected panic from mocked os.Exit
+		//nolint:errcheck // Expected panic from mocked os.Exit
+		_ = recover()
 	}()
 
 	_ = getLLM(&model.Profile{})

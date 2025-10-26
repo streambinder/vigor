@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"testing"
+	"testing/iotest"
 
 	"github.com/bytedance/mockey"
 	"github.com/rs/zerolog"
@@ -41,7 +42,7 @@ func TestLlamaCppQuery_Success(t *testing.T) {
 		t.Fatalf("Failed to marshal response: %v", err)
 	}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader(responseJSON)),
@@ -122,7 +123,7 @@ func TestLlamaCppQuery_NonOKStatus(t *testing.T) {
 		uri: "http://localhost:8080",
 	}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusBadRequest,
 			Body:       io.NopCloser(bytes.NewReader([]byte("error message"))),
@@ -143,12 +144,10 @@ func TestLlamaCppQuery_ReadBodyError(t *testing.T) {
 		uri: "http://localhost:8080",
 	}
 
-	errorReader := &errorReader{err: errors.New("read error")}
-
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
-			Body:       io.NopCloser(errorReader),
+			Body:       io.NopCloser(iotest.ErrReader(errors.New("read error"))),
 		}, nil
 	}).Build()
 	defer mockHTTP.UnPatch()
@@ -166,7 +165,7 @@ func TestLlamaCppQuery_UnmarshalResponseError(t *testing.T) {
 		uri: "http://localhost:8080",
 	}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(client *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte("invalid json"))),
@@ -200,7 +199,7 @@ func TestLlamaCppQuery_NoChoices(t *testing.T) {
 		t.Fatalf("Failed to marshal response: %v", err)
 	}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader(responseJSON)),
@@ -243,7 +242,7 @@ func TestLlamaCppQuery_InvalidContentJSON(t *testing.T) {
 		t.Fatalf("Failed to marshal response: %v", err)
 	}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader(responseJSON)),
