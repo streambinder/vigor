@@ -133,7 +133,7 @@ func TestAuthorized_ValidToken_Success(t *testing.T) {
 	testUserID := uuid.New()
 
 	// Mock VerifyAccessToken to return valid claims
-	mockVerify := mockey.Mock(token.VerifyAccessToken).To(func(tokenStr string) (*token.Claims, error) {
+	mockVerify := mockey.Mock(token.VerifyAccessToken).To(func(_ string) (*token.Claims, error) {
 		return &token.Claims{
 			UserID: testUserID,
 		}, nil
