@@ -5,16 +5,9 @@ package main
 import (
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/handler"
 )
-
-func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Debug().Msg("No .env file found")
-	}
-}
 
 func main() {
 	port := os.Getenv("PORT")

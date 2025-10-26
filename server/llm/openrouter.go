@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 )
 
@@ -20,10 +19,6 @@ type OpenRouter struct {
 }
 
 func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Debug().Msg("No .env file found")
-	}
-
 	apiKey := os.Getenv("OPENROUTER_API_KEY")
 	if apiKey == "" {
 		return
