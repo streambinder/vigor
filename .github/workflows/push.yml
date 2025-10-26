@@ -80,6 +80,25 @@ jobs:
         with:
           persist-credentials: false
       - run: cd server && test "$(grep -cr 'defer gomonkey\.')" = "$(grep -cr 'Reset()$')"
+  qtpl-generation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v6
+      - run: |
+          PATH="$PATH:$(go env GOPATH)/bin"
+          export PATH
+          go install github.com/valyala/quicktemplate/qtc@latest
+          cd server/llm/prompt
+          qtc
+          if git diff --exit-code *.qtpl.go; then
+            echo "Generated qtpl files match repository"
+          else
+            echo "ERROR: Generated qtpl files differ from repository. Please run 'qtc' in server/llm/prompt and commit the changes."
+            exit 1
+          fi
   test:
     runs-on: ubuntu-latest
     needs:
@@ -90,6 +109,7 @@ jobs:
         go-channel-closure,
         go-http-body-closure,
         go-monkey-unpatch,
+        qtpl-generation,
       ]
     if: success()
     steps:
