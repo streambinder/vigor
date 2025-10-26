@@ -22,6 +22,9 @@ func handleRegister(c *fiber.Ctx) error {
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse JSON"})
 	}
+	if err := database.DB.First(&model.User{}, "email = ?", body.Email).Error; err == nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "email already exists"})
+	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
 	if err != nil {
