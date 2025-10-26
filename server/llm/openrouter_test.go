@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"testing"
+	"testing/iotest"
 
 	"github.com/bytedance/mockey"
 	"github.com/rs/zerolog"
@@ -42,7 +43,7 @@ func TestOpenRouterQuery_Success(t *testing.T) {
 		t.Fatalf("Failed to marshal response: %v", err)
 	}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader(responseJSON)),
@@ -127,7 +128,7 @@ func TestOpenRouterQuery_NonOKStatus(t *testing.T) {
 		model:  "test-model",
 	}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusBadRequest,
 			Body:       io.NopCloser(bytes.NewReader([]byte("error message"))),
@@ -141,14 +142,6 @@ func TestOpenRouterQuery_NonOKStatus(t *testing.T) {
 	}
 }
 
-type errorReader struct {
-	err error
-}
-
-func (e *errorReader) Read(_ []byte) (n int, err error) {
-	return 0, e.err
-}
-
 func TestOpenRouterQuery_ReadBodyError(t *testing.T) {
 	zerolog.SetGlobalLevel(zerolog.Disabled)
 
@@ -157,12 +150,10 @@ func TestOpenRouterQuery_ReadBodyError(t *testing.T) {
 		model:  "test-model",
 	}
 
-	errorReader := &errorReader{err: errors.New("read error")}
-
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
-			Body:       io.NopCloser(errorReader),
+			Body:       io.NopCloser(iotest.ErrReader(errors.New("read error"))),
 		}, nil
 	}).Build()
 	defer mockHTTP.UnPatch()
@@ -181,7 +172,7 @@ func TestOpenRouterQuery_UnmarshalResponseError(t *testing.T) {
 		model:  "test-model",
 	}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte("invalid json"))),
@@ -216,7 +207,7 @@ func TestOpenRouterQuery_NoChoices(t *testing.T) {
 		t.Fatalf("Failed to marshal response: %v", err)
 	}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader(responseJSON)),
@@ -260,7 +251,7 @@ func TestOpenRouterQuery_InvalidContentJSON(t *testing.T) {
 		t.Fatalf("Failed to marshal response: %v", err)
 	}
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, req *http.Request) (*http.Response, error) {
+	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader(responseJSON)),
