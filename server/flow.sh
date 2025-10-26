@@ -1,23 +1,31 @@
 #!/bin/bash
 
 set -euo pipefail
+shopt -s expand_aliases
 
-curl -s -H "Content-Type: application/json" -X POST http://localhost:8080/register -d '{"email":"user@ema.il","password":"pass"}' | jq
+alias curl="curl -s -H \"Content-Type: application/json\""
+login='{"email":"user@ema.il","password":"pass"}'
 
-TOKENS=$(curl -s -H "Content-Type: application/json" -X POST http://localhost:8080/login -d '{"email":"user@ema.il","password":"pass"}')
+( \
+	curl -X POST http://localhost:8080/register -d "${login}" || \
+	curl -X POST http://localhost:8080/login -d "${login}" \
+) | jq
+TOKENS=$(curl -X POST http://localhost:8080/login -d '{"email":"user@ema.il","password":"pass"}')
 echo "$TOKENS" | jq
 ACCESS=$(echo "$TOKENS" | jq -r .access_token)
 REFRESH=$(echo "$TOKENS" | jq -r .refresh_token)
+alias curl="curl -s -H \"Content-Type:application/json\" -H \"Authorization: Bearer \${ACCESS}\""
 
-curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $ACCESS" -X POST http://localhost:8080/user/update \
+curl -X POST http://localhost:8080/user/update \
 	-d '{"birthdate":"01/01/2000","language":"it","height":180,"weight":60,"data":{"goals":["hypertrophy","hyperlordosis compensation"]}}' | jq
-curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $ACCESS" http://localhost:8080/user | jq
+curl http://localhost:8080/user | jq
 
-NEW=$(curl -s -H "Content-Type: application/json" -X POST http://localhost:8080/refresh -d '{"refresh_token":"'"$REFRESH"'"}')
+NEW=$(curl -X POST http://localhost:8080/refresh -d '{"refresh_token":"'"$REFRESH"'"}')
 echo "$NEW" | jq
 ACCESS=$(echo "$NEW" | jq -r .access_token)
 REFRESH=$(echo "$NEW" | jq -r .refresh_token)
+alias curl="curl -s -H \"Content-Type:application/json\" -H \"Authorization: Bearer \${ACCESS}\""
 
-curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $ACCESS" http://localhost:8080/training | jq
+# curl http://localhost:8080/training | jq
 
-# curl -s -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $ACCESS" http://localhost:8080/unregister | jq
+# curl -X POST http://localhost:8080/unregister | jq
