@@ -6,7 +6,7 @@ shopt -s expand_aliases
 alias curl="curl -s -H \"Content-Type: application/json\""
 login='{"email":"user@ema.il","password":"pass"}'
 
-curl -X POST http://localhost:8080/register -d "${login}" | jq || {}
+curl -X POST http://localhost:8080/register -d "${login}" | jq || true
 TOKENS=$(curl -X POST http://localhost:8080/login -d '{"email":"user@ema.il","password":"pass"}')
 echo "$TOKENS" | jq
 ACCESS=$(echo "$TOKENS" | jq -r .access_token)
@@ -23,7 +23,7 @@ ACCESS=$(echo "$NEW" | jq -r .access_token)
 REFRESH=$(echo "$NEW" | jq -r .refresh_token)
 alias curl="curl -s -H \"Content-Type:application/json\" -H \"Authorization: Bearer \${ACCESS}\""
 
-curl -X POST http://localhost:8080/gym -d '{"name":"Basement","equipment":["barbell","bench","dumbbels","elastic bands","pull-up bar","dip station","rings","ab wheel"]}' | jq || {}
+curl -X POST http://localhost:8080/gym -d '{"name":"Basement","equipment":["barbell","bench","dumbbels","elastic bands","pull-up bar","dip station","rings","ab wheel"]}' | jq || true
 curl http://localhost:8080/gym/basement | jq
 
 # curl http://localhost:8080/training | jq
