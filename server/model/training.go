@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"github.com/streambinder/vigor/encoder"
 	"gorm.io/gorm"
 )
@@ -21,14 +22,14 @@ func init() {
 
 // Training represents the entire training session with a UUID ID
 type Training struct {
-	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
-	Date        time.Time `gorm:"not null" json:"date" prompt:"Today's date in RFC3339 format"`
-	Name        string    `gorm:"not null" json:"name" prompt:"Catchy name for my training based on targeted goals and training type"`
-	Description string    `gorm:"not null" json:"description" prompt:"Relatively short description on how this training is going to impact based on the given goals"`
-	Category    string    `gorm:"not null" json:"category" prompt:"Training category"`
-	Duration    *int      `gorm:"not null" json:"duration" prompt:"Training duration in minutes"`
-	Equipment   []string  `gorm:"type:text" json:"equipment" prompt:"List of equipment needed for this training"`
-	Routines    []Routine `gorm:"foreignKey:TrainingID" json:"routines"`
+	ID          uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
+	Date        time.Time      `gorm:"not null" json:"date" prompt:"Today's date in RFC3339 format"`
+	Name        string         `gorm:"not null" json:"name" prompt:"Catchy name for my training based on targeted goals and training type"`
+	Description string         `gorm:"not null" json:"description" prompt:"Relatively short description on how this training is going to impact based on the given goals"`
+	Category    string         `gorm:"not null" json:"category" prompt:"Training category"`
+	Duration    *int           `gorm:"not null" json:"duration" prompt:"Training duration in minutes"`
+	Equipment   pq.StringArray `gorm:"type:text[]" json:"equipment" prompt:"List of equipment needed for this training"`
+	Routines    []Routine      `gorm:"foreignKey:TrainingID" json:"routines"`
 
 	CreatedAt time.Time      `json:"-"`
 	UpdatedAt time.Time      `json:"-"`

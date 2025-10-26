@@ -12,9 +12,9 @@ with
     {% for _, equipment := range equipment %}
         {%s equipment %},
     {% endfor %}
-equipment available
+equipment available. Not all equipment need to be used in this training.
 {% else %}
-with no equipment available
+with no equipment available.
 {% endif %}
 
 {% endcollapsespace -%}

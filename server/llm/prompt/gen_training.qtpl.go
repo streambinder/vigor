@@ -43,11 +43,11 @@ func StreamGenTraining(qw422016 *qt422016.Writer, profile *model.Profile, equipm
 //line llm/prompt/gen_training.qtpl:14
 		}
 //line llm/prompt/gen_training.qtpl:14
-		qw422016.N().S(` equipment available `)
+		qw422016.N().S(` equipment available. Not all equipment need to be used in this training. `)
 //line llm/prompt/gen_training.qtpl:16
 	} else {
 //line llm/prompt/gen_training.qtpl:16
-		qw422016.N().S(` with no equipment available `)
+		qw422016.N().S(` with no equipment available. `)
 //line llm/prompt/gen_training.qtpl:18
 	}
 //line llm/prompt/gen_training.qtpl:18
