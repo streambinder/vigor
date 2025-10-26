@@ -73,13 +73,13 @@ jobs:
         with:
           persist-credentials: false
       - run: cd server && test "$(grep -rc --exclude-dir=".git*" 'http.Get(\|http.Head(\|http.DefaultClient.Do(')" = "$(grep -rc --exclude-dir=".git*" '.Body.Close()')"
-  go-monkey-unpatch:
+  go-mockey-unpatch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - run: cd server && test "$(grep -cr 'defer gomonkey\.')" = "$(grep -cr 'Reset()$')"
+      - run: cd server && test "$(grep -cr 'mockey.Mock(')" = "$(grep -cr '\.UnPatch()$')"
   qtpl-generation:
     runs-on: ubuntu-latest
     steps:
@@ -108,7 +108,7 @@ jobs:
         gofumpt,
         go-channel-closure,
         go-http-body-closure,
-        go-monkey-unpatch,
+        go-mockey-unpatch,
         qtpl-generation,
       ]
     if: success()
