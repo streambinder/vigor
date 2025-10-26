@@ -11,21 +11,25 @@ import (
 
 var openLLMs = []LLM{}
 
+// LLM defines the interface for language model providers.
 type LLM interface {
 	query(system, user string) ([]byte, error)
 }
 
 // Common types shared across LLM providers
 
+// Message represents a chat message with role and content.
 type Message struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 }
 
+// ResponseFormat specifies the desired response format from the LLM.
 type ResponseFormat struct {
 	Type string `json:"type"` // Must be "json_object" for JSON mode
 }
 
+// ChatCompletionRequest contains parameters for an LLM chat completion API call.
 type ChatCompletionRequest struct {
 	Model          string         `json:"model"`
 	Messages       []Message      `json:"messages"`
@@ -37,17 +41,20 @@ type ChatCompletionRequest struct {
 	MinP           float64        `json:"min_p,omitempty"`
 }
 
+// ChatCompletionResponseMessage represents a message in the LLM response.
 type ChatCompletionResponseMessage struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 }
 
+// ChatCompletionChoice represents a single completion choice from the LLM.
 type ChatCompletionChoice struct {
 	Index        int                           `json:"index"`
 	Message      ChatCompletionResponseMessage `json:"message"`
 	FinishReason string                        `json:"finish_reason"`
 }
 
+// ChatCompletionResponse represents the full response from an LLM chat completion.
 type ChatCompletionResponse struct {
 	ID      string                 `json:"id"`
 	Object  string                 `json:"object"`
@@ -68,6 +75,7 @@ func getLLM(_ *model.Profile) LLM {
 	return openLLMs[0]
 }
 
+// GenTraining generates a personalized training plan using an LLM.
 func GenTraining(profile *model.Profile, equipment []string, duration int) (*model.Training, error) {
 	response, err := getLLM(profile).query(
 		prompt.System(profile, model.TrainingSchema),

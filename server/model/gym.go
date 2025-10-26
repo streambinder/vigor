@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Gym represents a user's training location with available equipment.
 type Gym struct {
 	ID        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Name      string         `gorm:"not null;uniqueIndex:idx_user_gym_name" json:"name"`

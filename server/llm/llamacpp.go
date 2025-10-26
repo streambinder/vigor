@@ -13,6 +13,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// LlamaCpp provides LLM capabilities via a local llama.cpp server.
 type LlamaCpp struct {
 	LLM
 	uri string

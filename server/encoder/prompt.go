@@ -6,12 +6,12 @@ import (
 	"reflect"
 )
 
-// JSONWithPrompts replaces struct field values with their `prompt` tag values.
-// Works recursively on nested structs and slices of structs.
+// JSONWithPrompts generates JSON schema by replacing values with prompt tag descriptions.
 type JSONWithPrompts struct {
 	Value any
 }
 
+// MarshalJSON converts the struct to JSON using prompt tags as values.
 func (j JSONWithPrompts) MarshalJSON() ([]byte, error) {
 	result := buildPromptMap(reflect.ValueOf(j.Value))
 	return json.Marshal(result)

@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Profile stores user's physical attributes and fitness-related metadata.
 type Profile struct {
 	Birthdate time.Time      `json:"birthdate"`
 	Language  string         `json:"language"` // ISO 639-1:2002
@@ -30,16 +31,19 @@ type profileData struct {
 	Limitations []string `json:"limitations"`
 }
 
+// Goal represents a user's fitness objective with timeline.
 type Goal struct {
 	Description string    `json:"description"`
 	StartDate   time.Time `json:"start_date"`
 }
 
+// Injury records a user's past injury for training considerations.
 type Injury struct {
 	Description string `json:"description"`
 	Year        int    `json:"year"`
 }
 
+// Age calculates the user's current age from their birthdate.
 func (p *Profile) Age() int {
 	now := time.Now()
 	years := now.Year() - p.Birthdate.Year()
@@ -55,6 +59,7 @@ func (p *Profile) data() (profileData, error) {
 	return data, err
 }
 
+// Goals extracts the user's fitness goals from profile data.
 func (p *Profile) Goals() []Goal {
 	data, err := p.data()
 	if err != nil {
@@ -63,6 +68,7 @@ func (p *Profile) Goals() []Goal {
 	return data.Goals
 }
 
+// Injuries extracts the user's injury history from profile data.
 func (p *Profile) Injuries() []Injury {
 	data, err := p.data()
 	if err != nil {
@@ -71,6 +77,7 @@ func (p *Profile) Injuries() []Injury {
 	return data.Injuries
 }
 
+// Limitations extracts the user's training limitations from profile data.
 func (p *Profile) Limitations() []string {
 	data, err := p.data()
 	if err != nil {

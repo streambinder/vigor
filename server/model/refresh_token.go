@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// RefreshToken stores JWT refresh tokens for session management.
 type RefreshToken struct {
 	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	UserID    uuid.UUID `gorm:"type:uuid;not null;index"`
