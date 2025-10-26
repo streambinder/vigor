@@ -103,8 +103,6 @@ jobs:
           go test -p 1 -v -timeout 30s ./...
           echo Checking coverage...
           go test -p 1 -v -timeout 30s -cover ./... | grep -E '[1-9]{1}[0-9]{1}.[0-9]+%' && exit 1 || echo ok
-        env:
-          XDG_MUSIC_DIR: /tmp
   docker-server:
     runs-on: ubuntu-latest
     needs: [test]
