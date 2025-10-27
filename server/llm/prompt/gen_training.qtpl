@@ -8,9 +8,9 @@
 
 Generate a {%d duration %} minutes long training
 
-by picking from this list of exercises (populate name and ID accordingly):
+by picking from this list of exercises:
 {% for _, exercise := range exercises %}
-- {%s exercise.Name %} (id {%s exercise.ID.String() %})
+- {%s exercise.ID %}
 {% endfor %}
 
 {% endcollapsespace -%}

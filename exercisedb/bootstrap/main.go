@@ -68,6 +68,25 @@ func cleanInstructions(instructions []string) []string {
 	return cleaned
 }
 
+// slugify converts a string into a URL-friendly slug.
+func slugify(s string) string {
+	// Convert to lowercase
+	slug := regexp.MustCompile(`[A-Z]`).ReplaceAllStringFunc(s, func(match string) string {
+		return fmt.Sprintf("%c", match[0]+32)
+	})
+
+	// Replace spaces and special characters with hyphens
+	slug = regexp.MustCompile(`[^a-z0-9]+`).ReplaceAllString(slug, "-")
+
+	// Remove leading and trailing hyphens
+	slug = regexp.MustCompile(`^-+|-+$`).ReplaceAllString(slug, "")
+
+	// Replace multiple consecutive hyphens with a single hyphen
+	slug = regexp.MustCompile(`-+`).ReplaceAllString(slug, "-")
+
+	return slug
+}
+
 // readJSON reads and unmarshals a JSON file into the provided interface.
 func readJSON(path string, v interface{}) error {
 	data, err := os.ReadFile(path)
@@ -182,7 +201,11 @@ func loadExercises(db *gorm.DB, dataPath string) error {
 			// Clean instructions by removing "Step:X " prefix
 			cleanedInstructions := cleanInstructions(e.Instructions)
 
+			// Generate ID by slugifying the exercise name
+			exerciseID := slugify(e.Name)
+
 			exercise := model.Exercise{
+				ID:               exerciseID,
 				Name:             e.Name,
 				Reference:        e.GifURL,
 				Equipment:        pq.StringArray(filteredEq),
@@ -192,8 +215,8 @@ func loadExercises(db *gorm.DB, dataPath string) error {
 				Instructions:     pq.StringArray(cleanedInstructions),
 			}
 
-			if err := db.FirstOrCreate(&exercise, model.Exercise{Name: e.Name}).Error; err != nil {
-				log.Error().Err(err).Str("name", e.Name).Msg("Failed to insert exercise")
+			if err := db.FirstOrCreate(&exercise, model.Exercise{ID: exerciseID}).Error; err != nil {
+				log.Error().Err(err).Str("name", e.Name).Str("id", exerciseID).Msg("Failed to insert exercise")
 				return fmt.Errorf("failed to insert exercise %s: %w", e.Name, err)
 			}
 		}

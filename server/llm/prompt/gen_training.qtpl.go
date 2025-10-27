@@ -30,19 +30,15 @@ func StreamGenTraining(qw422016 *qt422016.Writer, profile *model.Profile, exerci
 //line gen_training.qtpl:9
 	qw422016.N().D(duration)
 //line gen_training.qtpl:9
-	qw422016.N().S(` minutes long training by picking from this list of exercises (populate name and ID accordingly): `)
+	qw422016.N().S(` minutes long training by picking from this list of exercises: `)
 //line gen_training.qtpl:12
 	for _, exercise := range exercises {
 //line gen_training.qtpl:12
 		qw422016.N().S(` - `)
 //line gen_training.qtpl:13
-		qw422016.E().S(exercise.Name)
+		qw422016.E().S(exercise.ID)
 //line gen_training.qtpl:13
-		qw422016.N().S(` (id `)
-//line gen_training.qtpl:13
-		qw422016.E().S(exercise.ID.String())
-//line gen_training.qtpl:13
-		qw422016.N().S(`) `)
+		qw422016.N().S(` `)
 //line gen_training.qtpl:14
 	}
 //line gen_training.qtpl:14

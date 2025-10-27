@@ -115,7 +115,7 @@ func TestGenTraining_Success(t *testing.T) {
 	}
 
 	exercises := []exercisedb.Exercise{
-		{ID: uuid.New(), Name: "Dumbbell Press"},
+		{ID: uuid.New().String(), Name: "Dumbbell Press"},
 	}
 
 	result, err := GenTraining(profile, exercises, 30)
@@ -154,7 +154,7 @@ func TestGenTraining_QueryError(t *testing.T) {
 	}
 
 	exercises := []exercisedb.Exercise{
-		{ID: uuid.New(), Name: "Dumbbell Press"},
+		{ID: uuid.New().String(), Name: "Dumbbell Press"},
 	}
 
 	result, err := GenTraining(profile, exercises, 30)
@@ -192,7 +192,7 @@ func TestGenTraining_InvalidJSON(t *testing.T) {
 	}
 
 	exercises := []exercisedb.Exercise{
-		{ID: uuid.New(), Name: "Dumbbell Press"},
+		{ID: "dumbbell-press", Name: "Dumbbell Press"},
 	}
 
 	result, err := GenTraining(profile, exercises, 30)
@@ -246,8 +246,8 @@ func TestGenTraining_CallsPromptCorrectly(t *testing.T) {
 	}
 
 	exercises := []exercisedb.Exercise{
-		{ID: uuid.New(), Name: "Mat Stretch"},
-		{ID: uuid.New(), Name: "Kettlebell Swing"},
+		{ID: "mat-stretch", Name: "Mat Stretch"},
+		{ID: "kettlebell-swing", Name: "Kettlebell Swing"},
 	}
 	duration = 60
 
