@@ -95,9 +95,8 @@ jobs:
       - run: |
           PATH="$PATH:$(go env GOPATH)/bin"
           export PATH
-          go install github.com/valyala/quicktemplate/qtc@latest
-          cd server/llm/prompt
-          qtc
+          cd server
+          go generate
           if git diff --exit-code -- ./*.qtpl.go; then
             echo "Generated qtpl files match repository"
           else
