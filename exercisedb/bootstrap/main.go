@@ -13,10 +13,14 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/exercisedb/model"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
+
+var capitalizer = cases.Title(language.English)
 
 // Equipment represents equipment data from ExerciseDB JSON files.
 type Equipment struct {
@@ -209,7 +213,7 @@ func loadExercises(db *gorm.DB, dataPath string) error {
 
 			exercise := model.Exercise{
 				ID:               exerciseID,
-				Name:             e.Name,
+				Name:             capitalizer.String(e.Name),
 				Reference:        e.GifURL,
 				Equipment:        pq.StringArray(filteredEq),
 				BodyParts:        pq.StringArray(e.BodyParts),
