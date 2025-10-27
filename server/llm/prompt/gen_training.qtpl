@@ -8,13 +8,7 @@
 
 Generate a {%d duration %}min training from these exercises:
 {% for _, exercise := range exercises %}
-    ID: {%s exercise.ID %}
-    {% if len(exercise.Muscles) > 0 %}
-        (targets: {% for _, muscle := range exercise.Muscles %}{%s muscle %}, {% endfor %}
-        {% if len(exercise.SecondaryMuscles) > 0 %}
-            secondary: {% for _, muscle := range exercise.SecondaryMuscles %}{%s muscle %}, {% endfor %}
-        {% endif %})
-    {% endif %}
+ ID: {%s exercise.ID %},
 {% endfor %}
 
 {% endcollapsespace -%}
