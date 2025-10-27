@@ -23,86 +23,101 @@ type TrainingRequest struct {
 	Gym       string   `json:"gym"`       // Name of the gym to use for equipment lookup
 }
 
-func init() {
-	APP.Post("/training", middleware.Authorized(), func(c *fiber.Ctx) error {
-		var req TrainingRequest
-		if err := c.BodyParser(&req); err != nil {
-			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
-		}
-
-		if req.Duration <= 0 {
-			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "duration is required"})
-		}
-
-		var profile model.Profile
-		if err := database.DB.First(&profile, "user_id = ?", c.Locals("userID")).Error; err != nil {
-			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
-		}
-
-		var (
-			gymQuery = strings.ToLower(req.Gym)
-			gym      *model.Gym
-		)
-		if err := database.DB.First(&gym, "name ilike ? and user_id = ?", gymQuery, c.Locals("userID")).Error; err != nil {
-			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "gym not found"})
-		}
-
-		equipment := req.Equipment
-		if len(equipment) == 0 && gym != nil {
-			equipment = gym.Equipment
-		}
-
-		// Query exercises where all required equipment is available
-		// Using array containment operator to filter exercises whose equipment is a subset of available equipment
-		queryStart := time.Now()
-		exercises := []exercisedb.Exercise{}
-		if err := database.EXERCISE_DB.Where("equipment <@ ? OR equipment = '{}' OR equipment IS NULL", pq.StringArray(equipment)).Find(&exercises).Error; err != nil {
-			log.Error().Err(err).Msg("Failed to query exercises from database")
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-		}
-		log.Info().
-			Int("exercise_count", len(exercises)).
-			Dur("duration_ms", time.Since(queryStart)).
-			Msg("Queried exercises from database")
-
-		llmStart := time.Now()
-		training, err := llm.GenTraining(&profile, exercises, req.Duration)
-		if err != nil {
-			log.Error().Err(err).Msg("Failed to generate training via LLM")
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-		}
-		log.Info().
-			Dur("duration_ms", time.Since(llmStart)).
-			Msg("Generated training via LLM")
-		training.UserID = profile.UserID
-
-		enrichStart := time.Now()
-		enrichedCount := 0
-		for i := range training.Routines {
-			for j := range training.Routines[i].Blocks {
-				for k := range training.Routines[i].Blocks[j].Activities {
-					activity := &training.Routines[i].Blocks[j].Activities[k]
-					if activity.DetailID != "" {
-						var exercise exercisedb.Exercise
-						if err := database.EXERCISE_DB.First(&exercise, "id = ?", activity.DetailID).Error; err == nil {
-							if exerciseJSON, err := json.Marshal(exercise); err == nil {
-								activity.Detail = exerciseJSON
-								enrichedCount++
-							}
+// enrichActivitiesWithExerciseDetails enriches training activities with full exercise details.
+func enrichActivitiesWithExerciseDetails(training *model.Training) int {
+	enrichedCount := 0
+	for i := range training.Routines {
+		for j := range training.Routines[i].Blocks {
+			for k := range training.Routines[i].Blocks[j].Activities {
+				activity := &training.Routines[i].Blocks[j].Activities[k]
+				if activity.DetailID != "" {
+					var exercise exercisedb.Exercise
+					if err := database.ExerciseDB.First(&exercise, "id = ?", activity.DetailID).Error; err == nil {
+						if exerciseJSON, err := json.Marshal(exercise); err == nil {
+							activity.Detail = exerciseJSON
+							enrichedCount++
 						}
 					}
 				}
 			}
 		}
-		log.Info().
-			Int("enriched_activities", enrichedCount).
-			Dur("duration_ms", time.Since(enrichStart)).
-			Msg("Enriched activities with exercise details")
+	}
+	return enrichedCount
+}
 
-		if err := database.DB.Create(&training).Error; err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-		}
+// queryExercises queries the exercise database for exercises matching the given equipment.
+func queryExercises(equipment []string) ([]exercisedb.Exercise, error) {
+	exercises := []exercisedb.Exercise{}
+	err := database.ExerciseDB.Where("equipment <@ ? OR equipment = '{}' OR equipment IS NULL", pq.StringArray(equipment)).Find(&exercises).Error
+	return exercises, err
+}
 
-		return c.JSON(training)
-	})
+func init() {
+	APP.Post("/training", middleware.Authorized(), handleTrainingRequest)
+}
+
+// handleTrainingRequest handles POST /training endpoint for generating training plans.
+func handleTrainingRequest(c *fiber.Ctx) error {
+	var req TrainingRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
+	}
+
+	if req.Duration <= 0 {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "duration is required"})
+	}
+
+	var profile model.Profile
+	if err := database.DB.First(&profile, "user_id = ?", c.Locals("userID")).Error; err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
+	}
+
+	var (
+		gymQuery = strings.ToLower(req.Gym)
+		gym      *model.Gym
+	)
+	if err := database.DB.First(&gym, "name ilike ? and user_id = ?", gymQuery, c.Locals("userID")).Error; err != nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "gym not found"})
+	}
+
+	equipment := req.Equipment
+	if len(equipment) == 0 && gym != nil {
+		equipment = gym.Equipment
+	}
+
+	// Query exercises where all required equipment is available
+	queryStart := time.Now()
+	exercises, err := queryExercises(equipment)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query exercises from database")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	log.Info().
+		Int("exercise_count", len(exercises)).
+		Dur("duration_ms", time.Since(queryStart)).
+		Msg("Queried exercises from database")
+
+	llmStart := time.Now()
+	training, err := llm.GenTraining(&profile, exercises, req.Duration)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to generate training via LLM")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	log.Info().
+		Dur("duration_ms", time.Since(llmStart)).
+		Msg("Generated training via LLM")
+	training.UserID = profile.UserID
+
+	enrichStart := time.Now()
+	enrichedCount := enrichActivitiesWithExerciseDetails(training)
+	log.Info().
+		Int("enriched_activities", enrichedCount).
+		Dur("duration_ms", time.Since(enrichStart)).
+		Msg("Enriched activities with exercise details")
+
+	if err := database.DB.Create(&training).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(training)
 }
