@@ -6,11 +6,9 @@
 {% func GenTraining(profile *model.Profile, exercises []exercisedb.Exercise, duration int) -%}
 {% collapsespace %}
 
-Generate a {%d duration %} minutes long training
-
-by picking from this list of exercises:
+Generate a {%d duration %} minutes long training by picking from this list of exercises:
 {% for _, exercise := range exercises %}
-- {%s exercise.ID %}
+ID: {%s exercise.ID %} (for muscles {%s exercise.Muscles %}),
 {% endfor %}
 
 {% endcollapsespace -%}

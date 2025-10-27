@@ -31,43 +31,47 @@ func StreamGenTraining(qw422016 *qt422016.Writer, profile *model.Profile, exerci
 	qw422016.N().D(duration)
 //line gen_training.qtpl:9
 	qw422016.N().S(` minutes long training by picking from this list of exercises: `)
-//line gen_training.qtpl:12
+//line gen_training.qtpl:10
 	for _, exercise := range exercises {
-//line gen_training.qtpl:12
-		qw422016.N().S(` - `)
-//line gen_training.qtpl:13
+//line gen_training.qtpl:10
+		qw422016.N().S(` ID: `)
+//line gen_training.qtpl:11
 		qw422016.E().S(exercise.ID)
-//line gen_training.qtpl:13
-		qw422016.N().S(` `)
-//line gen_training.qtpl:14
+//line gen_training.qtpl:11
+		qw422016.N().S(` (for muscles `)
+//line gen_training.qtpl:11
+		qw422016.E().S(exercise.Muscles)
+//line gen_training.qtpl:11
+		qw422016.N().S(`), `)
+//line gen_training.qtpl:12
 	}
-//line gen_training.qtpl:14
+//line gen_training.qtpl:12
 	qw422016.N().S(` `)
-//line gen_training.qtpl:17
+//line gen_training.qtpl:15
 }
 
-//line gen_training.qtpl:17
+//line gen_training.qtpl:15
 func WriteGenTraining(qq422016 qtio422016.Writer, profile *model.Profile, exercises []exercisedb.Exercise, duration int) {
-//line gen_training.qtpl:17
+//line gen_training.qtpl:15
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line gen_training.qtpl:17
+//line gen_training.qtpl:15
 	StreamGenTraining(qw422016, profile, exercises, duration)
-//line gen_training.qtpl:17
+//line gen_training.qtpl:15
 	qt422016.ReleaseWriter(qw422016)
-//line gen_training.qtpl:17
+//line gen_training.qtpl:15
 }
 
-//line gen_training.qtpl:17
+//line gen_training.qtpl:15
 func GenTraining(profile *model.Profile, exercises []exercisedb.Exercise, duration int) string {
-//line gen_training.qtpl:17
+//line gen_training.qtpl:15
 	qb422016 := qt422016.AcquireByteBuffer()
-//line gen_training.qtpl:17
+//line gen_training.qtpl:15
 	WriteGenTraining(qb422016, profile, exercises, duration)
-//line gen_training.qtpl:17
+//line gen_training.qtpl:15
 	qs422016 := string(qb422016.B)
-//line gen_training.qtpl:17
+//line gen_training.qtpl:15
 	qt422016.ReleaseByteBuffer(qb422016)
-//line gen_training.qtpl:17
+//line gen_training.qtpl:15
 	return qs422016
-//line gen_training.qtpl:17
+//line gen_training.qtpl:15
 }
