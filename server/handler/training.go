@@ -86,9 +86,6 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 		Msg("Generated training via LLM")
 	training.UserID = profile.UserID
 
-	// Enrich activities with exercise details from the database
-	enrichStart := time.Now()
-	enrichedCount := 0
 	for i := range training.Routines {
 		for j := range training.Routines[i].Blocks {
 			for k := range training.Routines[i].Blocks[j].Activities {
@@ -97,16 +94,12 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 				if err := database.ExerciseDB.First(&exercise, "id = ?", activity.Name).Error; err == nil {
 					if exerciseJSON, err := json.Marshal(exercise); err == nil {
 						activity.Detail = exerciseJSON
-						enrichedCount++
+						activity.Name = exercise.Name
 					}
 				}
 			}
 		}
 	}
-	log.Info().
-		Int("enriched_activities", enrichedCount).
-		Dur("duration_ms", time.Since(enrichStart)).
-		Msg("Enriched activities with exercise details")
 
 	if err := database.DB.Create(&training).Error; err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
