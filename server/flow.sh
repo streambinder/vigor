@@ -26,6 +26,6 @@ alias curl="curl -s -H \"Content-Type:application/json\" -H \"Authorization: Bea
 curl -X POST http://localhost:8080/gym -d '{"name":"Basement","equipment":["barbell","bench","dumbbels","elastic bands","pull-up bar","dip station","rings","ab wheel"]}' | jq || true
 curl http://localhost:8080/gym/basement | jq
 
-curl "http://localhost:8080/training?gym=basement&duration=30" | jq
+curl -X POST http://localhost:8080/training -d '{"gym":"basement","duration":30}' | jq
 
 # curl -X POST http://localhost:8080/unregister | jq
