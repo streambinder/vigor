@@ -1,8 +1,10 @@
 FROM golang:1.25.0-alpine3.22 AS builder
 WORKDIR /app
-COPY go.mod go.sum ./
+COPY exercisedb/ ./exercisedb/
+COPY server/go.mod server/go.sum ./server/
+WORKDIR /app/server
 RUN go mod download
-COPY . .
+COPY server/ .
 RUN CGO_ENABLED=0 GOOS=linux go build -o server main.go
 
 FROM alpine:3.22
@@ -14,7 +16,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 RUN apk add --no-cache wget
 
 WORKDIR /home/appuser
-COPY --from=builder /app/server .
+COPY --from=builder /app/server/server .
 
 # Change ownership
 RUN chown -R appuser:appgroup /home/appuser
