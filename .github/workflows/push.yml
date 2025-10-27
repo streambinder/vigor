@@ -61,28 +61,28 @@ jobs:
           PATH="$PATH:$(go env GOPATH)/bin"
           export PATH
           go install mvdan.cc/gofumpt@latest
-          if gofumpt -l -e server | grep '^' -q; then exit 1; fi
+          if gofumpt -l -e server exercisedb | grep '^' -q; then exit 1; fi
   go-channel-closure:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - run: cd server && test "$(grep -Erc --exclude-dir=".git*" 'make\(chan\s')" = "$(grep -Erc --exclude-dir=".git*" '\sclose\(')"
+      - run: test "$(grep -Erc --include='*.go' --exclude-dir=".git*" 'make\(chan\s')" = "$(grep -Erc --include='*.go' --exclude-dir=".git*" '\sclose\(')"
   go-http-body-closure:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - run: cd server && test "$(grep -rc --exclude-dir=".git*" 'http.Get(\|http.Head(\|http.DefaultClient.Do(')" = "$(grep -rc --exclude-dir=".git*" '.Body.Close()')"
+      - run: test "$(grep -rc --include='*.go' --exclude-dir=".git*" 'http.Get(\|http.Head(\|http.DefaultClient.Do(')" = "$(grep -rc --include='*.go' --exclude-dir=".git*" '.Body.Close()')"
   go-mockey-unpatch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - run: cd server && test "$(grep -cr 'mockey.Mock(')" = "$(grep -cr '\.UnPatch()$')"
+      - run: test "$(grep -cr --include='*.go' 'mockey.Mock(')" = "$(grep -cr --include='*.go' '\.UnPatch()$')"
   qtpl-generation:
     runs-on: ubuntu-latest
     steps:

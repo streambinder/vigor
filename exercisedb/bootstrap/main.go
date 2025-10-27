@@ -296,11 +296,6 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to get database instance")
 	}
-	defer func() {
-		if closeErr := sqlDB.Close(); closeErr != nil {
-			log.Error().Err(closeErr).Msg("Failed to close database connection")
-		}
-	}()
 
 	// Configure connection pool
 	sqlDB.SetMaxIdleConns(10)
@@ -314,5 +309,10 @@ func main() {
 			log.Error().Err(closeErr).Msg("Failed to close database connection")
 		}
 		log.Fatal().Err(err).Msg("Bootstrap failed")
+	}
+
+	// Close database connection on success
+	if closeErr := sqlDB.Close(); closeErr != nil {
+		log.Error().Err(closeErr).Msg("Failed to close database connection")
 	}
 }

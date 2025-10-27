@@ -19,6 +19,7 @@ COPY bootstrap/ ./bootstrap/
 # Build the bootstrap binary with CGO enabled for PostgreSQL driver
 # Note: Using dynamic linking since gorm/pgx requires it
 WORKDIR /build/bootstrap
+# hadolint ignore=DL4006
 RUN CGO_ENABLED=1 go build -o /tmp/bootstrap . && \
     chmod +x /tmp/bootstrap && \
     file /tmp/bootstrap && \
@@ -43,87 +44,17 @@ RUN curl -L https://github.com/ExerciseDB/exercisedb-api/archive/refs/heads/main
 
 # Copy the bootstrap tool from bootstrap-builder (already executable)
 COPY --from=bootstrap-builder /tmp/bootstrap /usr/local/bin/bootstrap
+COPY --chmod=777 bootstrap.sh /usr/local/bin/bootstrap.sh
 
 # Verify bootstrap is executable
+# hadolint ignore=DL4006
 RUN ls -la /usr/local/bin/bootstrap && \
     file /usr/local/bin/bootstrap && \
     echo "Testing bootstrap binary..." && \
     /usr/local/bin/bootstrap 2>&1 | head -5 || echo "Bootstrap ready (needs DATABASE_URL)"
 
-# Create a script to initialize, populate, and dump the database
-RUN cat > /build/populate-and-dump.sh << 'EOF'
-#!/bin/sh
-set -e
-
-echo "Starting temporary PostgreSQL server..."
-# Initialize the database cluster
-initdb -D /tmp/pgdata
-
-# Start PostgreSQL in the background
-pg_ctl -D /tmp/pgdata -o "-k /tmp" -l /tmp/postgres.log start
-
-# Wait for PostgreSQL to be ready
-for i in $(seq 1 30); do
-    if pg_isready -h /tmp > /dev/null 2>&1; then
-        break
-    fi
-    echo "Waiting for PostgreSQL to start..."
-    sleep 1
-done
-
-# Create database and user
-psql -h /tmp -U postgres -c "CREATE DATABASE db;"
-psql -h /tmp -U postgres -c "CREATE USER \"user\" WITH PASSWORD 'password';"
-psql -h /tmp -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE db TO \"user\";"
-psql -h /tmp -U postgres -d db -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
-psql -h /tmp -U postgres -d db -c "GRANT ALL ON SCHEMA public TO \"user\";"
-
-# Run the bootstrap tool
-echo "Running bootstrap tool..."
-DATABASE_URL="postgres://user:password@/db?host=/tmp" bootstrap /build/data
-
-# Dump the populated database to a location postgres user can write
-echo "Dumping database..."
-pg_dump -h /tmp -U postgres -d db --clean --if-exists > /tmp/exercisedb-init.sql 2>/tmp/pg_dump_error.log
-DUMP_EXIT_CODE=$?
-
-echo "Dump command completed with exit code: $DUMP_EXIT_CODE"
-echo "Checking if dump file exists..."
-ls -lh /tmp/exercisedb-init.sql || echo "Dump file not found in /tmp"
-
-if [ $DUMP_EXIT_CODE -eq 0 ]; then
-    echo "pg_dump succeeded"
-    if [ -s /tmp/exercisedb-init.sql ]; then
-        echo "Dump file has content, moving to /build..."
-        # Move to /build (postgres user owns the file, needs permission to move to /build)
-        cp /tmp/exercisedb-init.sql /build/exercisedb-init.sql || echo "Copy failed, trying with elevated permissions"
-        echo "✓ Database dump successful!"
-        echo "Dump file size: $(ls -lh /build/exercisedb-init.sql)"
-        echo "Dump file lines: $(wc -l < /build/exercisedb-init.sql)"
-        echo "First 10 lines of dump:"
-        head -10 /build/exercisedb-init.sql
-    else
-        echo "ERROR: Dump file is empty!"
-        exit 1
-    fi
-else
-    echo "ERROR: pg_dump failed!"
-    echo "pg_dump error output:"
-    cat /tmp/pg_dump_error.log || echo "No error log"
-    exit 1
-fi
-
-# Stop PostgreSQL
-echo "Stopping PostgreSQL..."
-pg_ctl -D /tmp/pgdata stop
-
-echo "Database dump completed successfully!"
-EOF
-
-RUN chmod +x /build/populate-and-dump.sh
-
 # Run the populate and dump script
-RUN su-exec postgres /build/populate-and-dump.sh
+RUN su-exec postgres bootstrap.sh
 
 # Stage 3: Final PostgreSQL image with seeded data
 FROM postgres:16-alpine
