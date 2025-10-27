@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog/log"
 )
@@ -30,6 +31,7 @@ func init() {
 }
 
 func (llm *LlamaCpp) query(system, user string) ([]byte, error) {
+	start := time.Now()
 	requestPayload := ChatCompletionRequest{
 		// Model: "Llama-3.2-1B-Instruct-Q4_0.gguf",
 		// Model: "Mistral-Nemo-Instruct-2407-Q5_K_M.gguf",
@@ -90,6 +92,11 @@ func (llm *LlamaCpp) query(system, user string) ([]byte, error) {
 	}
 
 	llmContent := chatResponse.Choices[0].Message.Content
+	log.Info().
+		Str("provider", "llamacpp").
+		Str("endpoint", endpoint).
+		Dur("duration_ms", time.Since(start)).
+		Msg("LLM query completed")
 	log.Debug().
 		Str("content", llmContent).
 		Msg("Received LLM response")

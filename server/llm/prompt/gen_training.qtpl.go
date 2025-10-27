@@ -7,76 +7,71 @@ package prompt
 //line gen_training.qtpl:3
 import "github.com/streambinder/vigor/model"
 
-//line gen_training.qtpl:5
+//line gen_training.qtpl:4
+import exercisedb "github.com/streambinder/vigor/exercisedb/model"
+
+//line gen_training.qtpl:6
 import (
 	qtio422016 "io"
 
 	qt422016 "github.com/valyala/quicktemplate"
 )
 
-//line gen_training.qtpl:5
+//line gen_training.qtpl:6
 var (
 	_ = qtio422016.Copy
 	_ = qt422016.AcquireByteBuffer
 )
 
-//line gen_training.qtpl:5
-func StreamGenTraining(qw422016 *qt422016.Writer, profile *model.Profile, equipment []string, duration int) {
 //line gen_training.qtpl:6
+func StreamGenTraining(qw422016 *qt422016.Writer, profile *model.Profile, exercises []exercisedb.Exercise, duration int) {
+//line gen_training.qtpl:7
 	qw422016.N().S(` Generate a `)
-//line gen_training.qtpl:8
+//line gen_training.qtpl:9
 	qw422016.N().D(duration)
-//line gen_training.qtpl:8
-	qw422016.N().S(` minutes long training `)
-//line gen_training.qtpl:10
-	if len(equipment) > 0 {
-//line gen_training.qtpl:10
-		qw422016.N().S(` with `)
+//line gen_training.qtpl:9
+	qw422016.N().S(` minutes long training by picking from this list of exercises (using their ID): `)
 //line gen_training.qtpl:12
-		for _, equipment := range equipment {
+	for _, exercise := range exercises {
 //line gen_training.qtpl:12
-			qw422016.N().S(` `)
+		qw422016.N().S(` - `)
 //line gen_training.qtpl:13
-			qw422016.E().S(equipment)
+		qw422016.E().S(exercise.Name)
 //line gen_training.qtpl:13
-			qw422016.N().S(`, `)
+		qw422016.N().S(` (id `)
+//line gen_training.qtpl:13
+		qw422016.E().S(exercise.ID.String())
+//line gen_training.qtpl:13
+		qw422016.N().S(`) `)
 //line gen_training.qtpl:14
-		}
-//line gen_training.qtpl:14
-		qw422016.N().S(` equipment available. Not all equipment need to be used in this training. `)
-//line gen_training.qtpl:16
-	} else {
-//line gen_training.qtpl:16
-		qw422016.N().S(` with no equipment available. `)
-//line gen_training.qtpl:18
 	}
-//line gen_training.qtpl:18
+//line gen_training.qtpl:14
 	qw422016.N().S(` `)
-//line gen_training.qtpl:21
+//line gen_training.qtpl:17
 }
 
-//line gen_training.qtpl:21
-func WriteGenTraining(qq422016 qtio422016.Writer, profile *model.Profile, equipment []string, duration int) {
-//line gen_training.qtpl:21
+//line gen_training.qtpl:17
+func WriteGenTraining(qq422016 qtio422016.Writer, profile *model.Profile, exercises []exercisedb.Exercise, duration int) {
+//line gen_training.qtpl:17
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line gen_training.qtpl:21
-	StreamGenTraining(qw422016, profile, equipment, duration)
-//line gen_training.qtpl:21
+//line gen_training.qtpl:17
+	StreamGenTraining(qw422016, profile, exercises, duration)
+//line gen_training.qtpl:17
 	qt422016.ReleaseWriter(qw422016)
-//line gen_training.qtpl:21
+//line gen_training.qtpl:17
 }
 
-//line gen_training.qtpl:21
-func GenTraining(profile *model.Profile, equipment []string, duration int) string {
-//line gen_training.qtpl:21
+//line gen_training.qtpl:17
+func GenTraining(profile *model.Profile, exercises []exercisedb.Exercise, duration int) string {
+//line gen_training.qtpl:17
 	qb422016 := qt422016.AcquireByteBuffer()
-//line gen_training.qtpl:21
-	WriteGenTraining(qb422016, profile, equipment, duration)
-//line gen_training.qtpl:21
+//line gen_training.qtpl:17
+	WriteGenTraining(qb422016, profile, exercises, duration)
+//line gen_training.qtpl:17
 	qs422016 := string(qb422016.B)
-//line gen_training.qtpl:21
+//line gen_training.qtpl:17
 	qt422016.ReleaseByteBuffer(qb422016)
-//line gen_training.qtpl:21
+//line gen_training.qtpl:17
 	return qs422016
-//line gen_training.qtpl:21
+//line gen_training.qtpl:17
 }

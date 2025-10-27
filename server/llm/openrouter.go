@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/rs/zerolog/log"
 )
@@ -39,6 +40,7 @@ func init() {
 }
 
 func (llm *OpenRouter) query(system, user string) ([]byte, error) {
+	start := time.Now()
 	requestPayload := ChatCompletionRequest{
 		Model: llm.model,
 		Messages: []Message{
@@ -101,6 +103,11 @@ func (llm *OpenRouter) query(system, user string) ([]byte, error) {
 	}
 
 	llmContent := chatResponse.Choices[0].Message.Content
+	log.Info().
+		Str("provider", "openrouter").
+		Str("model", llm.model).
+		Dur("duration_ms", time.Since(start)).
+		Msg("LLM query completed")
 	log.Debug().
 		Str("content", llmContent).
 		Msg("Received LLM response")

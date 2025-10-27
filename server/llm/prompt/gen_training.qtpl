@@ -1,21 +1,17 @@
 {% package prompt %}
 
 {% import "github.com/streambinder/vigor/model" %}
+{% import exercisedb "github.com/streambinder/vigor/exercisedb/model" %}
 
-{% func GenTraining(profile *model.Profile, equipment []string, duration int) -%}
+{% func GenTraining(profile *model.Profile, exercises []exercisedb.Exercise, duration int) -%}
 {% collapsespace %}
 
 Generate a {%d duration %} minutes long training
 
-{% if len(equipment) > 0 %}
-with
-    {% for _, equipment := range equipment %}
-        {%s equipment %},
-    {% endfor %}
-equipment available. Not all equipment need to be used in this training.
-{% else %}
-with no equipment available.
-{% endif %}
+by picking from this list of exercises (populate name and ID accordingly):
+{% for _, exercise := range exercises %}
+- {%s exercise.Name %} (id {%s exercise.ID.String() %})
+{% endfor %}
 
 {% endcollapsespace -%}
 {% endfunc %}
