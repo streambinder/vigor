@@ -70,8 +70,11 @@ func cleanInstructions(instructions []string) []string {
 
 // slugify converts a string into a URL-friendly slug.
 func slugify(s string) string {
+	// Remove content within parentheses, brackets, braces, and angle brackets
+	slug := regexp.MustCompile(`\([^)]*\)|\[[^\]]*\]|\{[^}]*\}|<[^>]*>`).ReplaceAllString(s, "")
+
 	// Convert to lowercase
-	slug := regexp.MustCompile(`[A-Z]`).ReplaceAllStringFunc(s, func(match string) string {
+	slug = regexp.MustCompile(`[A-Z]`).ReplaceAllStringFunc(slug, func(match string) string {
 		return fmt.Sprintf("%c", match[0]+32)
 	})
 
