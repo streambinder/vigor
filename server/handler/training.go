@@ -23,28 +23,6 @@ type TrainingRequest struct {
 	Gym       string   `json:"gym"`       // Name of the gym to use for equipment lookup
 }
 
-// enrichActivitiesWithExerciseDetails enriches training activities with full exercise details.
-func enrichActivitiesWithExerciseDetails(training *model.Training) int {
-	enrichedCount := 0
-	for i := range training.Routines {
-		for j := range training.Routines[i].Blocks {
-			for k := range training.Routines[i].Blocks[j].Activities {
-				activity := &training.Routines[i].Blocks[j].Activities[k]
-				if activity.DetailID != "" {
-					var exercise exercisedb.Exercise
-					if err := database.ExerciseDB.First(&exercise, "id = ?", activity.DetailID).Error; err == nil {
-						if exerciseJSON, err := json.Marshal(exercise); err == nil {
-							activity.Detail = exerciseJSON
-							enrichedCount++
-						}
-					}
-				}
-			}
-		}
-	}
-	return enrichedCount
-}
-
 // queryExercises queries the exercise database for exercises matching the given equipment.
 func queryExercises(equipment []string) ([]exercisedb.Exercise, error) {
 	exercises := []exercisedb.Exercise{}
@@ -108,8 +86,23 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 		Msg("Generated training via LLM")
 	training.UserID = profile.UserID
 
+	// Enrich activities with exercise details from the database
 	enrichStart := time.Now()
-	enrichedCount := enrichActivitiesWithExerciseDetails(training)
+	enrichedCount := 0
+	for i := range training.Routines {
+		for j := range training.Routines[i].Blocks {
+			for k := range training.Routines[i].Blocks[j].Activities {
+				activity := &training.Routines[i].Blocks[j].Activities[k]
+				var exercise exercisedb.Exercise
+				if err := database.ExerciseDB.First(&exercise, "id = ?", activity.Name).Error; err == nil {
+					if exerciseJSON, err := json.Marshal(exercise); err == nil {
+						activity.Detail = exerciseJSON
+						enrichedCount++
+					}
+				}
+			}
+		}
+	}
 	log.Info().
 		Int("enriched_activities", enrichedCount).
 		Dur("duration_ms", time.Since(enrichStart)).

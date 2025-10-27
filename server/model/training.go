@@ -74,14 +74,13 @@ type Activity struct {
 	ID      string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id" prompt:"-"`
 	BlockID string `gorm:"index;type:uuid;not null" json:"block_id" prompt:"-"`
 
-	Name             string         `json:"name" prompt:"Exercise name"`
+	Name             string         `json:"name" prompt:"Exercise ID"`
 	Type             string         `json:"type" prompt:"one of exercise, stretch, rest"`
 	Duration         *int           `json:"duration" prompt:"Duration in seconds"`
 	Reps             *int           `json:"reps" prompt:"Number of repetitions"`
 	WeightKg         *int           `json:"weight_kg" prompt:"Weight in kg if applicable"`
 	RestAfterSeconds *int           `json:"rest_after_seconds" prompt:"Rest after this activity in seconds"`
 	Notes            string         `json:"notes" prompt:"Any additional notes"`
-	DetailID         string         `json:"detail_id" prompt:"Exercise ID from exercise database if applicable"`
 	Detail           datatypes.JSON `gorm:"type:jsonb" json:"detail" prompt:"-"` // Full exercise details as JSON
 
 	CreatedAt time.Time      `json:"-"`
