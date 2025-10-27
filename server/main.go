@@ -1,4 +1,4 @@
-//go:generate go get -u github.com/valyala/quicktemplate/qtc
+//go:generate go install github.com/valyala/quicktemplate/qtc@latest
 //go:generate qtc -dir=llm/prompt
 package main
 
