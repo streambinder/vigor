@@ -1,6 +1,6 @@
 module github.com/streambinder/vigor
 
-go 1.25.3
+go 1.24.7
 
 require (
 	github.com/bytedance/mockey v1.2.15
@@ -18,7 +18,8 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
-	github.com/clipperhouse/uax29/v2 v2.2.0 // indirect
+	github.com/clipperhouse/stringish v0.1.1 // indirect
+	github.com/clipperhouse/uax29/v2 v2.3.0 // indirect
 	github.com/go-sql-driver/mysql v1.9.3 // indirect
 	github.com/gopherjs/gopherjs v1.12.80 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
