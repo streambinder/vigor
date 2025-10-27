@@ -1,6 +1,6 @@
 module github.com/streambinder/vigor
 
-go 1.24.0
+go 1.25.3
 
 require (
 	github.com/bytedance/mockey v1.2.15
@@ -8,6 +8,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/lib/pq v1.10.9
 	github.com/rs/zerolog v1.34.0
+	github.com/streambinder/vigor/exercisedb v0.0.0-00010101000000-000000000000
 	github.com/valyala/quicktemplate v1.8.0
 	golang.org/x/crypto v0.43.0
 	gorm.io/driver/postgres v1.6.0
@@ -49,3 +50,5 @@ require (
 	golang.org/x/text v0.30.0 // indirect
 	gorm.io/datatypes v1.2.7
 )
+
+replace github.com/streambinder/vigor/exercisedb => ../exercisedb
