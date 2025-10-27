@@ -82,26 +82,8 @@ func readJSON(path string, v interface{}) error {
 	return nil
 }
 
-// Bootstrap loads ExerciseDB data into the database from the specified data path.
-func Bootstrap(db *gorm.DB, dataPath string) error {
-	startTime := time.Now()
-	log.Info().Msg("Starting database bootstrap")
-
-	// Auto-migrate all models
-	log.Info().Msg("Running database migrations")
-	migrationStart := time.Now()
-	if err := db.AutoMigrate(
-		&model.Equipment{},
-		&model.BodyPart{},
-		&model.Muscle{},
-		&model.Exercise{},
-	); err != nil {
-		log.Error().Err(err).Msg("Failed to migrate database")
-		return fmt.Errorf("failed to migrate database: %w", err)
-	}
-	log.Info().Dur("duration_ms", time.Since(migrationStart)).Msg("Database migrations completed")
-
-	// Load and insert equipment
+// loadEquipment loads and inserts equipment data into the database.
+func loadEquipment(db *gorm.DB, dataPath string) error {
 	log.Info().Msg("Loading equipment data")
 	var equipmentData []Equipment
 	if err := readJSON(filepath.Join(dataPath, "equipments.json"), &equipmentData); err != nil {
@@ -127,8 +109,11 @@ func Bootstrap(db *gorm.DB, dataPath string) error {
 		}
 	}
 	log.Info().Dur("duration_ms", time.Since(equipmentStart)).Msg("Equipment records inserted")
+	return nil
+}
 
-	// Load and insert bodyparts
+// loadBodyParts loads and inserts bodypart data into the database.
+func loadBodyParts(db *gorm.DB, dataPath string) error {
 	log.Info().Msg("Loading bodypart data")
 	var bodypartData []BodyPart
 	if err := readJSON(filepath.Join(dataPath, "bodyparts.json"), &bodypartData); err != nil {
@@ -146,8 +131,11 @@ func Bootstrap(db *gorm.DB, dataPath string) error {
 		}
 	}
 	log.Info().Dur("duration_ms", time.Since(bodypartStart)).Msg("Bodypart records inserted")
+	return nil
+}
 
-	// Load and insert muscles
+// loadMuscles loads and inserts muscle data into the database.
+func loadMuscles(db *gorm.DB, dataPath string) error {
 	log.Info().Msg("Loading muscle data")
 	var muscleData []Muscle
 	if err := readJSON(filepath.Join(dataPath, "muscles.json"), &muscleData); err != nil {
@@ -165,8 +153,11 @@ func Bootstrap(db *gorm.DB, dataPath string) error {
 		}
 	}
 	log.Info().Dur("duration_ms", time.Since(muscleStart)).Msg("Muscle records inserted")
+	return nil
+}
 
-	// Load and insert exercises
+// loadExercises loads and inserts exercise data into the database.
+func loadExercises(db *gorm.DB, dataPath string) error {
 	log.Info().Msg("Loading exercise data")
 	var exerciseData []Exercise
 	if err := readJSON(filepath.Join(dataPath, "exercises.json"), &exerciseData); err != nil {
@@ -210,6 +201,44 @@ func Bootstrap(db *gorm.DB, dataPath string) error {
 		log.Debug().Int("progress", end).Int("total", len(exerciseData)).Msg("Exercise insertion progress")
 	}
 	log.Info().Dur("duration_ms", time.Since(exerciseStart)).Msg("Exercise records inserted")
+	return nil
+}
+
+// Bootstrap loads ExerciseDB data into the database from the specified data path.
+func Bootstrap(db *gorm.DB, dataPath string) error {
+	startTime := time.Now()
+	log.Info().Msg("Starting database bootstrap")
+
+	// Auto-migrate all models
+	log.Info().Msg("Running database migrations")
+	migrationStart := time.Now()
+	if err := db.AutoMigrate(
+		&model.Equipment{},
+		&model.BodyPart{},
+		&model.Muscle{},
+		&model.Exercise{},
+	); err != nil {
+		log.Error().Err(err).Msg("Failed to migrate database")
+		return fmt.Errorf("failed to migrate database: %w", err)
+	}
+	log.Info().Dur("duration_ms", time.Since(migrationStart)).Msg("Database migrations completed")
+
+	// Load and insert all data types
+	if err := loadEquipment(db, dataPath); err != nil {
+		return err
+	}
+
+	if err := loadBodyParts(db, dataPath); err != nil {
+		return err
+	}
+
+	if err := loadMuscles(db, dataPath); err != nil {
+		return err
+	}
+
+	if err := loadExercises(db, dataPath); err != nil {
+		return err
+	}
 
 	// Print summary statistics
 	var equipmentCount, bodypartCount, muscleCount, exerciseCount int64
@@ -267,7 +296,11 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to get database instance")
 	}
-	defer sqlDB.Close()
+	defer func() {
+		if closeErr := sqlDB.Close(); closeErr != nil {
+			log.Error().Err(closeErr).Msg("Failed to close database connection")
+		}
+	}()
 
 	// Configure connection pool
 	sqlDB.SetMaxIdleConns(10)
@@ -276,6 +309,10 @@ func main() {
 
 	// Run bootstrap
 	if err := Bootstrap(db, dataPath); err != nil {
+		// Close database connection before calling Fatal
+		if closeErr := sqlDB.Close(); closeErr != nil {
+			log.Error().Err(closeErr).Msg("Failed to close database connection")
+		}
 		log.Fatal().Err(err).Msg("Bootstrap failed")
 	}
 }

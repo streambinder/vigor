@@ -18,8 +18,8 @@ COPY bootstrap/ ./bootstrap/
 
 # Build the bootstrap binary with CGO enabled for PostgreSQL driver
 # Note: Using dynamic linking since gorm/pgx requires it
-RUN cd bootstrap && \
-    CGO_ENABLED=1 go build -o /tmp/bootstrap . && \
+WORKDIR /build/bootstrap
+RUN CGO_ENABLED=1 go build -o /tmp/bootstrap . && \
     chmod +x /tmp/bootstrap && \
     file /tmp/bootstrap && \
     echo "Testing binary..." && \
@@ -141,6 +141,9 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 
 # Expose PostgreSQL port
 EXPOSE 5432
+
+# Run as postgres user (non-root)
+USER postgres
 
 # The postgres image automatically runs scripts in /docker-entrypoint-initdb.d/
 # when the container starts for the first time
