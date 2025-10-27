@@ -10,6 +10,7 @@ import (
 	"github.com/bytedance/mockey"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
+	exercisedb "github.com/streambinder/vigor/exercisedb/model"
 	"github.com/streambinder/vigor/llm/prompt"
 	"github.com/streambinder/vigor/model"
 	"gorm.io/datatypes"
@@ -113,7 +114,11 @@ func TestGenTraining_Success(t *testing.T) {
 		Data:      datatypes.JSON([]byte(`{}`)),
 	}
 
-	result, err := GenTraining(profile, []string{"dumbbells"}, 30)
+	exercises := []exercisedb.Exercise{
+		{ID: uuid.New(), Name: "Dumbbell Press"},
+	}
+
+	result, err := GenTraining(profile, exercises, 30)
 	if err != nil {
 		t.Errorf("Expected no error, got: %v", err)
 	}
@@ -148,7 +153,11 @@ func TestGenTraining_QueryError(t *testing.T) {
 		Data:      datatypes.JSON([]byte(`{}`)),
 	}
 
-	result, err := GenTraining(profile, []string{"dumbbells"}, 30)
+	exercises := []exercisedb.Exercise{
+		{ID: uuid.New(), Name: "Dumbbell Press"},
+	}
+
+	result, err := GenTraining(profile, exercises, 30)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -182,7 +191,11 @@ func TestGenTraining_InvalidJSON(t *testing.T) {
 		Data:      datatypes.JSON([]byte(`{}`)),
 	}
 
-	result, err := GenTraining(profile, []string{"dumbbells"}, 30)
+	exercises := []exercisedb.Exercise{
+		{ID: uuid.New(), Name: "Dumbbell Press"},
+	}
+
+	result, err := GenTraining(profile, exercises, 30)
 	if err == nil {
 		t.Error("Expected error for invalid JSON, got nil")
 	}
@@ -232,17 +245,20 @@ func TestGenTraining_CallsPromptCorrectly(t *testing.T) {
 		Data:      datatypes.JSON([]byte(`{}`)),
 	}
 
-	equipment := []string{"mat", "kettlebell"}
+	exercises := []exercisedb.Exercise{
+		{ID: uuid.New(), Name: "Mat Stretch"},
+		{ID: uuid.New(), Name: "Kettlebell Swing"},
+	}
 	duration = 60
 
-	_, err = GenTraining(profile, equipment, duration)
+	_, err = GenTraining(profile, exercises, duration)
 	if err != nil {
 		t.Errorf("Expected no error, got: %v", err)
 	}
 
 	// Verify the system and user prompts were called correctly
 	expectedSystem := prompt.System(profile, model.TrainingSchema)
-	expectedUser := prompt.GenTraining(profile, equipment, duration)
+	expectedUser := prompt.GenTraining(profile, exercises, duration)
 
 	if capturedSystem != expectedSystem {
 		t.Errorf("System prompt mismatch.\nExpected: %s\nGot: %s", expectedSystem, capturedSystem)
