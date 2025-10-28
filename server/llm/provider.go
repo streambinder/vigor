@@ -14,7 +14,7 @@ var openLLMs = []LLM{}
 
 // LLM defines the interface for language model providers.
 type LLM interface {
-	query(system, user string) ([]byte, error)
+	query(system, user string, temperature float64, maxTokens int) ([]byte, error)
 }
 
 // Common types shared across LLM providers
@@ -81,6 +81,8 @@ func GenTraining(profile *model.Profile, exercises []exercisedb.Exercise, durati
 	response, err := getLLM(profile).query(
 		prompt.System(profile, model.TrainingSchema),
 		prompt.GenTraining(profile, exercises, duration),
+		0.35,  // Balanced: structured output + workout variety
+		10000, // Sufficient for complex multi-routine workouts
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate training: %s", err)

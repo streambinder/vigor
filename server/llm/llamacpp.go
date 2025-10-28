@@ -30,18 +30,16 @@ func init() {
 	}
 }
 
-func (llm *LlamaCpp) query(system, user string) ([]byte, error) {
+func (llm *LlamaCpp) query(system, user string, temperature float64, maxTokens int) ([]byte, error) {
 	start := time.Now()
 	requestPayload := ChatCompletionRequest{
-		// Model: "Llama-3.2-1B-Instruct-Q4_0.gguf",
-		// Model: "Mistral-Nemo-Instruct-2407-Q5_K_M.gguf",
 		Messages: []Message{
 			{Role: "system", Content: system},
 			{Role: "user", Content: user},
 		},
 		ResponseFormat: ResponseFormat{Type: "json_object"},
-		Temperature:    0.2,
-		MaxTokens:      4000,
+		Temperature:    temperature,
+		MaxTokens:      maxTokens,
 		TopP:           0.9,
 		RepeatPenalty:  1.15,
 		MinP:           0.05,

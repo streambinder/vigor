@@ -39,7 +39,7 @@ func init() {
 	})
 }
 
-func (llm *OpenRouter) query(system, user string) ([]byte, error) {
+func (llm *OpenRouter) query(system, user string, temperature float64, maxTokens int) ([]byte, error) {
 	start := time.Now()
 	requestPayload := ChatCompletionRequest{
 		Model: llm.model,
@@ -48,9 +48,10 @@ func (llm *OpenRouter) query(system, user string) ([]byte, error) {
 			{Role: "user", Content: user},
 		},
 		ResponseFormat: ResponseFormat{Type: "json_object"},
-		Temperature:    0.2,
-		MaxTokens:      4000,
-		TopP:           0.9,
+		Temperature:    temperature,
+		MaxTokens:      maxTokens,
+		TopP:           0.9,  // Good sampling balance
+		RepeatPenalty:  1.15, // Reduces exercise repetition, encourages variety
 	}
 
 	jsonPayload, err := json.Marshal(requestPayload)
