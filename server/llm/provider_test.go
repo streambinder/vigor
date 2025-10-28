@@ -23,12 +23,12 @@ func init() {
 
 // mockLLM is a mock implementation of the LLM interface
 type mockLLM struct {
-	queryFunc func(system, user string) ([]byte, error)
+	queryFunc func(system, user string, temperature float64, maxTokens int) ([]byte, error)
 }
 
-func (m *mockLLM) query(system, user string) ([]byte, error) {
+func (m *mockLLM) query(system, user string, temperature float64, maxTokens int) ([]byte, error) {
 	if m.queryFunc != nil {
-		return m.queryFunc(system, user)
+		return m.queryFunc(system, user, temperature, maxTokens)
 	}
 	return nil, errors.New("not implemented")
 }
@@ -82,15 +82,13 @@ func TestGenTraining_Success(t *testing.T) {
 	defer func() { openLLMs = originalOpenLLMs }()
 
 	// Create a valid training response
-	duration := 30
 	training := &model.Training{
 		ID:          uuid.New(),
 		Date:        time.Now(),
 		Name:        "Test Training",
 		Description: "Test Description",
-		Category:    "Strength",
-		Duration:    &duration,
-		Equipment:   []string{"dumbbells"},
+		Type:        "Strength",
+		Duration:    30,
 		Routines:    []model.Routine{},
 	}
 
@@ -100,7 +98,7 @@ func TestGenTraining_Success(t *testing.T) {
 	}
 
 	mock := &mockLLM{
-		queryFunc: func(_, _ string) ([]byte, error) {
+		queryFunc: func(_, _ string, _ float64, _ int) ([]byte, error) {
 			return trainingJSON, nil
 		},
 	}
@@ -139,7 +137,7 @@ func TestGenTraining_QueryError(t *testing.T) {
 
 	expectedErr := errors.New("query error")
 	mock := &mockLLM{
-		queryFunc: func(_, _ string) ([]byte, error) {
+		queryFunc: func(_, _ string, _ float64, _ int) ([]byte, error) {
 			return nil, expectedErr
 		},
 	}
@@ -177,7 +175,7 @@ func TestGenTraining_InvalidJSON(t *testing.T) {
 	defer func() { openLLMs = originalOpenLLMs }()
 
 	mock := &mockLLM{
-		queryFunc: func(_, _ string) ([]byte, error) {
+		queryFunc: func(_, _ string, _ float64, _ int) ([]byte, error) {
 			return []byte("invalid json"), nil
 		},
 	}
@@ -211,15 +209,13 @@ func TestGenTraining_CallsPromptCorrectly(t *testing.T) {
 	defer func() { openLLMs = originalOpenLLMs }()
 
 	var capturedSystem, capturedUser string
-	duration := 45
 	training := &model.Training{
 		ID:          uuid.New(),
 		Date:        time.Now(),
 		Name:        "Test Training",
 		Description: "Test Description",
-		Category:    "Cardio",
-		Duration:    &duration,
-		Equipment:   []string{},
+		Type:        "Cardio",
+		Duration:    45,
 		Routines:    []model.Routine{},
 	}
 
@@ -229,7 +225,7 @@ func TestGenTraining_CallsPromptCorrectly(t *testing.T) {
 	}
 
 	mock := &mockLLM{
-		queryFunc: func(system, user string) ([]byte, error) {
+		queryFunc: func(system, user string, _ float64, _ int) ([]byte, error) {
 			capturedSystem = system
 			capturedUser = user
 			return trainingJSON, nil
@@ -249,7 +245,7 @@ func TestGenTraining_CallsPromptCorrectly(t *testing.T) {
 		{ID: "mat-stretch", Name: "Mat Stretch"},
 		{ID: "kettlebell-swing", Name: "Kettlebell Swing"},
 	}
-	duration = 60
+	duration := 60
 
 	_, err = GenTraining(profile, exercises, duration)
 	if err != nil {

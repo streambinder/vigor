@@ -50,7 +50,7 @@ func TestLlamaCppQuery_Success(t *testing.T) {
 	}).Build()
 	defer mockHTTP.UnPatch()
 
-	result, err := llm.query("system prompt", "user prompt")
+	result, err := llm.query("system prompt", "user prompt", 0.7, 1000)
 	if err != nil {
 		t.Errorf("Expected no error, got: %v", err)
 	}
@@ -78,7 +78,7 @@ func TestLlamaCppQuery_MarshalError(t *testing.T) {
 	}).Build()
 	defer mockMarshal.UnPatch()
 
-	_, err := llm.query("system prompt", "user prompt")
+	_, err := llm.query("system prompt", "user prompt", 0.7, 1000)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -94,7 +94,7 @@ func TestLlamaCppQuery_NewRequestError(t *testing.T) {
 	mockNewRequest := mockey.Mock(http.NewRequest).Return(nil, errors.New("request error")).Build()
 	defer mockNewRequest.UnPatch()
 
-	_, err := llm.query("system prompt", "user prompt")
+	_, err := llm.query("system prompt", "user prompt", 0.7, 1000)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -110,7 +110,7 @@ func TestLlamaCppQuery_DoError(t *testing.T) {
 	mockHTTP := mockey.Mock((*http.Client).Do).Return(nil, errors.New("network error")).Build()
 	defer mockHTTP.UnPatch()
 
-	_, err := llm.query("system prompt", "user prompt")
+	_, err := llm.query("system prompt", "user prompt", 0.7, 1000)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -131,7 +131,7 @@ func TestLlamaCppQuery_NonOKStatus(t *testing.T) {
 	}).Build()
 	defer mockHTTP.UnPatch()
 
-	_, err := llm.query("system prompt", "user prompt")
+	_, err := llm.query("system prompt", "user prompt", 0.7, 1000)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -152,7 +152,7 @@ func TestLlamaCppQuery_ReadBodyError(t *testing.T) {
 	}).Build()
 	defer mockHTTP.UnPatch()
 
-	_, err := llm.query("system prompt", "user prompt")
+	_, err := llm.query("system prompt", "user prompt", 0.7, 1000)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -173,7 +173,7 @@ func TestLlamaCppQuery_UnmarshalResponseError(t *testing.T) {
 	}).Build()
 	defer mockHTTP.UnPatch()
 
-	_, err := llm.query("system prompt", "user prompt")
+	_, err := llm.query("system prompt", "user prompt", 0.7, 1000)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -207,7 +207,7 @@ func TestLlamaCppQuery_NoChoices(t *testing.T) {
 	}).Build()
 	defer mockHTTP.UnPatch()
 
-	_, err = llm.query("system prompt", "user prompt")
+	_, err = llm.query("system prompt", "user prompt", 0.7, 1000)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -250,7 +250,7 @@ func TestLlamaCppQuery_InvalidContentJSON(t *testing.T) {
 	}).Build()
 	defer mockHTTP.UnPatch()
 
-	_, err = llm.query("system prompt", "user prompt")
+	_, err = llm.query("system prompt", "user prompt", 0.7, 1000)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
