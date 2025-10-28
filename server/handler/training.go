@@ -85,6 +85,8 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 		Dur("duration_ms", time.Since(llmStart)).
 		Msg("Generated training via LLM")
 	training.UserID = profile.UserID
+	training.Date = time.Now()
+	training.Duration = training.CalcDuration()
 
 	for i := range training.Routines {
 		for j := range training.Routines[i].Blocks {
