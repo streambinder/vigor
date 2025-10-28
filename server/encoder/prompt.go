@@ -97,9 +97,10 @@ func buildFieldPromptValue(field reflect.StructField, fv reflect.Value, ft refle
 	}
 
 	// Base case: use prompt tag
-	prompt := field.Tag.Get("prompt")
-	if prompt != "-" {
-		return fmt.Sprintf("(%s) %s", ft.String(), prompt)
+	if prompt := field.Tag.Get("prompt"); prompt != "-" && prompt != "+" {
+		return fmt.Sprintf("%s: %s", ft.String(), prompt)
+	} else if prompt == "+" {
+		return ft.String()
 	}
 	return nil
 }
@@ -109,8 +110,10 @@ func buildSliceFieldPromptValue(field reflect.StructField, ft reflect.Type) any 
 	switch {
 	case prompt == "-":
 		return []any{}
+	case prompt == "+":
+		return []any{}
 	case prompt != "":
-		return []any{prompt}
+		return []any{ft.String()}
 	default:
 		return []any{
 			buildPromptMap(reflect.New(ft.Elem())),
