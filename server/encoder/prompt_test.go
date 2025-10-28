@@ -72,12 +72,12 @@ func TestMarshalJSON_SimpleStruct(t *testing.T) {
 	}
 
 	// Check that prompt tags are used as values
-	if val, ok := decoded["name"].(string); !ok || val != "(string) User's full name" {
-		t.Errorf("Expected name to be '(string) User's full name', got: %v", decoded["name"])
+	if val, ok := decoded["name"].(string); !ok || val != "string: User's full name" {
+		t.Errorf("Expected name to be 'string: User's full name', got: %v", decoded["name"])
 	}
 
-	if val, ok := decoded["age"].(string); !ok || val != "(int) User's age in years" {
-		t.Errorf("Expected age to be '(int) User's age in years', got: %v", decoded["age"])
+	if val, ok := decoded["age"].(string); !ok || val != "int: User's age in years" {
+		t.Errorf("Expected age to be 'int: User's age in years', got: %v", decoded["age"])
 	}
 
 	// Check that unexported fields are not included
@@ -91,8 +91,8 @@ func TestMarshalJSON_SimpleStruct(t *testing.T) {
 	}
 
 	// Check that fields without prompt tags still appear but with empty prompt
-	if val, ok := decoded["no_prompt"].(string); !ok || val != "(string) " {
-		t.Errorf("Expected no_prompt to be '(string) ', got: %v", decoded["no_prompt"])
+	if val, ok := decoded["no_prompt"].(string); !ok || val != "string: " {
+		t.Errorf("Expected no_prompt to be 'string: ', got: %v", decoded["no_prompt"])
 	}
 
 	// Check that prompt:"-" fields are not included
@@ -124,14 +124,14 @@ func TestMarshalJSON_NestedStruct(t *testing.T) {
 	}
 
 	// Check ID field
-	if val, ok := decoded["id"].(string); !ok || val != "(uuid.UUID) Unique identifier" {
-		t.Errorf("Expected id to be '(uuid.UUID) Unique identifier', got: %v", decoded["id"])
+	if val, ok := decoded["id"].(string); !ok || val != "uuid.UUID: Unique identifier" {
+		t.Errorf("Expected id to be 'uuid.UUID: Unique identifier', got: %v", decoded["id"])
 	}
 
 	// Check nested struct
 	if details, ok := decoded["details"].(map[string]any); ok {
-		if val, ok := details["name"].(string); !ok || val != "(string) User's full name" {
-			t.Errorf("Expected nested name to be '(string) User's full name', got: %v", details["name"])
+		if val, ok := details["name"].(string); !ok || val != "string: User's full name" {
+			t.Errorf("Expected nested name to be 'string: User's full name', got: %v", details["name"])
 		}
 	} else {
 		t.Error("Expected details to be a nested object")
@@ -158,8 +158,8 @@ func TestMarshalJSON_SliceFields(t *testing.T) {
 
 	// Check tags with prompt
 	if tags, ok := decoded["tags"].([]any); ok {
-		if len(tags) != 1 || tags[0] != "List of tags" {
-			t.Errorf("Expected tags to be ['List of tags'], got: %v", tags)
+		if len(tags) != 1 || tags[0] != "[]string" {
+			t.Errorf("Expected tags to be ['[]string'], got: %v", tags)
 		}
 	} else {
 		t.Errorf("Expected tags to be an array, got: %v", decoded["tags"])
@@ -176,8 +176,8 @@ func TestMarshalJSON_SliceFields(t *testing.T) {
 
 	// Check counts with prompt
 	if counts, ok := decoded["counts"].([]any); ok {
-		if len(counts) != 1 || counts[0] != "Array of counts" {
-			t.Errorf("Expected counts to be ['Array of counts'], got: %v", counts)
+		if len(counts) != 1 || counts[0] != "[]int" {
+			t.Errorf("Expected counts to be ['[]int'], got: %v", counts)
 		}
 	} else {
 		t.Error("Expected counts to be an array")
@@ -209,8 +209,8 @@ func TestMarshalJSON_PointerField(t *testing.T) {
 
 	// Check that pointer field is processed
 	if details, ok := decoded["details"].(map[string]any); ok {
-		if val, ok := details["name"].(string); !ok || val != "(string) User's full name" {
-			t.Errorf("Expected pointer details name to be '(string) User's full name', got: %v", details["name"])
+		if val, ok := details["name"].(string); !ok || val != "string: User's full name" {
+			t.Errorf("Expected pointer details name to be 'string: User's full name', got: %v", details["name"])
 		}
 	} else {
 		t.Error("Expected details to be a nested object")
@@ -236,8 +236,8 @@ func TestMarshalJSON_NilPointerField(t *testing.T) {
 
 	// Check that nil pointer field still generates structure
 	if details, ok := decoded["details"].(map[string]any); ok {
-		if val, ok := details["name"].(string); !ok || val != "(string) User's full name" {
-			t.Errorf("Expected nil pointer details name to be '(string) User's full name', got: %v", details["name"])
+		if val, ok := details["name"].(string); !ok || val != "string: User's full name" {
+			t.Errorf("Expected nil pointer details name to be 'string: User's full name', got: %v", details["name"])
 		}
 	} else {
 		t.Error("Expected details to be a nested object even when nil")
@@ -324,8 +324,8 @@ func TestBuildPromptMap_TimeField(t *testing.T) {
 	}
 
 	// time.Time should be treated as a basic type
-	if val, ok := decoded["created_at"].(string); !ok || val != "(time.Time) Creation time" {
-		t.Errorf("Expected created_at to be '(time.Time) Creation time', got: %v", decoded["created_at"])
+	if val, ok := decoded["created_at"].(string); !ok || val != "time.Time: Creation time" {
+		t.Errorf("Expected created_at to be 'time.Time: Creation time', got: %v", decoded["created_at"])
 	}
 }
 
@@ -456,8 +456,8 @@ func TestBuildSliceFieldPromptValue_WithPrompt(t *testing.T) {
 	}
 
 	result := buildSliceFieldPromptValue(field, field.Type)
-	if slice, ok := result.([]any); !ok || len(slice) != 1 || slice[0] != "Custom prompt" {
-		t.Errorf("Expected ['Custom prompt'], got: %v", result)
+	if slice, ok := result.([]any); !ok || len(slice) != 1 || slice[0] != "[]string" {
+		t.Errorf("Expected ['[]string'], got: %v", result)
 	}
 }
 
@@ -493,8 +493,8 @@ func TestBuildPromptMap_Pointer(t *testing.T) {
 	}
 
 	// Verify pointer is dereferenced and processed
-	if val, ok := decoded["name"].(string); !ok || val != "(string) User's full name" {
-		t.Errorf("Expected name to be '(string) User's full name', got: %v", decoded["name"])
+	if val, ok := decoded["name"].(string); !ok || val != "string: User's full name" {
+		t.Errorf("Expected name to be 'string: User's full name', got: %v", decoded["name"])
 	}
 }
 
@@ -557,8 +557,8 @@ func TestBuildFieldPromptValue_PointerToNonStruct(t *testing.T) {
 	}
 
 	// Pointer to non-struct types should use prompt
-	if val, ok := decoded["value"].(string); !ok || val != "(*int) Integer value" {
-		t.Errorf("Expected value to be '(*int) Integer value', got: %v", decoded["value"])
+	if val, ok := decoded["value"].(string); !ok || val != "*int: Integer value" {
+		t.Errorf("Expected value to be '*int: Integer value', got: %v", decoded["value"])
 	}
 }
 
@@ -608,11 +608,11 @@ func TestBuildFieldPromptValue_SliceOfStructsWithPrompt(t *testing.T) {
 		t.Fatalf("Failed to unmarshal result: %v", err)
 	}
 
-	// Slice with prompt tag should use the prompt
+	// Slice with prompt tag should use the type
 	if items, ok := decoded["items"].([]any); !ok {
 		t.Error("Expected items to be an array")
-	} else if len(items) != 1 || items[0] != "List of items" {
-		t.Errorf("Expected items to be ['List of items'], got: %v", items)
+	} else if len(items) != 1 || items[0] != "[]encoder.TestStruct" {
+		t.Errorf("Expected items to be ['[]encoder.TestStruct'], got: %v", items)
 	}
 }
 
@@ -664,8 +664,8 @@ func TestBuildPromptMap_PointerToPointer(t *testing.T) {
 	}
 
 	// Should use prompt for pointer types
-	if val, ok := decoded["value"].(string); !ok || val != "(**string) String pointer" {
-		t.Errorf("Expected value to be '(**string) String pointer', got: %v", decoded["value"])
+	if val, ok := decoded["value"].(string); !ok || val != "**string: String pointer" {
+		t.Errorf("Expected value to be '**string: String pointer', got: %v", decoded["value"])
 	}
 }
 
