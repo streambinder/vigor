@@ -26,48 +26,50 @@ var (
 //line llm/prompt/gen_training.qtpl:6
 func StreamGenTraining(qw422016 *qt422016.Writer, profile *model.Profile, exercises []exercisedb.Exercise, duration int) {
 //line llm/prompt/gen_training.qtpl:7
-	qw422016.N().S(` Generate a `)
+	qw422016.N().S(` Generate `)
 //line llm/prompt/gen_training.qtpl:9
 	qw422016.N().D(duration)
 //line llm/prompt/gen_training.qtpl:9
-	qw422016.N().S(`min training from these exercises: `)
-//line llm/prompt/gen_training.qtpl:10
-	for _, exercise := range exercises {
-//line llm/prompt/gen_training.qtpl:10
-		qw422016.N().S(` ID: `)
-//line llm/prompt/gen_training.qtpl:11
+	qw422016.N().S(`min training from exercises: `)
+//line llm/prompt/gen_training.qtpl:9
+	for i, exercise := range exercises {
+//line llm/prompt/gen_training.qtpl:9
 		qw422016.E().S(exercise.ID)
-//line llm/prompt/gen_training.qtpl:11
-		qw422016.N().S(`, `)
-//line llm/prompt/gen_training.qtpl:12
+//line llm/prompt/gen_training.qtpl:9
+		if i < len(exercises)-1 {
+//line llm/prompt/gen_training.qtpl:9
+			qw422016.N().S(`, `)
+//line llm/prompt/gen_training.qtpl:9
+		}
+//line llm/prompt/gen_training.qtpl:9
 	}
-//line llm/prompt/gen_training.qtpl:12
+//line llm/prompt/gen_training.qtpl:9
 	qw422016.N().S(` `)
-//line llm/prompt/gen_training.qtpl:15
+//line llm/prompt/gen_training.qtpl:12
 }
 
-//line llm/prompt/gen_training.qtpl:15
+//line llm/prompt/gen_training.qtpl:12
 func WriteGenTraining(qq422016 qtio422016.Writer, profile *model.Profile, exercises []exercisedb.Exercise, duration int) {
-//line llm/prompt/gen_training.qtpl:15
+//line llm/prompt/gen_training.qtpl:12
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/gen_training.qtpl:15
+//line llm/prompt/gen_training.qtpl:12
 	StreamGenTraining(qw422016, profile, exercises, duration)
-//line llm/prompt/gen_training.qtpl:15
+//line llm/prompt/gen_training.qtpl:12
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/gen_training.qtpl:15
+//line llm/prompt/gen_training.qtpl:12
 }
 
-//line llm/prompt/gen_training.qtpl:15
+//line llm/prompt/gen_training.qtpl:12
 func GenTraining(profile *model.Profile, exercises []exercisedb.Exercise, duration int) string {
-//line llm/prompt/gen_training.qtpl:15
+//line llm/prompt/gen_training.qtpl:12
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/gen_training.qtpl:15
+//line llm/prompt/gen_training.qtpl:12
 	WriteGenTraining(qb422016, profile, exercises, duration)
-//line llm/prompt/gen_training.qtpl:15
+//line llm/prompt/gen_training.qtpl:12
 	qs422016 := string(qb422016.B)
-//line llm/prompt/gen_training.qtpl:15
+//line llm/prompt/gen_training.qtpl:12
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/gen_training.qtpl:15
+//line llm/prompt/gen_training.qtpl:12
 	return qs422016
-//line llm/prompt/gen_training.qtpl:15
+//line llm/prompt/gen_training.qtpl:12
 }

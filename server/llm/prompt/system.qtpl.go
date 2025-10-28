@@ -23,124 +23,112 @@ var (
 //line llm/prompt/system.qtpl:5
 func StreamSystem(qw422016 *qt422016.Writer, profile *model.Profile, schema string) {
 //line llm/prompt/system.qtpl:6
-	qw422016.N().S(` You are a personal trainer who helps people to achieve their fitness goals. `)
+	qw422016.N().S(` Personal trainer. Create workouts to achieve fitness goals. `)
 //line llm/prompt/system.qtpl:10
 	if len(profile.Goals()) > 0 {
 //line llm/prompt/system.qtpl:10
-		qw422016.N().S(` The target goals are: `)
-//line llm/prompt/system.qtpl:12
-		for _, goal := range profile.Goals() {
-//line llm/prompt/system.qtpl:12
-			qw422016.N().S(` `)
-//line llm/prompt/system.qtpl:13
+		qw422016.N().S(`Goals: `)
+//line llm/prompt/system.qtpl:10
+		for i, goal := range profile.Goals() {
+//line llm/prompt/system.qtpl:10
 			qw422016.E().S(goal.Description)
-//line llm/prompt/system.qtpl:13
-			qw422016.N().S(` (started: `)
-//line llm/prompt/system.qtpl:13
-			qw422016.E().S(goal.StartDate.Format("2006-01-02"))
-//line llm/prompt/system.qtpl:13
-			qw422016.N().S(`), `)
-//line llm/prompt/system.qtpl:14
+//line llm/prompt/system.qtpl:10
+			if i < len(profile.Goals())-1 {
+//line llm/prompt/system.qtpl:10
+				qw422016.N().S(`, `)
+//line llm/prompt/system.qtpl:10
+			}
+//line llm/prompt/system.qtpl:10
 		}
-//line llm/prompt/system.qtpl:14
+//line llm/prompt/system.qtpl:10
 		qw422016.N().S(` `)
-//line llm/prompt/system.qtpl:15
+//line llm/prompt/system.qtpl:11
 	}
-//line llm/prompt/system.qtpl:15
-	qw422016.N().S(` Profile details include: `)
-//line llm/prompt/system.qtpl:18
-	qw422016.E().S(profile.Language)
-//line llm/prompt/system.qtpl:18
-	qw422016.N().S(` language; `)
-//line llm/prompt/system.qtpl:19
-	qw422016.E().S(profile.Birthdate.Format("2006-01-02"))
-//line llm/prompt/system.qtpl:19
-	qw422016.N().S(` (age `)
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:11
+	qw422016.N().S(` Profile: age `)
+//line llm/prompt/system.qtpl:12
 	qw422016.N().D(profile.Age())
-//line llm/prompt/system.qtpl:19
-	qw422016.N().S(`) birthdate; `)
-//line llm/prompt/system.qtpl:20
+//line llm/prompt/system.qtpl:12
+	qw422016.N().S(`, `)
+//line llm/prompt/system.qtpl:12
 	qw422016.N().F(profile.Height)
-//line llm/prompt/system.qtpl:20
-	qw422016.N().S(`cm height; `)
-//line llm/prompt/system.qtpl:21
+//line llm/prompt/system.qtpl:12
+	qw422016.N().S(`cm, `)
+//line llm/prompt/system.qtpl:12
 	qw422016.N().F(profile.Weight)
-//line llm/prompt/system.qtpl:21
-	qw422016.N().S(`kg weight; `)
-//line llm/prompt/system.qtpl:22
+//line llm/prompt/system.qtpl:12
+	qw422016.N().S(`kg`)
+//line llm/prompt/system.qtpl:12
 	if len(profile.Injuries()) > 0 {
-//line llm/prompt/system.qtpl:22
-		qw422016.N().S(` `)
-//line llm/prompt/system.qtpl:23
-		for _, injury := range profile.Injuries() {
-//line llm/prompt/system.qtpl:23
-			qw422016.N().S(` `)
-//line llm/prompt/system.qtpl:24
+//line llm/prompt/system.qtpl:12
+		qw422016.N().S(` Injuries: `)
+//line llm/prompt/system.qtpl:13
+		for i, injury := range profile.Injuries() {
+//line llm/prompt/system.qtpl:13
 			qw422016.E().S(injury.Description)
-//line llm/prompt/system.qtpl:24
-			qw422016.N().S(` (year: `)
-//line llm/prompt/system.qtpl:24
-			qw422016.N().D(injury.Year)
-//line llm/prompt/system.qtpl:24
-			qw422016.N().S(`), `)
-//line llm/prompt/system.qtpl:25
+//line llm/prompt/system.qtpl:13
+			if i < len(profile.Injuries())-1 {
+//line llm/prompt/system.qtpl:13
+				qw422016.N().S(`, `)
+//line llm/prompt/system.qtpl:13
+			}
+//line llm/prompt/system.qtpl:13
 		}
-//line llm/prompt/system.qtpl:25
-		qw422016.N().S(` injury history; `)
-//line llm/prompt/system.qtpl:27
+//line llm/prompt/system.qtpl:13
 	}
-//line llm/prompt/system.qtpl:27
-	qw422016.N().S(` `)
-//line llm/prompt/system.qtpl:28
+//line llm/prompt/system.qtpl:13
 	if len(profile.Limitations()) > 0 {
-//line llm/prompt/system.qtpl:28
-		qw422016.N().S(` `)
-//line llm/prompt/system.qtpl:29
-		for _, limitation := range profile.Limitations() {
-//line llm/prompt/system.qtpl:29
-			qw422016.N().S(` `)
-//line llm/prompt/system.qtpl:30
+//line llm/prompt/system.qtpl:13
+		qw422016.N().S(` Limits: `)
+//line llm/prompt/system.qtpl:14
+		for i, limitation := range profile.Limitations() {
+//line llm/prompt/system.qtpl:14
 			qw422016.E().S(limitation)
-//line llm/prompt/system.qtpl:30
-			qw422016.N().S(`, `)
-//line llm/prompt/system.qtpl:31
+//line llm/prompt/system.qtpl:14
+			if i < len(profile.Limitations())-1 {
+//line llm/prompt/system.qtpl:14
+				qw422016.N().S(`, `)
+//line llm/prompt/system.qtpl:14
+			}
+//line llm/prompt/system.qtpl:14
 		}
-//line llm/prompt/system.qtpl:31
-		qw422016.N().S(` `)
-//line llm/prompt/system.qtpl:32
+//line llm/prompt/system.qtpl:14
 	}
-//line llm/prompt/system.qtpl:32
-	qw422016.N().S(` You must always speak the profile language. You must always respond with a JSON with this structure: `)
-//line llm/prompt/system.qtpl:35
+//line llm/prompt/system.qtpl:14
+	qw422016.N().S(` Respond in `)
+//line llm/prompt/system.qtpl:16
+	qw422016.E().S(profile.Language)
+//line llm/prompt/system.qtpl:16
+	qw422016.N().S(` using JSON: `)
+//line llm/prompt/system.qtpl:16
 	qw422016.N().S(schema)
-//line llm/prompt/system.qtpl:35
+//line llm/prompt/system.qtpl:16
 	qw422016.N().S(` `)
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:19
 }
 
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:19
 func WriteSystem(qq422016 qtio422016.Writer, profile *model.Profile, schema string) {
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:19
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:19
 	StreamSystem(qw422016, profile, schema)
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:19
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:19
 }
 
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:19
 func System(profile *model.Profile, schema string) string {
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:19
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:19
 	WriteSystem(qb422016, profile, schema)
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:19
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:19
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:19
 	return qs422016
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:19
 }
