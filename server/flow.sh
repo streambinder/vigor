@@ -28,6 +28,8 @@ alias curl="curl -s -H \"Content-Type:application/json\" -H \"Authorization: Bea
 curl -X POST "${HOST}"/gym -d '{"name":"Basement","equipment":["barbell","bench","dumbbels","elastic bands","pull-up bar","dip station","rings","ab wheel"]}' | jq || true
 curl "${HOST}"/gym/basement | jq
 
+ts="$(date +%s%N)"
 curl -X POST "${HOST}"/training -d '{"gym":"basement","duration":30}' | jq
+echo "Duration: $((($(date +%s%N) - $ts)/1000000))ms"
 
 # curl -X POST "${HOST}"/unregister | jq
