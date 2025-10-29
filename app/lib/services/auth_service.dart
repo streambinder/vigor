@@ -77,6 +77,40 @@ class AuthService {
     }
   }
 
+  /// Login with Google ID token
+  /// Returns tokens on success, stores them securely
+  Future<ApiResponse<AuthTokens>> loginWithGoogle({
+    required String idToken,
+  }) async {
+    final response = await _apiService.post(
+      ApiConfig.googleAuthEndpoint,
+      body: {
+        'id_token': idToken,
+      },
+    );
+
+    if (response.isSuccess && response.data != null) {
+      try {
+        final tokens = AuthTokens.fromJson(response.data!);
+
+        // Store tokens securely
+        await _storageService.saveTokens(
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+        );
+
+        return ApiResponse.success(tokens, response.statusCode);
+      } catch (e) {
+        return ApiResponse.error('Failed to parse tokens', response.statusCode);
+      }
+    } else {
+      return ApiResponse.error(
+        response.error ?? 'Google login failed',
+        response.statusCode,
+      );
+    }
+  }
+
   /// Refresh access token using refresh token
   /// Returns new tokens on success, stores them securely
   Future<ApiResponse<AuthTokens>> refreshToken() async {
