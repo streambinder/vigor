@@ -1,11 +1,15 @@
+import 'package:flutter/foundation.dart';
+
 /// API configuration for Vigor server
 class ApiConfig {
-  // Change this to your server URL
-  // For iOS simulator: http://localhost:8080
-  // For Android emulator: http://10.0.2.2:8080
-  // For physical device: http://<your-local-ip>:8080
-  static const String baseUrl = 'http://localhost:8080';
-  // static const String baseUrl = 'https://backend.vigor.davidepucci.it';
+  // Automatically switches between production and local URLs
+  // - Production (release mode): https://backend.vigor.davidepucci.it
+  // - Local (debug mode): http://localhost:8080
+  // Note: For Android emulator, use http://10.0.2.2:8080
+  // For physical device, use http://<your-local-ip>:8080
+  static const String baseUrl = kReleaseMode
+      ? 'https://backend.vigor.davidepucci.it'
+      : 'http://localhost:8080';
 
   // Authentication endpoints
   static const String registerEndpoint = '/register';
