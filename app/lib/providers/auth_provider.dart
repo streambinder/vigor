@@ -129,6 +129,43 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// Login with Google ID token
+  Future<bool> loginWithGoogle({
+    required String idToken,
+  }) async {
+    _setState(AuthState.loading);
+    _errorMessage = null;
+
+    try {
+      final response = await _authService.loginWithGoogle(
+        idToken: idToken,
+      );
+
+      if (response.isSuccess) {
+        // Load user data
+        final userResponse = await _authService.getCurrentUser();
+
+        if (userResponse.isSuccess && userResponse.data != null) {
+          _currentUser = userResponse.data;
+          _setState(AuthState.authenticated);
+          return true;
+        } else {
+          _errorMessage = 'Failed to load user data';
+          _setState(AuthState.unauthenticated);
+          return false;
+        }
+      } else {
+        _errorMessage = response.error ?? 'Google login failed';
+        _setState(AuthState.unauthenticated);
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Google login error: ${e.toString()}';
+      _setState(AuthState.unauthenticated);
+      return false;
+    }
+  }
+
   /// Logout user
   Future<void> logout() async {
     _setState(AuthState.loading);
