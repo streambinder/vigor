@@ -1,6 +1,6 @@
 //go:generate go install github.com/valyala/quicktemplate/qtc@latest
 //go:generate qtc -dir=llm/prompt
-//go:generate go run ../codegen -models model -output ../app/lib/models"
+//go:generate sh -c "cd ../codegen && go run . -models ../server/model -output ../app/lib/models"
 package main
 
 import (
