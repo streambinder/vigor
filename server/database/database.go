@@ -36,6 +36,7 @@ func init() {
 
 	if err := DB.AutoMigrate(
 		&model.User{},
+		&model.Identity{},
 		&model.RefreshToken{},
 		&model.Profile{},
 		&model.Training{},

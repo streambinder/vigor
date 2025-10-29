@@ -4,7 +4,7 @@ class ApiConfig {
   // For iOS simulator: http://localhost:8080
   // For Android emulator: http://10.0.2.2:8080
   // For physical device: http://<your-local-ip>:8080
-  static const String baseUrl = 'http://localhost:8080';
+  static const String baseUrl = 'https://backend.vigor.davidepucci.it';
 
   // Authentication endpoints
   static const String registerEndpoint = '/register';

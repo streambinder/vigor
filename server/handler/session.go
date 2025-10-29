@@ -20,12 +20,20 @@ func init() {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse JSON"})
 		}
 
+		// Find user by email
 		var user model.User
 		if err := database.DB.First(&user, "email = ?", body.Email).Error; err != nil {
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid credentials"})
 		}
 
-		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password)); err != nil {
+		// Find local identity for this user
+		var identity model.Identity
+		if err := database.DB.Where("user_id = ? AND provider = ?", user.ID, "local").First(&identity).Error; err != nil {
+			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid credentials"})
+		}
+
+		// Verify password
+		if err := bcrypt.CompareHashAndPassword([]byte(identity.PasswordHash), []byte(body.Password)); err != nil {
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid credentials"})
 		}
 

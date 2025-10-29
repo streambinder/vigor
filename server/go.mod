@@ -7,7 +7,9 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.9
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/lib/pq v1.10.9
+	github.com/markbates/goth v1.82.0
 	github.com/rs/zerolog v1.34.0
+	github.com/shareed2k/goth_fiber v0.3.2
 	github.com/streambinder/vigor/exercisedb v0.0.0-00010101000000-000000000000
 	github.com/valyala/quicktemplate v1.8.0
 	golang.org/x/crypto v0.43.0
@@ -17,16 +19,32 @@ require (
 )
 
 require (
+	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/clipperhouse/stringish v0.1.1 // indirect
 	github.com/clipperhouse/uax29/v2 v2.3.0 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
+	github.com/go-chi/chi/v5 v5.2.2 // indirect
 	github.com/go-sql-driver/mysql v1.9.3 // indirect
+	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gopherjs/gopherjs v1.12.80 // indirect
+	github.com/gorilla/context v1.1.1 // indirect
+	github.com/gorilla/mux v1.8.0 // indirect
+	github.com/gorilla/securecookie v1.1.1 // indirect
+	github.com/gorilla/sessions v1.1.1 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
+	github.com/lestrrat-go/backoff/v2 v2.0.8 // indirect
+	github.com/lestrrat-go/blackmagic v1.0.2 // indirect
+	github.com/lestrrat-go/httpcc v1.0.1 // indirect
+	github.com/lestrrat-go/iter v1.0.2 // indirect
+	github.com/lestrrat-go/jwx v1.2.29 // indirect
+	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/smartystreets/assertions v1.2.0 // indirect
 	github.com/smartystreets/goconvey v1.7.2 // indirect
 	golang.org/x/arch v0.11.0 // indirect
+	golang.org/x/oauth2 v0.27.0 // indirect
 	gorm.io/driver/mysql v1.6.0 // indirect
 )
 
@@ -53,3 +71,5 @@ require (
 )
 
 replace github.com/streambinder/vigor/exercisedb => ../exercisedb
+
+exclude cloud.google.com/go v0.67.0

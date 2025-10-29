@@ -12,6 +12,7 @@ import (
 	"github.com/streambinder/vigor/model"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 // handleRegister creates a new user account with email and password.
@@ -23,22 +24,46 @@ func handleRegister(c *fiber.Ctx) error {
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse JSON"})
 	}
+
+	// Check if user already exists
 	if err := database.DB.First(&model.User{}, "email = ?", body.Email).Error; err == nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "email already exists"})
 	}
 
+	// Hash the password
 	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to hash password"})
 	}
+
+	// Create user with profile
 	user := model.User{
-		Email:    body.Email,
-		Password: string(hash),
+		Email: body.Email,
 		Profile: model.Profile{
 			Data: datatypes.JSON([]byte("{}")),
 		},
 	}
-	if err := database.DB.Create(&user).Error; err != nil {
+
+	// Use transaction to ensure both user and auth method are created
+	err = database.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&user).Error; err != nil {
+			return err
+		}
+
+		// Create local identity
+		identity := model.Identity{
+			UserID:       user.ID,
+			Provider:     "local",
+			PasswordHash: string(hash),
+		}
+		if err := tx.Create(&identity).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "email already exists"})
 	}
 
