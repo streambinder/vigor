@@ -149,9 +149,7 @@ func needsImport(field Field) bool {
 }
 
 // getImports returns all necessary imports for a struct
-func getImports(s Struct) []string {
-	imports := make(map[string]bool)
-
+func getImports(s Struct) (imports []string) {
 	for _, field := range s.Fields {
 		if needsImport(field) {
 			typeName := field.CollectionOf
@@ -159,17 +157,10 @@ func getImports(s Struct) []string {
 				typeName = field.Type
 			}
 
-			dartType := mapGoTypeToDart(typeName)
-			fileName := toSnakeCase(dartType) + ".dart"
-			imports[fileName] = true
+			imports = append(imports, toSnakeCase(mapGoTypeToDart(typeName)) + ".dart")
 		}
 	}
-
-	result := make([]string, 0, len(imports))
-	for imp := range imports {
-		result = append(result, imp)
-	}
-	return result
+	return
 }
 
 // isNullable checks if a field is nullable
