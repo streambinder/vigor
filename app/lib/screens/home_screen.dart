@@ -84,7 +84,8 @@ class HomeScreen extends StatelessWidget {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       const Text(
                                         'Welcome back!',
@@ -138,7 +139,7 @@ class HomeScreen extends StatelessWidget {
                     ),
 
                     // Profile section
-                    if (user.profile != null) ...[
+                    ...[
                       const SizedBox(height: 24),
                       const Text(
                         'Profile',
@@ -148,43 +149,39 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      if (user.profile!.birthdate != null)
-                        Card(
-                          child: ListTile(
-                            leading: const Icon(Icons.cake),
-                            title: const Text('Birthdate'),
-                            subtitle: Text(
-                              _formatDate(user.profile!.birthdate!),
-                            ),
+                      Card(
+                        child: ListTile(
+                          leading: const Icon(Icons.cake),
+                          title: const Text('Birthdate'),
+                          subtitle: Text(
+                            _formatDate(user.profile.birthdate),
                           ),
                         ),
+                      ),
                       const SizedBox(height: 8),
-                      if (user.profile!.language != null)
-                        Card(
-                          child: ListTile(
-                            leading: const Icon(Icons.language),
-                            title: const Text('Language'),
-                            subtitle: Text(user.profile!.language!),
-                          ),
+                      Card(
+                        child: ListTile(
+                          leading: const Icon(Icons.language),
+                          title: const Text('Language'),
+                          subtitle: Text(user.profile.language),
                         ),
+                      ),
                       const SizedBox(height: 8),
-                      if (user.profile!.height != null)
-                        Card(
-                          child: ListTile(
-                            leading: const Icon(Icons.height),
-                            title: const Text('Height'),
-                            subtitle: Text('${user.profile!.height} cm'),
-                          ),
+                      Card(
+                        child: ListTile(
+                          leading: const Icon(Icons.height),
+                          title: const Text('Height'),
+                          subtitle: Text('${user.profile.height} cm'),
                         ),
+                      ),
                       const SizedBox(height: 8),
-                      if (user.profile!.weight != null)
-                        Card(
-                          child: ListTile(
-                            leading: const Icon(Icons.monitor_weight),
-                            title: const Text('Weight'),
-                            subtitle: Text('${user.profile!.weight} kg'),
-                          ),
+                      Card(
+                        child: ListTile(
+                          leading: const Icon(Icons.monitor_weight),
+                          title: const Text('Weight'),
+                          subtitle: Text('${user.profile.weight} kg'),
                         ),
+                      ),
                     ],
 
                     const SizedBox(height: 24),
@@ -223,7 +220,8 @@ class HomeScreen extends StatelessWidget {
                               // TODO: Navigate to training screen
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Training feature coming soon!'),
+                                  content:
+                                      Text('Training feature coming soon!'),
                                 ),
                               );
                             },
@@ -260,7 +258,8 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Card(
                       child: ListTile(
-                        leading: const Icon(Icons.delete_forever, color: Colors.red),
+                        leading:
+                            const Icon(Icons.delete_forever, color: Colors.red),
                         title: const Text(
                           'Delete Account',
                           style: TextStyle(color: Colors.red),
@@ -275,11 +274,13 @@ class HomeScreen extends StatelessWidget {
                               ),
                               actions: [
                                 TextButton(
-                                  onPressed: () => Navigator.of(context).pop(false),
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(false),
                                   child: const Text('Cancel'),
                                 ),
                                 TextButton(
-                                  onPressed: () => Navigator.of(context).pop(true),
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(true),
                                   style: TextButton.styleFrom(
                                     foregroundColor: Colors.red,
                                   ),
@@ -295,14 +296,16 @@ class HomeScreen extends StatelessWidget {
                               if (success) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Account deleted successfully'),
+                                    content:
+                                        Text('Account deleted successfully'),
                                   ),
                                 );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      authProvider.errorMessage ?? 'Failed to delete account',
+                                      authProvider.errorMessage ??
+                                          'Failed to delete account',
                                     ),
                                     backgroundColor: Colors.red,
                                   ),
