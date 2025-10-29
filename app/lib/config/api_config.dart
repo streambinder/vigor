@@ -12,8 +12,6 @@ class ApiConfig {
       : 'http://localhost:8080';
 
   // Authentication endpoints
-  static const String registerEndpoint = '/register';
-  static const String loginEndpoint = '/login';
   static const String googleAuthEndpoint = '/auth/google';
   static const String refreshEndpoint = '/refresh';
   static const String logoutEndpoint = '/logout';

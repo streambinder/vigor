@@ -16,67 +16,6 @@ class AuthService {
   })  : _apiService = apiService ?? ApiService(),
         _storageService = storageService ?? SecureStorageService();
 
-  /// Register a new user
-  /// Returns success message or error
-  Future<ApiResponse<String>> register({
-    required String email,
-    required String password,
-  }) async {
-    final response = await _apiService.post(
-      ApiConfig.registerEndpoint,
-      body: {
-        'email': email,
-        'password': password,
-      },
-    );
-
-    if (response.isSuccess) {
-      final message = response.data?['message'] as String? ?? 'User created';
-      return ApiResponse.success(message, response.statusCode);
-    } else {
-      return ApiResponse.error(
-        response.error ?? 'Registration failed',
-        response.statusCode,
-      );
-    }
-  }
-
-  /// Login with email and password
-  /// Returns tokens on success, stores them securely
-  Future<ApiResponse<AuthTokens>> login({
-    required String email,
-    required String password,
-  }) async {
-    final response = await _apiService.post(
-      ApiConfig.loginEndpoint,
-      body: {
-        'email': email,
-        'password': password,
-      },
-    );
-
-    if (response.isSuccess && response.data != null) {
-      try {
-        final tokens = AuthTokens.fromJson(response.data!);
-
-        // Store tokens securely
-        await _storageService.saveTokens(
-          accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken,
-        );
-
-        return ApiResponse.success(tokens, response.statusCode);
-      } catch (e) {
-        return ApiResponse.error('Failed to parse tokens', response.statusCode);
-      }
-    } else {
-      return ApiResponse.error(
-        response.error ?? 'Login failed',
-        response.statusCode,
-      );
-    }
-  }
-
   /// Login with Google ID token
   /// Returns tokens on success, stores them securely
   Future<ApiResponse<AuthTokens>> loginWithGoogle({
@@ -193,7 +132,8 @@ class AuthService {
         final user = User.fromJson(response.data!);
         return ApiResponse.success(user, response.statusCode);
       } catch (e) {
-        return ApiResponse.error('Failed to parse user data', response.statusCode);
+        return ApiResponse.error(
+            'Failed to parse user data', response.statusCode);
       }
     } else if (response.statusCode == 401) {
       // Token expired, try to refresh
