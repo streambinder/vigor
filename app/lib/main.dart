@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'screens/splash_screen.dart';
-import 'screens/login_screen.dart';
+import 'screens/google_auth_screen.dart';
 import 'screens/home_screen.dart';
 
 void main() {
@@ -63,8 +63,8 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
           return const HomeScreen();
         }
 
-        // Show login screen if unauthenticated
-        return const LoginScreen();
+        // Show Google auth screen if unauthenticated
+        return const GoogleAuthScreen();
       },
     );
   }
