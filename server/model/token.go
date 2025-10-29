@@ -15,3 +15,7 @@ type RefreshToken struct {
 	Revoked   bool      `gorm:"default:false"`
 	CreatedAt time.Time
 }
+
+func (RefreshToken) TableName() string {
+	return "tokens"
+}
