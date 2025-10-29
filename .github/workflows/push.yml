@@ -84,7 +84,7 @@ jobs:
         with:
           persist-credentials: false
       - run: test "$(grep -cr --include='*.go' 'mockey.Mock(')" = "$(grep -cr --include='*.go' '\.UnPatch()$')"
-  qtpl-generation:
+  code-generation:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -96,12 +96,25 @@ jobs:
       - run: |
           PATH="$PATH:$(go env GOPATH)/bin"
           export PATH
+
+          # Generate qtpl files
           cd server
           go generate
           if git diff --exit-code -- ./*.qtpl.go; then
-            echo "Generated qtpl files match repository"
+            echo "✓ Generated qtpl files match repository"
           else
-            echo "ERROR: Generated qtpl files differ from repository. Please run 'qtc' in server/llm/prompt and commit the changes."
+            echo "ERROR: Generated qtpl files differ from repository. Please run 'go generate' in server/ and commit the changes."
+            exit 1
+          fi
+
+          # Generate Dart models from Go structs
+          cd model
+          go generate
+          cd ../..
+          if git diff --exit-code -- app/lib/models/*.dart; then
+            echo "✓ Generated Dart models match repository"
+          else
+            echo "ERROR: Generated Dart models differ from repository. Please run 'go generate' in server/model/ and commit the changes."
             exit 1
           fi
   docker-exercisedb:
@@ -114,7 +127,7 @@ jobs:
         go-channel-closure,
         go-http-body-closure,
         go-mockey-unpatch,
-        qtpl-generation,
+        code-generation,
       ]
     if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
     permissions:
@@ -147,7 +160,7 @@ jobs:
         go-channel-closure,
         go-http-body-closure,
         go-mockey-unpatch,
-        qtpl-generation,
+        code-generation,
       ]
     if: success()
     steps:
