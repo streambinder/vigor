@@ -1,4 +1,4 @@
-package it.davidepucci.vigor.vigor
+package it.davidepucci.vigor
 
 import io.flutter.embedding.android.FlutterActivity
 
