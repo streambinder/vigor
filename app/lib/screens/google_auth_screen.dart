@@ -13,6 +13,8 @@ class GoogleAuthScreen extends StatefulWidget {
 class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
+    serverClientId:
+        '559332153701-0auu2d1c1q43u7kf5k12akdllo060flh.apps.googleusercontent.com',
   );
   bool _isLoading = false;
   String? _errorMessage;
@@ -56,8 +58,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
       if (!success && mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage =
-              authProvider.errorMessage ?? 'Google sign-in failed';
+          _errorMessage = authProvider.errorMessage ?? 'Google sign-in failed';
         });
 
         // Sign out from Google on failure
