@@ -72,12 +72,26 @@ func handleRegister(c *fiber.Ctx) error {
 
 // handleUnregister deletes the authenticated user's account and revokes tokens.
 func handleUnregister(c *fiber.Ctx) error {
-	if err := database.DB.Model(&model.User{}).Where("id = ?", c.Locals("userID")).Delete(&model.User{}).Error; err != nil {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
+	userID := c.Locals("userID")
+
+	// Use hard delete (Unscoped) instead of soft delete to allow email reuse
+	// Delete all identities for this user first (prevents orphaned identities)
+	if err := database.DB.Unscoped().Where("user_id = ?", userID).Delete(&model.Identity{}).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "could not delete identities"})
 	}
-	if err := database.DB.Model(&model.RefreshToken{}).Where("user_id = ?", c.Locals("userID")).Update("revoked", true).Error; err != nil {
+
+	// Delete all refresh tokens for this user (not just mark as revoked)
+	// This prevents "duplicate key" errors when the user creates a new account
+	if err := database.DB.Unscoped().Where("user_id = ?", userID).Delete(&model.RefreshToken{}).Error; err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "could not delete refresh_tokens"})
 	}
+
+	// Hard delete the user (this will also cascade delete profile due to foreign keys)
+	// Using Unscoped() ensures the email can be reused for new accounts
+	if err := database.DB.Unscoped().Where("id = ?", userID).Delete(&model.User{}).Error; err != nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
+	}
+
 	return c.JSON(fiber.Map{"message": "user deleted"})
 }
 
