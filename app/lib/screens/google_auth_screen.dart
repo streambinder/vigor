@@ -2,8 +2,11 @@ import 'dart:math' show min;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/auth_provider.dart';
+import '../services/app_logger.dart';
 
 class GoogleAuthScreen extends StatefulWidget {
   const GoogleAuthScreen({super.key});
@@ -15,6 +18,7 @@ class GoogleAuthScreen extends StatefulWidget {
 class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
   // Configure GoogleSignIn differently for web vs mobile
   late final GoogleSignIn _googleSignIn;
+  final Logger _log = AppLogger.getLogger('GoogleAuthScreen');
 
   @override
   void initState() {
@@ -23,7 +27,8 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
     if (kIsWeb) {
       // Web configuration - need to specify clientId to get ID tokens
       _googleSignIn = GoogleSignIn(
-        clientId: '559332153701-0auu2d1c1q43u7kf5k12akdllo060flh.apps.googleusercontent.com',
+        clientId:
+            '559332153701-0auu2d1c1q43u7kf5k12akdllo060flh.apps.googleusercontent.com',
         scopes: [
           'email',
           'profile',
@@ -37,10 +42,12 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
           'profile',
           'openid',
         ],
-        serverClientId: '559332153701-0auu2d1c1q43u7kf5k12akdllo060flh.apps.googleusercontent.com',
+        serverClientId:
+            '559332153701-0auu2d1c1q43u7kf5k12akdllo060flh.apps.googleusercontent.com',
       );
     }
   }
+
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -69,21 +76,15 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
       final String? idToken = googleAuth.idToken;
       final String? accessToken = googleAuth.accessToken;
 
-      // Debug logging
-      print('Access Token: ${accessToken != null ? "Present (${accessToken?.length} chars)" : "NULL"}');
-      print('ID Token: ${idToken != null ? "Present (${idToken?.length} chars)" : "NULL"}');
-      if (accessToken != null) {
-        print('Access Token (first 30): ${accessToken!.substring(0, min(30, accessToken.length))}...');
-      }
-      if (idToken != null) {
-        print('ID Token (first 30): ${idToken!.substring(0, min(30, idToken.length))}...');
-      }
+      _log.d('Google auth received: idToken=${idToken != null ? "${idToken.length}b" : "none"} '
+          'accessToken=${accessToken != null ? "${accessToken.length}b" : "none"}');
 
       // Prefer ID token over access token (more reliable across platforms)
       // Fall back to access token for web if ID token unavailable
       String? tokenToSend = idToken ?? accessToken;
 
       if (tokenToSend == null) {
+        _log.w('No token received from Google sign-in');
         setState(() {
           _isLoading = false;
           _errorMessage = 'Failed to get authentication token';
@@ -91,15 +92,17 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
         return;
       }
 
-      print('Sending ${tokenToSend == idToken ? "ID token" : "Access token"} to backend (${tokenToSend.length} chars)');
+      final tokenType = tokenToSend == idToken ? 'ID' : 'Access';
+      _log.i('Authenticating with $tokenType token (${tokenToSend.length}b)');
 
       // Send token to backend
       final authProvider = context.read<AuthProvider>();
       final success = await authProvider.loginWithGoogle(idToken: tokenToSend);
 
-      print('Backend response - Success: $success');
-      if (!success) {
-        print('Error from backend: ${authProvider.errorMessage}');
+      if (success) {
+        _log.i('Google sign-in completed successfully');
+      } else {
+        _log.e('Google sign-in failed: ${authProvider.errorMessage}');
       }
 
       if (!success && mounted) {
