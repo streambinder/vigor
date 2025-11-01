@@ -1,14 +1,18 @@
+import 'package:logger/logger.dart';
+
 import '../config/api_config.dart';
 import '../models/api_response.dart';
 import '../models/auth_tokens.dart';
 import '../models/user.dart';
 import 'api_service.dart';
+import 'app_logger.dart';
 import 'secure_storage_service.dart';
 
 /// Authentication service for user authentication operations
 class AuthService {
   final ApiService _apiService;
   final SecureStorageService _storageService;
+  final Logger _log = AppLogger.getLogger('AuthService');
 
   AuthService({
     ApiService? apiService,
@@ -21,9 +25,7 @@ class AuthService {
   Future<ApiResponse<AuthTokens>> loginWithGoogle({
     required String idToken,
   }) async {
-    print(
-        '[AuthService] Sending login request to ${ApiConfig.googleAuthEndpoint}');
-    print('[AuthService] Token length: ${idToken.length}');
+    _log.d('POST ${ApiConfig.googleAuthEndpoint} (token_len=${idToken.length})');
 
     final response = await _apiService.post(
       ApiConfig.googleAuthEndpoint,
@@ -32,39 +34,33 @@ class AuthService {
       },
     );
 
-    print('[AuthService] Response status: ${response.statusCode}');
-    print('[AuthService] Response success: ${response.isSuccess}');
-    print('[AuthService] Response data: ${response.data}');
+    _log.d('Response: status=${response.statusCode} success=${response.isSuccess}');
 
     if (response.isSuccess && response.data != null) {
       try {
-        print('[AuthService] Parsing tokens from response...');
         final tokens = AuthTokens.fromJson(response.data!);
-        print(
-            '[AuthService] Successfully parsed tokens - Access: ${tokens.accessToken.length} chars, Refresh: ${tokens.refreshToken.length} chars');
+        _log.i('Tokens parsed: access=${tokens.accessToken.length}b refresh=${tokens.refreshToken.length}b');
 
         // Store tokens securely
-        print('[AuthService] Storing tokens securely...');
         try {
           await _storageService.saveTokens(
             accessToken: tokens.accessToken,
             refreshToken: tokens.refreshToken,
           );
-          print('[AuthService] Tokens stored successfully');
+          _log.d('Tokens stored successfully');
         } catch (e) {
-          print(
-              '[AuthService] WARNING: Failed to store tokens (continuing anyway): $e');
+          _log.w('Token storage failed, continuing with in-memory tokens', e);
           // Don't fail the login just because storage failed
           // The tokens are still in the response and will be passed to getCurrentUser
         }
 
         return ApiResponse.success(tokens, response.statusCode);
       } catch (e) {
-        print('[AuthService] ERROR: Failed to parse tokens: $e');
+        _log.e('Failed to parse auth tokens', e);
         return ApiResponse.error('Failed to parse tokens', response.statusCode);
       }
     } else {
-      print('[AuthService] ERROR: Login failed - ${response.error}');
+      _log.e('Google login failed: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Google login failed',
         response.statusCode,
@@ -139,37 +135,33 @@ class AuthService {
   /// [_refreshAttempts] tracks recursion depth to prevent infinite loops
   Future<ApiResponse<User>> getCurrentUser(
       {String? useToken, int refreshAttempts = 0}) async {
-    print(
-        '[AuthService] Getting current user... (refresh attempts: $refreshAttempts)');
+    _log.d('getCurrentUser (attempt=$refreshAttempts)');
 
     // Prevent infinite refresh loops
     if (refreshAttempts >= 3) {
-      print(
-          '[AuthService] ERROR: Max refresh attempts reached, stopping recursion');
+      _log.e('Max refresh attempts reached, session expired');
       return ApiResponse.error('Session expired - max refresh attempts', 401);
     }
 
     String? accessToken = useToken;
     if (accessToken == null) {
-      print('[AuthService] No token provided, reading from storage...');
       try {
         accessToken = await _storageService.getAccessToken();
+        _log.d('Token retrieved from storage (len=${accessToken?.length ?? 0})');
       } catch (e) {
-        print('[AuthService] ERROR reading token from storage: $e');
+        _log.e('Failed to read token from storage', e);
         return ApiResponse.error('Failed to read authentication token', 500);
       }
     } else {
-      print(
-          '[AuthService] Using provided token, length: ${accessToken.length}');
+      _log.d('Using provided token (len=${accessToken.length})');
     }
 
     if (accessToken == null) {
-      print('[AuthService] ERROR: No access token found');
+      _log.w('No access token available');
       return ApiResponse.error('Not authenticated', 401);
     }
 
-    print('[AuthService] Access token ready, length: ${accessToken.length}');
-    print('[AuthService] Fetching user from ${ApiConfig.userEndpoint}');
+    _log.d('GET ${ApiConfig.userEndpoint}');
 
     final response = await _apiService.get(
       ApiConfig.userEndpoint,
@@ -178,38 +170,33 @@ class AuthService {
       },
     );
 
-    print('[AuthService] Get user response status: ${response.statusCode}');
-    print('[AuthService] Get user response success: ${response.isSuccess}');
-    print('[AuthService] Get user response data: ${response.data}');
+    _log.d('Response: status=${response.statusCode} success=${response.isSuccess}');
 
     if (response.isSuccess && response.data != null) {
       try {
-        print('[AuthService] Parsing user data...');
         final user = User.fromJson(response.data!);
-        print(
-            '[AuthService] Successfully parsed user - ID: ${user.id}, Email: ${user.email}');
+        _log.i('User retrieved: id=${user.id} email=${user.email}');
         return ApiResponse.success(user, response.statusCode);
       } catch (e) {
-        print('[AuthService] ERROR: Failed to parse user data: $e');
+        _log.e('Failed to parse user data', e);
         return ApiResponse.error(
             'Failed to parse user data', response.statusCode);
       }
     } else if (response.statusCode == 401) {
-      print('[AuthService] Token expired (401), attempting refresh...');
+      _log.w('Token expired (401), attempting refresh');
       // Token expired, try to refresh
       final refreshResponse = await refreshToken();
       if (refreshResponse.isSuccess) {
-        print(
-            '[AuthService] Token refresh successful, retrying getCurrentUser...');
+        _log.i('Token refresh successful, retrying getCurrentUser');
         // Retry with new token (don't pass useToken to force reading from storage)
         // Increment refresh attempts to prevent infinite loops
         return getCurrentUser(refreshAttempts: refreshAttempts + 1);
       } else {
-        print('[AuthService] ERROR: Token refresh failed');
+        _log.e('Token refresh failed');
         return ApiResponse.error('Session expired', 401);
       }
     } else {
-      print('[AuthService] ERROR: Failed to get user - ${response.error}');
+      _log.e('Get user failed: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to get user',
         response.statusCode,
@@ -287,12 +274,12 @@ class AuthService {
     try {
       accessToken = await _storageService.getAccessToken();
     } catch (e) {
-      print('[AuthService] ERROR: Failed to read token during account deletion: $e');
+      _log.e('Failed to read token for account deletion', e);
       // If we can't read the token, clear local storage and return error
       try {
         await _storageService.clearAll();
       } catch (clearError) {
-        print('[AuthService] WARNING: Failed to clear storage: $clearError');
+        _log.w('Failed to clear storage after token read error', clearError);
       }
       return ApiResponse.error(
         'Storage error. Please log out and try again.',
@@ -304,6 +291,7 @@ class AuthService {
       return ApiResponse.error('Not authenticated', 401);
     }
 
+    _log.i('Deleting user account');
     final response = await _apiService.post(
       ApiConfig.unregisterEndpoint,
       headers: {
@@ -315,13 +303,15 @@ class AuthService {
       // Clear local storage
       try {
         await _storageService.deleteTokens();
+        _log.d('Tokens cleared after account deletion');
       } catch (e) {
-        print('[AuthService] WARNING: Failed to clear tokens after deletion: $e');
+        _log.w('Failed to clear tokens after deletion', e);
         // Still return success since server deletion succeeded
       }
       final message = response.data?['message'] as String? ?? 'Account deleted';
       return ApiResponse.success(message, response.statusCode);
     } else {
+      _log.e('Account deletion failed: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to delete account',
         response.statusCode,
