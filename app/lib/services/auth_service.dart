@@ -282,7 +282,23 @@ class AuthService {
 
   /// Delete user account
   Future<ApiResponse<String>> deleteAccount() async {
-    final accessToken = await _storageService.getAccessToken();
+    String? accessToken;
+
+    try {
+      accessToken = await _storageService.getAccessToken();
+    } catch (e) {
+      print('[AuthService] ERROR: Failed to read token during account deletion: $e');
+      // If we can't read the token, clear local storage and return error
+      try {
+        await _storageService.clearAll();
+      } catch (clearError) {
+        print('[AuthService] WARNING: Failed to clear storage: $clearError');
+      }
+      return ApiResponse.error(
+        'Storage error. Please log out and try again.',
+        500,
+      );
+    }
 
     if (accessToken == null) {
       return ApiResponse.error('Not authenticated', 401);
@@ -297,7 +313,12 @@ class AuthService {
 
     if (response.isSuccess) {
       // Clear local storage
-      await _storageService.deleteTokens();
+      try {
+        await _storageService.deleteTokens();
+      } catch (e) {
+        print('[AuthService] WARNING: Failed to clear tokens after deletion: $e');
+        // Still return success since server deletion succeeded
+      }
       final message = response.data?['message'] as String? ?? 'Account deleted';
       return ApiResponse.success(message, response.statusCode);
     } else {
