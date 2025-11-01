@@ -17,7 +17,15 @@ class SecureStorageService {
 
   /// Get access token
   Future<String?> getAccessToken() async {
-    return await _storage.read(key: _accessTokenKey);
+    try {
+      print('[SecureStorage] Reading access token...');
+      final token = await _storage.read(key: _accessTokenKey);
+      print('[SecureStorage] Access token read - ${token != null ? "found (${token.length} chars)" : "not found"}');
+      return token;
+    } catch (e) {
+      print('[SecureStorage] ERROR reading access token: $e');
+      rethrow;
+    }
   }
 
   /// Save refresh token
@@ -35,10 +43,17 @@ class SecureStorageService {
     required String accessToken,
     required String refreshToken,
   }) async {
-    await Future.wait([
-      saveAccessToken(accessToken),
-      saveRefreshToken(refreshToken),
-    ]);
+    try {
+      print('[SecureStorage] Saving tokens...');
+      await Future.wait([
+        saveAccessToken(accessToken),
+        saveRefreshToken(refreshToken),
+      ]);
+      print('[SecureStorage] Tokens saved successfully');
+    } catch (e) {
+      print('[SecureStorage] ERROR saving tokens: $e');
+      rethrow;
+    }
   }
 
   /// Delete all tokens

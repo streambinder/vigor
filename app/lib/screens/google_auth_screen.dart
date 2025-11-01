@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
@@ -11,11 +12,34 @@ class GoogleAuthScreen extends StatefulWidget {
 }
 
 class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email', 'profile'],
-    serverClientId:
-        '559332153701-0auu2d1c1q43u7kf5k12akdllo060flh.apps.googleusercontent.com',
-  );
+  // Configure GoogleSignIn differently for web vs mobile
+  late final GoogleSignIn _googleSignIn;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (kIsWeb) {
+      // Web configuration - serverClientId not supported
+      _googleSignIn = GoogleSignIn(
+        scopes: [
+          'email',
+          'profile',
+          'openid',
+        ],
+      );
+    } else {
+      // Mobile configuration - use serverClientId for ID tokens
+      _googleSignIn = GoogleSignIn(
+        scopes: [
+          'email',
+          'profile',
+          'openid',
+        ],
+        serverClientId: '559332153701-0auu2d1c1q43u7kf5k12akdllo060flh.apps.googleusercontent.com',
+      );
+    }
+  }
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -42,8 +66,25 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
           await googleUser.authentication;
 
       final String? idToken = googleAuth.idToken;
+      final String? accessToken = googleAuth.accessToken;
 
-      if (idToken == null) {
+      // Debug logging
+      print('Access Token: ${accessToken != null ? "Present" : "NULL"}');
+      print('ID Token: ${idToken != null ? "Present" : "NULL"}');
+      print('Access Token value: ${accessToken?.substring(0, 20)}...');
+
+      // On web, google_sign_in only provides access tokens, not ID tokens
+      // On mobile, it provides ID tokens
+      String? tokenToSend;
+      if (kIsWeb) {
+        print('Running on Web - using access token');
+        tokenToSend = accessToken;
+      } else {
+        print('Running on Mobile - using ID token');
+        tokenToSend = idToken;
+      }
+
+      if (tokenToSend == null) {
         setState(() {
           _isLoading = false;
           _errorMessage = 'Failed to get authentication token';
@@ -51,9 +92,15 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
         return;
       }
 
-      // Send ID token to backend
+      // Send token to backend
+      print('Sending token to backend...');
       final authProvider = context.read<AuthProvider>();
-      final success = await authProvider.loginWithGoogle(idToken: idToken);
+      final success = await authProvider.loginWithGoogle(idToken: tokenToSend);
+
+      print('Backend response - Success: $success');
+      if (!success) {
+        print('Error from backend: ${authProvider.errorMessage}');
+      }
 
       if (!success && mounted) {
         setState(() {
@@ -124,15 +171,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
                             strokeWidth: 2,
                           ),
                         )
-                      : Image.asset(
-                          'assets/images/google_logo.png',
-                          height: 24,
-                          width: 24,
-                          errorBuilder: (context, error, stackTrace) {
-                            // Fallback to icon if image not found
-                            return const Icon(Icons.login, size: 24);
-                          },
-                        ),
+                      : const Icon(Icons.login, size: 24),
                   label: Text(
                     _isLoading ? 'Signing in...' : 'Sign in with Google',
                     style: const TextStyle(fontSize: 16),

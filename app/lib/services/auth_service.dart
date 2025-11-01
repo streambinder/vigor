@@ -21,6 +21,10 @@ class AuthService {
   Future<ApiResponse<AuthTokens>> loginWithGoogle({
     required String idToken,
   }) async {
+    print(
+        '[AuthService] Sending login request to ${ApiConfig.googleAuthEndpoint}');
+    print('[AuthService] Token length: ${idToken.length}');
+
     final response = await _apiService.post(
       ApiConfig.googleAuthEndpoint,
       body: {
@@ -28,21 +32,39 @@ class AuthService {
       },
     );
 
+    print('[AuthService] Response status: ${response.statusCode}');
+    print('[AuthService] Response success: ${response.isSuccess}');
+    print('[AuthService] Response data: ${response.data}');
+
     if (response.isSuccess && response.data != null) {
       try {
+        print('[AuthService] Parsing tokens from response...');
         final tokens = AuthTokens.fromJson(response.data!);
+        print(
+            '[AuthService] Successfully parsed tokens - Access: ${tokens.accessToken.length} chars, Refresh: ${tokens.refreshToken.length} chars');
 
         // Store tokens securely
-        await _storageService.saveTokens(
-          accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken,
-        );
+        print('[AuthService] Storing tokens securely...');
+        try {
+          await _storageService.saveTokens(
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+          );
+          print('[AuthService] Tokens stored successfully');
+        } catch (e) {
+          print(
+              '[AuthService] WARNING: Failed to store tokens (continuing anyway): $e');
+          // Don't fail the login just because storage failed
+          // The tokens are still in the response and will be passed to getCurrentUser
+        }
 
         return ApiResponse.success(tokens, response.statusCode);
       } catch (e) {
+        print('[AuthService] ERROR: Failed to parse tokens: $e');
         return ApiResponse.error('Failed to parse tokens', response.statusCode);
       }
     } else {
+      print('[AuthService] ERROR: Login failed - ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Google login failed',
         response.statusCode,
@@ -113,12 +135,41 @@ class AuthService {
 
   /// Get current user profile
   /// Requires valid access token
-  Future<ApiResponse<User>> getCurrentUser() async {
-    final accessToken = await _storageService.getAccessToken();
+  /// If [useToken] is provided, it will be used instead of reading from storage
+  /// [_refreshAttempts] tracks recursion depth to prevent infinite loops
+  Future<ApiResponse<User>> getCurrentUser(
+      {String? useToken, int refreshAttempts = 0}) async {
+    print(
+        '[AuthService] Getting current user... (refresh attempts: $refreshAttempts)');
+
+    // Prevent infinite refresh loops
+    if (refreshAttempts >= 3) {
+      print(
+          '[AuthService] ERROR: Max refresh attempts reached, stopping recursion');
+      return ApiResponse.error('Session expired - max refresh attempts', 401);
+    }
+
+    String? accessToken = useToken;
+    if (accessToken == null) {
+      print('[AuthService] No token provided, reading from storage...');
+      try {
+        accessToken = await _storageService.getAccessToken();
+      } catch (e) {
+        print('[AuthService] ERROR reading token from storage: $e');
+        return ApiResponse.error('Failed to read authentication token', 500);
+      }
+    } else {
+      print(
+          '[AuthService] Using provided token, length: ${accessToken.length}');
+    }
 
     if (accessToken == null) {
+      print('[AuthService] ERROR: No access token found');
       return ApiResponse.error('Not authenticated', 401);
     }
+
+    print('[AuthService] Access token ready, length: ${accessToken.length}');
+    print('[AuthService] Fetching user from ${ApiConfig.userEndpoint}');
 
     final response = await _apiService.get(
       ApiConfig.userEndpoint,
@@ -127,24 +178,38 @@ class AuthService {
       },
     );
 
+    print('[AuthService] Get user response status: ${response.statusCode}');
+    print('[AuthService] Get user response success: ${response.isSuccess}');
+    print('[AuthService] Get user response data: ${response.data}');
+
     if (response.isSuccess && response.data != null) {
       try {
+        print('[AuthService] Parsing user data...');
         final user = User.fromJson(response.data!);
+        print(
+            '[AuthService] Successfully parsed user - ID: ${user.id}, Email: ${user.email}');
         return ApiResponse.success(user, response.statusCode);
       } catch (e) {
+        print('[AuthService] ERROR: Failed to parse user data: $e');
         return ApiResponse.error(
             'Failed to parse user data', response.statusCode);
       }
     } else if (response.statusCode == 401) {
+      print('[AuthService] Token expired (401), attempting refresh...');
       // Token expired, try to refresh
       final refreshResponse = await refreshToken();
       if (refreshResponse.isSuccess) {
-        // Retry with new token
-        return getCurrentUser();
+        print(
+            '[AuthService] Token refresh successful, retrying getCurrentUser...');
+        // Retry with new token (don't pass useToken to force reading from storage)
+        // Increment refresh attempts to prevent infinite loops
+        return getCurrentUser(refreshAttempts: refreshAttempts + 1);
       } else {
+        print('[AuthService] ERROR: Token refresh failed');
         return ApiResponse.error('Session expired', 401);
       }
     } else {
+      print('[AuthService] ERROR: Failed to get user - ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to get user',
         response.statusCode,
@@ -256,5 +321,10 @@ class AuthService {
   /// Get stored refresh token
   Future<String?> getRefreshToken() async {
     return await _storageService.getRefreshToken();
+  }
+
+  /// Clear all tokens (used before login to prevent stale token issues)
+  Future<void> clearTokens() async {
+    await _storageService.deleteTokens();
   }
 }
