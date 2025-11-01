@@ -8,7 +8,13 @@ class SecureStorageService {
   final FlutterSecureStorage _storage;
 
   SecureStorageService({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+      : _storage = storage ??
+            const FlutterSecureStorage(
+              webOptions: WebOptions(
+                dbName: 'vigor_secure_storage',
+                publicKey: 'vigor_public_key',
+              ),
+            );
 
   /// Save access token
   Future<void> saveAccessToken(String token) async {
@@ -35,7 +41,15 @@ class SecureStorageService {
 
   /// Get refresh token
   Future<String?> getRefreshToken() async {
-    return await _storage.read(key: _refreshTokenKey);
+    try {
+      print('[SecureStorage] Reading refresh token...');
+      final token = await _storage.read(key: _refreshTokenKey);
+      print('[SecureStorage] Refresh token read - ${token != null ? "found (${token.length} chars)" : "not found"}');
+      return token;
+    } catch (e) {
+      print('[SecureStorage] ERROR reading refresh token: $e');
+      rethrow;
+    }
   }
 
   /// Save both tokens
@@ -66,9 +80,14 @@ class SecureStorageService {
 
   /// Check if user has valid tokens stored
   Future<bool> hasTokens() async {
-    final accessToken = await getAccessToken();
-    final refreshToken = await getRefreshToken();
-    return accessToken != null && refreshToken != null;
+    try {
+      final accessToken = await getAccessToken();
+      final refreshToken = await getRefreshToken();
+      return accessToken != null && refreshToken != null;
+    } catch (e) {
+      print('[SecureStorage] ERROR checking tokens: $e');
+      return false;
+    }
   }
 
   /// Clear all stored data
