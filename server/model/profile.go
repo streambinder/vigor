@@ -11,10 +11,10 @@ import (
 
 // Profile stores user's physical attributes and fitness-related metadata.
 type Profile struct {
-	Birthdate time.Time      `json:"birthdate"`
-	Language  string         `json:"language"` // ISO 639-1:2002
-	Height    float64        `json:"height"`
-	Weight    float64        `json:"weight"`
+	Birthdate time.Time      `json:"birthdate" flutter:"required"`
+	Language  string         `json:"language" flutter:"required"` // ISO 639-1:2002
+	Height    float64        `json:"height" flutter:"required"`
+	Weight    float64        `json:"weight" flutter:"required"`
 	Data      datatypes.JSON `gorm:"type:jsonb" json:"data"`
 
 	CreatedAt time.Time      `json:"-"`
@@ -26,9 +26,9 @@ type Profile struct {
 }
 
 type profileData struct {
-	Goals       []Goal   `json:"goals"`
-	Injuries    []Injury `json:"injuries"`
-	Limitations []string `json:"limitations"`
+	Goals       []Goal   `json:"goals" flutter:"required"`
+	Injuries    []Injury `json:"injuries" flutter:"required"`
+	Limitations []string `json:"limitations" flutter:"required"`
 }
 
 // Goal represents a user's fitness objective with timeline.
