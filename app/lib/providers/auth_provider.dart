@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
+import 'package:logger/logger.dart';
+
 import '../models/user.dart';
+import '../services/app_logger.dart';
 import '../services/auth_service.dart';
 
 /// Authentication state
@@ -13,6 +16,7 @@ enum AuthState {
 /// Authentication provider for managing auth state
 class AuthProvider with ChangeNotifier {
   final AuthService _authService;
+  final Logger _log = AppLogger.getLogger('AuthProvider');
 
   AuthState _state = AuthState.initial;
   User? _currentUser;
@@ -70,47 +74,44 @@ class AuthProvider with ChangeNotifier {
 
     try {
       // Clear any old tokens first to prevent nil UUID issues
-      print('Clearing old tokens before login...');
+      _log.d('Clearing stale tokens before login');
       await _authService.clearTokens();
 
-      print('pre _authService.loginWithGoogle');
       final response = await _authService.loginWithGoogle(
         idToken: idToken,
       );
-      print('post _authService.loginWithGoogle - Success: ${response.isSuccess}');
 
       if (response.isSuccess) {
         // Load user data using the access token we just received
         // This avoids reading from storage immediately after writing (web timing issue)
         final accessToken = response.data?.accessToken;
-        print('Token from response: ${accessToken != null ? "${accessToken.substring(0, 20)}... (${accessToken.length} chars)" : "NULL"}');
-        print('pre _authService.getCurrentUser (using token from response)');
+        _log.d('Using token from response for getCurrentUser (len=${accessToken?.length ?? 0})');
+
         final userResponse = await _authService.getCurrentUser(
           useToken: accessToken,
         );
-        print('post _authService.getCurrentUser - Success: ${userResponse.isSuccess}');
 
         if (userResponse.isSuccess && userResponse.data != null) {
           _currentUser = userResponse.data;
           _setState(AuthState.authenticated);
-          print('Authentication successful! User: ${_currentUser?.email}');
+          _log.i('Login successful: user=${_currentUser?.email}');
           return true;
         } else {
           _errorMessage = 'Failed to load user data: ${userResponse.error}';
           _setState(AuthState.unauthenticated);
-          print('Failed to load user data: ${userResponse.error}');
+          _log.e('Failed to load user after login: ${userResponse.error}');
           return false;
         }
       } else {
         _errorMessage = response.error ?? 'Google login failed';
         _setState(AuthState.unauthenticated);
-        print('Login failed: ${_errorMessage}');
+        _log.e('Login failed: $_errorMessage');
         return false;
       }
     } catch (e) {
       _errorMessage = 'Google login error: ${e.toString()}';
       _setState(AuthState.unauthenticated);
-      print('EXCEPTION during login: $e');
+      _log.e('Exception during login', e);
       return false;
     }
   }
