@@ -1,4 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:logger/logger.dart';
+
+import 'app_logger.dart';
 
 /// Service for securely storing sensitive data like tokens
 class SecureStorageService {
@@ -6,6 +9,7 @@ class SecureStorageService {
   static const String _refreshTokenKey = 'refresh_token';
 
   final FlutterSecureStorage _storage;
+  final Logger _log = AppLogger.getLogger('SecureStorage');
 
   SecureStorageService({FlutterSecureStorage? storage})
       : _storage = storage ??
@@ -24,12 +28,11 @@ class SecureStorageService {
   /// Get access token
   Future<String?> getAccessToken() async {
     try {
-      print('[SecureStorage] Reading access token...');
       final token = await _storage.read(key: _accessTokenKey);
-      print('[SecureStorage] Access token read - ${token != null ? "found (${token.length} chars)" : "not found"}');
+      _log.d('Read access token: ${token != null ? "found (${token.length}b)" : "none"}');
       return token;
     } catch (e) {
-      print('[SecureStorage] ERROR reading access token: $e');
+      _log.e('Failed to read access token', e);
       rethrow;
     }
   }
@@ -42,12 +45,11 @@ class SecureStorageService {
   /// Get refresh token
   Future<String?> getRefreshToken() async {
     try {
-      print('[SecureStorage] Reading refresh token...');
       final token = await _storage.read(key: _refreshTokenKey);
-      print('[SecureStorage] Refresh token read - ${token != null ? "found (${token.length} chars)" : "not found"}');
+      _log.d('Read refresh token: ${token != null ? "found (${token.length}b)" : "none"}');
       return token;
     } catch (e) {
-      print('[SecureStorage] ERROR reading refresh token: $e');
+      _log.e('Failed to read refresh token', e);
       rethrow;
     }
   }
@@ -58,14 +60,13 @@ class SecureStorageService {
     required String refreshToken,
   }) async {
     try {
-      print('[SecureStorage] Saving tokens...');
       await Future.wait([
         saveAccessToken(accessToken),
         saveRefreshToken(refreshToken),
       ]);
-      print('[SecureStorage] Tokens saved successfully');
+      _log.d('Tokens saved (access=${accessToken.length}b refresh=${refreshToken.length}b)');
     } catch (e) {
-      print('[SecureStorage] ERROR saving tokens: $e');
+      _log.e('Failed to save tokens', e);
       rethrow;
     }
   }
@@ -83,9 +84,11 @@ class SecureStorageService {
     try {
       final accessToken = await getAccessToken();
       final refreshToken = await getRefreshToken();
-      return accessToken != null && refreshToken != null;
+      final hasTokens = accessToken != null && refreshToken != null;
+      _log.d('Token check: $hasTokens');
+      return hasTokens;
     } catch (e) {
-      print('[SecureStorage] ERROR checking tokens: $e');
+      _log.e('Failed to check tokens', e);
       return false;
     }
   }
