@@ -9,26 +9,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  # State management
   provider: ^6.1.1
-
-  # HTTP client
   http: ^1.1.0
-
-  # Secure storage for tokens
   flutter_secure_storage: ^9.0.0
-
-  # JSON serialization
   json_annotation: ^4.9.0
-
-  # UUID generation
   uuid: ^4.2.2
-
-  # Google Sign-In
   google_sign_in: ^7.2.0
-
-  # Logging
+  google_sign_in_web: ^1.1.0
   logger: ^2.0.2
 
 dev_dependencies:
