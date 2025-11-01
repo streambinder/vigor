@@ -24,6 +24,8 @@ type Field struct {
 	IsOptional   bool // pointer or omitempty
 	IsCollection bool // slice/array
 	CollectionOf string
+	FlutterTag   string // flutter tag value
+	IsRequired   bool   // flutter:"required"
 }
 
 // Parser parses Go source files
@@ -133,6 +135,13 @@ func (p *Parser) parseField(field *ast.Field) Field {
 					f.IsOptional = true
 				}
 			}
+		}
+
+		// Parse flutter tag
+		flutterTag := tag.Get("flutter")
+		f.FlutterTag = flutterTag
+		if flutterTag == "required" {
+			f.IsRequired = true
 		}
 	}
 
