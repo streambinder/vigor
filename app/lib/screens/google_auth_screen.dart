@@ -1,3 +1,4 @@
+import 'dart:math' show min;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -20,12 +21,12 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
     super.initState();
 
     if (kIsWeb) {
-      // Web configuration - serverClientId not supported
+      // Web configuration - need to specify clientId to get ID tokens
       _googleSignIn = GoogleSignIn(
+        clientId: '559332153701-0auu2d1c1q43u7kf5k12akdllo060flh.apps.googleusercontent.com',
         scopes: [
           'email',
           'profile',
-          'openid',
         ],
       );
     } else {
@@ -69,20 +70,18 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
       final String? accessToken = googleAuth.accessToken;
 
       // Debug logging
-      print('Access Token: ${accessToken != null ? "Present" : "NULL"}');
-      print('ID Token: ${idToken != null ? "Present" : "NULL"}');
-      print('Access Token value: ${accessToken?.substring(0, 20)}...');
-
-      // On web, google_sign_in only provides access tokens, not ID tokens
-      // On mobile, it provides ID tokens
-      String? tokenToSend;
-      if (kIsWeb) {
-        print('Running on Web - using access token');
-        tokenToSend = accessToken;
-      } else {
-        print('Running on Mobile - using ID token');
-        tokenToSend = idToken;
+      print('Access Token: ${accessToken != null ? "Present (${accessToken?.length} chars)" : "NULL"}');
+      print('ID Token: ${idToken != null ? "Present (${idToken?.length} chars)" : "NULL"}');
+      if (accessToken != null) {
+        print('Access Token (first 30): ${accessToken!.substring(0, min(30, accessToken.length))}...');
       }
+      if (idToken != null) {
+        print('ID Token (first 30): ${idToken!.substring(0, min(30, idToken.length))}...');
+      }
+
+      // Prefer ID token over access token (more reliable across platforms)
+      // Fall back to access token for web if ID token unavailable
+      String? tokenToSend = idToken ?? accessToken;
 
       if (tokenToSend == null) {
         setState(() {
@@ -92,8 +91,9 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
         return;
       }
 
+      print('Sending ${tokenToSend == idToken ? "ID token" : "Access token"} to backend (${tokenToSend.length} chars)');
+
       // Send token to backend
-      print('Sending token to backend...');
       final authProvider = context.read<AuthProvider>();
       final success = await authProvider.loginWithGoogle(idToken: tokenToSend);
 
@@ -217,8 +217,8 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
 
   @override
   void dispose() {
-    // Clean up Google Sign-In
-    _googleSignIn.disconnect();
+    // Don't disconnect here - it revokes tokens that might be in use
+    // The user can sign out explicitly if needed
     super.dispose();
   }
 }
