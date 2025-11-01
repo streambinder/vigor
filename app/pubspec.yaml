@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ^3.8.0
 
 dependencies:
   flutter:
@@ -20,13 +20,13 @@ dependencies:
   flutter_secure_storage: ^9.0.0
 
   # JSON serialization
-  json_annotation: ^4.8.1
+  json_annotation: ^4.9.0
 
   # UUID generation
   uuid: ^4.2.2
 
   # Google Sign-In
-  google_sign_in: ^6.2.1
+  google_sign_in: ^7.2.0
 
   # Logging
   logger: ^2.0.2
@@ -34,7 +34,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^6.0.0
   build_runner: ^2.4.7
   json_serializable: ^6.7.1
 
