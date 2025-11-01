@@ -1,4 +1,3 @@
-import 'dart:math' show min;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -29,19 +28,12 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
       _googleSignIn = GoogleSignIn(
         clientId:
             '559332153701-0auu2d1c1q43u7kf5k12akdllo060flh.apps.googleusercontent.com',
-        scopes: [
-          'email',
-          'profile',
-        ],
+        scopes: ['email', 'profile'],
       );
     } else {
       // Mobile configuration - use serverClientId for ID tokens
       _googleSignIn = GoogleSignIn(
-        scopes: [
-          'email',
-          'profile',
-          'openid',
-        ],
+        scopes: ['email', 'profile', 'openid'],
         serverClientId:
             '559332153701-0auu2d1c1q43u7kf5k12akdllo060flh.apps.googleusercontent.com',
       );
@@ -56,6 +48,9 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
       _isLoading = true;
       _errorMessage = null;
     });
+
+    // Capture AuthProvider reference before any async operations
+    final authProvider = context.read<AuthProvider>();
 
     try {
       // Trigger Google sign-in flow
@@ -76,7 +71,8 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
       final String? idToken = googleAuth.idToken;
       final String? accessToken = googleAuth.accessToken;
 
-      _log.d('Google auth received: idToken=${idToken != null ? "${idToken.length}b" : "none"} '
+      _log.d(
+          'Google auth received: idToken=${idToken != null ? "${idToken.length}b" : "none"} '
           'accessToken=${accessToken != null ? "${accessToken.length}b" : "none"}');
 
       // Prefer ID token over access token (more reliable across platforms)
@@ -96,7 +92,6 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
       _log.i('Authenticating with $tokenType token (${tokenToSend.length}b)');
 
       // Send token to backend
-      final authProvider = context.read<AuthProvider>();
       final success = await authProvider.loginWithGoogle(idToken: tokenToSend);
 
       if (success) {
