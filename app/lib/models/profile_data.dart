@@ -9,6 +9,12 @@ part 'profile_data.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class profileData {
+  // Fields marked as required in the backend model
+  static const List<String> requiredFields = [
+    'goals',
+    'injuries',
+    'limitations'
+  ];
   @JsonKey(name: 'goals')
   final List<Goal> goals;
   @JsonKey(name: 'injuries')

@@ -7,6 +7,13 @@ part 'profile.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Profile {
+  // Fields marked as required in the backend model
+  static const List<String> requiredFields = [
+    'birthdate',
+    'language',
+    'height',
+    'weight'
+  ];
   @JsonKey(name: 'birthdate')
   final DateTime birthdate;
   @JsonKey(name: 'language')
