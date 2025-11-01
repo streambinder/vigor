@@ -32,7 +32,7 @@ class SecureStorageService {
       _log.d('Read access token: ${token != null ? "found (${token.length}b)" : "none"}');
       return token;
     } catch (e) {
-      _log.e('Failed to read access token', e);
+      _log.e('Failed to read access token', error: e);
       rethrow;
     }
   }
@@ -49,7 +49,7 @@ class SecureStorageService {
       _log.d('Read refresh token: ${token != null ? "found (${token.length}b)" : "none"}');
       return token;
     } catch (e) {
-      _log.e('Failed to read refresh token', e);
+      _log.e('Failed to read refresh token', error: e);
       rethrow;
     }
   }
@@ -66,7 +66,7 @@ class SecureStorageService {
       ]);
       _log.d('Tokens saved (access=${accessToken.length}b refresh=${refreshToken.length}b)');
     } catch (e) {
-      _log.e('Failed to save tokens', e);
+      _log.e('Failed to save tokens', error: e);
       rethrow;
     }
   }
@@ -88,7 +88,7 @@ class SecureStorageService {
       _log.d('Token check: $hasTokens');
       return hasTokens;
     } catch (e) {
-      _log.e('Failed to check tokens', e);
+      _log.e('Failed to check tokens', error: e);
       return false;
     }
   }

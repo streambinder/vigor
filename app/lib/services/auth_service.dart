@@ -49,14 +49,14 @@ class AuthService {
           );
           _log.d('Tokens stored successfully');
         } catch (e) {
-          _log.w('Token storage failed, continuing with in-memory tokens', e);
+          _log.w('Token storage failed, continuing with in-memory tokens', error: e);
           // Don't fail the login just because storage failed
           // The tokens are still in the response and will be passed to getCurrentUser
         }
 
         return ApiResponse.success(tokens, response.statusCode);
       } catch (e) {
-        _log.e('Failed to parse auth tokens', e);
+        _log.e('Failed to parse auth tokens', error: e);
         return ApiResponse.error('Failed to parse tokens', response.statusCode);
       }
     } else {
@@ -149,7 +149,7 @@ class AuthService {
         accessToken = await _storageService.getAccessToken();
         _log.d('Token retrieved from storage (len=${accessToken?.length ?? 0})');
       } catch (e) {
-        _log.e('Failed to read token from storage', e);
+        _log.e('Failed to read token from storage', error: e);
         return ApiResponse.error('Failed to read authentication token', 500);
       }
     } else {
@@ -178,7 +178,7 @@ class AuthService {
         _log.i('User retrieved: id=${user.id} email=${user.email}');
         return ApiResponse.success(user, response.statusCode);
       } catch (e) {
-        _log.e('Failed to parse user data', e);
+        _log.e('Failed to parse user data', error: e);
         return ApiResponse.error(
             'Failed to parse user data', response.statusCode);
       }
@@ -274,12 +274,12 @@ class AuthService {
     try {
       accessToken = await _storageService.getAccessToken();
     } catch (e) {
-      _log.e('Failed to read token for account deletion', e);
+      _log.e('Failed to read token for account deletion', error: e);
       // If we can't read the token, clear local storage and return error
       try {
         await _storageService.clearAll();
       } catch (clearError) {
-        _log.w('Failed to clear storage after token read error', clearError);
+        _log.w('Failed to clear storage after token read error', error: clearError);
       }
       return ApiResponse.error(
         'Storage error. Please log out and try again.',
@@ -305,7 +305,7 @@ class AuthService {
         await _storageService.deleteTokens();
         _log.d('Tokens cleared after account deletion');
       } catch (e) {
-        _log.w('Failed to clear tokens after deletion', e);
+        _log.w('Failed to clear tokens after deletion', error: e);
         // Still return success since server deletion succeeded
       }
       final message = response.data?['message'] as String? ?? 'Account deleted';

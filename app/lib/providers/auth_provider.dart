@@ -111,7 +111,7 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       _errorMessage = 'Google login error: ${e.toString()}';
       _setState(AuthState.unauthenticated);
-      _log.e('Exception during login', e);
+      _log.e('Exception during login', error: e);
       return false;
     }
   }
