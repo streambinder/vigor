@@ -28,6 +28,9 @@ dependencies:
   # Google Sign-In
   google_sign_in: ^6.2.1
 
+  # Logging
+  logger: ^2.0.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
