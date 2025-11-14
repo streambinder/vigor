@@ -27,7 +27,7 @@ type EmbeddingRequest struct {
 // EmbeddingResponse represents the response from llama.cpp embedding API.
 type EmbeddingResponse struct {
 	Index     int         `json:"index"`
-	Embedding [][]float64 `json:"embedding"`
+	Embedding [][]float32 `json:"embedding"`
 }
 
 func init() {
@@ -41,7 +41,7 @@ func init() {
 	}
 }
 
-func (provider *LlamaCpp) vectorize(sequence string) ([]float64, error) {
+func (provider *LlamaCpp) vectorize(sequence string) ([]float32, error) {
 	start := time.Now()
 
 	jsonPayload, err := json.Marshal(EmbeddingRequest{Content: sequence})

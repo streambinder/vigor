@@ -10,11 +10,11 @@ require (
 	github.com/rs/zerolog v1.34.0
 	github.com/streambinder/vigor/knowledge v0.0.0-00010101000000-000000000000
 	github.com/valyala/quicktemplate v1.8.0
-	golang.org/x/crypto v0.43.0
+	golang.org/x/crypto v0.44.0
 	google.golang.org/api v0.254.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/driver/sqlite v1.6.0
-	gorm.io/gorm v1.31.0
+	gorm.io/gorm v1.31.1
 )
 
 require (
@@ -34,6 +34,7 @@ require (
 	github.com/gopherjs/gopherjs v1.12.80 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
+	github.com/pgvector/pgvector-go v0.3.0 // indirect
 	github.com/smartystreets/assertions v1.2.0 // indirect
 	github.com/smartystreets/goconvey v1.7.2 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
@@ -66,12 +67,12 @@ require (
 	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.68.0 // indirect
-	golang.org/x/sync v0.17.0 // indirect
-	golang.org/x/sys v0.37.0 // indirect
-	golang.org/x/text v0.30.0 // indirect
+	golang.org/x/sync v0.18.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
 	gorm.io/datatypes v1.2.7
 )
 
-replace github.com/streambinder/vigor/knowledge => ../knowledge
-
 exclude cloud.google.com/go v0.67.0
+
+replace github.com/streambinder/vigor/knowledge => ../knowledge

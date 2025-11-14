@@ -10,7 +10,7 @@ var providers = []EmbeddingModel{}
 
 // EmbeddingModel defines the interface for language model providers.
 type EmbeddingModel interface {
-	vectorize(string) ([]float64, error)
+	vectorize(string) ([]float32, error)
 }
 
 func getProvider() EmbeddingModel {
@@ -22,7 +22,7 @@ func getProvider() EmbeddingModel {
 }
 
 // GenVector generates an embedding vector for a given payload
-func GenVector(sequence string) ([]float64, error) {
+func GenVector(sequence string) ([]float32, error) {
 	embedding, err := getProvider().vectorize(sequence)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate embedding: %s", err)
