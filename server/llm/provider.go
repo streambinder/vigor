@@ -10,7 +10,7 @@ import (
 	"github.com/streambinder/vigor/model"
 )
 
-var openLLMs = []LLM{}
+var providers = []LLM{}
 
 // LLM defines the interface for language model providers.
 type LLM interface {
@@ -69,11 +69,11 @@ func getLLM(_ *model.Profile) LLM {
 	// eventually we'll be able to discern what LLM
 	// to use for a given profile, if they have specific
 	// settings, e.g. a personal token
-	if len(openLLMs) == 0 {
+	if len(providers) == 0 {
 		log.Fatal().Msg("No LLMs available")
 	}
 
-	return openLLMs[0]
+	return providers[0]
 }
 
 // GenTraining generates a personalized training plan using an LLM.

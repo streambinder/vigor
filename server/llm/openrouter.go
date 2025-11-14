@@ -33,10 +33,7 @@ func init() {
 		model = defaultOpenRouterModel
 	}
 
-	openLLMs = append(openLLMs, &OpenRouter{
-		apiKey: apiKey,
-		model:  model,
-	})
+	providers = append(providers, &OpenRouter{apiKey: apiKey, model: model})
 }
 
 func (llm *OpenRouter) query(system, user string, temperature float64, maxTokens int) ([]byte, error) {

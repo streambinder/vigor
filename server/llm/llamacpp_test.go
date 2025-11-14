@@ -257,26 +257,26 @@ func TestLlamaCppQuery_InvalidContentJSON(t *testing.T) {
 }
 
 func TestLlamaCppInit_WithTiers(t *testing.T) {
-	// Save original openLLMs
-	originalOpenLLMs := openLLMs
-	defer func() { openLLMs = originalOpenLLMs }()
+	// Save original providers
+	originalProviders := providers
+	defer func() { providers = originalProviders }()
 
-	openLLMs = []LLM{}
+	providers = []LLM{}
 
 	// Simulate init() behavior with tiers configured
 	tiers := "http://tier1:8080,http://tier2:8080,http://tier3:8080"
 	if tiers != "" {
 		tierList := []string{"http://tier1:8080", "http://tier2:8080", "http://tier3:8080"}
 		for _, tier := range tierList {
-			openLLMs = append(openLLMs, &LlamaCpp{uri: tier})
+			providers = append(providers, &LlamaCpp{uri: tier})
 		}
 	}
 
-	if len(openLLMs) != 3 {
-		t.Errorf("Expected 3 LLMs, got %d", len(openLLMs))
+	if len(providers) != 3 {
+		t.Errorf("Expected 3 LLMs, got %d", len(providers))
 	}
 
-	for i, llm := range openLLMs {
+	for i, llm := range providers {
 		lc, ok := llm.(*LlamaCpp)
 		if !ok {
 			t.Fatalf("Expected LlamaCpp LLM at index %d", i)
@@ -289,21 +289,21 @@ func TestLlamaCppInit_WithTiers(t *testing.T) {
 }
 
 func TestLlamaCppInit_WithoutTiers(t *testing.T) {
-	// Save original openLLMs
-	originalOpenLLMs := openLLMs
-	defer func() { openLLMs = originalOpenLLMs }()
+	// Save original providers
+	originalProviders := providers
+	defer func() { providers = originalProviders }()
 
-	openLLMs = []LLM{}
+	providers = []LLM{}
 
 	// Simulate init() behavior without tiers
 	tiers := ""
 	if tiers != "" {
 		for _, tier := range []string{} {
-			openLLMs = append(openLLMs, &LlamaCpp{uri: tier})
+			providers = append(providers, &LlamaCpp{uri: tier})
 		}
 	}
 
-	if len(openLLMs) != 0 {
-		t.Errorf("Expected 0 LLMs when tiers is not set, got %d", len(openLLMs))
+	if len(providers) != 0 {
+		t.Errorf("Expected 0 LLMs when tiers is not set, got %d", len(providers))
 	}
 }

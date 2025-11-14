@@ -266,11 +266,11 @@ func TestOpenRouterQuery_InvalidContentJSON(t *testing.T) {
 }
 
 func TestOpenRouterInit_WithAPIKey(t *testing.T) {
-	// Save original openLLMs
-	originalOpenLLMs := openLLMs
-	defer func() { openLLMs = originalOpenLLMs }()
+	// Save original providers
+	originalProviders := providers
+	defer func() { providers = originalProviders }()
 
-	openLLMs = []LLM{}
+	providers = []LLM{}
 
 	// Simulate init() behavior with API key and custom model
 	apiKey := "test-api-key"
@@ -279,17 +279,17 @@ func TestOpenRouterInit_WithAPIKey(t *testing.T) {
 		if model == "" {
 			model = defaultOpenRouterModel
 		}
-		openLLMs = append(openLLMs, &OpenRouter{
+		providers = append(providers, &OpenRouter{
 			apiKey: apiKey,
 			model:  model,
 		})
 	}
 
-	if len(openLLMs) != 1 {
-		t.Errorf("Expected 1 LLM, got %d", len(openLLMs))
+	if len(providers) != 1 {
+		t.Errorf("Expected 1 LLM, got %d", len(providers))
 	}
 
-	or, ok := openLLMs[0].(*OpenRouter)
+	or, ok := providers[0].(*OpenRouter)
 	if !ok {
 		t.Fatal("Expected OpenRouter LLM")
 	}
@@ -304,11 +304,11 @@ func TestOpenRouterInit_WithAPIKey(t *testing.T) {
 }
 
 func TestOpenRouterInit_WithoutAPIKey(t *testing.T) {
-	// Save original openLLMs
-	originalOpenLLMs := openLLMs
-	defer func() { openLLMs = originalOpenLLMs }()
+	// Save original providers
+	originalProviders := providers
+	defer func() { providers = originalProviders }()
 
-	openLLMs = []LLM{}
+	providers = []LLM{}
 
 	// Simulate init() behavior without API key
 	apiKey := ""
@@ -317,23 +317,23 @@ func TestOpenRouterInit_WithoutAPIKey(t *testing.T) {
 		if model == "" {
 			model = defaultOpenRouterModel
 		}
-		openLLMs = append(openLLMs, &OpenRouter{
+		providers = append(providers, &OpenRouter{
 			apiKey: apiKey,
 			model:  model,
 		})
 	}
 
-	if len(openLLMs) != 0 {
-		t.Errorf("Expected 0 LLMs when API key is not set, got %d", len(openLLMs))
+	if len(providers) != 0 {
+		t.Errorf("Expected 0 LLMs when API key is not set, got %d", len(providers))
 	}
 }
 
 func TestOpenRouterInit_DefaultModel(t *testing.T) {
-	// Save original openLLMs
-	originalOpenLLMs := openLLMs
-	defer func() { openLLMs = originalOpenLLMs }()
+	// Save original providers
+	originalProviders := providers
+	defer func() { providers = originalProviders }()
 
-	openLLMs = []LLM{}
+	providers = []LLM{}
 
 	// Directly add an OpenRouter with test values to simulate init behavior
 	apiKey := "test-api-key"
@@ -341,16 +341,16 @@ func TestOpenRouterInit_DefaultModel(t *testing.T) {
 	if model == "" {
 		model = defaultOpenRouterModel
 	}
-	openLLMs = append(openLLMs, &OpenRouter{
+	providers = append(providers, &OpenRouter{
 		apiKey: apiKey,
 		model:  model,
 	})
 
-	if len(openLLMs) != 1 {
-		t.Errorf("Expected 1 LLM, got %d", len(openLLMs))
+	if len(providers) != 1 {
+		t.Errorf("Expected 1 LLM, got %d", len(providers))
 	}
 
-	or, ok := openLLMs[0].(*OpenRouter)
+	or, ok := providers[0].(*OpenRouter)
 	if !ok {
 		t.Fatal("Expected OpenRouter LLM")
 	}

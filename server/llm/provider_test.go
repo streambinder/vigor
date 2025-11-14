@@ -34,11 +34,11 @@ func (m *mockLLM) query(system, user string, temperature float64, maxTokens int)
 }
 
 func TestGetLLM_EmptyList(t *testing.T) {
-	// Save original openLLMs and restore after test
-	originalOpenLLMs := openLLMs
-	defer func() { openLLMs = originalOpenLLMs }()
+	// Save original llms and restore after test
+	originalProviders := providers
+	defer func() { providers = originalProviders }()
 
-	openLLMs = []LLM{}
+	providers = []LLM{}
 
 	// Mock os.Exit to prevent actual exit
 	exitCalled := false
@@ -62,24 +62,24 @@ func TestGetLLM_EmptyList(t *testing.T) {
 }
 
 func TestGetLLM_WithLLMs(t *testing.T) {
-	// Save original openLLMs and restore after test
-	originalOpenLLMs := openLLMs
-	defer func() { openLLMs = originalOpenLLMs }()
+	// Save original providers and restore after test
+	originalProviders := providers
+	defer func() { providers = originalProviders }()
 
 	mock := &mockLLM{}
-	openLLMs = []LLM{mock}
+	providers = []LLM{mock}
 
 	result := getLLM(&model.Profile{})
 
 	if result != mock {
-		t.Error("Expected getLLM to return the first LLM from openLLMs")
+		t.Error("Expected getLLM to return the first LLM from llms")
 	}
 }
 
 func TestGenTraining_Success(t *testing.T) {
-	// Save original openLLMs and restore after test
-	originalOpenLLMs := openLLMs
-	defer func() { openLLMs = originalOpenLLMs }()
+	// Save original llms and restore after test
+	originalProviders := providers
+	defer func() { providers = originalProviders }()
 
 	// Create a valid training response
 	training := &model.Training{
@@ -102,7 +102,7 @@ func TestGenTraining_Success(t *testing.T) {
 			return trainingJSON, nil
 		},
 	}
-	openLLMs = []LLM{mock}
+	providers = []LLM{mock}
 
 	profile := &model.Profile{
 		Birthdate: time.Now().AddDate(-30, 0, 0),
@@ -131,9 +131,9 @@ func TestGenTraining_Success(t *testing.T) {
 }
 
 func TestGenTraining_QueryError(t *testing.T) {
-	// Save original openLLMs and restore after test
-	originalOpenLLMs := openLLMs
-	defer func() { openLLMs = originalOpenLLMs }()
+	// Save original llms and restore after test
+	originalProviders := providers
+	defer func() { providers = originalProviders }()
 
 	expectedErr := errors.New("query error")
 	mock := &mockLLM{
@@ -141,7 +141,7 @@ func TestGenTraining_QueryError(t *testing.T) {
 			return nil, expectedErr
 		},
 	}
-	openLLMs = []LLM{mock}
+	providers = []LLM{mock}
 
 	profile := &model.Profile{
 		Birthdate: time.Now().AddDate(-30, 0, 0),
@@ -170,16 +170,16 @@ func TestGenTraining_QueryError(t *testing.T) {
 }
 
 func TestGenTraining_InvalidJSON(t *testing.T) {
-	// Save original openLLMs and restore after test
-	originalOpenLLMs := openLLMs
-	defer func() { openLLMs = originalOpenLLMs }()
+	// Save original llms and restore after test
+	originalProviders := providers
+	defer func() { providers = originalProviders }()
 
 	mock := &mockLLM{
 		queryFunc: func(_, _ string, _ float64, _ int) ([]byte, error) {
 			return []byte("invalid json"), nil
 		},
 	}
-	openLLMs = []LLM{mock}
+	providers = []LLM{mock}
 
 	profile := &model.Profile{
 		Birthdate: time.Now().AddDate(-30, 0, 0),
@@ -204,9 +204,9 @@ func TestGenTraining_InvalidJSON(t *testing.T) {
 }
 
 func TestGenTraining_CallsPromptCorrectly(t *testing.T) {
-	// Save original openLLMs and restore after test
-	originalOpenLLMs := openLLMs
-	defer func() { openLLMs = originalOpenLLMs }()
+	// Save original llms and restore after test
+	originalProviders := providers
+	defer func() { providers = originalProviders }()
 
 	var capturedSystem, capturedUser string
 	training := &model.Training{
@@ -231,7 +231,7 @@ func TestGenTraining_CallsPromptCorrectly(t *testing.T) {
 			return trainingJSON, nil
 		},
 	}
-	openLLMs = []LLM{mock}
+	providers = []LLM{mock}
 
 	profile := &model.Profile{
 		Birthdate: time.Now().AddDate(-30, 0, 0),

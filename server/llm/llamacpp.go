@@ -26,7 +26,7 @@ func init() {
 	}
 
 	for tier := range strings.SplitSeq(tiers, ",") {
-		openLLMs = append(openLLMs, &LlamaCpp{uri: tier})
+		providers = append(providers, &LlamaCpp{uri: tier})
 	}
 }
 
