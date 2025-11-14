@@ -11,11 +11,11 @@ import (
 type Exercise struct {
 	ID               string         `gorm:"type:varchar(255);primaryKey" json:"id"`
 	Name             string         `gorm:"not null;uniqueIndex:idx_exercise_name" json:"name"`
-	Reference        string         `json:"reference"`
 	Equipment        pq.StringArray `gorm:"type:text[]" json:"equipment"`
-	BodyParts        pq.StringArray `gorm:"type:text[]" json:"body_parts"`
 	Muscles          pq.StringArray `gorm:"type:text[]" json:"muscles"`
 	SecondaryMuscles pq.StringArray `gorm:"type:text[]" json:"secondary_muscles"`
+	BodyParts        pq.StringArray `gorm:"type:text[]" json:"body_parts"`
+	Reference        string         `json:"reference"`
 	Instructions     pq.StringArray `gorm:"type:text[]" json:"instructions"`
 
 	CreatedAt time.Time      `json:"-"`
