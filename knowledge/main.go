@@ -7,7 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/pgvector/pgvector-go"
 	"github.com/streambinder/vigor/knowledge/model"
+	"github.com/streambinder/vigor/server/llm/embedding"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -54,6 +56,19 @@ func main() {
 	for _, exercise := range exercises {
 		if err := gormDB.FirstOrCreate(&exercise, model.Exercise{ID: exercise.ID}).Error; err != nil {
 			log.Fatalf("Failed to insert exercise: %s", err)
+		}
+
+		embeddingText := exercise.EmbeddingText()
+		vector, err := embedding.GenVector(embeddingText)
+		if err != nil {
+			log.Fatalf("Failed to generate embedding: %s", err)
+		}
+
+		if err := gormDB.FirstOrCreate(
+			&model.ExerciseEmbedding{ExerciseID: exercise.ID, Text: embeddingText, Embedding: pgvector.NewVector(vector)},
+			model.ExerciseEmbedding{ExerciseID: exercise.ID},
+		).Error; err != nil {
+			log.Fatalf("Failed to insert embedding: %s", err)
 		}
 	}
 }
