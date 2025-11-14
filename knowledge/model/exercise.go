@@ -7,7 +7,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Exercise represents a physical exercise with associated metadata.
 type Exercise struct {
 	ID               string         `gorm:"type:varchar(255);primaryKey" json:"id"`
 	Name             string         `gorm:"not null;uniqueIndex:idx_exercise_name" json:"name"`

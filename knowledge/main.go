@@ -34,7 +34,10 @@ func main() {
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 
-	if err := gormDB.AutoMigrate(&model.Exercise{}); err != nil {
+	if err := gormDB.AutoMigrate(
+		&model.Exercise{},
+		&model.ExerciseEmbedding{},
+	); err != nil {
 		log.Fatalf("Failed to migrate database: %s", err)
 	}
 
