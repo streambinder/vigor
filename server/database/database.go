@@ -12,16 +12,16 @@ import (
 // DB is the main application database connection.
 var DB *gorm.DB
 
-// ExerciseDB is the dedicated database connection for exercise data.
-var ExerciseDB *gorm.DB
+// Knowledge is the dedicated database connection for exercise data.
+var Knowledge *gorm.DB
 
 func init() {
 	var err error
 
-	exerciseDBURL := os.Getenv("EXERCISE_DATABASE_URL")
-	ExerciseDB, err = gorm.Open(postgres.Open(exerciseDBURL), &gorm.Config{})
+	knowledgeURL := os.Getenv("KNOWLEDGE_URL")
+	Knowledge, err = gorm.Open(postgres.Open(knowledgeURL), &gorm.Config{})
 	if err != nil {
-		log.Fatal().Err(err).Str("database_url", exerciseDBURL).Msg("Failed to connect to exercise database")
+		log.Fatal().Err(err).Str("knowledge_url", knowledgeURL).Msg("Failed to connect to exercise database")
 	}
 
 	dbURL := os.Getenv("DATABASE_URL")

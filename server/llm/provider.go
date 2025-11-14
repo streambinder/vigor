@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/rs/zerolog/log"
-	exercisedb "github.com/streambinder/vigor/exercisedb/model"
+	knowledge "github.com/streambinder/vigor/knowledge/model"
 	"github.com/streambinder/vigor/llm/prompt"
 	"github.com/streambinder/vigor/model"
 )
@@ -77,7 +77,7 @@ func getLLM(_ *model.Profile) LLM {
 }
 
 // GenTraining generates a personalized training plan using an LLM.
-func GenTraining(profile *model.Profile, exercises []exercisedb.Exercise, duration int) (*model.Training, error) {
+func GenTraining(profile *model.Profile, exercises []knowledge.Exercise, duration int) (*model.Training, error) {
 	response, err := getLLM(profile).query(
 		prompt.System(profile, model.TrainingSchema),
 		prompt.GenTraining(profile, exercises, duration),

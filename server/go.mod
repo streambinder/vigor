@@ -8,7 +8,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/lib/pq v1.10.9
 	github.com/rs/zerolog v1.34.0
-	github.com/streambinder/vigor/exercisedb v0.0.0-00010101000000-000000000000
+	github.com/streambinder/vigor/knowledge v0.0.0-00010101000000-000000000000
 	github.com/valyala/quicktemplate v1.8.0
 	golang.org/x/crypto v0.43.0
 	google.golang.org/api v0.254.0
@@ -72,6 +72,6 @@ require (
 	gorm.io/datatypes v1.2.7
 )
 
-replace github.com/streambinder/vigor/exercisedb => ../exercisedb
+replace github.com/streambinder/vigor/knowledge => ../knowledge
 
 exclude cloud.google.com/go v0.67.0

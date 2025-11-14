@@ -10,7 +10,7 @@ import (
 	"github.com/bytedance/mockey"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
-	exercisedb "github.com/streambinder/vigor/exercisedb/model"
+	knowledge "github.com/streambinder/vigor/knowledge/model"
 	"github.com/streambinder/vigor/llm/prompt"
 	"github.com/streambinder/vigor/model"
 	"gorm.io/datatypes"
@@ -112,7 +112,7 @@ func TestGenTraining_Success(t *testing.T) {
 		Data:      datatypes.JSON([]byte(`{}`)),
 	}
 
-	exercises := []exercisedb.Exercise{
+	exercises := []knowledge.Exercise{
 		{ID: uuid.New().String(), Name: "Dumbbell Press"},
 	}
 
@@ -151,7 +151,7 @@ func TestGenTraining_QueryError(t *testing.T) {
 		Data:      datatypes.JSON([]byte(`{}`)),
 	}
 
-	exercises := []exercisedb.Exercise{
+	exercises := []knowledge.Exercise{
 		{ID: uuid.New().String(), Name: "Dumbbell Press"},
 	}
 
@@ -189,7 +189,7 @@ func TestGenTraining_InvalidJSON(t *testing.T) {
 		Data:      datatypes.JSON([]byte(`{}`)),
 	}
 
-	exercises := []exercisedb.Exercise{
+	exercises := []knowledge.Exercise{
 		{ID: "dumbbell-press", Name: "Dumbbell Press"},
 	}
 
@@ -241,7 +241,7 @@ func TestGenTraining_CallsPromptCorrectly(t *testing.T) {
 		Data:      datatypes.JSON([]byte(`{}`)),
 	}
 
-	exercises := []exercisedb.Exercise{
+	exercises := []knowledge.Exercise{
 		{ID: "mat-stretch", Name: "Mat Stretch"},
 		{ID: "kettlebell-swing", Name: "Kettlebell Swing"},
 	}

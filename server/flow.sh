@@ -9,7 +9,7 @@ alias curl="curl -s -H \"Content-Type: application/json\""
 login='{"email":"user@ema.il","password":"pass"}'
 
 curl -X POST "${HOST}"/register -d "${login}" | jq || true
-TOKENS=$(curl -X POST "${HOST}"/login -d '{"email":"user@ema.il","password":"pass"}')
+TOKENS=$(curl -X POST "${HOST}"/login -d "${login}")
 echo "$TOKENS" | jq
 ACCESS=$(echo "$TOKENS" | jq -r .access_token)
 REFRESH=$(echo "$TOKENS" | jq -r .refresh_token)

@@ -8,7 +8,7 @@ package prompt
 import "github.com/streambinder/vigor/model"
 
 //line llm/prompt/gen_training.qtpl:4
-import exercisedb "github.com/streambinder/vigor/exercisedb/model"
+import knowledge "github.com/streambinder/vigor/knowledge/model"
 
 //line llm/prompt/gen_training.qtpl:6
 import (
@@ -24,7 +24,7 @@ var (
 )
 
 //line llm/prompt/gen_training.qtpl:6
-func StreamGenTraining(qw422016 *qt422016.Writer, profile *model.Profile, exercises []exercisedb.Exercise, duration int) {
+func StreamGenTraining(qw422016 *qt422016.Writer, profile *model.Profile, exercises []knowledge.Exercise, duration int) {
 //line llm/prompt/gen_training.qtpl:7
 	qw422016.N().S(` Generate `)
 //line llm/prompt/gen_training.qtpl:9
@@ -49,7 +49,7 @@ func StreamGenTraining(qw422016 *qt422016.Writer, profile *model.Profile, exerci
 }
 
 //line llm/prompt/gen_training.qtpl:12
-func WriteGenTraining(qq422016 qtio422016.Writer, profile *model.Profile, exercises []exercisedb.Exercise, duration int) {
+func WriteGenTraining(qq422016 qtio422016.Writer, profile *model.Profile, exercises []knowledge.Exercise, duration int) {
 //line llm/prompt/gen_training.qtpl:12
 	qw422016 := qt422016.AcquireWriter(qq422016)
 //line llm/prompt/gen_training.qtpl:12
@@ -60,7 +60,7 @@ func WriteGenTraining(qq422016 qtio422016.Writer, profile *model.Profile, exerci
 }
 
 //line llm/prompt/gen_training.qtpl:12
-func GenTraining(profile *model.Profile, exercises []exercisedb.Exercise, duration int) string {
+func GenTraining(profile *model.Profile, exercises []knowledge.Exercise, duration int) string {
 //line llm/prompt/gen_training.qtpl:12
 	qb422016 := qt422016.AcquireByteBuffer()
 //line llm/prompt/gen_training.qtpl:12

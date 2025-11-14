@@ -12,7 +12,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/streambinder/vigor/exercisedb/model"
+	"github.com/streambinder/vigor/knowledge/model"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"gorm.io/driver/postgres"

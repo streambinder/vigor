@@ -10,8 +10,8 @@ import (
 	"github.com/lib/pq"
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/database"
-	exercisedb "github.com/streambinder/vigor/exercisedb/model"
 	"github.com/streambinder/vigor/handler/middleware"
+	knowledge "github.com/streambinder/vigor/knowledge/model"
 	"github.com/streambinder/vigor/llm"
 	"github.com/streambinder/vigor/model"
 )
@@ -24,9 +24,9 @@ type TrainingRequest struct {
 }
 
 // queryExercises queries the exercise database for exercises matching the given equipment.
-func queryExercises(equipment []string) ([]exercisedb.Exercise, error) {
-	exercises := []exercisedb.Exercise{}
-	err := database.ExerciseDB.Where("equipment <@ ? OR equipment = '{}' OR equipment IS NULL", pq.StringArray(equipment)).Find(&exercises).Error
+func queryExercises(equipment []string) ([]knowledge.Exercise, error) {
+	exercises := []knowledge.Exercise{}
+	err := database.Knowledge.Where("equipment <@ ? OR equipment = '{}' OR equipment IS NULL", pq.StringArray(equipment)).Find(&exercises).Error
 	return exercises, err
 }
 
@@ -92,8 +92,8 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 		for j := range training.Routines[i].Blocks {
 			for k := range training.Routines[i].Blocks[j].Activities {
 				activity := &training.Routines[i].Blocks[j].Activities[k]
-				var exercise exercisedb.Exercise
-				if err := database.ExerciseDB.First(&exercise, "id = ?", activity.Name).Error; err == nil {
+				var exercise knowledge.Exercise
+				if err := database.Knowledge.First(&exercise, "id = ?", activity.Name).Error; err == nil {
 					if exerciseJSON, err := json.Marshal(exercise); err == nil {
 						activity.Detail = exerciseJSON
 						activity.Name = exercise.Name

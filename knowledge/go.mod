@@ -1,4 +1,4 @@
-module github.com/streambinder/vigor/exercisedb
+module github.com/streambinder/vigor/knowledge
 
 go 1.24.7
 

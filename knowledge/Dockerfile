@@ -64,7 +64,7 @@ ENV POSTGRES_DB=db
 ENV POSTGRES_USER=user
 
 # Copy the generated SQL dump from data-builder
-COPY --from=data-builder /build/exercisedb-init.sql /docker-entrypoint-initdb.d/
+COPY --from=data-builder /build/init.sql /docker-entrypoint-initdb.d/
 
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
