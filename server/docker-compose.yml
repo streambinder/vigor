@@ -24,6 +24,9 @@ services:
       - 5433:5432
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -q -U postgres -d db"]
+  # llama-server --embeddings -hf Mungert/all-MiniLM-L6-v2-GGUF --port 8001
+  # embedding-model:
+  #   image: ghcr.io/ggml-org/llama.cpp:server
   # llama-server -hf ggml-org/gpt-oss-20b-GGUF  --ctx-size 0 --jinja -ub 2048 -b 2048 --port 8000
   # llama-server -hf bartowski/Llama-3.2-1B-Instruct-GGUF --ctx-size 0 --jinja -ub 2048 -b 2048 --port 8000
   # llm:
