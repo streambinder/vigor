@@ -15,7 +15,7 @@ import (
 	knowledge "github.com/streambinder/vigor/knowledge/model"
 	"github.com/streambinder/vigor/llm"
 	"github.com/streambinder/vigor/llm/embedding"
-	"github.com/streambinder/vigor/llm/embedding/rag"
+	"github.com/streambinder/vigor/llm/rag"
 	"github.com/streambinder/vigor/model"
 )
 

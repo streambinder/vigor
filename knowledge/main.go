@@ -10,7 +10,7 @@ import (
 	"github.com/pgvector/pgvector-go"
 	"github.com/streambinder/vigor/knowledge/model"
 	"github.com/streambinder/vigor/server/llm/embedding"
-	"github.com/streambinder/vigor/server/llm/embedding/rag"
+	"github.com/streambinder/vigor/server/llm/rag"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
