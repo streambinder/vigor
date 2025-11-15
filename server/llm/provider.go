@@ -63,7 +63,7 @@ type ChatCompletionResponse struct {
 	Choices []ChatCompletionChoice `json:"choices"`
 }
 
-func getLLM(_ *model.Profile) LLM {
+func getLLM(_ model.Profile) LLM {
 	// this is a placeholder for now
 	// eventually we'll be able to discern what LLM
 	// to use for a given profile, if they have specific
@@ -76,10 +76,10 @@ func getLLM(_ *model.Profile) LLM {
 }
 
 // GenTraining generates a personalized training plan using an LLM.
-func GenTraining(profile *model.Profile, exercises []model.Exercise, duration int) (*model.Training, error) {
+func GenTraining(profile model.Profile, exercises []model.Exercise, duration int, recentTrainings []model.Training) (*model.Training, error) {
 	response, err := getLLM(profile).query(
 		prompt.System(profile, model.TrainingSchema),
-		prompt.GenTraining(profile, exercises, duration),
+		prompt.GenTraining(profile, exercises, duration, recentTrainings),
 		0.35,  // Balanced: structured output + workout variety
 		10000, // Sufficient for complex multi-routine workouts
 	)

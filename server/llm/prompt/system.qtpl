@@ -2,17 +2,43 @@
 
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func System(profile *model.Profile, schema string) -%}
+{% func System(profile model.Profile, schema string) -%}
 {% collapsespace %}
 
 Personal trainer. Create workouts to achieve fitness goals.
+Profile: age {%d profile.Age() %}, {%f profile.Height %}cm, {%f profile.Weight %}kg.
 
-{% if len(profile.Goals()) > 0 %}Fitness goals: {% for i, goal := range profile.Goals() %}{%s goal.Description %}{% if i < len(profile.Goals())-1 %}, {% endif %}{% endfor %}{% endif %}
-Profile: age {%d profile.Age() %}, {%f profile.Height %}cm, {%f profile.Weight %}kg{% if len(profile.Injuries()) > 0 %}
-Injuries: {% for i, injury := range profile.Injuries() %}{%s injury.Description %}{% if i < len(profile.Injuries())-1 %}, {% endif %}{% endfor %}{% endif %}{% if len(profile.Limitations()) > 0 %}
-Limits: {% for i, limitation := range profile.Limitations() %}{%s limitation %}{% if i < len(profile.Limitations())-1 %}, {% endif %}{% endfor %}{% endif %}
+{% if len(profile.Goals()) > 0 %}
+    Fitness goals:
+    {% for i, goal := range profile.Goals() %}
+        {%s goal.Description %}{% if i < len(profile.Goals())-1 %}, {% endif %}
+    {% endfor %}
+    .
+{% endif %}
 
-Respond in {%s profile.Language %} using JSON: {%s= schema %}
+{% if len(profile.Injuries()) > 0 %}
+    Injuries:
+    {% for i, injury := range profile.Injuries() %}
+        {%s injury.Description %}{% if i < len(profile.Injuries())-1 %}, {% endif %}
+    {% endfor %}
+    .
+{% endif %}
+
+{% if len(profile.Limitations()) > 0 %}
+    Limits:
+    {% for i, limitation := range profile.Limitations() %}
+        {%s limitation %}{% if i < len(profile.Limitations())-1 %}, {% endif %}
+    {% endfor %}
+    .
+{% endif %}
+
+Respond in
+{% if len(profile.Language) > 0 %}
+    {%s profile.Language %}
+{% else %}
+    English
+{% endif %}
+using JSON: {%s= schema %}
 
 {% endcollapsespace -%}
 {% endfunc %}

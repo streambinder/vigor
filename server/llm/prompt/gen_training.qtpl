@@ -3,11 +3,10 @@
 {% import "strings" %}
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func GenTraining(profile *model.Profile, exercises []model.Exercise, duration int) -%}
+{% func GenTraining(profile model.Profile, exercises []model.Exercise, duration int, recentTrainings []model.Training) -%}
 {% collapsespace %}
 
 Generate {%d duration %}min training from these exercises:
-
 {% for _, exercise := range exercises %}
     {%s exercise.ID %} (
     {% if len(exercise.Instructions) > 0 %}Instructions: {%s strings.Join(exercise.Instructions, ", ") %}{% endif %}.
@@ -17,6 +16,38 @@ Generate {%d duration %}min training from these exercises:
     {% if len(exercise.Equipment) > 0 %}Equipment: {%s strings.Join(exercise.Equipment, ", ") %}{% endif %}.
     );
 {% endfor %}
+
+{% if len(recentTrainings) > 0 %}
+Recent training history (consider variety and progression):
+    {% for _, training := range recentTrainings %}
+        {%s training.Type %} workout {%s training.Name %} ({%d training.DaysSince() %} days ago):
+        {%s training.Description %}
+        (exercises:
+        {% for _, routine := range training.Routines %}
+            {% for _, block := range routine.Blocks %}
+                {% for _, activity := range block.Activities %}
+                    {% if activity.Type == "exercise" %}
+                        {%s activity.Name %}
+                        {% if activity.WeightKg > 0 %}
+                            at {%d activity.WeightKg %}kg
+                        {% endif %}
+                        {% if activity.Reps > 0 %}
+                            for {%d activity.WeightKg %} reps
+                        {% endif %}
+                        {% if activity.Duration > 0 %}
+                            for {%d activity.Duration %}s
+                        {% endif %}
+                        {% if len(activity.Feedback) > 0 %}
+                            wth feedback "{%s activity.Feedback %}"
+                        {% endif %}
+                        ;
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        {% endfor %}
+        );
+    {% endfor %}.
+{% endif %}
 
 {% endcollapsespace -%}
 {% endfunc %}

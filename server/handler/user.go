@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	iso6391 "github.com/emvi/iso-639-1"
 	"github.com/gofiber/fiber/v2"
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/handler/middleware"
@@ -135,11 +134,6 @@ func handleUpdateUser(c *fiber.Ctx) error {
 
 	// language
 	if body.Language != "" {
-		if !iso6391.ValidCode(body.Language) {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "invalid language code",
-			})
-		}
 		profile.Language = body.Language
 	}
 

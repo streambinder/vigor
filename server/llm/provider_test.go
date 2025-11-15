@@ -53,7 +53,7 @@ func TestGetLLM_EmptyList(t *testing.T) {
 		_ = recover()
 	}()
 
-	_ = getLLM(&model.Profile{})
+	_ = getLLM(model.Profile{})
 
 	if !exitCalled {
 		t.Error("Expected os.Exit to be called (via log.Fatal) when openLLMs is empty")
@@ -68,7 +68,7 @@ func TestGetLLM_WithLLMs(t *testing.T) {
 	mock := &mockLLM{}
 	providers = []LLM{mock}
 
-	result := getLLM(&model.Profile{})
+	result := getLLM(model.Profile{})
 
 	if result != mock {
 		t.Error("Expected getLLM to return the first LLM from llms")
@@ -83,7 +83,6 @@ func TestGenTraining_Success(t *testing.T) {
 	// Create a valid training response
 	training := &model.Training{
 		ID:          uuid.New(),
-		Date:        time.Now(),
 		Name:        "Test Training",
 		Description: "Test Description",
 		Type:        "Strength",
@@ -103,7 +102,7 @@ func TestGenTraining_Success(t *testing.T) {
 	}
 	providers = []LLM{mock}
 
-	profile := &model.Profile{
+	profile := model.Profile{
 		Birthdate: time.Now().AddDate(-30, 0, 0),
 		Language:  "en",
 		Height:    180,
@@ -115,7 +114,7 @@ func TestGenTraining_Success(t *testing.T) {
 		{ID: uuid.New().String(), Name: "Dumbbell Press"},
 	}
 
-	result, err := GenTraining(profile, exercises, 30)
+	result, err := GenTraining(profile, exercises, 30, []model.Training{})
 	if err != nil {
 		t.Errorf("Expected no error, got: %v", err)
 	}
@@ -142,7 +141,7 @@ func TestGenTraining_QueryError(t *testing.T) {
 	}
 	providers = []LLM{mock}
 
-	profile := &model.Profile{
+	profile := model.Profile{
 		Birthdate: time.Now().AddDate(-30, 0, 0),
 		Language:  "en",
 		Height:    180,
@@ -154,7 +153,7 @@ func TestGenTraining_QueryError(t *testing.T) {
 		{ID: uuid.New().String(), Name: "Dumbbell Press"},
 	}
 
-	result, err := GenTraining(profile, exercises, 30)
+	result, err := GenTraining(profile, exercises, 30, []model.Training{})
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -180,7 +179,7 @@ func TestGenTraining_InvalidJSON(t *testing.T) {
 	}
 	providers = []LLM{mock}
 
-	profile := &model.Profile{
+	profile := model.Profile{
 		Birthdate: time.Now().AddDate(-30, 0, 0),
 		Language:  "en",
 		Height:    180,
@@ -192,7 +191,7 @@ func TestGenTraining_InvalidJSON(t *testing.T) {
 		{ID: "dumbbell-press", Name: "Dumbbell Press"},
 	}
 
-	result, err := GenTraining(profile, exercises, 30)
+	result, err := GenTraining(profile, exercises, 30, []model.Training{})
 	if err == nil {
 		t.Error("Expected error for invalid JSON, got nil")
 	}
@@ -210,7 +209,6 @@ func TestGenTraining_CallsPromptCorrectly(t *testing.T) {
 	var capturedSystem, capturedUser string
 	training := &model.Training{
 		ID:          uuid.New(),
-		Date:        time.Now(),
 		Name:        "Test Training",
 		Description: "Test Description",
 		Type:        "Cardio",
@@ -232,7 +230,7 @@ func TestGenTraining_CallsPromptCorrectly(t *testing.T) {
 	}
 	providers = []LLM{mock}
 
-	profile := &model.Profile{
+	profile := model.Profile{
 		Birthdate: time.Now().AddDate(-30, 0, 0),
 		Language:  "en",
 		Height:    180,
@@ -246,14 +244,14 @@ func TestGenTraining_CallsPromptCorrectly(t *testing.T) {
 	}
 	duration := 60
 
-	_, err = GenTraining(profile, exercises, duration)
+	_, err = GenTraining(profile, exercises, duration, []model.Training{})
 	if err != nil {
 		t.Errorf("Expected no error, got: %v", err)
 	}
 
 	// Verify the system and user prompts were called correctly
 	expectedSystem := prompt.System(profile, model.TrainingSchema)
-	expectedUser := prompt.GenTraining(profile, exercises, duration)
+	expectedUser := prompt.GenTraining(profile, exercises, duration, []model.Training{})
 
 	if capturedSystem != expectedSystem {
 		t.Errorf("System prompt mismatch.\nExpected: %s\nGot: %s", expectedSystem, capturedSystem)

@@ -16,7 +16,7 @@ REFRESH=$(echo "$TOKENS" | jq -r .refresh_token)
 alias curl="curl -s -H \"Content-Type:application/json\" -H \"Authorization: Bearer \${ACCESS}\""
 
 curl -X POST "${HOST}"/user/update \
-	-d '{"birthdate":"01/01/2000","language":"it","height":180,"weight":60,"data":{"goals":["hypertrophy","hyperlordosis compensation"]}}' | jq
+	-d '{"birthdate":"01/01/2000","language":"italiano","height":180,"weight":60,"data":{"goals":["hypertrophy","hyperlordosis compensation"]}}' | jq
 curl "${HOST}"/user | jq
 
 NEW=$(curl -X POST "${HOST}"/refresh -d '{"refresh_token":"'"$REFRESH"'"}')

@@ -18,6 +18,11 @@ import (
 	"github.com/streambinder/vigor/model"
 )
 
+const (
+	recentTrainingDays       = 14
+	recentTrainingMaxResults = 5
+)
+
 // TrainingRequest represents the request body for generating a training plan.
 type TrainingRequest struct {
 	Duration  int      `json:"duration"`  // Duration in minutes for the training session
@@ -89,7 +94,7 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 		equipment = gym.Equipment
 	}
 
-	// Query exercises where all required equipment is available
+	// Query exercises compatible with the user's profile and equipment
 	queryStart := time.Now()
 	exercises, err := queryUserExercises(profile, equipment)
 	if err != nil {
@@ -101,8 +106,19 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 		Dur("duration_ms", time.Since(queryStart)).
 		Msg("Queried exercises from database")
 
+	// Query recent trainings to avoid repeating exercises and ensure progression
+	var recentTrainings []model.Training
+	if err := database.DB.
+		Where("user_id = ? and completed_at > ?", profile.UserID, time.Now().Add(-time.Hour*24*recentTrainingDays)).
+		Order("completed_at desc").
+		Limit(recentTrainingMaxResults).
+		Find(&recentTrainings).Error; err != nil {
+		log.Error().Err(err).Msg("Failed to query recent trainings from database")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
 	llmStart := time.Now()
-	training, err := llm.GenTraining(&profile, exercises, req.Duration)
+	training, err := llm.GenTraining(profile, exercises, req.Duration, recentTrainings)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate training via LLM")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
@@ -111,7 +127,6 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 		Dur("duration_ms", time.Since(llmStart)).
 		Msg("Generated training via LLM")
 	training.UserID = profile.UserID
-	training.Date = time.Now()
 	training.Duration = training.CalcDuration()
 
 	for i := range training.Routines {

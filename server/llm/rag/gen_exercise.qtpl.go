@@ -5,13 +5,13 @@
 package rag
 
 //line llm/rag/gen_exercise.qtpl:3
-import (
-	"strings"
+import "strings"
 
-	"github.com/streambinder/vigor/model" //line llm/rag/gen_exercise.qtpl:4
+//line llm/rag/gen_exercise.qtpl:4
+import "github.com/streambinder/vigor/model"
 
 //line llm/rag/gen_exercise.qtpl:6
-
+import (
 	qtio422016 "io"
 
 	qt422016 "github.com/valyala/quicktemplate"
