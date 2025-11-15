@@ -10,6 +10,7 @@ import (
 	"github.com/pgvector/pgvector-go"
 	"github.com/streambinder/vigor/knowledge/model"
 	"github.com/streambinder/vigor/server/llm/embedding"
+	"github.com/streambinder/vigor/server/llm/embedding/template"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -58,7 +59,7 @@ func main() {
 			log.Fatalf("Failed to insert exercise: %s", err)
 		}
 
-		embeddingText := exercise.EmbeddingText()
+		embeddingText := template.GenExercise(exercise)
 		vector, err := embedding.GenVector(embeddingText)
 		if err != nil {
 			log.Fatalf("Failed to generate embedding: %s", err)

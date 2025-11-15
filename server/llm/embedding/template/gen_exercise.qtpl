@@ -1,0 +1,16 @@
+{% package template %}
+
+{% import "strings" %}
+{% import "github.com/streambinder/vigor/knowledge/model" %}
+
+{% func GenExercise(exercise model.Exercise) -%}
+{% collapsespace %}
+
+Name: {%s exercise.Name %}.
+Equipment: {%s strings.Join(exercise.Equipment, ", ") %}.
+Muscles: {%s strings.Join(exercise.Muscles, ", ") %} (secondary: {%s strings.Join(exercise.SecondaryMuscles, ", ") %}).
+Body parts: {%s strings.Join(exercise.BodyParts, ", ") %}.
+Instructions: {%s strings.Join(exercise.Instructions, ", ") %}.
+
+{% endcollapsespace -%}
+{% endfunc %}
