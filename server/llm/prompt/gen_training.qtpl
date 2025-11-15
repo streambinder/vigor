@@ -1,12 +1,23 @@
 {% package prompt %}
 
+{% import "strings" %}
 {% import "github.com/streambinder/vigor/model" %}
 {% import knowledge "github.com/streambinder/vigor/knowledge/model" %}
 
 {% func GenTraining(profile *model.Profile, exercises []knowledge.Exercise, duration int) -%}
 {% collapsespace %}
 
-Generate {%d duration %}min training from exercises: {% for i, exercise := range exercises %}{%s exercise.ID %}{% if i < len(exercises)-1 %}, {% endif %}{% endfor %}
+Generate {%d duration %}min training from these exercises:
+
+{% for _, exercise := range exercises %}
+    {%s exercise.ID %} (
+    {% if len(exercise.Instructions) > 0 %}Instructions: {%s strings.Join(exercise.Instructions, ", ") %}{% endif %}.
+    {% if len(exercise.Muscles) > 0 %}Target muscles: {%s strings.Join(exercise.Muscles, ", ") %}{% endif %}.
+    {% if len(exercise.SecondaryMuscles) > 0 %}Secondary muscles: {%s strings.Join(exercise.SecondaryMuscles, ", ") %}{% endif %}.
+    {% if len(exercise.BodyParts) > 0 %}Body parts: {%s strings.Join(exercise.BodyParts, ", ") %}{% endif %}.
+    {% if len(exercise.Equipment) > 0 %}Equipment: {%s strings.Join(exercise.Equipment, ", ") %}{% endif %}.
+    );
+{% endfor %}
 
 {% endcollapsespace -%}
 {% endfunc %}

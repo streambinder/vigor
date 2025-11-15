@@ -7,6 +7,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.9
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/lib/pq v1.10.9
+	github.com/pgvector/pgvector-go v0.3.0
 	github.com/rs/zerolog v1.34.0
 	github.com/streambinder/vigor/knowledge v0.0.0-00010101000000-000000000000
 	github.com/valyala/quicktemplate v1.8.0
@@ -34,7 +35,6 @@ require (
 	github.com/gopherjs/gopherjs v1.12.80 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
-	github.com/pgvector/pgvector-go v0.3.0 // indirect
 	github.com/smartystreets/assertions v1.2.0 // indirect
 	github.com/smartystreets/goconvey v1.7.2 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect

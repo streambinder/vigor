@@ -27,7 +27,7 @@ func StreamSystem(qw422016 *qt422016.Writer, profile *model.Profile, schema stri
 //line llm/prompt/system.qtpl:10
 	if len(profile.Goals()) > 0 {
 //line llm/prompt/system.qtpl:10
-		qw422016.N().S(`Goals: `)
+		qw422016.N().S(`Fitness goals: `)
 //line llm/prompt/system.qtpl:10
 		for i, goal := range profile.Goals() {
 //line llm/prompt/system.qtpl:10
@@ -41,94 +41,92 @@ func StreamSystem(qw422016 *qt422016.Writer, profile *model.Profile, schema stri
 //line llm/prompt/system.qtpl:10
 		}
 //line llm/prompt/system.qtpl:10
-		qw422016.N().S(` `)
-//line llm/prompt/system.qtpl:11
 	}
-//line llm/prompt/system.qtpl:11
+//line llm/prompt/system.qtpl:10
 	qw422016.N().S(` Profile: age `)
-//line llm/prompt/system.qtpl:12
+//line llm/prompt/system.qtpl:11
 	qw422016.N().D(profile.Age())
-//line llm/prompt/system.qtpl:12
+//line llm/prompt/system.qtpl:11
 	qw422016.N().S(`, `)
-//line llm/prompt/system.qtpl:12
+//line llm/prompt/system.qtpl:11
 	qw422016.N().F(profile.Height)
-//line llm/prompt/system.qtpl:12
+//line llm/prompt/system.qtpl:11
 	qw422016.N().S(`cm, `)
-//line llm/prompt/system.qtpl:12
+//line llm/prompt/system.qtpl:11
 	qw422016.N().F(profile.Weight)
-//line llm/prompt/system.qtpl:12
+//line llm/prompt/system.qtpl:11
 	qw422016.N().S(`kg`)
-//line llm/prompt/system.qtpl:12
+//line llm/prompt/system.qtpl:11
 	if len(profile.Injuries()) > 0 {
-//line llm/prompt/system.qtpl:12
+//line llm/prompt/system.qtpl:11
 		qw422016.N().S(` Injuries: `)
-//line llm/prompt/system.qtpl:13
+//line llm/prompt/system.qtpl:12
 		for i, injury := range profile.Injuries() {
-//line llm/prompt/system.qtpl:13
+//line llm/prompt/system.qtpl:12
 			qw422016.E().S(injury.Description)
-//line llm/prompt/system.qtpl:13
+//line llm/prompt/system.qtpl:12
 			if i < len(profile.Injuries())-1 {
-//line llm/prompt/system.qtpl:13
+//line llm/prompt/system.qtpl:12
 				qw422016.N().S(`, `)
-//line llm/prompt/system.qtpl:13
+//line llm/prompt/system.qtpl:12
 			}
-//line llm/prompt/system.qtpl:13
+//line llm/prompt/system.qtpl:12
 		}
-//line llm/prompt/system.qtpl:13
+//line llm/prompt/system.qtpl:12
 	}
-//line llm/prompt/system.qtpl:13
+//line llm/prompt/system.qtpl:12
 	if len(profile.Limitations()) > 0 {
-//line llm/prompt/system.qtpl:13
+//line llm/prompt/system.qtpl:12
 		qw422016.N().S(` Limits: `)
-//line llm/prompt/system.qtpl:14
+//line llm/prompt/system.qtpl:13
 		for i, limitation := range profile.Limitations() {
-//line llm/prompt/system.qtpl:14
+//line llm/prompt/system.qtpl:13
 			qw422016.E().S(limitation)
-//line llm/prompt/system.qtpl:14
+//line llm/prompt/system.qtpl:13
 			if i < len(profile.Limitations())-1 {
-//line llm/prompt/system.qtpl:14
+//line llm/prompt/system.qtpl:13
 				qw422016.N().S(`, `)
-//line llm/prompt/system.qtpl:14
+//line llm/prompt/system.qtpl:13
 			}
-//line llm/prompt/system.qtpl:14
+//line llm/prompt/system.qtpl:13
 		}
-//line llm/prompt/system.qtpl:14
+//line llm/prompt/system.qtpl:13
 	}
-//line llm/prompt/system.qtpl:14
+//line llm/prompt/system.qtpl:13
 	qw422016.N().S(` Respond in `)
-//line llm/prompt/system.qtpl:16
+//line llm/prompt/system.qtpl:15
 	qw422016.E().S(profile.Language)
-//line llm/prompt/system.qtpl:16
+//line llm/prompt/system.qtpl:15
 	qw422016.N().S(` using JSON: `)
-//line llm/prompt/system.qtpl:16
+//line llm/prompt/system.qtpl:15
 	qw422016.N().S(schema)
-//line llm/prompt/system.qtpl:16
+//line llm/prompt/system.qtpl:15
 	qw422016.N().S(` `)
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:18
 }
 
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:18
 func WriteSystem(qq422016 qtio422016.Writer, profile *model.Profile, schema string) {
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:18
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:18
 	StreamSystem(qw422016, profile, schema)
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:18
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:18
 }
 
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:18
 func System(profile *model.Profile, schema string) string {
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:18
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:18
 	WriteSystem(qb422016, profile, schema)
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:18
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:18
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:18
 	return qs422016
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:18
 }

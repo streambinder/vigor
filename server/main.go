@@ -1,5 +1,6 @@
 //go:generate go install github.com/valyala/quicktemplate/qtc@latest
 //go:generate qtc -dir=llm/prompt
+//go:generate qtc -dir=llm/embedding/template
 //go:generate sh -c "cd tools/codegen && go run . -models ../../model -output ../../../app/lib/models"
 //go:generate sh -c "cd ../app && dart run build_runner build"
 package main

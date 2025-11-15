@@ -30,8 +30,12 @@ func init() {
 		log.Fatal().Err(err).Str("database_url", dbURL).Msg("Failed to connect to database")
 	}
 
+	if err := DB.Exec("CREATE EXTENSION IF NOT EXISTS vector;").Error; err != nil {
+		log.Fatal().Err(err).Msg("Failed to create vector extension")
+	}
+
 	if err := DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";").Error; err != nil {
-		log.Fatal().Err(err).Msg("Failed to create extension")
+		log.Fatal().Err(err).Msg("Failed to create uuid extension")
 	}
 
 	if err := DB.AutoMigrate(
