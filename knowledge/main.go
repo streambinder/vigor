@@ -1,4 +1,3 @@
-// Package main provides a bootstrap tool to load ExerciseDB data into the database.
 package main
 
 import (
@@ -8,9 +7,9 @@ import (
 	"path/filepath"
 
 	"github.com/pgvector/pgvector-go"
-	"github.com/streambinder/vigor/knowledge/model"
-	"github.com/streambinder/vigor/server/llm/embedding"
-	"github.com/streambinder/vigor/server/llm/rag"
+	"github.com/streambinder/vigor/llm/embedding"
+	"github.com/streambinder/vigor/llm/rag"
+	"github.com/streambinder/vigor/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

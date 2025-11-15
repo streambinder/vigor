@@ -9,7 +9,6 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/pgvector/pgvector-go v0.3.0
 	github.com/rs/zerolog v1.34.0
-	github.com/streambinder/vigor/knowledge v0.0.0-00010101000000-000000000000
 	github.com/valyala/quicktemplate v1.8.0
 	golang.org/x/crypto v0.44.0
 	google.golang.org/api v0.254.0

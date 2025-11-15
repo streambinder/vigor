@@ -2,9 +2,8 @@
 
 {% import "strings" %}
 {% import "github.com/streambinder/vigor/model" %}
-{% import knowledge "github.com/streambinder/vigor/knowledge/model" %}
 
-{% func GenTraining(profile *model.Profile, exercises []knowledge.Exercise, duration int) -%}
+{% func GenTraining(profile *model.Profile, exercises []model.Exercise, duration int) -%}
 {% collapsespace %}
 
 Generate {%d duration %}min training from these exercises:

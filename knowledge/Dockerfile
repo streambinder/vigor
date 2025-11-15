@@ -6,13 +6,11 @@ WORKDIR /build/knowledge
 COPY knowledge/go.mod knowledge/go.sum ./
 COPY server/go.mod server/go.sum ../server/
 RUN go mod download
-COPY knowledge/model/ ./model/
 COPY server ../server/
 COPY knowledge/main.go ./
 RUN CGO_ENABLED=0 go build -o bootstrap main.go
 
 FROM pgvector/pgvector:0.8.1-pg18 AS data-builder
-ARG EMBEDDING_HOST
 USER postgres
 WORKDIR /build
 COPY --from=bootstrap-builder /build/knowledge/bootstrap /usr/local/bin/bootstrap
@@ -25,7 +23,7 @@ RUN initdb -D /tmp/pgdata && \
   psql -h /tmp -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE db TO \"user\";" && \
   psql -h /tmp -U postgres -d db -c "CREATE EXTENSION IF NOT EXISTS vector;" && \
   psql -h /tmp -U postgres -d db -c "GRANT ALL ON SCHEMA public TO \"user\";" && \
-  sh -c "DATABASE_URL=\"postgres://user:password@/db?host=/tmp\" LLAMACPP_EMBEDDING_TIERS=http://host.docker.internal:8000 bootstrap" && \
+  sh -c "DATABASE_URL='postgres://user:password@/db?host=/tmp' LLAMACPP_EMBEDDING_TIERS=http://host.docker.internal:8000 bootstrap" && \
   pg_dump -h /tmp -U postgres -d db --clean --if-exists >/build/init.sql && \
   pg_ctl -D /tmp/pgdata stop
 

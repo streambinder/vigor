@@ -2,16 +2,18 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/pgvector/pgvector-go"
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/handler/middleware"
-	knowledge "github.com/streambinder/vigor/knowledge/model"
 	"github.com/streambinder/vigor/llm"
+	"github.com/streambinder/vigor/llm/embedding"
 	"github.com/streambinder/vigor/llm/rag"
 	"github.com/streambinder/vigor/model"
 )
@@ -25,6 +27,37 @@ type TrainingRequest struct {
 
 func init() {
 	APP.Post("/training", middleware.Authorized(), handleTrainingRequest)
+}
+
+func queryUserExercises(profile model.Profile, equipment []string) ([]model.Exercise, error) {
+	embeddingText := rag.GenUserExercises(profile, equipment)
+	embedding, err := embedding.GenVector(embeddingText)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []struct {
+		ExerciseID string
+		Text       string
+		Distance   float64
+		Exercise   model.Exercise `gorm:"embedded"`
+	}
+	if err := database.Knowledge.
+		Table("exercise_embeddings").
+		Select("exercise_embeddings.exercise_id, exercise_embeddings.text, exercise_embeddings.embedding <=> ? as distance, exercises.*", pgvector.NewVector(embedding)).
+		Joins("JOIN exercises ON exercises.id = exercise_embeddings.exercise_id").
+		Order("distance ASC").
+		Limit(50).
+		Scan(&results).
+		Error; err != nil {
+		return nil, fmt.Errorf("failed to execute similarity search: %w", err)
+	}
+
+	exercises := make([]model.Exercise, 0, len(results))
+	for _, result := range results {
+		exercises = append(exercises, result.Exercise)
+	}
+	return exercises, nil
 }
 
 // handleTrainingRequest handles POST /training endpoint for generating training plans.
@@ -58,7 +91,7 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 
 	// Query exercises where all required equipment is available
 	queryStart := time.Now()
-	exercises, err := rag.QueryUserExercises(profile, equipment)
+	exercises, err := queryUserExercises(profile, equipment)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to query exercises from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
@@ -85,7 +118,7 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 		for j := range training.Routines[i].Blocks {
 			for k := range training.Routines[i].Blocks[j].Activities {
 				activity := &training.Routines[i].Blocks[j].Activities[k]
-				var exercise knowledge.Exercise
+				var exercise model.Exercise
 				if err := database.Knowledge.First(&exercise, "id = ?", activity.Name).Error; err == nil {
 					if exerciseJSON, err := json.Marshal(exercise); err == nil {
 						activity.Detail = exerciseJSON
