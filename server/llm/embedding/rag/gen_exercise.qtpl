@@ -1,4 +1,4 @@
-{% package template %}
+{% package rag %}
 
 {% import "strings" %}
 {% import "github.com/streambinder/vigor/knowledge/model" %}

@@ -15,7 +15,7 @@ import (
 	knowledge "github.com/streambinder/vigor/knowledge/model"
 	"github.com/streambinder/vigor/llm"
 	"github.com/streambinder/vigor/llm/embedding"
-	"github.com/streambinder/vigor/llm/embedding/template"
+	"github.com/streambinder/vigor/llm/embedding/rag"
 	"github.com/streambinder/vigor/model"
 )
 
@@ -28,7 +28,7 @@ type TrainingRequest struct {
 
 // queryExercises queries the exercise database for exercises matching the given equipment.
 func queryExercises(profile model.Profile, equipment []string) ([]knowledge.Exercise, error) {
-	embeddingText := template.GenUserExercises(profile, equipment)
+	embeddingText := rag.GenUserExercises(profile, equipment)
 	embedding, err := embedding.GenVector(embeddingText)
 	if err != nil {
 		return nil, err

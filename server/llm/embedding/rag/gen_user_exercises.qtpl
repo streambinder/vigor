@@ -1,4 +1,4 @@
-{% package template %}
+{% package rag %}
 
 {% import "github.com/streambinder/vigor/model" %}
 
