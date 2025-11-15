@@ -21,9 +21,10 @@ RUN initdb -D /tmp/pgdata && \
   psql -h /tmp -U postgres -c "CREATE DATABASE db;" && \
   psql -h /tmp -U postgres -c "CREATE USER \"user\" WITH PASSWORD 'password';" && \
   psql -h /tmp -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE db TO \"user\";" && \
+  psql -h /tmp -U postgres -d db -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";" && \
   psql -h /tmp -U postgres -d db -c "CREATE EXTENSION IF NOT EXISTS vector;" && \
   psql -h /tmp -U postgres -d db -c "GRANT ALL ON SCHEMA public TO \"user\";" && \
-  sh -c "DATABASE_URL='postgres://user:password@/db?host=/tmp' LLAMACPP_EMBEDDING_TIERS=http://host.docker.internal:8000 bootstrap" && \
+  sh -c "DATABASE_URL='postgres://user:password@/db?host=/tmp' LLAMACPP_EMBEDDING_TIERS=http://host.docker.internal:8001 bootstrap" && \
   pg_dump -h /tmp -U postgres -d db --clean --if-exists >/build/init.sql && \
   pg_ctl -D /tmp/pgdata stop
 

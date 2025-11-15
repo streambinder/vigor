@@ -39,36 +39,82 @@ func main() {
 	if err := gormDB.AutoMigrate(
 		&model.Exercise{},
 		&model.ExerciseEmbedding{},
+		&model.Fact{},
+		&model.FactEmbedding{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %s", err)
 	}
 
-	exerciseBytes, err := os.ReadFile(filepath.Join("features", "exercises.json"))
+	if err := boostrapFacts(gormDB); err != nil {
+		log.Fatalf("Failed to inject facts: %s", err)
+	}
+	if err := boostrapExercises(gormDB); err != nil {
+		log.Fatalf("Failed to inject exercises: %s", err)
+	}
+}
+
+func boostrapExercises(gormDB *gorm.DB) error {
+	bytes, err := os.ReadFile(filepath.Join("features", "exercises.json"))
 	if err != nil {
-		log.Fatalf("Failed to read file: %s", err)
+		return err
 	}
 
-	var exercises []model.Exercise
-	if err := json.Unmarshal(exerciseBytes, &exercises); err != nil {
-		log.Fatalf("Failed to unmarshal JSON: %s", err)
+	var rows []model.Exercise
+	if err := json.Unmarshal(bytes, &rows); err != nil {
+		return err
 	}
 
-	for _, exercise := range exercises {
-		if err := gormDB.FirstOrCreate(&exercise, model.Exercise{ID: exercise.ID}).Error; err != nil {
-			log.Fatalf("Failed to insert exercise: %s", err)
+	for _, row := range rows {
+		if err := gormDB.FirstOrCreate(&row, model.Exercise{ID: row.ID}).Error; err != nil {
+			return err
 		}
 
-		embeddingText := rag.GenExercise(exercise)
-		vector, err := embedding.GenVector(embeddingText)
+		text := rag.GenExercise(row)
+		vector, err := embedding.GenVector(text)
 		if err != nil {
-			log.Fatalf("Failed to generate embedding: %s", err)
+			return err
 		}
 
 		if err := gormDB.FirstOrCreate(
-			&model.ExerciseEmbedding{ExerciseID: exercise.ID, Text: embeddingText, Embedding: pgvector.NewVector(vector)},
-			model.ExerciseEmbedding{ExerciseID: exercise.ID},
+			&model.ExerciseEmbedding{ExerciseID: row.ID, Text: text, Embedding: pgvector.NewVector(vector)},
+			model.ExerciseEmbedding{ExerciseID: row.ID},
 		).Error; err != nil {
-			log.Fatalf("Failed to insert embedding: %s", err)
+			return err
 		}
 	}
+
+	return nil
+}
+
+func boostrapFacts(gormDB *gorm.DB) error {
+	bytes, err := os.ReadFile(filepath.Join("features", "facts.json"))
+	if err != nil {
+		return err
+	}
+
+	var rows []model.Fact
+	if err := json.Unmarshal(bytes, &rows); err != nil {
+		return err
+	}
+
+	for _, row := range rows {
+		if err := gormDB.FirstOrCreate(&row, model.Fact{ID: row.ID}).Error; err != nil {
+			return err
+		}
+
+		text := rag.GenFact(row)
+		vector, err := embedding.GenVector(text)
+		if err != nil {
+			return err
+		}
+
+		if err := gormDB.FirstOrCreate(
+			&model.FactEmbedding{FactID: row.ID, Text: text, Embedding: pgvector.NewVector(vector)},
+			model.FactEmbedding{FactID: row.ID},
+		).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

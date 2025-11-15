@@ -1,0 +1,14 @@
+{% package rag %}
+
+{% import "strings" %}
+{% import "github.com/streambinder/vigor/model" %}
+
+{% func GenFact(fact model.Fact) -%}
+{% collapsespace %}
+
+Area: {%s fact.Area %}.
+Tags: {%s strings.Join(fact.Tags, ", ") %}.
+Content: {%s fact.Content %}.
+
+{% endcollapsespace -%}
+{% endfunc %}

@@ -3,7 +3,7 @@
 {% import "strings" %}
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func GenTraining(profile model.Profile, exercises []model.Exercise, duration int, recentTrainings []model.Training) -%}
+{% func GenTraining(profile model.Profile, exercises []model.Exercise, duration int, recentTrainings []model.Training, facts []model.Fact) -%}
 {% collapsespace %}
 
 Generate {%d duration %}min training from these exercises:
@@ -46,6 +46,13 @@ Recent training history (consider variety and progression):
             {% endfor %}
         {% endfor %}
         );
+    {% endfor %}.
+{% endif %}
+
+{% if len(facts) > 0 %}
+Relevant knowledge facts:
+    {% for _, fact := range facts %}
+        - {%s fact.Reference %}: {%s fact.Content %}
     {% endfor %}.
 {% endif %}
 

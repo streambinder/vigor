@@ -1,0 +1,26 @@
+{% package rag %}
+
+{% import "github.com/streambinder/vigor/model" %}
+
+{% func GenUserFacts(profile model.Profile) -%}
+{% collapsespace %}
+
+{% if len(profile.Goals()) > 0 %}
+    Fitness goals:
+    {% for i, goal := range profile.Goals() %}{%s goal.Description %}{% if i < len(profile.Goals())-1 %}, {% endif %}{% endfor %}.
+{% endif %}
+{% if len(profile.Injuries()) > 0 %}
+    Avoid exercises that impact:
+    {% for i, injury := range profile.Injuries() %}{%s injury.Description %}{% if i < len(profile.Injuries())-1 %}, {% endif %}{% endfor %}.
+{% endif %}
+{% if len(profile.Limitations()) > 0 %}
+    Limitations:
+    {% for i, limitation := range profile.Limitations() %}{%s limitation %}{% if i < len(profile.Limitations())-1 %}, {% endif %}{% endfor %}.
+{% endif %}
+
+{% if len(profile.Goals()) == 0 && len(profile.Injuries()) == 0 && len(profile.Limitations()) == 0 %}
+    General strength and fitness training exercises.
+{% endif %}
+
+{% endcollapsespace -%}
+{% endfunc %}

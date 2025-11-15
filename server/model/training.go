@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"github.com/streambinder/vigor/encoder"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -24,12 +25,13 @@ func init() {
 
 // Training represents the entire training session with a UUID ID
 type Training struct {
-	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
-	Name        string    `gorm:"not null" json:"name" prompt:"Catchy training name that reminds of themes of classical epic"`
-	Description string    `gorm:"not null" json:"description" prompt:"Training description in terms of impact on profile goals"`
-	Type        string    `gorm:"not null" json:"type" prompt:"Training type (e.g. HIIT, pilates, swimming, etc)"`
-	Duration    int       `gorm:"not null" json:"duration" prompt:"-"`
-	Routines    []Routine `gorm:"foreignKey:TrainingID" json:"routines"`
+	ID          uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
+	Name        string         `gorm:"not null" json:"name" prompt:"Catchy training name that reminds of themes of classical epic"`
+	Description string         `gorm:"not null" json:"description" prompt:"Training description in terms of impact on profile goals"`
+	Type        string         `gorm:"not null" json:"type" prompt:"Training type (e.g. HIIT, pilates, swimming, etc)"`
+	Duration    int            `gorm:"not null" json:"duration" prompt:"-"`
+	References  pq.StringArray `gorm:"type:text[]" json:"references" prompt:"Relevant knowledge fact URLs"`
+	Routines    []Routine      `gorm:"foreignKey:TrainingID" json:"routines"`
 
 	CompletedAt time.Time      `json:"completed_at" prompt:"-"`
 	CreatedAt   time.Time      `json:"created_at" prompt:"-"`

@@ -21,6 +21,8 @@ import (
 const (
 	recentTrainingDays       = 14
 	recentTrainingMaxResults = 5
+	maxPromptExercises       = 50
+	maxPromptFacts           = 5
 )
 
 // TrainingRequest represents the request body for generating a training plan.
@@ -52,7 +54,7 @@ func queryUserExercises(profile model.Profile, equipment []string) ([]model.Exer
 		Select("exercise_embeddings.exercise_id, exercise_embeddings.text, exercise_embeddings.embedding <=> ? as distance, exercises.*", pgvector.NewVector(embedding)).
 		Joins("JOIN exercises ON exercises.id = exercise_embeddings.exercise_id").
 		Order("distance ASC").
-		Limit(50).
+		Limit(maxPromptExercises).
 		Scan(&results).
 		Error; err != nil {
 		return nil, fmt.Errorf("failed to execute similarity search: %w", err)
@@ -63,6 +65,37 @@ func queryUserExercises(profile model.Profile, equipment []string) ([]model.Exer
 		exercises = append(exercises, result.Exercise)
 	}
 	return exercises, nil
+}
+
+func queryUserFacts(profile model.Profile) ([]model.Fact, error) {
+	embeddingText := rag.GenUserFacts(profile)
+	embedding, err := embedding.GenVector(embeddingText)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []struct {
+		FactID   string
+		Text     string
+		Distance float64
+		Fact     model.Fact `gorm:"embedded"`
+	}
+	if err := database.Knowledge.
+		Table("fact_embeddings").
+		Select("fact_embeddings.fact_id, fact_embeddings.text, fact_embeddings.embedding <=> ? as distance, facts.*", pgvector.NewVector(embedding)).
+		Joins("JOIN facts ON facts.id = fact_embeddings.fact_id").
+		Order("distance ASC").
+		Limit(maxPromptFacts).
+		Scan(&results).
+		Error; err != nil {
+		return nil, fmt.Errorf("failed to execute similarity search: %w", err)
+	}
+
+	facts := make([]model.Fact, 0, len(results))
+	for _, result := range results {
+		facts = append(facts, result.Fact)
+	}
+	return facts, nil
 }
 
 // handleTrainingRequest handles POST /training endpoint for generating training plans.
@@ -95,7 +128,7 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 	}
 
 	// Query exercises compatible with the user's profile and equipment
-	queryStart := time.Now()
+	queryExerciseStart := time.Now()
 	exercises, err := queryUserExercises(profile, equipment)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to query exercises from database")
@@ -103,8 +136,20 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 	}
 	log.Info().
 		Int("exercise_count", len(exercises)).
-		Dur("duration_ms", time.Since(queryStart)).
+		Dur("duration_ms", time.Since(queryExerciseStart)).
 		Msg("Queried exercises from database")
+
+	// Query knowledge facts related to user's profile
+	queryFactsStart := time.Now()
+	facts, err := queryUserFacts(profile)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query facts from database")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	log.Info().
+		Int("facts_count", len(facts)).
+		Dur("duration_ms", time.Since(queryFactsStart)).
+		Msg("Queried facts from database")
 
 	// Query recent trainings to avoid repeating exercises and ensure progression
 	var recentTrainings []model.Training
@@ -118,7 +163,7 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 	}
 
 	llmStart := time.Now()
-	training, err := llm.GenTraining(profile, exercises, req.Duration, recentTrainings)
+	training, err := llm.GenTraining(profile, exercises, req.Duration, recentTrainings, facts)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate training via LLM")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
