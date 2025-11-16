@@ -22,6 +22,9 @@ permissions:
   security-events: none
   statuses: none
 
+env:
+  DOCKER_PLATFORMS: linux/arm64,linux/amd64
+
 jobs:
   codespell:
     runs-on: ubuntu-latest
@@ -160,7 +163,7 @@ jobs:
       - uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           context: exercisedb
-          platforms: linux/amd64,linux/arm/v7,linux/arm64/v8
+          platforms: ${{ env.DOCKER_PLATFORMS }}
           tags: ghcr.io/streambinder/vigor/exercisedb:latest
           push: ${{ github.event_name != 'pull_request' }}
   server-test:
@@ -280,6 +283,6 @@ jobs:
         with:
           context: .
           file: server/Dockerfile
-          platforms: linux/amd64,linux/arm/v7,linux/arm64/v8
+          platforms: ${{ env.DOCKER_PLATFORMS }}
           tags: ghcr.io/streambinder/vigor:latest
           push: ${{ github.event_name != 'pull_request' }}
