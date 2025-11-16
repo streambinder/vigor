@@ -1,6 +1,6 @@
 FROM golang:1.25.0-alpine3.22 AS builder
 WORKDIR /app
-COPY exercisedb/ ./exercisedb/
+COPY knowledge/ ./knowledge/
 COPY server/go.mod server/go.sum ./server/
 WORKDIR /app/server
 RUN go mod download
