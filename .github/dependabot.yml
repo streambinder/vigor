@@ -16,6 +16,11 @@ updates:
       interval: "weekly"
 
   - package-ecosystem: "docker"
-    directory: "/"
+    directory: "/knowledge"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "docker"
+    directory: "/server"
     schedule:
       interval: "weekly"
