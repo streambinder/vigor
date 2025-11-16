@@ -17,14 +17,14 @@ type Generator struct {
 // NewGenerator creates a new generator
 func NewGenerator(outputDir string) *Generator {
 	tmpl := template.Must(template.New("dart").Funcs(template.FuncMap{
-		"toDartType":       toDartType,
-		"toSnakeCase":      toSnakeCase,
-		"toCamelCase":      toCamelCase,
-		"toClassName":      toClassName,
-		"needsImport":      needsImport,
-		"getImports":       getImports,
-		"isNullable":       isNullable,
-		"defaultValue":     defaultValue,
+		"toDartType":        toDartType,
+		"toSnakeCase":       toSnakeCase,
+		"toCamelCase":       toCamelCase,
+		"toClassName":       toClassName,
+		"needsImport":       needsImport,
+		"getImports":        getImports,
+		"isNullable":        isNullable,
+		"defaultValue":      defaultValue,
 		"getRequiredFields": getRequiredFields,
 	}).Parse(dartTemplate))
 
@@ -37,7 +37,7 @@ func NewGenerator(outputDir string) *Generator {
 // Generate generates a Dart file for a struct
 func (g *Generator) Generate(s Struct) error {
 	// Ensure output directory exists
-	if err := os.MkdirAll(g.outputDir, 0755); err != nil {
+	if err := os.MkdirAll(g.outputDir, 0o755); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
@@ -158,7 +158,7 @@ func getImports(s Struct) (imports []string) {
 				typeName = field.Type
 			}
 
-			imports = append(imports, toSnakeCase(mapGoTypeToDart(typeName)) + ".dart")
+			imports = append(imports, toSnakeCase(mapGoTypeToDart(typeName))+".dart")
 		}
 	}
 	return

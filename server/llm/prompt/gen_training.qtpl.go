@@ -176,7 +176,7 @@ func StreamGenTraining(qw422016 *qt422016.Writer, profile model.Profile, exercis
 //line llm/prompt/gen_training.qtpl:40
 							if len(activity.Feedback) > 0 {
 //line llm/prompt/gen_training.qtpl:40
-								qw422016.N().S(` wth feedback "`)
+								qw422016.N().S(` with feedback "`)
 //line llm/prompt/gen_training.qtpl:41
 								qw422016.E().S(activity.Feedback)
 //line llm/prompt/gen_training.qtpl:41

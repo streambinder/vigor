@@ -10,27 +10,33 @@ part 'training.g.dart';
 class Training {
   @JsonKey(name: 'id')
   final String id;
-  @JsonKey(name: 'date')
-  final DateTime date;
   @JsonKey(name: 'name')
   final String name;
   @JsonKey(name: 'description')
   final String description;
-  @JsonKey(name: 'category')
+  @JsonKey(name: 'type')
   final String type;
   @JsonKey(name: 'duration')
   final int duration;
+  @JsonKey(name: 'references')
+  final List<String> references;
   @JsonKey(name: 'routines')
   final List<Routine> routines;
+  @JsonKey(name: 'completed_at')
+  final DateTime completedAt;
+  @JsonKey(name: 'created_at')
+  final DateTime createdAt;
 
   Training({
     required this.id,
-    required this.date,
     required this.name,
     required this.description,
     required this.type,
     required this.duration,
+    required this.references,
     required this.routines,
+    required this.completedAt,
+    required this.createdAt,
   });
 
   factory Training.fromJson(Map<String, dynamic> json) => _$TrainingFromJson(json);

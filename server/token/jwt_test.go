@@ -76,8 +76,8 @@ func TestGenerateTokens_Success(t *testing.T) {
 
 	// Create a user
 	user := model.User{
-		ID:       userID,
-		Email:    "test@example.com",
+		ID:    userID,
+		Email: "test@example.com",
 	}
 	if err := db.Create(&user).Error; err != nil {
 		t.Fatalf("Failed to create test user: %v", err)
@@ -135,8 +135,8 @@ func TestRefreshTokens_Success(t *testing.T) {
 
 	// Create a user
 	user := model.User{
-		ID:       userID,
-		Email:    "test@example.com",
+		ID:    userID,
+		Email: "test@example.com",
 	}
 	if err := db.Create(&user).Error; err != nil {
 		t.Fatalf("Failed to create test user: %v", err)
@@ -200,8 +200,8 @@ func TestRefreshTokens_ExpiredToken(t *testing.T) {
 
 	// Create a user
 	user := model.User{
-		ID:       userID,
-		Email:    "test@example.com",
+		ID:    userID,
+		Email: "test@example.com",
 	}
 	if err := db.Create(&user).Error; err != nil {
 		t.Fatalf("Failed to create test user: %v", err)
@@ -233,8 +233,8 @@ func TestRefreshTokens_RevokedToken(t *testing.T) {
 
 	// Create a user
 	user := model.User{
-		ID:       userID,
-		Email:    "test@example.com",
+		ID:    userID,
+		Email: "test@example.com",
 	}
 	if err := db.Create(&user).Error; err != nil {
 		t.Fatalf("Failed to create test user: %v", err)
@@ -262,8 +262,8 @@ func TestRevokeToken_Success(t *testing.T) {
 
 	// Create a user
 	user := model.User{
-		ID:       userID,
-		Email:    "test@example.com",
+		ID:    userID,
+		Email: "test@example.com",
 	}
 	if err := db.Create(&user).Error; err != nil {
 		t.Fatalf("Failed to create test user: %v", err)
@@ -298,8 +298,8 @@ func TestVerifyAccessToken_Success(t *testing.T) {
 
 	// Create a user
 	user := model.User{
-		ID:       userID,
-		Email:    "test@example.com",
+		ID:    userID,
+		Email: "test@example.com",
 	}
 	if err := db.Create(&user).Error; err != nil {
 		t.Fatalf("Failed to create test user: %v", err)

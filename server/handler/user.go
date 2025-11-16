@@ -61,7 +61,6 @@ func handleRegister(c *fiber.Ctx) error {
 
 		return nil
 	})
-
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "email already exists"})
 	}

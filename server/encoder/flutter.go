@@ -72,4 +72,3 @@ func extractStructMetadata(v reflect.Value) []FieldMetadata {
 
 	return metadata
 }
-

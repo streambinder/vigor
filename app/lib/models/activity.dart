@@ -13,6 +13,8 @@ class Activity {
   final String blockId;
   @JsonKey(name: 'name')
   final String name;
+  @JsonKey(name: 'rationale')
+  final String rationale;
   @JsonKey(name: 'type')
   final String type;
   @JsonKey(name: 'duration')
@@ -25,17 +27,21 @@ class Activity {
   final int rest;
   @JsonKey(name: 'detail')
   final Map<String, dynamic> detail;
+  @JsonKey(name: 'feedback')
+  final String feedback;
 
   Activity({
     required this.id,
     required this.blockId,
     required this.name,
+    required this.rationale,
     required this.type,
     required this.duration,
     required this.reps,
     required this.weightKg,
     required this.rest,
     required this.detail,
+    required this.feedback,
   });
 
   factory Activity.fromJson(Map<String, dynamic> json) => _$ActivityFromJson(json);

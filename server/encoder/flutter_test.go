@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/streambinder/vigor/encoder"
 	"github.com/google/uuid"
+	"github.com/streambinder/vigor/encoder"
 )
 
 type TestProfile struct {

@@ -30,6 +30,6 @@ curl "${HOST}"/gym/basement | jq
 
 ts="$(date +%s%N)"
 curl -X POST "${HOST}"/training -d '{"gym":"basement","duration":30}' | jq
-echo "Duration: $((($(date +%s%N) - $ts)/1000000))ms"
+echo "Duration: $((($(date +%s%N) - ts) / 1000000))ms"
 
 # curl -X POST "${HOST}"/unregister | jq

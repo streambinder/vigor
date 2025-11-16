@@ -38,7 +38,7 @@ Recent training history (consider variety and progression):
                             for {%d activity.Duration %}s
                         {% endif %}
                         {% if len(activity.Feedback) > 0 %}
-                            wth feedback "{%s activity.Feedback %}"
+                            with feedback "{%s activity.Feedback %}"
                         {% endif %}
                         ;
                     {% endif %}

@@ -77,8 +77,7 @@ func handleGoogleIDTokenAuth(c *fiber.Ctx) error {
 		}
 		req.Header.Set("Authorization", "Bearer "+body.IDToken)
 
-		client := &http.Client{}
-		resp, err := client.Do(req)
+		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to call userinfo endpoint")
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid token", "details": "token validation failed"})
@@ -180,7 +179,6 @@ func handleGoogleIDTokenAuth(c *fiber.Ctx) error {
 
 				return nil
 			})
-
 			if err != nil {
 				log.Error().Err(err).Msg("Transaction failed during user creation")
 				return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to create user"})
