@@ -4,6 +4,9 @@ import '../providers/auth_provider.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
+import '../models/goal.dart';
+import '../models/injury.dart';
+import 'profile_completion_modal.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -171,9 +174,17 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     AdaptiveCard(
                       child: AdaptiveListTile(
+                        leading: const Icon(Icons.person),
+                        title: const Text('Gender'),
+                        subtitle: Text(_capitalizeFirst(user.profile.gender)),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    AdaptiveCard(
+                      child: AdaptiveListTile(
                         leading: const Icon(Icons.language),
                         title: const Text('Language'),
-                        subtitle: Text(user.profile.language),
+                        subtitle: Text(_capitalizeFirst(user.profile.language)),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -192,6 +203,159 @@ class HomeScreen extends StatelessWidget {
                         subtitle: Text('${user.profile.weight} kg'),
                       ),
                     ),
+
+                    // Goals section
+                    if (_getGoals(user.profile.data).isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      AdaptiveCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.flag),
+                                  const SizedBox(width: 16),
+                                  Text(
+                                    'Goals',
+                                    style: PlatformHelper.useLiquidGlass
+                                        ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
+                                        : const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            ..._getGoals(user.profile.data).map((goal) => Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('• ', style: TextStyle(fontSize: 18)),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(goal.description),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'Started: ${_formatDate(goal.startDate)}',
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    // Injuries section
+                    if (_getInjuries(user.profile.data).isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      AdaptiveCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.healing),
+                                  const SizedBox(width: 16),
+                                  Text(
+                                    'Injuries',
+                                    style: PlatformHelper.useLiquidGlass
+                                        ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
+                                        : const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            ..._getInjuries(user.profile.data).map((injury) => Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('• ', style: TextStyle(fontSize: 18)),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(injury.description),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'Year: ${injury.year}',
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    // Limitations section
+                    if (_getLimitations(user.profile.data).isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      AdaptiveCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.warning_amber),
+                                  const SizedBox(width: 16),
+                                  Text(
+                                    'Limitations',
+                                    style: PlatformHelper.useLiquidGlass
+                                        ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
+                                        : const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            ..._getLimitations(user.profile.data).map((limitation) => Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('• ', style: TextStyle(fontSize: 18)),
+                                      Expanded(child: Text(limitation)),
+                                    ],
+                                  ),
+                                )),
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+                      ),
+                    ],
 
                     const SizedBox(height: 24),
 
@@ -213,38 +377,41 @@ class HomeScreen extends StatelessWidget {
                             leading: const Icon(Icons.edit),
                             title: const Text('Edit Profile'),
                             onTap: () {
-                              // TODO: Navigate to profile edit screen
-                              AdaptiveNotification.show(
+                              showDialog(
                                 context: context,
-                                message: 'Profile editing coming soon!',
+                                barrierDismissible: true, // Allow dismissing when editing
+                                builder: (context) => ProfileCompletionModal(
+                                  profile: user.profile,
+                                  missingFields: const {}, // Empty = all fields optional
+                                ),
                               );
                             },
                           ),
                           if (!PlatformHelper.useLiquidGlass)
                             const Divider(height: 1),
                           AdaptiveListTile(
-                            leading: const Icon(Icons.fitness_center),
-                            title: const Text('Start Training'),
-                            onTap: () {
-                              // TODO: Navigate to training screen
-                              AdaptiveNotification.show(
-                                context: context,
-                                message: 'Training feature coming soon!',
-                              );
-                            },
+                            leading: Icon(
+                              Icons.fitness_center,
+                              color: Colors.grey.withOpacity(0.5),
+                            ),
+                            title: Text(
+                              'Start Training',
+                              style: TextStyle(color: Colors.grey.withOpacity(0.5)),
+                            ),
+                            onTap: null, // Disabled
                           ),
                           if (!PlatformHelper.useLiquidGlass)
                             const Divider(height: 1),
                           AdaptiveListTile(
-                            leading: const Icon(Icons.settings),
-                            title: const Text('Settings'),
-                            onTap: () {
-                              // TODO: Navigate to settings screen
-                              AdaptiveNotification.show(
-                                context: context,
-                                message: 'Settings coming soon!',
-                              );
-                            },
+                            leading: Icon(
+                              Icons.settings,
+                              color: Colors.grey.withOpacity(0.5),
+                            ),
+                            title: Text(
+                              'Settings',
+                              style: TextStyle(color: Colors.grey.withOpacity(0.5)),
+                            ),
+                            onTap: null, // Disabled
                           ),
                         ],
                       ),
@@ -331,5 +498,43 @@ class HomeScreen extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  String _capitalizeFirst(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
+  }
+
+  List<Goal> _getGoals(Map<String, dynamic> data) {
+    try {
+      if (data['goals'] != null) {
+        return (data['goals'] as List).map((g) => Goal.fromJson(g)).toList();
+      }
+    } catch (e) {
+      // Ignore parsing errors
+    }
+    return [];
+  }
+
+  List<Injury> _getInjuries(Map<String, dynamic> data) {
+    try {
+      if (data['injuries'] != null) {
+        return (data['injuries'] as List).map((i) => Injury.fromJson(i)).toList();
+      }
+    } catch (e) {
+      // Ignore parsing errors
+    }
+    return [];
+  }
+
+  List<String> _getLimitations(Map<String, dynamic> data) {
+    try {
+      if (data['limitations'] != null) {
+        return (data['limitations'] as List).cast<String>();
+      }
+    } catch (e) {
+      // Ignore parsing errors
+    }
+    return [];
   }
 }
