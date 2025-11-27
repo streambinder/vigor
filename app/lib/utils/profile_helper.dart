@@ -12,11 +12,21 @@ class ProfileHelper {
     for (final fieldName in Profile.requiredFields) {
       switch (fieldName) {
         case 'birthdate':
-          // Check if birthdate is the default/zero value
-          if (profile.birthdate.year == 1970 &&
-              profile.birthdate.month == 1 &&
-              profile.birthdate.day == 1) {
+          // Check if birthdate is invalid or a default value
+          // Reject: Unix epoch (1970-01-01), Go zero time (0001-01-01),
+          // dates before 1900, or dates in the future
+          final now = DateTime.now();
+          if (profile.birthdate.year < 1900 ||
+              profile.birthdate.isAfter(now) ||
+              (profile.birthdate.year == 1970 &&
+                  profile.birthdate.month == 1 &&
+                  profile.birthdate.day == 1)) {
             missing[fieldName] = 'Birth Date';
+          }
+          break;
+        case 'gender':
+          if (profile.gender.isEmpty) {
+            missing[fieldName] = 'Gender';
           }
           break;
         case 'language':
