@@ -1,0 +1,41 @@
+# Flutter/Dart build artifacts
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Android
+android/
+!android/.gitkeep
+
+# iOS
+ios/
+!ios/.gitkeep
+
+# Documentation
+*.md
+!README.md
+
+# Tests
+test/
+coverage/
+
+# Misc
+*.log
