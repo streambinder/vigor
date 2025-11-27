@@ -118,6 +118,7 @@ class AuthenticationWrapper extends StatefulWidget {
 class _AuthenticationWrapperState extends State<AuthenticationWrapper>
     with WidgetsBindingObserver {
   bool _hasCheckedProfile = false;
+  bool _isModalCurrentlyShown = false;
   AuthState? _previousAuthState;
 
   @override
@@ -146,7 +147,8 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper>
 
     // Reset profile check when app comes to foreground
     // This ensures the modal appears every time the app is opened
-    if (state == AppLifecycleState.resumed) {
+    // BUT only if a modal isn't currently being shown
+    if (state == AppLifecycleState.resumed && !_isModalCurrentlyShown) {
       setState(() {
         _hasCheckedProfile = false;
       });
@@ -159,12 +161,14 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper>
       _previousAuthState = currentState;
       if (currentState != AuthState.authenticated) {
         _hasCheckedProfile = false;
+        _isModalCurrentlyShown = false;
       }
     }
   }
 
   void _checkAndShowProfileModal(AuthProvider authProvider) {
     if (!_hasCheckedProfile &&
+        !_isModalCurrentlyShown &&
         authProvider.state == AuthState.authenticated &&
         authProvider.currentUser != null) {
       _hasCheckedProfile = true;
@@ -173,16 +177,29 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper>
       final missingFields = ProfileHelper.getMissingRequiredFields(profile);
 
       if (missingFields.isNotEmpty) {
+        // Mark modal as shown before displaying
+        _isModalCurrentlyShown = true;
+
         // Show profile completion modal after current frame
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => ProfileCompletionModal(
-              profile: profile,
-              missingFields: missingFields,
-            ),
-          );
+          if (mounted) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => ProfileCompletionModal(
+                profile: profile,
+                missingFields: missingFields,
+              ),
+            ).then((_) {
+              // Modal closed, reset flags to allow checking again
+              if (mounted) {
+                setState(() {
+                  _isModalCurrentlyShown = false;
+                  _hasCheckedProfile = false;
+                });
+              }
+            });
+          }
         });
       }
     }
