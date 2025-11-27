@@ -33,4 +33,4 @@ require (
 	gorm.io/driver/mysql v1.6.0 // indirect
 )
 
-replace github.com/streambinder/vigor => ../server
+replace github.com/streambinder/vigor => ../backend

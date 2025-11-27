@@ -4,9 +4,9 @@ FROM golang:1.25-alpine AS bootstrap-builder
 RUN apk add --no-cache gcc musl-dev
 WORKDIR /build/knowledge
 COPY knowledge/go.mod knowledge/go.sum ./
-COPY server/go.mod server/go.sum ../server/
+COPY backend/go.mod backend/go.sum ../backend/
 RUN go mod download
-COPY server ../server/
+COPY backend ../backend/
 COPY knowledge/main.go ./
 RUN CGO_ENABLED=0 go build -o bootstrap main.go
 

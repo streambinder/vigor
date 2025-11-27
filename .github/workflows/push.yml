@@ -60,12 +60,12 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-go@v6
         with:
-          cache-dependency-path: server/go.sum
+          cache-dependency-path: backend/go.sum
       - run: |
           PATH="$PATH:$(go env GOPATH)/bin"
           export PATH
           go install mvdan.cc/gofumpt@latest
-          if gofumpt -l -e server knowledge | grep '^' -q; then exit 1; fi
+          if gofumpt -l -e backend knowledge | grep '^' -q; then exit 1; fi
   go-channel-closure:
     runs-on: ubuntu-latest
     steps:
@@ -95,12 +95,12 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-go@v6
         with:
-          cache-dependency-path: server/go.sum
+          cache-dependency-path: backend/go.sum
       - uses: subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e
         with:
           channel: stable
       - run: |
-          cd server
+          cd backend
           go generate
           git diff --exit-code
   dart-build-runner:
@@ -132,7 +132,7 @@ jobs:
           cd app
           flutter pub get
           flutter build apk --debug
-  exercisedb-docker:
+  app-docker:
     runs-on: ubuntu-latest
     needs:
       [
@@ -160,11 +160,43 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
-          context: exercisedb
+          context: knowledge
           platforms: ${{ env.DOCKER_PLATFORMS }}
-          tags: ghcr.io/streambinder/vigor/exercisedb:latest
+          tags: ghcr.io/streambinder/vigor/knowledge:latest
           push: ${{ github.event_name != 'pull_request' }}
-  server-test:
+  knowledge-docker:
+    runs-on: ubuntu-latest
+    needs:
+      [
+        codespell,
+        super-linter,
+        gofumpt,
+        go-channel-closure,
+        go-http-body-closure,
+        go-mockey-unpatch,
+      ]
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130
+      - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
+      - uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        with:
+          context: knowledge
+          platforms: ${{ env.DOCKER_PLATFORMS }}
+          tags: ghcr.io/streambinder/vigor/knowledge:latest
+          push: ${{ github.event_name != 'pull_request' }}
+  backend-test:
     runs-on: ubuntu-latest
     needs:
       [
@@ -183,9 +215,9 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-go@v6
         with:
-          cache-dependency-path: server/go.sum
+          cache-dependency-path: backend/go.sum
       - run: |
-          cd server
+          cd backend
           echo "Running tests with coverage collection..."
 
           # Run tests with coverage for each testable package
@@ -209,11 +241,11 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: coverage-reports
-          path: server/*.out
+          path: backend/*.out
           retention-days: 1
-  server-coverage:
+  backend-coverage:
     runs-on: ubuntu-latest
-    needs: [server-test]
+    needs: [backend-test]
     if: success()
     steps:
       - uses: actions/checkout@v6
@@ -221,14 +253,14 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-go@v6
         with:
-          cache-dependency-path: server/go.sum
+          cache-dependency-path: backend/go.sum
       - name: Download coverage artifacts
         uses: actions/download-artifact@v6
         with:
           name: coverage-reports
-          path: server
+          path: backend
       - run: |
-          cd server
+          cd backend
           echo "Verifying coverage requirements (>= 90%)..."
 
           # Function to check coverage percentage
@@ -259,9 +291,9 @@ jobs:
 
           echo ""
           echo "All packages meet 90% coverage requirement!"
-  server-docker:
+  backend-docker:
     runs-on: ubuntu-latest
-    needs: [server-coverage]
+    needs: [backend-coverage]
     if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
     permissions:
       contents: read
@@ -280,7 +312,7 @@ jobs:
       - uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           context: .
-          file: server/Dockerfile
+          file: backend/Dockerfile
           platforms: ${{ env.DOCKER_PLATFORMS }}
           tags: ghcr.io/streambinder/vigor:latest
           push: ${{ github.event_name != 'pull_request' }}

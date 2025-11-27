@@ -1,11 +1,11 @@
 FROM golang:1.25.4-alpine3.22 AS builder
 WORKDIR /app
 COPY knowledge/ ./knowledge/
-COPY server/go.mod server/go.sum ./server/
-WORKDIR /app/server
+COPY backend/go.mod backend/go.sum ./backend/
+WORKDIR /app/backend
 RUN go mod download
-COPY server/ .
-RUN CGO_ENABLED=0 GOOS=linux go build -o server main.go
+COPY backend/ .
+RUN CGO_ENABLED=0 GOOS=linux go build -o backend main.go
 
 FROM alpine:3.22
 
@@ -16,7 +16,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 RUN apk add --no-cache wget
 
 WORKDIR /home/appuser
-COPY --from=builder /app/server/server .
+COPY --from=builder /app/backend/backend .
 
 # Change ownership
 RUN chown -R appuser:appgroup /home/appuser
@@ -29,4 +29,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
 
 EXPOSE 8080
-CMD ["./server"]
+CMD ["./backend"]

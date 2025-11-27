@@ -21,6 +21,6 @@ updates:
       interval: "weekly"
 
   - package-ecosystem: "docker"
-    directory: "/server"
+    directory: "/backend"
     schedule:
       interval: "weekly"
