@@ -30,6 +30,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
 
   // Form field controllers
   DateTime? _birthdate;
+  String? _gender;
   String? _language;
   double? _height;
   double? _weight;
@@ -46,8 +47,17 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   @override
   void initState() {
     super.initState();
-    // Pre-fill with existing values if they exist
-    _birthdate = widget.profile.birthdate;
+    // Pre-fill with existing values if they exist and are valid
+    final now = DateTime.now();
+    final birthdate = widget.profile.birthdate;
+    // Only use birthdate if it's valid (between 1900 and today)
+    if (birthdate.year >= 1900 && !birthdate.isAfter(now)) {
+      _birthdate = birthdate;
+    } else {
+      _birthdate = null; // Will use default in date picker
+    }
+
+    _gender = widget.profile.gender.isNotEmpty ? widget.profile.gender : null;
     _language = widget.profile.language.isNotEmpty ? widget.profile.language : null;
     _height = widget.profile.height > 0 ? widget.profile.height : null;
     _weight = widget.profile.weight > 0 ? widget.profile.weight : null;
@@ -84,6 +94,14 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
       return;
     }
 
+    // Validate required fields that aren't in the form
+    if (widget.missingFields.containsKey('birthdate') && _birthdate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select your birth date')),
+      );
+      return;
+    }
+
     // Ensure required list fields have at least one entry
     if (widget.missingFields.containsKey('goals') && _goals.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -107,6 +125,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
       final authProvider = context.read<AuthProvider>();
       final success = await authProvider.updateProfile(
         birthdate: _birthdate,
+        gender: _gender,
         language: _language,
         height: _height,
         weight: _weight,
@@ -136,7 +155,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false, // Prevent back button dismissal
+      canPop: widget.missingFields.isEmpty, // Allow dismissal when editing
       child: Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
@@ -160,7 +179,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
                   children: [
                     // Header
                     Text(
-                      'Complete Your Profile',
+                      widget.missingFields.isEmpty ? 'Edit Profile' : 'Complete Your Profile',
                       style: PlatformHelper.useLiquidGlass
                           ? LiquidGlassTheme.titleStyle
                           : const TextStyle(
@@ -170,7 +189,9 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Please fill in the following required information to continue:',
+                      widget.missingFields.isEmpty
+                          ? 'Update your profile information below.'
+                          : 'Please complete your profile. Fields marked with * are required.',
                       style: PlatformHelper.useLiquidGlass
                           ? LiquidGlassTheme.captionStyle
                           : const TextStyle(color: Colors.grey),
@@ -178,32 +199,28 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
                     const SizedBox(height: 24),
 
                     // Birthdate
-                    if (widget.missingFields.containsKey('birthdate'))
-                      _buildDateField(),
+                    _buildDateField(),
+
+                    // Gender
+                    _buildGenderField(),
 
                     // Language
-                    if (widget.missingFields.containsKey('language'))
-                      _buildLanguageField(),
+                    _buildLanguageField(),
 
                     // Height
-                    if (widget.missingFields.containsKey('height'))
-                      _buildHeightField(),
+                    _buildHeightField(),
 
                     // Weight
-                    if (widget.missingFields.containsKey('weight'))
-                      _buildWeightField(),
+                    _buildWeightField(),
 
                     // Goals
-                    if (widget.missingFields.containsKey('goals'))
-                      _buildGoalsSection(),
+                    _buildGoalsSection(),
 
                     // Injuries
-                    if (widget.missingFields.containsKey('injuries'))
-                      _buildInjuriesSection(),
+                    _buildInjuriesSection(),
 
                     // Limitations
-                    if (widget.missingFields.containsKey('limitations'))
-                      _buildLimitationsSection(),
+                    _buildLimitationsSection(),
 
                     const SizedBox(height: 24),
 
@@ -216,8 +233,17 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
                               width: 20,
                               child: AdaptiveLoadingIndicator(),
                             )
-                          : const Text('Save Profile'),
+                          : Text(widget.missingFields.isEmpty ? 'Save Changes' : 'Save Profile'),
                     ),
+
+                    // Cancel button (only when editing)
+                    if (widget.missingFields.isEmpty) ...[
+                      const SizedBox(height: 12),
+                      TextButton(
+                        onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                        child: const Text('Cancel'),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -229,12 +255,16 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   }
 
   Widget _buildDateField() {
+    final isRequired = widget.missingFields.containsKey('birthdate');
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Birth Date *', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            isRequired ? 'Birth Date *' : 'Birth Date',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           InkWell(
             onTap: () async {
@@ -260,7 +290,9 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
                     ? '${_birthdate!.day}/${_birthdate!.month}/${_birthdate!.year}'
                     : 'Select date',
                 style: TextStyle(
-                  color: _birthdate != null ? Colors.black : Colors.grey,
+                  color: _birthdate != null
+                      ? Theme.of(context).textTheme.bodyLarge?.color
+                      : Theme.of(context).hintColor,
                 ),
               ),
             ),
@@ -270,40 +302,104 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
     );
   }
 
-  Widget _buildLanguageField() {
+  Widget _buildGenderField() {
+    final isRequired = widget.missingFields.containsKey('gender');
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        initialValue: _language,
-        decoration: const InputDecoration(
-          labelText: 'Language *',
-          hintText: 'e.g., en, it, es',
-          border: OutlineInputBorder(),
-        ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Please enter your language (ISO 639-1 code)';
-          }
-          return null;
-        },
-        onChanged: (value) {
-          _language = value;
-        },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isRequired ? 'Gender *' : 'Gender',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<String>(
+            value: _gender,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Select gender',
+            ),
+            items: const [
+              DropdownMenuItem(value: 'male', child: Text('Male')),
+              DropdownMenuItem(value: 'female', child: Text('Female')),
+            ],
+            validator: isRequired ? (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select your gender';
+              }
+              return null;
+            } : null,
+            onChanged: (value) {
+              setState(() {
+                _gender = value;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageField() {
+    final isRequired = widget.missingFields.containsKey('language');
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isRequired ? 'Language *' : 'Language',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<String>(
+            value: _language,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Select language',
+            ),
+            items: const [
+              DropdownMenuItem(value: 'english', child: Text('English')),
+              DropdownMenuItem(value: 'italiano', child: Text('Italiano')),
+              DropdownMenuItem(value: 'español', child: Text('Español')),
+              DropdownMenuItem(value: 'français', child: Text('Français')),
+              DropdownMenuItem(value: 'deutsch', child: Text('Deutsch')),
+              DropdownMenuItem(value: 'português', child: Text('Português')),
+              DropdownMenuItem(value: 'русский', child: Text('Русский')),
+              DropdownMenuItem(value: '中文', child: Text('中文')),
+              DropdownMenuItem(value: '日本語', child: Text('日本語')),
+              DropdownMenuItem(value: '한국어', child: Text('한국어')),
+            ],
+            validator: isRequired ? (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select your language';
+              }
+              return null;
+            } : null,
+            onChanged: (value) {
+              setState(() {
+                _language = value;
+              });
+            },
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildHeightField() {
+    final isRequired = widget.missingFields.containsKey('height');
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         initialValue: _height?.toString(),
-        decoration: const InputDecoration(
-          labelText: 'Height (cm) *',
-          border: OutlineInputBorder(),
+        decoration: InputDecoration(
+          labelText: isRequired ? 'Height (cm) *' : 'Height (cm)',
+          border: const OutlineInputBorder(),
         ),
         keyboardType: TextInputType.number,
-        validator: (value) {
+        validator: isRequired ? (value) {
           if (value == null || value.isEmpty) {
             return 'Please enter your height';
           }
@@ -312,7 +408,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
             return 'Please enter a valid height';
           }
           return null;
-        },
+        } : null,
         onChanged: (value) {
           _height = double.tryParse(value);
         },
@@ -321,16 +417,17 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   }
 
   Widget _buildWeightField() {
+    final isRequired = widget.missingFields.containsKey('weight');
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         initialValue: _weight?.toString(),
-        decoration: const InputDecoration(
-          labelText: 'Weight (kg) *',
-          border: OutlineInputBorder(),
+        decoration: InputDecoration(
+          labelText: isRequired ? 'Weight (kg) *' : 'Weight (kg)',
+          border: const OutlineInputBorder(),
         ),
         keyboardType: TextInputType.number,
-        validator: (value) {
+        validator: isRequired ? (value) {
           if (value == null || value.isEmpty) {
             return 'Please enter your weight';
           }
@@ -339,7 +436,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
             return 'Please enter a valid weight';
           }
           return null;
-        },
+        } : null,
         onChanged: (value) {
           _weight = double.tryParse(value);
         },
@@ -348,12 +445,16 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   }
 
   Widget _buildGoalsSection() {
+    final isRequired = widget.missingFields.containsKey('goals');
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Goals *', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            isRequired ? 'Goals *' : 'Goals',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           ..._goals.map((goal) => ListTile(
                 title: Text(goal.description),
@@ -401,13 +502,21 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   }
 
   Widget _buildInjuriesSection() {
+    final isRequired = widget.missingFields.containsKey('injuries');
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Injuries', style: TextStyle(fontWeight: FontWeight.bold)),
-          const Text('(Optional - leave empty if none)', style: TextStyle(fontSize: 12, color: Colors.grey)),
+          Text(
+            isRequired ? 'Injuries *' : 'Injuries',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          if (!isRequired)
+            const Text(
+              '(Optional - leave empty if none)',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
           const SizedBox(height: 8),
           ..._injuries.map((injury) => ListTile(
                 title: Text(injury.description),
@@ -470,13 +579,21 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   }
 
   Widget _buildLimitationsSection() {
+    final isRequired = widget.missingFields.containsKey('limitations');
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Limitations', style: TextStyle(fontWeight: FontWeight.bold)),
-          const Text('(Optional - leave empty if none)', style: TextStyle(fontSize: 12, color: Colors.grey)),
+          Text(
+            isRequired ? 'Limitations *' : 'Limitations',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          if (!isRequired)
+            const Text(
+              '(Optional - leave empty if none)',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
           const SizedBox(height: 8),
           ..._limitations.map((limitation) => ListTile(
                 title: Text(limitation),
