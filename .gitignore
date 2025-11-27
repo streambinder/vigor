@@ -35,3 +35,6 @@ go.work.sum
 
 # Generated code artifacts (keep *.g.dart files from build_runner)
 app/lib/models/*.g.dart
+
+# Claude
+CLAUDE.md
