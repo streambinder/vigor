@@ -18,7 +18,15 @@ class AuthService {
     ApiService? apiService,
     SecureStorageService? storageService,
   })  : _apiService = apiService ?? ApiService(),
-        _storageService = storageService ?? SecureStorageService();
+        _storageService = storageService ?? SecureStorageService() {
+    // Ensure storage is initialized if using default instance
+    if (storageService == null && !_storageService.isHealthy) {
+      throw StateError(
+        'SecureStorageService must be initialized before creating AuthService. '
+        'Either pass an initialized instance or call storage.initialize() first.',
+      );
+    }
+  }
 
   /// Login with Google ID token
   /// Returns tokens on success, stores them securely

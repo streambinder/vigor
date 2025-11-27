@@ -8,18 +8,91 @@ import 'screens/profile_completion_modal.dart';
 import 'utils/profile_helper.dart';
 import 'utils/platform_helper.dart';
 import 'theme/material_you_theme.dart';
+import 'services/secure_storage_service.dart';
+import 'services/app_logger.dart';
 
-void main() {
-  runApp(const VigorApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize secure storage and fail fast if not available
+  final storage = SecureStorageService();
+  try {
+    await storage.initialize();
+  } catch (e) {
+    // Show error and exit app
+    runApp(StorageErrorApp(error: e.toString()));
+    return;
+  }
+
+  runApp(VigorApp(storage: storage));
+}
+
+/// Error screen shown when storage initialization fails
+class StorageErrorApp extends StatelessWidget {
+  final String error;
+
+  const StorageErrorApp({super.key, required this.error});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Vigor - Storage Error',
+      theme: MaterialYouTheme.lightTheme,
+      darkTheme: MaterialYouTheme.darkTheme,
+      themeMode: ThemeMode.system,
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Colors.red,
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Storage Unavailable',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  error,
+                  style: const TextStyle(fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'This app requires secure storage to protect your data. '
+                  'Please check your browser settings and try again.',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      debugShowCheckedModeBanner: false,
+    );
+  }
 }
 
 class VigorApp extends StatelessWidget {
-  const VigorApp({super.key});
+  final SecureStorageService storage;
+
+  const VigorApp({super.key, required this.storage});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => AuthProvider(),
+      create: (_) => AuthProvider(storage: storage),
       child: MaterialApp(
         title: 'Vigor',
         // Use Material You theme for all platforms

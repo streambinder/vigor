@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 import '../models/user.dart';
 import '../services/app_logger.dart';
 import '../services/auth_service.dart';
+import '../services/secure_storage_service.dart';
 
 /// Authentication state
 enum AuthState {
@@ -22,8 +23,10 @@ class AuthProvider with ChangeNotifier {
   User? _currentUser;
   String? _errorMessage;
 
-  AuthProvider({AuthService? authService})
-      : _authService = authService ?? AuthService();
+  AuthProvider({
+    AuthService? authService,
+    SecureStorageService? storage,
+  }) : _authService = authService ?? AuthService(storageService: storage);
 
   // Getters
   AuthState get state => _state;
