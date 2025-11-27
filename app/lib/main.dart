@@ -115,18 +115,42 @@ class AuthenticationWrapper extends StatefulWidget {
   State<AuthenticationWrapper> createState() => _AuthenticationWrapperState();
 }
 
-class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
+class _AuthenticationWrapperState extends State<AuthenticationWrapper>
+    with WidgetsBindingObserver {
   bool _hasCheckedProfile = false;
   AuthState? _previousAuthState;
 
   @override
   void initState() {
     super.initState();
+    // Register for app lifecycle events
+    WidgetsBinding.instance.addObserver(this);
+
     // Initialize authentication state on app startup
     // This will check for stored tokens and refresh them if available
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthProvider>().initialize();
     });
+  }
+
+  @override
+  void dispose() {
+    // Unregister app lifecycle observer
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // Reset profile check when app comes to foreground
+    // This ensures the modal appears every time the app is opened
+    if (state == AppLifecycleState.resumed) {
+      setState(() {
+        _hasCheckedProfile = false;
+      });
+    }
   }
 
   void _resetProfileCheckOnAuthChange(AuthState currentState) {
