@@ -38,3 +38,6 @@ app/lib/models/*.g.dart
 
 # Claude
 CLAUDE.md
+
+# Testing
+flow.sh
