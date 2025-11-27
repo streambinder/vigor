@@ -4,6 +4,9 @@ import '../providers/auth_provider.dart';
 import '../models/profile.dart';
 import '../models/goal.dart';
 import '../models/injury.dart';
+import '../widgets/adaptive/adaptive.dart';
+import '../theme/liquid_glass_theme.dart';
+import '../utils/platform_helper.dart';
 
 /// Modal for completing missing profile fields
 /// This modal cannot be dismissed and blocks user from proceeding until complete
@@ -135,75 +138,88 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
     return PopScope(
       canPop: false, // Prevent back button dismissal
       child: Dialog(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Header
-                  const Text(
-                    'Complete Your Profile',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+        backgroundColor: Colors.transparent,
+        child: Container(
+          decoration: PlatformHelper.useLiquidGlass
+              ? LiquidGlassTheme.glassDecoration(
+                  borderRadius: 20,
+                  opacity: 0.95,
+                )
+              : BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Header
+                    Text(
+                      'Complete Your Profile',
+                      style: PlatformHelper.useLiquidGlass
+                          ? LiquidGlassTheme.titleStyle
+                          : const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Please fill in the following required information to continue:',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Birthdate
-                  if (widget.missingFields.containsKey('birthdate'))
-                    _buildDateField(),
-
-                  // Language
-                  if (widget.missingFields.containsKey('language'))
-                    _buildLanguageField(),
-
-                  // Height
-                  if (widget.missingFields.containsKey('height'))
-                    _buildHeightField(),
-
-                  // Weight
-                  if (widget.missingFields.containsKey('weight'))
-                    _buildWeightField(),
-
-                  // Goals
-                  if (widget.missingFields.containsKey('goals'))
-                    _buildGoalsSection(),
-
-                  // Injuries
-                  if (widget.missingFields.containsKey('injuries'))
-                    _buildInjuriesSection(),
-
-                  // Limitations
-                  if (widget.missingFields.containsKey('limitations'))
-                    _buildLimitationsSection(),
-
-                  const SizedBox(height: 24),
-
-                  // Submit button
-                  ElevatedButton(
-                    onPressed: _isSubmitting ? null : _submitProfile,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(16),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Please fill in the following required information to continue:',
+                      style: PlatformHelper.useLiquidGlass
+                          ? LiquidGlassTheme.captionStyle
+                          : const TextStyle(color: Colors.grey),
                     ),
-                    child: _isSubmitting
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Save Profile'),
-                  ),
-                ],
+                    const SizedBox(height: 24),
+
+                    // Birthdate
+                    if (widget.missingFields.containsKey('birthdate'))
+                      _buildDateField(),
+
+                    // Language
+                    if (widget.missingFields.containsKey('language'))
+                      _buildLanguageField(),
+
+                    // Height
+                    if (widget.missingFields.containsKey('height'))
+                      _buildHeightField(),
+
+                    // Weight
+                    if (widget.missingFields.containsKey('weight'))
+                      _buildWeightField(),
+
+                    // Goals
+                    if (widget.missingFields.containsKey('goals'))
+                      _buildGoalsSection(),
+
+                    // Injuries
+                    if (widget.missingFields.containsKey('injuries'))
+                      _buildInjuriesSection(),
+
+                    // Limitations
+                    if (widget.missingFields.containsKey('limitations'))
+                      _buildLimitationsSection(),
+
+                    const SizedBox(height: 24),
+
+                    // Submit button
+                    AdaptiveButton(
+                      onPressed: _isSubmitting ? null : _submitProfile,
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: AdaptiveLoadingIndicator(),
+                            )
+                          : const Text('Save Profile'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

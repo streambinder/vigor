@@ -6,6 +6,8 @@ import 'screens/google_auth_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/profile_completion_modal.dart';
 import 'utils/profile_helper.dart';
+import 'utils/platform_helper.dart';
+import 'theme/material_you_theme.dart';
 
 void main() {
   runApp(const VigorApp());
@@ -20,10 +22,11 @@ class VigorApp extends StatelessWidget {
       create: (_) => AuthProvider(),
       child: MaterialApp(
         title: 'Vigor',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-          useMaterial3: true,
-        ),
+        // Use Material You theme for all platforms
+        // iOS will use Liquid Glass widgets on top of Material base
+        theme: MaterialYouTheme.lightTheme,
+        darkTheme: MaterialYouTheme.darkTheme,
+        themeMode: ThemeMode.system,
         home: const AuthenticationWrapper(),
         debugShowCheckedModeBanner: false,
       ),

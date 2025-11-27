@@ -8,6 +8,9 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import '../services/app_logger.dart';
+import '../widgets/adaptive/adaptive.dart';
+import '../theme/liquid_glass_theme.dart';
+import '../utils/platform_helper.dart';
 
 // Import web-only methods when on web
 import 'package:google_sign_in_web/web_only.dart' as web_only
@@ -217,7 +220,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AdaptiveScaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -227,34 +230,42 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Logo or App Name
-                const Icon(
+                Icon(
                   Icons.fitness_center,
                   size: 80,
-                  color: Colors.blue,
+                  color: PlatformHelper.useLiquidGlass
+                      ? LiquidGlassTheme.primaryColor
+                      : Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Vigor',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: PlatformHelper.useLiquidGlass
+                      ? LiquidGlassTheme.titleStyle
+                      : const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Your personal training assistant',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
+                  style: PlatformHelper.useLiquidGlass
+                      ? LiquidGlassTheme.bodyStyle.copyWith(
+                          color: LiquidGlassTheme.captionStyle.color,
+                        )
+                      : const TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 48),
 
                 // Google Sign-In Button (platform-specific)
                 if (!_initialized)
-                  const Center(child: CircularProgressIndicator())
+                  const Center(child: AdaptiveLoadingIndicator())
                 else if (kIsWeb)
                   // Web: Use Google's renderButton widget
                   Center(
@@ -269,38 +280,39 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
                     ),
                   )
                 else
-                  // Mobile: Use custom button with authenticate()
-                  ElevatedButton.icon(
+                  // Mobile: Use adaptive button with authenticate()
+                  AdaptiveButton(
                     onPressed: _isLoading ? null : _handleGoogleSignIn,
-                    icon: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
+                    child: _isLoading
+                        ? const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: AdaptiveLoadingIndicator(),
+                              ),
+                              SizedBox(width: 12),
+                              Text('Signing in...'),
+                            ],
                           )
-                        : const Icon(Icons.login, size: 24),
-                    label: Text(
-                      _isLoading ? 'Signing in...' : 'Sign in with Google',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 16,
-                        horizontal: 24,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
+                        : const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.login, size: 24, color: Colors.white),
+                              SizedBox(width: 12),
+                              Text('Sign in with Google'),
+                            ],
+                          ),
                   ),
 
                 // Loading indicator for web (separate from button)
                 if (kIsWeb && _isLoading) ...[
                   const SizedBox(height: 16),
                   const Center(
-                    child: CircularProgressIndicator(),
+                    child: AdaptiveLoadingIndicator(),
                   ),
                 ],
 
@@ -310,14 +322,22 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red.shade200),
+                      color: PlatformHelper.useLiquidGlass
+                          ? LiquidGlassTheme.errorColor.withOpacity(0.1)
+                          : Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.errorColor.withOpacity(0.3)
+                            : Colors.red.shade200,
+                      ),
                     ),
                     child: Text(
                       _errorMessage!,
                       style: TextStyle(
-                        color: Colors.red.shade900,
+                        color: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.errorColor
+                            : Colors.red.shade900,
                         fontSize: 14,
                       ),
                       textAlign: TextAlign.center,
