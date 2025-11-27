@@ -10,12 +10,15 @@ class Profile {
   // Fields marked as required in the backend model
   static const List<String> requiredFields = [
     'birthdate',
+    'gender',
     'language',
     'height',
     'weight'
   ];
   @JsonKey(name: 'birthdate')
   final DateTime birthdate;
+  @JsonKey(name: 'gender')
+  final String gender;
   @JsonKey(name: 'language')
   final String language;
   @JsonKey(name: 'height')
@@ -29,6 +32,7 @@ class Profile {
 
   Profile({
     required this.birthdate,
+    required this.gender,
     required this.language,
     required this.height,
     required this.weight,
