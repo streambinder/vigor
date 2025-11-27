@@ -14,6 +14,9 @@ import (
 
 func main() {
 	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
 	if err := handler.APP.Listen(":" + port); err != nil {
 		log.Fatal().Err(err).Str("port", port).Msg("Failed to start server")
 	}
