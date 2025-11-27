@@ -22,6 +22,8 @@ RUN apt-get update && apt-get install -y \
 
 FROM nginx:1.27-alpine
 
+LABEL org.opencontainers.image.source=https://github.com/streambinder/vigor
+
 COPY --from=builder /app/build/web /usr/share/nginx/html
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker/docker-entrypoint.sh /docker-entrypoint.sh

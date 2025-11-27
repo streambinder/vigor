@@ -9,6 +9,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o backend main.go
 
 FROM alpine:3.22
 
+LABEL org.opencontainers.image.source=https://github.com/streambinder/vigor
+
 # Create non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 

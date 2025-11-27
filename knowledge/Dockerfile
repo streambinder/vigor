@@ -30,6 +30,9 @@ RUN initdb -D /tmp/pgdata && \
   pg_ctl -D /tmp/pgdata stop
 
 FROM pgvector/pgvector:0.8.1-pg18
+
+LABEL org.opencontainers.image.source=https://github.com/streambinder/vigor
+
 ENV POSTGRES_DB=db
 ENV POSTGRES_USER=user
 COPY --from=data-builder /build/init.sql /docker-entrypoint-initdb.d/
