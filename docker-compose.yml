@@ -1,0 +1,120 @@
+---
+services:
+  database:
+    image: pgvector/pgvector:0.8.1-pg18
+    restart: always
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    volumes:
+      - db_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -U user -d db"]
+    networks:
+      - default
+  embedding:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    command:
+      - --embedding
+      - --model
+      - /model.gguf
+    volumes:
+      - ./models/model.gguf:/model.gguf:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - default
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+  llm:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    command:
+      - --model
+      - /model.gguf
+    volumes:
+      - ./models/model.gguf:/model.gguf:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - default
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+  knowledge:
+    build:
+      context: .
+      dockerfile: knowledge/Dockerfile
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -U user -d db"]
+    networks:
+      - default
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      database:
+        condition: service_healthy
+      embedding:
+        condition: service_healthy
+      # llm:
+      #   condition: service_healthy
+    environment:
+      PORT: 8000
+      DATABASE_URL: postgres://user:pass@database:5432/db?sslmode=disable
+      KNOWLEDGE_URL: postgres://user:pass@knowledge:5432/db?sslmode=disable
+      JWT_SECRET: 123456789
+      LLAMACPP_TIERS: http://llm:8000
+      LLAMACPP_EMBEDDING_TIERS: http://embedding:8000
+      OPENROUTER_API_KEY: sk-or-v1-blablabla
+      OPENROUTER_MODEL: openai/gpt-oss-20b:free
+      GOOGLE_CLIENT_ID: 123123123-abcedfghilmnopqrstuvz.apps.googleusercontent.com
+    networks:
+      - default
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      API_URL: http://backend:8000
+    ports:
+      - 8080:80
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - default
+
+volumes:
+  db_data:
+
+networks:
+  default:
