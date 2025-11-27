@@ -215,6 +215,7 @@ class AuthService {
   /// Update user profile
   Future<ApiResponse<String>> updateProfile({
     DateTime? birthdate,
+    String? gender,
     String? language,
     double? height,
     double? weight,
@@ -236,6 +237,7 @@ class AuthService {
       final year = birthdate.year.toString();
       body['birthdate'] = '$day/$month/$year';
     }
+    if (gender != null) body['gender'] = gender;
     if (language != null) body['language'] = language;
     if (height != null) body['height'] = height;
     if (weight != null) body['weight'] = weight;

@@ -162,6 +162,7 @@ class AuthProvider with ChangeNotifier {
   /// Update user profile
   Future<bool> updateProfile({
     DateTime? birthdate,
+    String? gender,
     String? language,
     double? height,
     double? weight,
@@ -175,6 +176,7 @@ class AuthProvider with ChangeNotifier {
     try {
       final response = await _authService.updateProfile(
         birthdate: birthdate,
+        gender: gender,
         language: language,
         height: height,
         weight: weight,
