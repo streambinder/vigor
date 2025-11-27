@@ -111,6 +111,7 @@ func handleUpdateUser(c *fiber.Ctx) error {
 
 	var body struct {
 		Birthdate string         `json:"birthdate"`
+		Gender    string         `json:"gender"`
 		Language  string         `json:"language"`
 		Height    float64        `json:"height"`
 		Weight    float64        `json:"weight"`
@@ -125,10 +126,15 @@ func handleUpdateUser(c *fiber.Ctx) error {
 		t, err := time.Parse("02/01/2006", body.Birthdate)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "invalid date format, use YYYY-MM-DD",
+				"error": "invalid date format, use DD-MM-YYYY",
 			})
 		}
 		profile.Birthdate = t
+	}
+
+	// gender
+	if body.Gender != "" {
+		profile.Gender = body.Gender
 	}
 
 	// language

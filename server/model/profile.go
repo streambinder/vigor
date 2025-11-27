@@ -12,6 +12,7 @@ import (
 // Profile stores user's physical attributes and fitness-related metadata.
 type Profile struct {
 	Birthdate time.Time      `json:"birthdate" flutter:"required"`
+	Gender    string         `json:"gender" flutter:"required"`
 	Language  string         `gorm:"default:'english'" json:"language" flutter:"required"`
 	Height    float64        `json:"height" flutter:"required"`
 	Weight    float64        `json:"weight" flutter:"required"`
