@@ -37,7 +37,11 @@ go.work.sum
 app/lib/models/*.g.dart
 
 # Claude
+.claude
 CLAUDE.md
 
 # Testing
 flow.sh
+
+# Docker
+.docker-compose.yml
