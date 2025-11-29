@@ -35,6 +35,7 @@ type TrainingRequest struct {
 
 func init() {
 	APP.Post("/training", middleware.Authorized(), handleTrainingRequest)
+	APP.Get("/training", middleware.Authorized(), handleGetTrainings)
 }
 
 func queryUserExercises(profile model.Profile, equipment []string) ([]model.Exercise, error) {
@@ -194,5 +195,57 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
+	// Ensure null slices are converted to empty slices for JSON serialization
+	if training.References == nil {
+		training.References = []string{}
+	}
+	if training.Routines == nil {
+		training.Routines = []model.Routine{}
+	}
+	for i := range training.Routines {
+		if training.Routines[i].Blocks == nil {
+			training.Routines[i].Blocks = []model.Block{}
+		}
+		for j := range training.Routines[i].Blocks {
+			if training.Routines[i].Blocks[j].Activities == nil {
+				training.Routines[i].Blocks[j].Activities = []model.Activity{}
+			}
+		}
+	}
+
 	return c.JSON(training)
+}
+
+// handleGetTrainings handles GET /training endpoint for retrieving user's training history.
+func handleGetTrainings(c *fiber.Ctx) error {
+	var trainings []model.Training
+	if err := database.DB.
+		Preload("Routines.Blocks.Activities").
+		Where("user_id = ?", c.Locals("userID")).
+		Order("completed_at desc").
+		Find(&trainings).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	// Ensure null slices are converted to empty slices for JSON serialization
+	for i := range trainings {
+		if trainings[i].References == nil {
+			trainings[i].References = []string{}
+		}
+		if trainings[i].Routines == nil {
+			trainings[i].Routines = []model.Routine{}
+		}
+		for j := range trainings[i].Routines {
+			if trainings[i].Routines[j].Blocks == nil {
+				trainings[i].Routines[j].Blocks = []model.Block{}
+			}
+			for k := range trainings[i].Routines[j].Blocks {
+				if trainings[i].Routines[j].Blocks[k].Activities == nil {
+					trainings[i].Routines[j].Blocks[k].Activities = []model.Activity{}
+				}
+			}
+		}
+	}
+
+	return c.JSON(fiber.Map{"trainings": trainings})
 }

@@ -663,19 +663,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             const Divider(height: 1),
                           AdaptiveListTile(
                             leading: Icon(
-                              Icons.fitness_center,
-                              color: Colors.grey.withOpacity(0.5),
-                            ),
-                            title: Text(
-                              'Start Training',
-                              style: TextStyle(color: Colors.grey.withOpacity(0.5)),
-                            ),
-                            onTap: null,
-                          ),
-                          if (!PlatformHelper.useLiquidGlass)
-                            const Divider(height: 1),
-                          AdaptiveListTile(
-                            leading: Icon(
                               Icons.settings,
                               color: Colors.grey.withOpacity(0.5),
                             ),
