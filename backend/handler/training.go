@@ -70,8 +70,8 @@ func queryUserExercises(profile model.Profile, equipment []string) ([]model.Exer
 	return exercises, nil
 }
 
-func queryUserFacts(profile model.Profile) ([]model.Fact, error) {
-	embeddingText := rag.GenUserFacts(profile)
+func queryUserFacts(profile model.Profile, prompt string) ([]model.Fact, error) {
+	embeddingText := rag.GenUserFacts(profile, prompt)
 	embedding, err := embedding.GenVector(embeddingText)
 	if err != nil {
 		return nil, err
@@ -144,7 +144,7 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 
 	// Query knowledge facts related to user's profile
 	queryFactsStart := time.Now()
-	facts, err := queryUserFacts(profile)
+	facts, err := queryUserFacts(profile, req.Prompt)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to query facts from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})

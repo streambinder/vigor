@@ -2,8 +2,12 @@
 
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func GenUserFacts(profile model.Profile) -%}
+{% func GenUserFacts(profile model.Profile, prompt string) -%}
 {% collapsespace %}
+
+{% if len(prompt) > 0 %}
+    Specific request: {%s prompt %}.
+{% endif %}
 
 {% if len(profile.Goals()) > 0 %}
     Fitness goals:
