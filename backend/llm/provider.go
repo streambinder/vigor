@@ -25,9 +25,9 @@ type Message struct {
 }
 
 // ResponseFormat specifies the desired response format from the LLM.
-type ResponseFormat struct {
-	Type string `json:"type"` // Must be "json_object" for JSON mode
-}
+// Can be either a simple type string or a structured schema object.
+type ResponseFormat interface{}
+
 
 // ChatCompletionRequest contains parameters for an LLM chat completion API call.
 type ChatCompletionRequest struct {
@@ -90,6 +90,14 @@ func GenTraining(profile model.Profile, exercises []model.Exercise, userPrompt s
 	training := &model.Training{}
 	if err := json.Unmarshal(response, &training); err != nil {
 		return nil, fmt.Errorf("unable to generate training for %s: %s", string(response), err)
+	}
+
+	// Validate that critical fields are populated (safety net against silent unmarshal failures)
+	if training.Name == "" || training.Description == "" || training.Type == "" {
+		return nil, fmt.Errorf("invalid training generated: missing required fields (name/description/type), got: %s", string(response))
+	}
+	if len(training.Routines) == 0 {
+		return nil, fmt.Errorf("invalid training generated: no routines found, got: %s", string(response))
 	}
 
 	return training, nil

@@ -37,7 +37,7 @@ func (llm *LlamaCpp) query(system, user string, temperature float64, maxTokens i
 			{Role: "system", Content: system},
 			{Role: "user", Content: user},
 		},
-		ResponseFormat: ResponseFormat{Type: "json_object"},
+		ResponseFormat: map[string]string{"type": "json_object"}, // llama.cpp uses basic JSON mode
 		Temperature:    temperature,
 		MaxTokens:      maxTokens,
 		TopP:           0.9,

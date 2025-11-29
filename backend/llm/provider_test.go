@@ -80,14 +80,37 @@ func TestGenTraining_Success(t *testing.T) {
 	originalProviders := providers
 	defer func() { providers = originalProviders }()
 
-	// Create a valid training response
+	// Create a valid training response with routines
 	training := &model.Training{
 		ID:          uuid.New(),
 		Name:        "Test Training",
 		Description: "Test Description",
 		Type:        "Strength",
 		Duration:    30,
-		Routines:    []model.Routine{},
+		Routines: []model.Routine{
+			{
+				Type: "warmup",
+				Rest: 60,
+				Blocks: []model.Block{
+					{
+						Type:    "warmup",
+						Repeats: 1,
+						Rest:    0,
+						Activities: []model.Activity{
+							{
+								Name:      "jumping-jacks",
+								Rationale: "Warm up exercise",
+								Type:      "exercise",
+								Duration:  60,
+								Reps:      0,
+								WeightKg:  0,
+								Rest:      0,
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	trainingJSON, err := json.Marshal(training)
@@ -213,7 +236,30 @@ func TestGenTraining_CallsPromptCorrectly(t *testing.T) {
 		Description: "Test Description",
 		Type:        "Cardio",
 		Duration:    45,
-		Routines:    []model.Routine{},
+		Routines: []model.Routine{
+			{
+				Type: "circuit",
+				Rest: 30,
+				Blocks: []model.Block{
+					{
+						Type:    "circuit",
+						Repeats: 3,
+						Rest:    10,
+						Activities: []model.Activity{
+							{
+								Name:      "mat-stretch",
+								Rationale: "Flexibility exercise",
+								Type:      "stretch",
+								Duration:  30,
+								Reps:      0,
+								WeightKg:  0,
+								Rest:      10,
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	trainingJSON, err := json.Marshal(training)

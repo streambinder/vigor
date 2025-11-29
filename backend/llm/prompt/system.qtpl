@@ -40,5 +40,7 @@ Respond in
 {% endif %}
 using JSON: {%s= schema %}
 
+IMPORTANT: Output ONLY the final JSON object. Do not include commentary, thinking steps, or intermediate responses. Respond with a complete training plan matching the exact JSON schema provided. Suppress any newline or tab characters.
+
 {% endcollapsespace -%}
 {% endfunc %}

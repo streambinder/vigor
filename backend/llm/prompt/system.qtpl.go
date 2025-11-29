@@ -133,32 +133,32 @@ func StreamSystem(qw422016 *qt422016.Writer, profile model.Profile, schema strin
 //line llm/prompt/system.qtpl:41
 	qw422016.N().S(schema)
 //line llm/prompt/system.qtpl:41
-	qw422016.N().S(` `)
-//line llm/prompt/system.qtpl:44
+	qw422016.N().S(` IMPORTANT: Output ONLY the final JSON object. Do not include commentary, thinking steps, or intermediate responses. Respond with a complete training plan matching the exact JSON schema provided. `)
+//line llm/prompt/system.qtpl:46
 }
 
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:46
 func WriteSystem(qq422016 qtio422016.Writer, profile model.Profile, schema string) {
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:46
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:46
 	StreamSystem(qw422016, profile, schema)
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:46
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:46
 }
 
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:46
 func System(profile model.Profile, schema string) string {
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:46
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:46
 	WriteSystem(qb422016, profile, schema)
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:46
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:46
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:46
 	return qs422016
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:46
 }
