@@ -20,6 +20,8 @@ class ApiConfig {
       return _cachedBaseUrl!;
     }
 
+    String? source;
+
     // Try to get from runtime config (web/Docker)
     try {
       final env = js_util.getProperty(html.window, 'ENV');
@@ -27,6 +29,8 @@ class ApiConfig {
         final apiUrl = js_util.getProperty(env, 'API_URL');
         if (apiUrl != null && apiUrl.toString().isNotEmpty) {
           _cachedBaseUrl = apiUrl.toString();
+          source = 'window.ENV';
+          print('[ApiConfig] Using API URL from $source: $_cachedBaseUrl');
           return _cachedBaseUrl!;
         }
       }
@@ -38,11 +42,15 @@ class ApiConfig {
     const compileTimeUrl = String.fromEnvironment('API_URL');
     if (compileTimeUrl.isNotEmpty) {
       _cachedBaseUrl = compileTimeUrl;
+      source = '--dart-define';
+      print('[ApiConfig] Using API URL from $source: $_cachedBaseUrl');
       return _cachedBaseUrl!;
     }
 
     // Default for local development
     _cachedBaseUrl = 'http://localhost:8000';
+    source = 'default';
+    print('[ApiConfig] Using API URL from $source: $_cachedBaseUrl');
     return _cachedBaseUrl!;
   }
 

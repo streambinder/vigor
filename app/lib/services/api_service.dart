@@ -1,12 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 import '../config/api_config.dart';
 import '../models/api_response.dart';
+import 'app_logger.dart';
 
 /// Base API service for making HTTP requests
 class ApiService {
   final http.Client _client;
+  final Logger _log = AppLogger.getLogger('ApiService');
 
   ApiService({http.Client? client}) : _client = client ?? http.Client();
 
@@ -17,9 +20,38 @@ class ApiService {
   }) async {
     try {
       final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+      _log.d('GET ${url.toString()}');
+      _log.d('Headers: $headers');
       final response = await _client.get(
         url,
         headers: _buildHeaders(headers),
+      );
+
+      return _handleResponse(response);
+    } on SocketException {
+      return ApiResponse.networkError('No internet connection');
+    } on HttpException {
+      return ApiResponse.networkError('HTTP error occurred');
+    } on FormatException {
+      return ApiResponse.networkError('Bad response format');
+    } catch (e) {
+      _log.e('GET request failed: $e');
+      return ApiResponse.networkError('Unexpected error: ${e.toString()}');
+    }
+  }
+
+  /// Make a POST request
+  Future<ApiResponse<Map<String, dynamic>>> post(
+    String endpoint, {
+    Map<String, dynamic>? body,
+    Map<String, String>? headers,
+  }) async {
+    try {
+      final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+      final response = await _client.post(
+        url,
+        headers: _buildHeaders(headers),
+        body: body != null ? jsonEncode(body) : null,
       );
 
       return _handleResponse(response);
@@ -34,15 +66,15 @@ class ApiService {
     }
   }
 
-  /// Make a POST request
-  Future<ApiResponse<Map<String, dynamic>>> post(
+  /// Make a PUT request
+  Future<ApiResponse<Map<String, dynamic>>> put(
     String endpoint, {
     Map<String, dynamic>? body,
     Map<String, String>? headers,
   }) async {
     try {
       final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
-      final response = await _client.post(
+      final response = await _client.put(
         url,
         headers: _buildHeaders(headers),
         body: body != null ? jsonEncode(body) : null,

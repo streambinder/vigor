@@ -91,8 +91,13 @@ class VigorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthProvider(storage: storage),
+    return MultiProvider(
+      providers: [
+        Provider<SecureStorageService>.value(value: storage),
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(storage: storage),
+        ),
+      ],
       child: MaterialApp(
         title: 'Vigor',
         // Use Material You theme for all platforms

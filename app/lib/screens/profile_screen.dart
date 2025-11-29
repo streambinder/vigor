@@ -6,10 +6,155 @@ import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 import '../models/goal.dart';
 import '../models/injury.dart';
+import '../models/gym.dart';
+import '../services/gym_service.dart';
+import '../services/secure_storage_service.dart';
+import '../widgets/gym_form_dialog.dart';
 import 'profile_completion_modal.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  GymService? _gymService;
+  List<Gym>? _gyms;
+  bool _isLoadingGyms = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Get the storage service from provider context
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final storage = context.read<SecureStorageService>();
+      _gymService = GymService(storageService: storage);
+      _loadGyms();
+    });
+  }
+
+  Future<void> _loadGyms() async {
+    if (_gymService == null) return;
+
+    setState(() {
+      _isLoadingGyms = true;
+    });
+
+    final response = await _gymService!.getGyms();
+    if (response.isSuccess && mounted) {
+      setState(() {
+        _gyms = response.data;
+        _isLoadingGyms = false;
+      });
+    } else if (mounted) {
+      setState(() {
+        _isLoadingGyms = false;
+      });
+      AdaptiveNotification.showError(
+        context: context,
+        message: response.error ?? 'Failed to load gyms',
+      );
+    }
+  }
+
+  Future<void> _showGymDialog({Gym? gym}) async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => GymFormDialog(gym: gym),
+    );
+
+    if (result != null) {
+      if (gym == null) {
+        await _addGym(result['name'], result['equipment']);
+      } else {
+        await _updateGym(gym.name, result['name'], result['equipment']);
+      }
+    }
+  }
+
+  Future<void> _addGym(String name, List<String> equipment) async {
+    if (_gymService == null) return;
+
+    final response = await _gymService!.createGym(
+      name: name,
+      equipment: equipment,
+    );
+
+    if (response.isSuccess && mounted) {
+      AdaptiveNotification.show(
+        context: context,
+        message: 'Gym added successfully',
+      );
+      await _loadGyms();
+    } else if (mounted) {
+      AdaptiveNotification.showError(
+        context: context,
+        message: response.error ?? 'Failed to add gym',
+      );
+    }
+  }
+
+  Future<void> _updateGym(String currentName, String newName, List<String> equipment) async {
+    if (_gymService == null) return;
+
+    final response = await _gymService!.updateGym(
+      currentName: currentName,
+      newName: newName != currentName ? newName : null,
+      equipment: equipment,
+    );
+
+    if (response.isSuccess && mounted) {
+      AdaptiveNotification.show(
+        context: context,
+        message: 'Gym updated successfully',
+      );
+      await _loadGyms();
+    } else if (mounted) {
+      AdaptiveNotification.showError(
+        context: context,
+        message: response.error ?? 'Failed to update gym',
+      );
+    }
+  }
+
+  Future<void> _deleteGym(String name) async {
+    if (_gymService == null) return;
+    final shouldDelete = await AdaptiveAlertDialog.show<bool>(
+      context: context,
+      title: 'Delete Gym',
+      content: 'Are you sure you want to delete "$name"?',
+      actions: [
+        AdaptiveDialogAction(
+          label: 'Cancel',
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+        AdaptiveDialogAction(
+          label: 'Delete',
+          isDestructive: true,
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
+      ],
+    );
+
+    if (shouldDelete == true) {
+      final response = await _gymService!.deleteGym(name);
+
+      if (response.isSuccess && mounted) {
+        AdaptiveNotification.show(
+          context: context,
+          message: 'Gym deleted successfully',
+        );
+        await _loadGyms();
+      } else if (mounted) {
+        AdaptiveNotification.showError(
+          context: context,
+          message: response.error ?? 'Failed to delete gym',
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +170,7 @@ class ProfileScreen extends StatelessWidget {
             tooltip: 'Refresh',
             onPressed: () async {
               await authProvider.refreshUserData();
+              await _loadGyms();
               if (context.mounted) {
                 AdaptiveNotification.show(
                   context: context,
@@ -67,6 +213,7 @@ class ProfileScreen extends StatelessWidget {
           : RefreshIndicator(
               onRefresh: () async {
                 await authProvider.refreshUserData();
+                await _loadGyms();
               },
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -356,6 +503,131 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ),
                     ],
+
+                    const SizedBox(height: 24),
+
+                    // Gyms section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'My Gyms',
+                          style: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.headlineStyle
+                              : const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                        ),
+                        AdaptiveIconButton(
+                          icon: const Icon(Icons.add),
+                          tooltip: 'Add Gym',
+                          onPressed: () => _showGymDialog(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    if (_isLoadingGyms)
+                      const Center(child: AdaptiveLoadingIndicator())
+                    else if (_gyms == null || _gyms!.isEmpty)
+                      AdaptiveCard(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Center(
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.fitness_center,
+                                  size: 48,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'No gyms added yet',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                TextButton.icon(
+                                  onPressed: () => _showGymDialog(),
+                                  icon: const Icon(Icons.add),
+                                  label: const Text('Add Your First Gym'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      ...(_gyms!.map((gym) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: AdaptiveCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.fitness_center),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Text(
+                                            gym.name,
+                                            style: PlatformHelper.useLiquidGlass
+                                                ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
+                                                : const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                          ),
+                                        ),
+                                        AdaptiveIconButton(
+                                          icon: const Icon(Icons.edit, size: 20),
+                                          tooltip: 'Edit',
+                                          onPressed: () => _showGymDialog(gym: gym),
+                                        ),
+                                        AdaptiveIconButton(
+                                          icon: const Icon(Icons.delete, size: 20),
+                                          tooltip: 'Delete',
+                                          onPressed: () => _deleteGym(gym.name),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (gym.equipment.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        left: 16.0,
+                                        right: 16.0,
+                                        bottom: 16.0,
+                                      ),
+                                      child: Wrap(
+                                        spacing: 8,
+                                        runSpacing: 8,
+                                        children: gym.equipment.map((equipment) {
+                                          return Chip(
+                                            label: Text(
+                                              equipment,
+                                              style: const TextStyle(fontSize: 12),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            backgroundColor: PlatformHelper.useLiquidGlass
+                                                ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
+                                                : Theme.of(context).colorScheme.secondaryContainer,
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ))),
 
                     const SizedBox(height: 24),
 
