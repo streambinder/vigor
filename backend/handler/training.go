@@ -36,6 +36,7 @@ type TrainingRequest struct {
 func init() {
 	APP.Post("/training", middleware.Authorized(), handleTrainingRequest)
 	APP.Get("/training", middleware.Authorized(), handleGetTrainings)
+	APP.Delete("/training/:id", middleware.Authorized(), handleDeleteTraining)
 }
 
 func queryUserExercises(profile model.Profile, equipment []string) ([]model.Exercise, error) {
@@ -248,4 +249,25 @@ func handleGetTrainings(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{"trainings": trainings})
+}
+
+// handleDeleteTraining handles DELETE /training/:id endpoint for deleting a training.
+func handleDeleteTraining(c *fiber.Ctx) error {
+	trainingID := c.Params("id")
+	if trainingID == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "training id is required"})
+	}
+
+	// Verify the training belongs to the user before deleting
+	var training model.Training
+	if err := database.DB.First(&training, "id = ? and user_id = ?", trainingID, c.Locals("userID")).Error; err != nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})
+	}
+
+	// Delete the training (cascade will handle routines, blocks, activities)
+	if err := database.DB.Delete(&training).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(fiber.Map{"message": "training deleted successfully"})
 }

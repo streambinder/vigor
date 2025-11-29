@@ -104,4 +104,29 @@ class TrainingService {
       );
     }
   }
+
+  Future<ApiResponse<String>> deleteTraining(String trainingId) async {
+    _log.d('Deleting training: $trainingId');
+    final headers = await _getAuthHeaders();
+    if (headers == null) {
+      return ApiResponse.error('Not authenticated', 401);
+    }
+
+    final response = await _apiService.delete(
+      '/training/$trainingId',
+      headers: headers,
+    );
+
+    if (response.isSuccess) {
+      final message = response.data?['message'] as String? ?? 'Training deleted';
+      _log.i('Deleted training: $trainingId');
+      return ApiResponse.success(message, response.statusCode);
+    } else {
+      _log.e('Failed to delete training: ${response.error}');
+      return ApiResponse.error(
+        response.error ?? 'Failed to delete training',
+        response.statusCode,
+      );
+    }
+  }
 }

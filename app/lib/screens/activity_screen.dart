@@ -6,6 +6,7 @@ import '../services/secure_storage_service.dart';
 import '../models/training.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
+import 'training_details_screen.dart';
 
 class ActivityScreen extends StatefulWidget {
   const ActivityScreen({super.key});
@@ -147,8 +148,16 @@ class _ActivityScreenState extends State<ActivityScreen> {
   Widget _buildTrainingCard(Training training) {
     return AdaptiveCard(
       child: InkWell(
-        onTap: () {
-          // TODO: Navigate to training details screen
+        onTap: () async {
+          final deleted = await Navigator.of(context).push<bool>(
+            MaterialPageRoute(
+              builder: (context) => TrainingDetailsScreen(training: training),
+            ),
+          );
+          // Refresh the list if training was deleted
+          if (deleted == true) {
+            _loadTrainings();
+          }
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
