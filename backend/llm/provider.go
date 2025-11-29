@@ -76,10 +76,10 @@ func getLLM(_ model.Profile) LLM {
 }
 
 // GenTraining generates a personalized training plan using an LLM.
-func GenTraining(profile model.Profile, exercises []model.Exercise, duration int, recentTrainings []model.Training, facts []model.Fact) (*model.Training, error) {
+func GenTraining(profile model.Profile, exercises []model.Exercise, userPrompt string, duration int, recentTrainings []model.Training, facts []model.Fact) (*model.Training, error) {
 	response, err := getLLM(profile).query(
 		prompt.System(profile, model.TrainingSchema),
-		prompt.GenTraining(profile, exercises, duration, recentTrainings, facts),
+		prompt.GenTraining(profile, exercises, userPrompt, duration, recentTrainings, facts),
 		0.35,  // Balanced: structured output + workout variety
 		10000, // Sufficient for complex multi-routine workouts
 	)

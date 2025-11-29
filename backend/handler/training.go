@@ -30,6 +30,7 @@ type TrainingRequest struct {
 	Duration  int      `json:"duration"`  // Duration in minutes for the training session
 	Equipment []string `json:"equipment"` // List of available equipment (optional if gym is specified)
 	Gym       string   `json:"gym"`       // Name of the gym to use for equipment lookup
+	Prompt    string   `json:"prompt"`    // Specific prompt to use for generating the training plan
 }
 
 func init() {
@@ -163,7 +164,7 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 	}
 
 	llmStart := time.Now()
-	training, err := llm.GenTraining(profile, exercises, req.Duration, recentTrainings, facts)
+	training, err := llm.GenTraining(profile, exercises, req.Prompt, req.Duration, recentTrainings, facts)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate training via LLM")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})

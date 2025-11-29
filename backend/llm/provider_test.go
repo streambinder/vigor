@@ -114,7 +114,7 @@ func TestGenTraining_Success(t *testing.T) {
 		{ID: uuid.New().String(), Name: "Dumbbell Press"},
 	}
 
-	result, err := GenTraining(profile, exercises, 30, []model.Training{}, []model.Fact{})
+	result, err := GenTraining(profile, exercises, "", 30, []model.Training{}, []model.Fact{})
 	if err != nil {
 		t.Errorf("Expected no error, got: %v", err)
 	}
@@ -153,7 +153,7 @@ func TestGenTraining_QueryError(t *testing.T) {
 		{ID: uuid.New().String(), Name: "Dumbbell Press"},
 	}
 
-	result, err := GenTraining(profile, exercises, 30, []model.Training{}, []model.Fact{})
+	result, err := GenTraining(profile, exercises, "", 30, []model.Training{}, []model.Fact{})
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -191,7 +191,7 @@ func TestGenTraining_InvalidJSON(t *testing.T) {
 		{ID: "dumbbell-press", Name: "Dumbbell Press"},
 	}
 
-	result, err := GenTraining(profile, exercises, 30, []model.Training{}, []model.Fact{})
+	result, err := GenTraining(profile, exercises, "", 30, []model.Training{}, []model.Fact{})
 	if err == nil {
 		t.Error("Expected error for invalid JSON, got nil")
 	}
@@ -244,14 +244,14 @@ func TestGenTraining_CallsPromptCorrectly(t *testing.T) {
 	}
 	duration := 60
 
-	_, err = GenTraining(profile, exercises, duration, []model.Training{}, []model.Fact{})
+	_, err = GenTraining(profile, exercises, "", duration, []model.Training{}, []model.Fact{})
 	if err != nil {
 		t.Errorf("Expected no error, got: %v", err)
 	}
 
 	// Verify the system and user prompts were called correctly
 	expectedSystem := prompt.System(profile, model.TrainingSchema)
-	expectedUser := prompt.GenTraining(profile, exercises, duration, []model.Training{}, []model.Fact{})
+	expectedUser := prompt.GenTraining(profile, exercises, "", duration, []model.Training{}, []model.Fact{})
 
 	if capturedSystem != expectedSystem {
 		t.Errorf("System prompt mismatch.\nExpected: %s\nGot: %s", expectedSystem, capturedSystem)
