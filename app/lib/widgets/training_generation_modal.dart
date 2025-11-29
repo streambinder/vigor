@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../models/gym.dart';
+import '../models/training.dart';
 import '../services/training_service.dart';
 import '../services/secure_storage_service.dart';
 import '../widgets/adaptive/adaptive.dart';
@@ -10,7 +11,7 @@ import '../utils/platform_helper.dart';
 
 class TrainingGenerationModal extends StatefulWidget {
   final List<Gym> gyms;
-  final VoidCallback? onSuccess;
+  final Function(Training)? onSuccess;
 
   const TrainingGenerationModal({
     super.key,
@@ -87,7 +88,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           context: context,
           message: 'Training generated successfully!',
         );
-        widget.onSuccess?.call();
+        widget.onSuccess?.call(response.data!);
       } else {
         AdaptiveNotification.showError(
           context: context,

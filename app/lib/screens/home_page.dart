@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/training_generation_modal.dart';
+import '../screens/training_details_screen.dart';
 import '../services/gym_service.dart';
 import '../services/secure_storage_service.dart';
 import '../models/gym.dart';
+import '../models/training.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 
@@ -64,8 +66,13 @@ class _HomePageState extends State<HomePage> {
       barrierDismissible: false,
       builder: (context) => TrainingGenerationModal(
         gyms: _gyms!,
-        onSuccess: () {
-          // Success callback - user can view the training in Activity tab
+        onSuccess: (training) {
+          // Navigate to the generated training details
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => TrainingDetailsScreen(training: training),
+            ),
+          );
         },
       ),
     );
