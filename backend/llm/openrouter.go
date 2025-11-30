@@ -1,14 +1,15 @@
 package llm
 
 import (
-	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"time"
 
+	"github.com/openai/openai-go"
+	"github.com/openai/openai-go/option"
+	"github.com/openai/openai-go/shared"
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/model"
 )
@@ -18,7 +19,7 @@ const defaultOpenRouterModel = "x-ai/grok-4.1-fast:free"
 // OpenRouter provides LLM capabilities via the OpenRouter API.
 type OpenRouter struct {
 	LLM
-	apiKey string
+	client openai.Client
 	model  string
 }
 
@@ -29,79 +30,71 @@ func init() {
 	}
 
 	// Default to a good model, but can be configured via env var
-	model := os.Getenv("OPENROUTER_MODEL")
-	if model == "" {
-		model = defaultOpenRouterModel
+	modelName := os.Getenv("OPENROUTER_MODEL")
+	if modelName == "" {
+		modelName = defaultOpenRouterModel
 	}
 
-	providers = append(providers, &OpenRouter{apiKey: apiKey, model: model})
+	// Create client with OpenRouter base URL and custom headers
+	client := openai.NewClient(
+		option.WithAPIKey(apiKey),
+		option.WithBaseURL("https://openrouter.ai/api/v1"),
+		option.WithHeader("HTTP-Referer", "https://github.com/streambinder/vigor"),
+		option.WithHeader("X-Title", "Vigor"),
+	)
+
+	providers = append(providers, &OpenRouter{client: client, model: modelName})
 }
 
 func (llm *OpenRouter) query(system, user string, temperature float64, maxTokens int) ([]byte, error) {
 	start := time.Now()
-	requestPayload := ChatCompletionRequest{
+	ctx := context.Background()
+
+	// Build chat completion parameters
+	params := openai.ChatCompletionNewParams{
 		Model: llm.model,
-		Messages: []Message{
-			{Role: "system", Content: system},
-			{Role: "user", Content: user},
+		Messages: []openai.ChatCompletionMessageParamUnion{
+			openai.SystemMessage(system),
+			openai.UserMessage(user),
 		},
-		ResponseFormat: model.TrainingSchema,
-		Temperature:    temperature,
-		MaxTokens:      maxTokens,
-		TopP:           0.9,  // Good sampling balance
-		RepeatPenalty:  1.15, // Reduces exercise repetition, encourages variety
+		Temperature: openai.Float(temperature),
+		MaxTokens:   openai.Int(int64(maxTokens)),
+		TopP:        openai.Float(0.9), // Good sampling balance
 	}
 
-	jsonPayload, err := json.Marshal(requestPayload)
-	if err != nil {
-		return nil, fmt.Errorf("unable to create OpenRouter payload: %s", err)
+	// Set structured JSON schema response format
+	params.ResponseFormat = openai.ChatCompletionNewParamsResponseFormatUnion{
+		OfJSONSchema: &shared.ResponseFormatJSONSchemaParam{
+			Type: "json_schema",
+			JSONSchema: shared.ResponseFormatJSONSchemaJSONSchemaParam{
+				Name:        model.TrainingSchema.JSONSchema.Name,
+				Description: openai.String(model.TrainingSchema.JSONSchema.Description),
+				Schema:      model.TrainingSchema.JSONSchema.Schema,
+				Strict:      openai.Bool(model.TrainingSchema.JSONSchema.Strict),
+			},
+		},
 	}
+
+	// Add provider-specific parameter (reduces exercise repetition, encourages variety)
+	params.SetExtraFields(map[string]any{
+		"repeat_penalty": 1.15,
+	})
 
 	log.Debug().
 		Str("endpoint", "https://openrouter.ai/api/v1/chat/completions").
 		Str("model", llm.model).
-		Str("payload", string(jsonPayload)).
 		Msg("Sending request to OpenRouter")
 
-	request, err := http.NewRequest("POST", "https://openrouter.ai/api/v1/chat/completions", bytes.NewBuffer(jsonPayload))
-	if err != nil {
-		return nil, fmt.Errorf("unable to create OpenRouter request: %s", err)
-	}
-
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", llm.apiKey))
-	request.Header.Set("HTTP-Referer", "https://github.com/streambinder/vigor")
-	request.Header.Set("X-Title", "Vigor")
-
-	resp, err := http.DefaultClient.Do(request)
+	completion, err := llm.client.Chat.Completions.New(ctx, params)
 	if err != nil {
 		return nil, fmt.Errorf("unable to send request to OpenRouter: %s", err)
 	}
-	defer func() {
-		if closeErr := resp.Body.Close(); closeErr != nil {
-			log.Error().Err(closeErr).Msg("Failed to close response body")
-		}
-	}()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("unable to read response from OpenRouter: %s", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("bad response from OpenRouter: status %d, body: %s", resp.StatusCode, string(body))
-	}
-
-	var chatResponse ChatCompletionResponse
-	if err := json.Unmarshal(body, &chatResponse); err != nil {
-		return nil, fmt.Errorf("unable to unmarshal OpenRouter response: %s", err)
-	}
-
-	if len(chatResponse.Choices) == 0 {
+	if len(completion.Choices) == 0 {
 		return nil, fmt.Errorf("no choices in OpenRouter response")
 	}
 
-	llmContent := chatResponse.Choices[0].Message.Content
+	llmContent := completion.Choices[0].Message.Content
 	log.Info().
 		Str("provider", "openrouter").
 		Str("model", llm.model).

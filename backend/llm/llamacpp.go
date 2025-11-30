@@ -1,22 +1,25 @@
 package llm
 
 import (
-	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/openai/openai-go"
+	"github.com/openai/openai-go/option"
+	"github.com/openai/openai-go/shared"
 	"github.com/rs/zerolog/log"
+	"github.com/streambinder/vigor/model"
 )
 
 // LlamaCpp provides LLM capabilities via a local llama.cpp server.
 type LlamaCpp struct {
 	LLM
-	uri string
+	client openai.Client
+	uri    string
 }
 
 func init() {
@@ -26,70 +29,65 @@ func init() {
 	}
 
 	for tier := range strings.SplitSeq(tiers, ",") {
-		providers = append(providers, &LlamaCpp{uri: tier})
+		// Create client with custom base URL for llama.cpp server
+		client := openai.NewClient(
+			option.WithAPIKey("NO_KEY"), // llama.cpp doesn't require a real key
+			option.WithBaseURL(tier),
+		)
+		providers = append(providers, &LlamaCpp{client: client, uri: tier})
 	}
 }
 
 func (llm *LlamaCpp) query(system, user string, temperature float64, maxTokens int) ([]byte, error) {
 	start := time.Now()
-	requestPayload := ChatCompletionRequest{
-		Messages: []Message{
-			{Role: "system", Content: system},
-			{Role: "user", Content: user},
-		},
-		ResponseFormat: map[string]string{"type": "json_object"}, // llama.cpp uses basic JSON mode
-		Temperature:    temperature,
-		MaxTokens:      maxTokens,
-		TopP:           0.9,
-		RepeatPenalty:  1.15,
-		MinP:           0.05,
-	}
-	jsonPayload, err := json.Marshal(requestPayload)
-	if err != nil {
-		return nil, fmt.Errorf("unable to create llama.cpp payload: %s", err)
-	}
+	ctx := context.Background()
 
 	endpoint := fmt.Sprintf("%s/v1/chat/completions", llm.uri)
+
+	// Build chat completion parameters
+	params := openai.ChatCompletionNewParams{
+		Messages: []openai.ChatCompletionMessageParamUnion{
+			openai.SystemMessage(system),
+			openai.UserMessage(user),
+		},
+		Temperature: openai.Float(temperature),
+		MaxTokens:   openai.Int(int64(maxTokens)),
+		TopP:        openai.Float(0.9),
+	}
+
+	// Set structured JSON schema response format (llama.cpp supports this in OpenAI-compatible mode)
+	params.ResponseFormat = openai.ChatCompletionNewParamsResponseFormatUnion{
+		OfJSONSchema: &shared.ResponseFormatJSONSchemaParam{
+			Type: "json_schema",
+			JSONSchema: shared.ResponseFormatJSONSchemaJSONSchemaParam{
+				Name:        model.TrainingSchema.JSONSchema.Name,
+				Description: openai.String(model.TrainingSchema.JSONSchema.Description),
+				Schema:      model.TrainingSchema.JSONSchema.Schema,
+				Strict:      openai.Bool(model.TrainingSchema.JSONSchema.Strict),
+			},
+		},
+	}
+
+	// Add llama.cpp-specific parameters
+	params.SetExtraFields(map[string]any{
+		"repeat_penalty": 1.15,
+		"min_p":          0.05,
+	})
+
 	log.Debug().
 		Str("endpoint", endpoint).
-		Str("payload", string(jsonPayload)).
 		Msg("Sending request to llama.cpp")
 
-	request, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/chat/completions", llm.uri), bytes.NewBuffer(jsonPayload))
-	if err != nil {
-		return nil, fmt.Errorf("unable to create llama.cpp request: %s", err)
-	}
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer NO_KEY")
-
-	resp, err := http.DefaultClient.Do(request)
+	completion, err := llm.client.Chat.Completions.New(ctx, params)
 	if err != nil {
 		return nil, fmt.Errorf("unable to send request to llama.cpp: %s", err)
 	}
-	defer func() {
-		if closeErr := resp.Body.Close(); closeErr != nil {
-			log.Error().Err(closeErr).Msg("Failed to close response body")
-		}
-	}()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("unable to read response from llama.cpp: %s", err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("bad response from llama.cpp: status %d", resp.StatusCode)
-	}
-
-	var chatResponse ChatCompletionResponse
-	if err := json.Unmarshal(body, &chatResponse); err != nil {
-		return nil, fmt.Errorf("unable to unmarshal llama.cpp response: %s", err)
-	}
-
-	if len(chatResponse.Choices) == 0 {
+	if len(completion.Choices) == 0 {
 		return nil, fmt.Errorf("no choices in llama.cpp response")
 	}
 
-	llmContent := chatResponse.Choices[0].Message.Content
+	llmContent := completion.Choices[0].Message.Content
 	log.Info().
 		Str("provider", "llamacpp").
 		Str("endpoint", endpoint).

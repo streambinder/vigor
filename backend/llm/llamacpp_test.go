@@ -1,35 +1,34 @@
 package llm
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
 	"errors"
-	"io"
-	"net/http"
 	"testing"
-	"testing/iotest"
 
 	"github.com/bytedance/mockey"
+	"github.com/openai/openai-go"
+	"github.com/openai/openai-go/option"
 	"github.com/rs/zerolog"
 )
 
 func TestLlamaCppQuery_Success(t *testing.T) {
 	zerolog.SetGlobalLevel(zerolog.Disabled)
 
+	client := openai.NewClient()
 	llm := &LlamaCpp{
-		uri: "http://localhost:8080",
+		client: client,
+		uri:    "http://localhost:8080",
 	}
 
-	response := ChatCompletionResponse{
+	mockCompletion := openai.ChatCompletion{
 		ID:      "test-id",
 		Object:  "chat.completion",
 		Created: 1234567890,
 		Model:   "test-model",
-		Choices: []ChatCompletionChoice{
+		Choices: []openai.ChatCompletionChoice{
 			{
 				Index: 0,
-				Message: ChatCompletionResponseMessage{
-					Role:    "assistant",
+				Message: openai.ChatCompletionMessage{
 					Content: `{"key": "value"}`,
 				},
 				FinishReason: "stop",
@@ -37,18 +36,12 @@ func TestLlamaCppQuery_Success(t *testing.T) {
 		},
 	}
 
-	responseJSON, err := json.Marshal(response)
-	if err != nil {
-		t.Fatalf("Failed to marshal response: %v", err)
-	}
-
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
-		return &http.Response{
-			StatusCode: http.StatusOK,
-			Body:       io.NopCloser(bytes.NewReader(responseJSON)),
-		}, nil
-	}).Build()
-	defer mockHTTP.UnPatch()
+	mockNew := mockey.Mock((*openai.ChatCompletionService).New).To(
+		func(_ *openai.ChatCompletionService, _ context.Context, _ openai.ChatCompletionNewParams, _ ...option.RequestOption) (*openai.ChatCompletion, error) {
+			return &mockCompletion, nil
+		},
+	).Build()
+	defer mockNew.UnPatch()
 
 	result, err := llm.query("system prompt", "user prompt", 0.7, 1000)
 	if err != nil {
@@ -60,118 +53,19 @@ func TestLlamaCppQuery_Success(t *testing.T) {
 	}
 }
 
-func TestLlamaCppQuery_MarshalError(t *testing.T) {
+func TestLlamaCppQuery_APIError(t *testing.T) {
 	zerolog.SetGlobalLevel(zerolog.Disabled)
 
+	client := openai.NewClient()
 	llm := &LlamaCpp{
-		uri: "http://localhost:8080",
+		client: client,
+		uri:    "http://localhost:8080",
 	}
 
-	callCount := 0
-	mockMarshal := mockey.Mock(json.Marshal).To(func(v any) ([]byte, error) {
-		callCount++
-		if callCount == 1 {
-			return nil, errors.New("marshal error")
-		}
-		// Let subsequent calls succeed
-		return json.Marshal(v)
-	}).Build()
-	defer mockMarshal.UnPatch()
-
-	_, err := llm.query("system prompt", "user prompt", 0.7, 1000)
-	if err == nil {
-		t.Error("Expected error, got nil")
-	}
-}
-
-func TestLlamaCppQuery_NewRequestError(t *testing.T) {
-	zerolog.SetGlobalLevel(zerolog.Disabled)
-
-	llm := &LlamaCpp{
-		uri: "http://localhost:8080",
-	}
-
-	mockNewRequest := mockey.Mock(http.NewRequest).Return(nil, errors.New("request error")).Build()
-	defer mockNewRequest.UnPatch()
-
-	_, err := llm.query("system prompt", "user prompt", 0.7, 1000)
-	if err == nil {
-		t.Error("Expected error, got nil")
-	}
-}
-
-func TestLlamaCppQuery_DoError(t *testing.T) {
-	zerolog.SetGlobalLevel(zerolog.Disabled)
-
-	llm := &LlamaCpp{
-		uri: "http://localhost:8080",
-	}
-
-	mockHTTP := mockey.Mock((*http.Client).Do).Return(nil, errors.New("network error")).Build()
-	defer mockHTTP.UnPatch()
-
-	_, err := llm.query("system prompt", "user prompt", 0.7, 1000)
-	if err == nil {
-		t.Error("Expected error, got nil")
-	}
-}
-
-func TestLlamaCppQuery_NonOKStatus(t *testing.T) {
-	zerolog.SetGlobalLevel(zerolog.Disabled)
-
-	llm := &LlamaCpp{
-		uri: "http://localhost:8080",
-	}
-
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
-		return &http.Response{
-			StatusCode: http.StatusBadRequest,
-			Body:       io.NopCloser(bytes.NewReader([]byte("error message"))),
-		}, nil
-	}).Build()
-	defer mockHTTP.UnPatch()
-
-	_, err := llm.query("system prompt", "user prompt", 0.7, 1000)
-	if err == nil {
-		t.Error("Expected error, got nil")
-	}
-}
-
-func TestLlamaCppQuery_ReadBodyError(t *testing.T) {
-	zerolog.SetGlobalLevel(zerolog.Disabled)
-
-	llm := &LlamaCpp{
-		uri: "http://localhost:8080",
-	}
-
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
-		return &http.Response{
-			StatusCode: http.StatusOK,
-			Body:       io.NopCloser(iotest.ErrReader(errors.New("read error"))),
-		}, nil
-	}).Build()
-	defer mockHTTP.UnPatch()
-
-	_, err := llm.query("system prompt", "user prompt", 0.7, 1000)
-	if err == nil {
-		t.Error("Expected error, got nil")
-	}
-}
-
-func TestLlamaCppQuery_UnmarshalResponseError(t *testing.T) {
-	zerolog.SetGlobalLevel(zerolog.Disabled)
-
-	llm := &LlamaCpp{
-		uri: "http://localhost:8080",
-	}
-
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
-		return &http.Response{
-			StatusCode: http.StatusOK,
-			Body:       io.NopCloser(bytes.NewReader([]byte("invalid json"))),
-		}, nil
-	}).Build()
-	defer mockHTTP.UnPatch()
+	mockNew := mockey.Mock((*openai.ChatCompletionService).New).Return(
+		nil, errors.New("API error"),
+	).Build()
+	defer mockNew.UnPatch()
 
 	_, err := llm.query("system prompt", "user prompt", 0.7, 1000)
 	if err == nil {
@@ -182,32 +76,28 @@ func TestLlamaCppQuery_UnmarshalResponseError(t *testing.T) {
 func TestLlamaCppQuery_NoChoices(t *testing.T) {
 	zerolog.SetGlobalLevel(zerolog.Disabled)
 
+	client := openai.NewClient()
 	llm := &LlamaCpp{
-		uri: "http://localhost:8080",
+		client: client,
+		uri:    "http://localhost:8080",
 	}
 
-	response := ChatCompletionResponse{
+	mockCompletion := openai.ChatCompletion{
 		ID:      "test-id",
 		Object:  "chat.completion",
 		Created: 1234567890,
 		Model:   "test-model",
-		Choices: []ChatCompletionChoice{},
+		Choices: []openai.ChatCompletionChoice{},
 	}
 
-	responseJSON, err := json.Marshal(response)
-	if err != nil {
-		t.Fatalf("Failed to marshal response: %v", err)
-	}
+	mockNew := mockey.Mock((*openai.ChatCompletionService).New).To(
+		func(_ *openai.ChatCompletionService, _ context.Context, _ openai.ChatCompletionNewParams, _ ...option.RequestOption) (*openai.ChatCompletion, error) {
+			return &mockCompletion, nil
+		},
+	).Build()
+	defer mockNew.UnPatch()
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
-		return &http.Response{
-			StatusCode: http.StatusOK,
-			Body:       io.NopCloser(bytes.NewReader(responseJSON)),
-		}, nil
-	}).Build()
-	defer mockHTTP.UnPatch()
-
-	_, err = llm.query("system prompt", "user prompt", 0.7, 1000)
+	_, err := llm.query("system prompt", "user prompt", 0.7, 1000)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -216,20 +106,21 @@ func TestLlamaCppQuery_NoChoices(t *testing.T) {
 func TestLlamaCppQuery_InvalidContentJSON(t *testing.T) {
 	zerolog.SetGlobalLevel(zerolog.Disabled)
 
+	client := openai.NewClient()
 	llm := &LlamaCpp{
-		uri: "http://localhost:8080",
+		client: client,
+		uri:    "http://localhost:8080",
 	}
 
-	response := ChatCompletionResponse{
+	mockCompletion := openai.ChatCompletion{
 		ID:      "test-id",
 		Object:  "chat.completion",
 		Created: 1234567890,
 		Model:   "test-model",
-		Choices: []ChatCompletionChoice{
+		Choices: []openai.ChatCompletionChoice{
 			{
 				Index: 0,
-				Message: ChatCompletionResponseMessage{
-					Role:    "assistant",
+				Message: openai.ChatCompletionMessage{
 					Content: "not valid json",
 				},
 				FinishReason: "stop",
@@ -237,20 +128,14 @@ func TestLlamaCppQuery_InvalidContentJSON(t *testing.T) {
 		},
 	}
 
-	responseJSON, err := json.Marshal(response)
-	if err != nil {
-		t.Fatalf("Failed to marshal response: %v", err)
-	}
+	mockNew := mockey.Mock((*openai.ChatCompletionService).New).To(
+		func(_ *openai.ChatCompletionService, _ context.Context, _ openai.ChatCompletionNewParams, _ ...option.RequestOption) (*openai.ChatCompletion, error) {
+			return &mockCompletion, nil
+		},
+	).Build()
+	defer mockNew.UnPatch()
 
-	mockHTTP := mockey.Mock((*http.Client).Do).To(func(_ *http.Client, _ *http.Request) (*http.Response, error) {
-		return &http.Response{
-			StatusCode: http.StatusOK,
-			Body:       io.NopCloser(bytes.NewReader(responseJSON)),
-		}, nil
-	}).Build()
-	defer mockHTTP.UnPatch()
-
-	_, err = llm.query("system prompt", "user prompt", 0.7, 1000)
+	_, err := llm.query("system prompt", "user prompt", 0.7, 1000)
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -268,7 +153,10 @@ func TestLlamaCppInit_WithTiers(t *testing.T) {
 	if tiers != "" {
 		tierList := []string{"http://tier1:8080", "http://tier2:8080", "http://tier3:8080"}
 		for _, tier := range tierList {
-			providers = append(providers, &LlamaCpp{uri: tier})
+			providers = append(providers, &LlamaCpp{
+				client: openai.NewClient(),
+				uri:    tier,
+			})
 		}
 	}
 
@@ -299,7 +187,10 @@ func TestLlamaCppInit_WithoutTiers(t *testing.T) {
 	tiers := ""
 	if tiers != "" {
 		for _, tier := range []string{} {
-			providers = append(providers, &LlamaCpp{uri: tier})
+			providers = append(providers, &LlamaCpp{
+				client: openai.NewClient(),
+				uri:    tier,
+			})
 		}
 	}
 
