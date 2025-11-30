@@ -2,7 +2,7 @@
 
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func System(profile model.Profile, schema string) -%}
+{% func System(profile model.Profile) -%}
 {% collapsespace %}
 
 Personal trainer. Create workouts to achieve fitness goals.
@@ -37,10 +37,7 @@ Respond in
     {%s profile.Language %}
 {% else %}
     English
-{% endif %}
-using JSON: {%s= schema %}
-
-IMPORTANT: Output ONLY the final JSON object. Do not include commentary, thinking steps, or intermediate responses. Respond with a complete training plan matching the exact JSON schema provided. Suppress any newline or tab characters.
+{% endif %}.
 
 {% endcollapsespace -%}
 {% endfunc %}

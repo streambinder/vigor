@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,14 +12,33 @@ import (
 
 const WeightActivityDurationPerRep = 3 // 3 seconds per rep
 
-var TrainingSchema = ""
+// JSONSchemaFormat defines the structure for OpenRouter's structured outputs
+type JSONSchemaFormat struct {
+	Type       string     `json:"type"`
+	JSONSchema JSONSchema `json:"json_schema"`
+}
+
+// JSONSchema defines the schema structure with strict validation
+type JSONSchema struct {
+	Name        string                 `json:"name"`
+	Strict      bool                   `json:"strict"`
+	Schema      map[string]interface{} `json:"schema"`
+	Description string                 `json:"description,omitempty"`
+}
+
+var	TrainingSchema JSONSchemaFormat
+
 
 func init() {
-	schema, err := json.Marshal(encoder.JSONWithPrompts{Value: Training{}})
-	if err != nil {
-		panic(err)
+	TrainingSchema = JSONSchemaFormat{
+		Type: "json_schema",
+		JSONSchema: JSONSchema{
+			Name:        "training_workout_schema",
+			Strict:      true,
+			Description: "AI-generated personalized workout training session",
+			Schema:      encoder.JSONSchema(Training{}),
+		},
 	}
-	TrainingSchema = string(schema)
 }
 
 // Training represents the entire training session with a UUID ID
@@ -29,8 +47,8 @@ type Training struct {
 	Name        string         `gorm:"not null" json:"name" prompt:"Catchy training name that reminds of themes of classical epic"`
 	Description string         `gorm:"not null" json:"description" prompt:"Training description in terms of impact on profile goals"`
 	Type        string         `gorm:"not null" json:"type" prompt:"Training type (e.g. HIIT, pilates, swimming, etc)"`
-	Duration    int            `gorm:"not null" json:"duration" prompt:"-"`
-	References  pq.StringArray `gorm:"type:text[]" json:"references" prompt:"Relevant knowledge fact URLs"`
+	Duration    int            `gorm:"not null" json:"duration" prompt:"Total training duration in seconds"`
+	References  pq.StringArray `gorm:"type:text[]" json:"references" prompt:"Relevant knowledge fact URLs used in generation"`
 	Routines    []Routine      `gorm:"foreignKey:TrainingID" json:"routines"`
 
 	CompletedAt time.Time      `json:"completed_at" prompt:"-"`
@@ -47,8 +65,8 @@ type Routine struct {
 	ID         string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id" prompt:"-"`
 	TrainingID string `gorm:"index;type:uuid;not null" json:"training_id" prompt:"-"`
 
-	Type   string  `json:"name" prompt:"warmup/circuit/etc"`
-	Rest   int     `json:"rest" prompt:"Seconds between routines"`
+	Type   string  `json:"name" prompt:"Routine type (warmup/circuit/cooldown)"`
+	Rest   int     `json:"rest" prompt:"Rest seconds between routines"`
 	Blocks []Block `json:"blocks" gorm:"foreignKey:RoutineID;constraint:OnDelete:CASCADE"`
 
 	CreatedAt time.Time      `json:"-"`
@@ -61,9 +79,9 @@ type Block struct {
 	ID        string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id" prompt:"-"`
 	RoutineID string `gorm:"index;type:uuid;not null" json:"routine_id" prompt:"-"`
 
-	Type       string     `json:"type" prompt:"warmup/circuit/rest/cooldown"`
-	Repeats    int        `json:"repeats" prompt:"+"`
-	Rest       int        `json:"rest" prompt:"Seconds between blocks"`
+	Type       string     `json:"type" prompt:"Block type (warmup/circuit/rest/cooldown)"`
+	Repeats    int        `json:"repeats" prompt:"Number of times to repeat this block"`
+	Rest       int        `json:"rest" prompt:"Rest seconds between block repeats"`
 	Activities []Activity `json:"activities" gorm:"foreignKey:BlockID;constraint:OnDelete:CASCADE"`
 
 	CreatedAt time.Time      `json:"-"`
@@ -76,13 +94,13 @@ type Activity struct {
 	ID      string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id" prompt:"-"`
 	BlockID string `gorm:"index;type:uuid;not null" json:"block_id" prompt:"-"`
 
-	Name      string         `json:"name" prompt:"Exercise ID"`
-	Rationale string         `json:"rationale" prompt:"Why this exercise against profile goals, limitation, progressions, etc"`
-	Type      string         `json:"type" prompt:"exercise/stretch/rest"`
-	Duration  int            `json:"duration" prompt:"Seconds"`
-	Reps      int            `json:"reps" prompt:"Reps"`
-	WeightKg  int            `json:"weight_kg" prompt:"Weight kg"`
-	Rest      int            `json:"rest" prompt:"Seconds"`
+	Name      string         `json:"name" prompt:"Exercise ID from provided knowledge base"`
+	Rationale string         `json:"rationale" prompt:"Why this exercise addresses profile goals, limitations, progressions"`
+	Type      string         `json:"type" prompt:"Activity type (exercise/stretch/rest)"`
+	Duration  int            `json:"duration" prompt:"Activity duration in seconds"`
+	Reps      int            `json:"reps" prompt:"Number of repetitions"`
+	WeightKg  int            `json:"weight_kg" prompt:"Weight in kilograms"`
+	Rest      int            `json:"rest" prompt:"Rest seconds after this activity"`
 	Detail    datatypes.JSON `gorm:"type:jsonb" json:"detail" prompt:"-"` // Full exercise details as JSON
 	Feedback  string         `json:"feedback" prompt:"-"`
 

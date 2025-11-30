@@ -196,24 +196,6 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	// Ensure null slices are converted to empty slices for JSON serialization
-	if training.References == nil {
-		training.References = []string{}
-	}
-	if training.Routines == nil {
-		training.Routines = []model.Routine{}
-	}
-	for i := range training.Routines {
-		if training.Routines[i].Blocks == nil {
-			training.Routines[i].Blocks = []model.Block{}
-		}
-		for j := range training.Routines[i].Blocks {
-			if training.Routines[i].Blocks[j].Activities == nil {
-				training.Routines[i].Blocks[j].Activities = []model.Activity{}
-			}
-		}
-	}
-
 	return c.JSON(training)
 }
 
@@ -227,27 +209,6 @@ func handleGetTrainings(c *fiber.Ctx) error {
 		Find(&trainings).Error; err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-
-	// Ensure null slices are converted to empty slices for JSON serialization
-	for i := range trainings {
-		if trainings[i].References == nil {
-			trainings[i].References = []string{}
-		}
-		if trainings[i].Routines == nil {
-			trainings[i].Routines = []model.Routine{}
-		}
-		for j := range trainings[i].Routines {
-			if trainings[i].Routines[j].Blocks == nil {
-				trainings[i].Routines[j].Blocks = []model.Block{}
-			}
-			for k := range trainings[i].Routines[j].Blocks {
-				if trainings[i].Routines[j].Blocks[k].Activities == nil {
-					trainings[i].Routines[j].Blocks[k].Activities = []model.Activity{}
-				}
-			}
-		}
-	}
-
 	return c.JSON(fiber.Map{"trainings": trainings})
 }
 

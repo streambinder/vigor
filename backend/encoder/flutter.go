@@ -54,7 +54,7 @@ func extractStructMetadata(v reflect.Value) []FieldMetadata {
 			continue
 		}
 
-		jsonTag := parseJSONTag(field)
+		jsonTag := jsonTag(field)
 		if jsonTag == "" || jsonTag == "-" {
 			continue
 		}

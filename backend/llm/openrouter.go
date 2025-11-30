@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
+	"github.com/streambinder/vigor/model"
 )
 
 const defaultOpenRouterModel = "x-ai/grok-4.1-fast:free"
@@ -19,20 +20,6 @@ type OpenRouter struct {
 	LLM
 	apiKey string
 	model  string
-}
-
-// JSONSchemaFormat defines the structure for OpenRouter's structured outputs
-type JSONSchemaFormat struct {
-	Type       string     `json:"type"`
-	JSONSchema JSONSchema `json:"json_schema"`
-}
-
-// JSONSchema defines the schema structure with strict validation
-type JSONSchema struct {
-	Name        string                 `json:"name"`
-	Strict      bool                   `json:"strict"`
-	Schema      map[string]interface{} `json:"schema"`
-	Description string                 `json:"description,omitempty"`
 }
 
 func init() {
@@ -50,129 +37,6 @@ func init() {
 	providers = append(providers, &OpenRouter{apiKey: apiKey, model: model})
 }
 
-// buildTrainingJSONSchema creates a strict JSON Schema for Training model validation
-func buildTrainingJSONSchema() JSONSchemaFormat {
-	return JSONSchemaFormat{
-		Type: "json_schema",
-		JSONSchema: JSONSchema{
-			Name:        "training_workout_schema",
-			Strict:      true,
-			Description: "AI-generated personalized workout training session",
-			Schema: map[string]interface{}{
-				"type":                 "object",
-				"additionalProperties": false,
-				"required":             []string{"name", "description", "type", "duration", "references", "routines"},
-				"properties": map[string]interface{}{
-					"name": map[string]interface{}{
-						"type":        "string",
-						"description": "Catchy training name that reminds of themes of classical epic",
-					},
-					"description": map[string]interface{}{
-						"type":        "string",
-						"description": "Training description in terms of impact on profile goals",
-					},
-					"type": map[string]interface{}{
-						"type":        "string",
-						"description": "Training type (e.g. HIIT, pilates, swimming, etc)",
-					},
-					"duration": map[string]interface{}{
-						"type":        "integer",
-						"description": "Total training duration in seconds",
-					},
-					"references": map[string]interface{}{
-						"type":        "array",
-						"description": "Relevant knowledge fact URLs used in generation",
-						"items": map[string]interface{}{
-							"type": "string",
-						},
-					},
-					"routines": map[string]interface{}{
-						"type":        "array",
-						"description": "Training routines (warmup, main workout, cooldown)",
-						"items": map[string]interface{}{
-							"type":                 "object",
-							"additionalProperties": false,
-							"required":             []string{"name", "rest", "blocks"},
-							"properties": map[string]interface{}{
-								"name": map[string]interface{}{
-									"type":        "string",
-									"description": "Routine type (warmup/circuit/cooldown)",
-								},
-								"rest": map[string]interface{}{
-									"type":        "integer",
-									"description": "Rest seconds between routines",
-								},
-								"blocks": map[string]interface{}{
-									"type":        "array",
-									"description": "Exercise blocks within this routine",
-									"items": map[string]interface{}{
-										"type":                 "object",
-										"additionalProperties": false,
-										"required":             []string{"type", "repeats", "rest", "activities"},
-										"properties": map[string]interface{}{
-											"type": map[string]interface{}{
-												"type":        "string",
-												"description": "Block type (warmup/circuit/rest/cooldown)",
-											},
-											"repeats": map[string]interface{}{
-												"type":        "integer",
-												"description": "Number of times to repeat this block",
-											},
-											"rest": map[string]interface{}{
-												"type":        "integer",
-												"description": "Rest seconds between block repeats",
-											},
-											"activities": map[string]interface{}{
-												"type":        "array",
-												"description": "Exercises/stretches/rests in this block",
-												"items": map[string]interface{}{
-													"type":                 "object",
-													"additionalProperties": false,
-													"required":             []string{"name", "rationale", "type", "duration", "reps", "weight_kg", "rest"},
-													"properties": map[string]interface{}{
-														"name": map[string]interface{}{
-															"type":        "string",
-															"description": "Exercise ID from provided knowledge base",
-														},
-														"rationale": map[string]interface{}{
-															"type":        "string",
-															"description": "Why this exercise addresses profile goals, limitations, progressions",
-														},
-														"type": map[string]interface{}{
-															"type":        "string",
-															"description": "Activity type (exercise/stretch/rest)",
-														},
-														"duration": map[string]interface{}{
-															"type":        "integer",
-															"description": "Activity duration in seconds",
-														},
-														"reps": map[string]interface{}{
-															"type":        "integer",
-															"description": "Number of repetitions",
-														},
-														"weight_kg": map[string]interface{}{
-															"type":        "integer",
-															"description": "Weight in kilograms",
-														},
-														"rest": map[string]interface{}{
-															"type":        "integer",
-															"description": "Rest seconds after this activity",
-														},
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
 func (llm *OpenRouter) query(system, user string, temperature float64, maxTokens int) ([]byte, error) {
 	start := time.Now()
 	requestPayload := ChatCompletionRequest{
@@ -181,7 +45,7 @@ func (llm *OpenRouter) query(system, user string, temperature float64, maxTokens
 			{Role: "system", Content: system},
 			{Role: "user", Content: user},
 		},
-		ResponseFormat: buildTrainingJSONSchema(),
+		ResponseFormat: model.TrainingSchema,
 		Temperature:    temperature,
 		MaxTokens:      maxTokens,
 		TopP:           0.9,  // Good sampling balance
