@@ -3,7 +3,7 @@
 {% import "strings" %}
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func GenTraining(profile model.Profile, exercises []model.Exercise, prompt string, duration int, recentTrainings []model.Training, facts []model.Fact) -%}
+{% func GenTraining(profile model.Profile, exercises []model.Exercise, prompt string, duration int, recentTrainings []model.Training, facts []model.Fact, classics []model.Classic) -%}
 {% collapsespace %}
 
 Generate {%d duration %}min training from these exercises:
@@ -58,6 +58,13 @@ Recent training history (consider variety and progression):
 Relevant knowledge facts:
     {% for _, fact := range facts %}
         - {%s fact.Reference %}: {%s fact.Content %}
+    {% endfor %}.
+{% endif %}
+
+{% if len(classics) > 0 %}
+Relevant classics excerpts to leverage for workout name generation:
+    {% for _, classic := range classics %}
+        - {%s classic.Excerpt %}
     {% endfor %}.
 {% endif %}
 

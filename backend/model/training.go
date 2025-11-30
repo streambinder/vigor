@@ -26,8 +26,7 @@ type JSONSchema struct {
 	Description string                 `json:"description,omitempty"`
 }
 
-var	TrainingSchema JSONSchemaFormat
-
+var TrainingSchema JSONSchemaFormat
 
 func init() {
 	TrainingSchema = JSONSchemaFormat{
@@ -44,7 +43,7 @@ func init() {
 // Training represents the entire training session with a UUID ID
 type Training struct {
 	ID          uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
-	Name        string         `gorm:"not null" json:"name" prompt:"Catchy training name that reminds of themes of classical epic"`
+	Name        string         `gorm:"not null" json:"name" prompt:"Catchy training name that reflects the user goals and injuries with given classical history, literature, myth and epic"`
 	Description string         `gorm:"not null" json:"description" prompt:"Training description in terms of impact on profile goals"`
 	Type        string         `gorm:"not null" json:"type" prompt:"Training type (e.g. HIIT, pilates, swimming, etc)"`
 	Duration    int            `gorm:"not null" json:"duration" prompt:"Total training duration in seconds"`
@@ -101,7 +100,7 @@ type Activity struct {
 	Reps      int            `json:"reps" prompt:"Number of repetitions"`
 	WeightKg  int            `json:"weight_kg" prompt:"Weight in kilograms"`
 	Rest      int            `json:"rest" prompt:"Rest seconds after this activity"`
-	Detail    datatypes.JSON `gorm:"type:jsonb" json:"detail" prompt:"-"` // Full exercise details as JSON
+	Detail    datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"` // Full exercise details as JSON
 	Feedback  string         `json:"feedback" prompt:"-"`
 
 	CreatedAt time.Time      `json:"-"`

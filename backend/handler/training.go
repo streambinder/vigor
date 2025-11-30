@@ -23,6 +23,7 @@ const (
 	recentTrainingMaxResults = 5
 	maxPromptExercises       = 50
 	maxPromptFacts           = 5
+	maxPromptClassics        = 5
 )
 
 // TrainingRequest represents the request body for generating a training plan.
@@ -101,6 +102,37 @@ func queryUserFacts(profile model.Profile, prompt string) ([]model.Fact, error) 
 	return facts, nil
 }
 
+func queryUserClassics(profile model.Profile, prompt string) ([]model.Classic, error) {
+	embeddingText := rag.GenUserClassics(profile, prompt)
+	embedding, err := embedding.GenVector(embeddingText)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []struct {
+		ClassicID string
+		Text      string
+		Distance  float64
+		Classic   model.Classic `gorm:"embedded"`
+	}
+	if err := database.Knowledge.
+		Table("classic_embeddings").
+		Select("classic_embeddings.classic_id, classic_embeddings.text, classic_embeddings.embedding <=> ? as distance, classics.*", pgvector.NewVector(embedding)).
+		Joins("JOIN classics ON classics.id = classic_embeddings.classic_id").
+		Order("distance ASC").
+		Limit(maxPromptClassics).
+		Scan(&results).
+		Error; err != nil {
+		return nil, fmt.Errorf("failed to execute similarity search: %w", err)
+	}
+
+	classics := make([]model.Classic, 0, len(results))
+	for _, result := range results {
+		classics = append(classics, result.Classic)
+	}
+	return classics, nil
+}
+
 // handleTrainingRequest handles POST /training endpoint for generating training plans.
 func handleTrainingRequest(c *fiber.Ctx) error {
 	var req TrainingRequest
@@ -154,6 +186,18 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 		Dur("duration_ms", time.Since(queryFactsStart)).
 		Msg("Queried facts from database")
 
+	// Query knowledge classics related to user's profile
+	queryClassicsStart := time.Now()
+	classics, err := queryUserClassics(profile, req.Prompt)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query classics from database")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	log.Info().
+		Int("classics_count", len(classics)).
+		Dur("duration_ms", time.Since(queryClassicsStart)).
+		Msg("Queried classics from database")
+
 	// Query recent trainings to avoid repeating exercises and ensure progression
 	var recentTrainings []model.Training
 	if err := database.DB.
@@ -166,7 +210,7 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 	}
 
 	llmStart := time.Now()
-	training, err := llm.GenTraining(profile, exercises, req.Prompt, req.Duration, recentTrainings, facts)
+	training, err := llm.GenTraining(profile, exercises, req.Prompt, req.Duration, recentTrainings, facts, classics)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate training via LLM")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})

@@ -1,0 +1,9 @@
+{% package rag %}
+
+{% import "github.com/streambinder/vigor/model" %}
+
+{% func GenClassic(classic model.Classic) -%}
+{% collapsespace %}
+{%s classic.Excerpt %}.
+{% endcollapsespace -%}
+{% endfunc %}
