@@ -9,10 +9,15 @@ import (
 	"os"
 
 	"github.com/rs/zerolog/log"
+	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/handler"
 )
 
 func main() {
+	if err := database.Init(); err != nil {
+		log.Fatal().Err(err).Msg("Failed to initialize database")
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8000"
