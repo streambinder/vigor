@@ -129,4 +129,34 @@ class TrainingService {
       );
     }
   }
+
+  Future<ApiResponse<Training>> completeTraining(String trainingId) async {
+    _log.d('Completing training: $trainingId');
+    final headers = await _getAuthHeaders();
+    if (headers == null) {
+      return ApiResponse.error('Not authenticated', 401);
+    }
+
+    final response = await _apiService.post(
+      '/training/complete/$trainingId',
+      headers: headers,
+    );
+
+    if (response.isSuccess && response.data != null) {
+      try {
+        final training = Training.fromJson(response.data!['training']);
+        _log.i('Completed training: $trainingId');
+        return ApiResponse.success(training, response.statusCode);
+      } catch (e) {
+        _log.e('Failed to parse completed training', error: e);
+        return ApiResponse.error('Failed to parse completed training', response.statusCode);
+      }
+    } else {
+      _log.e('Failed to complete training: ${response.error}');
+      return ApiResponse.error(
+        response.error ?? 'Failed to complete training',
+        response.statusCode,
+      );
+    }
+  }
 }

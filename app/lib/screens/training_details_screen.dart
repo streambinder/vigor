@@ -107,6 +107,28 @@ class TrainingDetailsScreen extends StatelessWidget {
     }
   }
 
+  Future<void> _completeTraining(BuildContext context) async {
+    final storage = context.read<SecureStorageService>();
+    final trainingService = TrainingService(storageService: storage);
+
+    final response = await trainingService.completeTraining(training.id);
+
+    if (context.mounted) {
+      if (response.isSuccess) {
+        Navigator.of(context).pop(true); // Return true to refresh the list
+        AdaptiveNotification.show(
+          context: context,
+          message: 'Training marked as complete',
+        );
+      } else {
+        AdaptiveNotification.showError(
+          context: context,
+          message: response.error ?? 'Failed to complete training',
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
@@ -196,7 +218,7 @@ class TrainingDetailsScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          _formatDate(training.completedAt),
+                          _formatDate(training.completedAt ?? training.createdAt),
                           style: PlatformHelper.useLiquidGlass
                               ? LiquidGlassTheme.captionStyle
                               : Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -215,12 +237,16 @@ class TrainingDetailsScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).push(
+                onPressed: () async {
+                  final completed = await Navigator.of(context).push<bool>(
                     MaterialPageRoute(
                       builder: (context) => TabataTimerScreen(training: training),
                     ),
                   );
+                  // If the timer returned true (workout completed), refresh
+                  if (completed == true && context.mounted) {
+                    Navigator.of(context).pop(true);
+                  }
                 },
                 icon: const Icon(Icons.timer),
                 label: const Text('Start Workout Timer'),
@@ -236,6 +262,32 @@ class TrainingDetailsScreen extends StatelessWidget {
                 ),
               ),
             ),
+            // Mark as Complete button (only show if not already completed)
+            if (training.completedAt == null) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _completeTraining(context),
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: const Text('Mark as Complete'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: PlatformHelper.useLiquidGlass
+                        ? LiquidGlassTheme.successColor
+                        : Colors.green[600],
+                    side: BorderSide(
+                      color: PlatformHelper.useLiquidGlass
+                          ? LiquidGlassTheme.successColor
+                          : Colors.green[600]!,
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 24),
 
             // Routines

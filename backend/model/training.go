@@ -50,7 +50,7 @@ type Training struct {
 	References  pq.StringArray `gorm:"type:text[]" json:"references" prompt:"Relevant knowledge fact URLs used in generation"`
 	Routines    []Routine      `gorm:"foreignKey:TrainingID" json:"routines"`
 
-	CompletedAt time.Time      `json:"completed_at" prompt:"-"`
+	CompletedAt *time.Time     `json:"completed_at" prompt:"-"`
 	CreatedAt   time.Time      `json:"created_at" prompt:"-"`
 	UpdatedAt   time.Time      `json:"-"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
@@ -125,8 +125,8 @@ func (t Training) CalcDuration() (duration int) {
 
 func (t Training) DaysSince() int {
 	date := t.CreatedAt
-	if !t.CompletedAt.IsZero() {
-		date = t.CompletedAt
+	if t.CompletedAt != nil {
+		date = *t.CompletedAt
 	}
 	return int(time.Since(date).Hours() / 24)
 }

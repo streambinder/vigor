@@ -23,7 +23,7 @@ class Training {
   @JsonKey(name: 'routines', defaultValue: const [])
   final List<Routine> routines;
   @JsonKey(name: 'completed_at')
-  final DateTime completedAt;
+  final DateTime? completedAt;
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
 
@@ -35,7 +35,7 @@ class Training {
     required this.duration,
     required this.references,
     required this.routines,
-    required this.completedAt,
+    this.completedAt,
     required this.createdAt,
   });
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/training.dart';
 import '../models/activity.dart';
 import '../models/exercise.dart';
@@ -7,6 +8,8 @@ import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 import '../utils/exercise_modal.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../services/training_service.dart';
+import '../services/secure_storage_service.dart';
 
 class TabataTimerScreen extends StatefulWidget {
   final Training training;
@@ -58,6 +61,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
   bool _isCompleted = false;
   bool _hasStarted = false;
   List<int> _history = [];
+  TrainingService? _trainingService;
 
   @override
   void initState() {
@@ -65,6 +69,11 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     _intervals = _buildIntervals();
     // Start countdown immediately
     _startInitialCountdown();
+    // Initialize training service
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final storage = context.read<SecureStorageService>();
+      _trainingService = TrainingService(storageService: storage);
+    });
   }
 
   void _startInitialCountdown() {
@@ -305,6 +314,24 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     setState(() {
       _isCompleted = true;
     });
+    // Automatically mark as complete when workout finishes
+    _markTrainingComplete();
+  }
+
+  Future<void> _markTrainingComplete() async {
+    if (_trainingService == null) return;
+
+    final response = await _trainingService!.completeTraining(widget.training.id);
+    if (response.isSuccess && mounted) {
+      // Training marked as complete successfully
+      // Could show a success message if desired
+    } else if (mounted) {
+      // Could show an error message if desired
+      AdaptiveNotification.showError(
+        context: context,
+        message: response.error ?? 'Failed to mark training as complete',
+      );
+    }
   }
 
   void _togglePause() {
@@ -428,7 +455,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
             ),
             const SizedBox(height: 48),
             AdaptiveButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.of(context).pop(true),
               child: const Text('Done'),
             ),
           ],
@@ -775,18 +802,28 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Exit Workout?'),
-        content: const Text('Are you sure you want to exit this workout?'),
+        content: const Text('What would you like to do?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(); // Close dialog
+              Navigator.of(context).pop(); // Exit workout
             },
             child: const Text('Exit'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Continue'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop(); // Close dialog
+              await _markTrainingComplete();
+              if (mounted) {
+                Navigator.of(context).pop(true); // Return true to indicate completion
+              }
+            },
+            child: const Text('Mark as Complete'),
           ),
         ],
       ),

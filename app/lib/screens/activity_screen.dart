@@ -75,13 +75,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
   }
 
   bool _isCompletedWorkout(Training training) {
-    try {
-      final completedAt = training.completedAt;
-      final now = DateTime.now();
-      return completedAt.isBefore(now);
-    } catch (e) {
+    final completedAt = training.completedAt;
+    if (completedAt == null) {
       return false;
     }
+    final now = DateTime.now();
+    return completedAt.isBefore(now);
   }
 
   @override
@@ -156,7 +155,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
     final pastWorkouts = _trainings!
         .where((t) => _isCompletedWorkout(t))
         .toList()
-      ..sort((a, b) => b.completedAt.compareTo(a.completedAt)); // Most recent first
+      ..sort((a, b) {
+        // Both should have non-null completedAt after filtering, but add safety
+        final aDate = a.completedAt ?? a.createdAt;
+        final bDate = b.completedAt ?? b.createdAt;
+        return bDate.compareTo(aDate);
+      }); // Most recent first
 
     return ListView(
       padding: const EdgeInsets.all(16.0),
@@ -240,13 +244,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
       child: AdaptiveCard(
         child: InkWell(
           onTap: () async {
-            final deleted = await Navigator.of(context).push<bool>(
+            final changed = await Navigator.of(context).push<bool>(
               MaterialPageRoute(
                 builder: (context) => TrainingDetailsScreen(training: training),
               ),
             );
-            // Refresh the list if training was deleted
-            if (deleted == true) {
+            // Refresh the list if training was deleted or completed
+            if (changed == true) {
               _loadTrainings();
             }
           },
@@ -306,7 +310,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Completed: ${_formatDate(training.completedAt)}',
+                        'Completed: ${_formatDate(training.completedAt ?? training.createdAt)}',
                         style: PlatformHelper.useLiquidGlass
                             ? LiquidGlassTheme.captionStyle.copyWith(
                                 color: LiquidGlassTheme.successColor,
@@ -357,12 +361,16 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).push(
+                    onPressed: () async {
+                      final completed = await Navigator.of(context).push<bool>(
                         MaterialPageRoute(
                           builder: (context) => TabataTimerScreen(training: training),
                         ),
                       );
+                      // Reload trainings if workout was completed
+                      if (completed == true) {
+                        _loadTrainings();
+                      }
                     },
                     icon: const Icon(Icons.timer),
                     label: const Text('Start Workout Timer'),

@@ -30,6 +30,7 @@ type TrainingRequest struct {
 
 func init() {
 	APP.Post("/training", middleware.Authorized(), handleTrainingRequest)
+	APP.Post("/training/complete/:id", middleware.Authorized(), handleCompleteTraining)
 	APP.Get("/training", middleware.Authorized(), handleGetTrainings)
 	APP.Delete("/training/:id", middleware.Authorized(), handleDeleteTraining)
 }
@@ -150,7 +151,7 @@ func handleGetTrainings(c *fiber.Ctx) error {
 	if err := database.DB.
 		Preload("Routines.Blocks.Activities").
 		Where("user_id = ?", c.Locals("userID")).
-		Order("completed_at desc").
+		Order("(completed_at IS NOT NULL), COALESCE(completed_at, created_at) desc").
 		Find(&trainings).Error; err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -176,4 +177,38 @@ func handleDeleteTraining(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{"message": "training deleted successfully"})
+}
+
+func handleCompleteTraining(c *fiber.Ctx) error {
+	trainingID := c.Params("id")
+	if trainingID == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "training id is required"})
+	}
+
+	var training model.Training
+	if err := database.DB.First(&training, "id = ? and user_id = ?", trainingID, c.Locals("userID")).Error; err != nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})
+	}
+	now := time.Now()
+	training.CompletedAt = &now
+
+	if err := database.DB.Save(&training).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to update training",
+		})
+	}
+
+	// Reload with associations
+	if err := database.DB.
+		Preload("Routines.Blocks.Activities").
+		First(&training, "id = ?", trainingID).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to reload training",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message":  "training updated successfully",
+		"training": training,
+	})
 }
