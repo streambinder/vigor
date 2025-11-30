@@ -24,6 +24,9 @@ const (
 	maxPromptExercises       = 50
 	maxPromptFacts           = 5
 	maxPromptClassics        = 5
+	maxFactDistance          = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
+	maxClassicDistance       = 0.7 // Maximum cosine distance for classics
+	maxEquipmentDistance     = 0.3 // Maximum cosine distance for equipment matching (stricter)
 )
 
 // TrainingRequest represents the request body for generating a training plan.
@@ -42,9 +45,28 @@ func init() {
 
 func queryUserExercises(profile model.Profile, equipment []string) ([]model.Exercise, error) {
 	embeddingText := rag.GenUserExercises(profile, equipment)
-	embedding, err := embedding.GenVector(embeddingText)
+	exerciseEmbedding, err := embedding.GenVector(embeddingText)
 	if err != nil {
 		return nil, err
+	}
+
+	equipmentEmbeddings := make([][]float32, 0, len(equipment))
+	for _, entry := range equipment {
+		equipment, err := embedding.GenVector(entry)
+		if err != nil {
+			log.Warn().Err(err).Str("equipment", entry).Msg("Failed to generate embedding for equipment")
+			continue
+		}
+		equipmentEmbeddings = append(equipmentEmbeddings, equipment)
+	}
+
+	// Build dynamic OR clause for equipment matching using cosine distance
+	// Each required equipment must match at least ONE user equipment embedding
+	var equipmentMatchConditions []string
+	var equipmentMatchArgs []interface{}
+	for _, userEqEmbed := range equipmentEmbeddings {
+		equipmentMatchConditions = append(equipmentMatchConditions, "eq.embedding <=> ? < ?")
+		equipmentMatchArgs = append(equipmentMatchArgs, pgvector.NewVector(userEqEmbed), maxEquipmentDistance)
 	}
 
 	var results []struct {
@@ -53,11 +75,50 @@ func queryUserExercises(profile model.Profile, equipment []string) ([]model.Exer
 		Distance   float64
 		Exercise   model.Exercise `gorm:"embedded"`
 	}
-	if err := database.Knowledge.
+
+	// Single query with joins:
+	// 1. Start from exercise_embeddings (for ordering by similarity)
+	// 2. Join to exercises
+	// 3. Use subqueries to check equipment matching via exercise_equipment join table
+	// 4. Filter: bodyweight OR all equipment matches user equipment
+	// 5. Order by exercise embedding distance
+	query := database.Knowledge.
 		Table("exercise_embeddings").
-		Select("exercise_embeddings.exercise_id, exercise_embeddings.text, exercise_embeddings.embedding <=> ? as distance, exercises.*", pgvector.NewVector(embedding)).
-		Joins("JOIN exercises ON exercises.id = exercise_embeddings.exercise_id").
-		Order("distance ASC").
+		Select(`DISTINCT exercise_embeddings.exercise_id,
+		        exercise_embeddings.text,
+		        exercise_embeddings.embedding <=> ? as distance,
+		        exercises.*`, pgvector.NewVector(exerciseEmbedding)).
+		Joins("JOIN exercises ON exercises.id = exercise_embeddings.exercise_id")
+
+	// Build WHERE clause dynamically based on user equipment
+	if len(equipmentMatchConditions) > 0 {
+		// Exercises where ALL required equipment matches at least ONE user equipment
+		equipmentMatchSQL := strings.Join(equipmentMatchConditions, " OR ")
+		whereClause := fmt.Sprintf(`(
+			-- Bodyweight exercises (no equipment required)
+			NOT EXISTS (
+				SELECT 1 FROM exercise_equipment
+				WHERE exercise_equipment.exercise_id = exercises.id
+			)
+			OR
+			-- Exercises where ALL equipment has semantic match with user equipment
+			NOT EXISTS (
+				SELECT 1 FROM exercise_equipment ee
+				JOIN equipment_embeddings eq ON ee.equipment_embedding_id = eq.id
+				WHERE ee.exercise_id = exercises.id
+				AND NOT (%s)
+			)
+		)`, equipmentMatchSQL)
+		query = query.Where(whereClause, equipmentMatchArgs...)
+	} else {
+		// No user equipment - only return bodyweight exercises
+		query = query.Where(`NOT EXISTS (
+			SELECT 1 FROM exercise_equipment
+			WHERE exercise_equipment.exercise_id = exercises.id
+		)`)
+	}
+
+	if err := query.Order("distance ASC").
 		Limit(maxPromptExercises).
 		Scan(&results).
 		Error; err != nil {
@@ -68,6 +129,7 @@ func queryUserExercises(profile model.Profile, equipment []string) ([]model.Exer
 	for _, result := range results {
 		exercises = append(exercises, result.Exercise)
 	}
+
 	return exercises, nil
 }
 
@@ -78,16 +140,20 @@ func queryUserFacts(profile model.Profile, prompt string) ([]model.Fact, error) 
 		return nil, err
 	}
 
-	var results []struct {
-		FactID   string
-		Text     string
-		Distance float64
-		Fact     model.Fact `gorm:"embedded"`
-	}
+	var (
+		vector  = pgvector.NewVector(embedding)
+		results []struct {
+			FactID   string
+			Text     string
+			Distance float64
+			Fact     model.Fact `gorm:"embedded"`
+		}
+	)
 	if err := database.Knowledge.
 		Table("fact_embeddings").
-		Select("fact_embeddings.fact_id, fact_embeddings.text, fact_embeddings.embedding <=> ? as distance, facts.*", pgvector.NewVector(embedding)).
+		Select("fact_embeddings.fact_id, fact_embeddings.text, fact_embeddings.embedding <=> ? as distance, facts.*", vector).
 		Joins("JOIN facts ON facts.id = fact_embeddings.fact_id").
+		Where("fact_embeddings.embedding <=> ? < ?", vector, maxFactDistance).
 		Order("distance ASC").
 		Limit(maxPromptFacts).
 		Scan(&results).
@@ -109,16 +175,20 @@ func queryUserClassics(profile model.Profile, prompt string) ([]model.Classic, e
 		return nil, err
 	}
 
-	var results []struct {
-		ClassicID string
-		Text      string
-		Distance  float64
-		Classic   model.Classic `gorm:"embedded"`
-	}
+	var (
+		vector  = pgvector.NewVector(embedding)
+		results []struct {
+			ClassicID string
+			Text      string
+			Distance  float64
+			Classic   model.Classic `gorm:"embedded"`
+		}
+	)
 	if err := database.Knowledge.
 		Table("classic_embeddings").
-		Select("classic_embeddings.classic_id, classic_embeddings.text, classic_embeddings.embedding <=> ? as distance, classics.*", pgvector.NewVector(embedding)).
+		Select("classic_embeddings.classic_id, classic_embeddings.text, classic_embeddings.embedding <=> ? as distance, classics.*", vector).
 		Joins("JOIN classics ON classics.id = classic_embeddings.classic_id").
+		Where("classic_embeddings.embedding <=> ? < ?", vector, maxClassicDistance).
 		Order("distance ASC").
 		Limit(maxPromptClassics).
 		Scan(&results).

@@ -49,10 +49,14 @@ func (provider *LlamaCpp) vectorize(sequence string) ([]float32, error) {
 		return nil, fmt.Errorf("unable to create llama.cpp embedding payload: %s", err)
 	}
 
+	excerpt := sequence
+	if len(sequence) > 10 {
+		excerpt = fmt.Sprintf("%s...", sequence[:10])
+	}
 	endpoint := fmt.Sprintf("%s/embedding", provider.uri)
 	log.Debug().
 		Str("endpoint", endpoint).
-		Str("sequence_preview", fmt.Sprintf("%s...", sequence[:10])).
+		Str("sequence_preview", excerpt).
 		Msg("Sending embedding request to llama.cpp")
 
 	// Create HTTP request

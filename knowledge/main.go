@@ -39,6 +39,7 @@ func main() {
 	if err := gormDB.AutoMigrate(
 		&model.Exercise{},
 		&model.ExerciseEmbedding{},
+		&model.EquipmentEmbedding{},
 		&model.Fact{},
 		&model.FactEmbedding{},
 		&model.Classic{},
@@ -64,7 +65,10 @@ func boostrapExercises(gormDB *gorm.DB) error {
 		return err
 	}
 
-	var rows []model.Exercise
+	var (
+		rows                []model.Exercise
+		equipmentExcercises = make(map[string][]string) // map of equipment name to exercise IDs
+	)
 	if err := json.Unmarshal(bytes, &rows); err != nil {
 		return err
 	}
@@ -74,6 +78,7 @@ func boostrapExercises(gormDB *gorm.DB) error {
 			return err
 		}
 
+		// exercise embeddings
 		text := rag.GenExercise(row)
 		vector, err := embedding.GenVector(text)
 		if err != nil {
@@ -84,6 +89,34 @@ func boostrapExercises(gormDB *gorm.DB) error {
 			&model.ExerciseEmbedding{ExerciseID: row.ID, Text: text, Embedding: pgvector.NewVector(vector)},
 			model.ExerciseEmbedding{ExerciseID: row.ID},
 		).Error; err != nil {
+			return err
+		}
+
+		for _, equipment := range row.Equipment {
+			equipmentExcercises[equipment] = append(equipmentExcercises[equipment], row.ID)
+		}
+	}
+
+	// equipment embeddings
+	for equipment, exerciseIDs := range equipmentExcercises {
+		vector, err := embedding.GenVector(equipment)
+		if err != nil {
+			return err
+		}
+
+		equipmentEmbedding := model.EquipmentEmbedding{Text: equipment}
+		if err := gormDB.FirstOrCreate(
+			&equipmentEmbedding,
+			model.EquipmentEmbedding{Text: equipment, Embedding: pgvector.NewVector(vector)},
+		).Error; err != nil {
+			return err
+		}
+
+		var exercises []model.Exercise
+		if err := gormDB.Where("id IN ?", exerciseIDs).Find(&exercises).Error; err != nil {
+			return err
+		}
+		if err := gormDB.Model(&equipmentEmbedding).Association("Exercises").Replace(&exercises); err != nil {
 			return err
 		}
 	}
