@@ -15,11 +15,11 @@ class profileData {
     'injuries',
     'limitations'
   ];
-  @JsonKey(name: 'goals')
+  @JsonKey(name: 'goals', defaultValue: const [])
   final List<Goal> goals;
-  @JsonKey(name: 'injuries')
+  @JsonKey(name: 'injuries', defaultValue: const [])
   final List<Injury> injuries;
-  @JsonKey(name: 'limitations')
+  @JsonKey(name: 'limitations', defaultValue: const [])
   final List<String> limitations;
 
   profileData({

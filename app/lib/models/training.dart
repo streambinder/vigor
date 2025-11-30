@@ -18,9 +18,9 @@ class Training {
   final String type;
   @JsonKey(name: 'duration')
   final int duration;
-  @JsonKey(name: 'references')
+  @JsonKey(name: 'references', defaultValue: const [])
   final List<String> references;
-  @JsonKey(name: 'routines')
+  @JsonKey(name: 'routines', defaultValue: const [])
   final List<Routine> routines;
   @JsonKey(name: 'completed_at')
   final DateTime completedAt;

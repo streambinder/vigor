@@ -16,7 +16,7 @@ class Routine {
   final String type;
   @JsonKey(name: 'rest')
   final int rest;
-  @JsonKey(name: 'blocks')
+  @JsonKey(name: 'blocks', defaultValue: const [])
   final List<Block> blocks;
 
   Routine({

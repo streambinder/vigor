@@ -11,17 +11,17 @@ class Exercise {
   final String id;
   @JsonKey(name: 'name')
   final String name;
-  @JsonKey(name: 'equipment')
+  @JsonKey(name: 'equipment', defaultValue: const [])
   final List<String> equipment;
-  @JsonKey(name: 'muscles')
+  @JsonKey(name: 'muscles', defaultValue: const [])
   final List<String> muscles;
-  @JsonKey(name: 'secondary_muscles')
+  @JsonKey(name: 'secondary_muscles', defaultValue: const [])
   final List<String> secondaryMuscles;
-  @JsonKey(name: 'body_parts')
+  @JsonKey(name: 'body_parts', defaultValue: const [])
   final List<String> bodyParts;
   @JsonKey(name: 'reference')
   final String reference;
-  @JsonKey(name: 'instructions')
+  @JsonKey(name: 'instructions', defaultValue: const [])
   final List<String> instructions;
 
   Exercise({
