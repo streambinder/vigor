@@ -83,6 +83,16 @@ class _ActivityScreenState extends State<ActivityScreen> {
     return completedAt.isBefore(now);
   }
 
+  bool _isStaleWorkout(Training training) {
+    // Consider a workout stale if it's older than 7 days and not completed
+    if (_isCompletedWorkout(training)) {
+      return false;
+    }
+    final now = DateTime.now();
+    final daysSinceCreation = now.difference(training.createdAt).inDays;
+    return daysSinceCreation >= 7;
+  }
+
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
@@ -237,6 +247,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
   Widget _buildTrainingCard(Training training) {
     final isCompleted = _isCompletedWorkout(training);
+    final isStale = _isStaleWorkout(training);
     final opacity = isCompleted ? 0.5 : 1.0;
 
     return Opacity(
@@ -317,6 +328,29 @@ class _ActivityScreenState extends State<ActivityScreen> {
                               )
                             : Theme.of(context).textTheme.bodySmall?.copyWith(
                                   color: Colors.green[600],
+                                ),
+                      ),
+                      const SizedBox(width: 16),
+                    ],
+                    if (!isCompleted && isStale) ...[
+                      Icon(
+                        Icons.warning,
+                        size: 16,
+                        color: PlatformHelper.useLiquidGlass
+                            ? Colors.orange[700]
+                            : Colors.orange[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Stale',
+                        style: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.captionStyle.copyWith(
+                                color: Colors.orange[700],
+                                fontWeight: FontWeight.w600,
+                              )
+                            : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.orange[600],
+                                  fontWeight: FontWeight.w600,
                                 ),
                       ),
                       const SizedBox(width: 16),
