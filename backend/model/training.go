@@ -43,7 +43,7 @@ func init() {
 // Training represents the entire training session with a UUID ID
 type Training struct {
 	ID          uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
-	Name        string         `gorm:"not null" json:"name" prompt:"Catchy training name that reflects the user goals and injuries with given classical history, literature, myth and epic"`
+	Name        string         `gorm:"not null" json:"name" prompt:"Epic movie-style 3-4 words title (no hyphens or colons or special characters) drawn from provided classical history, literature, mythology, and epic excerpts that resonates with the user's journey—using their goals and challenges as inspiration to find the most fitting classical parallel or archetype. Ensure variation compared to completed trainings."`
 	Description string         `gorm:"not null" json:"description" prompt:"Training description in terms of impact on profile goals"`
 	Type        string         `gorm:"not null" json:"type" prompt:"Training type (e.g. HIIT, pilates, swimming, etc)"`
 	Duration    int            `gorm:"not null" json:"duration" prompt:"Total training duration in seconds"`
