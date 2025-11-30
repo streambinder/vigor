@@ -299,19 +299,11 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 18)
                       : Theme.of(context).textTheme.titleLarge,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  training.description,
-                  style: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.bodyStyle
-                      : Theme.of(context).textTheme.bodyMedium,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    if (isCompleted) ...[
+                if (isCompleted) ...[
+                  // For completed workouts: show only completion time and duration
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
                       Icon(
                         Icons.check_circle,
                         size: 16,
@@ -331,95 +323,127 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                 ),
                       ),
                       const SizedBox(width: 16),
-                    ],
-                    if (!isCompleted && isStale) ...[
                       Icon(
-                        Icons.warning,
+                        Icons.schedule,
                         size: 16,
                         color: PlatformHelper.useLiquidGlass
-                            ? Colors.orange[700]
-                            : Colors.orange[600],
+                            ? LiquidGlassTheme.captionStyle.color
+                            : Colors.grey[600],
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Stale',
+                        _formatDuration(training.duration),
                         style: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle.copyWith(
-                                color: Colors.orange[700],
-                                fontWeight: FontWeight.w600,
-                              )
+                            ? LiquidGlassTheme.captionStyle
                             : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.orange[600],
+                                  color: Colors.grey[600],
+                                ),
+                      ),
+                    ],
+                  ),
+                ] else ...[
+                  // For available workouts: show full details
+                  const SizedBox(height: 8),
+                  Text(
+                    training.description,
+                    style: PlatformHelper.useLiquidGlass
+                        ? LiquidGlassTheme.bodyStyle
+                        : Theme.of(context).textTheme.bodyMedium,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      if (isStale) ...[
+                        Icon(
+                          Icons.warning,
+                          size: 16,
+                          color: PlatformHelper.useLiquidGlass
+                              ? Colors.orange[700]
+                              : Colors.orange[600],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Stale',
+                          style: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle.copyWith(
+                                  color: Colors.orange[700],
                                   fontWeight: FontWeight.w600,
+                                )
+                              : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.orange[600],
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                        const SizedBox(width: 16),
+                      ],
+                      Icon(
+                        Icons.calendar_today,
+                        size: 16,
+                        color: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.captionStyle.color
+                            : Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Created: ${_formatDate(training.createdAt)}',
+                        style: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.captionStyle
+                            : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.grey[600],
                                 ),
                       ),
                       const SizedBox(width: 16),
+                      Icon(
+                        Icons.schedule,
+                        size: 16,
+                        color: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.captionStyle.color
+                            : Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _formatDuration(training.duration),
+                        style: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.captionStyle
+                            : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.grey[600],
+                                ),
+                      ),
                     ],
-                    Icon(
-                      Icons.calendar_today,
-                      size: 16,
-                      color: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.captionStyle.color
-                          : Colors.grey[600],
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Created: ${_formatDate(training.createdAt)}',
-                      style: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.captionStyle
-                          : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey[600],
-                              ),
-                    ),
-                    const SizedBox(width: 16),
-                    Icon(
-                      Icons.schedule,
-                      size: 16,
-                      color: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.captionStyle.color
-                          : Colors.grey[600],
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      _formatDuration(training.duration),
-                      style: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.captionStyle
-                          : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey[600],
-                              ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Timer button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      final completed = await Navigator.of(context).push<bool>(
-                        MaterialPageRoute(
-                          builder: (context) => TabataTimerScreen(training: training),
+                  ),
+                  const SizedBox(height: 12),
+                  // Timer button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final completed = await Navigator.of(context).push<bool>(
+                          MaterialPageRoute(
+                            builder: (context) => TabataTimerScreen(training: training),
+                          ),
+                        );
+                        // Reload trainings if workout was completed
+                        if (completed == true) {
+                          _loadTrainings();
+                        }
+                      },
+                      icon: const Icon(Icons.timer),
+                      label: const Text('Start Workout Timer'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.successColor
+                            : Colors.green[600],
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      );
-                      // Reload trainings if workout was completed
-                      if (completed == true) {
-                        _loadTrainings();
-                      }
-                    },
-                    icon: const Icon(Icons.timer),
-                    label: const Text('Start Workout Timer'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.successColor
-                          : Colors.green[600],
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
