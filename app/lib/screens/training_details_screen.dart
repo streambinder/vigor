@@ -10,6 +10,8 @@ import '../services/secure_storage_service.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
+import '../utils/exercise_modal.dart';
+import 'tabata_timer_screen.dart';
 
 class TrainingDetailsScreen extends StatelessWidget {
   final Training training;
@@ -23,7 +25,8 @@ class TrainingDetailsScreen extends StatelessWidget {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  String _formatDuration(int minutes) {
+  String _formatDuration(int seconds) {
+    final minutes = seconds ~/ 60;
     if (minutes < 60) {
       return '$minutes min';
     }
@@ -104,144 +107,6 @@ class TrainingDetailsScreen extends StatelessWidget {
     }
   }
 
-  void _showExerciseImageModal(BuildContext context, Exercise exercise) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 600),
-          decoration: PlatformHelper.useLiquidGlass
-              ? LiquidGlassTheme.glassDecoration(
-                  borderRadius: 20,
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.2),
-                    width: 1.5,
-                  ),
-                )
-              : BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Image
-                  if (_isValidImageUrl(exercise.reference))
-                    Image.network(
-                      exercise.reference,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        final isDark = Theme.of(context).brightness == Brightness.dark;
-                        return Container(
-                          height: 200,
-                          color: isDark
-                              ? Colors.white.withOpacity(0.1)
-                              : Colors.grey[300],
-                          child: Center(
-                            child: Icon(
-                              Icons.broken_image,
-                              size: 64,
-                              color: isDark
-                                  ? Colors.white.withOpacity(0.5)
-                                  : Colors.grey.shade600,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  // Exercise details
-                  Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          exercise.name,
-                          style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 22)
-                              : Theme.of(context).textTheme.headlineSmall,
-                        ),
-                        if (exercise.instructions.isNotEmpty) ...[
-                          const SizedBox(height: 16),
-                          Text(
-                            'Instructions',
-                            style: PlatformHelper.useLiquidGlass
-                                ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
-                                : Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                          ),
-                          const SizedBox(height: 8),
-                          ...exercise.instructions.asMap().entries.map((entry) {
-                            final index = entry.key;
-                            final instruction = entry.value;
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: 24,
-                                    height: 24,
-                                    decoration: BoxDecoration(
-                                      color: PlatformHelper.useLiquidGlass
-                                          ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
-                                          : Theme.of(context).colorScheme.primaryContainer,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        '${index + 1}',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: PlatformHelper.useLiquidGlass
-                                              ? LiquidGlassTheme.primaryColor
-                                              : Theme.of(context).colorScheme.primary,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      instruction,
-                                      style: PlatformHelper.useLiquidGlass
-                                          ? LiquidGlassTheme.bodyStyle
-                                          : Theme.of(context).textTheme.bodyMedium,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
-                        ],
-                        const SizedBox(height: 16),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: AdaptiveTextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('Close'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
@@ -267,36 +132,33 @@ class TrainingDetailsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            training.name,
-                            style: PlatformHelper.useLiquidGlass
-                                ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 24)
-                                : Theme.of(context).textTheme.headlineMedium,
-                          ),
+                    // Workout type badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
+                            : Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        training.type,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.primaryColor
+                              : Theme.of(context).colorScheme.primary,
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: PlatformHelper.useLiquidGlass
-                                ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
-                                : Theme.of(context).colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            training.type,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: PlatformHelper.useLiquidGlass
-                                  ? LiquidGlassTheme.primaryColor
-                                  : Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Workout name
+                    Text(
+                      training.name,
+                      style: PlatformHelper.useLiquidGlass
+                          ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 24)
+                          : Theme.of(context).textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -344,6 +206,33 @@ class TrainingDetailsScreen extends StatelessWidget {
                       ],
                     ),
                   ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Start Tabata Timer button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => TabataTimerScreen(training: training),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.timer),
+                label: const Text('Start Workout Timer'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PlatformHelper.useLiquidGlass
+                      ? LiquidGlassTheme.successColor
+                      : Colors.green[600],
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),
@@ -576,7 +465,7 @@ class TrainingDetailsScreen extends StatelessWidget {
           // Exercise image thumbnail (if available)
           if (exercise != null && _isValidImageUrl(exercise.reference)) ...[
             GestureDetector(
-              onTap: () => _showExerciseImageModal(context, exercise),
+              onTap: () => ExerciseModal.show(context, exercise),
               child: Container(
                 width: 60,
                 height: 60,

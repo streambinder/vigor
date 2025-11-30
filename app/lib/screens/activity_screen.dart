@@ -7,6 +7,7 @@ import '../models/training.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 import 'training_details_screen.dart';
+import 'tabata_timer_screen.dart';
 
 class ActivityScreen extends StatefulWidget {
   const ActivityScreen({super.key});
@@ -60,7 +61,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  String _formatDuration(int minutes) {
+  String _formatDuration(int seconds) {
+    final minutes = seconds ~/ 60;
     if (minutes < 60) {
       return '$minutes min';
     }
@@ -70,6 +72,16 @@ class _ActivityScreenState extends State<ActivityScreen> {
       return '$hours hr';
     }
     return '$hours hr $remainingMinutes min';
+  }
+
+  bool _isCompletedWorkout(Training training) {
+    try {
+      final completedAt = training.completedAt;
+      final now = DateTime.now();
+      return completedAt.isBefore(now);
+    } catch (e) {
+      return false;
+    }
   }
 
   @override
@@ -85,39 +97,130 @@ class _ActivityScreenState extends State<ActivityScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: AdaptiveLoadingIndicator())
-          : _trainings == null || _trainings!.isEmpty
-              ? _buildEmptyState()
-              : _buildTrainingsList(),
+      body: RefreshIndicator(
+        onRefresh: _loadTrainings,
+        child: _isLoading
+            ? const Center(child: AdaptiveLoadingIndicator())
+            : _trainings == null || _trainings!.isEmpty
+                ? _buildEmptyState()
+                : _buildTrainingsList(),
+      ),
     );
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
+    return ListView(
+      padding: const EdgeInsets.all(24.0),
+      children: [
+        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.fitness_center,
+                size: 64,
+                color: Colors.grey[400],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'No workouts yet',
+                style: PlatformHelper.useLiquidGlass
+                    ? LiquidGlassTheme.headlineStyle
+                    : Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Generate your first workout from the Home tab',
+                textAlign: TextAlign.center,
+                style: PlatformHelper.useLiquidGlass
+                    ? LiquidGlassTheme.captionStyle
+                    : Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTrainingsList() {
+    // Separate workouts into available and past
+    final availableWorkouts = _trainings!
+        .where((t) => !_isCompletedWorkout(t))
+        .toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Most recent first
+
+    final pastWorkouts = _trainings!
+        .where((t) => _isCompletedWorkout(t))
+        .toList()
+      ..sort((a, b) => b.completedAt.compareTo(a.completedAt)); // Most recent first
+
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        // Available Workouts Section
+        Text(
+          'Available workouts',
+          style: PlatformHelper.useLiquidGlass
+              ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
+              : Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 12),
+
+        if (availableWorkouts.isEmpty)
+          _buildEmptyAvailableState()
+        else
+          ...availableWorkouts.map((training) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: _buildTrainingCard(training),
+            );
+          }),
+
+        const SizedBox(height: 32),
+
+        // Past Workouts Section (only show if there are past workouts)
+        if (pastWorkouts.isNotEmpty) ...[
+          Text(
+            'Past workouts',
+            style: PlatformHelper.useLiquidGlass
+                ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
+                : Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+          ...pastWorkouts.map((training) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: _buildTrainingCard(training),
+            );
+          }),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildEmptyAvailableState() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24.0),
+      child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.fitness_center,
-              size: 64,
+              size: 48,
               color: Colors.grey[400],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Text(
-              'No workouts yet',
-              style: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.headlineStyle
-                  : Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Generate your first workout from the Home tab',
+              'No workout available. Start generating one.',
               textAlign: TextAlign.center,
               style: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.captionStyle
+                  ? LiquidGlassTheme.bodyStyle.copyWith(
+                      color: Colors.grey[600],
+                    )
                   : Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -128,131 +231,155 @@ class _ActivityScreenState extends State<ActivityScreen> {
     );
   }
 
-  Widget _buildTrainingsList() {
-    return RefreshIndicator(
-      onRefresh: _loadTrainings,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: _trainings!.length,
-        itemBuilder: (context, index) {
-          final training = _trainings![index];
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12.0),
-            child: _buildTrainingCard(training),
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildTrainingCard(Training training) {
-    return AdaptiveCard(
-      child: InkWell(
-        onTap: () async {
-          final deleted = await Navigator.of(context).push<bool>(
-            MaterialPageRoute(
-              builder: (context) => TrainingDetailsScreen(training: training),
-            ),
-          );
-          // Refresh the list if training was deleted
-          if (deleted == true) {
-            _loadTrainings();
-          }
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      training.name,
-                      style: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 18)
-                          : Theme.of(context).textTheme.titleLarge,
+    final isCompleted = _isCompletedWorkout(training);
+    final opacity = isCompleted ? 0.5 : 1.0;
+
+    return Opacity(
+      opacity: opacity,
+      child: AdaptiveCard(
+        child: InkWell(
+          onTap: () async {
+            final deleted = await Navigator.of(context).push<bool>(
+              MaterialPageRoute(
+                builder: (context) => TrainingDetailsScreen(training: training),
+              ),
+            );
+            // Refresh the list if training was deleted
+            if (deleted == true) {
+              _loadTrainings();
+            }
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Workout type badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: PlatformHelper.useLiquidGlass
+                        ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
+                        : Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    training.type,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: PlatformHelper.useLiquidGlass
+                          ? LiquidGlassTheme.primaryColor
+                          : Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
-                          : Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      training.type,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                ),
+                const SizedBox(height: 8),
+                // Workout name (uppercase)
+                Text(
+                  training.name.toUpperCase(),
+                  style: PlatformHelper.useLiquidGlass
+                      ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 18)
+                      : Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  training.description,
+                  style: PlatformHelper.useLiquidGlass
+                      ? LiquidGlassTheme.bodyStyle
+                      : Theme.of(context).textTheme.bodyMedium,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    if (isCompleted) ...[
+                      Icon(
+                        Icons.check_circle,
+                        size: 16,
                         color: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.primaryColor
-                            : Theme.of(context).colorScheme.primary,
+                            ? LiquidGlassTheme.successColor
+                            : Colors.green[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Completed: ${_formatDate(training.completedAt)}',
+                        style: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.captionStyle.copyWith(
+                                color: LiquidGlassTheme.successColor,
+                              )
+                            : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.green[600],
+                                ),
+                      ),
+                      const SizedBox(width: 16),
+                    ],
+                    Icon(
+                      Icons.calendar_today,
+                      size: 16,
+                      color: PlatformHelper.useLiquidGlass
+                          ? LiquidGlassTheme.captionStyle.color
+                          : Colors.grey[600],
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Created: ${_formatDate(training.createdAt)}',
+                      style: PlatformHelper.useLiquidGlass
+                          ? LiquidGlassTheme.captionStyle
+                          : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.grey[600],
+                              ),
+                    ),
+                    const SizedBox(width: 16),
+                    Icon(
+                      Icons.schedule,
+                      size: 16,
+                      color: PlatformHelper.useLiquidGlass
+                          ? LiquidGlassTheme.captionStyle.color
+                          : Colors.grey[600],
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      _formatDuration(training.duration),
+                      style: PlatformHelper.useLiquidGlass
+                          ? LiquidGlassTheme.captionStyle
+                          : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.grey[600],
+                              ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Timer button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => TabataTimerScreen(training: training),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.timer),
+                    label: const Text('Start Workout Timer'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: PlatformHelper.useLiquidGlass
+                          ? LiquidGlassTheme.successColor
+                          : Colors.green[600],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                training.description,
-                style: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.bodyStyle
-                    : Theme.of(context).textTheme.bodyMedium,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(
-                    Icons.schedule,
-                    size: 16,
-                    color: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.captionStyle.color
-                        : Colors.grey[600],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    _formatDuration(training.duration),
-                    style: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.captionStyle
-                        : Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[600],
-                            ),
-                  ),
-                  const SizedBox(width: 16),
-                  Icon(
-                    Icons.calendar_today,
-                    size: 16,
-                    color: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.captionStyle.color
-                        : Colors.grey[600],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    _formatDate(training.completedAt),
-                    style: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.captionStyle
-                        : Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[600],
-                            ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    '${training.routines.length} routines',
-                    style: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.captionStyle
-                        : Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[600],
-                            ),
-                  ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
