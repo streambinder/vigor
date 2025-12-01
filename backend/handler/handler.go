@@ -1,44 +1,27 @@
 package handler
 
 import (
-	"time"
-
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/rs/zerolog/log"
+	"github.com/streambinder/vigor/handler/middleware"
 )
 
-// APP is the global Fiber application instance for all HTTP handlers.
-var APP = fiber.New()
 
-func init() {
-	// Configure CORS to allow requests from web/mobile clients
-	APP.Use(cors.New(cors.Config{
-		AllowOrigins:     "*",
-		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
-		AllowHeaders:     "Origin,Content-Type,Accept,Authorization",
-		AllowCredentials: false,
-	}))
+// Init initializes the Fiber application with middleware and routes.
+// This function must be called before starting the server.
+func Init() *fiber.App {
+	app := fiber.New()
 
-	// Add logging middleware to track request processing time
-	APP.Use(func(c *fiber.Ctx) error {
-		start := time.Now()
+	// Register global middleware (order matters!)
+	app.Use(middleware.CORS())
+	app.Use(middleware.Logging())
 
-		// Process request
-		err := c.Next()
+	// Register route handlers
+	initHealth(app)
+	initSession(app)
+	initOauth(app)
+	initUser(app)
+	initGym(app)
+	initTraining(app)
 
-		// Calculate duration
-		duration := time.Since(start)
-
-		// Log request details
-		log.Info().
-			Str("method", c.Method()).
-			Str("path", c.Path()).
-			Int("status", c.Response().StatusCode()).
-			Dur("duration", duration).
-			Str("ip", c.IP()).
-			Msg("HTTP request")
-
-		return err
-	})
+	return app
 }

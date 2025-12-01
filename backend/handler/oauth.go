@@ -17,8 +17,14 @@ import (
 	"gorm.io/gorm"
 )
 
-// handleGoogleIDTokenAuth handles authentication with Google ID token from mobile/web clients
-func handleGoogleIDTokenAuth(c *fiber.Ctx) error {
+// initOauth registers OAuth authentication routes.
+func initOauth(app *fiber.App) {
+	// Mobile/Web Google Sign-In with ID token
+	app.Post("/auth/google", postAuthGoogle)
+}
+
+// postAuthGoogle handles POST /auth/google - authentication with Google ID token from mobile/web clients
+func postAuthGoogle(c *fiber.Ctx) error {
 	log.Debug().Msg("Received Google auth request")
 
 	// Parse request body
@@ -201,9 +207,4 @@ func handleGoogleIDTokenAuth(c *fiber.Ctx) error {
 		"refresh_token": refreshToken,
 		"user":          user,
 	})
-}
-
-func init() {
-	// Mobile/Web Google Sign-In with ID token
-	APP.Post("/auth/google", handleGoogleIDTokenAuth)
 }

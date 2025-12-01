@@ -4,10 +4,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func handleHealth(c *fiber.Ctx) error {
-	return c.SendStatus(fiber.StatusOK)
+// initHealth registers health check routes.
+func initHealth(app *fiber.App) {
+	app.Get("/health", getHealth)
 }
 
-func init() {
-	APP.Get("/health", handleHealth)
+// getHealth handles GET /health
+func getHealth(c *fiber.Ctx) error {
+	return c.SendStatus(fiber.StatusOK)
 }

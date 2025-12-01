@@ -22,7 +22,9 @@ func main() {
 	if port == "" {
 		port = "8000"
 	}
-	if err := handler.APP.Listen(":" + port); err != nil {
+
+	app := handler.Init()
+	if err := app.Listen(":" + port); err != nil {
 		log.Fatal().Err(err).Str("port", port).Msg("Failed to start server")
 	}
 }

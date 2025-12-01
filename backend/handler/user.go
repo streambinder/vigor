@@ -14,8 +14,16 @@ import (
 	"gorm.io/gorm"
 )
 
-// handleRegister creates a new user account with email and password.
-func handleRegister(c *fiber.Ctx) error {
+// initUser registers user-related routes.
+func initUser(app *fiber.App) {
+	app.Post("/register", postRegister)
+	app.Post("/unregister", middleware.Authorized(), postUnregister)
+	app.Get("/user", middleware.Authorized(), getUser)
+	app.Post("/user/update", middleware.Authorized(), postUserUpdate)
+}
+
+// postRegister handles POST /register - creates a new user account with email and password
+func postRegister(c *fiber.Ctx) error {
 	var body struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -68,8 +76,8 @@ func handleRegister(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "user created"})
 }
 
-// handleUnregister deletes the authenticated user's account and revokes tokens.
-func handleUnregister(c *fiber.Ctx) error {
+// postUnregister handles POST /unregister - deletes the authenticated user's account and revokes tokens
+func postUnregister(c *fiber.Ctx) error {
 	userID := c.Locals("userID")
 
 	// Use hard delete (Unscoped) instead of soft delete to allow email reuse
@@ -93,8 +101,8 @@ func handleUnregister(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "user deleted"})
 }
 
-// handleGetUser retrieves the authenticated user's profile information.
-func handleGetUser(c *fiber.Ctx) error {
+// getUser handles GET /user - retrieves the authenticated user's profile information
+func getUser(c *fiber.Ctx) error {
 	var user model.User
 	if err := database.DB.Preload("Profile").First(&user, "id = ?", c.Locals("userID")).Error; err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
@@ -102,8 +110,8 @@ func handleGetUser(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
-// handleUpdateUser updates the authenticated user's profile data.
-func handleUpdateUser(c *fiber.Ctx) error {
+// postUserUpdate handles POST /user/update - updates the authenticated user's profile data
+func postUserUpdate(c *fiber.Ctx) error {
 	var profile model.Profile
 	if err := database.DB.First(&profile, "user_id = ?", c.Locals("userID")).Error; err != nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
@@ -173,11 +181,4 @@ func handleUpdateUser(c *fiber.Ctx) error {
 		"message": "profile updated successfully",
 		"profile": profile,
 	})
-}
-
-func init() {
-	APP.Post("/register", handleRegister)
-	APP.Post("/unregister", middleware.Authorized(), handleUnregister)
-	APP.Get("/user", middleware.Authorized(), handleGetUser)
-	APP.Post("/user/update", middleware.Authorized(), handleUpdateUser)
 }

@@ -28,15 +28,16 @@ type TrainingRequest struct {
 	Prompt    string   `json:"prompt"`    // Specific prompt to use for generating the training plan
 }
 
-func init() {
-	APP.Post("/training", middleware.Authorized(), handleTrainingRequest)
-	APP.Post("/training/complete/:id", middleware.Authorized(), handleCompleteTraining)
-	APP.Get("/training", middleware.Authorized(), handleGetTrainings)
-	APP.Delete("/training/:id", middleware.Authorized(), handleDeleteTraining)
+// initTraining registers training-related routes.
+func initTraining(app *fiber.App) {
+	app.Post("/training", middleware.Authorized(), postTraining)
+	app.Post("/training/complete/:id", middleware.Authorized(), postTrainingCompleteById)
+	app.Get("/training", middleware.Authorized(), getTraining)
+	app.Delete("/training/:id", middleware.Authorized(), deleteTrainingById)
 }
 
-// handleTrainingRequest handles POST /training endpoint for generating training plans.
-func handleTrainingRequest(c *fiber.Ctx) error {
+// postTraining handles POST /training - generates a training plan for the authenticated user
+func postTraining(c *fiber.Ctx) error {
 	var req TrainingRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
@@ -145,8 +146,8 @@ func handleTrainingRequest(c *fiber.Ctx) error {
 	return c.JSON(training)
 }
 
-// handleGetTrainings handles GET /training endpoint for retrieving user's training history.
-func handleGetTrainings(c *fiber.Ctx) error {
+// getTraining handles GET /training - retrieves user's training history
+func getTraining(c *fiber.Ctx) error {
 	var trainings []model.Training
 	if err := database.DB.
 		Preload("Routines.Blocks.Activities").
@@ -158,8 +159,8 @@ func handleGetTrainings(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"trainings": trainings})
 }
 
-// handleDeleteTraining handles DELETE /training/:id endpoint for deleting a training.
-func handleDeleteTraining(c *fiber.Ctx) error {
+// deleteTrainingById handles DELETE /training/:id - deletes a training
+func deleteTrainingById(c *fiber.Ctx) error {
 	trainingID := c.Params("id")
 	if trainingID == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "training id is required"})
@@ -179,7 +180,8 @@ func handleDeleteTraining(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "training deleted successfully"})
 }
 
-func handleCompleteTraining(c *fiber.Ctx) error {
+// postTrainingCompleteById handles POST /training/complete/:id - marks a training as completed
+func postTrainingCompleteById(c *fiber.Ctx) error {
 	trainingID := c.Params("id")
 	if trainingID == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "training id is required"})
