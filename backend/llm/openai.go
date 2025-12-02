@@ -29,14 +29,14 @@ func openAIClient(host, apiKey string) openai.Client {
 	)
 }
 
-func (llm *OpenAI) query(system, user string, temperature float64, maxTokens int) ([]byte, error) {
+func (llm *OpenAI) query(prompt llmPrompt, temperature float64, maxTokens int) ([]byte, error) {
 	start := time.Now()
 	ctx := context.Background()
 	params := openai.ChatCompletionNewParams{
 		Model: llm.model,
 		Messages: []openai.ChatCompletionMessageParamUnion{
-			openai.SystemMessage(system),
-			openai.UserMessage(user),
+			openai.SystemMessage(prompt.System),
+			openai.UserMessage(prompt.User),
 		},
 		Temperature: openai.Float(temperature),
 		MaxTokens:   openai.Int(int64(maxTokens)),
@@ -56,7 +56,8 @@ func (llm *OpenAI) query(system, user string, temperature float64, maxTokens int
 	// Add provider-specific parameter (reduces exercise repetition, encourages variety)
 	params.SetExtraFields(map[string]any{"repeat_penalty": 1.15})
 
-	log.Debug().Str("provider", llm.provider).Str("model", llm.model).Msg("Sending request to LLM")
+	promptJSON, _ := json.Marshal(prompt)
+	log.Debug().Str("provider", llm.provider).Str("model", llm.model).RawJSON("request", promptJSON).Msg("Sending request to LLM")
 	completion, err := llm.client.Chat.Completions.New(ctx, params)
 	if err != nil {
 		return nil, fmt.Errorf("unable to send request to %s: %s", llm.provider, err)
@@ -69,11 +70,7 @@ func (llm *OpenAI) query(system, user string, temperature float64, maxTokens int
 		return nil, fmt.Errorf("incomplete response from %s: finish_reason=%s", llm.provider, completionChoice.FinishReason)
 	}
 
-	var parsedJSON map[string]any
 	log.Info().Str("provider", llm.provider).Str("model", llm.model).Dur("duration_ms", time.Since(start)).Msg("LLM query completed")
-	log.Debug().RawJSON("content", []byte(completionChoice.Message.Content)).Msg("Received LLM response")
-	if err := json.Unmarshal([]byte(completionChoice.Message.Content), &parsedJSON); err != nil {
-		return nil, fmt.Errorf("invalid JSON from %s: %s", llm.provider, err)
-	}
+	log.Debug().Str("provider", llm.provider).Dur("duration_ms", time.Since(start)).RawJSON("request", promptJSON).RawJSON("content", []byte(completionChoice.Message.Content)).Msg("Received LLM response")
 	return []byte(completionChoice.Message.Content), nil
 }

@@ -13,7 +13,7 @@ var providers = []LLM{}
 
 // LLM defines the interface for language model providers.
 type LLM interface {
-	query(system, user string, temperature float64, maxTokens int) ([]byte, error)
+	query(prompt llmPrompt, temperature float64, maxTokens int) ([]byte, error)
 }
 
 // Common types shared across LLM providers
@@ -62,6 +62,11 @@ type ChatCompletionResponse struct {
 	Choices []ChatCompletionChoice `json:"choices"`
 }
 
+type llmPrompt struct {
+	System string `json:"system"`
+	User   string `json:"user"`
+}
+
 func getLLM(_ model.Profile) LLM {
 	// this is a placeholder for now
 	// eventually we'll be able to discern what LLM
@@ -75,21 +80,32 @@ func getLLM(_ model.Profile) LLM {
 }
 
 // GenTraining generates a personalized training plan using an LLM.
-func GenTraining(profile model.Profile, exercises []model.Exercise, userPrompt string, duration int, recentTrainings []model.Training, facts []model.Fact, classics []model.Classic) (*model.Training, error) {
-	response, err := getLLM(profile).query(
+func GenTraining(
+	profile model.Profile,
+	exercises []model.Exercise,
+	userPrompt string,
+	duration int,
+	recentTrainings []model.Training,
+	facts []model.Fact,
+	classics []model.Classic,
+) (*model.Training, llmPrompt, error) {
+	request := llmPrompt{
 		prompt.System(profile),
 		prompt.GenTraining(profile, exercises, userPrompt, duration, recentTrainings, facts, classics),
+	}
+	response, err := getLLM(profile).query(
+		request,
 		0.35,  // Balanced: structured output + workout variety
 		10000, // Sufficient for complex multi-routine workouts
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate training: %s", err)
+		return nil, request, fmt.Errorf("failed to generate training: %s", err)
 	}
 
 	training := &model.Training{}
 	if err := json.Unmarshal(response, &training); err != nil {
-		return nil, fmt.Errorf("unable to generate training for %s: %s", string(response), err)
+		return nil, request, fmt.Errorf("unable to generate training for %s: %s", string(response), err)
 	}
 
-	return training, nil
+	return training, request, nil
 }

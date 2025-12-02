@@ -49,6 +49,7 @@ type Training struct {
 	Duration    int            `gorm:"not null" json:"duration" prompt:"Total training duration in seconds"`
 	References  pq.StringArray `gorm:"type:text[]" json:"references" prompt:"Relevant knowledge fact URLs used in generation"`
 	Routines    []Routine      `gorm:"foreignKey:TrainingID" json:"routines"`
+	Prompt      datatypes.JSON `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
 
 	CompletedAt *time.Time     `json:"completed_at" prompt:"-"`
 	CreatedAt   time.Time      `json:"created_at" prompt:"-"`
