@@ -64,12 +64,16 @@ func (llm *OpenAI) query(system, user string, temperature float64, maxTokens int
 		return nil, fmt.Errorf("no choices in %s response", llm.provider)
 	}
 
+	completionChoice := completion.Choices[0]
+	if completionChoice.FinishReason != "stop" {
+		return nil, fmt.Errorf("incomplete response from %s: finish_reason=%s", llm.provider, completionChoice.FinishReason)
+	}
+
 	var parsedJSON map[string]any
-	llmContent := completion.Choices[0].Message.Content
 	log.Info().Str("provider", llm.provider).Str("model", llm.model).Dur("duration_ms", time.Since(start)).Msg("LLM query completed")
-	log.Debug().RawJSON("content", []byte(llmContent)).Msg("Received LLM response")
-	if err := json.Unmarshal([]byte(llmContent), &parsedJSON); err != nil {
+	log.Debug().RawJSON("content", []byte(completionChoice.Message.Content)).Msg("Received LLM response")
+	if err := json.Unmarshal([]byte(completionChoice.Message.Content), &parsedJSON); err != nil {
 		return nil, fmt.Errorf("invalid JSON from %s: %s", llm.provider, err)
 	}
-	return []byte(llmContent), nil
+	return []byte(completionChoice.Message.Content), nil
 }
