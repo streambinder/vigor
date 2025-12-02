@@ -1,11 +1,11 @@
 {
-  "name": "vigor",
-  "short_name": "vigor",
+  "name": "Vigor",
+  "short_name": "Vigor",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0175C2",
   "theme_color": "#0175C2",
-  "description": "A new Flutter project.",
+  "description": "Ex Sapientia Vis",
   "orientation": "portrait-primary",
   "prefer_related_applications": false,
   "icons": [
