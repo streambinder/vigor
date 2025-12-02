@@ -1,0 +1,1 @@
+void consoleLog(String message) {}

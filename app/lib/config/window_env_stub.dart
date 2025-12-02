@@ -1,0 +1,1 @@
+String? getApiUrlFromWindow() => null;

@@ -1,5 +1,3 @@
-import 'package:logger/logger.dart';
-
 import '../config/api_config.dart';
 import '../models/api_response.dart';
 import '../models/auth_tokens.dart';
@@ -8,11 +6,9 @@ import 'api_service.dart';
 import 'app_logger.dart';
 import 'secure_storage_service.dart';
 
-/// Authentication service for user authentication operations
 class AuthService {
   final ApiService _apiService;
   final SecureStorageService _storageService;
-  final Logger _log = AppLogger.getLogger('AuthService');
 
   AuthService({
     ApiService? apiService,
@@ -33,7 +29,7 @@ class AuthService {
   Future<ApiResponse<AuthTokens>> loginWithGoogle({
     required String idToken,
   }) async {
-    _log.d('POST ${ApiConfig.googleAuthEndpoint} (token_len=${idToken.length})');
+    AppLogger.debug('[AuthService] POST ${ApiConfig.googleAuthEndpoint} (token_len=${idToken.length})');
 
     final response = await _apiService.post(
       ApiConfig.googleAuthEndpoint,
@@ -42,12 +38,12 @@ class AuthService {
       },
     );
 
-    _log.d('Response: status=${response.statusCode} success=${response.isSuccess}');
+    AppLogger.debug('[AuthService] Response: status=${response.statusCode} success=${response.isSuccess}');
 
     if (response.isSuccess && response.data != null) {
       try {
         final tokens = AuthTokens.fromJson(response.data!);
-        _log.i('Tokens parsed: access=${tokens.accessToken.length}b refresh=${tokens.refreshToken.length}b');
+        AppLogger.info('[AuthService] Tokens parsed: access=${tokens.accessToken.length}b refresh=${tokens.refreshToken.length}b');
 
         // Store tokens securely
         try {
@@ -55,20 +51,20 @@ class AuthService {
             accessToken: tokens.accessToken,
             refreshToken: tokens.refreshToken,
           );
-          _log.d('Tokens stored successfully');
+          AppLogger.debug('[AuthService] Tokens stored successfully');
         } catch (e) {
-          _log.w('Token storage failed, continuing with in-memory tokens', error: e);
+          AppLogger.warning('[AuthService] Token storage failed, continuing with in-memory tokens', e);
           // Don't fail the login just because storage failed
           // The tokens are still in the response and will be passed to getCurrentUser
         }
 
         return ApiResponse.success(tokens, response.statusCode);
       } catch (e) {
-        _log.e('Failed to parse auth tokens', error: e);
+        AppLogger.error('[AuthService] Failed to parse auth tokens', e);
         return ApiResponse.error('Failed to parse tokens', response.statusCode);
       }
     } else {
-      _log.e('Google login failed: ${response.error}');
+      AppLogger.error('[AuthService] Google login failed: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Google login failed',
         response.statusCode,
@@ -143,11 +139,11 @@ class AuthService {
   /// [_refreshAttempts] tracks recursion depth to prevent infinite loops
   Future<ApiResponse<User>> getCurrentUser(
       {String? useToken, int refreshAttempts = 0}) async {
-    _log.d('getCurrentUser (attempt=$refreshAttempts)');
+    AppLogger.debug('[AuthService] getCurrentUser (attempt=$refreshAttempts)');
 
     // Prevent infinite refresh loops
     if (refreshAttempts >= 3) {
-      _log.e('Max refresh attempts reached, session expired');
+      AppLogger.error('[AuthService] Max refresh attempts reached, session expired');
       return ApiResponse.error('Session expired - max refresh attempts', 401);
     }
 
@@ -155,21 +151,21 @@ class AuthService {
     if (accessToken == null) {
       try {
         accessToken = await _storageService.getAccessToken();
-        _log.d('Token retrieved from storage (len=${accessToken?.length ?? 0})');
+        AppLogger.debug('[AuthService] Token retrieved from storage (len=${accessToken?.length ?? 0})');
       } catch (e) {
-        _log.e('Failed to read token from storage', error: e);
+        AppLogger.error('[AuthService] Failed to read token from storage', e);
         return ApiResponse.error('Failed to read authentication token', 500);
       }
     } else {
-      _log.d('Using provided token (len=${accessToken.length})');
+      AppLogger.debug('[AuthService] Using provided token (len=${accessToken.length})');
     }
 
     if (accessToken == null) {
-      _log.w('No access token available');
+      AppLogger.warning('[AuthService] No access token available');
       return ApiResponse.error('Not authenticated', 401);
     }
 
-    _log.d('GET ${ApiConfig.userEndpoint}');
+    AppLogger.debug('[AuthService] GET ${ApiConfig.userEndpoint}');
 
     final response = await _apiService.get(
       ApiConfig.userEndpoint,
@@ -178,33 +174,33 @@ class AuthService {
       },
     );
 
-    _log.d('Response: status=${response.statusCode} success=${response.isSuccess}');
+    AppLogger.debug('[AuthService] Response: status=${response.statusCode} success=${response.isSuccess}');
 
     if (response.isSuccess && response.data != null) {
       try {
         final user = User.fromJson(response.data!);
-        _log.i('User retrieved: id=${user.id} email=${user.email}');
+        AppLogger.info('[AuthService] User retrieved: id=${user.id} email=${user.email}');
         return ApiResponse.success(user, response.statusCode);
       } catch (e) {
-        _log.e('Failed to parse user data', error: e);
+        AppLogger.error('[AuthService] Failed to parse user data', e);
         return ApiResponse.error(
             'Failed to parse user data', response.statusCode);
       }
     } else if (response.statusCode == 401) {
-      _log.w('Token expired (401), attempting refresh');
+      AppLogger.warning('[AuthService] Token expired (401), attempting refresh');
       // Token expired, try to refresh
       final refreshResponse = await refreshToken();
       if (refreshResponse.isSuccess) {
-        _log.i('Token refresh successful, retrying getCurrentUser');
+        AppLogger.info('[AuthService] Token refresh successful, retrying getCurrentUser');
         // Retry with new token (don't pass useToken to force reading from storage)
         // Increment refresh attempts to prevent infinite loops
         return getCurrentUser(refreshAttempts: refreshAttempts + 1);
       } else {
-        _log.e('Token refresh failed');
+        AppLogger.error('[AuthService] Token refresh failed');
         return ApiResponse.error('Session expired', 401);
       }
     } else {
-      _log.e('Get user failed: ${response.error}');
+      AppLogger.error('[AuthService] Get user failed: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to get user',
         response.statusCode,
@@ -284,12 +280,12 @@ class AuthService {
     try {
       accessToken = await _storageService.getAccessToken();
     } catch (e) {
-      _log.e('Failed to read token for account deletion', error: e);
+      AppLogger.error('[AuthService] Failed to read token for account deletion', e);
       // If we can't read the token, clear local storage and return error
       try {
         await _storageService.clearAll();
       } catch (clearError) {
-        _log.w('Failed to clear storage after token read error', error: clearError);
+        AppLogger.warning('[AuthService] Failed to clear storage after token read error', clearError);
       }
       return ApiResponse.error(
         'Storage error. Please log out and try again.',
@@ -301,7 +297,7 @@ class AuthService {
       return ApiResponse.error('Not authenticated', 401);
     }
 
-    _log.i('Deleting user account');
+    AppLogger.info('[AuthService] Deleting user account');
     final response = await _apiService.post(
       ApiConfig.unregisterEndpoint,
       headers: {
@@ -313,15 +309,15 @@ class AuthService {
       // Clear local storage
       try {
         await _storageService.deleteTokens();
-        _log.d('Tokens cleared after account deletion');
+        AppLogger.debug('[AuthService] Tokens cleared after account deletion');
       } catch (e) {
-        _log.w('Failed to clear tokens after deletion', error: e);
+        AppLogger.warning('[AuthService] Failed to clear tokens after deletion', e);
         // Still return success since server deletion succeeded
       }
       final message = response.data?['message'] as String? ?? 'Account deleted';
       return ApiResponse.success(message, response.statusCode);
     } else {
-      _log.e('Account deletion failed: ${response.error}');
+      AppLogger.error('[AuthService] Account deletion failed: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to delete account',
         response.statusCode,

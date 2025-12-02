@@ -13,13 +13,14 @@ import 'services/app_logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  AppLogger.info('vigor app starting');
 
   // Initialize secure storage and fail fast if not available
   final storage = SecureStorageService();
   try {
     await storage.initialize();
   } catch (e) {
-    // Show error and exit app
+    AppLogger.error('Secure storage initialization failed', e);
     runApp(StorageErrorApp(error: e.toString()));
     return;
   }

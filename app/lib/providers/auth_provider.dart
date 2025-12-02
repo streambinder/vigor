@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:logger/logger.dart';
 
 import '../models/user.dart';
 import '../services/app_logger.dart';
@@ -17,7 +16,6 @@ enum AuthState {
 /// Authentication provider for managing auth state
 class AuthProvider with ChangeNotifier {
   final AuthService _authService;
-  final Logger _log = AppLogger.getLogger('AuthProvider');
 
   AuthState _state = AuthState.initial;
   User? _currentUser;
@@ -77,7 +75,7 @@ class AuthProvider with ChangeNotifier {
 
     try {
       // Clear any old tokens first to prevent nil UUID issues
-      _log.d('Clearing stale tokens before login');
+      AppLogger.debug('[AuthProvider] clearing stale tokens before login');
       await _authService.clearTokens();
 
       final response = await _authService.loginWithGoogle(
@@ -88,7 +86,7 @@ class AuthProvider with ChangeNotifier {
         // Load user data using the access token we just received
         // This avoids reading from storage immediately after writing (web timing issue)
         final accessToken = response.data?.accessToken;
-        _log.d('Using token from response for getCurrentUser (len=${accessToken?.length ?? 0})');
+        AppLogger.debug('[AuthProvider] using token from response for getCurrentUser (len=${accessToken?.length ?? 0})');
 
         final userResponse = await _authService.getCurrentUser(
           useToken: accessToken,
@@ -97,24 +95,24 @@ class AuthProvider with ChangeNotifier {
         if (userResponse.isSuccess && userResponse.data != null) {
           _currentUser = userResponse.data;
           _setState(AuthState.authenticated);
-          _log.i('Login successful: user=${_currentUser?.email}');
+          AppLogger.info('[AuthProvider] login successful: user=${_currentUser?.email}');
           return true;
         } else {
           _errorMessage = 'Failed to load user data: ${userResponse.error}';
           _setState(AuthState.unauthenticated);
-          _log.e('Failed to load user after login: ${userResponse.error}');
+          AppLogger.error('[AuthProvider] failed to load user after login: ${userResponse.error}');
           return false;
         }
       } else {
         _errorMessage = response.error ?? 'Google login failed';
         _setState(AuthState.unauthenticated);
-        _log.e('Login failed: $_errorMessage');
+        AppLogger.error('[AuthProvider] login failed: $_errorMessage');
         return false;
       }
     } catch (e) {
       _errorMessage = 'Google login error: ${e.toString()}';
       _setState(AuthState.unauthenticated);
-      _log.e('Exception during login', error: e);
+      AppLogger.error('[AuthProvider] exception during login', e);
       return false;
     }
   }

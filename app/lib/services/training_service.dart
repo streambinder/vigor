@@ -1,5 +1,3 @@
-import 'package:logger/logger.dart';
-
 import '../models/api_response.dart';
 import '../models/training.dart';
 import 'api_service.dart';
@@ -9,7 +7,6 @@ import 'secure_storage_service.dart';
 class TrainingService {
   final ApiService _apiService;
   final SecureStorageService _storageService;
-  final Logger _log = AppLogger.getLogger('TrainingService');
 
   TrainingService({
     ApiService? apiService,
@@ -33,7 +30,7 @@ class TrainingService {
     String? prompt,
     List<String>? equipment,
   }) async {
-    _log.d('Generating training with duration: $duration, gym: $gym');
+    AppLogger.debug('[TrainingService] Generating training with duration: $duration, gym: $gym');
     final headers = await _getAuthHeaders();
     if (headers == null) {
       return ApiResponse.error('Not authenticated', 401);
@@ -59,14 +56,14 @@ class TrainingService {
     if (response.isSuccess && response.data != null) {
       try {
         final training = Training.fromJson(response.data!);
-        _log.i('Generated training: ${training.id}');
+        AppLogger.info('[TrainingService] Generated training: ${training.id}');
         return ApiResponse.success(training, response.statusCode);
       } catch (e) {
-        _log.e('Failed to parse training', error: e);
+        AppLogger.error('[TrainingService] failed to parse training', e);
         return ApiResponse.error('Failed to parse training', response.statusCode);
       }
     } else {
-      _log.e('Failed to generate training: ${response.error}');
+      AppLogger.error('[TrainingService] Failed to generate training: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to generate training',
         response.statusCode,
@@ -75,7 +72,7 @@ class TrainingService {
   }
 
   Future<ApiResponse<List<Training>>> getTrainings() async {
-    _log.d('Fetching trainings');
+    AppLogger.debug('[TrainingService] Fetching trainings');
     final headers = await _getAuthHeaders();
     if (headers == null) {
       return ApiResponse.error('Not authenticated', 401);
@@ -90,14 +87,14 @@ class TrainingService {
       try {
         final trainingsJson = response.data!['trainings'] as List;
         final trainings = trainingsJson.map((json) => Training.fromJson(json)).toList();
-        _log.i('Fetched ${trainings.length} trainings');
+        AppLogger.info('[TrainingService] Fetched ${trainings.length} trainings');
         return ApiResponse.success(trainings, response.statusCode);
       } catch (e) {
-        _log.e('Failed to parse trainings', error: e);
+        AppLogger.error('[TrainingService] failed to parse trainings', e);
         return ApiResponse.error('Failed to parse trainings', response.statusCode);
       }
     } else {
-      _log.e('Failed to fetch trainings: ${response.error}');
+      AppLogger.error('[TrainingService] Failed to fetch trainings: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to fetch trainings',
         response.statusCode,
@@ -106,7 +103,7 @@ class TrainingService {
   }
 
   Future<ApiResponse<String>> deleteTraining(String trainingId) async {
-    _log.d('Deleting training: $trainingId');
+    AppLogger.debug('[TrainingService] Deleting training: $trainingId');
     final headers = await _getAuthHeaders();
     if (headers == null) {
       return ApiResponse.error('Not authenticated', 401);
@@ -119,10 +116,10 @@ class TrainingService {
 
     if (response.isSuccess) {
       final message = response.data?['message'] as String? ?? 'Training deleted';
-      _log.i('Deleted training: $trainingId');
+      AppLogger.info('[TrainingService] Deleted training: $trainingId');
       return ApiResponse.success(message, response.statusCode);
     } else {
-      _log.e('Failed to delete training: ${response.error}');
+      AppLogger.error('[TrainingService] Failed to delete training: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to delete training',
         response.statusCode,
@@ -131,7 +128,7 @@ class TrainingService {
   }
 
   Future<ApiResponse<Training>> completeTraining(String trainingId) async {
-    _log.d('Completing training: $trainingId');
+    AppLogger.debug('[TrainingService] Completing training: $trainingId');
     final headers = await _getAuthHeaders();
     if (headers == null) {
       return ApiResponse.error('Not authenticated', 401);
@@ -145,14 +142,14 @@ class TrainingService {
     if (response.isSuccess && response.data != null) {
       try {
         final training = Training.fromJson(response.data!['training']);
-        _log.i('Completed training: $trainingId');
+        AppLogger.info('[TrainingService] Completed training: $trainingId');
         return ApiResponse.success(training, response.statusCode);
       } catch (e) {
-        _log.e('Failed to parse completed training', error: e);
+        AppLogger.error('[TrainingService] failed to parse completed training', e);
         return ApiResponse.error('Failed to parse completed training', response.statusCode);
       }
     } else {
-      _log.e('Failed to complete training: ${response.error}');
+      AppLogger.error('[TrainingService] Failed to complete training: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to complete training',
         response.statusCode,

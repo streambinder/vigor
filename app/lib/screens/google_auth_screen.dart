@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
@@ -24,7 +23,6 @@ class GoogleAuthScreen extends StatefulWidget {
 }
 
 class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
-  final Logger _log = AppLogger.getLogger('GoogleAuthScreen');
   bool _initialized = false;
   bool _isLoading = false;
   String? _errorMessage;
@@ -62,7 +60,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
         _initialized = true;
       });
     } catch (e) {
-      _log.e('Failed to initialize Google Sign In: $e');
+      AppLogger.error('[GoogleAuthScreen] failed to initialize: $e');
       setState(() {
         _errorMessage = 'Failed to initialize Google Sign In';
       });
@@ -70,17 +68,17 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
   }
 
   void _handleAuthenticationEvent(GoogleSignInAuthenticationEvent event) {
-    _log.d('Authentication event received: ${event.runtimeType}');
+    AppLogger.debug('[GoogleAuthScreen] authentication event: ${event.runtimeType}');
 
     if (event is GoogleSignInAuthenticationEventSignIn) {
       _handleSignInSuccess(event.user);
     } else if (event is GoogleSignInAuthenticationEventSignOut) {
-      _log.i('User signed out');
+      AppLogger.info('[GoogleAuthScreen] user signed out');
     }
   }
 
   void _handleAuthenticationError(Object error, StackTrace stackTrace) {
-    _log.e('Authentication error: $error', error: error, stackTrace: stackTrace);
+    AppLogger.error('[GoogleAuthScreen] authentication error', error, stackTrace);
 
     if (error is GoogleSignInException) {
       // Don't show error for user cancellation
@@ -111,10 +109,10 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
       final GoogleSignInAuthentication googleAuth = user.authentication;
       final String? idToken = googleAuth.idToken;
 
-      _log.d('Google auth received: idToken=${idToken != null ? "${idToken.length}b" : "none"}');
+      AppLogger.debug('[GoogleAuthScreen] google auth received: idToken=${idToken != null ? "${idToken.length}b" : "none"}');
 
       if (idToken == null) {
-        _log.w('No ID token received from Google sign-in');
+        AppLogger.warning('[GoogleAuthScreen] no ID token received');
         setState(() {
           _isLoading = false;
           _errorMessage = 'Failed to get authentication token';
@@ -122,15 +120,15 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
         return;
       }
 
-      _log.i('Authenticating with ID token (${idToken.length}b)');
+      AppLogger.info('[GoogleAuthScreen] authenticating with ID token (${idToken.length}b)');
 
       // Send token to backend
       final success = await authProvider.loginWithGoogle(idToken: idToken);
 
       if (success) {
-        _log.i('Google sign-in completed successfully');
+        AppLogger.info('[GoogleAuthScreen] sign-in completed successfully');
       } else {
-        _log.e('Google sign-in failed: ${authProvider.errorMessage}');
+        AppLogger.error('[GoogleAuthScreen] sign-in failed: ${authProvider.errorMessage}');
       }
 
       if (!success && mounted) {
@@ -143,7 +141,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
         await GoogleSignIn.instance.signOut();
       }
     } catch (e) {
-      _log.e('Error processing sign-in: $e');
+      AppLogger.error('[GoogleAuthScreen] error processing sign-in: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -157,7 +155,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
   // Mobile-only: trigger authentication flow
   Future<void> _handleGoogleSignIn() async {
     if (!_initialized) {
-      _log.w('Google Sign In not initialized yet');
+      AppLogger.warning('[GoogleAuthScreen] not initialized yet');
       setState(() {
         _errorMessage = 'Google Sign In is still initializing...';
       });
@@ -178,7 +176,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
 
       await _handleSignInSuccess(googleUser);
     } on GoogleSignInException catch (e) {
-      _log.w('Google sign-in exception: ${e.code} - ${e.description}');
+      AppLogger.warning('[GoogleAuthScreen] sign-in exception: ${e.code} - ${e.description}');
 
       // User canceled - don't show error
       if (e.code == GoogleSignInExceptionCode.canceled) {
@@ -199,7 +197,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
       }
       await GoogleSignIn.instance.signOut();
     } catch (e) {
-      _log.e('Unexpected error during Google sign-in: $e');
+      AppLogger.error('[GoogleAuthScreen] unexpected error: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;

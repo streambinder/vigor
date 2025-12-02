@@ -1,9 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:logger/logger.dart';
 
 import 'app_logger.dart';
 
-/// Exception thrown when secure storage is unavailable or broken
 class StorageUnavailableException implements Exception {
   final String message;
   final Object? originalError;
@@ -14,14 +12,12 @@ class StorageUnavailableException implements Exception {
   String toString() => 'StorageUnavailableException: $message${originalError != null ? ' ($originalError)' : ''}';
 }
 
-/// Service for securely storing sensitive data like tokens
 class SecureStorageService {
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
   static const String _healthCheckKey = '__storage_health_check__';
 
   final FlutterSecureStorage _storage;
-  final Logger _log = AppLogger.getLogger('SecureStorage');
   bool _isHealthy = false;
 
   SecureStorageService({FlutterSecureStorage? storage})
@@ -44,7 +40,7 @@ class SecureStorageService {
   /// Throws [StorageUnavailableException] if storage is not available
   Future<void> initialize() async {
     try {
-      _log.d('Initializing secure storage...');
+      AppLogger.debug('[SecureStorage] Initializing secure storage...');
 
       // Test write operation
       await _storage.write(
@@ -64,10 +60,10 @@ class SecureStorageService {
       await _storage.delete(key: _healthCheckKey);
 
       _isHealthy = true;
-      _log.i('Secure storage initialized successfully');
+      AppLogger.info('[SecureStorage] Secure storage initialized successfully');
     } catch (e) {
       _isHealthy = false;
-      _log.e('Secure storage initialization failed', error: e);
+      AppLogger.error('[SecureStorage] Secure storage initialization failed', e);
       throw StorageUnavailableException(
         'Secure storage is not available on this platform/browser. '
         'This app requires secure storage to function. '
@@ -93,7 +89,7 @@ class SecureStorageService {
     try {
       await _storage.write(key: _accessTokenKey, value: token);
     } catch (e) {
-      _log.e('Failed to save access token', error: e);
+      AppLogger.error('[SecureStorage] Failed to save access token', e);
       throw StorageUnavailableException('Failed to save access token', e);
     }
   }
@@ -103,10 +99,10 @@ class SecureStorageService {
     _ensureHealthy();
     try {
       final token = await _storage.read(key: _accessTokenKey);
-      _log.d('Read access token: ${token != null ? "found (${token.length}b)" : "none"}');
+      AppLogger.debug('[SecureStorage] Read access token: ${token != null ? "found (${token.length}b)" : "none"}');
       return token;
     } catch (e) {
-      _log.e('Failed to read access token', error: e);
+      AppLogger.error('[SecureStorage] Failed to read access token', e);
       throw StorageUnavailableException('Failed to read access token', e);
     }
   }
@@ -117,7 +113,7 @@ class SecureStorageService {
     try {
       await _storage.write(key: _refreshTokenKey, value: token);
     } catch (e) {
-      _log.e('Failed to save refresh token', error: e);
+      AppLogger.error('[SecureStorage] Failed to save refresh token', e);
       throw StorageUnavailableException('Failed to save refresh token', e);
     }
   }
@@ -127,10 +123,10 @@ class SecureStorageService {
     _ensureHealthy();
     try {
       final token = await _storage.read(key: _refreshTokenKey);
-      _log.d('Read refresh token: ${token != null ? "found (${token.length}b)" : "none"}');
+      AppLogger.debug('[SecureStorage] Read refresh token: ${token != null ? "found (${token.length}b)" : "none"}');
       return token;
     } catch (e) {
-      _log.e('Failed to read refresh token', error: e);
+      AppLogger.error('[SecureStorage] Failed to read refresh token', e);
       throw StorageUnavailableException('Failed to read refresh token', e);
     }
   }
@@ -146,9 +142,9 @@ class SecureStorageService {
         saveAccessToken(accessToken),
         saveRefreshToken(refreshToken),
       ]);
-      _log.d('Tokens saved (access=${accessToken.length}b refresh=${refreshToken.length}b)');
+      AppLogger.debug('[SecureStorage] Tokens saved (access=${accessToken.length}b refresh=${refreshToken.length}b)');
     } catch (e) {
-      _log.e('Failed to save tokens', error: e);
+      AppLogger.error('[SecureStorage] Failed to save tokens', e);
       rethrow;
     }
   }
@@ -162,7 +158,7 @@ class SecureStorageService {
         _storage.delete(key: _refreshTokenKey),
       ]);
     } catch (e) {
-      _log.e('Failed to delete tokens', error: e);
+      AppLogger.error('[SecureStorage] Failed to delete tokens', e);
       throw StorageUnavailableException('Failed to delete tokens', e);
     }
   }
@@ -174,10 +170,10 @@ class SecureStorageService {
       final accessToken = await getAccessToken();
       final refreshToken = await getRefreshToken();
       final hasTokens = accessToken != null && refreshToken != null;
-      _log.d('Token check: $hasTokens');
+      AppLogger.debug('[SecureStorage] Token check: $hasTokens');
       return hasTokens;
     } catch (e) {
-      _log.e('Failed to check tokens', error: e);
+      AppLogger.error('[SecureStorage] Failed to check tokens', e);
       rethrow;
     }
   }
@@ -188,7 +184,7 @@ class SecureStorageService {
     try {
       await _storage.deleteAll();
     } catch (e) {
-      _log.e('Failed to clear all storage', error: e);
+      AppLogger.error('[SecureStorage] Failed to clear all storage', e);
       throw StorageUnavailableException('Failed to clear storage', e);
     }
   }

@@ -1,5 +1,3 @@
-import 'package:logger/logger.dart';
-
 import '../models/api_response.dart';
 import '../models/gym.dart';
 import 'api_service.dart';
@@ -9,7 +7,6 @@ import 'secure_storage_service.dart';
 class GymService {
   final ApiService _apiService;
   final SecureStorageService _storageService;
-  final Logger _log = AppLogger.getLogger('GymService');
 
   GymService({
     ApiService? apiService,
@@ -28,7 +25,7 @@ class GymService {
   }
 
   Future<ApiResponse<List<Gym>>> getGyms() async {
-    _log.d('Fetching gyms');
+    AppLogger.debug('[GymService] Fetching gyms');
     final headers = await _getAuthHeaders();
     if (headers == null) {
       return ApiResponse.error('Not authenticated', 401);
@@ -43,14 +40,14 @@ class GymService {
       try {
         final gymsJson = response.data!['gyms'] as List;
         final gyms = gymsJson.map((json) => Gym.fromJson(json)).toList();
-        _log.i('Fetched ${gyms.length} gyms');
+        AppLogger.info('[GymService] Fetched ${gyms.length} gyms');
         return ApiResponse.success(gyms, response.statusCode);
       } catch (e) {
-        _log.e('Failed to parse gyms', error: e);
+        AppLogger.error('[GymService] failed to parse gyms', e);
         return ApiResponse.error('Failed to parse gyms', response.statusCode);
       }
     } else {
-      _log.e('Failed to fetch gyms: ${response.error}');
+      AppLogger.error('[GymService] Failed to fetch gyms: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to fetch gyms',
         response.statusCode,
@@ -59,7 +56,7 @@ class GymService {
   }
 
   Future<ApiResponse<Gym>> getGym(String name) async {
-    _log.d('Fetching gym: $name');
+    AppLogger.debug('[GymService] Fetching gym: $name');
     final headers = await _getAuthHeaders();
     if (headers == null) {
       return ApiResponse.error('Not authenticated', 401);
@@ -73,14 +70,14 @@ class GymService {
     if (response.isSuccess && response.data != null) {
       try {
         final gym = Gym.fromJson(response.data!);
-        _log.i('Fetched gym: ${gym.name}');
+        AppLogger.info('[GymService] Fetched gym: ${gym.name}');
         return ApiResponse.success(gym, response.statusCode);
       } catch (e) {
-        _log.e('Failed to parse gym', error: e);
+        AppLogger.error('[GymService] failed to parse gym', e);
         return ApiResponse.error('Failed to parse gym', response.statusCode);
       }
     } else {
-      _log.e('Failed to fetch gym: ${response.error}');
+      AppLogger.error('[GymService] Failed to fetch gym: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to fetch gym',
         response.statusCode,
@@ -92,7 +89,7 @@ class GymService {
     required String name,
     required List<String> equipment,
   }) async {
-    _log.d('Creating gym: $name');
+    AppLogger.debug('[GymService] Creating gym: $name');
     final headers = await _getAuthHeaders();
     if (headers == null) {
       return ApiResponse.error('Not authenticated', 401);
@@ -110,14 +107,14 @@ class GymService {
     if (response.isSuccess && response.data != null) {
       try {
         final gym = Gym.fromJson(response.data!['gym']);
-        _log.i('Created gym: ${gym.name}');
+        AppLogger.info('[GymService] Created gym: ${gym.name}');
         return ApiResponse.success(gym, response.statusCode);
       } catch (e) {
-        _log.e('Failed to parse created gym', error: e);
+        AppLogger.error('[GymService] failed to parse created gym', e);
         return ApiResponse.error('Failed to parse created gym', response.statusCode);
       }
     } else {
-      _log.e('Failed to create gym: ${response.error}');
+      AppLogger.error('[GymService] Failed to create gym: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to create gym',
         response.statusCode,
@@ -130,7 +127,7 @@ class GymService {
     String? newName,
     List<String>? equipment,
   }) async {
-    _log.d('Updating gym: $currentName');
+    AppLogger.debug('[GymService] Updating gym: $currentName');
     final headers = await _getAuthHeaders();
     if (headers == null) {
       return ApiResponse.error('Not authenticated', 401);
@@ -149,14 +146,14 @@ class GymService {
     if (response.isSuccess && response.data != null) {
       try {
         final gym = Gym.fromJson(response.data!['gym']);
-        _log.i('Updated gym: ${gym.name}');
+        AppLogger.info('[GymService] Updated gym: ${gym.name}');
         return ApiResponse.success(gym, response.statusCode);
       } catch (e) {
-        _log.e('Failed to parse updated gym', error: e);
+        AppLogger.error('[GymService] failed to parse updated gym', e);
         return ApiResponse.error('Failed to parse updated gym', response.statusCode);
       }
     } else {
-      _log.e('Failed to update gym: ${response.error}');
+      AppLogger.error('[GymService] Failed to update gym: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to update gym',
         response.statusCode,
@@ -165,7 +162,7 @@ class GymService {
   }
 
   Future<ApiResponse<String>> deleteGym(String name) async {
-    _log.d('Deleting gym: $name');
+    AppLogger.debug('[GymService] Deleting gym: $name');
     final headers = await _getAuthHeaders();
     if (headers == null) {
       return ApiResponse.error('Not authenticated', 401);
@@ -178,10 +175,10 @@ class GymService {
 
     if (response.isSuccess) {
       final message = response.data?['message'] as String? ?? 'Gym deleted';
-      _log.i('Deleted gym: $name');
+      AppLogger.info('[GymService] Deleted gym: $name');
       return ApiResponse.success(message, response.statusCode);
     } else {
-      _log.e('Failed to delete gym: ${response.error}');
+      AppLogger.error('[GymService] Failed to delete gym: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to delete gym',
         response.statusCode,
