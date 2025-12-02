@@ -1,10 +1,14 @@
 FROM ghcr.io/cirruslabs/flutter:stable AS builder
 
 WORKDIR /app
+
+# copy dependencies first for better layer caching
+COPY pubspec.yaml pubspec.lock ./
+RUN flutter config --enable-web && flutter pub get
+
+# copy source code after dependencies are cached
 COPY . .
-RUN flutter config --enable-web \
-    && flutter pub get \
-    && flutter pub run build_runner build --delete-conflicting-outputs \
+RUN dart run build_runner build --delete-conflicting-outputs \
     && flutter build web --release
 
 FROM nginx:1.27-alpine
