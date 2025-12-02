@@ -129,11 +129,14 @@ func postTraining(c *fiber.Ctx) error {
 			for k := range training.Routines[i].Blocks[j].Activities {
 				activity := &training.Routines[i].Blocks[j].Activities[k]
 				var exercise model.Exercise
-				if err := database.Knowledge.First(&exercise, "id = ?", activity.Name).Error; err == nil {
-					if exerciseJSON, err := json.Marshal(exercise); err == nil {
-						activity.Detail = exerciseJSON
-						activity.Name = exercise.Name
-					}
+				if err := database.Knowledge.First(&exercise, "id = ?", activity.Name).Error; err != nil {
+					log.Error().Err(err).Msg("Failed to query exercise from database")
+					return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+				}
+
+				if exerciseJSON, err := json.Marshal(exercise); err == nil {
+					activity.Detail = exerciseJSON
+					activity.Name = exercise.Name
 				}
 			}
 		}
