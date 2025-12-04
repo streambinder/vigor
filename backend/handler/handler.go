@@ -23,6 +23,7 @@ func Init() *fiber.App {
 	initUser(app)
 	initGym(app)
 	initTraining(app)
+	initProxy(app)
 
 	return app
 }

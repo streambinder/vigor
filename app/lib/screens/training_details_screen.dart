@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../config/api_config.dart';
 import '../models/training.dart';
 import '../models/routine.dart';
 import '../models/block.dart';
@@ -64,6 +65,11 @@ class TrainingDetailsScreen extends StatelessWidget {
     final uri = Uri.tryParse(url);
     if (uri == null) return false;
     return uri.hasScheme && (uri.scheme == 'http' || uri.scheme == 'https');
+  }
+
+  // proxy external image URLs through backend to avoid CORS issues on web
+  String _proxyImageUrl(String url) {
+    return '${ApiConfig.baseUrl}/proxy/image?url=${Uri.encodeComponent(url)}';
   }
 
   Future<void> _deleteTraining(BuildContext context) async {
@@ -534,7 +540,7 @@ class TrainingDetailsScreen extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
-                    exercise.reference,
+                    _proxyImageUrl(exercise.reference),
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       final isDark = Theme.of(context).brightness == Brightness.dark;

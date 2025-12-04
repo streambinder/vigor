@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../config/api_config.dart';
 import '../models/training.dart';
 import '../models/activity.dart';
 import '../models/exercise.dart';
@@ -214,6 +215,11 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     final uri = Uri.tryParse(url);
     if (uri == null) return false;
     return uri.hasScheme && (uri.scheme == 'http' || uri.scheme == 'https');
+  }
+
+  // proxy external image URLs through backend to avoid CORS issues on web
+  String _proxyImageUrl(String url) {
+    return '${ApiConfig.baseUrl}/proxy/image?url=${Uri.encodeComponent(url)}';
   }
 
   void _startCurrentInterval() {
@@ -635,7 +641,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
                   ),
                   child: ClipOval(
                     child: Image.network(
-                      exercise.reference,
+                      _proxyImageUrl(exercise.reference),
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(

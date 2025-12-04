@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/api_config.dart';
 import '../models/exercise.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
@@ -10,6 +11,11 @@ class ExerciseModal {
     final uri = Uri.tryParse(url);
     if (uri == null) return false;
     return uri.hasScheme && (uri.scheme == 'http' || uri.scheme == 'https');
+  }
+
+  // proxy external image URLs through backend to avoid CORS issues on web
+  static String _proxyImageUrl(String url) {
+    return '${ApiConfig.baseUrl}/proxy/image?url=${Uri.encodeComponent(url)}';
   }
 
   static void show(BuildContext context, Exercise exercise) {
@@ -42,7 +48,7 @@ class ExerciseModal {
                   // Image
                   if (_isValidImageUrl(exercise.reference))
                     Image.network(
-                      exercise.reference,
+                      _proxyImageUrl(exercise.reference),
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
                         final isDark = Theme.of(context).brightness == Brightness.dark;
