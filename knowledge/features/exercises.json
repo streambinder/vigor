@@ -381,7 +381,7 @@
   {
     "id": "archer-pull-up",
     "name": "Archer Pull Up",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -485,7 +485,7 @@
   {
     "id": "chest-dip-on-straight-bar",
     "name": "Chest Dip On Straight Bar",
-    "equipment": [],
+    "equipment": ["dip station"],
     "muscles": ["pectorals"],
     "secondary_muscles": ["delts", "triceps"],
     "body_parts": ["chest"],
@@ -603,7 +603,7 @@
   {
     "id": "inverted-row-bent-knees",
     "name": "Inverted Row Bent Knees",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["upper back"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -1369,7 +1369,7 @@
   {
     "id": "side-to-side-chin",
     "name": "Side-To-Side Chin",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -1508,7 +1508,7 @@
   {
     "id": "hyperextension-on-bench",
     "name": "Hyperextension (On Bench)",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["spine"],
     "secondary_muscles": ["glutes", "hamstrings"],
     "body_parts": ["back"],
@@ -1829,7 +1829,7 @@
   {
     "id": "incline-push-up-depth-jump",
     "name": "Incline Push Up Depth Jump",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["pectorals"],
     "secondary_muscles": ["core", "delts", "triceps"],
     "body_parts": ["chest"],
@@ -2492,7 +2492,7 @@
   {
     "id": "vertical-leg-raise-on-parallel-bars",
     "name": "Vertical Leg Raise (On Parallel Bars)",
-    "equipment": [],
+    "equipment": ["dip station"],
     "muscles": ["abs"],
     "secondary_muscles": ["hip flexors"],
     "body_parts": ["waist"],
@@ -2609,7 +2609,7 @@
   {
     "id": "triceps-dip-between-benches",
     "name": "Triceps Dip (Between Benches)",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["triceps"],
     "secondary_muscles": ["chest", "delts"],
     "body_parts": ["upper arms"],
@@ -2707,7 +2707,7 @@
   {
     "id": "wide-grip-chest-dip-on-high-parallel-bars",
     "name": "Wide-Grip Chest Dip On High Parallel Bars",
-    "equipment": [],
+    "equipment": ["dip station"],
     "muscles": ["pectorals"],
     "secondary_muscles": ["delts", "triceps"],
     "body_parts": ["chest"],
@@ -3335,7 +3335,7 @@
   {
     "id": "muscle-up",
     "name": "Muscle Up",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "chest", "delts", "triceps"],
     "body_parts": ["back"],
@@ -3937,7 +3937,7 @@
   {
     "id": "scapula-dips",
     "name": "Scapula Dips",
-    "equipment": [],
+    "equipment": ["dip station"],
     "muscles": ["traps"],
     "secondary_muscles": ["delts", "rhomboids"],
     "body_parts": ["back"],
@@ -4577,7 +4577,7 @@
   {
     "id": "incline-close-grip-push-up",
     "name": "Incline Close-Grip Push-Up",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["triceps"],
     "secondary_muscles": ["chest", "delts"],
     "body_parts": ["upper arms"],
@@ -5261,7 +5261,7 @@
   {
     "id": "chest-dip",
     "name": "Chest Dip",
-    "equipment": [],
+    "equipment": ["dip station"],
     "muscles": ["pectorals"],
     "secondary_muscles": ["delts", "triceps"],
     "body_parts": ["chest"],
@@ -5294,7 +5294,7 @@
   {
     "id": "one-arm-chin-up",
     "name": "One Arm Chin-Up",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -5977,7 +5977,7 @@
   {
     "id": "kipping-muscle-up",
     "name": "Kipping Muscle Up",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "core", "delts", "triceps"],
     "body_parts": ["back"],
@@ -6125,7 +6125,7 @@
   {
     "id": "side-hip-on-parallel-bars",
     "name": "Side Hip (On Parallel Bars)",
-    "equipment": [],
+    "equipment": ["dip station"],
     "muscles": ["abs"],
     "secondary_muscles": ["hip flexors", "obliques"],
     "body_parts": ["waist"],
@@ -6208,7 +6208,7 @@
   {
     "id": "chest-dip-on-dip-pull-up-cage",
     "name": "Chest Dip (On Dip-Pull-Up Cage)",
-    "equipment": [],
+    "equipment": ["dip station"],
     "muscles": ["pectorals"],
     "secondary_muscles": ["delts", "triceps"],
     "body_parts": ["chest"],
@@ -6794,7 +6794,7 @@
   {
     "id": "swing-360",
     "name": "Swing 360",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["cardiovascular system"],
     "secondary_muscles": ["core", "delts"],
     "body_parts": ["cardio"],
@@ -6810,7 +6810,7 @@
   {
     "id": "chin-up",
     "name": "Chin-Up",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -7180,7 +7180,7 @@
   {
     "id": "inverted-row",
     "name": "Inverted Row",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["upper back"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -7389,7 +7389,7 @@
   {
     "id": "flag",
     "name": "Flag",
-    "equipment": [],
+    "equipment": ["dip station"],
     "muscles": ["abs"],
     "secondary_muscles": ["delts", "obliques"],
     "body_parts": ["waist"],
@@ -7754,7 +7754,7 @@
   {
     "id": "bench-pull-ups",
     "name": "Bench Pull-Ups",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -7789,7 +7789,7 @@
   {
     "id": "glute-bridge-two-legs-on-bench-male",
     "name": "Glute Bridge Two Legs On Bench (Male)",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["glutes"],
     "secondary_muscles": ["core", "hamstrings"],
     "body_parts": ["upper legs"],
@@ -7901,7 +7901,7 @@
   {
     "id": "incline-push-up-on-box",
     "name": "Incline Push-Up (On Box)",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["pectorals"],
     "secondary_muscles": ["delts", "triceps"],
     "body_parts": ["chest"],
@@ -8237,7 +8237,7 @@
   {
     "id": "chin-ups-narrow-parallel-grip",
     "name": "Chin-Ups (Narrow Parallel Grip)",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["upper back"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -9120,7 +9120,7 @@
   {
     "id": "decline-push-up",
     "name": "Decline Push-Up",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["pectorals"],
     "secondary_muscles": ["delts", "triceps"],
     "body_parts": ["chest"],
@@ -9388,7 +9388,7 @@
   {
     "id": "hanging-leg-raise",
     "name": "Hanging Leg Raise",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["hip flexors"],
     "body_parts": ["waist"],
@@ -9459,7 +9459,7 @@
   {
     "id": "three-bench-dip",
     "name": "Three Bench Dip",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["triceps"],
     "secondary_muscles": ["chest", "delts"],
     "body_parts": ["upper arms"],
@@ -9764,7 +9764,7 @@
   {
     "id": "ring-dips",
     "name": "Ring Dips",
-    "equipment": [],
+    "equipment": ["rings"],
     "muscles": ["triceps"],
     "secondary_muscles": ["chest", "delts"],
     "body_parts": ["upper arms"],
@@ -9779,7 +9779,7 @@
   {
     "id": "reverse-hyper-on-flat-bench",
     "name": "Reverse Hyper On Flat Bench",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["glutes"],
     "secondary_muscles": ["hamstrings", "lower back"],
     "body_parts": ["upper legs"],
@@ -10273,7 +10273,7 @@
   {
     "id": "bench-dip-knees-bent",
     "name": "Bench Dip (Knees Bent)",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["triceps"],
     "secondary_muscles": ["chest", "delts"],
     "body_parts": ["upper arms"],
@@ -10340,7 +10340,7 @@
   {
     "id": "leg-pull-in-flat-bench",
     "name": "Leg Pull In Flat Bench",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["abs"],
     "secondary_muscles": ["hip flexors", "lower back"],
     "body_parts": ["waist"],
@@ -10390,7 +10390,7 @@
   {
     "id": "glute-ham-raise",
     "name": "Glute-Ham Raise",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["hamstrings"],
     "secondary_muscles": ["glutes", "lower back"],
     "body_parts": ["upper legs"],
@@ -10424,7 +10424,7 @@
   {
     "id": "hanging-oblique-knee-raise",
     "name": "Hanging Oblique Knee Raise",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["obliques"],
     "body_parts": ["waist"],
@@ -11493,7 +11493,7 @@
   {
     "id": "gironda-sternum-chin",
     "name": "Gironda Sternum Chin",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "rear delts", "rhomboids"],
     "body_parts": ["back"],
@@ -11510,7 +11510,7 @@
   {
     "id": "inverted-row-v-2",
     "name": "Inverted Row V. 2",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["upper back"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -11854,7 +11854,7 @@
   {
     "id": "incline-scapula-push-up",
     "name": "Incline Scapula Push Up",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["serratus anterior"],
     "secondary_muscles": ["delts", "triceps"],
     "body_parts": ["chest"],
@@ -11889,7 +11889,7 @@
   {
     "id": "hanging-straight-leg-raise",
     "name": "Hanging Straight Leg Raise",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["hip flexors"],
     "body_parts": ["waist"],
@@ -12042,7 +12042,7 @@
   {
     "id": "mixed-grip-chin-up",
     "name": "Mixed Grip Chin-Up",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -12654,7 +12654,7 @@
   {
     "id": "triceps-dip-bench-leg",
     "name": "Triceps Dip (Bench Leg)",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["triceps"],
     "secondary_muscles": ["chest", "delts"],
     "body_parts": ["upper arms"],
@@ -13064,7 +13064,7 @@
   {
     "id": "incline-twisting-sit-up",
     "name": "Incline Twisting Sit-Up",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["abs"],
     "secondary_muscles": ["obliques"],
     "body_parts": ["waist"],
@@ -13408,7 +13408,7 @@
   {
     "id": "muscle-up-on-vertical-bar",
     "name": "Muscle-Up (On Vertical Bar)",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "forearms", "triceps"],
     "body_parts": ["back"],
@@ -13474,7 +13474,7 @@
   {
     "id": "balance-board",
     "name": "Balance Board",
-    "equipment": [],
+    "equipment": ["balance board"],
     "muscles": ["quads"],
     "secondary_muscles": ["calves", "glutes", "hamstrings"],
     "body_parts": ["upper legs"],
@@ -13791,7 +13791,7 @@
   {
     "id": "close-grip-chin-up",
     "name": "Close Grip Chin-Up",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -13842,7 +13842,7 @@
   {
     "id": "triceps-dips-floor",
     "name": "Triceps Dips Floor",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["triceps"],
     "secondary_muscles": ["chest", "delts"],
     "body_parts": ["upper arms"],
@@ -14253,7 +14253,7 @@
   {
     "id": "back-lever",
     "name": "Back Lever",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["upper back"],
     "secondary_muscles": ["biceps", "core", "forearms"],
     "body_parts": ["back"],
@@ -14578,7 +14578,7 @@
   {
     "id": "wheel-run",
     "name": "Wheel Run",
-    "equipment": [],
+    "equipment": ["wheel roller"],
     "muscles": ["cardiovascular system"],
     "secondary_muscles": ["calves", "hamstrings", "quads"],
     "body_parts": ["cardio"],
@@ -14697,7 +14697,7 @@
   {
     "id": "body-up",
     "name": "Body-Up",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["triceps"],
     "secondary_muscles": ["chest", "delts"],
     "body_parts": ["upper arms"],
@@ -15217,7 +15217,7 @@
   {
     "id": "arm-slingers-hanging-bent-knee-legs",
     "name": "Arm Slingers Hanging Bent Knee Legs",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["back", "delts"],
     "body_parts": ["waist"],
@@ -16041,7 +16041,7 @@
   {
     "id": "front-lever-reps",
     "name": "Front Lever Reps",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["upper back"],
     "secondary_muscles": ["core", "delts"],
     "body_parts": ["back"],
@@ -16223,7 +16223,7 @@
   {
     "id": "gorilla-chin",
     "name": "Gorilla Chin",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["waist"],
@@ -16305,7 +16305,7 @@
   {
     "id": "incline-push-up",
     "name": "Incline Push-Up",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["pectorals"],
     "secondary_muscles": ["delts", "triceps"],
     "body_parts": ["chest"],
@@ -16472,7 +16472,7 @@
   {
     "id": "inverse-leg-curl-on-pull-up-cable-machine",
     "name": "Inverse Leg Curl (On Pull-Up Cable Machine)",
-    "equipment": [],
+    "equipment": ["cable"],
     "muscles": ["hamstrings"],
     "secondary_muscles": ["calves", "glutes"],
     "body_parts": ["upper legs"],
@@ -16593,7 +16593,7 @@
   {
     "id": "bench-dip-on-floor",
     "name": "Bench Dip On Floor",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["triceps"],
     "secondary_muscles": ["chest", "delts"],
     "body_parts": ["upper arms"],
@@ -17020,7 +17020,7 @@
   {
     "id": "decline-sit-up",
     "name": "Decline Sit-Up",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["abs"],
     "secondary_muscles": ["hip flexors", "lower back"],
     "body_parts": ["waist"],
@@ -17036,7 +17036,7 @@
   {
     "id": "front-lever",
     "name": "Front Lever",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["delts", "forearms", "lats"],
     "body_parts": ["waist"],
@@ -17369,7 +17369,7 @@
   {
     "id": "hyperextension",
     "name": "Hyperextension",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["spine"],
     "secondary_muscles": ["glutes", "hamstrings"],
     "body_parts": ["back"],
@@ -17650,7 +17650,7 @@
   {
     "id": "skin-the-cat",
     "name": "Skin The Cat",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["upper back"],
     "secondary_muscles": ["core", "delts"],
     "body_parts": ["back"],
@@ -17952,7 +17952,7 @@
   {
     "id": "decline-crunch",
     "name": "Decline Crunch",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["abs"],
     "secondary_muscles": ["hip flexors"],
     "body_parts": ["waist"],
@@ -18001,7 +18001,7 @@
   {
     "id": "inverted-row-on-bench",
     "name": "Inverted Row On Bench",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["upper back"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -18104,7 +18104,7 @@
   {
     "id": "inverse-leg-curl-bench-support",
     "name": "Inverse Leg Curl (Bench Support)",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["hamstrings"],
     "secondary_muscles": ["calves", "glutes"],
     "body_parts": ["upper legs"],
@@ -18154,7 +18154,7 @@
   {
     "id": "hanging-straight-leg-hip-raise",
     "name": "Hanging Straight Leg Hip Raise",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["hip flexors"],
     "body_parts": ["waist"],
@@ -18169,7 +18169,7 @@
   {
     "id": "lying-leg-raise-flat-bench",
     "name": "Lying Leg Raise Flat Bench",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["abs"],
     "secondary_muscles": ["hip flexors"],
     "body_parts": ["waist"],
@@ -18220,7 +18220,7 @@
   {
     "id": "one-arm-dip",
     "name": "One Arm Dip",
-    "equipment": [],
+    "equipment": ["dip station"],
     "muscles": ["triceps"],
     "secondary_muscles": ["chest", "delts"],
     "body_parts": ["upper arms"],
@@ -18435,7 +18435,7 @@
   {
     "id": "bench-hip-extension",
     "name": "Bench Hip Extension",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["glutes"],
     "secondary_muscles": ["hamstrings"],
     "body_parts": ["upper legs"],
@@ -18674,7 +18674,7 @@
   {
     "id": "hanging-leg-hip-raise",
     "name": "Hanging Leg Hip Raise",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["hip flexors", "lower back"],
     "body_parts": ["waist"],
@@ -18940,7 +18940,7 @@
   {
     "id": "pull-up-neutral-grip",
     "name": "Pull Up (Neutral Grip)",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -19260,7 +19260,7 @@
   {
     "id": "arm-slingers-hanging-straight-legs",
     "name": "Arm Slingers Hanging Straight Legs",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["back", "delts"],
     "body_parts": ["waist"],
@@ -19577,7 +19577,7 @@
   {
     "id": "incline-leg-hip-raise-leg-straight",
     "name": "Incline Leg Hip Raise (Leg Straight)",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["abs"],
     "secondary_muscles": ["hip flexors"],
     "body_parts": ["waist"],
@@ -19725,7 +19725,7 @@
   {
     "id": "reverse-dip",
     "name": "Reverse Dip",
-    "equipment": [],
+    "equipment": ["dip station"],
     "muscles": ["triceps"],
     "secondary_muscles": ["chest", "delts"],
     "body_parts": ["upper arms"],
@@ -19891,7 +19891,7 @@
   {
     "id": "triceps-dip",
     "name": "Triceps Dip",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["triceps"],
     "secondary_muscles": ["chest", "delts"],
     "body_parts": ["upper arms"],
@@ -19961,7 +19961,7 @@
   {
     "id": "hanging-straight-twisting-leg-hip-raise",
     "name": "Hanging Straight Twisting Leg Hip Raise",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["hip flexors", "obliques"],
     "body_parts": ["waist"],
@@ -20445,7 +20445,7 @@
   {
     "id": "hanging-pike",
     "name": "Hanging Pike",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["delts", "hip flexors"],
     "body_parts": ["waist"],
@@ -21945,7 +21945,7 @@
   {
     "id": "incline-reverse-grip-push-up",
     "name": "Incline Reverse Grip Push-Up",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["pectorals"],
     "secondary_muscles": ["delts", "triceps"],
     "body_parts": ["chest"],
@@ -22410,7 +22410,7 @@
   {
     "id": "hanging-pike-with-intense",
     "name": "Hanging Pike With Intense",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["delts", "hip flexors"],
     "body_parts": ["waist"],
@@ -22491,7 +22491,7 @@
   {
     "id": "slow-leg-pull-in-flat-bench",
     "name": "Slow Leg Pull In Flat Bench",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["abs"],
     "secondary_muscles": ["hip flexors", "lower back"],
     "body_parts": ["waist"],
@@ -23088,7 +23088,7 @@
   {
     "id": "forward-lunge-male-with-bench",
     "name": "Forward Lunge (Male) With Bench",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["glutes"],
     "secondary_muscles": ["calves", "hamstrings", "quads"],
     "body_parts": ["upper legs"],
@@ -23172,7 +23172,7 @@
   {
     "id": "pure-chin-up",
     "name": "Pure Chin-Up",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -23306,7 +23306,7 @@
   {
     "id": "incline-push-up-on-box-active-variation",
     "name": "Incline Push-Up (On Box) - Active Variation",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["pectorals"],
     "secondary_muscles": ["delts", "triceps"],
     "body_parts": ["chest"],
@@ -23390,7 +23390,7 @@
   {
     "id": "endurance-style-one-arm-dip",
     "name": "Endurance Style One Arm Dip",
-    "equipment": [],
+    "equipment": ["dip station"],
     "muscles": ["triceps"],
     "secondary_muscles": ["chest", "delts"],
     "body_parts": ["upper arms"],
@@ -23613,7 +23613,7 @@
   {
     "id": "wide-grip-chest-dip-on-high-parallel-bars-low-variation",
     "name": "Wide-Grip Chest Dip On High Parallel Bars - Low Variation",
-    "equipment": [],
+    "equipment": ["dip station"],
     "muscles": ["pectorals"],
     "secondary_muscles": ["delts", "triceps"],
     "body_parts": ["chest"],
@@ -23663,7 +23663,7 @@
   {
     "id": "hanging-pike-weak",
     "name": "Hanging Pike Weak",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["delts", "hip flexors"],
     "body_parts": ["waist"],
@@ -23729,7 +23729,7 @@
   {
     "id": "incline-push-up-depth-jump-with-complex",
     "name": "Incline Push Up Depth Jump With Complex",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["pectorals"],
     "secondary_muscles": ["core", "delts", "triceps"],
     "body_parts": ["chest"],
@@ -23911,7 +23911,7 @@
   {
     "id": "chin-up-diagonal",
     "name": "Chin-Up Diagonal",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -23993,7 +23993,7 @@
   {
     "id": "triceps-dip-between-benches-extreme-variation",
     "name": "Triceps Dip (Between Benches) - Extreme Variation",
-    "equipment": [],
+    "equipment": ["bench"],
     "muscles": ["triceps"],
     "secondary_muscles": ["chest", "delts"],
     "body_parts": ["upper arms"],
@@ -24062,7 +24062,7 @@
   {
     "id": "twisted-side-to-side-chin",
     "name": "Twisted Side-To-Side Chin",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -24197,7 +24197,7 @@
   {
     "id": "inverted-style-inverse-leg-curl-on-pull-up-cable-machine",
     "name": "Inverted Style Inverse Leg Curl (On Pull-Up Cable Machine)",
-    "equipment": [],
+    "equipment": ["cable"],
     "muscles": ["hamstrings"],
     "secondary_muscles": ["calves", "glutes"],
     "body_parts": ["upper legs"],
@@ -24749,7 +24749,7 @@
   {
     "id": "hanging-straight-leg-raise-with-elevated",
     "name": "Hanging Straight Leg Raise With Elevated",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["hip flexors"],
     "body_parts": ["waist"],
@@ -24782,7 +24782,7 @@
   {
     "id": "extended-style-inverted-row",
     "name": "Extended Style Inverted Row",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["upper back"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -24817,7 +24817,7 @@
   {
     "id": "hanging-straight-twisting-leg-hip-raise-with-compound",
     "name": "Hanging Straight Twisting Leg Hip Raise With Compound",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["hip flexors", "obliques"],
     "body_parts": ["waist"],
@@ -25003,7 +25003,7 @@
   {
     "id": "kipping-muscle-up-with-triple",
     "name": "Kipping Muscle Up With Triple",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "core", "delts", "triceps"],
     "body_parts": ["back"],
@@ -25100,7 +25100,7 @@
   {
     "id": "side-to-side-chin-with-reverse",
     "name": "Side-To-Side Chin With Reverse",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["lats"],
     "secondary_muscles": ["biceps", "forearms"],
     "body_parts": ["back"],
@@ -25221,7 +25221,7 @@
   {
     "id": "firm-style-hanging-oblique-knee-raise",
     "name": "Firm Style Hanging Oblique Knee Raise",
-    "equipment": [],
+    "equipment": ["pull-up bar"],
     "muscles": ["abs"],
     "secondary_muscles": ["obliques"],
     "body_parts": ["waist"],
