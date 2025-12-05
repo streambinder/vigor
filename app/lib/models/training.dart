@@ -22,6 +22,8 @@ class Training {
   final List<String> references;
   @JsonKey(name: 'routines', defaultValue: const [])
   final List<Routine> routines;
+  @JsonKey(name: 'prompt')
+  final Map<String, dynamic> prompt;
   @JsonKey(name: 'completed_at')
   final DateTime? completedAt;
   @JsonKey(name: 'created_at')
@@ -35,6 +37,7 @@ class Training {
     required this.duration,
     required this.references,
     required this.routines,
+    required this.prompt,
     this.completedAt,
     required this.createdAt,
   });
