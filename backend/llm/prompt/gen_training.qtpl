@@ -3,70 +3,51 @@
 {% import "strings" %}
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func GenTraining(profile model.Profile, exercises []model.Exercise, prompt string, duration int, recentTrainings []model.Training, facts []model.Fact, classics []model.Classic) -%}
-{% collapsespace %}
+{% func GenTraining(profile model.Profile, exercises []model.Exercise, userPrompt string, duration int, recentTrainings []model.Training, facts []model.Fact, classics []model.Classic) %}
+TASK: Generate a {%d duration %}-minute training session.
 
-Generate {%d duration %}min training from these exercises:
-{% for _, exercise := range exercises %}
-    {%s exercise.ID %} (
-    {% if len(exercise.Instructions) > 0 %}Instructions: {%s strings.Join(exercise.Instructions, ", ") %}{% endif %}.
-    {% if len(exercise.Muscles) > 0 %}Target muscles: {%s strings.Join(exercise.Muscles, ", ") %}{% endif %}.
-    {% if len(exercise.SecondaryMuscles) > 0 %}Secondary muscles: {%s strings.Join(exercise.SecondaryMuscles, ", ") %}{% endif %}.
-    {% if len(exercise.BodyParts) > 0 %}Body parts: {%s strings.Join(exercise.BodyParts, ", ") %}{% endif %}.
-    {% if len(exercise.Equipment) > 0 %}Equipment: {%s strings.Join(exercise.Equipment, ", ") %}{% endif %}.
-    );
-{% endfor %}
-
-{% if len(prompt) > 0 %}
-Critical constraints by the user:
-    {%s prompt %}
+USER PROFILE:
+- Age {%d profile.Age() %}, {%f.0 profile.Height %}cm, {%f.0 profile.Weight %}kg, {%s profile.Gender %}
+{% if len(profile.Goals()) > 0 %}
+- Goals: {% for i, goal := range profile.Goals() %}{%s goal.Description %}{% if i < len(profile.Goals())-1 %}, {% endif %}{% endfor %}
+{% endif %}
+{% if len(profile.Injuries()) > 0 %}
+- Injuries (avoid aggravating): {% for i, injury := range profile.Injuries() %}{%s injury.Description %} ({%d injury.Year %}){% if i < len(profile.Injuries())-1 %}, {% endif %}{% endfor %}
+{% endif %}
+{% if len(profile.Limitations()) > 0 %}
+- Limitations: {% for i, limitation := range profile.Limitations() %}{%s limitation %}{% if i < len(profile.Limitations())-1 %}, {% endif %}{% endfor %}
 {% endif %}
 
+{% if len(userPrompt) > 0 %}
+USER CONSTRAINTS (must follow):
+{%s userPrompt %}
+
+{% endif %}
+AVAILABLE EXERCISES:
+{% for _, exercise := range exercises %}
+- {%s exercise.ID %}{% if len(exercise.Equipment) > 0 %} [{% for i, eq := range exercise.Equipment %}{%s eq %}{% if i < len(exercise.Equipment)-1 %}, {% endif %}{% endfor %}]{% endif %}{% if len(exercise.Muscles) > 0 %}: {%s strings.Join(exercise.Muscles, ", ") %}{% endif %}
+{% endfor %}
+
 {% if len(recentTrainings) > 0 %}
-Recent training history (consider variety and progression):
-    {% for _, training := range recentTrainings %}
-        {%s training.Type %} workout {%s training.Name %} ({%d training.DaysSince() %} days ago):
-        {%s training.Description %}
-        (exercises:
-        {% for _, routine := range training.Routines %}
-            {% for _, block := range routine.Blocks %}
-                {% for _, activity := range block.Activities %}
-                    {% if activity.Type == "exercise" %}
-                        {%s activity.Name %}
-                        {% if activity.WeightKg > 0 %}
-                            at {%d activity.WeightKg %}kg
-                        {% endif %}
-                        {% if activity.Reps > 0 %}
-                            for {%d activity.WeightKg %} reps
-                        {% endif %}
-                        {% if activity.Duration > 0 %}
-                            for {%d activity.Duration %}s
-                        {% endif %}
-                        {% if len(activity.Feedback) > 0 %}
-                            with feedback "{%s activity.Feedback %}"
-                        {% endif %}
-                        ;
-                    {% endif %}
-                {% endfor %}
-            {% endfor %}
-        {% endfor %}
-        );
-    {% endfor %}.
+RECENT HISTORY (ensure variety, consider progression):
+{% for _, training := range recentTrainings %}
+- {%d training.DaysSince() %}d ago: {%s training.Type %} "{%s training.Name %}" — {% for _, routine := range training.Routines %}{% for _, block := range routine.Blocks %}{% for _, activity := range block.Activities %}{% if activity.Type == "exercise" %}{%s activity.Name %}{% if activity.WeightKg > 0 %}@{%d activity.WeightKg %}kg{% endif %}{% if activity.Reps > 0 %}x{%d activity.Reps %}{% endif %}{% if len(activity.Feedback) > 0 %}({%s activity.Feedback %}){% endif %}, {% endif %}{% endfor %}{% endfor %}{% endfor %}
+{% endfor %}
 {% endif %}
 
 {% if len(facts) > 0 %}
-Relevant knowledge facts:
-    {% for _, fact := range facts %}
-        - {%s fact.Reference %}: {%s fact.Content %}
-    {% endfor %}.
+KNOWLEDGE FACTS:
+{% for _, fact := range facts %}
+- [{%s fact.Reference %}] {%s fact.Content %}
+{% endfor %}
 {% endif %}
 
 {% if len(classics) > 0 %}
-Relevant classics excerpts to leverage for workout name generation:
-    {% for _, classic := range classics %}
-        - {%s classic.Excerpt %}
-    {% endfor %}.
+NAMING INSPIRATION (for epic workout title):
+{% for _, classic := range classics %}
+- {%s classic.Excerpt %}
+{% endfor %}
 {% endif %}
 
-{% endcollapsespace -%}
+Respond in {% if len(profile.Language) > 0 %}{%s profile.Language %}{% else %}English{% endif %}.
 {% endfunc %}

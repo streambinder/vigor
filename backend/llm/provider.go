@@ -44,7 +44,7 @@ func GenTraining(
 	classics []model.Classic,
 ) (*model.Training, llmPrompt, error) {
 	request := llmPrompt{
-		prompt.System(profile),
+		prompt.System(),
 		prompt.GenTraining(profile, exercises, userPrompt, duration, recentTrainings, facts, classics),
 	}
 	response, err := getLLM(profile).query(
