@@ -555,14 +555,31 @@ class TrainingDetailsScreen extends StatelessWidget {
             const SizedBox(width: 12),
           ] else ...[
             Container(
-              width: 6,
-              height: 6,
-              margin: const EdgeInsets.only(top: 6),
+              width: 60,
+              height: 60,
               decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
                 color: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.primaryColor.withOpacity(0.6)
-                    : Theme.of(context).colorScheme.primary.withOpacity(0.6),
-                shape: BoxShape.circle,
+                    ? Colors.white.withOpacity(0.1)
+                    : Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.grey.shade200,
+                border: Border.all(
+                  color: PlatformHelper.useLiquidGlass
+                      ? Colors.white.withOpacity(0.2)
+                      : Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withOpacity(0.2)
+                          : Colors.grey.shade300,
+                ),
+              ),
+              child: Icon(
+                Icons.fitness_center,
+                size: 24,
+                color: PlatformHelper.useLiquidGlass
+                    ? Colors.white.withOpacity(0.4)
+                    : Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withOpacity(0.4)
+                        : Colors.grey.shade500,
               ),
             ),
             const SizedBox(width: 12),
