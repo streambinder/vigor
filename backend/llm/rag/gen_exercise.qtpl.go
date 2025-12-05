@@ -26,56 +26,86 @@ var (
 //line llm/rag/gen_exercise.qtpl:6
 func StreamGenExercise(qw422016 *qt422016.Writer, exercise model.Exercise) {
 //line llm/rag/gen_exercise.qtpl:7
-	qw422016.N().S(` Name: `)
+	qw422016.N().S(` `)
 //line llm/rag/gen_exercise.qtpl:9
 	qw422016.E().S(exercise.Name)
 //line llm/rag/gen_exercise.qtpl:9
-	qw422016.N().S(`. Equipment: `)
+	qw422016.N().S(`. `)
 //line llm/rag/gen_exercise.qtpl:10
-	qw422016.E().S(strings.Join(exercise.Equipment, ", "))
+	if len(exercise.Equipment) > 0 {
 //line llm/rag/gen_exercise.qtpl:10
-	qw422016.N().S(`. Muscles: `)
+		qw422016.N().S(`Equipment: `)
+//line llm/rag/gen_exercise.qtpl:10
+		qw422016.E().S(strings.Join(exercise.Equipment, ", "))
+//line llm/rag/gen_exercise.qtpl:10
+		qw422016.N().S(`.`)
+//line llm/rag/gen_exercise.qtpl:10
+	}
+//line llm/rag/gen_exercise.qtpl:10
+	qw422016.N().S(` Primary muscles: `)
 //line llm/rag/gen_exercise.qtpl:11
 	qw422016.E().S(strings.Join(exercise.Muscles, ", "))
 //line llm/rag/gen_exercise.qtpl:11
-	qw422016.N().S(` (secondary: `)
-//line llm/rag/gen_exercise.qtpl:11
-	qw422016.E().S(strings.Join(exercise.SecondaryMuscles, ", "))
-//line llm/rag/gen_exercise.qtpl:11
-	qw422016.N().S(`). Body parts: `)
+	qw422016.N().S(`. `)
 //line llm/rag/gen_exercise.qtpl:12
-	qw422016.E().S(strings.Join(exercise.BodyParts, ", "))
+	if len(exercise.SecondaryMuscles) > 0 {
 //line llm/rag/gen_exercise.qtpl:12
-	qw422016.N().S(`. Instructions: `)
+		qw422016.N().S(`Secondary muscles: `)
+//line llm/rag/gen_exercise.qtpl:12
+		qw422016.E().S(strings.Join(exercise.SecondaryMuscles, ", "))
+//line llm/rag/gen_exercise.qtpl:12
+		qw422016.N().S(`.`)
+//line llm/rag/gen_exercise.qtpl:12
+	}
+//line llm/rag/gen_exercise.qtpl:12
+	qw422016.N().S(` Body parts: `)
 //line llm/rag/gen_exercise.qtpl:13
-	qw422016.E().S(strings.Join(exercise.Instructions, ", "))
+	qw422016.E().S(strings.Join(exercise.BodyParts, ", "))
 //line llm/rag/gen_exercise.qtpl:13
 	qw422016.N().S(`. `)
-//line llm/rag/gen_exercise.qtpl:16
+//line llm/rag/gen_exercise.qtpl:14
+	if len(exercise.Instructions) > 0 {
+//line llm/rag/gen_exercise.qtpl:14
+		for i, instruction := range exercise.Instructions {
+//line llm/rag/gen_exercise.qtpl:14
+			qw422016.N().D(i + 1)
+//line llm/rag/gen_exercise.qtpl:14
+			qw422016.N().S(`. `)
+//line llm/rag/gen_exercise.qtpl:14
+			qw422016.E().S(instruction)
+//line llm/rag/gen_exercise.qtpl:14
+			qw422016.N().S(` `)
+//line llm/rag/gen_exercise.qtpl:14
+		}
+//line llm/rag/gen_exercise.qtpl:14
+	}
+//line llm/rag/gen_exercise.qtpl:14
+	qw422016.N().S(` `)
+//line llm/rag/gen_exercise.qtpl:17
 }
 
-//line llm/rag/gen_exercise.qtpl:16
+//line llm/rag/gen_exercise.qtpl:17
 func WriteGenExercise(qq422016 qtio422016.Writer, exercise model.Exercise) {
-//line llm/rag/gen_exercise.qtpl:16
+//line llm/rag/gen_exercise.qtpl:17
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/rag/gen_exercise.qtpl:16
+//line llm/rag/gen_exercise.qtpl:17
 	StreamGenExercise(qw422016, exercise)
-//line llm/rag/gen_exercise.qtpl:16
+//line llm/rag/gen_exercise.qtpl:17
 	qt422016.ReleaseWriter(qw422016)
-//line llm/rag/gen_exercise.qtpl:16
+//line llm/rag/gen_exercise.qtpl:17
 }
 
-//line llm/rag/gen_exercise.qtpl:16
+//line llm/rag/gen_exercise.qtpl:17
 func GenExercise(exercise model.Exercise) string {
-//line llm/rag/gen_exercise.qtpl:16
+//line llm/rag/gen_exercise.qtpl:17
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/rag/gen_exercise.qtpl:16
+//line llm/rag/gen_exercise.qtpl:17
 	WriteGenExercise(qb422016, exercise)
-//line llm/rag/gen_exercise.qtpl:16
+//line llm/rag/gen_exercise.qtpl:17
 	qs422016 := string(qb422016.B)
-//line llm/rag/gen_exercise.qtpl:16
+//line llm/rag/gen_exercise.qtpl:17
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/rag/gen_exercise.qtpl:16
+//line llm/rag/gen_exercise.qtpl:17
 	return qs422016
-//line llm/rag/gen_exercise.qtpl:16
+//line llm/rag/gen_exercise.qtpl:17
 }

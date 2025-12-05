@@ -26,44 +26,52 @@ var (
 //line llm/rag/gen_fact.qtpl:6
 func StreamGenFact(qw422016 *qt422016.Writer, fact model.Fact) {
 //line llm/rag/gen_fact.qtpl:7
-	qw422016.N().S(` Area: `)
+	qw422016.N().S(` `)
 //line llm/rag/gen_fact.qtpl:9
 	qw422016.E().S(fact.Area)
 //line llm/rag/gen_fact.qtpl:9
-	qw422016.N().S(`. Tags: `)
-//line llm/rag/gen_fact.qtpl:10
-	qw422016.E().S(strings.Join(fact.Tags, ", "))
-//line llm/rag/gen_fact.qtpl:10
-	qw422016.N().S(`. Content: `)
-//line llm/rag/gen_fact.qtpl:11
+	qw422016.N().S(`: `)
+//line llm/rag/gen_fact.qtpl:9
 	qw422016.E().S(fact.Content)
-//line llm/rag/gen_fact.qtpl:11
-	qw422016.N().S(`. `)
-//line llm/rag/gen_fact.qtpl:14
+//line llm/rag/gen_fact.qtpl:9
+	qw422016.N().S(` `)
+//line llm/rag/gen_fact.qtpl:10
+	if len(fact.Tags) > 0 {
+//line llm/rag/gen_fact.qtpl:10
+		qw422016.N().S(`Tags: `)
+//line llm/rag/gen_fact.qtpl:10
+		qw422016.E().S(strings.Join(fact.Tags, ", "))
+//line llm/rag/gen_fact.qtpl:10
+		qw422016.N().S(`.`)
+//line llm/rag/gen_fact.qtpl:10
+	}
+//line llm/rag/gen_fact.qtpl:10
+	qw422016.N().S(` `)
+//line llm/rag/gen_fact.qtpl:13
 }
 
-//line llm/rag/gen_fact.qtpl:14
+//line llm/rag/gen_fact.qtpl:13
 func WriteGenFact(qq422016 qtio422016.Writer, fact model.Fact) {
-//line llm/rag/gen_fact.qtpl:14
+//line llm/rag/gen_fact.qtpl:13
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/rag/gen_fact.qtpl:14
+//line llm/rag/gen_fact.qtpl:13
 	StreamGenFact(qw422016, fact)
-//line llm/rag/gen_fact.qtpl:14
+//line llm/rag/gen_fact.qtpl:13
 	qt422016.ReleaseWriter(qw422016)
-//line llm/rag/gen_fact.qtpl:14
+//line llm/rag/gen_fact.qtpl:13
 }
 
-//line llm/rag/gen_fact.qtpl:14
+//line llm/rag/gen_fact.qtpl:13
 func GenFact(fact model.Fact) string {
-//line llm/rag/gen_fact.qtpl:14
+//line llm/rag/gen_fact.qtpl:13
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/rag/gen_fact.qtpl:14
+//line llm/rag/gen_fact.qtpl:13
 	WriteGenFact(qb422016, fact)
-//line llm/rag/gen_fact.qtpl:14
+//line llm/rag/gen_fact.qtpl:13
 	qs422016 := string(qb422016.B)
-//line llm/rag/gen_fact.qtpl:14
+//line llm/rag/gen_fact.qtpl:13
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/rag/gen_fact.qtpl:14
+//line llm/rag/gen_fact.qtpl:13
 	return qs422016
-//line llm/rag/gen_fact.qtpl:14
+//line llm/rag/gen_fact.qtpl:13
 }

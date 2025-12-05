@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 	"github.com/streambinder/vigor/encoder"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -43,12 +42,11 @@ func init() {
 // Training represents the entire training session with a UUID ID
 type Training struct {
 	ID          uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
-	Name        string         `gorm:"not null" json:"name" prompt:"Epic movie-style 3-4 words title (no hyphens or colons or special characters) drawn from provided classical history, literature, mythology, and epic excerpts that resonates with the user's journey—using their goals and challenges as inspiration to find the most fitting classical parallel or archetype. Ensure variation compared to completed trainings."`
-	Description string         `gorm:"not null" json:"description" prompt:"Training description in terms of impact on profile goals"`
-	Type        string         `gorm:"not null" json:"type" prompt:"Training type (e.g. HIIT, pilates, swimming, etc)"`
-	Duration    int            `gorm:"not null" json:"duration" prompt:"Total training duration in seconds"`
-	References  pq.StringArray `gorm:"type:text[]" json:"references" prompt:"Relevant knowledge fact URLs used in generation"`
-	Routines    []Routine      `gorm:"foreignKey:TrainingID" json:"routines"`
+	Name        string         `gorm:"not null" json:"name" prompt:"Epic 3-4 word title inspired by classics, no special characters (e.g. Trojan War Training, Achilles Trial Run, Pius Aeneas Fitness, Son of Zeus Gains)"`
+	Description string         `gorm:"not null" json:"description" prompt:"Short paragraph describing how the generated program fits the user's goals and limitations. No need to mention user profile details such as age, weight, height, etc. It's highly appreciated to mention weight/reps regressions or increases based on user's feedback and/or previous trainings."`
+	Type        string         `gorm:"not null" json:"type" prompt:"Training broad category, which can be either the sport for sports-related trainings — boxing, swimming, running, pilates, yoga, etc. —, or subtype of HIIT for HIIT — AMRAP, EMOM, etc. – or other generic terms such as strength, flexibility, etc.)"`
+	Duration    int            `gorm:"not null" json:"duration" prompt:"Total duration in seconds"`
+	Routines    []Routine      `gorm:"foreignKey:TrainingID" json:"routines" prompt:"Set of routines to be performed, where each comprehends the same type of activity. Standard workouts have at least 3 routines, with warmup, work, cooldown."`
 	Prompt      datatypes.JSON `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
 
 	CompletedAt *time.Time     `json:"completed_at" prompt:"-"`
@@ -65,9 +63,9 @@ type Routine struct {
 	ID         string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id" prompt:"-"`
 	TrainingID string `gorm:"index;type:uuid;not null" json:"training_id" prompt:"-"`
 
-	Type   string  `gorm:"not null" json:"name" prompt:"Routine type (warmup/circuit/cooldown)"`
-	Rest   int     `gorm:"not null" json:"rest" prompt:"Rest seconds between routines"`
-	Blocks []Block `json:"blocks" gorm:"foreignKey:RoutineID;constraint:OnDelete:CASCADE"`
+	Type   string  `gorm:"not null" json:"name" prompt:"Routine phase;enum:warmup,work,cooldown"`
+	Rest   int     `gorm:"not null" json:"rest" prompt:"Rest seconds after this routine"`
+	Blocks []Block `json:"blocks" gorm:"foreignKey:RoutineID;constraint:OnDelete:CASCADE" prompt:"Set of blocks to be performed. A block is composed by at least 2 activities."`
 
 	CreatedAt time.Time      `json:"-"`
 	UpdatedAt time.Time      `json:"-"`
@@ -79,9 +77,8 @@ type Block struct {
 	ID        string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id" prompt:"-"`
 	RoutineID string `gorm:"index;type:uuid;not null" json:"routine_id" prompt:"-"`
 
-	Type       string     `gorm:"not null" json:"type" prompt:"Block type (warmup/circuit/rest/cooldown)"`
-	Repeats    int        `gorm:"not null" json:"repeats" prompt:"Number of times to repeat this block"`
-	Rest       int        `gorm:"not null" json:"rest" prompt:"Rest seconds between block repeats"`
+	Repeats    int        `gorm:"not null" json:"repeats" prompt:"Number of block repetitions"`
+	Rest       int        `gorm:"not null" json:"rest" prompt:"Rest seconds between repeats"`
 	Activities []Activity `json:"activities" gorm:"foreignKey:BlockID;constraint:OnDelete:CASCADE"`
 
 	CreatedAt time.Time      `json:"-"`
@@ -89,19 +86,18 @@ type Block struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
-// Activity represents a single business or activity with a UUID ID and an explicit FK
+// Activity represents a single exercise or rest period with a UUID ID and an explicit FK
 type Activity struct {
 	ID      string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id" prompt:"-"`
 	BlockID string `gorm:"index;type:uuid;not null" json:"block_id" prompt:"-"`
 
-	Name      string         `gorm:"not null" json:"name" prompt:"Exercise ID from provided knowledge base"`
-	Rationale string         `gorm:"not null" json:"rationale" prompt:"Why this exercise addresses profile goals, limitations, progressions"`
-	Type      string         `gorm:"not null" json:"type" prompt:"Activity type (exercise/stretch/rest)"`
-	Duration  int            `gorm:"not null" json:"duration" prompt:"Activity duration in seconds"`
-	Reps      int            `gorm:"not null" json:"reps" prompt:"Number of repetitions"`
-	WeightKg  int            `gorm:"not null" json:"weight_kg" prompt:"Weight in kilograms"`
+	Name      string         `gorm:"not null" json:"name" prompt:"Exercise ID from AVAILABLE_EXERCISES"`
+	Type      string         `gorm:"not null" json:"type" prompt:"Activity category;enum:exercise,stretch,rest"`
+	Duration  int            `gorm:"not null" json:"duration" prompt:"Seconds (use 0 when reps > 0)"`
+	Reps      int            `gorm:"not null" json:"reps" prompt:"Repetition count (use 0 for time-based)"`
+	WeightKg  int            `gorm:"not null" json:"weight_kg" prompt:"Weight in kg (0 for bodyweight)"`
 	Rest      int            `gorm:"not null" json:"rest" prompt:"Rest seconds after this activity"`
-	Detail    datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"` // Full exercise details as JSON
+	Detail    datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"`
 	Feedback  string         `json:"feedback" prompt:"-"`
 
 	CreatedAt time.Time      `json:"-"`

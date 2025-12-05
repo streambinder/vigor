@@ -13,8 +13,6 @@ class Activity {
   final String blockId;
   @JsonKey(name: 'name')
   final String name;
-  @JsonKey(name: 'rationale')
-  final String rationale;
   @JsonKey(name: 'type')
   final String type;
   @JsonKey(name: 'duration')
@@ -34,7 +32,6 @@ class Activity {
     required this.id,
     required this.blockId,
     required this.name,
-    required this.rationale,
     required this.type,
     required this.duration,
     required this.reps,

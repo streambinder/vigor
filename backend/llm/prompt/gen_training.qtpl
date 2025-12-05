@@ -4,57 +4,48 @@
 {% import "github.com/streambinder/vigor/model" %}
 
 {% func GenTraining(profile model.Profile, exercises []model.Exercise, equipment []string, userPrompt string, duration int, recentTrainings []model.Training, facts []model.Fact, classics []model.Classic) %}
-TASK: Generate a {%d duration %}-minute training session.
+Generate a {%d duration %}-minute training session.
 
-USER PROFILE:
-- Age {%d profile.Age() %}, {%f.0 profile.Height %}cm, {%f.0 profile.Weight %}kg, {%s profile.Gender %}
-{% if len(profile.Goals()) > 0 %}
-- Goals: {% for i, goal := range profile.Goals() %}{%s goal.Description %}{% if i < len(profile.Goals())-1 %}, {% endif %}{% endfor %}
-{% endif %}
-{% if len(profile.Injuries()) > 0 %}
-- Injuries (avoid aggravating): {% for i, injury := range profile.Injuries() %}{%s injury.Description %} ({%d injury.Year %}){% if i < len(profile.Injuries())-1 %}, {% endif %}{% endfor %}
-{% endif %}
-{% if len(profile.Limitations()) > 0 %}
-- Limitations: {% for i, limitation := range profile.Limitations() %}{%s limitation %}{% if i < len(profile.Limitations())-1 %}, {% endif %}{% endfor %}
-{% endif %}
+<<<USER_PROFILE>>>
+Age: {%d profile.Age() %}, Height: {%f.0 profile.Height %}cm, Weight: {%f.0 profile.Weight %}kg, Gender: {%s profile.Gender %}
+{% if len(profile.Goals()) > 0 %}Goals: {% for i, goal := range profile.Goals() %}{%s goal.Description %}{% if i < len(profile.Goals())-1 %}, {% endif %}{% endfor %}{% endif %}
+{% if len(profile.Injuries()) > 0 %}Injuries (AVOID): {% for i, injury := range profile.Injuries() %}{%s injury.Description %} ({%d injury.Year %}){% if i < len(profile.Injuries())-1 %}, {% endif %}{% endfor %}{% endif %}
+{% if len(profile.Limitations()) > 0 %}Limitations: {% for i, limitation := range profile.Limitations() %}{%s limitation %}{% if i < len(profile.Limitations())-1 %}, {% endif %}{% endfor %}{% endif %}
+<<<END_USER_PROFILE>>>
 
 {% if len(userPrompt) > 0 %}
-USER CONSTRAINTS (must follow):
+<<<USER_REQUEST>>>
 {%s userPrompt %}
-
+<<<END_USER_REQUEST>>>
 {% endif %}
+
 {% if len(equipment) > 0 %}
-AVAILABLE EQUIPMENT:
+<<<EQUIPMENT>>>
 {% for i, eq := range equipment %}{%s eq %}{% if i < len(equipment)-1 %}, {% endif %}{% endfor %}
-
-IMPORTANT: Prioritize exercises that use available equipment over bodyweight alternatives when both are suitable.
+<<<END_EQUIPMENT>>>
 {% endif %}
 
-AVAILABLE EXERCISES:
-{% for _, exercise := range exercises %}
-- {%s exercise.ID %}{% if len(exercise.Equipment) > 0 %} [{% for i, eq := range exercise.Equipment %}{%s eq %}{% if i < len(exercise.Equipment)-1 %}, {% endif %}{% endfor %}]{% endif %}{% if len(exercise.Muscles) > 0 %}: {%s strings.Join(exercise.Muscles, ", ") %}{% endif %}
-{% endfor %}
-
+<<<AVAILABLE_EXERCISES>>>
+{% for _, exercise := range exercises %}{%s exercise.ID %}{% if len(exercise.Equipment) > 0 %} [{% for i, eq := range exercise.Equipment %}{%s eq %}{% if i < len(exercise.Equipment)-1 %}, {% endif %}{% endfor %}]{% endif %}{% if len(exercise.Muscles) > 0 %}: {%s strings.Join(exercise.Muscles, ", ") %}{% endif %}
+{% endfor %}<<<END_AVAILABLE_EXERCISES>>>
 {% if len(recentTrainings) > 0 %}
-RECENT HISTORY (ensure variety, consider progression):
-{% for _, training := range recentTrainings %}
-- {%d training.DaysSince() %}d ago: {%s training.Type %} "{%s training.Name %}" — {% for _, routine := range training.Routines %}{% for _, block := range routine.Blocks %}{% for _, activity := range block.Activities %}{% if activity.Type == "exercise" %}{%s activity.Name %}{% if activity.WeightKg > 0 %}@{%d activity.WeightKg %}kg{% endif %}{% if activity.Reps > 0 %}x{%d activity.Reps %}{% endif %}{% if len(activity.Feedback) > 0 %}({%s activity.Feedback %}){% endif %}, {% endif %}{% endfor %}{% endfor %}{% endfor %}
-{% endfor %}
-{% endif %}
 
+<<<RECENT_HISTORY>>>
+{% for _, training := range recentTrainings %}{%d training.DaysSince() %}d ago | {%s training.Type %} | {%s training.Name %} | {% for _, routine := range training.Routines %}{% for _, block := range routine.Blocks %}{% for _, activity := range block.Activities %}{% if activity.Type == "exercise" %}{%s activity.Name %}{% if activity.WeightKg > 0 %}@{%d activity.WeightKg %}kg{% endif %}{% if activity.Reps > 0 %}x{%d activity.Reps %}{% endif %}{% if len(activity.Feedback) > 0 %}({%s activity.Feedback %}){% endif %} {% endif %}{% endfor %}{% endfor %}{% endfor %}
+{% endfor %}<<<END_RECENT_HISTORY>>>
+{% endif %}
 {% if len(facts) > 0 %}
-KNOWLEDGE FACTS:
-{% for _, fact := range facts %}
-- [{%s fact.Reference %}] {%s fact.Content %}
-{% endfor %}
+
+<<<KNOWLEDGE_FACTS>>>
+{% for _, fact := range facts %}[{%s fact.Reference %}] {%s fact.Content %}
+{% endfor %}<<<END_KNOWLEDGE_FACTS>>>
 {% endif %}
 
 {% if len(classics) > 0 %}
-NAMING INSPIRATION (for epic workout title):
-{% for _, classic := range classics %}
-- {%s classic.Excerpt %}
-{% endfor %}
+<<<NAMING_INSPIRATION>>>
+{% for _, classic := range classics %}{%s classic.Excerpt %}
+{% endfor %}<<<END_NAMING_INSPIRATION>>>
 {% endif %}
 
-Respond in {% if len(profile.Language) > 0 %}{%s profile.Language %}{% else %}English{% endif %}.
+Output language: {% if len(profile.Language) > 0 %}{%s profile.Language %}{% else %}English{% endif %}
 {% endfunc %}

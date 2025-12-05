@@ -449,15 +449,6 @@ class TrainingDetailsScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Text(
-                block.type,
-                style: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.bodyStyle.copyWith(fontWeight: FontWeight.w600)
-                    : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-              ),
               const Spacer(),
               if (block.repeats > 1)
                 Container(
@@ -591,18 +582,6 @@ class TrainingDetailsScreen extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                 ),
-                if (activity.rationale.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    activity.rationale,
-                    style: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
-                        : Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey.shade600,
-                              fontSize: 12,
-                            ),
-                  ),
-                ],
                 // Exercise details from parsed detail field
                 if (exercise != null) ...[
                   const SizedBox(height: 8),

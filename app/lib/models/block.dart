@@ -12,8 +12,6 @@ class Block {
   final String id;
   @JsonKey(name: 'routine_id')
   final String routineId;
-  @JsonKey(name: 'type')
-  final String type;
   @JsonKey(name: 'repeats')
   final int repeats;
   @JsonKey(name: 'rest')
@@ -24,7 +22,6 @@ class Block {
   Block({
     required this.id,
     required this.routineId,
-    required this.type,
     required this.repeats,
     required this.rest,
     required this.activities,

@@ -6,9 +6,8 @@
 {% func GenFact(fact model.Fact) -%}
 {% collapsespace %}
 
-Area: {%s fact.Area %}.
-Tags: {%s strings.Join(fact.Tags, ", ") %}.
-Content: {%s fact.Content %}.
+{%s fact.Area %}: {%s fact.Content %}
+{% if len(fact.Tags) > 0 %}Tags: {%s strings.Join(fact.Tags, ", ") %}.{% endif %}
 
 {% endcollapsespace -%}
 {% endfunc %}

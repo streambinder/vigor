@@ -51,14 +51,17 @@ func jsonSchemaForType(t reflect.Type) map[string]interface{} {
 			continue
 		}
 
-		// Get prompt tag for description
+		// Get prompt tag for description (may include enum)
 		promptTag := field.Tag.Get("prompt")
 		if promptTag == "-" {
 			continue
 		}
 
+		// Parse prompt tag: "description;enum:val1,val2,val3"
+		description, enumValues := parsePromptTag(promptTag)
+
 		// Build property schema
-		prop := buildPropertySchema(field.Type, promptTag)
+		prop := buildPropertySchema(field.Type, description, enumValues)
 		if prop != nil {
 			properties[fieldName] = prop
 
@@ -96,7 +99,25 @@ func parseJSONTagForSchema(tag string) (string, bool) {
 	return fieldName, omitempty
 }
 
-func buildPropertySchema(t reflect.Type, promptTag string) map[string]interface{} {
+// parsePromptTag parses "description;enum:val1,val2" into description and enum values
+func parsePromptTag(tag string) (string, []string) {
+	parts := strings.Split(tag, ";")
+	description := parts[0]
+
+	var enumValues []string
+	for _, part := range parts[1:] {
+		if strings.HasPrefix(part, "enum:") {
+			values := strings.TrimPrefix(part, "enum:")
+			for _, v := range strings.Split(values, ",") {
+				enumValues = append(enumValues, strings.TrimSpace(v))
+			}
+		}
+	}
+
+	return description, enumValues
+}
+
+func buildPropertySchema(t reflect.Type, description string, enumValues []string) map[string]interface{} {
 	// Handle pointer types
 	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
@@ -107,6 +128,13 @@ func buildPropertySchema(t reflect.Type, promptTag string) map[string]interface{
 	switch t.Kind() {
 	case reflect.String:
 		prop["type"] = "string"
+		if len(enumValues) > 0 {
+			enumIface := make([]interface{}, len(enumValues))
+			for i, v := range enumValues {
+				enumIface[i] = v
+			}
+			prop["enum"] = enumIface
+		}
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		prop["type"] = "integer"
@@ -135,8 +163,8 @@ func buildPropertySchema(t reflect.Type, promptTag string) map[string]interface{
 	}
 
 	// Add description from prompt tag if available
-	if promptTag != "" && promptTag != "+" {
-		prop["description"] = promptTag
+	if description != "" && description != "+" {
+		prop["description"] = description
 	}
 
 	return prop

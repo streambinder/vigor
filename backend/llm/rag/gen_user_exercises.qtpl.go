@@ -23,128 +23,128 @@ var (
 //line llm/rag/gen_user_exercises.qtpl:5
 func StreamGenUserExercises(qw422016 *qt422016.Writer, profile model.Profile, equipment []string) {
 //line llm/rag/gen_user_exercises.qtpl:6
-	qw422016.N().S(` `)
-//line llm/rag/gen_user_exercises.qtpl:8
+	qw422016.N().S(` Exercises for: `)
+//line llm/rag/gen_user_exercises.qtpl:9
 	if len(profile.Goals()) > 0 {
-//line llm/rag/gen_user_exercises.qtpl:8
-		qw422016.N().S(` Fitness goals: `)
-//line llm/rag/gen_user_exercises.qtpl:10
+//line llm/rag/gen_user_exercises.qtpl:9
+		qw422016.N().S(`Goals: `)
+//line llm/rag/gen_user_exercises.qtpl:9
 		for i, goal := range profile.Goals() {
-//line llm/rag/gen_user_exercises.qtpl:10
+//line llm/rag/gen_user_exercises.qtpl:9
 			qw422016.E().S(goal.Description)
-//line llm/rag/gen_user_exercises.qtpl:10
+//line llm/rag/gen_user_exercises.qtpl:9
 			if i < len(profile.Goals())-1 {
-//line llm/rag/gen_user_exercises.qtpl:10
+//line llm/rag/gen_user_exercises.qtpl:9
 				qw422016.N().S(`, `)
-//line llm/rag/gen_user_exercises.qtpl:10
+//line llm/rag/gen_user_exercises.qtpl:9
 			}
-//line llm/rag/gen_user_exercises.qtpl:10
+//line llm/rag/gen_user_exercises.qtpl:9
 		}
-//line llm/rag/gen_user_exercises.qtpl:10
-		qw422016.N().S(`. `)
-//line llm/rag/gen_user_exercises.qtpl:11
+//line llm/rag/gen_user_exercises.qtpl:9
+		qw422016.N().S(`.`)
+//line llm/rag/gen_user_exercises.qtpl:9
 	}
-//line llm/rag/gen_user_exercises.qtpl:11
+//line llm/rag/gen_user_exercises.qtpl:9
 	qw422016.N().S(` `)
-//line llm/rag/gen_user_exercises.qtpl:12
+//line llm/rag/gen_user_exercises.qtpl:10
 	if len(profile.Injuries()) > 0 {
-//line llm/rag/gen_user_exercises.qtpl:12
-		qw422016.N().S(` Avoid exercises that impact: `)
-//line llm/rag/gen_user_exercises.qtpl:14
+//line llm/rag/gen_user_exercises.qtpl:10
+		qw422016.N().S(`Avoid: `)
+//line llm/rag/gen_user_exercises.qtpl:10
 		for i, injury := range profile.Injuries() {
-//line llm/rag/gen_user_exercises.qtpl:14
+//line llm/rag/gen_user_exercises.qtpl:10
 			qw422016.E().S(injury.Description)
-//line llm/rag/gen_user_exercises.qtpl:14
+//line llm/rag/gen_user_exercises.qtpl:10
 			if i < len(profile.Injuries())-1 {
-//line llm/rag/gen_user_exercises.qtpl:14
+//line llm/rag/gen_user_exercises.qtpl:10
 				qw422016.N().S(`, `)
-//line llm/rag/gen_user_exercises.qtpl:14
+//line llm/rag/gen_user_exercises.qtpl:10
 			}
-//line llm/rag/gen_user_exercises.qtpl:14
+//line llm/rag/gen_user_exercises.qtpl:10
 		}
-//line llm/rag/gen_user_exercises.qtpl:14
-		qw422016.N().S(`. `)
-//line llm/rag/gen_user_exercises.qtpl:15
+//line llm/rag/gen_user_exercises.qtpl:10
+		qw422016.N().S(`.`)
+//line llm/rag/gen_user_exercises.qtpl:10
 	}
-//line llm/rag/gen_user_exercises.qtpl:15
+//line llm/rag/gen_user_exercises.qtpl:10
 	qw422016.N().S(` `)
-//line llm/rag/gen_user_exercises.qtpl:16
+//line llm/rag/gen_user_exercises.qtpl:11
 	if len(profile.Limitations()) > 0 {
-//line llm/rag/gen_user_exercises.qtpl:16
-		qw422016.N().S(` Limitations: `)
-//line llm/rag/gen_user_exercises.qtpl:18
+//line llm/rag/gen_user_exercises.qtpl:11
+		qw422016.N().S(`Limitations: `)
+//line llm/rag/gen_user_exercises.qtpl:11
 		for i, limitation := range profile.Limitations() {
-//line llm/rag/gen_user_exercises.qtpl:18
+//line llm/rag/gen_user_exercises.qtpl:11
 			qw422016.E().S(limitation)
-//line llm/rag/gen_user_exercises.qtpl:18
+//line llm/rag/gen_user_exercises.qtpl:11
 			if i < len(profile.Limitations())-1 {
-//line llm/rag/gen_user_exercises.qtpl:18
+//line llm/rag/gen_user_exercises.qtpl:11
 				qw422016.N().S(`, `)
-//line llm/rag/gen_user_exercises.qtpl:18
+//line llm/rag/gen_user_exercises.qtpl:11
 			}
-//line llm/rag/gen_user_exercises.qtpl:18
+//line llm/rag/gen_user_exercises.qtpl:11
 		}
-//line llm/rag/gen_user_exercises.qtpl:18
-		qw422016.N().S(`. `)
-//line llm/rag/gen_user_exercises.qtpl:19
+//line llm/rag/gen_user_exercises.qtpl:11
+		qw422016.N().S(`.`)
+//line llm/rag/gen_user_exercises.qtpl:11
 	}
-//line llm/rag/gen_user_exercises.qtpl:19
+//line llm/rag/gen_user_exercises.qtpl:11
 	qw422016.N().S(` `)
-//line llm/rag/gen_user_exercises.qtpl:20
+//line llm/rag/gen_user_exercises.qtpl:12
 	if len(equipment) > 0 {
-//line llm/rag/gen_user_exercises.qtpl:20
-		qw422016.N().S(` Available equipment: `)
-//line llm/rag/gen_user_exercises.qtpl:22
-		for i, equipment := range equipment {
-//line llm/rag/gen_user_exercises.qtpl:22
-			qw422016.E().S(equipment)
-//line llm/rag/gen_user_exercises.qtpl:22
+//line llm/rag/gen_user_exercises.qtpl:12
+		qw422016.N().S(`Equipment: `)
+//line llm/rag/gen_user_exercises.qtpl:12
+		for i, eq := range equipment {
+//line llm/rag/gen_user_exercises.qtpl:12
+			qw422016.E().S(eq)
+//line llm/rag/gen_user_exercises.qtpl:12
 			if i < len(equipment)-1 {
-//line llm/rag/gen_user_exercises.qtpl:22
+//line llm/rag/gen_user_exercises.qtpl:12
 				qw422016.N().S(`, `)
-//line llm/rag/gen_user_exercises.qtpl:22
+//line llm/rag/gen_user_exercises.qtpl:12
 			}
-//line llm/rag/gen_user_exercises.qtpl:22
+//line llm/rag/gen_user_exercises.qtpl:12
 		}
-//line llm/rag/gen_user_exercises.qtpl:22
-		qw422016.N().S(`. `)
-//line llm/rag/gen_user_exercises.qtpl:23
+//line llm/rag/gen_user_exercises.qtpl:12
+		qw422016.N().S(`.`)
+//line llm/rag/gen_user_exercises.qtpl:12
 	}
-//line llm/rag/gen_user_exercises.qtpl:23
+//line llm/rag/gen_user_exercises.qtpl:12
 	qw422016.N().S(` `)
-//line llm/rag/gen_user_exercises.qtpl:25
-	if len(profile.Goals()) == 0 && len(profile.Injuries()) == 0 && len(profile.Limitations()) == 0 {
-//line llm/rag/gen_user_exercises.qtpl:25
-		qw422016.N().S(` General strength and fitness training exercises. `)
-//line llm/rag/gen_user_exercises.qtpl:27
+//line llm/rag/gen_user_exercises.qtpl:13
+	if len(profile.Goals()) == 0 && len(profile.Injuries()) == 0 && len(profile.Limitations()) == 0 && len(equipment) == 0 {
+//line llm/rag/gen_user_exercises.qtpl:13
+		qw422016.N().S(`General fitness exercises.`)
+//line llm/rag/gen_user_exercises.qtpl:13
 	}
-//line llm/rag/gen_user_exercises.qtpl:27
+//line llm/rag/gen_user_exercises.qtpl:13
 	qw422016.N().S(` `)
-//line llm/rag/gen_user_exercises.qtpl:30
+//line llm/rag/gen_user_exercises.qtpl:16
 }
 
-//line llm/rag/gen_user_exercises.qtpl:30
+//line llm/rag/gen_user_exercises.qtpl:16
 func WriteGenUserExercises(qq422016 qtio422016.Writer, profile model.Profile, equipment []string) {
-//line llm/rag/gen_user_exercises.qtpl:30
+//line llm/rag/gen_user_exercises.qtpl:16
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/rag/gen_user_exercises.qtpl:30
+//line llm/rag/gen_user_exercises.qtpl:16
 	StreamGenUserExercises(qw422016, profile, equipment)
-//line llm/rag/gen_user_exercises.qtpl:30
+//line llm/rag/gen_user_exercises.qtpl:16
 	qt422016.ReleaseWriter(qw422016)
-//line llm/rag/gen_user_exercises.qtpl:30
+//line llm/rag/gen_user_exercises.qtpl:16
 }
 
-//line llm/rag/gen_user_exercises.qtpl:30
+//line llm/rag/gen_user_exercises.qtpl:16
 func GenUserExercises(profile model.Profile, equipment []string) string {
-//line llm/rag/gen_user_exercises.qtpl:30
+//line llm/rag/gen_user_exercises.qtpl:16
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/rag/gen_user_exercises.qtpl:30
+//line llm/rag/gen_user_exercises.qtpl:16
 	WriteGenUserExercises(qb422016, profile, equipment)
-//line llm/rag/gen_user_exercises.qtpl:30
+//line llm/rag/gen_user_exercises.qtpl:16
 	qs422016 := string(qb422016.B)
-//line llm/rag/gen_user_exercises.qtpl:30
+//line llm/rag/gen_user_exercises.qtpl:16
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/rag/gen_user_exercises.qtpl:30
+//line llm/rag/gen_user_exercises.qtpl:16
 	return qs422016
-//line llm/rag/gen_user_exercises.qtpl:30
+//line llm/rag/gen_user_exercises.qtpl:16
 }

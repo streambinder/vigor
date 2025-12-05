@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-const defaultOpenRouterModel = "x-ai/grok-4.1-fast:free"
+const defaultOpenRouterModel = "nvidia/nemotron-nano-9b-v2:free"
 
 func init() {
 	apiKey := os.Getenv("OPENROUTER_API_KEY")
