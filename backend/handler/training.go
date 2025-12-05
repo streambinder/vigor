@@ -113,7 +113,7 @@ func postTraining(c *fiber.Ctx) error {
 	}
 
 	llmStart := time.Now()
-	training, prompt, err := llm.GenTraining(profile, exercises, req.Prompt, req.Duration, recentTrainings, facts, classics)
+	training, prompt, err := llm.GenTraining(profile, exercises, equipment, req.Prompt, req.Duration, recentTrainings, facts, classics)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate training via LLM")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})

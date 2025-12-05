@@ -3,7 +3,7 @@
 {% import "strings" %}
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func GenTraining(profile model.Profile, exercises []model.Exercise, userPrompt string, duration int, recentTrainings []model.Training, facts []model.Fact, classics []model.Classic) %}
+{% func GenTraining(profile model.Profile, exercises []model.Exercise, equipment []string, userPrompt string, duration int, recentTrainings []model.Training, facts []model.Fact, classics []model.Classic) %}
 TASK: Generate a {%d duration %}-minute training session.
 
 USER PROFILE:
@@ -23,6 +23,13 @@ USER CONSTRAINTS (must follow):
 {%s userPrompt %}
 
 {% endif %}
+{% if len(equipment) > 0 %}
+AVAILABLE EQUIPMENT:
+{% for i, eq := range equipment %}{%s eq %}{% if i < len(equipment)-1 %}, {% endif %}{% endfor %}
+
+IMPORTANT: Prioritize exercises that use available equipment over bodyweight alternatives when both are suitable.
+{% endif %}
+
 AVAILABLE EXERCISES:
 {% for _, exercise := range exercises %}
 - {%s exercise.ID %}{% if len(exercise.Equipment) > 0 %} [{% for i, eq := range exercise.Equipment %}{%s eq %}{% if i < len(exercise.Equipment)-1 %}, {% endif %}{% endfor %}]{% endif %}{% if len(exercise.Muscles) > 0 %}: {%s strings.Join(exercise.Muscles, ", ") %}{% endif %}

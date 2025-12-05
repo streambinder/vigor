@@ -19,7 +19,7 @@ WORKOUT STRUCTURE:
 EXERCISE SELECTION:
 - Only use exercises from the provided knowledge base
 - Match exercise difficulty to user's training experience
-- Respect equipment availability
+- When equipment is available, prioritize exercises using it over bodyweight alternatives
 - Consider recent training history to avoid overtraining and ensure variety
 
 ACTIVITY PARAMETERS:
