@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-const defaultOpenRouterModel = "nvidia/nemotron-nano-9b-v2:free"
+const defaultOpenRouterModel = "mistralai/mistral-small-3.1-24b-instruct"
 
 func init() {
 	apiKey := os.Getenv("OPENROUTER_API_KEY")
