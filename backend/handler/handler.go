@@ -13,17 +13,21 @@ func Init() *fiber.App {
 	// Register route handlers with no middleware
 	initHealth(app)
 
-	// Register global middleware (order matters!)
+	// Register CORS middleware
 	app.Use(middleware.CORS())
+
+	// Register route handlers with CORS
+	initProxy(app)
+
+	// Register logging middleware
 	app.Use(middleware.Logging())
 
-	// Register route handlers with default middleware
+	// Register route handlers with logging and CORS
 	initSession(app)
 	initOauth(app)
 	initUser(app)
 	initGym(app)
 	initTraining(app)
-	initProxy(app)
 
 	return app
 }
