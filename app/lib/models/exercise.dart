@@ -15,10 +15,6 @@ class Exercise {
   final List<String> equipment;
   @JsonKey(name: 'muscles', defaultValue: const [])
   final List<String> muscles;
-  @JsonKey(name: 'secondary_muscles', defaultValue: const [])
-  final List<String> secondaryMuscles;
-  @JsonKey(name: 'body_parts', defaultValue: const [])
-  final List<String> bodyParts;
   @JsonKey(name: 'reference')
   final String reference;
   @JsonKey(name: 'instructions', defaultValue: const [])
@@ -29,8 +25,6 @@ class Exercise {
     required this.name,
     required this.equipment,
     required this.muscles,
-    required this.secondaryMuscles,
-    required this.bodyParts,
     required this.reference,
     required this.instructions,
   });

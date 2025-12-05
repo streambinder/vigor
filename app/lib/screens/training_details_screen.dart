@@ -618,22 +618,6 @@ class TrainingDetailsScreen extends StatelessWidget {
                       values: exercise.muscles,
                       color: Colors.red.shade700,
                     ),
-                  if (exercise.secondaryMuscles.isNotEmpty)
-                    _buildExerciseDetailRow(
-                      context,
-                      icon: Icons.accessibility,
-                      label: 'Secondary',
-                      values: exercise.secondaryMuscles,
-                      color: Colors.orange.shade700,
-                    ),
-                  if (exercise.bodyParts.isNotEmpty)
-                    _buildExerciseDetailRow(
-                      context,
-                      icon: Icons.person,
-                      label: 'Body Parts',
-                      values: exercise.bodyParts,
-                      color: Colors.green.shade700,
-                    ),
                 ],
                 const SizedBox(height: 6),
                 Wrap(

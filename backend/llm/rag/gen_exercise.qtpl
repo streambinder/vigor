@@ -8,9 +8,7 @@
 
 {%s exercise.Name %}.
 {% if len(exercise.Equipment) > 0 %}Equipment: {%s strings.Join(exercise.Equipment, ", ") %}.{% endif %}
-Primary muscles: {%s strings.Join(exercise.Muscles, ", ") %}.
-{% if len(exercise.SecondaryMuscles) > 0 %}Secondary muscles: {%s strings.Join(exercise.SecondaryMuscles, ", ") %}.{% endif %}
-Body parts: {%s strings.Join(exercise.BodyParts, ", ") %}.
+Muscles: {%s strings.Join(exercise.Muscles, ", ") %}.
 {% if len(exercise.Instructions) > 0 %}{% for i, instruction := range exercise.Instructions %}{%d i+1 %}. {%s instruction %} {% endfor %}{% endif %}
 
 {% endcollapsespace -%}
