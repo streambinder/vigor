@@ -16,7 +16,6 @@ const (
 	MaxPromptFacts       = 5
 	MaxPromptClassics    = 5
 	MaxFactDistance      = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
-	MaxClassicDistance   = 0.7 // Maximum cosine distance for classics
 	MaxEquipmentDistance = 0.3 // Maximum cosine distance for equipment matching (stricter)
 )
 
@@ -147,38 +146,15 @@ func RetrieveUserFacts(profile model.Profile, prompt string) ([]model.Fact, erro
 	return facts, nil
 }
 
-// QueryUserClassics retrieves classic workouts relevant to the user's profile and prompt.
-func RetrieveUserClassics(profile model.Profile, prompt string) ([]model.Classic, error) {
-	embeddingText := GenUserClassics(profile, prompt)
-	embedding, err := embedding.GenVector(embeddingText)
-	if err != nil {
-		return nil, err
-	}
-
-	var (
-		vector  = pgvector.NewVector(embedding)
-		results []struct {
-			ClassicID string
-			Text      string
-			Distance  float64
-			Classic   model.Classic `gorm:"embedded"`
-		}
-	)
+// RetrieveClassics retrieves random classic workouts for prompt enrichment.
+func RetrieveClassics() ([]model.Classic, error) {
+	var classics []model.Classic
 	if err := database.Knowledge.
-		Table("classic_embeddings").
-		Select("classic_embeddings.classic_id, classic_embeddings.text, classic_embeddings.embedding <=> ? as distance, classics.*", vector).
-		Joins("JOIN classics ON classics.id = classic_embeddings.classic_id").
-		Where("classic_embeddings.embedding <=> ? < ?", vector, MaxClassicDistance).
-		Order("distance ASC").
+		Order("RANDOM()").
 		Limit(MaxPromptClassics).
-		Scan(&results).
+		Find(&classics).
 		Error; err != nil {
-		return nil, fmt.Errorf("failed to execute similarity search: %w", err)
-	}
-
-	classics := make([]model.Classic, 0, len(results))
-	for _, result := range results {
-		classics = append(classics, result.Classic)
+		return nil, fmt.Errorf("failed to query classics: %w", err)
 	}
 	return classics, nil
 }

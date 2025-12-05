@@ -89,9 +89,9 @@ func postTraining(c *fiber.Ctx) error {
 		Dur("duration_ms", time.Since(queryFactsStart)).
 		Msg("Queried facts from database")
 
-	// Query knowledge classics related to user's profile
+	// Query random classics for prompt enrichment
 	queryClassicsStart := time.Now()
-	classics, err := rag.RetrieveUserClassics(profile, req.Prompt)
+	classics, err := rag.RetrieveClassics()
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to query classics from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
