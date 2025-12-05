@@ -8,11 +8,11 @@ part 'fact_embedding.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class FactEmbedding {
-  @JsonKey(name: 'id')
+  @JsonKey(name: 'id', defaultValue: '')
   final String id;
-  @JsonKey(name: 'text')
+  @JsonKey(name: 'text', defaultValue: '')
   final String text;
-  @JsonKey(name: 'fact_id')
+  @JsonKey(name: 'fact_id', defaultValue: '')
   final String factId;
   @JsonKey(name: 'fact')
   final Fact fact;

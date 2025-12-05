@@ -7,13 +7,13 @@ part 'classic.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Classic {
-  @JsonKey(name: 'id')
+  @JsonKey(name: 'id', defaultValue: '')
   final String id;
-  @JsonKey(name: 'name')
+  @JsonKey(name: 'name', defaultValue: '')
   final String name;
-  @JsonKey(name: 'type')
+  @JsonKey(name: 'type', defaultValue: '')
   final String type;
-  @JsonKey(name: 'excerpt')
+  @JsonKey(name: 'excerpt', defaultValue: '')
   final String excerpt;
 
   Classic({

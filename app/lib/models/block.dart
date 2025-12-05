@@ -8,9 +8,9 @@ part 'block.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Block {
-  @JsonKey(name: 'id')
+  @JsonKey(name: 'id', defaultValue: '')
   final String id;
-  @JsonKey(name: 'routine_id')
+  @JsonKey(name: 'routine_id', defaultValue: '')
   final String routineId;
   @JsonKey(name: 'repeats')
   final int repeats;

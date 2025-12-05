@@ -7,7 +7,7 @@ part 'injury.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Injury {
-  @JsonKey(name: 'description')
+  @JsonKey(name: 'description', defaultValue: '')
   final String description;
   @JsonKey(name: 'year')
   final int year;

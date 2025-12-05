@@ -7,13 +7,13 @@ part 'identity.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Identity {
-  @JsonKey(name: 'id')
+  @JsonKey(name: 'id', defaultValue: '')
   final String id;
-  @JsonKey(name: 'user_id')
+  @JsonKey(name: 'user_id', defaultValue: '')
   final String userId;
-  @JsonKey(name: 'provider')
+  @JsonKey(name: 'provider', defaultValue: '')
   final String provider;
-  @JsonKey(name: 'provider_user_id')
+  @JsonKey(name: 'provider_user_id', defaultValue: '')
   final String providerUserId;
   @JsonKey(name: 'created_at')
   final DateTime createdAt;

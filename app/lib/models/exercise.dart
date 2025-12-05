@@ -7,15 +7,15 @@ part 'exercise.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Exercise {
-  @JsonKey(name: 'id')
+  @JsonKey(name: 'id', defaultValue: '')
   final String id;
-  @JsonKey(name: 'name')
+  @JsonKey(name: 'name', defaultValue: '')
   final String name;
   @JsonKey(name: 'equipment', defaultValue: const [])
   final List<String> equipment;
   @JsonKey(name: 'muscles', defaultValue: const [])
   final List<String> muscles;
-  @JsonKey(name: 'reference')
+  @JsonKey(name: 'reference', defaultValue: '')
   final String reference;
   @JsonKey(name: 'instructions', defaultValue: const [])
   final List<String> instructions;

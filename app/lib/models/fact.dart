@@ -7,15 +7,15 @@ part 'fact.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Fact {
-  @JsonKey(name: 'id')
+  @JsonKey(name: 'id', defaultValue: '')
   final String id;
-  @JsonKey(name: 'reference')
+  @JsonKey(name: 'reference', defaultValue: '')
   final String reference;
-  @JsonKey(name: 'area')
+  @JsonKey(name: 'area', defaultValue: '')
   final String area;
   @JsonKey(name: 'tags', defaultValue: const [])
   final List<String> tags;
-  @JsonKey(name: 'content')
+  @JsonKey(name: 'content', defaultValue: '')
   final String content;
 
   Fact({

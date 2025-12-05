@@ -27,7 +27,7 @@ class Profile {
   final double weight;
   @JsonKey(name: 'data')
   final Map<String, dynamic> data;
-  @JsonKey(name: 'user_id')
+  @JsonKey(name: 'user_id', defaultValue: '')
   final String userId;
 
   Profile({

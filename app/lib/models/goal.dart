@@ -7,7 +7,7 @@ part 'goal.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Goal {
-  @JsonKey(name: 'description')
+  @JsonKey(name: 'description', defaultValue: '')
   final String description;
   @JsonKey(name: 'start_date')
   final DateTime startDate;

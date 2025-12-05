@@ -7,7 +7,7 @@ part 'json_schema.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class JSONSchema {
-  @JsonKey(name: 'name')
+  @JsonKey(name: 'name', defaultValue: '')
   final String name;
   @JsonKey(name: 'strict')
   final bool strict;

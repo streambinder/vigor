@@ -8,7 +8,7 @@ part 'json_schema_format.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class JSONSchemaFormat {
-  @JsonKey(name: 'type')
+  @JsonKey(name: 'type', defaultValue: '')
   final String type;
   @JsonKey(name: 'json_schema')
   final JSONSchema jSONSchema;

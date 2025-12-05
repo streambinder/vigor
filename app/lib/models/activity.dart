@@ -7,13 +7,13 @@ part 'activity.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Activity {
-  @JsonKey(name: 'id')
+  @JsonKey(name: 'id', defaultValue: '')
   final String id;
-  @JsonKey(name: 'block_id')
+  @JsonKey(name: 'block_id', defaultValue: '')
   final String blockId;
-  @JsonKey(name: 'name')
+  @JsonKey(name: 'name', defaultValue: '')
   final String name;
-  @JsonKey(name: 'type')
+  @JsonKey(name: 'type', defaultValue: '')
   final String type;
   @JsonKey(name: 'duration')
   final int duration;
@@ -25,7 +25,7 @@ class Activity {
   final int rest;
   @JsonKey(name: 'detail')
   final Map<String, dynamic> detail;
-  @JsonKey(name: 'feedback')
+  @JsonKey(name: 'feedback', defaultValue: '')
   final String feedback;
 
   Activity({

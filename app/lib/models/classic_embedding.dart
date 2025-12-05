@@ -8,11 +8,11 @@ part 'classic_embedding.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class ClassicEmbedding {
-  @JsonKey(name: 'id')
+  @JsonKey(name: 'id', defaultValue: '')
   final String id;
-  @JsonKey(name: 'text')
+  @JsonKey(name: 'text', defaultValue: '')
   final String text;
-  @JsonKey(name: 'classic_id')
+  @JsonKey(name: 'classic_id', defaultValue: '')
   final String classicId;
   @JsonKey(name: 'classic')
   final Classic classic;

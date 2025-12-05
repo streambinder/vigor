@@ -10,9 +10,9 @@ part 'exercise_embedding.g.dart';
 class ExerciseEmbedding {
   @JsonKey(name: 'id')
   final int id;
-  @JsonKey(name: 'text')
+  @JsonKey(name: 'text', defaultValue: '')
   final String text;
-  @JsonKey(name: 'exercise_id')
+  @JsonKey(name: 'exercise_id', defaultValue: '')
   final String exerciseId;
   @JsonKey(name: 'exercise')
   final Exercise exercise;

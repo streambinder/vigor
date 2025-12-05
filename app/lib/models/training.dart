@@ -8,13 +8,13 @@ part 'training.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Training {
-  @JsonKey(name: 'id')
+  @JsonKey(name: 'id', defaultValue: '')
   final String id;
-  @JsonKey(name: 'name')
+  @JsonKey(name: 'name', defaultValue: '')
   final String name;
-  @JsonKey(name: 'description')
+  @JsonKey(name: 'description', defaultValue: '')
   final String description;
-  @JsonKey(name: 'type')
+  @JsonKey(name: 'type', defaultValue: '')
   final String type;
   @JsonKey(name: 'duration')
   final int duration;

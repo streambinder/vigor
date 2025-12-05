@@ -7,11 +7,11 @@ part 'refresh_token.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class RefreshToken {
-  @JsonKey(name: 'id')
+  @JsonKey(name: 'id', defaultValue: '')
   final String id;
-  @JsonKey(name: 'user_id')
+  @JsonKey(name: 'user_id', defaultValue: '')
   final String userId;
-  @JsonKey(name: 'token')
+  @JsonKey(name: 'token', defaultValue: '')
   final String token;
   @JsonKey(name: 'expires_at')
   final DateTime expiresAt;

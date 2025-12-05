@@ -8,11 +8,11 @@ part 'routine.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Routine {
-  @JsonKey(name: 'id')
+  @JsonKey(name: 'id', defaultValue: '')
   final String id;
-  @JsonKey(name: 'training_id')
+  @JsonKey(name: 'training_id', defaultValue: '')
   final String trainingId;
-  @JsonKey(name: 'name')
+  @JsonKey(name: 'name', defaultValue: '')
   final String type;
   @JsonKey(name: 'rest')
   final int rest;
