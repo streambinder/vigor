@@ -108,14 +108,21 @@ type Activity struct {
 func (t Training) CalcDuration() (duration int) {
 	for _, r := range t.Routines {
 		for _, b := range r.Blocks {
+			blockDuration := 0
 			for _, a := range b.Activities {
 				activityDuration := a.Duration
 				if a.Reps > 0 {
 					activityDuration += WeightActivityDurationPerRep * a.Reps
 				}
-				duration += activityDuration + a.Rest
+				blockDuration += activityDuration + a.Rest
+			}
+			duration += blockDuration * b.Repeats
+			// rest between repeats, not after the last one
+			if b.Repeats > 1 {
+				duration += b.Rest * (b.Repeats - 1)
 			}
 		}
+		duration += r.Rest
 	}
 	return
 }
