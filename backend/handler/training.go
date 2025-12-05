@@ -131,8 +131,7 @@ func postTraining(c *fiber.Ctx) error {
 				activity := &training.Routines[i].Blocks[j].Activities[k]
 				var exercise model.Exercise
 				if err := database.Knowledge.First(&exercise, "id = ?", activity.Name).Error; err != nil {
-					log.Error().Err(err).Msg("Failed to query exercise from database")
-					return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+					log.Error().Err(err).Str("exercise", activity.Name).Msg("Failed to query exercise from database")
 				}
 
 				if exerciseJSON, err := json.Marshal(exercise); err == nil {
