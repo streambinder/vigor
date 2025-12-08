@@ -181,33 +181,39 @@ class TrainingDetailsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Workout type badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
-                            : Theme.of(context).colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        training.type,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.primaryColor
-                              : Theme.of(context).colorScheme.primary,
+                    // Workout type badge + name on same line
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: PlatformHelper.useLiquidGlass
+                                ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
+                                : Theme.of(context).colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            training.type,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: PlatformHelper.useLiquidGlass
+                                  ? LiquidGlassTheme.primaryColor
+                                  : Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    // Workout name
-                    Text(
-                      training.name,
-                      style: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 24)
-                          : Theme.of(context).textTheme.headlineMedium,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            training.name,
+                            style: PlatformHelper.useLiquidGlass
+                                ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 24)
+                                : Theme.of(context).textTheme.headlineMedium,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -538,8 +544,8 @@ class TrainingDetailsScreen extends StatelessWidget {
             GestureDetector(
               onTap: () => ExerciseModal.show(context, exercise),
               child: Container(
-                width: 60,
-                height: 60,
+                width: 80,
+                height: 80,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
@@ -577,8 +583,8 @@ class TrainingDetailsScreen extends StatelessWidget {
             const SizedBox(width: 12),
           ] else ...[
             Container(
-              width: 60,
-              height: 60,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 color: PlatformHelper.useLiquidGlass
@@ -622,24 +628,10 @@ class TrainingDetailsScreen extends StatelessWidget {
                           ),
                 ),
                 // Exercise details from parsed detail field
-                if (exercise != null) ...[
+                if (exercise != null &&
+                    (exercise.equipment.isNotEmpty || exercise.muscles.isNotEmpty)) ...[
                   const SizedBox(height: 8),
-                  if (exercise.equipment.isNotEmpty)
-                    _buildExerciseDetailRow(
-                      context,
-                      icon: Icons.fitness_center,
-                      label: 'Equipment',
-                      values: exercise.equipment,
-                      color: Colors.blue.shade700,
-                    ),
-                  if (exercise.muscles.isNotEmpty)
-                    _buildExerciseDetailRow(
-                      context,
-                      icon: Icons.accessibility_new,
-                      label: 'Muscles',
-                      values: exercise.muscles,
-                      color: Colors.red.shade700,
-                    ),
+                  _buildExerciseDetailsRow(context, exercise),
                 ],
                 const SizedBox(height: 6),
                 Wrap(
@@ -684,37 +676,51 @@ class TrainingDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildExerciseDetailRow(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required List<String> values,
-    required Color color,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildExerciseDetailsRow(BuildContext context, Exercise exercise) {
+    final parts = <Widget>[];
+
+    if (exercise.equipment.isNotEmpty) {
+      parts.add(Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 14,
-            color: color,
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              values.join(', '),
-              style: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
-                  : Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
-            ),
+          Icon(Icons.fitness_center, size: 14, color: Colors.blue.shade700),
+          const SizedBox(width: 4),
+          Text(
+            exercise.equipment.join(', '),
+            style: PlatformHelper.useLiquidGlass
+                ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
+                : Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
           ),
         ],
-      ),
+      ));
+    }
+
+    if (exercise.muscles.isNotEmpty) {
+      parts.add(Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.accessibility_new, size: 14, color: Colors.red.shade700),
+          const SizedBox(width: 4),
+          Text(
+            exercise.muscles.join(', '),
+            style: PlatformHelper.useLiquidGlass
+                ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
+                : Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+          ),
+        ],
+      ));
+    }
+
+    return Wrap(
+      spacing: 12,
+      runSpacing: 4,
+      children: parts,
     );
   }
 

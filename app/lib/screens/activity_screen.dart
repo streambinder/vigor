@@ -271,33 +271,39 @@ class _ActivityScreenState extends State<ActivityScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Workout type badge
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
-                        : Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    training.type,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.primaryColor
-                          : Theme.of(context).colorScheme.primary,
+                // Workout type badge + name on same line
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
+                            : Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        training.type,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.primaryColor
+                              : Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Workout name (uppercase)
-                Text(
-                  training.name.toUpperCase(),
-                  style: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 18)
-                      : Theme.of(context).textTheme.titleLarge,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        training.name.toUpperCase(),
+                        style: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 18)
+                            : Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                  ],
                 ),
                 if (isCompleted) ...[
                   // For completed workouts: show only completion time and duration
