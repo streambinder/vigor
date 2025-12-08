@@ -9,6 +9,7 @@ import '../models/injury.dart';
 import '../models/gym.dart';
 import '../services/gym_service.dart';
 import '../services/secure_storage_service.dart';
+import '../services/preferences_service.dart';
 import '../widgets/gym_form_dialog.dart';
 import 'profile_completion_modal.dart';
 
@@ -21,6 +22,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   GymService? _gymService;
+  PreferencesService? _prefsService;
   List<Gym>? _gyms;
   bool _isLoadingGyms = false;
 
@@ -31,6 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final storage = context.read<SecureStorageService>();
       _gymService = GymService(storageService: storage);
+      _prefsService = context.read<PreferencesService>();
       _loadGyms();
     });
   }
@@ -142,6 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final response = await _gymService!.deleteGym(name);
 
       if (response.isSuccess && mounted) {
+        await _prefsService?.clearDefaultGymIfMatches(name);
         AdaptiveNotification.show(
           context: context,
           message: 'Gym deleted successfully',
@@ -154,6 +158,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       }
     }
+  }
+
+  Future<void> _toggleDefaultGym(String name) async {
+    final current = _prefsService?.defaultGymName;
+    final newDefault = current == name ? null : name;
+    await _prefsService?.setDefaultGymName(newDefault);
+    setState(() {});
   }
 
   @override
@@ -561,7 +572,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       )
                     else
-                      ...(_gyms!.map((gym) => Padding(
+                      ...(_gyms!.map((gym) {
+                        final isDefault = _prefsService?.defaultGymName == gym.name;
+                        return Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
                             child: AdaptiveCard(
                               child: Column(
@@ -583,6 +596,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                           ),
+                                        ),
+                                        AdaptiveIconButton(
+                                          icon: Icon(
+                                            isDefault ? Icons.star : Icons.star_border,
+                                            size: 20,
+                                            color: isDefault ? Colors.amber : null,
+                                          ),
+                                          tooltip: isDefault ? 'Remove Default' : 'Set as Default',
+                                          onPressed: () => _toggleDefaultGym(gym.name),
                                         ),
                                         AdaptiveIconButton(
                                           icon: const Icon(Icons.edit, size: 20),
@@ -627,7 +649,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ],
                               ),
                             ),
-                          ))),
+                          );
+                      })),
 
                     const SizedBox(height: 24),
 

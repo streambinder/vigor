@@ -9,6 +9,7 @@ import 'utils/profile_helper.dart';
 import 'utils/platform_helper.dart';
 import 'theme/material_you_theme.dart';
 import 'services/secure_storage_service.dart';
+import 'services/preferences_service.dart';
 import 'services/app_logger.dart';
 
 void main() async {
@@ -25,7 +26,10 @@ void main() async {
     return;
   }
 
-  runApp(VigorApp(storage: storage));
+  final prefs = PreferencesService();
+  await prefs.initialize();
+
+  runApp(VigorApp(storage: storage, prefs: prefs));
 }
 
 /// Error screen shown when storage initialization fails
@@ -87,14 +91,16 @@ class StorageErrorApp extends StatelessWidget {
 
 class VigorApp extends StatelessWidget {
   final SecureStorageService storage;
+  final PreferencesService prefs;
 
-  const VigorApp({super.key, required this.storage});
+  const VigorApp({super.key, required this.storage, required this.prefs});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         Provider<SecureStorageService>.value(value: storage),
+        Provider<PreferencesService>.value(value: prefs),
         ChangeNotifierProvider(
           create: (_) => AuthProvider(storage: storage),
         ),

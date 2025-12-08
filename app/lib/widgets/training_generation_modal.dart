@@ -5,6 +5,7 @@ import '../models/gym.dart';
 import '../models/training.dart';
 import '../services/training_service.dart';
 import '../services/secure_storage_service.dart';
+import '../services/preferences_service.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
@@ -34,9 +35,13 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   @override
   void initState() {
     super.initState();
-    // Pre-select first gym if available
     if (widget.gyms.isNotEmpty) {
-      _selectedGym = widget.gyms.first;
+      final prefs = context.read<PreferencesService>();
+      final defaultName = prefs.defaultGymName;
+      _selectedGym = widget.gyms.firstWhere(
+        (g) => g.name == defaultName,
+        orElse: () => widget.gyms.first,
+      );
     }
   }
 
