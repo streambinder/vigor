@@ -20,8 +20,7 @@ var (
 //line llm/prompt/system.qtpl:3
 func StreamSystem(qw422016 *qt422016.Writer) {
 //line llm/prompt/system.qtpl:3
-	qw422016.N().S(`
-You are an expert personal trainer AI creating individualized workout programs.
+	qw422016.N().S(`You are an expert personal trainer AI creating individualized workout programs.
 
 CRITICAL CONSTRAINTS:
 - ONLY use exercise IDs from the provided AVAILABLE EXERCISES list. Never invent exercises.
@@ -36,7 +35,7 @@ TRAINING PHILOSOPHY:
 
 WORKOUT STRUCTURE (required routines in order):
 1. warmup: dynamic stretches, activation exercises targeting main workout muscles (5-10min)
-2. circuit: main training blocks with appropriate rest periods (bulk of duration)
+2. work: main training blocks with appropriate rest periods (bulk of duration)
 3. cooldown: static stretches, breathing exercises for worked muscles (5min)
 
 EXERCISE SELECTION PRIORITY:
@@ -54,32 +53,92 @@ ACTIVITY PARAMETERS:
 KNOWLEDGE FACTS:
 - Apply relevant facts from KNOWLEDGE FACTS section when provided
 - Include fact URLs in the references array when used
+
+EXAMPLE OUTPUT (30min upper body strength with dumbbells):
+{
+  "name": "Odyssean Arms Protocol",
+  "description": "Progressive upper body session targeting chest, shoulders, and arms. Compound pressing movements paired with isolation work for balanced development.",
+  "type": "HIIT",
+  "duration": 1800,
+  "routines": [
+    {
+      "name": "warmup",
+      "rest": 0,
+      "blocks": [
+        {
+          "repeats": 1,
+          "rest": 0,
+          "activities": [
+            {"name": "arms-apart-circular-toe-touch-male", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "rest": 10},
+            {"name": "dynamic-chest-stretch-male", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "rest": 10}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "work",
+      "rest": 60,
+      "blocks": [
+        {
+          "repeats": 3,
+          "rest": 60,
+          "activities": [
+            {"name": "dumbbell-bench-press", "type": "exercise", "duration": 0, "reps": 10, "weight_kg": 20, "rest": 45},
+            {"name": "dumbbell-bent-over-row", "type": "exercise", "duration": 0, "reps": 10, "weight_kg": 18, "rest": 45}
+          ]
+        },
+        {
+          "repeats": 3,
+          "rest": 45,
+          "activities": [
+            {"name": "dumbbell-shoulder-press", "type": "exercise", "duration": 0, "reps": 12, "weight_kg": 14, "rest": 30},
+            {"name": "dumbbell-biceps-curl", "type": "exercise", "duration": 0, "reps": 12, "weight_kg": 10, "rest": 30}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cooldown",
+      "rest": 0,
+      "blocks": [
+        {
+          "repeats": 1,
+          "rest": 0,
+          "activities": [
+            {"name": "chest-and-front-of-shoulder-stretch", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "rest": 10},
+            {"name": "standing-calves-calf-stretch", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "rest": 0}
+          ]
+        }
+      ]
+    }
+  ]
+}
 `)
-//line llm/prompt/system.qtpl:37
+//line llm/prompt/system.qtpl:97
 }
 
-//line llm/prompt/system.qtpl:37
+//line llm/prompt/system.qtpl:97
 func WriteSystem(qq422016 qtio422016.Writer) {
-//line llm/prompt/system.qtpl:37
+//line llm/prompt/system.qtpl:97
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:37
+//line llm/prompt/system.qtpl:97
 	StreamSystem(qw422016)
-//line llm/prompt/system.qtpl:37
+//line llm/prompt/system.qtpl:97
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:37
+//line llm/prompt/system.qtpl:97
 }
 
-//line llm/prompt/system.qtpl:37
+//line llm/prompt/system.qtpl:97
 func System() string {
-//line llm/prompt/system.qtpl:37
+//line llm/prompt/system.qtpl:97
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:37
+//line llm/prompt/system.qtpl:97
 	WriteSystem(qb422016)
-//line llm/prompt/system.qtpl:37
+//line llm/prompt/system.qtpl:97
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:37
+//line llm/prompt/system.qtpl:97
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:37
+//line llm/prompt/system.qtpl:97
 	return qs422016
-//line llm/prompt/system.qtpl:37
+//line llm/prompt/system.qtpl:97
 }

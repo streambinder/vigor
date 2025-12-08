@@ -135,12 +135,13 @@ func boostrapFacts(gormDB *gorm.DB) error {
 		return err
 	}
 
-	for _, row := range rows {
-		if err := gormDB.FirstOrCreate(&row, model.Fact{ID: row.ID}).Error; err != nil {
+	for i := range rows {
+		row := &rows[i]
+		if err := gormDB.FirstOrCreate(row, model.Fact{Content: row.Content}).Error; err != nil {
 			return err
 		}
 
-		text := rag.GenFact(row)
+		text := rag.GenFact(*row)
 		vector, err := embedding.GenVector(text)
 		if err != nil {
 			return err
@@ -168,12 +169,13 @@ func boostrapClassics(gormDB *gorm.DB) error {
 		return err
 	}
 
-	for _, row := range rows {
-		if err := gormDB.FirstOrCreate(&row, model.Classic{ID: row.ID}).Error; err != nil {
+	for i := range rows {
+		row := &rows[i]
+		if err := gormDB.FirstOrCreate(row, model.Classic{Excerpt: row.Excerpt}).Error; err != nil {
 			return err
 		}
 
-		text := rag.GenClassic(row)
+		text := rag.GenClassic(*row)
 		vector, err := embedding.GenVector(text)
 		if err != nil {
 			return err

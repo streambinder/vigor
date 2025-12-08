@@ -16,8 +16,9 @@ import (
 )
 
 const (
-	recentTrainingDays       = 14
-	recentTrainingMaxResults = 5
+	recentTrainingDays          = 14
+	recentTrainingMaxResults    = 5
+	recentGenerationsMaxResults = 3
 )
 
 // TrainingRequest represents the request body for generating a training plan.
@@ -112,8 +113,19 @@ func postTraining(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
+	// Query recent generated to avoid repeating exercises and ensure progression
+	var recentGenerations []model.Training
+	if err := database.DB.
+		Where("user_id = ?", profile.UserID).
+		Order("created_at desc").
+		Limit(recentGenerationsMaxResults).
+		Find(&recentGenerations).Error; err != nil {
+		log.Error().Err(err).Msg("Failed to query recent generations from database")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
 	llmStart := time.Now()
-	training, prompt, err := llm.GenTraining(profile, exercises, equipment, req.Prompt, req.Duration, recentTrainings, facts, classics)
+	training, prompt, err := llm.GenTraining(profile, exercises, equipment, req.Prompt, req.Duration, recentTrainings, recentGenerations, facts, classics)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate training via LLM")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})

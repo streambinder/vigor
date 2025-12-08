@@ -3,7 +3,17 @@
 {% import "strings" %}
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func GenTraining(profile model.Profile, exercises []model.Exercise, equipment []string, userPrompt string, duration int, recentTrainings []model.Training, facts []model.Fact, classics []model.Classic) %}
+{% func GenTraining(
+    profile model.Profile,
+    exercises []model.Exercise,
+    equipment []string,
+    userPrompt string,
+    duration int,
+    recentTrainings []model.Training,
+    recentGenerations []model.Training,
+    facts []model.Fact,
+    classics []model.Classic,
+) -%}
 Generate a {%d duration %}-minute training session.
 
 <<<USER_PROFILE>>>
@@ -25,17 +35,25 @@ Age: {%d profile.Age() %}, Height: {%f.0 profile.Height %}cm, Weight: {%f.0 prof
 <<<END_EQUIPMENT>>>
 {% endif %}
 
-<<<AVAILABLE_EXERCISES>>>
-{% for _, exercise := range exercises %}{%s exercise.ID %}{% if len(exercise.Equipment) > 0 %} [{% for i, eq := range exercise.Equipment %}{%s eq %}{% if i < len(exercise.Equipment)-1 %}, {% endif %}{% endfor %}]{% endif %}{% if len(exercise.Muscles) > 0 %}: {%s strings.Join(exercise.Muscles, ", ") %}{% endif %}
-{% endfor %}<<<END_AVAILABLE_EXERCISES>>>
-{% if len(recentTrainings) > 0 %}
+<<<AVAILABLE_EXERCISES ({%d len(exercises) %} options)>>>
+Use ONLY these exercise IDs in your output. Select {%d len(exercises)/4 %}-{%d len(exercises)/2 %} exercises for a balanced workout.
+{% for _, exercise := range exercises %}
+- {%s exercise.ID %}{% if len(exercise.Equipment) > 0 %} [{% for i, eq := range exercise.Equipment %}{%s eq %}{% if i < len(exercise.Equipment)-1 %}, {% endif %}{% endfor %}]{% endif %} → {%s strings.Join(exercise.Muscles, ", ") %}{% endfor %}
+<<<END_AVAILABLE_EXERCISES>>>
 
-<<<RECENT_HISTORY>>>
+{% if len(recentTrainings) > 0 %}
+<<<RECENT_HISTORY (avoid repeating these exercises)>>>
 {% for _, training := range recentTrainings %}{%d training.DaysSince() %}d ago | {%s training.Type %} | {%s training.Name %} | {% for _, routine := range training.Routines %}{% for _, block := range routine.Blocks %}{% for _, activity := range block.Activities %}{% if activity.Type == "exercise" %}{%s activity.Name %}{% if activity.WeightKg > 0 %}@{%d activity.WeightKg %}kg{% endif %}{% if activity.Reps > 0 %}x{%d activity.Reps %}{% endif %}{% if len(activity.Feedback) > 0 %}({%s activity.Feedback %}){% endif %} {% endif %}{% endfor %}{% endfor %}{% endfor %}
 {% endfor %}<<<END_RECENT_HISTORY>>>
 {% endif %}
-{% if len(facts) > 0 %}
 
+{% if len(recentGenerations) > 0 %}
+<<<RECENT_GENERATIONS (avoid repeating names, types and workout rationale — if the user does not ask otherwise)>>>
+{% for _, training := range recentGenerations %}{%s training.Type %} | {%s training.Name %} | {%s training.Description %}
+{% endfor %}<<<END_RECENT_GENERATIONS>>>
+{% endif %}
+
+{% if len(facts) > 0 %}
 <<<KNOWLEDGE_FACTS>>>
 {% for _, fact := range facts %}[{%s fact.Reference %}] {%s fact.Content %}
 {% endfor %}<<<END_KNOWLEDGE_FACTS>>>

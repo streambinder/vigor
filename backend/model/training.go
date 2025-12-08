@@ -124,7 +124,8 @@ func (t Training) CalcDuration() (duration int) {
 		}
 		duration += r.Rest
 	}
-	return
+	// round up to next 5 minutes
+	return ((duration + 299) / 300) * 300
 }
 
 func (t Training) DaysSince() int {
