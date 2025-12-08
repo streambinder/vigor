@@ -331,12 +331,10 @@ class TrainingDetailsScreen extends StatelessWidget {
                   : Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
-            ...training.routines.asMap().entries.map((entry) {
-              final index = entry.key;
-              final routine = entry.value;
+            ...training.routines.map((routine) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
-                child: _buildRoutineCard(context, routine, index + 1),
+                child: _buildRoutineCard(context, routine),
               );
             }),
           ],
@@ -346,7 +344,7 @@ class TrainingDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRoutineCard(BuildContext context, Routine routine, int routineNumber) {
+  Widget _buildRoutineCard(BuildContext context, Routine routine) {
     return AdaptiveCard(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -355,28 +353,6 @@ class TrainingDetailsScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
-                        : Theme.of(context).colorScheme.primaryContainer,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      routineNumber.toString(),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.primaryColor
-                            : Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     routine.type.toUpperCase(),
@@ -424,7 +400,7 @@ class TrainingDetailsScreen extends StatelessWidget {
               final block = entry.value;
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12.0),
-                child: _buildBlockCard(context, block, blockIndex + 1),
+                child: _buildBlockCard(context, block, blockIndex + 1, routine.blocks.length),
               );
             }),
           ],
@@ -433,8 +409,9 @@ class TrainingDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBlockCard(BuildContext context, Block block, int blockNumber) {
+  Widget _buildBlockCard(BuildContext context, Block block, int blockNumber, int totalBlocks) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final showBlockLabel = totalBlocks > 1;
 
     return Container(
       decoration: BoxDecoration(
@@ -456,28 +433,30 @@ class TrainingDetailsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.primaryColor.withOpacity(0.15)
-                      : Theme.of(context).colorScheme.secondaryContainer,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  'Block $blockNumber',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.primaryColor
-                        : Theme.of(context).colorScheme.secondary,
+          if (showBlockLabel || block.repeats > 1 || block.rest > 0)
+            Row(
+              children: [
+                if (showBlockLabel)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: PlatformHelper.useLiquidGlass
+                          ? LiquidGlassTheme.primaryColor.withOpacity(0.15)
+                          : Theme.of(context).colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      'Block $blockNumber',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.primaryColor
+                            : Theme.of(context).colorScheme.secondary,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const Spacer(),
+                const Spacer(),
               if (block.repeats > 1)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -522,9 +501,10 @@ class TrainingDetailsScreen extends StatelessWidget {
                   ),
                 ),
               ],
-            ],
-          ),
-          const SizedBox(height: 12),
+              ],
+            ),
+          if (showBlockLabel || block.repeats > 1 || block.rest > 0)
+            const SizedBox(height: 12),
           ...block.activities.map((activity) => _buildActivityRow(context, activity)),
         ],
       ),
