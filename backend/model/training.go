@@ -91,14 +91,14 @@ type Activity struct {
 	ID      string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id" prompt:"-"`
 	BlockID string `gorm:"index;type:uuid;not null" json:"block_id" prompt:"-"`
 
-	Name      string         `gorm:"not null" json:"name" prompt:"Exercise ID from AVAILABLE_EXERCISES"`
-	Type      string         `gorm:"not null" json:"type" prompt:"Activity category;enum:exercise,stretch,rest"`
-	Duration  int            `gorm:"not null" json:"duration" prompt:"Seconds (use 0 when reps > 0)"`
-	Reps      int            `gorm:"not null" json:"reps" prompt:"Repetition count (use 0 for time-based)"`
-	WeightKg  int            `gorm:"not null" json:"weight_kg" prompt:"Weight in kg (0 for bodyweight)"`
-	Rest      int            `gorm:"not null" json:"rest" prompt:"Rest seconds after this activity"`
-	Detail    datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"`
-	Feedback  string         `json:"feedback" prompt:"-"`
+	Name     string         `gorm:"not null" json:"name" prompt:"Exercise ID from AVAILABLE_EXERCISES"`
+	Type     string         `gorm:"not null" json:"type" prompt:"Activity category;enum:exercise,stretch,rest"`
+	Duration int            `gorm:"not null" json:"duration" prompt:"Seconds (use 0 when reps > 0)"`
+	Reps     int            `gorm:"not null" json:"reps" prompt:"Repetition count (use 0 for time-based)"`
+	WeightKg int            `gorm:"not null" json:"weight_kg" prompt:"Weight in kg (0 for bodyweight)"`
+	Rest     int            `gorm:"not null" json:"rest" prompt:"Rest seconds after this activity"`
+	Detail   datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"`
+	Feedback string         `json:"feedback" prompt:"-"`
 
 	CreatedAt time.Time      `json:"-"`
 	UpdatedAt time.Time      `json:"-"`
