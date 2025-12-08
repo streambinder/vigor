@@ -14,7 +14,7 @@ import (
 const (
 	MaxPromptExercises   = 20 // reduced from 50 to improve model focus and reduce context flooding
 	MaxPromptFacts       = 5
-	MaxPromptClassics    = 5
+	MaxPromptClassics    = 3
 	MaxFactDistance      = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
 	MaxEquipmentDistance = 0.3 // Maximum cosine distance for equipment matching (stricter)
 )

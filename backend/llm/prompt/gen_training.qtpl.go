@@ -321,15 +321,7 @@ Use ONLY these exercise IDs in your output. Select `)
 //line llm/prompt/gen_training.qtpl:52
 		for _, training := range recentGenerations {
 //line llm/prompt/gen_training.qtpl:52
-			qw422016.E().S(training.Type)
-//line llm/prompt/gen_training.qtpl:52
-			qw422016.N().S(` | `)
-//line llm/prompt/gen_training.qtpl:52
 			qw422016.E().S(training.Name)
-//line llm/prompt/gen_training.qtpl:52
-			qw422016.N().S(` | `)
-//line llm/prompt/gen_training.qtpl:52
-			qw422016.E().S(training.Description)
 //line llm/prompt/gen_training.qtpl:52
 			qw422016.N().S(`
 `)

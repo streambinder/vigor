@@ -49,7 +49,7 @@ Use ONLY these exercise IDs in your output. Select {%d len(exercises)/4 %}-{%d l
 
 {% if len(recentGenerations) > 0 %}
 <<<RECENT_GENERATIONS (avoid repeating names, types and workout rationale — if the user does not ask otherwise)>>>
-{% for _, training := range recentGenerations %}{%s training.Type %} | {%s training.Name %} | {%s training.Description %}
+{% for _, training := range recentGenerations %}{%s training.Name %}
 {% endfor %}<<<END_RECENT_GENERATIONS>>>
 {% endif %}
 
