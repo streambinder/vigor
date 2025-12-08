@@ -12,6 +12,7 @@ import '../widgets/adaptive/adaptive.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 import '../utils/exercise_modal.dart';
+import 'main_navigation.dart';
 import 'tabata_timer_screen.dart';
 
 class TrainingDetailsScreen extends StatelessWidget {
@@ -135,20 +136,40 @@ class TrainingDetailsScreen extends StatelessWidget {
     }
   }
 
+  void _navigateToActivityScreen(BuildContext context) {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    MainNavigation.navigateToTab(1); // Activity tab
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(
-        title: Text(training.name),
-        actions: [
-          AdaptiveIconButton(
-            icon: const Icon(Icons.delete),
-            tooltip: 'Delete Training',
-            onPressed: () => _deleteTraining(context),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _navigateToActivityScreen(context);
+        }
+      },
+      child: AdaptiveScaffold(
+        appBar: AdaptiveAppBar(
+          title: Text(training.name),
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            icon: Icon(
+              PlatformHelper.useLiquidGlass ? Icons.arrow_back_ios : Icons.arrow_back,
+              color: PlatformHelper.useLiquidGlass ? LiquidGlassTheme.primaryColor : null,
+            ),
+            onPressed: () => _navigateToActivityScreen(context),
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
+          actions: [
+            AdaptiveIconButton(
+              icon: const Icon(Icons.delete),
+              tooltip: 'Delete Training',
+              onPressed: () => _deleteTraining(context),
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,6 +336,7 @@ class TrainingDetailsScreen extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 

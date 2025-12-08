@@ -94,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         _resetProfileCheckOnAuthChange(authProvider.state);
         _checkAndShowProfileModal(authProvider);
 
-        return const MainNavigation();
+        return MainNavigation(key: MainNavigation.navKey);
       },
     );
   }

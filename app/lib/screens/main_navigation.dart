@@ -8,6 +8,13 @@ import 'profile_screen.dart';
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
 
+  static final GlobalKey<_MainNavigationState> navKey = GlobalKey();
+
+  /// Navigate to a specific tab by index
+  static void navigateToTab(int index) {
+    navKey.currentState?._onTabTapped(index);
+  }
+
   @override
   State<MainNavigation> createState() => _MainNavigationState();
 }
