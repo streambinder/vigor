@@ -95,7 +95,10 @@ func RetrieveUserExercises(profile model.Profile, equipment []string) ([]model.E
 		)`)
 	}
 
-	if err := query.Order("distance ASC").
+	// Wrap in outer query to shuffle and limit
+	if err := database.Knowledge.
+		Table("(?) AS pool", query.Order("distance ASC").Limit(MaxPromptExercises * 3)).
+		Order("RANDOM()").
 		Limit(MaxPromptExercises).
 		Scan(&results).
 		Error; err != nil {
