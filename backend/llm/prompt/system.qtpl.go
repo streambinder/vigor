@@ -25,7 +25,17 @@ func StreamSystem(qw422016 *qt422016.Writer) {
 CRITICAL CONSTRAINTS:
 - ONLY use exercise IDs from the provided AVAILABLE EXERCISES list. Never invent exercises.
 - Never program exercises contraindicated by user injuries or limitations.
-- Respond ONLY with valid JSON matching the schema. No commentary or explanation.
+- Respond ONLY with valid JSON matching the schema.
+
+REASONING-FIRST APPROACH:
+You MUST complete the "reasoning" object BEFORE generating workout structure. This ensures coherent, well-planned workouts. The reasoning process:
+1. constraints: List active limitations (injuries, equipment, time)
+2. strategy: 1-2 sentence approach respecting constraints and goals
+3. target_muscles: Which muscle groups to focus on
+4. exercises: List selected exercise IDs with brief reason (e.g. "push-up: chest compound")
+5. naming_logic: Brief connection between name and workout theme
+
+Only AFTER completing reasoning should you populate name, description, type, and routines.
 
 TRAINING PHILOSOPHY:
 - Safety over intensity: skip any exercise that could aggravate listed injuries
@@ -54,11 +64,23 @@ KNOWLEDGE FACTS:
 - Apply relevant facts from KNOWLEDGE FACTS section when provided
 - Include fact URLs in the references array when used
 
-EXAMPLE OUTPUT (30min upper body strength with dumbbells):
+EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder injury):
 {
-  "name": "Odyssean Arms Protocol",
-  "description": "Progressive upper body session targeting chest, shoulders, and arms. Compound pressing movements paired with isolation work for balanced development.",
-  "type": "HIIT",
+  "reasoning": {
+    "constraints": ["shoulder injury limits overhead pressing", "dumbbells only", "30min"],
+    "strategy": "Upper body push/pull avoiding overhead. Horizontal pressing and rowing patterns.",
+    "target_muscles": ["chest", "upper back", "biceps", "triceps"],
+    "exercises": [
+      "dumbbell-bench-press: horizontal press, shoulder-safe",
+      "dumbbell-bent-over-row: horizontal pull, back focus",
+      "dumbbell-biceps-curl: arm isolation",
+      "dumbbell-triceps-kickback: triceps, no shoulder stress"
+    ],
+    "naming_logic": "Horizontal movements like Sisyphus pushing sideways"
+  },
+  "name": "Sisyphean Horizontal Push",
+  "description": "Upper body session avoiding overhead work. Horizontal pressing and pulling with arm isolation finishers.",
+  "type": "strength",
   "duration": 1800,
   "routines": [
     {
@@ -91,8 +113,8 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells):
           "repeats": 3,
           "rest": 45,
           "activities": [
-            {"name": "dumbbell-shoulder-press", "type": "exercise", "duration": 0, "reps": 12, "weight_kg": 14, "rest": 30},
-            {"name": "dumbbell-biceps-curl", "type": "exercise", "duration": 0, "reps": 12, "weight_kg": 10, "rest": 30}
+            {"name": "dumbbell-biceps-curl", "type": "exercise", "duration": 0, "reps": 12, "weight_kg": 10, "rest": 30},
+            {"name": "dumbbell-triceps-kickback", "type": "exercise", "duration": 0, "reps": 12, "weight_kg": 8, "rest": 30}
           ]
         }
       ]
@@ -114,31 +136,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells):
   ]
 }
 `)
-//line llm/prompt/system.qtpl:97
+//line llm/prompt/system.qtpl:119
 }
 
-//line llm/prompt/system.qtpl:97
+//line llm/prompt/system.qtpl:119
 func WriteSystem(qq422016 qtio422016.Writer) {
-//line llm/prompt/system.qtpl:97
+//line llm/prompt/system.qtpl:119
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:97
+//line llm/prompt/system.qtpl:119
 	StreamSystem(qw422016)
-//line llm/prompt/system.qtpl:97
+//line llm/prompt/system.qtpl:119
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:97
+//line llm/prompt/system.qtpl:119
 }
 
-//line llm/prompt/system.qtpl:97
+//line llm/prompt/system.qtpl:119
 func System() string {
-//line llm/prompt/system.qtpl:97
+//line llm/prompt/system.qtpl:119
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:97
+//line llm/prompt/system.qtpl:119
 	WriteSystem(qb422016)
-//line llm/prompt/system.qtpl:97
+//line llm/prompt/system.qtpl:119
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:97
+//line llm/prompt/system.qtpl:119
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:97
+//line llm/prompt/system.qtpl:119
 	return qs422016
-//line llm/prompt/system.qtpl:97
+//line llm/prompt/system.qtpl:119
 }

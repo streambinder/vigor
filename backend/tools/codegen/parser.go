@@ -143,6 +143,10 @@ func (p *Parser) parseField(field *ast.Field) Field {
 		if flutterTag == "required" {
 			f.IsRequired = true
 		}
+		if flutterTag == "skip" || flutterTag == "-" {
+			f.JsonOmit = true
+			return f
+		}
 	}
 
 	// Default json tag is lowercase field name

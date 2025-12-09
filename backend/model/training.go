@@ -41,7 +41,18 @@ func init() {
 
 // Training represents the entire training session with a UUID ID
 type Training struct {
-	ID          uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
+	ID uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
+
+	// Reasoning captures the model's thought process before generating workout structure.
+	// This forces coherent planning: constraints → strategy → exercises → naming.
+	Reasoning struct {
+		Constraints   []string `json:"constraints" prompt:"Active constraints from user profile (injuries, limitations, equipment restrictions, time)"`
+		Strategy      string   `json:"strategy" prompt:"1-2 sentence workout approach that respects constraints while meeting goals"`
+		TargetMuscles []string `json:"target_muscles" prompt:"Primary muscle groups this workout will target"`
+		Exercises     []string `json:"exercises" prompt:"Exercise IDs selected for this workout with brief reason each (e.g. 'push-up: chest compound')"`
+		NamingLogic   string   `json:"naming_logic" prompt:"Brief explanation connecting workout name to theme/exercises"`
+	} `gorm:"type:jsonb" json:"reasoning" prompt:"Step-by-step reasoning that led to this workout design. MUST be completed before other fields." flutter:"skip"`
+
 	Name        string         `gorm:"not null" json:"name" prompt:"Epic 3-4 word title inspired by classics, no special characters (e.g. Trojan War Training, Achilles Trial Run, Pius Aeneas Fitness, Son of Zeus Gains)"`
 	Description string         `gorm:"not null" json:"description" prompt:"Short paragraph describing how the generated program fits the user's goals and limitations. No need to mention user profile details such as age, weight, height, etc. It's highly appreciated to mention weight/reps regressions or increases based on user's feedback and/or previous trainings."`
 	Type        string         `gorm:"not null" json:"type" prompt:"Training broad category, which can be either the sport for sports-related trainings — boxing, swimming, running, pilates, yoga, etc. —, or subtype of HIIT for HIIT — AMRAP, EMOM, etc. – or other generic terms such as strength, flexibility, etc.)"`

@@ -60,6 +60,10 @@ func extractStructMetadata(v reflect.Value) []FieldMetadata {
 		}
 
 		flutterTag := field.Tag.Get("flutter")
+		if flutterTag == "skip" || flutterTag == "-" {
+			continue
+		}
+
 		fieldMeta := FieldMetadata{
 			Name:     field.Name,
 			JSONTag:  jsonTag,
