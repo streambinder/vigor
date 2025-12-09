@@ -30,15 +30,17 @@ type Field struct {
 
 // Parser parses Go source files
 type Parser struct {
-	modelDir   string
-	modulePath string
+	modelDir    string
+	modulePath  string
+	typeAliases map[string]string // maps type name to underlying type (e.g., FactArea -> string)
 }
 
 // NewParser creates a new parser
 func NewParser(modelDir, modulePath string) *Parser {
 	return &Parser{
-		modelDir:   modelDir,
-		modulePath: modulePath,
+		modelDir:    modelDir,
+		modulePath:  modulePath,
+		typeAliases: make(map[string]string),
 	}
 }
 
@@ -52,6 +54,31 @@ func (p *Parser) ParsePackage() ([]Struct, error) {
 		return nil, fmt.Errorf("failed to parse directory: %w", err)
 	}
 
+	// First pass: collect type aliases (e.g., type FactArea string)
+	for _, pkg := range pkgs {
+		for _, file := range pkg.Files {
+			for _, decl := range file.Decls {
+				genDecl, ok := decl.(*ast.GenDecl)
+				if !ok || genDecl.Tok != token.TYPE {
+					continue
+				}
+
+				for _, spec := range genDecl.Specs {
+					typeSpec, ok := spec.(*ast.TypeSpec)
+					if !ok {
+						continue
+					}
+
+					// check if it's a simple type alias (not a struct)
+					if ident, ok := typeSpec.Type.(*ast.Ident); ok {
+						p.typeAliases[typeSpec.Name.Name] = ident.Name
+					}
+				}
+			}
+		}
+	}
+
+	// Second pass: parse structs
 	var structs []Struct
 
 	for _, pkg := range pkgs {
@@ -161,8 +188,13 @@ func (p *Parser) parseField(field *ast.Field) Field {
 func (p *Parser) parseType(expr ast.Expr) (typeName string, isOptional bool, isCollection bool, collectionOf string) {
 	switch t := expr.(type) {
 	case *ast.Ident:
-		// Simple type: string, int, etc.
-		return t.Name, false, false, ""
+		// Simple type: string, int, or custom type alias
+		name := t.Name
+		// resolve type alias if exists
+		if underlying, ok := p.typeAliases[name]; ok {
+			return underlying, false, false, ""
+		}
+		return name, false, false, ""
 
 	case *ast.StarExpr:
 		// Pointer type: *Type

@@ -28,7 +28,7 @@ func StreamGenFact(qw422016 *qt422016.Writer, fact model.Fact) {
 //line llm/rag/gen_fact.qtpl:7
 	qw422016.N().S(` `)
 //line llm/rag/gen_fact.qtpl:9
-	qw422016.E().S(fact.Area)
+	qw422016.E().S(string(fact.Area))
 //line llm/rag/gen_fact.qtpl:9
 	qw422016.N().S(`: `)
 //line llm/rag/gen_fact.qtpl:9

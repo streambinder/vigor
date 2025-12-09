@@ -20,7 +20,7 @@ const (
 type Classic struct {
 	ID      uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Name    string    `gorm:"type:varchar(255);not null;index:idx_knowledge_name" json:"name"`
-	Type    string    `gorm:"type:varchar(50);not null;index:idx_knowledge_type" json:"type"`
+	Type    ClassicType `gorm:"type:varchar(50);not null;index:idx_knowledge_type" json:"type"`
 	Excerpt string    `gorm:"type:text;not null" json:"excerpt"`
 
 	CreatedAt time.Time      `json:"-"`

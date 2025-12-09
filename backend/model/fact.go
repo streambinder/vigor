@@ -31,7 +31,7 @@ const (
 type Fact struct {
 	ID        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Reference string         `gorm:"type:varchar(255);not null;index:idx_knowledge_reference" json:"reference"`
-	Area      string         `gorm:"type:varchar(50);not null;index:idx_knowledge_area" json:"area"`
+	Area      FactArea       `gorm:"type:varchar(50);not null;index:idx_knowledge_area" json:"area"`
 	Tags      pq.StringArray `gorm:"type:text[];index:idx_knowledge_tags,type:gin" json:"tags"`
 	Content   string         `gorm:"type:text;not null" json:"content"`
 
