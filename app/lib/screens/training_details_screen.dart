@@ -609,9 +609,11 @@ class TrainingDetailsScreen extends StatelessWidget {
                 ),
                 // Exercise details from parsed detail field
                 if (exercise != null &&
-                    (exercise.equipment.isNotEmpty || exercise.muscles.isNotEmpty)) ...[
+                    (exercise.equipment.isNotEmpty ||
+                        exercise.muscles.isNotEmpty ||
+                        activity.modifiers.isNotEmpty)) ...[
                   const SizedBox(height: 8),
-                  _buildExerciseDetailsRow(context, exercise),
+                  _buildExerciseDetailsRow(context, exercise, activity.modifiers),
                 ],
                 const SizedBox(height: 6),
                 Wrap(
@@ -656,7 +658,8 @@ class TrainingDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildExerciseDetailsRow(BuildContext context, Exercise exercise) {
+  Widget _buildExerciseDetailsRow(
+      BuildContext context, Exercise exercise, List<String> modifiers) {
     final parts = <Widget>[];
 
     if (exercise.equipment.isNotEmpty) {
@@ -686,6 +689,25 @@ class TrainingDetailsScreen extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             exercise.muscles.join(', '),
+            style: PlatformHelper.useLiquidGlass
+                ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
+                : Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+          ),
+        ],
+      ));
+    }
+
+    if (modifiers.isNotEmpty) {
+      parts.add(Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.tune, size: 14, color: Colors.green.shade700),
+          const SizedBox(width: 4),
+          Text(
+            modifiers.join(', '),
             style: PlatformHelper.useLiquidGlass
                 ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
                 : Theme.of(context).textTheme.bodySmall?.copyWith(
