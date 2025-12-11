@@ -20,6 +20,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
   TrainingService? _trainingService;
   List<Training>? _trainings;
   bool _isLoading = false;
+  Map<String, int> _partnerCounts = {};
 
   @override
   void initState() {
@@ -44,6 +45,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
         _trainings = response.data;
         _isLoading = false;
       });
+      // load partner counts in background
+      _loadPartnerCounts();
     } else if (mounted) {
       setState(() {
         _isLoading = false;
@@ -53,6 +56,18 @@ class _ActivityScreenState extends State<ActivityScreen> {
           context: context,
           message: response.error!,
         );
+      }
+    }
+  }
+
+  Future<void> _loadPartnerCounts() async {
+    if (_trainingService == null || _trainings == null) return;
+    for (final training in _trainings!) {
+      final response = await _trainingService!.getPartners(training.id);
+      if (response.isSuccess && mounted) {
+        setState(() {
+          _partnerCounts[training.id] = response.data?.length ?? 0;
+        });
       }
     }
   }
@@ -248,6 +263,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
   Widget _buildTrainingCard(Training training) {
     final isCompleted = _isCompletedWorkout(training);
     final isStale = _isStaleWorkout(training);
+    final partnerCount = _partnerCounts[training.id] ?? 0;
+    final peopleCount = 1 + partnerCount; // owner + partners
     final opacity = isCompleted ? 0.5 : 1.0;
 
     return Opacity(
@@ -379,6 +396,52 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                 )
                               : Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Colors.orange[600],
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                        const SizedBox(width: 16),
+                      ],
+                      if (partnerCount > 0) ...[
+                        Icon(
+                          Icons.people,
+                          size: 16,
+                          color: PlatformHelper.useLiquidGlass
+                              ? Colors.blue[700]
+                              : Colors.blue[600],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$peopleCount',
+                          style: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle.copyWith(
+                                  color: Colors.blue[700],
+                                  fontWeight: FontWeight.w600,
+                                )
+                              : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.blue[600],
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                        const SizedBox(width: 16),
+                      ],
+                      if (training.parentId != null) ...[
+                        Icon(
+                          Icons.copy,
+                          size: 16,
+                          color: PlatformHelper.useLiquidGlass
+                              ? Colors.purple[700]
+                              : Colors.purple[600],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Copied',
+                          style: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle.copyWith(
+                                  color: Colors.purple[700],
+                                  fontWeight: FontWeight.w600,
+                                )
+                              : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.purple[600],
                                     fontWeight: FontWeight.w600,
                                   ),
                         ),

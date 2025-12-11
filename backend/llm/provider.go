@@ -21,7 +21,7 @@ type llmPrompt struct {
 	User   string `json:"user"`
 }
 
-func getLLM(_ model.Profile) LLM {
+func getLLM(_ []model.Profile) LLM {
 	// this is a placeholder for now
 	// eventually we'll be able to discern what LLM
 	// to use for a given profile, if they have specific
@@ -35,7 +35,7 @@ func getLLM(_ model.Profile) LLM {
 
 // GenTraining generates a personalized training plan using an LLM.
 func GenTraining(
-	profile model.Profile,
+	profiles []model.Profile,
 	workExercises []model.Exercise,
 	warmupExercises []model.Exercise,
 	cooldownExercises []model.Exercise,
@@ -51,7 +51,7 @@ func GenTraining(
 	request := llmPrompt{
 		prompt.System(),
 		prompt.GenTraining(
-			profile,
+			profiles,
 			workExercises,
 			warmupExercises,
 			cooldownExercises,
@@ -65,7 +65,7 @@ func GenTraining(
 			classics,
 		),
 	}
-	response, err := getLLM(profile).query(
+	response, err := getLLM(profiles).query(
 		request,
 		0.35,  // Balanced: structured output + workout variety
 		10000, // Sufficient for complex multi-routine workouts

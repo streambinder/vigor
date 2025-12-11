@@ -21,120 +21,148 @@ var (
 )
 
 //line llm/rag/gen_user_facts.qtpl:5
-func StreamGenUserFacts(qw422016 *qt422016.Writer, profile model.Profile, prompt string) {
+func StreamGenUserFacts(qw422016 *qt422016.Writer, profiles []model.Profile, prompt string) {
 //line llm/rag/gen_user_facts.qtpl:6
 	qw422016.N().S(` Knowledge for: `)
-//line llm/rag/gen_user_facts.qtpl:9
+//line llm/rag/gen_user_facts.qtpl:10
+	var allGoals, allInjuries, allLimitations []string
+	goalSet := make(map[string]bool)
+	injurySet := make(map[string]bool)
+	limitationSet := make(map[string]bool)
+	for _, profile := range profiles {
+		for _, goal := range profile.Goals() {
+			if !goalSet[goal.Description] {
+				goalSet[goal.Description] = true
+				allGoals = append(allGoals, goal.Description)
+			}
+		}
+		for _, injury := range profile.Injuries() {
+			if !injurySet[injury.Description] {
+				injurySet[injury.Description] = true
+				allInjuries = append(allInjuries, injury.Description)
+			}
+		}
+		for _, limitation := range profile.Limitations() {
+			if !limitationSet[limitation] {
+				limitationSet[limitation] = true
+				allLimitations = append(allLimitations, limitation)
+			}
+		}
+	}
+
+//line llm/rag/gen_user_facts.qtpl:34
+	qw422016.N().S(` `)
+//line llm/rag/gen_user_facts.qtpl:35
 	if len(prompt) > 0 {
-//line llm/rag/gen_user_facts.qtpl:9
+//line llm/rag/gen_user_facts.qtpl:35
 		qw422016.N().S(`Request: `)
-//line llm/rag/gen_user_facts.qtpl:9
+//line llm/rag/gen_user_facts.qtpl:35
 		qw422016.E().S(prompt)
-//line llm/rag/gen_user_facts.qtpl:9
+//line llm/rag/gen_user_facts.qtpl:35
 		qw422016.N().S(`.`)
-//line llm/rag/gen_user_facts.qtpl:9
+//line llm/rag/gen_user_facts.qtpl:35
 	}
-//line llm/rag/gen_user_facts.qtpl:9
+//line llm/rag/gen_user_facts.qtpl:35
 	qw422016.N().S(` `)
-//line llm/rag/gen_user_facts.qtpl:10
-	if len(profile.Goals()) > 0 {
-//line llm/rag/gen_user_facts.qtpl:10
+//line llm/rag/gen_user_facts.qtpl:36
+	if len(allGoals) > 0 {
+//line llm/rag/gen_user_facts.qtpl:36
 		qw422016.N().S(`Goals: `)
-//line llm/rag/gen_user_facts.qtpl:10
-		for i, goal := range profile.Goals() {
-//line llm/rag/gen_user_facts.qtpl:10
-			qw422016.E().S(goal.Description)
-//line llm/rag/gen_user_facts.qtpl:10
-			if i < len(profile.Goals())-1 {
-//line llm/rag/gen_user_facts.qtpl:10
+//line llm/rag/gen_user_facts.qtpl:36
+		for i, goal := range allGoals {
+//line llm/rag/gen_user_facts.qtpl:36
+			qw422016.E().S(goal)
+//line llm/rag/gen_user_facts.qtpl:36
+			if i < len(allGoals)-1 {
+//line llm/rag/gen_user_facts.qtpl:36
 				qw422016.N().S(`, `)
-//line llm/rag/gen_user_facts.qtpl:10
+//line llm/rag/gen_user_facts.qtpl:36
 			}
-//line llm/rag/gen_user_facts.qtpl:10
+//line llm/rag/gen_user_facts.qtpl:36
 		}
-//line llm/rag/gen_user_facts.qtpl:10
+//line llm/rag/gen_user_facts.qtpl:36
 		qw422016.N().S(`.`)
-//line llm/rag/gen_user_facts.qtpl:10
+//line llm/rag/gen_user_facts.qtpl:36
 	}
-//line llm/rag/gen_user_facts.qtpl:10
+//line llm/rag/gen_user_facts.qtpl:36
 	qw422016.N().S(` `)
-//line llm/rag/gen_user_facts.qtpl:11
-	if len(profile.Injuries()) > 0 {
-//line llm/rag/gen_user_facts.qtpl:11
+//line llm/rag/gen_user_facts.qtpl:37
+	if len(allInjuries) > 0 {
+//line llm/rag/gen_user_facts.qtpl:37
 		qw422016.N().S(`Injuries: `)
-//line llm/rag/gen_user_facts.qtpl:11
-		for i, injury := range profile.Injuries() {
-//line llm/rag/gen_user_facts.qtpl:11
-			qw422016.E().S(injury.Description)
-//line llm/rag/gen_user_facts.qtpl:11
-			if i < len(profile.Injuries())-1 {
-//line llm/rag/gen_user_facts.qtpl:11
+//line llm/rag/gen_user_facts.qtpl:37
+		for i, injury := range allInjuries {
+//line llm/rag/gen_user_facts.qtpl:37
+			qw422016.E().S(injury)
+//line llm/rag/gen_user_facts.qtpl:37
+			if i < len(allInjuries)-1 {
+//line llm/rag/gen_user_facts.qtpl:37
 				qw422016.N().S(`, `)
-//line llm/rag/gen_user_facts.qtpl:11
+//line llm/rag/gen_user_facts.qtpl:37
 			}
-//line llm/rag/gen_user_facts.qtpl:11
+//line llm/rag/gen_user_facts.qtpl:37
 		}
-//line llm/rag/gen_user_facts.qtpl:11
+//line llm/rag/gen_user_facts.qtpl:37
 		qw422016.N().S(`.`)
-//line llm/rag/gen_user_facts.qtpl:11
+//line llm/rag/gen_user_facts.qtpl:37
 	}
-//line llm/rag/gen_user_facts.qtpl:11
+//line llm/rag/gen_user_facts.qtpl:37
 	qw422016.N().S(` `)
-//line llm/rag/gen_user_facts.qtpl:12
-	if len(profile.Limitations()) > 0 {
-//line llm/rag/gen_user_facts.qtpl:12
+//line llm/rag/gen_user_facts.qtpl:38
+	if len(allLimitations) > 0 {
+//line llm/rag/gen_user_facts.qtpl:38
 		qw422016.N().S(`Limitations: `)
-//line llm/rag/gen_user_facts.qtpl:12
-		for i, limitation := range profile.Limitations() {
-//line llm/rag/gen_user_facts.qtpl:12
+//line llm/rag/gen_user_facts.qtpl:38
+		for i, limitation := range allLimitations {
+//line llm/rag/gen_user_facts.qtpl:38
 			qw422016.E().S(limitation)
-//line llm/rag/gen_user_facts.qtpl:12
-			if i < len(profile.Limitations())-1 {
-//line llm/rag/gen_user_facts.qtpl:12
+//line llm/rag/gen_user_facts.qtpl:38
+			if i < len(allLimitations)-1 {
+//line llm/rag/gen_user_facts.qtpl:38
 				qw422016.N().S(`, `)
-//line llm/rag/gen_user_facts.qtpl:12
+//line llm/rag/gen_user_facts.qtpl:38
 			}
-//line llm/rag/gen_user_facts.qtpl:12
+//line llm/rag/gen_user_facts.qtpl:38
 		}
-//line llm/rag/gen_user_facts.qtpl:12
+//line llm/rag/gen_user_facts.qtpl:38
 		qw422016.N().S(`.`)
-//line llm/rag/gen_user_facts.qtpl:12
+//line llm/rag/gen_user_facts.qtpl:38
 	}
-//line llm/rag/gen_user_facts.qtpl:12
+//line llm/rag/gen_user_facts.qtpl:38
 	qw422016.N().S(` `)
-//line llm/rag/gen_user_facts.qtpl:13
-	if len(prompt) == 0 && len(profile.Goals()) == 0 && len(profile.Injuries()) == 0 && len(profile.Limitations()) == 0 {
-//line llm/rag/gen_user_facts.qtpl:13
+//line llm/rag/gen_user_facts.qtpl:39
+	if len(prompt) == 0 && len(allGoals) == 0 && len(allInjuries) == 0 && len(allLimitations) == 0 {
+//line llm/rag/gen_user_facts.qtpl:39
 		qw422016.N().S(`General fitness knowledge.`)
-//line llm/rag/gen_user_facts.qtpl:13
+//line llm/rag/gen_user_facts.qtpl:39
 	}
-//line llm/rag/gen_user_facts.qtpl:13
+//line llm/rag/gen_user_facts.qtpl:39
 	qw422016.N().S(` `)
-//line llm/rag/gen_user_facts.qtpl:16
+//line llm/rag/gen_user_facts.qtpl:42
 }
 
-//line llm/rag/gen_user_facts.qtpl:16
-func WriteGenUserFacts(qq422016 qtio422016.Writer, profile model.Profile, prompt string) {
-//line llm/rag/gen_user_facts.qtpl:16
+//line llm/rag/gen_user_facts.qtpl:42
+func WriteGenUserFacts(qq422016 qtio422016.Writer, profiles []model.Profile, prompt string) {
+//line llm/rag/gen_user_facts.qtpl:42
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/rag/gen_user_facts.qtpl:16
-	StreamGenUserFacts(qw422016, profile, prompt)
-//line llm/rag/gen_user_facts.qtpl:16
+//line llm/rag/gen_user_facts.qtpl:42
+	StreamGenUserFacts(qw422016, profiles, prompt)
+//line llm/rag/gen_user_facts.qtpl:42
 	qt422016.ReleaseWriter(qw422016)
-//line llm/rag/gen_user_facts.qtpl:16
+//line llm/rag/gen_user_facts.qtpl:42
 }
 
-//line llm/rag/gen_user_facts.qtpl:16
-func GenUserFacts(profile model.Profile, prompt string) string {
-//line llm/rag/gen_user_facts.qtpl:16
+//line llm/rag/gen_user_facts.qtpl:42
+func GenUserFacts(profiles []model.Profile, prompt string) string {
+//line llm/rag/gen_user_facts.qtpl:42
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/rag/gen_user_facts.qtpl:16
-	WriteGenUserFacts(qb422016, profile, prompt)
-//line llm/rag/gen_user_facts.qtpl:16
+//line llm/rag/gen_user_facts.qtpl:42
+	WriteGenUserFacts(qb422016, profiles, prompt)
+//line llm/rag/gen_user_facts.qtpl:42
 	qs422016 := string(qb422016.B)
-//line llm/rag/gen_user_facts.qtpl:16
+//line llm/rag/gen_user_facts.qtpl:42
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/rag/gen_user_facts.qtpl:16
+//line llm/rag/gen_user_facts.qtpl:42
 	return qs422016
-//line llm/rag/gen_user_facts.qtpl:16
+//line llm/rag/gen_user_facts.qtpl:42
 }

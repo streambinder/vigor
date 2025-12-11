@@ -26,6 +26,10 @@ class Training {
   final DateTime? completedAt;
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
+  @JsonKey(name: 'user_id', defaultValue: '')
+  final String userId;
+  @JsonKey(name: 'parent_id')
+  final String? parentId;
 
   Training({
     required this.id,
@@ -37,6 +41,8 @@ class Training {
     required this.prompt,
     this.completedAt,
     required this.createdAt,
+    required this.userId,
+    this.parentId,
   });
 
   factory Training.fromJson(Map<String, dynamic> json) => _$TrainingFromJson(json);

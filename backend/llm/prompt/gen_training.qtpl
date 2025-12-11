@@ -4,7 +4,7 @@
 {% import "github.com/streambinder/vigor/model" %}
 
 {% func GenTraining(
-    profile model.Profile,
+    profiles []model.Profile,
     workExercises []model.Exercise,
     warmupExercises []model.Exercise,
     cooldownExercises []model.Exercise,
@@ -19,12 +19,22 @@
 ) -%}
 Generate a {%d duration %}-minute training session.
 
-<<<USER_PROFILE>>>
+{% if len(profiles) > 1 %}
+<<<PARTNER_WORKOUT>>>
+This is a partner workout for {%d len(profiles) %} participants.
+Apply MOST RESTRICTIVE constraints - if ANY participant has an injury/limitation, avoid those exercises for ALL participants.
+<<<END_PARTNER_WORKOUT>>>
+
+{% endif %}
+{% for i, profile := range profiles %}
+<<<USER_PROFILE{% if len(profiles) > 1 %} #{%d i+1 %}{% endif %}>>>
 Age: {%d profile.Age() %}, Height: {%f.0 profile.Height %}cm, Weight: {%f.0 profile.Weight %}kg, Gender: {%s profile.Gender %}
-{% if len(profile.Goals()) > 0 %}Goals: {% for i, goal := range profile.Goals() %}{%s goal.Description %}{% if i < len(profile.Goals())-1 %}, {% endif %}{% endfor %}{% endif %}
-{% if len(profile.Injuries()) > 0 %}Injuries (AVOID): {% for i, injury := range profile.Injuries() %}{%s injury.Description %} ({%d injury.Year %}){% if i < len(profile.Injuries())-1 %}, {% endif %}{% endfor %}{% endif %}
-{% if len(profile.Limitations()) > 0 %}Limitations: {% for i, limitation := range profile.Limitations() %}{%s limitation %}{% if i < len(profile.Limitations())-1 %}, {% endif %}{% endfor %}{% endif %}
-<<<END_USER_PROFILE>>>
+{% if len(profile.Goals()) > 0 %}Goals: {% for j, goal := range profile.Goals() %}{%s goal.Description %}{% if j < len(profile.Goals())-1 %}, {% endif %}{% endfor %}{% endif %}
+{% if len(profile.Injuries()) > 0 %}Injuries (AVOID): {% for j, injury := range profile.Injuries() %}{%s injury.Description %} ({%d injury.Year %}){% if j < len(profile.Injuries())-1 %}, {% endif %}{% endfor %}{% endif %}
+{% if len(profile.Limitations()) > 0 %}Limitations: {% for j, limitation := range profile.Limitations() %}{%s limitation %}{% if j < len(profile.Limitations())-1 %}, {% endif %}{% endfor %}{% endif %}
+<<<END_USER_PROFILE{% if len(profiles) > 1 %} #{%d i+1 %}{% endif %}>>>
+
+{% endfor %}
 
 {% if len(userPrompt) > 0 %}
 <<<USER_REQUEST>>>
@@ -86,5 +96,5 @@ Use ONLY these exercise IDs for the cooldown routine.
 {% endfor %}<<<END_NAMING_INSPIRATION>>>
 {% endif %}
 
-Output language: {% if len(profile.Language) > 0 %}{%s profile.Language %}{% else %}English{% endif %}
+Output language: {% if len(profiles) > 0 && len(profiles[0].Language) > 0 %}{%s profiles[0].Language %}{% else %}English{% endif %}
 {% endfunc %}

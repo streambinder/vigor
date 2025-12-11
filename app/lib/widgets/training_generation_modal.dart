@@ -28,9 +28,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   final _formKey = GlobalKey<FormState>();
   final _durationController = TextEditingController(text: '60');
   final _promptController = TextEditingController();
+  final _partnerController = TextEditingController();
 
   Gym? _selectedGym;
   bool _isGenerating = false;
+  final List<String> _partners = [];
 
   @override
   void initState() {
@@ -49,7 +51,24 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   void dispose() {
     _durationController.dispose();
     _promptController.dispose();
+    _partnerController.dispose();
     super.dispose();
+  }
+
+  void _addPartner() {
+    final partner = _partnerController.text.trim();
+    if (partner.isNotEmpty && !_partners.contains(partner)) {
+      setState(() {
+        _partners.add(partner);
+        _partnerController.clear();
+      });
+    }
+  }
+
+  void _removePartner(String partner) {
+    setState(() {
+      _partners.remove(partner);
+    });
   }
 
   Future<void> _generateTraining() async {
@@ -80,6 +99,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       duration: duration,
       gym: gym,
       prompt: prompt.isEmpty ? null : prompt,
+      partners: _partners.isEmpty ? null : _partners,
     );
 
     if (mounted) {
@@ -249,6 +269,59 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               placeholder: 'e.g., Focus on upper body',
               maxLines: 3,
               minLines: 1,
+            ),
+            const SizedBox(height: 16),
+
+            // Partners section
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Training Partners (optional)',
+                  style: PlatformHelper.useLiquidGlass
+                      ? LiquidGlassTheme.captionStyle
+                      : Theme.of(context).textTheme.labelMedium,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AdaptiveTextField(
+                        controller: _partnerController,
+                        placeholder: 'Email or user ID',
+                        onSubmitted: (_) => _addPartner(),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    AdaptiveIconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: _addPartner,
+                    ),
+                  ],
+                ),
+                if (_partners.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _partners.map((partner) {
+                      return Chip(
+                        label: Text(
+                          partner,
+                          style: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
+                              : null,
+                        ),
+                        deleteIcon: const Icon(Icons.close, size: 16),
+                        onDeleted: () => _removePartner(partner),
+                        backgroundColor: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.primaryColor.withOpacity(0.1)
+                            : null,
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ],
             ),
             const SizedBox(height: 24),
 

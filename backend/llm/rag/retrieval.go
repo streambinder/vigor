@@ -30,8 +30,8 @@ var (
 
 // RetrieveWorkExercises retrieves exercises for the main workout phase via RAG.
 // Filters by work types (cardio, strength, skill) and user equipment.
-func RetrieveWorkExercises(profile model.Profile, equipment []string) ([]model.Exercise, error) {
-	embeddingText := GenUserExercises(profile, equipment)
+func RetrieveWorkExercises(profiles []model.Profile, equipment []string) ([]model.Exercise, error) {
+	embeddingText := GenUserExercises(profiles, equipment)
 	exerciseEmbedding, err := embedding.GenVector(embeddingText)
 	if err != nil {
 		return nil, err
@@ -125,9 +125,9 @@ func RetrieveWorkExercises(profile model.Profile, equipment []string) ([]model.E
 	return exercises, nil
 }
 
-// QueryUserFacts retrieves facts relevant to the user's profile and prompt.
-func RetrieveUserFacts(profile model.Profile, prompt string) ([]model.Fact, error) {
-	embeddingText := GenUserFacts(profile, prompt)
+// QueryUserFacts retrieves facts relevant to the users' profiles and prompt.
+func RetrieveUserFacts(profiles []model.Profile, prompt string) ([]model.Fact, error) {
+	embeddingText := GenUserFacts(profiles, prompt)
 	embedding, err := embedding.GenVector(embeddingText)
 	if err != nil {
 		return nil, err

@@ -6,6 +6,7 @@ import '../models/routine.dart';
 import '../models/block.dart';
 import '../models/activity.dart';
 import '../models/exercise.dart';
+import '../providers/auth_provider.dart';
 import '../services/training_service.dart';
 import '../services/secure_storage_service.dart';
 import '../widgets/adaptive/adaptive.dart';
@@ -15,13 +16,38 @@ import '../utils/exercise_modal.dart';
 import 'main_navigation.dart';
 import 'tabata_timer_screen.dart';
 
-class TrainingDetailsScreen extends StatelessWidget {
+class TrainingDetailsScreen extends StatefulWidget {
   final Training training;
 
   const TrainingDetailsScreen({
     super.key,
     required this.training,
   });
+
+  @override
+  State<TrainingDetailsScreen> createState() => _TrainingDetailsScreenState();
+}
+
+class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
+  Training get training => widget.training;
+  int _partnerCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPartners();
+  }
+
+  Future<void> _loadPartners() async {
+    final storage = context.read<SecureStorageService>();
+    final trainingService = TrainingService(storageService: storage);
+    final response = await trainingService.getPartners(training.id);
+    if (response.isSuccess && mounted) {
+      setState(() {
+        _partnerCount = response.data?.length ?? 0;
+      });
+    }
+  }
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
@@ -74,17 +100,26 @@ class TrainingDetailsScreen extends StatelessWidget {
   }
 
   Future<void> _deleteTraining(BuildContext context) async {
+    final currentUserId = context.read<AuthProvider>().currentUser?.id ?? '';
+    final isOwner = training.userId == currentUserId;
+    final title = isOwner ? 'Delete Training' : 'Leave Training';
+    final content = isOwner
+        ? 'Are you sure you want to delete "${training.name}"? This action cannot be undone.'
+        : 'Are you sure you want to leave "${training.name}"? You will no longer see this training.';
+    final actionLabel = isOwner ? 'Delete' : 'Leave';
+    final successMessage = isOwner ? 'Training deleted successfully' : 'Left training successfully';
+
     final shouldDelete = await AdaptiveAlertDialog.show<bool>(
       context: context,
-      title: 'Delete Training',
-      content: 'Are you sure you want to delete "${training.name}"? This action cannot be undone.',
+      title: title,
+      content: content,
       actions: [
         AdaptiveDialogAction(
           label: 'Cancel',
           onPressed: () => Navigator.of(context).pop(false),
         ),
         AdaptiveDialogAction(
-          label: 'Delete',
+          label: actionLabel,
           isDestructive: true,
           onPressed: () => Navigator.of(context).pop(true),
         ),
@@ -102,7 +137,7 @@ class TrainingDetailsScreen extends StatelessWidget {
           Navigator.of(context).pop(true); // Return true to indicate deletion
           AdaptiveNotification.show(
             context: context,
-            message: 'Training deleted successfully',
+            message: successMessage,
           );
         } else {
           AdaptiveNotification.showError(
@@ -141,8 +176,129 @@ class TrainingDetailsScreen extends StatelessWidget {
     MainNavigation.navigateToTab(1); // Activity tab
   }
 
+  Future<void> _showAddPartnerDialog(BuildContext context) async {
+    final controller = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Add Partner'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'Email or user ID',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(null),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty && context.mounted) {
+      final storage = context.read<SecureStorageService>();
+      final trainingService = TrainingService(storageService: storage);
+      final response = await trainingService.addPartner(training.id, result);
+
+      if (context.mounted) {
+        if (response.isSuccess) {
+          AdaptiveNotification.show(
+            context: context,
+            message: 'Partner added successfully',
+          );
+        } else {
+          AdaptiveNotification.showError(
+            context: context,
+            message: response.error ?? 'Failed to add partner',
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _cloneTraining(BuildContext context) async {
+    final currentUserId = context.read<AuthProvider>().currentUser?.id ?? '';
+    if (currentUserId.isEmpty) return;
+
+    final storage = context.read<SecureStorageService>();
+    final trainingService = TrainingService(storageService: storage);
+    final response = await trainingService.copyTraining(training.id, currentUserId);
+
+    if (context.mounted) {
+      if (response.isSuccess) {
+        AdaptiveNotification.show(
+          context: context,
+          message: 'Training cloned',
+        );
+        Navigator.of(context).pop(true);
+      } else {
+        AdaptiveNotification.showError(
+          context: context,
+          message: response.error ?? 'Failed to clone training',
+        );
+      }
+    }
+  }
+
+  Future<void> _showCopyTrainingDialog(BuildContext context) async {
+    final controller = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Copy Training'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'Email or user ID',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(null),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+            child: const Text('Copy'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty && context.mounted) {
+      final storage = context.read<SecureStorageService>();
+      final trainingService = TrainingService(storageService: storage);
+      final response = await trainingService.copyTraining(training.id, result);
+
+      if (context.mounted) {
+        if (response.isSuccess) {
+          AdaptiveNotification.show(
+            context: context,
+            message: 'Training copied successfully',
+          );
+        } else {
+          AdaptiveNotification.showError(
+            context: context,
+            message: response.error ?? 'Failed to copy training',
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final currentUserId = context.read<AuthProvider>().currentUser?.id ?? '';
+    final isOwner = training.userId == currentUserId;
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -163,8 +319,28 @@ class TrainingDetailsScreen extends StatelessWidget {
           ),
           actions: [
             AdaptiveIconButton(
-              icon: const Icon(Icons.delete),
-              tooltip: 'Delete Training',
+              icon: const Icon(Icons.copy),
+              tooltip: 'Clone Training',
+              onPressed: () => _cloneTraining(context),
+            ),
+            // only owner can add partners
+            if (isOwner)
+              AdaptiveIconButton(
+                icon: const Icon(Icons.person_add),
+                tooltip: 'Add Partner',
+                onPressed: () => _showAddPartnerDialog(context),
+              ),
+            AdaptiveIconButton(
+              icon: const Icon(Icons.share),
+              tooltip: 'Share to User',
+              onPressed: () => _showCopyTrainingDialog(context),
+            ),
+            AdaptiveIconButton(
+              icon: Icon(
+                Icons.delete,
+                color: isOwner ? null : Colors.grey,
+              ),
+              tooltip: isOwner ? 'Delete Training' : 'Leave Training',
               onPressed: () => _deleteTraining(context),
             ),
           ],
@@ -223,41 +399,34 @@ class TrainingDetailsScreen extends StatelessWidget {
                           : Theme.of(context).textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 16),
-                    Row(
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 8,
                       children: [
-                        Icon(
-                          Icons.schedule,
-                          size: 18,
-                          color: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle.color
-                              : Colors.grey.shade600,
+                        _buildInfoLabel(
+                          context,
+                          icon: Icons.schedule,
+                          text: _formatDuration(training.duration),
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          _formatDuration(training.duration),
-                          style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle
-                              : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.grey.shade600,
-                                  ),
+                        _buildInfoLabel(
+                          context,
+                          icon: Icons.calendar_today,
+                          text: _formatDate(training.completedAt ?? training.createdAt),
                         ),
-                        const SizedBox(width: 20),
-                        Icon(
-                          Icons.calendar_today,
-                          size: 18,
-                          color: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle.color
-                              : Colors.grey.shade600,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          _formatDate(training.completedAt ?? training.createdAt),
-                          style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle
-                              : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.grey.shade600,
-                                  ),
-                        ),
+                        if (_partnerCount > 0)
+                          _buildInfoLabel(
+                            context,
+                            icon: Icons.people,
+                            text: '${1 + _partnerCount}',
+                            color: Colors.blue[600],
+                          ),
+                        if (training.parentId != null)
+                          _buildInfoLabel(
+                            context,
+                            icon: Icons.copy,
+                            text: 'Copied',
+                            color: Colors.purple[600],
+                          ),
                       ],
                     ),
                   ],
@@ -295,23 +464,33 @@ class TrainingDetailsScreen extends StatelessWidget {
                 ),
               ),
             ),
-            // Mark as Complete button (only show if not already completed)
+            // Mark as Complete button (only show if not already completed, only owner can complete)
             if (training.completedAt == null) ...[
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed: () => _completeTraining(context),
-                  icon: const Icon(Icons.check_circle_outline),
-                  label: const Text('Mark as Complete'),
+                  onPressed: isOwner ? () => _completeTraining(context) : null,
+                  icon: Icon(
+                    Icons.check_circle_outline,
+                    color: isOwner ? null : Colors.grey,
+                  ),
+                  label: Text(
+                    'Mark as Complete',
+                    style: TextStyle(
+                      color: isOwner ? null : Colors.grey,
+                    ),
+                  ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: PlatformHelper.useLiquidGlass
                         ? LiquidGlassTheme.successColor
                         : Colors.green[600],
                     side: BorderSide(
-                      color: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.successColor
-                          : Colors.green[600]!,
+                      color: isOwner
+                          ? (PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.successColor
+                              : Colors.green[600]!)
+                          : Colors.grey,
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -660,69 +839,73 @@ class TrainingDetailsScreen extends StatelessWidget {
 
   Widget _buildExerciseDetailsRow(
       BuildContext context, Exercise exercise, List<String> modifiers) {
-    final parts = <Widget>[];
+    final items = <Widget>[];
 
-    if (exercise.equipment.isNotEmpty) {
-      parts.add(Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.fitness_center, size: 14, color: Colors.blue.shade700),
-          const SizedBox(width: 4),
-          Text(
-            exercise.equipment.join(', '),
-            style: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
-                : Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
-          ),
-        ],
-      ));
+    for (final eq in exercise.equipment) {
+      items.add(_buildDetailChip(context, Icons.fitness_center, eq, Colors.blue.shade700));
     }
-
-    if (exercise.muscles.isNotEmpty) {
-      parts.add(Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.accessibility_new, size: 14, color: Colors.red.shade700),
-          const SizedBox(width: 4),
-          Text(
-            exercise.muscles.join(', '),
-            style: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
-                : Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
-          ),
-        ],
-      ));
+    for (final muscle in exercise.muscles) {
+      items.add(_buildDetailChip(context, Icons.accessibility_new, muscle, Colors.red.shade700));
     }
-
-    if (modifiers.isNotEmpty) {
-      parts.add(Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.tune, size: 14, color: Colors.green.shade700),
-          const SizedBox(width: 4),
-          Text(
-            modifiers.join(', '),
-            style: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
-                : Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
-          ),
-        ],
-      ));
+    for (final mod in modifiers) {
+      items.add(_buildDetailChip(context, Icons.tune, mod, Colors.green.shade700));
     }
 
     return Wrap(
-      spacing: 12,
+      spacing: 8,
       runSpacing: 4,
-      children: parts,
+      children: items,
+    );
+  }
+
+  Widget _buildDetailChip(BuildContext context, IconData icon, String text, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: PlatformHelper.useLiquidGlass
+              ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
+              : Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoLabel(
+    BuildContext context, {
+    required IconData icon,
+    required String text,
+    Color? color,
+  }) {
+    final defaultColor = PlatformHelper.useLiquidGlass
+        ? LiquidGlassTheme.captionStyle.color
+        : Colors.grey.shade600;
+    final labelColor = color ?? defaultColor;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18, color: labelColor),
+        const SizedBox(width: 6),
+        Text(
+          text,
+          style: PlatformHelper.useLiquidGlass
+              ? LiquidGlassTheme.captionStyle.copyWith(
+                  color: labelColor,
+                  fontWeight: color != null ? FontWeight.w600 : null,
+                )
+              : Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: labelColor,
+                    fontWeight: color != null ? FontWeight.w600 : null,
+                  ),
+        ),
+      ],
     );
   }
 

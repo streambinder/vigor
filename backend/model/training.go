@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -69,8 +70,10 @@ type Training struct {
 	UpdatedAt   time.Time      `json:"-"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
 
-	UserID uuid.UUID `gorm:"type:uuid;not null" json:"-"`
-	User   User      `gorm:"constraint:OnDelete:CASCADE;" json:"-"`
+	UserID   uuid.UUID  `gorm:"type:uuid;not null" json:"user_id" prompt:"-"`
+	User     User       `gorm:"constraint:OnDelete:CASCADE;" json:"-"`
+	ParentID *uuid.UUID `gorm:"type:uuid" json:"parent_id" prompt:"-"`
+	Parent   *Training  `gorm:"foreignKey:ParentID" json:"-"`
 }
 
 // Routine represents a section of the workout with a UUID ID and an explicit FK
@@ -106,15 +109,15 @@ type Activity struct {
 	ID      string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id" prompt:"-"`
 	BlockID string `gorm:"index;type:uuid;not null" json:"block_id" prompt:"-"`
 
-	Name     string         `gorm:"not null" json:"name" prompt:"Exercise ID from AVAILABLE_EXERCISES"`
-	Type     string         `gorm:"not null" json:"type" prompt:"Activity category;enum:exercise,stretch,rest"`
-	Duration int            `gorm:"not null" json:"duration" prompt:"Seconds (use 0 when reps > 0)"`
-	Reps     int            `gorm:"not null" json:"reps" prompt:"Repetition count (use 0 for time-based)"`
+	Name      string         `gorm:"not null" json:"name" prompt:"Exercise ID from AVAILABLE_EXERCISES"`
+	Type      string         `gorm:"not null" json:"type" prompt:"Activity category;enum:exercise,stretch,rest"`
+	Duration  int            `gorm:"not null" json:"duration" prompt:"Seconds (use 0 when reps > 0)"`
+	Reps      int            `gorm:"not null" json:"reps" prompt:"Repetition count (use 0 for time-based)"`
 	WeightKg  int            `gorm:"not null" json:"weight_kg" prompt:"Weight in kg (0 for bodyweight)"`
 	Modifiers pq.StringArray `gorm:"type:text[]" json:"modifiers" prompt:"Equipment modifiers applied (empty array if none)"`
 	Rest      int            `gorm:"not null" json:"rest" prompt:"Rest seconds after this activity"`
-	Detail   datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"`
-	Feedback string         `json:"feedback" prompt:"-"`
+	Detail    datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"`
+	Feedback  string         `json:"feedback" prompt:"-"`
 
 	CreatedAt time.Time      `json:"-"`
 	UpdatedAt time.Time      `json:"-"`
@@ -150,4 +153,45 @@ func (t Training) DaysSince() int {
 		date = *t.CompletedAt
 	}
 	return int(time.Since(date).Hours() / 24)
+}
+
+// Clone creates a deep copy of the training for a new user, clearing IDs and setting ParentID
+func (t Training) Clone(newUserID uuid.UUID) Training {
+	data, _ := json.Marshal(t)
+	var clone Training
+	json.Unmarshal(data, &clone)
+
+	clone.ID = uuid.UUID{}
+	clone.UserID = newUserID
+	clone.ParentID = &t.ID
+	clone.Prompt = []byte("{}")
+	clone.CompletedAt = nil
+	clone.CreatedAt = time.Time{}
+	clone.UpdatedAt = time.Time{}
+	clone.DeletedAt = gorm.DeletedAt{}
+
+	for i := range clone.Routines {
+		clone.Routines[i].ID = ""
+		clone.Routines[i].TrainingID = ""
+		clone.Routines[i].CreatedAt = time.Time{}
+		clone.Routines[i].UpdatedAt = time.Time{}
+		clone.Routines[i].DeletedAt = gorm.DeletedAt{}
+		for j := range clone.Routines[i].Blocks {
+			clone.Routines[i].Blocks[j].ID = ""
+			clone.Routines[i].Blocks[j].RoutineID = ""
+			clone.Routines[i].Blocks[j].CreatedAt = time.Time{}
+			clone.Routines[i].Blocks[j].UpdatedAt = time.Time{}
+			clone.Routines[i].Blocks[j].DeletedAt = gorm.DeletedAt{}
+			for k := range clone.Routines[i].Blocks[j].Activities {
+				clone.Routines[i].Blocks[j].Activities[k].ID = ""
+				clone.Routines[i].Blocks[j].Activities[k].BlockID = ""
+				clone.Routines[i].Blocks[j].Activities[k].Feedback = ""
+				clone.Routines[i].Blocks[j].Activities[k].CreatedAt = time.Time{}
+				clone.Routines[i].Blocks[j].Activities[k].UpdatedAt = time.Time{}
+				clone.Routines[i].Blocks[j].Activities[k].DeletedAt = gorm.DeletedAt{}
+			}
+		}
+	}
+
+	return clone
 }

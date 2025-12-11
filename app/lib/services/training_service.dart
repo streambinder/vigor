@@ -1,4 +1,5 @@
 import '../models/api_response.dart';
+import '../models/partner.dart';
 import '../models/training.dart';
 import 'app_logger.dart';
 import 'authenticated_api_service.dart';
@@ -18,6 +19,7 @@ class TrainingService {
     required String gym,
     String? prompt,
     List<String>? equipment,
+    List<String>? partners,
   }) async {
     AppLogger.debug('[TrainingService] Generating training with duration: $duration, gym: $gym');
 
@@ -30,6 +32,9 @@ class TrainingService {
     }
     if (equipment != null && equipment.isNotEmpty) {
       body['equipment'] = equipment;
+    }
+    if (partners != null && partners.isNotEmpty) {
+      body['partners'] = partners;
     }
 
     final response = await _apiService.post('/training', body: body);
@@ -112,6 +117,77 @@ class TrainingService {
       AppLogger.error('[TrainingService] Failed to complete training: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to complete training',
+        response.statusCode,
+      );
+    }
+  }
+
+  Future<ApiResponse<String>> addPartner(String trainingId, String partner) async {
+    AppLogger.debug('[TrainingService] Adding partner to training: $trainingId');
+
+    final response = await _apiService.post(
+      '/training/partner/$trainingId',
+      body: {'partner': partner},
+    );
+
+    if (response.isSuccess) {
+      final message = response.data?['message'] as String? ?? 'Partner added';
+      AppLogger.info('[TrainingService] Added partner to training: $trainingId');
+      return ApiResponse.success(message, response.statusCode);
+    } else {
+      AppLogger.error('[TrainingService] Failed to add partner: ${response.error}');
+      return ApiResponse.error(
+        response.error ?? 'Failed to add partner',
+        response.statusCode,
+      );
+    }
+  }
+
+  Future<ApiResponse<Training>> copyTraining(String trainingId, String target) async {
+    AppLogger.debug('[TrainingService] Copying training: $trainingId to $target');
+
+    final response = await _apiService.post(
+      '/training/copy/$trainingId',
+      body: {'target': target},
+    );
+
+    if (response.isSuccess && response.data != null) {
+      try {
+        final training = Training.fromJson(response.data!);
+        AppLogger.info('[TrainingService] Copied training: $trainingId');
+        return ApiResponse.success(training, response.statusCode);
+      } catch (e) {
+        AppLogger.error('[TrainingService] failed to parse copied training', e);
+        return ApiResponse.error('Failed to parse copied training', response.statusCode);
+      }
+    } else {
+      AppLogger.error('[TrainingService] Failed to copy training: ${response.error}');
+      return ApiResponse.error(
+        response.error ?? 'Failed to copy training',
+        response.statusCode,
+      );
+    }
+  }
+
+  Future<ApiResponse<List<Partner>>> getPartners(String trainingId) async {
+    AppLogger.debug('[TrainingService] Fetching partners for training: $trainingId');
+
+    final response = await _apiService.get('/training/partners/$trainingId');
+
+    if (response.isSuccess && response.data != null) {
+      try {
+        final partnersJson = response.data!['partners'] as List;
+        final partners = partnersJson.map((json) => Partner.fromJson(json)).toList();
+        AppLogger.info('[TrainingService] Fetched ${partners.length} partners');
+        return ApiResponse.success(partners, response.statusCode);
+      } catch (e) {
+        AppLogger.error('[TrainingService] failed to parse partners', e);
+        return ApiResponse.error('Failed to parse partners', response.statusCode);
+      }
+    } else {
+      AppLogger.error('[TrainingService] Failed to fetch partners: ${response.error}');
+      return ApiResponse.error(
+        response.error ?? 'Failed to fetch partners',
         response.statusCode,
       );
     }
