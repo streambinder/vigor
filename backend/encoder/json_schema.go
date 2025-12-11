@@ -156,6 +156,17 @@ func buildPropertySchema(t reflect.Type, description string, enumValues []string
 		if t.String() == "time.Time" || t.String() == "gorm.DeletedAt" {
 			return nil // Skip time fields
 		}
+		// Handle datatypes.JSONType[T] by unwrapping the inner type via Data() method
+		if strings.Contains(t.String(), "JSONType[") {
+			if dataMethod, ok := t.MethodByName("Data"); ok && dataMethod.Type.NumOut() == 1 {
+				innerType := dataMethod.Type.Out(0)
+				schema := jsonSchemaForType(innerType)
+				if description != "" && description != "+" {
+					schema["description"] = description
+				}
+				return schema
+			}
+		}
 		// Handle nested structs
 		return jsonSchemaForType(t)
 	default:
