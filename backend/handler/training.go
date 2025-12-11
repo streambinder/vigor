@@ -152,6 +152,7 @@ func postTraining(c *fiber.Ctx) error {
 	// Query recent trainings to avoid repeating exercises and ensure progression
 	var recentTrainings []model.Training
 	if err := database.DB.
+		Preload("Routines.Blocks.Activities").
 		Where("user_id = ? and completed_at > ?", requestorProfile.UserID, time.Now().Add(-time.Hour*24*recentTrainingDays)).
 		Order("completed_at desc").
 		Limit(recentTrainingMaxResults).
@@ -163,8 +164,9 @@ func postTraining(c *fiber.Ctx) error {
 	// Query recent generated to avoid repeating exercises and ensure progression
 	var recentGenerations []model.Training
 	if err := database.DB.
+		Select("DISTINCT ON (name) *").
 		Where("user_id = ?", requestorProfile.UserID).
-		Order("created_at desc").
+		Order("name, created_at desc").
 		Limit(recentGenerationsMaxResults).
 		Find(&recentGenerations).Error; err != nil {
 		log.Error().Err(err).Msg("Failed to query recent generations from database")
@@ -316,14 +318,24 @@ func postTrainingCompleteById(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "training id is required"})
 	}
 
+	var body struct {
+		Feedback         string            `json:"feedback"`
+		ActivityFeedback map[string]string `json:"activityFeedback"`
+	}
+	_ = c.BodyParser(&body) // ignore error, feedback is optional for backwards compat
+
 	userID := c.Locals("userID")
 	var training model.Training
-	// allow owner OR partner to complete
-	if err := database.DB.First(&training, "id = ? AND (user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ? AND deleted_at IS NULL))", trainingID, userID, userID).Error; err != nil {
+	// load training with associations so we can update activities
+	if err := database.DB.
+		Preload("Routines.Blocks.Activities").
+		First(&training, "id = ? AND (user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ? AND deleted_at IS NULL))", trainingID, userID, userID).Error; err != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})
 	}
+
 	now := time.Now()
 	training.CompletedAt = &now
+	training.Feedback = body.Feedback
 
 	if err := database.DB.Save(&training).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -331,13 +343,14 @@ func postTrainingCompleteById(c *fiber.Ctx) error {
 		})
 	}
 
-	// Reload with associations
-	if err := database.DB.
-		Preload("Routines.Blocks.Activities").
-		First(&training, "id = ?", trainingID).Error; err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": "failed to reload training",
-		})
+	// update activity feedback based on exercise name
+	if len(body.ActivityFeedback) > 0 {
+		for _, activity := range training.Activities() {
+			if feedback, ok := body.ActivityFeedback[activity.Name]; ok {
+				activity.Feedback = feedback
+				database.DB.Model(activity).Update("feedback", feedback)
+			}
+		}
 	}
 
 	return c.JSON(fiber.Map{

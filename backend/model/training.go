@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"slices"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,6 +13,12 @@ import (
 )
 
 const WeightActivityDurationPerRep = 3 // 3 seconds per rep
+
+var (
+	ActivityWorkTypes     = []string{"cardio", "strength", "skill"}
+	ActivityWarmupTypes   = []string{"mobility", "skill", "cardio"}
+	ActivityCooldownTypes = []string{"flexibility", "cardio", "balance"}
+)
 
 // JSONSchemaFormat defines the structure for OpenRouter's structured outputs
 type JSONSchemaFormat struct {
@@ -64,6 +71,7 @@ type Training struct {
 	Duration    int            `gorm:"not null" json:"duration" prompt:"Total duration in seconds"`
 	Routines    []Routine      `gorm:"foreignKey:TrainingID" json:"routines" prompt:"Set of routines to be performed, where each comprehends the same type of activity. Standard workouts have at least 3 routines, with warmup, work, cooldown."`
 	Prompt      datatypes.JSON `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
+	Feedback    string         `json:"feedback" prompt:"-"`
 
 	CompletedAt *time.Time     `json:"completed_at" prompt:"-"`
 	CreatedAt   time.Time      `json:"created_at" prompt:"-"`
@@ -110,7 +118,6 @@ type Activity struct {
 	BlockID string `gorm:"index;type:uuid;not null" json:"block_id" prompt:"-"`
 
 	Name      string         `gorm:"not null" json:"name" prompt:"Exercise ID from AVAILABLE_EXERCISES"`
-	Type      string         `gorm:"not null" json:"type" prompt:"Activity category;enum:exercise,stretch,rest"`
 	Duration  int            `gorm:"not null" json:"duration" prompt:"Seconds (use 0 when reps > 0)"`
 	Reps      int            `gorm:"not null" json:"reps" prompt:"Repetition count (use 0 for time-based)"`
 	WeightKg  int            `gorm:"not null" json:"weight_kg" prompt:"Weight in kg (0 for bodyweight)"`
@@ -122,6 +129,17 @@ type Activity struct {
 	CreatedAt time.Time      `json:"-"`
 	UpdatedAt time.Time      `json:"-"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+// DetailType returns the exercise type from the Detail JSON field
+func (a *Activity) DetailType() string {
+	var detail struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(a.Detail, &detail); err != nil {
+		return ""
+	}
+	return detail.Type
 }
 
 func (t Training) CalcDuration() (duration int) {
@@ -155,6 +173,25 @@ func (t Training) DaysSince() int {
 	return int(time.Since(date).Hours() / 24)
 }
 
+// Activities returns pointers to work-type activities in the training, deduplicated by name
+func (t *Training) Activities() []*Activity {
+	seen := make(map[string]bool)
+	var activities []*Activity
+	for i := range t.Routines {
+		for j := range t.Routines[i].Blocks {
+			for k := range t.Routines[i].Blocks[j].Activities {
+				a := &t.Routines[i].Blocks[j].Activities[k]
+				if seen[a.Name] || !slices.Contains(ActivityWorkTypes, a.DetailType()) {
+					continue
+				}
+				seen[a.Name] = true
+				activities = append(activities, a)
+			}
+		}
+	}
+	return activities
+}
+
 // Clone creates a deep copy of the training for a new user, clearing IDs and setting ParentID
 func (t Training) Clone(newUserID uuid.UUID) Training {
 	data, _ := json.Marshal(t)
@@ -165,6 +202,7 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 	clone.UserID = newUserID
 	clone.ParentID = &t.ID
 	clone.Prompt = []byte("{}")
+	clone.Feedback = ""
 	clone.CompletedAt = nil
 	clone.CreatedAt = time.Time{}
 	clone.UpdatedAt = time.Time{}
@@ -185,7 +223,6 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 			for k := range clone.Routines[i].Blocks[j].Activities {
 				clone.Routines[i].Blocks[j].Activities[k].ID = ""
 				clone.Routines[i].Blocks[j].Activities[k].BlockID = ""
-				clone.Routines[i].Blocks[j].Activities[k].Feedback = ""
 				clone.Routines[i].Blocks[j].Activities[k].CreatedAt = time.Time{}
 				clone.Routines[i].Blocks[j].Activities[k].UpdatedAt = time.Time{}
 				clone.Routines[i].Blocks[j].Activities[k].DeletedAt = gorm.DeletedAt{}

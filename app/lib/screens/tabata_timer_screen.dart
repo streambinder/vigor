@@ -8,6 +8,7 @@ import '../models/exercise.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 import '../utils/exercise_modal.dart';
+import '../utils/feedback_modal.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../services/training_service.dart';
 import '../services/secure_storage_service.dart';
@@ -320,19 +321,31 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     setState(() {
       _isCompleted = true;
     });
-    // Automatically mark as complete when workout finishes
-    _markTrainingComplete();
   }
 
-  Future<void> _markTrainingComplete() async {
+  Future<void> _showFeedbackAndComplete() async {
+    final result = await FeedbackModal.show(context, widget.training);
+    if (result == null) {
+      // user cancelled, stay on completed screen
+      return;
+    }
+    await _markTrainingComplete(result);
+    if (mounted) {
+      Navigator.of(context).pop(true);
+    }
+  }
+
+  Future<void> _markTrainingComplete(FeedbackResult result) async {
     if (_trainingService == null) return;
 
-    final response = await _trainingService!.completeTraining(widget.training.id);
+    final response = await _trainingService!.completeTraining(
+      widget.training.id,
+      feedback: result.feedback,
+      activityFeedback: result.activityFeedback,
+    );
     if (response.isSuccess && mounted) {
       // Training marked as complete successfully
-      // Could show a success message if desired
     } else if (mounted) {
-      // Could show an error message if desired
       AdaptiveNotification.showError(
         context: context,
         message: response.error ?? 'Failed to mark training as complete',
@@ -461,7 +474,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
             ),
             const SizedBox(height: 48),
             AdaptiveButton(
-              onPressed: () => Navigator.of(context).pop(true),
+              onPressed: _showFeedbackAndComplete,
               child: const Text('Done'),
             ),
           ],
@@ -823,10 +836,12 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
           ),
           TextButton(
             onPressed: () async {
-              Navigator.of(context).pop(); // Close dialog
-              await _markTrainingComplete();
+              Navigator.of(context).pop(); // Close exit dialog first
+              final result = await FeedbackModal.show(this.context, widget.training);
+              if (result == null) return; // user cancelled
+              await _markTrainingComplete(result);
               if (mounted) {
-                Navigator.of(context).pop(true); // Return true to indicate completion
+                Navigator.of(this.context).pop(true); // Return true to indicate completion
               }
             },
             child: const Text('Mark as Complete'),

@@ -22,12 +22,6 @@ const (
 	MaxModifierDistance  = 0.3 // Maximum cosine distance for modifier matching
 )
 
-var (
-	WorkTypes     = []string{"cardio", "strength", "skill"}
-	WarmupTypes   = []string{"mobility", "skill", "cardio"}
-	CooldownTypes = []string{"flexibility", "cardio", "balance"}
-)
-
 // RetrieveWorkExercises retrieves exercises for the main workout phase via RAG.
 // Filters by work types (cardio, strength, skill) and user equipment.
 func RetrieveWorkExercises(profiles []model.Profile, equipment []string) ([]model.Exercise, error) {
@@ -77,7 +71,7 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string) ([]mode
 		        exercise_embeddings.embedding <=> ? as distance,
 		        exercises.*`, pgvector.NewVector(exerciseEmbedding)).
 		Joins("JOIN exercises ON exercises.id = exercise_embeddings.exercise_id").
-		Where("exercises.type IN ?", WorkTypes)
+		Where("exercises.type IN ?", model.ActivityWorkTypes)
 
 	// Build WHERE clause dynamically based on user equipment
 	if len(equipmentMatchConditions) > 0 {
@@ -109,7 +103,7 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string) ([]mode
 
 	// Wrap in outer query to shuffle and limit
 	if err := database.Knowledge.
-		Table("(?) AS pool", query.Order("distance ASC").Limit(MaxWorkExercises * 3)).
+		Table("(?) AS pool", query.Order("distance ASC").Limit(MaxWorkExercises*3)).
 		Order("RANDOM()").
 		Limit(MaxWorkExercises).
 		Scan(&results).
@@ -234,7 +228,7 @@ func RetrieveUserModifiers(equipment []string) ([]model.Modifier, error) {
 func RetrieveWarmupExercises() ([]model.Exercise, error) {
 	var exercises []model.Exercise
 	if err := database.Knowledge.
-		Where("type IN ?", WarmupTypes).
+		Where("type IN ?", model.ActivityWarmupTypes).
 		Where(`NOT EXISTS (
 			SELECT 1 FROM exercise_equipment
 			WHERE exercise_equipment.exercise_id = exercises.id
@@ -253,7 +247,7 @@ func RetrieveWarmupExercises() ([]model.Exercise, error) {
 func RetrieveCooldownExercises() ([]model.Exercise, error) {
 	var exercises []model.Exercise
 	if err := database.Knowledge.
-		Where("type IN ?", CooldownTypes).
+		Where("type IN ?", model.ActivityCooldownTypes).
 		Where(`NOT EXISTS (
 			SELECT 1 FROM exercise_equipment
 			WHERE exercise_equipment.exercise_id = exercises.id

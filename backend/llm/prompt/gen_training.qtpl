@@ -73,8 +73,8 @@ Use ONLY these exercise IDs for the cooldown routine.
 <<<END_COOLDOWN_EXERCISES>>>
 
 {% if len(recentTrainings) > 0 %}
-<<<RECENT_HISTORY (avoid repeating these exercises)>>>
-{% for _, training := range recentTrainings %}{%d training.DaysSince() %}d ago | {%s training.Type %} | {%s training.Name %} | {% for _, routine := range training.Routines %}{% for _, block := range routine.Blocks %}{% for _, activity := range block.Activities %}{% if activity.Type == "exercise" %}{%s activity.Name %}{% if activity.WeightKg > 0 %}@{%d activity.WeightKg %}kg{% endif %}{% if activity.Reps > 0 %}x{%d activity.Reps %}{% endif %}{% if len(activity.Feedback) > 0 %}({%s activity.Feedback %}){% endif %} {% endif %}{% endfor %}{% endfor %}{% endfor %}
+<<<RECENT_HISTORY (use to ensure proper progression towards user goals, respecting user feedback on exercises and general comments)>>>
+{% for _, training := range recentTrainings %}{%d training.DaysSince() %}d ago{% if len(training.Feedback) > 0 %} | feedback: {%s training.Feedback %}{% endif %} | exercises: {% for _, activity := range training.Activities() %}{%s activity.Name %} ({% if activity.WeightKg > 0 %}weight: {%d activity.WeightKg %}kg{% endif %}, {% if activity.Reps > 0 %}reps: {%d activity.Reps %}{% endif %}, {% if len(activity.Feedback) > 0 %}feedback: {%s activity.Feedback %}{% endif %}) {% endfor %}
 {% endfor %}<<<END_RECENT_HISTORY>>>
 {% endif %}
 

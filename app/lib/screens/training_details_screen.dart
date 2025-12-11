@@ -13,6 +13,7 @@ import '../widgets/adaptive/adaptive.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 import '../utils/exercise_modal.dart';
+import '../utils/feedback_modal.dart';
 import 'main_navigation.dart';
 import 'tabata_timer_screen.dart';
 
@@ -150,10 +151,17 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   Future<void> _completeTraining(BuildContext context) async {
+    final result = await FeedbackModal.show(context, training);
+    if (result == null) return; // user cancelled
+
     final storage = context.read<SecureStorageService>();
     final trainingService = TrainingService(storageService: storage);
 
-    final response = await trainingService.completeTraining(training.id);
+    final response = await trainingService.completeTraining(
+      training.id,
+      feedback: result.feedback,
+      activityFeedback: result.activityFeedback,
+    );
 
     if (context.mounted) {
       if (response.isSuccess) {

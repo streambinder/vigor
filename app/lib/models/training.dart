@@ -22,6 +22,8 @@ class Training {
   final List<Routine> routines;
   @JsonKey(name: 'prompt')
   final Map<String, dynamic> prompt;
+  @JsonKey(name: 'feedback', defaultValue: '')
+  final String feedback;
   @JsonKey(name: 'completed_at')
   final DateTime? completedAt;
   @JsonKey(name: 'created_at')
@@ -39,6 +41,7 @@ class Training {
     required this.duration,
     required this.routines,
     required this.prompt,
+    required this.feedback,
     this.completedAt,
     required this.createdAt,
     required this.userId,

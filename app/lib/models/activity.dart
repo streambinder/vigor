@@ -13,8 +13,6 @@ class Activity {
   final String blockId;
   @JsonKey(name: 'name', defaultValue: '')
   final String name;
-  @JsonKey(name: 'type', defaultValue: '')
-  final String type;
   @JsonKey(name: 'duration')
   final int duration;
   @JsonKey(name: 'reps')
@@ -34,7 +32,6 @@ class Activity {
     required this.id,
     required this.blockId,
     required this.name,
-    required this.type,
     required this.duration,
     required this.reps,
     required this.weightKg,

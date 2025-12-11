@@ -99,10 +99,22 @@ class TrainingService {
     }
   }
 
-  Future<ApiResponse<Training>> completeTraining(String trainingId) async {
+  Future<ApiResponse<Training>> completeTraining(
+    String trainingId, {
+    String? feedback,
+    Map<String, String>? activityFeedback,
+  }) async {
     AppLogger.debug('[TrainingService] Completing training: $trainingId');
 
-    final response = await _apiService.post('/training/complete/$trainingId');
+    final body = <String, dynamic>{};
+    if (feedback != null && feedback.isNotEmpty) {
+      body['feedback'] = feedback;
+    }
+    if (activityFeedback != null && activityFeedback.isNotEmpty) {
+      body['activityFeedback'] = activityFeedback;
+    }
+
+    final response = await _apiService.post('/training/complete/$trainingId', body: body.isNotEmpty ? body : null);
 
     if (response.isSuccess && response.data != null) {
       try {
