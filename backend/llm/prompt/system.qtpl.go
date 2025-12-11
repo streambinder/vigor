@@ -5,21 +5,24 @@
 package prompt
 
 //line llm/prompt/system.qtpl:3
+import "github.com/streambinder/vigor/model"
+
+//line llm/prompt/system.qtpl:5
 import (
 	qtio422016 "io"
 
 	qt422016 "github.com/valyala/quicktemplate"
 )
 
-//line llm/prompt/system.qtpl:3
+//line llm/prompt/system.qtpl:5
 var (
 	_ = qtio422016.Copy
 	_ = qt422016.AcquireByteBuffer
 )
 
-//line llm/prompt/system.qtpl:3
+//line llm/prompt/system.qtpl:5
 func StreamSystem(qw422016 *qt422016.Writer) {
-//line llm/prompt/system.qtpl:3
+//line llm/prompt/system.qtpl:5
 	qw422016.N().S(`You are an expert personal trainer AI creating individualized workout programs.
 
 CRITICAL CONSTRAINTS:
@@ -28,6 +31,21 @@ CRITICAL CONSTRAINTS:
 - For cooldown: ONLY use exercise IDs from the COOLDOWN_EXERCISES list. Never invent exercises.
 - Never program exercises contraindicated by user injuries or limitations.
 - Respond ONLY with valid JSON matching the schema.
+
+DURATION CALCULATION (MUST RESPECT):
+- Each rep takes ~`)
+//line llm/prompt/system.qtpl:16
+	qw422016.N().D(model.WeightActivityDurationPerRep)
+//line llm/prompt/system.qtpl:16
+	qw422016.N().S(`s to perform
+- All rest periods (activity rest, block rest, routine rest) count toward total duration
+- Time-based activities (stretches, holds) use their duration value directly
+- You MUST stay within ±5 minutes of the requested session duration
+- Calculate total time as you design: sum of (reps × `)
+//line llm/prompt/system.qtpl:20
+	qw422016.N().D(model.WeightActivityDurationPerRep)
+//line llm/prompt/system.qtpl:20
+	qw422016.N().S(`s) + durations + all rest periods
 
 GOAL-DRIVEN DESIGN (PRIMARY DIRECTIVE):
 User goals are the MOST IMPORTANT factor in workout design. Every exercise selection, rep scheme, rest period, and intensity level must directly serve the stated goals.
@@ -47,7 +65,12 @@ You MUST complete the "reasoning" object BEFORE generating workout structure. Th
 3. strategy: 1-2 sentence approach that PRIORITIZES goals while respecting constraints
 4. target_muscles: Which muscle groups to focus on (selected to serve goals)
 5. exercises: List selected exercise IDs with reason showing goal relevance (e.g. "bench-press: chest compound, serves hypertrophy goal with 8-12 rep range")
-6. naming_logic: Brief connection between name and workout theme
+6. duration_estimate: Calculate expected total duration using the formula (reps × `)
+//line llm/prompt/system.qtpl:40
+	qw422016.N().D(model.WeightActivityDurationPerRep)
+//line llm/prompt/system.qtpl:40
+	qw422016.N().S(`s + durations + rest). Adjust volume if estimate exceeds target ±5min.
+7. naming_logic: Brief connection between name and workout theme
 
 Only AFTER completing reasoning should you populate name, description, type, and routines.
 
@@ -105,6 +128,7 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
       "dumbbell-biceps-curl: arm strength, lower reps than hypertrophy",
       "dumbbell-triceps-kickback: triceps strength, no shoulder stress"
     ],
+    "duration_estimate": "Warmup ~1min. Work: Block1 (2 exercises × 5 reps × 3s + rests) × 4 repeats ≈ 18min. Block2 (2 exercises × 6 reps × 3s + rests) × 3 ≈ 10min. Cooldown ~1min. Total ≈ 30min. Within target.",
     "naming_logic": "Horizontal movements like Sisyphus pushing sideways"
   },
   "name": "Sisyphean Horizontal Push",
@@ -165,31 +189,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   ]
 }
 `)
-//line llm/prompt/system.qtpl:148
+//line llm/prompt/system.qtpl:159
 }
 
-//line llm/prompt/system.qtpl:148
+//line llm/prompt/system.qtpl:159
 func WriteSystem(qq422016 qtio422016.Writer) {
-//line llm/prompt/system.qtpl:148
+//line llm/prompt/system.qtpl:159
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:148
+//line llm/prompt/system.qtpl:159
 	StreamSystem(qw422016)
-//line llm/prompt/system.qtpl:148
+//line llm/prompt/system.qtpl:159
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:148
+//line llm/prompt/system.qtpl:159
 }
 
-//line llm/prompt/system.qtpl:148
+//line llm/prompt/system.qtpl:159
 func System() string {
-//line llm/prompt/system.qtpl:148
+//line llm/prompt/system.qtpl:159
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:148
+//line llm/prompt/system.qtpl:159
 	WriteSystem(qb422016)
-//line llm/prompt/system.qtpl:148
+//line llm/prompt/system.qtpl:159
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:148
+//line llm/prompt/system.qtpl:159
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:148
+//line llm/prompt/system.qtpl:159
 	return qs422016
-//line llm/prompt/system.qtpl:148
+//line llm/prompt/system.qtpl:159
 }
