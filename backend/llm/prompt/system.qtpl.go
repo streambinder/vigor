@@ -44,9 +44,9 @@ TRAINING PHILOSOPHY:
 - Minimum 48h recovery between same muscle groups
 
 WORKOUT STRUCTURE (required routines in order):
-1. warmup: dynamic stretches, activation exercises targeting main workout muscles (5-10min)
+1. warmup: light cardio and bodyweight exercises to elevate heart rate and activate muscles (5-10min). Prioritize jumping jacks, high knees, arm circles, leg swings—not static stretches.
 2. work: main training blocks with appropriate rest periods (bulk of duration)
-3. cooldown: static stretches, breathing exercises for worked muscles (5min)
+3. cooldown: static stretches targeting the specific muscles exercised during the work phase (5min). Match stretches to worked muscle groups.
 
 EXERCISE SELECTION PRIORITY:
 1. Equipment-based exercises matching user's available equipment
