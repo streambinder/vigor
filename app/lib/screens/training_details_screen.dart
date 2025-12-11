@@ -302,6 +302,100 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     }
   }
 
+  void _showReasoningDialog(BuildContext context) {
+    final r = training.reasoning;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Reasoning'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildReasoningSection(
+                  title: 'Strategy',
+                  child: Text(r.strategy),
+                ),
+                if (r.constraints.isNotEmpty)
+                  _buildReasoningSection(
+                    title: 'Constraints',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: r.constraints.map((c) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('• '),
+                            Expanded(child: Text(c)),
+                          ],
+                        ),
+                      )).toList(),
+                    ),
+                  ),
+                if (r.targetMuscles.isNotEmpty)
+                  _buildReasoningSection(
+                    title: 'Target Muscles',
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: r.targetMuscles.map((m) => Chip(
+                        label: Text(m),
+                        visualDensity: VisualDensity.compact,
+                      )).toList(),
+                    ),
+                  ),
+                if (r.exercises.isNotEmpty)
+                  _buildReasoningSection(
+                    title: 'Exercises',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: r.exercises.map((e) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('• '),
+                            Expanded(child: Text(e)),
+                          ],
+                        ),
+                      )).toList(),
+                    ),
+                  ),
+                _buildReasoningSection(
+                  title: 'Naming',
+                  child: Text(r.namingLogic),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReasoningSection({required String title, required Widget child}) {
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+        initiallyExpanded: false,
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.only(bottom: 8),
+        children: [child],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentUserId = context.read<AuthProvider>().currentUser?.id ?? '';
@@ -365,11 +459,28 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      training.name,
-                      style: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 24)
-                          : Theme.of(context).textTheme.headlineMedium,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            training.name,
+                            style: PlatformHelper.useLiquidGlass
+                                ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 24)
+                                : Theme.of(context).textTheme.headlineMedium,
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.help_outline,
+                            size: 20,
+                            color: PlatformHelper.useLiquidGlass
+                                ? LiquidGlassTheme.captionStyle.color
+                                : Colors.grey,
+                          ),
+                          tooltip: 'Show AI reasoning',
+                          onPressed: () => _showReasoningDialog(context),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 12),
                     Text(

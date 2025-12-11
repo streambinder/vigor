@@ -63,7 +63,7 @@ type Training struct {
 
 	// Reasoning captures the model's thought process before generating workout structure.
 	// This forces coherent planning: constraints → strategy → exercises → naming.
-	Reasoning datatypes.JSONType[TrainingReasoning] `gorm:"type:jsonb,not null" json:"reasoning" prompt:"Step-by-step reasoning that led to this workout design. MUST be completed before other fields." flutter:"skip"`
+	Reasoning datatypes.JSONType[TrainingReasoning] `gorm:"type:jsonb,not null" json:"reasoning" prompt:"Step-by-step reasoning that led to this workout design. MUST be completed before other fields."`
 
 	Name        string         `gorm:"not null" json:"name" prompt:"Epic 3-4 word title inspired by classics, no special characters (e.g. Trojan War Training, Achilles Trial Run, Pius Aeneas Fitness, Son of Zeus Gains)"`
 	Description string         `gorm:"not null" json:"description" prompt:"Short paragraph describing how the generated program fits the user's goals and limitations. No need to mention user profile details such as age, weight, height, etc. It's highly appreciated to mention weight/reps regressions or increases based on user's feedback and/or previous trainings."`

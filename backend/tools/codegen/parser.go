@@ -217,6 +217,20 @@ func (p *Parser) parseType(expr ast.Expr) (typeName string, isOptional bool, isC
 		// Map type: map[K]V
 		return "Map", false, false, ""
 
+	case *ast.IndexExpr:
+		// Generic type: pkg.Type[T] (e.g., datatypes.JSONType[TrainingReasoning])
+		// Extract the type argument and use it as the type
+		if sel, ok := t.X.(*ast.SelectorExpr); ok {
+			if pkg, ok := sel.X.(*ast.Ident); ok {
+				if pkg.Name == "datatypes" && strings.HasPrefix(sel.Sel.Name, "JSONType") {
+					// datatypes.JSONType[T] -> T
+					innerType, isOpt, isColl, collOf := p.parseType(t.Index)
+					return innerType, isOpt, isColl, collOf
+				}
+			}
+		}
+		return "unknown", false, false, ""
+
 	case *ast.InterfaceType:
 		// Interface type
 		return "interface{}", false, false, ""
