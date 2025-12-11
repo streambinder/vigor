@@ -1,40 +1,22 @@
 import '../models/api_response.dart';
 import '../models/gym.dart';
-import 'api_service.dart';
 import 'app_logger.dart';
+import 'authenticated_api_service.dart';
 import 'secure_storage_service.dart';
 
 class GymService {
-  final ApiService _apiService;
-  final SecureStorageService _storageService;
+  final AuthenticatedApiService _apiService;
 
   GymService({
-    ApiService? apiService,
+    AuthenticatedApiService? apiService,
     SecureStorageService? storageService,
-  })  : _apiService = apiService ?? ApiService(),
-        _storageService = storageService ?? SecureStorageService();
-
-  Future<Map<String, String>?> _getAuthHeaders() async {
-    final accessToken = await _storageService.getAccessToken();
-    if (accessToken == null) {
-      return null;
-    }
-    return {
-      'Authorization': 'Bearer $accessToken',
-    };
-  }
+  }) : _apiService = apiService ??
+            AuthenticatedApiService(storageService: storageService);
 
   Future<ApiResponse<List<Gym>>> getGyms() async {
     AppLogger.debug('[GymService] Fetching gyms');
-    final headers = await _getAuthHeaders();
-    if (headers == null) {
-      return ApiResponse.error('Not authenticated', 401);
-    }
 
-    final response = await _apiService.get(
-      '/gym',
-      headers: headers,
-    );
+    final response = await _apiService.get('/gym');
 
     if (response.isSuccess && response.data != null) {
       try {
@@ -57,15 +39,8 @@ class GymService {
 
   Future<ApiResponse<Gym>> getGym(String name) async {
     AppLogger.debug('[GymService] Fetching gym: $name');
-    final headers = await _getAuthHeaders();
-    if (headers == null) {
-      return ApiResponse.error('Not authenticated', 401);
-    }
 
-    final response = await _apiService.get(
-      '/gym/$name',
-      headers: headers,
-    );
+    final response = await _apiService.get('/gym/$name');
 
     if (response.isSuccess && response.data != null) {
       try {
@@ -90,14 +65,9 @@ class GymService {
     required List<String> equipment,
   }) async {
     AppLogger.debug('[GymService] Creating gym: $name');
-    final headers = await _getAuthHeaders();
-    if (headers == null) {
-      return ApiResponse.error('Not authenticated', 401);
-    }
 
     final response = await _apiService.post(
       '/gym',
-      headers: headers,
       body: {
         'name': name,
         'equipment': equipment,
@@ -128,20 +98,12 @@ class GymService {
     List<String>? equipment,
   }) async {
     AppLogger.debug('[GymService] Updating gym: $currentName');
-    final headers = await _getAuthHeaders();
-    if (headers == null) {
-      return ApiResponse.error('Not authenticated', 401);
-    }
 
     final body = <String, dynamic>{};
     if (newName != null) body['name'] = newName;
     if (equipment != null) body['equipment'] = equipment;
 
-    final response = await _apiService.put(
-      '/gym/$currentName',
-      headers: headers,
-      body: body,
-    );
+    final response = await _apiService.put('/gym/$currentName', body: body);
 
     if (response.isSuccess && response.data != null) {
       try {
@@ -163,15 +125,8 @@ class GymService {
 
   Future<ApiResponse<String>> deleteGym(String name) async {
     AppLogger.debug('[GymService] Deleting gym: $name');
-    final headers = await _getAuthHeaders();
-    if (headers == null) {
-      return ApiResponse.error('Not authenticated', 401);
-    }
 
-    final response = await _apiService.delete(
-      '/gym/$name',
-      headers: headers,
-    );
+    final response = await _apiService.delete('/gym/$name');
 
     if (response.isSuccess) {
       final message = response.data?['message'] as String? ?? 'Gym deleted';

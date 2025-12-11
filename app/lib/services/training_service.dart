@@ -1,28 +1,17 @@
 import '../models/api_response.dart';
 import '../models/training.dart';
-import 'api_service.dart';
 import 'app_logger.dart';
+import 'authenticated_api_service.dart';
 import 'secure_storage_service.dart';
 
 class TrainingService {
-  final ApiService _apiService;
-  final SecureStorageService _storageService;
+  final AuthenticatedApiService _apiService;
 
   TrainingService({
-    ApiService? apiService,
+    AuthenticatedApiService? apiService,
     SecureStorageService? storageService,
-  })  : _apiService = apiService ?? ApiService(),
-        _storageService = storageService ?? SecureStorageService();
-
-  Future<Map<String, String>?> _getAuthHeaders() async {
-    final accessToken = await _storageService.getAccessToken();
-    if (accessToken == null) {
-      return null;
-    }
-    return {
-      'Authorization': 'Bearer $accessToken',
-    };
-  }
+  }) : _apiService = apiService ??
+            AuthenticatedApiService(storageService: storageService);
 
   Future<ApiResponse<Training>> generateTraining({
     required int duration,
@@ -31,10 +20,6 @@ class TrainingService {
     List<String>? equipment,
   }) async {
     AppLogger.debug('[TrainingService] Generating training with duration: $duration, gym: $gym');
-    final headers = await _getAuthHeaders();
-    if (headers == null) {
-      return ApiResponse.error('Not authenticated', 401);
-    }
 
     final body = <String, dynamic>{
       'duration': duration,
@@ -47,11 +32,7 @@ class TrainingService {
       body['equipment'] = equipment;
     }
 
-    final response = await _apiService.post(
-      '/training',
-      headers: headers,
-      body: body,
-    );
+    final response = await _apiService.post('/training', body: body);
 
     if (response.isSuccess && response.data != null) {
       try {
@@ -73,15 +54,8 @@ class TrainingService {
 
   Future<ApiResponse<List<Training>>> getTrainings() async {
     AppLogger.debug('[TrainingService] Fetching trainings');
-    final headers = await _getAuthHeaders();
-    if (headers == null) {
-      return ApiResponse.error('Not authenticated', 401);
-    }
 
-    final response = await _apiService.get(
-      '/training',
-      headers: headers,
-    );
+    final response = await _apiService.get('/training');
 
     if (response.isSuccess && response.data != null) {
       try {
@@ -104,15 +78,8 @@ class TrainingService {
 
   Future<ApiResponse<String>> deleteTraining(String trainingId) async {
     AppLogger.debug('[TrainingService] Deleting training: $trainingId');
-    final headers = await _getAuthHeaders();
-    if (headers == null) {
-      return ApiResponse.error('Not authenticated', 401);
-    }
 
-    final response = await _apiService.delete(
-      '/training/$trainingId',
-      headers: headers,
-    );
+    final response = await _apiService.delete('/training/$trainingId');
 
     if (response.isSuccess) {
       final message = response.data?['message'] as String? ?? 'Training deleted';
@@ -129,15 +96,8 @@ class TrainingService {
 
   Future<ApiResponse<Training>> completeTraining(String trainingId) async {
     AppLogger.debug('[TrainingService] Completing training: $trainingId');
-    final headers = await _getAuthHeaders();
-    if (headers == null) {
-      return ApiResponse.error('Not authenticated', 401);
-    }
 
-    final response = await _apiService.post(
-      '/training/complete/$trainingId',
-      headers: headers,
-    );
+    final response = await _apiService.post('/training/complete/$trainingId');
 
     if (response.isSuccess && response.data != null) {
       try {

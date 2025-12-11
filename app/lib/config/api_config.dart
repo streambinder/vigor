@@ -31,7 +31,7 @@ class ApiConfig {
   static const String unregisterEndpoint = '/unregister';
 
   // Token configuration
-  static const Duration accessTokenExpiry = Duration(minutes: 15);
+  static const Duration accessTokenExpiry = Duration(hours: 2);
   static const Duration refreshTokenExpiry = Duration(days: 7);
 
   // HTTP headers
