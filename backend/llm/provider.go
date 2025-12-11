@@ -38,6 +38,7 @@ func GenTraining(
 	profile model.Profile,
 	exercises []model.Exercise,
 	equipment []string,
+	modifiers []model.Modifier,
 	userPrompt string,
 	duration int,
 	recentTrainings []model.Training,
@@ -47,7 +48,18 @@ func GenTraining(
 ) (*model.Training, llmPrompt, error) {
 	request := llmPrompt{
 		prompt.System(),
-		prompt.GenTraining(profile, exercises, equipment, userPrompt, duration, recentTrainings, recentGenerations, facts, classics),
+		prompt.GenTraining(
+			profile,
+			exercises,
+			equipment,
+			modifiers,
+			userPrompt,
+			duration,
+			recentTrainings,
+			recentGenerations,
+			facts,
+			classics,
+		),
 	}
 	response, err := getLLM(profile).query(
 		request,

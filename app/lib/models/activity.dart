@@ -21,6 +21,8 @@ class Activity {
   final int reps;
   @JsonKey(name: 'weight_kg')
   final int weightKg;
+  @JsonKey(name: 'modifiers', defaultValue: const [])
+  final List<String> modifiers;
   @JsonKey(name: 'rest')
   final int rest;
   @JsonKey(name: 'detail')
@@ -36,6 +38,7 @@ class Activity {
     required this.duration,
     required this.reps,
     required this.weightKg,
+    required this.modifiers,
     required this.rest,
     required this.detail,
     required this.feedback,

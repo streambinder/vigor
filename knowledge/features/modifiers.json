@@ -1,0 +1,34 @@
+[
+  {
+    "id": "weighted-vest",
+    "patterns": [".*"]
+  },
+  {
+    "id": "parallettes",
+    "patterns": ["push-up", "dip", "l-sit", "planche", "handstand"]
+  },
+  {
+    "id": "ankle-weights",
+    "patterns": ["leg-raise", "kick", "lunge", "running", "flutter"]
+  },
+  {
+    "id": "dip-belt",
+    "patterns": ["dip", "pull-up", "chin-up", "muscle-up"]
+  },
+  {
+    "id": "push-up-bars",
+    "patterns": ["push-up"]
+  },
+  {
+    "id": "resistance-bands",
+    "patterns": [".*"]
+  },
+  {
+    "id": "wrist-weights",
+    "patterns": ["punch", "raise", "arm-circle", "shadow"]
+  },
+  {
+    "id": "rings",
+    "patterns": ["dip", "row", "push-up", "muscle-up", "pull-up"]
+  }
+]

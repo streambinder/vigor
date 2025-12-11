@@ -17,6 +17,7 @@ const (
 	MaxPromptClassics    = 3
 	MaxFactDistance      = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
 	MaxEquipmentDistance = 0.3 // Maximum cosine distance for equipment matching (stricter)
+	MaxModifierDistance  = 0.3 // Maximum cosine distance for modifier matching
 )
 
 // QueryUserExercises retrieves exercises compatible with the user's profile and equipment.
@@ -160,4 +161,59 @@ func RetrieveClassics() ([]model.Classic, error) {
 		return nil, fmt.Errorf("failed to query classics: %w", err)
 	}
 	return classics, nil
+}
+
+// RetrieveUserModifiers retrieves modifiers that match user's available equipment.
+func RetrieveUserModifiers(equipment []string) ([]model.Modifier, error) {
+	if len(equipment) == 0 {
+		return nil, nil
+	}
+
+	// generate embeddings for user equipment
+	equipmentEmbeddings := make([][]float32, 0, len(equipment))
+	for _, entry := range equipment {
+		vec, err := embedding.GenVector(entry)
+		if err != nil {
+			log.Warn().Err(err).Str("equipment", entry).Msg("Failed to generate embedding for equipment")
+			continue
+		}
+		equipmentEmbeddings = append(equipmentEmbeddings, vec)
+	}
+
+	if len(equipmentEmbeddings) == 0 {
+		return nil, nil
+	}
+
+	// build dynamic OR clause for equipment matching using cosine distance
+	var matchConditions []string
+	var matchArgs []interface{}
+	for _, eqEmbed := range equipmentEmbeddings {
+		matchConditions = append(matchConditions, "modifier_embeddings.embedding <=> ? < ?")
+		matchArgs = append(matchArgs, pgvector.NewVector(eqEmbed), MaxModifierDistance)
+	}
+
+	var results []struct {
+		ModifierID string
+		Distance   float64
+		Modifier   model.Modifier `gorm:"embedded"`
+	}
+
+	matchSQL := strings.Join(matchConditions, " OR ")
+	if err := database.Knowledge.
+		Table("modifier_embeddings").
+		Select("modifier_embeddings.modifier_id, modifier_embeddings.embedding <=> ? as distance, modifiers.*",
+			pgvector.NewVector(equipmentEmbeddings[0])).
+		Joins("JOIN modifiers ON modifiers.id = modifier_embeddings.modifier_id").
+		Where(matchSQL, matchArgs...).
+		Order("distance ASC").
+		Scan(&results).
+		Error; err != nil {
+		return nil, fmt.Errorf("failed to query modifiers: %w", err)
+	}
+
+	modifiers := make([]model.Modifier, 0, len(results))
+	for _, result := range results {
+		modifiers = append(modifiers, result.Modifier)
+	}
+	return modifiers, nil
 }

@@ -54,10 +54,23 @@ EXERCISE SELECTION PRIORITY:
 3. Variety: avoid repeating exercises from recent training history
 4. Progression: increase weight/reps based on feedback from history
 
+EQUIPMENT MODIFIERS:
+- If EQUIPMENT_MODIFIERS are provided, you MAY apply them to compatible exercises
+- Apply weighted modifiers (vest, dip belt, ankle weights) when:
+  - User feedback indicates current difficulty is too easy
+  - Progressive overload is needed for strength goals
+- Apply ROM modifiers (parallettes, push-up bars) when:
+  - Exercise targets muscles that benefit from deeper stretch
+  - User has no wrist injuries
+- Set weight_kg based on user history and progression needs
+- Resistance bands can assist (regression) or add difficulty (progression)
+- When applying modifiers, set the "modifiers" array to the list of modifier IDs (empty array if none)
+
 ACTIVITY PARAMETERS:
 - duration: seconds for cardio, stretches, holds (use 0 when reps > 0)
 - reps: count for strength exercises (use 0 for time-based activities)
 - weight_kg: based on history feedback, 0 for bodyweight
+- modifiers: array of equipment modifiers applied (empty array if none)
 - rest: 30-60s for hypertrophy, 2-3min for strength, 10-20s for circuits
 
 KNOWLEDGE FACTS:
@@ -91,8 +104,8 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
           "repeats": 1,
           "rest": 0,
           "activities": [
-            {"name": "arms-apart-circular-toe-touch-male", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "rest": 10},
-            {"name": "dynamic-chest-stretch-male", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "rest": 10}
+            {"name": "arms-apart-circular-toe-touch-male", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "modifiers": [], "rest": 10},
+            {"name": "dynamic-chest-stretch-male", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "modifiers": [], "rest": 10}
           ]
         }
       ]
@@ -105,16 +118,16 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
           "repeats": 3,
           "rest": 60,
           "activities": [
-            {"name": "dumbbell-bench-press", "type": "exercise", "duration": 0, "reps": 10, "weight_kg": 20, "rest": 45},
-            {"name": "dumbbell-bent-over-row", "type": "exercise", "duration": 0, "reps": 10, "weight_kg": 18, "rest": 45}
+            {"name": "dumbbell-bench-press", "type": "exercise", "duration": 0, "reps": 10, "weight_kg": 20, "modifiers": [], "rest": 45},
+            {"name": "dumbbell-bent-over-row", "type": "exercise", "duration": 0, "reps": 10, "weight_kg": 18, "modifiers": [], "rest": 45}
           ]
         },
         {
           "repeats": 3,
           "rest": 45,
           "activities": [
-            {"name": "dumbbell-biceps-curl", "type": "exercise", "duration": 0, "reps": 12, "weight_kg": 10, "rest": 30},
-            {"name": "dumbbell-triceps-kickback", "type": "exercise", "duration": 0, "reps": 12, "weight_kg": 8, "rest": 30}
+            {"name": "dumbbell-biceps-curl", "type": "exercise", "duration": 0, "reps": 12, "weight_kg": 10, "modifiers": [], "rest": 30},
+            {"name": "dumbbell-triceps-kickback", "type": "exercise", "duration": 0, "reps": 12, "weight_kg": 8, "modifiers": [], "rest": 30}
           ]
         }
       ]
@@ -127,8 +140,8 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
           "repeats": 1,
           "rest": 0,
           "activities": [
-            {"name": "chest-and-front-of-shoulder-stretch", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "rest": 10},
-            {"name": "standing-calves-calf-stretch", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "rest": 0}
+            {"name": "chest-and-front-of-shoulder-stretch", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "modifiers": [], "rest": 10},
+            {"name": "standing-calves-calf-stretch", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "modifiers": [], "rest": 0}
           ]
         }
       ]
@@ -136,31 +149,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   ]
 }
 `)
-//line llm/prompt/system.qtpl:119
+//line llm/prompt/system.qtpl:132
 }
 
-//line llm/prompt/system.qtpl:119
+//line llm/prompt/system.qtpl:132
 func WriteSystem(qq422016 qtio422016.Writer) {
-//line llm/prompt/system.qtpl:119
+//line llm/prompt/system.qtpl:132
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:119
+//line llm/prompt/system.qtpl:132
 	StreamSystem(qw422016)
-//line llm/prompt/system.qtpl:119
+//line llm/prompt/system.qtpl:132
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:119
+//line llm/prompt/system.qtpl:132
 }
 
-//line llm/prompt/system.qtpl:119
+//line llm/prompt/system.qtpl:132
 func System() string {
-//line llm/prompt/system.qtpl:119
+//line llm/prompt/system.qtpl:132
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:119
+//line llm/prompt/system.qtpl:132
 	WriteSystem(qb422016)
-//line llm/prompt/system.qtpl:119
+//line llm/prompt/system.qtpl:132
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:119
+//line llm/prompt/system.qtpl:132
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:119
+//line llm/prompt/system.qtpl:132
 	return qs422016
-//line llm/prompt/system.qtpl:119
+//line llm/prompt/system.qtpl:132
 }

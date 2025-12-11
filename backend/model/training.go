@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"github.com/streambinder/vigor/encoder"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -109,8 +110,9 @@ type Activity struct {
 	Type     string         `gorm:"not null" json:"type" prompt:"Activity category;enum:exercise,stretch,rest"`
 	Duration int            `gorm:"not null" json:"duration" prompt:"Seconds (use 0 when reps > 0)"`
 	Reps     int            `gorm:"not null" json:"reps" prompt:"Repetition count (use 0 for time-based)"`
-	WeightKg int            `gorm:"not null" json:"weight_kg" prompt:"Weight in kg (0 for bodyweight)"`
-	Rest     int            `gorm:"not null" json:"rest" prompt:"Rest seconds after this activity"`
+	WeightKg  int            `gorm:"not null" json:"weight_kg" prompt:"Weight in kg (0 for bodyweight)"`
+	Modifiers pq.StringArray `gorm:"type:text[]" json:"modifiers" prompt:"Equipment modifiers applied (empty array if none)"`
+	Rest      int            `gorm:"not null" json:"rest" prompt:"Rest seconds after this activity"`
 	Detail   datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"`
 	Feedback string         `json:"feedback" prompt:"-"`
 

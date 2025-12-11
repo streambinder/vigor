@@ -40,6 +40,8 @@ func main() {
 		&model.Exercise{},
 		&model.ExerciseEmbedding{},
 		&model.EquipmentEmbedding{},
+		&model.Modifier{},
+		&model.ModifierEmbedding{},
 		&model.Fact{},
 		&model.FactEmbedding{},
 		&model.Classic{},
@@ -50,6 +52,9 @@ func main() {
 
 	if err := boostrapExercises(gormDB); err != nil {
 		log.Fatalf("Failed to inject exercises: %s", err)
+	}
+	if err := bootstrapModifiers(gormDB); err != nil {
+		log.Fatalf("Failed to inject modifiers: %s", err)
 	}
 	if err := boostrapFacts(gormDB); err != nil {
 		log.Fatalf("Failed to inject facts: %s", err)
@@ -124,6 +129,38 @@ func boostrapExercises(gormDB *gorm.DB) error {
 	return nil
 }
 
+func bootstrapModifiers(gormDB *gorm.DB) error {
+	bytes, err := os.ReadFile(filepath.Join("features", "modifiers.json"))
+	if err != nil {
+		return err
+	}
+
+	var rows []model.Modifier
+	if err := json.Unmarshal(bytes, &rows); err != nil {
+		return err
+	}
+
+	for _, row := range rows {
+		if err := gormDB.FirstOrCreate(&row, model.Modifier{ID: row.ID}).Error; err != nil {
+			return err
+		}
+
+		// embed based on ID only
+		vector, err := embedding.GenVector(row.ID)
+		if err != nil {
+			return err
+		}
+
+		if err := gormDB.FirstOrCreate(
+			&model.ModifierEmbedding{ModifierID: row.ID, Text: row.ID, Embedding: pgvector.NewVector(vector)},
+			model.ModifierEmbedding{ModifierID: row.ID},
+		).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
 func boostrapFacts(gormDB *gorm.DB) error {
 	bytes, err := os.ReadFile(filepath.Join("features", "facts.json"))
 	if err != nil {

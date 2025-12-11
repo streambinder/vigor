@@ -7,6 +7,7 @@
     profile model.Profile,
     exercises []model.Exercise,
     equipment []string,
+    modifiers []model.Modifier,
     userPrompt string,
     duration int,
     recentTrainings []model.Training,
@@ -33,6 +34,12 @@ Age: {%d profile.Age() %}, Height: {%f.0 profile.Height %}cm, Weight: {%f.0 prof
 <<<EQUIPMENT>>>
 {% for i, eq := range equipment %}{%s eq %}{% if i < len(equipment)-1 %}, {% endif %}{% endfor %}
 <<<END_EQUIPMENT>>>
+{% endif %}
+
+{% if len(modifiers) > 0 %}
+<<<EQUIPMENT_MODIFIERS (available to enhance exercises)>>>
+{% for _, mod := range modifiers %}- {%s mod.ID %}: applies to exercises matching [{%s strings.Join(mod.Patterns, ", ") %}]
+{% endfor %}<<<END_EQUIPMENT_MODIFIERS>>>
 {% endif %}
 
 <<<AVAILABLE_EXERCISES ({%d len(exercises) %} options)>>>

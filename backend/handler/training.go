@@ -78,6 +78,13 @@ func postTraining(c *fiber.Ctx) error {
 		Dur("duration_ms", time.Since(queryExerciseStart)).
 		Msg("Queried exercises from database")
 
+	// Query modifiers that match user's equipment
+	modifiers, err := rag.RetrieveUserModifiers(equipment)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query modifiers from database")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
 	// Query knowledge facts related to user's profile
 	queryFactsStart := time.Now()
 	facts, err := rag.RetrieveUserFacts(profile, req.Prompt)
@@ -125,7 +132,18 @@ func postTraining(c *fiber.Ctx) error {
 	}
 
 	llmStart := time.Now()
-	training, prompt, err := llm.GenTraining(profile, exercises, equipment, req.Prompt, req.Duration, recentTrainings, recentGenerations, facts, classics)
+	training, prompt, err := llm.GenTraining(
+		profile,
+		exercises,
+		equipment,
+		modifiers,
+		req.Prompt,
+		req.Duration,
+		recentTrainings,
+		recentGenerations,
+		facts,
+		classics,
+	)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate training via LLM")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
