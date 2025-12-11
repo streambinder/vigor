@@ -288,42 +288,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Workout type badge + name on same line
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
-                            : Theme.of(context).colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        training.type,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.primaryColor
-                              : Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        training.name.toUpperCase(),
-                        style: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 18)
-                            : Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ),
-                  ],
+                Text(
+                  training.name,
+                  style: PlatformHelper.useLiquidGlass
+                      ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 18)
+                      : Theme.of(context).textTheme.titleLarge,
                 ),
                 if (isCompleted) ...[
-                  // For completed workouts: show only completion time and duration
+                  // For completed workouts: show completion time first, then other labels
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -336,7 +308,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Completed: ${_formatDate(training.completedAt ?? training.createdAt)}',
+                        _formatDate(training.completedAt ?? training.createdAt),
                         style: PlatformHelper.useLiquidGlass
                             ? LiquidGlassTheme.captionStyle.copyWith(
                                 color: LiquidGlassTheme.successColor,
@@ -346,6 +318,61 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                 ),
                       ),
                       const SizedBox(width: 16),
+                      if (partnerCount > 0) ...[
+                        Icon(
+                          Icons.people,
+                          size: 16,
+                          color: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle.color
+                              : Colors.grey[600],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$peopleCount',
+                          style: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle
+                              : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
+                        ),
+                        const SizedBox(width: 16),
+                      ],
+                      Icon(
+                        Icons.fitness_center,
+                        size: 16,
+                        color: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.captionStyle.color
+                            : Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        training.type,
+                        style: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.captionStyle
+                            : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.grey[600],
+                                ),
+                      ),
+                      const SizedBox(width: 16),
+                      if (training.parentId != null) ...[
+                        Icon(
+                          Icons.copy,
+                          size: 16,
+                          color: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle.color
+                              : Colors.grey[600],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Copied',
+                          style: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle
+                              : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
+                        ),
+                        const SizedBox(width: 16),
+                      ],
                       Icon(
                         Icons.schedule,
                         size: 16,
@@ -378,6 +405,42 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
+                      if (partnerCount > 0) ...[
+                        Icon(
+                          Icons.people,
+                          size: 16,
+                          color: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle.color
+                              : Colors.grey[600],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$peopleCount',
+                          style: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle
+                              : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
+                        ),
+                        const SizedBox(width: 16),
+                      ],
+                      Icon(
+                        Icons.fitness_center,
+                        size: 16,
+                        color: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.captionStyle.color
+                            : Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        training.type,
+                        style: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.captionStyle
+                            : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.grey[600],
+                                ),
+                      ),
+                      const SizedBox(width: 16),
                       if (isStale) ...[
                         Icon(
                           Icons.warning,
@@ -401,48 +464,21 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         ),
                         const SizedBox(width: 16),
                       ],
-                      if (partnerCount > 0) ...[
-                        Icon(
-                          Icons.people,
-                          size: 16,
-                          color: PlatformHelper.useLiquidGlass
-                              ? Colors.blue[700]
-                              : Colors.blue[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '$peopleCount',
-                          style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle.copyWith(
-                                  color: Colors.blue[700],
-                                  fontWeight: FontWeight.w600,
-                                )
-                              : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.blue[600],
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                        ),
-                        const SizedBox(width: 16),
-                      ],
                       if (training.parentId != null) ...[
                         Icon(
                           Icons.copy,
                           size: 16,
                           color: PlatformHelper.useLiquidGlass
-                              ? Colors.purple[700]
-                              : Colors.purple[600],
+                              ? LiquidGlassTheme.captionStyle.color
+                              : Colors.grey[600],
                         ),
                         const SizedBox(width: 4),
                         Text(
                           'Copied',
                           style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle.copyWith(
-                                  color: Colors.purple[700],
-                                  fontWeight: FontWeight.w600,
-                                )
+                              ? LiquidGlassTheme.captionStyle
                               : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.purple[600],
-                                    fontWeight: FontWeight.w600,
+                                    color: Colors.grey[600],
                                   ),
                         ),
                         const SizedBox(width: 16),
@@ -456,7 +492,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Created: ${_formatDate(training.createdAt)}',
+                        _formatDate(training.createdAt),
                         style: PlatformHelper.useLiquidGlass
                             ? LiquidGlassTheme.captionStyle
                             : Theme.of(context).textTheme.bodySmall?.copyWith(

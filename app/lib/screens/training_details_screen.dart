@@ -357,39 +357,11 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Workout type badge + name on same line
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: PlatformHelper.useLiquidGlass
-                                ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
-                                : Theme.of(context).colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            training.type,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: PlatformHelper.useLiquidGlass
-                                  ? LiquidGlassTheme.primaryColor
-                                  : Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            training.name,
-                            style: PlatformHelper.useLiquidGlass
-                                ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 24)
-                                : Theme.of(context).textTheme.headlineMedium,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      training.name,
+                      style: PlatformHelper.useLiquidGlass
+                          ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 24)
+                          : Theme.of(context).textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -403,6 +375,17 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                       spacing: 16,
                       runSpacing: 8,
                       children: [
+                        if (_partnerCount > 0)
+                          _buildInfoLabel(
+                            context,
+                            icon: Icons.people,
+                            text: '${1 + _partnerCount}',
+                          ),
+                        _buildInfoLabel(
+                          context,
+                          icon: Icons.fitness_center,
+                          text: training.type,
+                        ),
                         _buildInfoLabel(
                           context,
                           icon: Icons.schedule,
@@ -413,19 +396,11 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                           icon: Icons.calendar_today,
                           text: _formatDate(training.completedAt ?? training.createdAt),
                         ),
-                        if (_partnerCount > 0)
-                          _buildInfoLabel(
-                            context,
-                            icon: Icons.people,
-                            text: '${1 + _partnerCount}',
-                            color: Colors.blue[600],
-                          ),
                         if (training.parentId != null)
                           _buildInfoLabel(
                             context,
                             icon: Icons.copy,
                             text: 'Copied',
-                            color: Colors.purple[600],
                           ),
                       ],
                     ),
