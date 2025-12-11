@@ -36,7 +36,9 @@ func getLLM(_ model.Profile) LLM {
 // GenTraining generates a personalized training plan using an LLM.
 func GenTraining(
 	profile model.Profile,
-	exercises []model.Exercise,
+	workExercises []model.Exercise,
+	warmupExercises []model.Exercise,
+	cooldownExercises []model.Exercise,
 	equipment []string,
 	modifiers []model.Modifier,
 	userPrompt string,
@@ -50,7 +52,9 @@ func GenTraining(
 		prompt.System(),
 		prompt.GenTraining(
 			profile,
-			exercises,
+			workExercises,
+			warmupExercises,
+			cooldownExercises,
 			equipment,
 			modifiers,
 			userPrompt,

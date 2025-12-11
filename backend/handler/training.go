@@ -68,13 +68,25 @@ func postTraining(c *fiber.Ctx) error {
 
 	// Query exercises compatible with the user's profile and equipment
 	queryExerciseStart := time.Now()
-	exercises, err := rag.RetrieveUserExercises(profile, equipment)
+	workExercises, err := rag.RetrieveWorkExercises(profile, equipment)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to query exercises from database")
+		log.Error().Err(err).Msg("Failed to query work exercises from database")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	warmupExercises, err := rag.RetrieveWarmupExercises()
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query warmup exercises from database")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	cooldownExercises, err := rag.RetrieveCooldownExercises()
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query cooldown exercises from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	log.Info().
-		Int("exercise_count", len(exercises)).
+		Int("work_exercise_count", len(workExercises)).
+		Int("warmup_exercise_count", len(warmupExercises)).
+		Int("cooldown_exercise_count", len(cooldownExercises)).
 		Dur("duration_ms", time.Since(queryExerciseStart)).
 		Msg("Queried exercises from database")
 
@@ -134,7 +146,9 @@ func postTraining(c *fiber.Ctx) error {
 	llmStart := time.Now()
 	training, prompt, err := llm.GenTraining(
 		profile,
-		exercises,
+		workExercises,
+		warmupExercises,
+		cooldownExercises,
 		equipment,
 		modifiers,
 		req.Prompt,

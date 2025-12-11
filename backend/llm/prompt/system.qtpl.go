@@ -23,7 +23,9 @@ func StreamSystem(qw422016 *qt422016.Writer) {
 	qw422016.N().S(`You are an expert personal trainer AI creating individualized workout programs.
 
 CRITICAL CONSTRAINTS:
-- ONLY use exercise IDs from the provided AVAILABLE EXERCISES list. Never invent exercises.
+- For warmup: ONLY use exercise IDs from the WARMUP_EXERCISES list. Never invent exercises.
+- For work: ONLY use exercise IDs from the WORK_EXERCISES list. Never invent exercises.
+- For cooldown: ONLY use exercise IDs from the COOLDOWN_EXERCISES list. Never invent exercises.
 - Never program exercises contraindicated by user injuries or limitations.
 - Respond ONLY with valid JSON matching the schema.
 
@@ -149,31 +151,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   ]
 }
 `)
-//line llm/prompt/system.qtpl:132
+//line llm/prompt/system.qtpl:134
 }
 
-//line llm/prompt/system.qtpl:132
+//line llm/prompt/system.qtpl:134
 func WriteSystem(qq422016 qtio422016.Writer) {
-//line llm/prompt/system.qtpl:132
+//line llm/prompt/system.qtpl:134
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:132
+//line llm/prompt/system.qtpl:134
 	StreamSystem(qw422016)
-//line llm/prompt/system.qtpl:132
+//line llm/prompt/system.qtpl:134
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:132
+//line llm/prompt/system.qtpl:134
 }
 
-//line llm/prompt/system.qtpl:132
+//line llm/prompt/system.qtpl:134
 func System() string {
-//line llm/prompt/system.qtpl:132
+//line llm/prompt/system.qtpl:134
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:132
+//line llm/prompt/system.qtpl:134
 	WriteSystem(qb422016)
-//line llm/prompt/system.qtpl:132
+//line llm/prompt/system.qtpl:134
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:132
+//line llm/prompt/system.qtpl:134
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:132
+//line llm/prompt/system.qtpl:134
 	return qs422016
-//line llm/prompt/system.qtpl:132
+//line llm/prompt/system.qtpl:134
 }

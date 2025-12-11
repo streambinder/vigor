@@ -12,7 +12,9 @@ import (
 )
 
 const (
-	MaxPromptExercises   = 20 // reduced from 50 to improve model focus and reduce context flooding
+	MaxWorkExercises     = 20 // RAG-based retrieval for main workout
+	MaxWarmupExercises   = 8  // random selection for warmup
+	MaxCooldownExercises = 5  // random selection for cooldown
 	MaxPromptFacts       = 5
 	MaxPromptClassics    = 3
 	MaxFactDistance      = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
@@ -20,8 +22,15 @@ const (
 	MaxModifierDistance  = 0.3 // Maximum cosine distance for modifier matching
 )
 
-// QueryUserExercises retrieves exercises compatible with the user's profile and equipment.
-func RetrieveUserExercises(profile model.Profile, equipment []string) ([]model.Exercise, error) {
+var (
+	WorkTypes     = []string{"cardio", "strength", "skill"}
+	WarmupTypes   = []string{"mobility", "skill", "cardio"}
+	CooldownTypes = []string{"flexibility", "cardio", "balance"}
+)
+
+// RetrieveWorkExercises retrieves exercises for the main workout phase via RAG.
+// Filters by work types (cardio, strength, skill) and user equipment.
+func RetrieveWorkExercises(profile model.Profile, equipment []string) ([]model.Exercise, error) {
 	embeddingText := GenUserExercises(profile, equipment)
 	exerciseEmbedding, err := embedding.GenVector(embeddingText)
 	if err != nil {
@@ -59,14 +68,16 @@ func RetrieveUserExercises(profile model.Profile, equipment []string) ([]model.E
 	// 2. Join to exercises
 	// 3. Use subqueries to check equipment matching via exercise_equipment join table
 	// 4. Filter: bodyweight OR all equipment matches user equipment
-	// 5. Order by exercise embedding distance
+	// 5. Filter by exercise type for work phase
+	// 6. Order by exercise embedding distance
 	query := database.Knowledge.
 		Table("exercise_embeddings").
 		Select(`DISTINCT exercise_embeddings.exercise_id,
 		        exercise_embeddings.text,
 		        exercise_embeddings.embedding <=> ? as distance,
 		        exercises.*`, pgvector.NewVector(exerciseEmbedding)).
-		Joins("JOIN exercises ON exercises.id = exercise_embeddings.exercise_id")
+		Joins("JOIN exercises ON exercises.id = exercise_embeddings.exercise_id").
+		Where("exercises.type IN ?", WorkTypes)
 
 	// Build WHERE clause dynamically based on user equipment
 	if len(equipmentMatchConditions) > 0 {
@@ -98,9 +109,9 @@ func RetrieveUserExercises(profile model.Profile, equipment []string) ([]model.E
 
 	// Wrap in outer query to shuffle and limit
 	if err := database.Knowledge.
-		Table("(?) AS pool", query.Order("distance ASC").Limit(MaxPromptExercises * 3)).
+		Table("(?) AS pool", query.Order("distance ASC").Limit(MaxWorkExercises * 3)).
 		Order("RANDOM()").
-		Limit(MaxPromptExercises).
+		Limit(MaxWorkExercises).
 		Scan(&results).
 		Error; err != nil {
 		return nil, fmt.Errorf("failed to execute similarity search: %w", err)
@@ -216,4 +227,42 @@ func RetrieveUserModifiers(equipment []string) ([]model.Modifier, error) {
 		modifiers = append(modifiers, result.Modifier)
 	}
 	return modifiers, nil
+}
+
+// RetrieveWarmupExercises retrieves exercises for the warmup phase via random selection.
+// Filters by warmup types (mobility, skill, cardio) and returns bodyweight exercises only.
+func RetrieveWarmupExercises() ([]model.Exercise, error) {
+	var exercises []model.Exercise
+	if err := database.Knowledge.
+		Where("type IN ?", WarmupTypes).
+		Where(`NOT EXISTS (
+			SELECT 1 FROM exercise_equipment
+			WHERE exercise_equipment.exercise_id = exercises.id
+		)`).
+		Order("RANDOM()").
+		Limit(MaxWarmupExercises).
+		Find(&exercises).
+		Error; err != nil {
+		return nil, fmt.Errorf("failed to query warmup exercises: %w", err)
+	}
+	return exercises, nil
+}
+
+// RetrieveCooldownExercises retrieves exercises for the cooldown phase via random selection.
+// Filters by cooldown types (flexibility, cardio, balance) and returns bodyweight exercises only.
+func RetrieveCooldownExercises() ([]model.Exercise, error) {
+	var exercises []model.Exercise
+	if err := database.Knowledge.
+		Where("type IN ?", CooldownTypes).
+		Where(`NOT EXISTS (
+			SELECT 1 FROM exercise_equipment
+			WHERE exercise_equipment.exercise_id = exercises.id
+		)`).
+		Order("RANDOM()").
+		Limit(MaxCooldownExercises).
+		Find(&exercises).
+		Error; err != nil {
+		return nil, fmt.Errorf("failed to query cooldown exercises: %w", err)
+	}
+	return exercises, nil
 }
