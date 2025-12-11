@@ -19,6 +19,12 @@
 ) -%}
 Generate a {%d duration %}-minute training session.
 
+{% if len(profiles) > 0 %}{% code var allGoals []string; goalMap := make(map[string]bool) %}{% for _, profile := range profiles %}{% for _, goal := range profile.Goals() %}{% if !goalMap[goal.Description] %}{% code goalMap[goal.Description] = true; allGoals = append(allGoals, goal.Description) %}{% endif %}{% endfor %}{% endfor %}{% if len(allGoals) > 0 %}
+<<<USER_GOALS (PRIMARY DESIGN CRITERIA - ALL EXERCISE SELECTIONS MUST SERVE THESE GOALS)>>>
+{% for _, goal := range allGoals %}- {%s goal %}
+{% endfor %}<<<END_USER_GOALS>>>
+
+{% endif %}{% endif %}
 {% if len(profiles) > 1 %}
 <<<PARTNER_WORKOUT>>>
 This is a partner workout for {%d len(profiles) %} participants.
@@ -73,7 +79,7 @@ Use ONLY these exercise IDs for the cooldown routine.
 <<<END_COOLDOWN_EXERCISES>>>
 
 {% if len(recentTrainings) > 0 %}
-<<<RECENT_HISTORY (use to ensure proper progression towards user goals, respecting user feedback on exercises and general comments)>>>
+<<<RECENT_HISTORY (CRITICAL: analyze progression towards USER_GOALS, apply progressive overload, respect user feedback)>>>
 {% for _, training := range recentTrainings %}{%d training.DaysSince() %}d ago{% if len(training.Feedback) > 0 %} | feedback: {%s training.Feedback %}{% endif %} | exercises: {% for _, activity := range training.Activities() %}{%s activity.Name %} ({% if activity.WeightKg > 0 %}weight: {%d activity.WeightKg %}kg{% endif %}, {% if activity.Reps > 0 %}reps: {%d activity.Reps %}{% endif %}, {% if len(activity.Feedback) > 0 %}feedback: {%s activity.Feedback %}{% endif %}) {% endfor %}
 {% endfor %}<<<END_RECENT_HISTORY>>>
 {% endif %}
