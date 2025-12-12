@@ -142,29 +142,6 @@ func (a *Activity) DetailType() string {
 	return detail.Type
 }
 
-func (t Training) CalcDuration() (duration int) {
-	for _, r := range t.Routines {
-		for _, b := range r.Blocks {
-			blockDuration := 0
-			for _, a := range b.Activities {
-				activityDuration := a.Duration
-				if a.Reps > 0 {
-					activityDuration += WeightActivityDurationPerRep * a.Reps
-				}
-				blockDuration += activityDuration + a.Rest
-			}
-			duration += blockDuration * b.Repeats
-			// rest between repeats, not after the last one
-			if b.Repeats > 1 {
-				duration += b.Rest * (b.Repeats - 1)
-			}
-		}
-		duration += r.Rest
-	}
-	// round up to next 5 minutes
-	return ((duration + 299) / 300) * 300
-}
-
 func (t Training) DaysSince() int {
 	date := t.CreatedAt
 	if t.CompletedAt != nil {

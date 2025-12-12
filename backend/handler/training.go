@@ -194,7 +194,6 @@ func postTraining(c *fiber.Ctx) error {
 	}
 	log.Info().Dur("duration_ms", time.Since(llmStart)).Msg("Generated training via LLM")
 	training.UserID = requestorProfile.UserID
-	training.Duration = training.CalcDuration()
 	if promptJSON, err := json.Marshal(prompt); err == nil {
 		training.Prompt = promptJSON
 	}
