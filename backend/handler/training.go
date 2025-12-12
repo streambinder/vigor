@@ -210,6 +210,7 @@ func postTraining(c *fiber.Ctx) error {
 	}
 	if gym != nil {
 		training.GymID = &gym.ID
+		training.Gym = gym
 	}
 	training.Equipment = equipmentIDs
 
@@ -258,6 +259,7 @@ func getTraining(c *fiber.Ctx) error {
 	userID := c.Locals("userID")
 	var trainings []model.Training
 	if err := database.DB.
+		Preload("Gym").
 		Preload("Routines.Blocks.Activities").
 		Where("user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ? AND deleted_at IS NULL)", userID, userID).
 		Order("(completed_at IS NOT NULL), COALESCE(completed_at, created_at) desc").
@@ -342,6 +344,7 @@ func postTrainingCompleteById(c *fiber.Ctx) error {
 	var training model.Training
 	// load training with associations so we can update activities
 	if err := database.DB.
+		Preload("Gym").
 		Preload("Routines.Blocks.Activities").
 		First(&training, "id = ? AND (user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ? AND deleted_at IS NULL))", trainingID, userID, userID).Error; err != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})

@@ -4,6 +4,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'training_reasoning.dart';
 import 'routine.dart';
+import 'gym.dart';
 
 part 'training.g.dart';
 
@@ -39,6 +40,8 @@ class Training {
   final String? parentId;
   @JsonKey(name: 'gym_id')
   final String? gymId;
+  @JsonKey(name: 'gym')
+  final Gym? gym;
 
   Training({
     required this.id,
@@ -56,6 +59,7 @@ class Training {
     required this.userId,
     this.parentId,
     this.gymId,
+    this.gym,
   });
 
   factory Training.fromJson(Map<String, dynamic> json) => _$TrainingFromJson(json);

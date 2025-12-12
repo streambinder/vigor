@@ -516,11 +516,11 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                             icon: Icons.people,
                             text: '${1 + _partnerCount}',
                           ),
-                        if (training.gymId != null)
+                        if (training.gym != null)
                           _buildInfoLabel(
                             context,
                             icon: Icons.location_on,
-                            text: 'Gym',
+                            text: training.gym!.name,
                           ),
                         _buildInfoLabel(
                           context,

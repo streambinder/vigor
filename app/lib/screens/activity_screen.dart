@@ -337,7 +337,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         ),
                         const SizedBox(width: 16),
                       ],
-                      if (training.gymId != null) ...[
+                      if (training.gym != null) ...[
                         Icon(
                           Icons.location_on,
                           size: 16,
@@ -347,7 +347,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Gym',
+                          training.gym!.name,
                           style: PlatformHelper.useLiquidGlass
                               ? LiquidGlassTheme.captionStyle
                               : Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -460,7 +460,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         ),
                         const SizedBox(width: 16),
                       ],
-                      if (training.gymId != null) ...[
+                      if (training.gym != null) ...[
                         Icon(
                           Icons.location_on,
                           size: 16,
@@ -470,7 +470,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Gym',
+                          training.gym!.name,
                           style: PlatformHelper.useLiquidGlass
                               ? LiquidGlassTheme.captionStyle
                               : Theme.of(context).textTheme.bodySmall?.copyWith(
