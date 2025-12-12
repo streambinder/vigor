@@ -5,14 +5,21 @@ import 'secure_storage_service.dart';
 
 class UserInfo {
   final String id;
-  final String email;
+  final String firstName;
+  final String lastName;
 
-  const UserInfo({required this.id, required this.email});
+  const UserInfo({required this.id, required this.firstName, required this.lastName});
+
+  String get displayName {
+    if (firstName.isEmpty && lastName.isEmpty) return 'Unknown';
+    return '$firstName $lastName'.trim();
+  }
 
   factory UserInfo.fromJson(Map<String, dynamic> json) {
     return UserInfo(
-      id: json['id'] as String? ?? '',
-      email: json['email'] as String? ?? '',
+      id: json['user_id'] as String? ?? '',
+      firstName: json['first_name'] as String? ?? '',
+      lastName: json['last_name'] as String? ?? '',
     );
   }
 }

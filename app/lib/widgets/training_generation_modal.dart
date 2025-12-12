@@ -304,7 +304,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                     children: _partners.map((partner) {
                       return Chip(
                         label: Text(
-                          partner.email,
+                          partner.displayName,
                           style: PlatformHelper.useLiquidGlass
                               ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
                               : null,

@@ -29,7 +29,7 @@ type TrainingRequest struct {
 	Equipment []string `json:"equipment"` // List of available equipment (optional if gym is specified)
 	Gym       string   `json:"gym"`       // Name of the gym to use for equipment lookup
 	Prompt    string   `json:"prompt"`    // Specific prompt to use for generating the training plan
-	Partners  []string `json:"partners"`  // Optional partners (user UUIDs or emails) for partner workouts
+	Partners  []string `json:"partners"`  // Optional partner user UUIDs for partner workouts
 }
 
 // initTraining registers training-related routes.
@@ -63,19 +63,15 @@ func postTraining(c *fiber.Ctx) error {
 	profiles := []model.Profile{requestorProfile}
 	var partnerUserIDs []uuid.UUID
 
-	// fetch partner profiles if specified (can be UUID or email)
+	// fetch partner profiles by UUID
 	for _, partner := range req.Partners {
+		partnerID, err := uuid.Parse(partner)
+		if err != nil {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid partner UUID"})
+		}
 		var user model.User
-		// try parsing as UUID first
-		if partnerID, err := uuid.Parse(partner); err == nil {
-			if err := database.DB.Preload("Profile").First(&user, "id = ?", partnerID).Error; err != nil {
-				return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "user not found or sharing disabled"})
-			}
-		} else {
-			// treat as email
-			if err := database.DB.Preload("Profile").First(&user, "email = ?", partner).Error; err != nil {
-				return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "user not found or sharing disabled"})
-			}
+		if err := database.DB.Preload("Profile").First(&user, "id = ?", partnerID).Error; err != nil {
+			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "user not found"})
 		}
 		profiles = append(profiles, user.Profile)
 		partnerUserIDs = append(partnerUserIDs, user.ID)
@@ -384,7 +380,7 @@ func postTrainingPartner(c *fiber.Ctx) error {
 	}
 
 	var body struct {
-		Partner string `json:"partner"` // user UUID or email
+		Partner string `json:"partner"` // user UUID
 	}
 	if err := c.BodyParser(&body); err != nil || body.Partner == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "partner is required"})
@@ -396,16 +392,14 @@ func postTrainingPartner(c *fiber.Ctx) error {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})
 	}
 
-	// lookup partner by UUID or email
+	// lookup partner by UUID
+	partnerID, err := uuid.Parse(body.Partner)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid partner UUID"})
+	}
 	var partnerUser model.User
-	if partnerID, err := uuid.Parse(body.Partner); err == nil {
-		if err := database.DB.First(&partnerUser, "id = ?", partnerID).Error; err != nil {
-			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "user not found or sharing disabled"})
-		}
-	} else {
-		if err := database.DB.First(&partnerUser, "email = ?", body.Partner).Error; err != nil {
-			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "user not found or sharing disabled"})
-		}
+	if err := database.DB.First(&partnerUser, "id = ?", partnerID).Error; err != nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "user not found"})
 	}
 
 	// prevent adding self as partner
@@ -433,7 +427,7 @@ func postTrainingCopy(c *fiber.Ctx) error {
 	}
 
 	var body struct {
-		Target string `json:"target"` // user UUID or email
+		Target string `json:"target"` // user UUID
 	}
 	if err := c.BodyParser(&body); err != nil || body.Target == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "target is required"})
@@ -460,16 +454,14 @@ func postTrainingCopy(c *fiber.Ctx) error {
 		return c.Status(http.StatusForbidden).JSON(fiber.Map{"error": "access denied"})
 	}
 
-	// lookup target user by UUID or email
+	// lookup target user by UUID
+	targetID, err := uuid.Parse(body.Target)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid target UUID"})
+	}
 	var targetUser model.User
-	if targetID, err := uuid.Parse(body.Target); err == nil {
-		if err := database.DB.First(&targetUser, "id = ?", targetID).Error; err != nil {
-			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "user not found or sharing disabled"})
-		}
-	} else {
-		if err := database.DB.First(&targetUser, "email = ?", body.Target).Error; err != nil {
-			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "user not found or sharing disabled"})
-		}
+	if err := database.DB.First(&targetUser, "id = ?", targetID).Error; err != nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "user not found"})
 	}
 
 	clone := source.Clone(targetUser.ID)

@@ -77,7 +77,7 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
         _filteredUsers = _users;
       } else {
         final lower = query.toLowerCase();
-        _filteredUsers = _users.where((u) => u.email.toLowerCase().contains(lower)).toList();
+        _filteredUsers = _users.where((u) => u.displayName.toLowerCase().contains(lower)).toList();
       }
     });
   }
@@ -116,7 +116,7 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
                     const SizedBox(height: 12),
                     AdaptiveTextField(
                       controller: _searchController,
-                      placeholder: 'Search by email',
+                      placeholder: 'Search by name',
                       prefix: const Icon(Icons.search, size: 20),
                       onChanged: _filterUsers,
                     ),
@@ -186,7 +186,7 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
                 ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
                 : Theme.of(context).colorScheme.primaryContainer,
             child: Text(
-              user.email.isNotEmpty ? user.email[0].toUpperCase() : '?',
+              user.firstName.isNotEmpty ? user.firstName[0].toUpperCase() : '?',
               style: TextStyle(
                 color: PlatformHelper.useLiquidGlass
                     ? LiquidGlassTheme.primaryColor
@@ -195,7 +195,7 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
             ),
           ),
           title: Text(
-            user.email,
+            user.displayName,
             style: PlatformHelper.useLiquidGlass ? LiquidGlassTheme.bodyStyle : null,
           ),
           onTap: () => Navigator.of(context).pop(user),

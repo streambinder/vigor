@@ -196,7 +196,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     final shouldAdd = await AdaptiveAlertDialog.show<bool>(
       context: context,
       title: 'Add Partner',
-      content: 'Add ${user.email} as a partner to "${training.name}"?',
+      content: 'Add ${user.displayName} as a partner to "${training.name}"?',
       actions: [
         AdaptiveDialogAction(
           label: 'Cancel',
@@ -284,7 +284,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     final shouldShare = await AdaptiveAlertDialog.show<bool>(
       context: context,
       title: 'Share with User',
-      content: 'Share "${training.name}" with ${user.email}?',
+      content: 'Share "${training.name}" with ${user.displayName}?',
       actions: [
         AdaptiveDialogAction(
           label: 'Cancel',

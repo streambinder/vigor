@@ -137,16 +137,15 @@ func getUser(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
-// getUsers handles GET /users - returns all users except the requesting user
+// getUsers handles GET /users - returns profiles for all users except the requesting user
 func getUsers(c *fiber.Ctx) error {
-	var users []model.User
-	if err := database.DB.Where("id != ?", c.Locals("userID")).Find(&users).Error; err != nil {
+	var profiles []model.Profile
+	if err := database.DB.Select("user_id", "first_name", "last_name").Where("user_id != ?", c.Locals("userID")).Find(&profiles).Error; err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch users"})
 	}
-	// return minimal user info (id and email only)
-	result := make([]fiber.Map, len(users))
-	for i, u := range users {
-		result[i] = fiber.Map{"id": u.ID, "email": u.Email}
+	result := make([]fiber.Map, len(profiles))
+	for i, p := range profiles {
+		result[i] = fiber.Map{"user_id": p.UserID, "first_name": p.FirstName, "last_name": p.LastName}
 	}
 	return c.JSON(fiber.Map{"users": result})
 }
