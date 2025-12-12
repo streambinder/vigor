@@ -19,6 +19,7 @@ func initUser(app *fiber.App) {
 	app.Post("/register", postRegister)
 	app.Post("/unregister", middleware.Authorized(), postUnregister)
 	app.Get("/user", middleware.Authorized(), getUser)
+	app.Get("/users", middleware.Authorized(), getUsers)
 	app.Post("/user/update", middleware.Authorized(), postUserUpdate)
 }
 
@@ -108,6 +109,20 @@ func getUser(c *fiber.Ctx) error {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
 	}
 	return c.JSON(user)
+}
+
+// getUsers handles GET /users - returns all users except the requesting user
+func getUsers(c *fiber.Ctx) error {
+	var users []model.User
+	if err := database.DB.Where("id != ?", c.Locals("userID")).Find(&users).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch users"})
+	}
+	// return minimal user info (id and email only)
+	result := make([]fiber.Map, len(users))
+	for i, u := range users {
+		result[i] = fiber.Map{"id": u.ID, "email": u.Email}
+	}
+	return c.JSON(fiber.Map{"users": result})
 }
 
 // postUserUpdate handles POST /user/update - updates the authenticated user's profile data

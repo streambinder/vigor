@@ -6,7 +6,9 @@ import '../models/training.dart';
 import '../services/training_service.dart';
 import '../services/secure_storage_service.dart';
 import '../services/preferences_service.dart';
+import '../services/user_service.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../widgets/user_select_dialog.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 
@@ -28,11 +30,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   final _formKey = GlobalKey<FormState>();
   final _durationController = TextEditingController(text: '60');
   final _promptController = TextEditingController();
-  final _partnerController = TextEditingController();
 
   Gym? _selectedGym;
   bool _isGenerating = false;
-  final List<String> _partners = [];
+  final List<UserInfo> _partners = [];
 
   @override
   void initState() {
@@ -51,21 +52,22 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   void dispose() {
     _durationController.dispose();
     _promptController.dispose();
-    _partnerController.dispose();
     super.dispose();
   }
 
-  void _addPartner() {
-    final partner = _partnerController.text.trim();
-    if (partner.isNotEmpty && !_partners.contains(partner)) {
+  Future<void> _addPartner() async {
+    final user = await showUserSelectDialog(
+      context: context,
+      title: 'Add Partner',
+    );
+    if (user != null && !_partners.any((p) => p.id == user.id)) {
       setState(() {
-        _partners.add(partner);
-        _partnerController.clear();
+        _partners.add(user);
       });
     }
   }
 
-  void _removePartner(String partner) {
+  void _removePartner(UserInfo partner) {
     setState(() {
       _partners.remove(partner);
     });
@@ -99,7 +101,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       duration: duration,
       gym: gym,
       prompt: prompt.isEmpty ? null : prompt,
-      partners: _partners.isEmpty ? null : _partners,
+      partners: _partners.isEmpty ? null : _partners.map((p) => p.id).toList(),
     );
 
     if (mounted) {
@@ -283,21 +285,16 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                       : Theme.of(context).textTheme.labelMedium,
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: AdaptiveTextField(
-                        controller: _partnerController,
-                        placeholder: 'Email or user ID',
-                        onSubmitted: (_) => _addPartner(),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    AdaptiveIconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: _addPartner,
-                    ),
-                  ],
+                AdaptiveButton(
+                  onPressed: _addPartner,
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.person_add, size: 18),
+                      SizedBox(width: 8),
+                      Text('Add Partner'),
+                    ],
+                  ),
                 ),
                 if (_partners.isNotEmpty) ...[
                   const SizedBox(height: 8),
@@ -307,7 +304,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                     children: _partners.map((partner) {
                       return Chip(
                         label: Text(
-                          partner,
+                          partner.email,
                           style: PlatformHelper.useLiquidGlass
                               ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
                               : null,

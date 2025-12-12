@@ -10,6 +10,7 @@ import '../providers/auth_provider.dart';
 import '../services/training_service.dart';
 import '../services/secure_storage_service.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../widgets/user_select_dialog.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 import '../utils/exercise_modal.dart';
@@ -185,38 +186,19 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   Future<void> _showAddPartnerDialog(BuildContext context) async {
-    final controller = TextEditingController();
-    final result = await showDialog<String>(
+    final user = await showUserSelectDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Add Partner'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Email or user ID',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(null),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-            child: const Text('Add'),
-          ),
-        ],
-      ),
+      title: 'Add Partner',
     );
 
-    if (result != null && result.isNotEmpty && context.mounted) {
+    if (user != null && context.mounted) {
       final storage = context.read<SecureStorageService>();
       final trainingService = TrainingService(storageService: storage);
-      final response = await trainingService.addPartner(training.id, result);
+      final response = await trainingService.addPartner(training.id, user.id);
 
       if (context.mounted) {
         if (response.isSuccess) {
+          _loadPartners();
           AdaptiveNotification.show(
             context: context,
             message: 'Partner added successfully',
@@ -256,35 +238,15 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   Future<void> _showCopyTrainingDialog(BuildContext context) async {
-    final controller = TextEditingController();
-    final result = await showDialog<String>(
+    final user = await showUserSelectDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Copy Training'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Email or user ID',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(null),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-            child: const Text('Copy'),
-          ),
-        ],
-      ),
+      title: 'Copy Training To',
     );
 
-    if (result != null && result.isNotEmpty && context.mounted) {
+    if (user != null && context.mounted) {
       final storage = context.read<SecureStorageService>();
       final trainingService = TrainingService(storageService: storage);
-      final response = await trainingService.copyTraining(training.id, result);
+      final response = await trainingService.copyTraining(training.id, user.id);
 
       if (context.mounted) {
         if (response.isSuccess) {
