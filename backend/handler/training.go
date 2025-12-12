@@ -261,7 +261,7 @@ func getTraining(c *fiber.Ctx) error {
 	if err := database.DB.
 		Preload("Gym").
 		Preload("Routines.Blocks.Activities").
-		Where("user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ? AND deleted_at IS NULL)", userID, userID).
+		Where("user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?)", userID, userID).
 		Order("(completed_at IS NOT NULL), COALESCE(completed_at, created_at) desc").
 		Find(&trainings).Error; err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
@@ -280,7 +280,7 @@ func getTrainingPartners(c *fiber.Ctx) error {
 
 	// verify user can access this training (owner OR partner)
 	var training model.Training
-	if err := database.DB.First(&training, "id = ? AND (user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ? AND deleted_at IS NULL))", trainingID, userID, userID).Error; err != nil {
+	if err := database.DB.First(&training, "id = ? AND (user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?))", trainingID, userID, userID).Error; err != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})
 	}
 
@@ -346,7 +346,7 @@ func postTrainingCompleteById(c *fiber.Ctx) error {
 	if err := database.DB.
 		Preload("Gym").
 		Preload("Routines.Blocks.Activities").
-		First(&training, "id = ? AND (user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ? AND deleted_at IS NULL))", trainingID, userID, userID).Error; err != nil {
+		First(&training, "id = ? AND (user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?))", trainingID, userID, userID).Error; err != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})
 	}
 
