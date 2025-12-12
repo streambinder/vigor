@@ -1,3 +1,5 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -58,7 +60,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
     }
 
     _gender = widget.profile.gender.isNotEmpty ? widget.profile.gender : null;
-    _language = widget.profile.language.isNotEmpty ? widget.profile.language : null;
+    _language = widget.profile.language.isNotEmpty ? widget.profile.language : _getSystemLanguage();
     _height = widget.profile.height > 0 ? widget.profile.height : null;
     _weight = widget.profile.weight > 0 ? widget.profile.weight : null;
 
@@ -87,6 +89,23 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
     _injuryDescriptionController.dispose();
     _limitationController.dispose();
     super.dispose();
+  }
+
+  String? _getSystemLanguage() {
+    final locale = PlatformDispatcher.instance.locale;
+    const localeMap = {
+      'en': 'english',
+      'it': 'italiano',
+      'es': 'español',
+      'fr': 'français',
+      'de': 'deutsch',
+      'pt': 'português',
+      'ru': 'русский',
+      'zh': '中文',
+      'ja': '日本語',
+      'ko': '한국어',
+    };
+    return localeMap[locale.languageCode];
   }
 
   Future<void> _submitProfile() async {
