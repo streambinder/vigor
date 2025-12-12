@@ -145,17 +145,24 @@ func bootstrapModifiers(gormDB *gorm.DB) error {
 			return err
 		}
 
-		// embed based on ID only
-		vector, err := embedding.GenVector(row.ID)
-		if err != nil {
-			return err
+		// create one embedding per alias for multilingual matching
+		aliases := row.Aliases
+		if len(aliases) == 0 {
+			aliases = []string{row.ID} // fallback to ID if no aliases
 		}
 
-		if err := gormDB.FirstOrCreate(
-			&model.ModifierEmbedding{ModifierID: row.ID, Text: row.ID, Embedding: pgvector.NewVector(vector)},
-			model.ModifierEmbedding{ModifierID: row.ID},
-		).Error; err != nil {
-			return err
+		for _, alias := range aliases {
+			vector, err := embedding.GenVector(alias)
+			if err != nil {
+				return err
+			}
+
+			if err := gormDB.FirstOrCreate(
+				&model.ModifierEmbedding{ModifierID: row.ID, Text: alias, Embedding: pgvector.NewVector(vector)},
+				model.ModifierEmbedding{Text: alias},
+			).Error; err != nil {
+				return err
+			}
 		}
 	}
 

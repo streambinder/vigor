@@ -1,34 +1,133 @@
 [
   {
-    "id": "weighted-vest",
-    "patterns": [".*"]
+    "id": "weighted vest",
+    "patterns": [".*"],
+    "aliases": [
+      "weighted vest",
+      "giubbotto zavorrato",
+      "chaleco lastrado",
+      "chaleco con peso",
+      "gilet lesté",
+      "Gewichtsweste",
+      "colete com peso",
+      "утяжелённый жилет"
+    ]
   },
   {
     "id": "parallettes",
-    "patterns": ["push-up", "dip", "l-sit", "planche", "handstand"]
+    "patterns": ["push-up", "dip", "l-sit", "planche", "handstand"],
+    "aliases": [
+      "parallettes",
+      "parallele basse",
+      "paralelas bajas",
+      "parallettes",
+      "Mini-Barren",
+      "paralelas baixas",
+      "параллетсы",
+      "низкие брусья"
+    ]
   },
   {
-    "id": "ankle-weights",
-    "patterns": ["leg-raise", "kick", "lunge", "running", "flutter"]
+    "id": "ankle weights",
+    "patterns": ["leg-raise", "kick", "lunge", "running", "flutter"],
+    "aliases": [
+      "ankle weights",
+      "cavigliere con pesi",
+      "pesi alle caviglie",
+      "pesas de tobillo",
+      "tobilleras con peso",
+      "poids de cheville",
+      "lest chevilles",
+      "Fußgewichte",
+      "Knöchelgewichte",
+      "pesos de tornozelo",
+      "caneleiras com peso",
+      "утяжелители для ног"
+    ]
   },
   {
-    "id": "dip-belt",
-    "patterns": ["dip", "pull-up", "chin-up", "muscle-up"]
+    "id": "dip belt",
+    "patterns": ["dip", "pull-up", "chin-up", "muscle-up"],
+    "aliases": [
+      "dip belt",
+      "cintura per dip",
+      "cintura zavorrata",
+      "cinturón de lastre",
+      "cinturón para dips",
+      "ceinture de lest",
+      "Dip-Gürtel",
+      "Dipgürtel",
+      "cinto de lastro",
+      "cinto para mergulho",
+      "пояс для отягощений"
+    ]
   },
   {
-    "id": "push-up-bars",
-    "patterns": ["push-up"]
+    "id": "push up bars",
+    "patterns": ["push-up"],
+    "aliases": [
+      "push up bars",
+      "push-up bars",
+      "pushup bars",
+      "maniglie per flessioni",
+      "barras para flexiones",
+      "soportes de flexiones",
+      "poignées de pompes",
+      "Liegestützgriffe",
+      "barras para flexões",
+      "apoio para flexão",
+      "упоры для отжиманий"
+    ]
   },
   {
-    "id": "resistance-bands",
-    "patterns": [".*"]
+    "id": "resistance bands",
+    "patterns": [".*"],
+    "aliases": [
+      "resistance bands",
+      "elastici di resistenza",
+      "bande elastiche",
+      "bandas de resistencia",
+      "gomas elásticas",
+      "bandes de résistance",
+      "élastiques",
+      "Widerstandsbänder",
+      "Fitnessbänder",
+      "bandas de resistência",
+      "elásticos de treino",
+      "резинки для фитнеса",
+      "эспандеры"
+    ]
   },
   {
-    "id": "wrist-weights",
-    "patterns": ["punch", "raise", "arm-circle", "shadow"]
+    "id": "wrist weights",
+    "patterns": ["punch", "raise", "arm-circle", "shadow"],
+    "aliases": [
+      "wrist weights",
+      "pesi per polsi",
+      "polsiere con pesi",
+      "pesas de muñeca",
+      "muñequeras con peso",
+      "poids de poignet",
+      "lest poignets",
+      "Handgelenkgewichte",
+      "pesos de pulso",
+      "утяжелители для рук"
+    ]
   },
   {
-    "id": "rings",
-    "patterns": ["dip", "row", "push-up", "muscle-up", "pull-up"]
+    "id": "gymnastic rings",
+    "patterns": ["dip", "row", "push-up", "muscle-up", "pull-up"],
+    "aliases": [
+      "gymnastic rings",
+      "gym rings",
+      "rings",
+      "anelli da ginnastica",
+      "anillas de gimnasia",
+      "anneaux de gymnastique",
+      "Turnringe",
+      "Gymnastikringe",
+      "argolas de ginástica",
+      "гимнастические кольца"
+    ]
   }
 ]

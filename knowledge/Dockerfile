@@ -25,7 +25,7 @@ RUN initdb -D /tmp/pgdata && \
   psql -h /tmp -U postgres -d db -c "CREATE EXTENSION IF NOT EXISTS vector;" && \
   psql -h /tmp -U postgres -d db -c "GRANT ALL ON SCHEMA public TO \"user\";" && \
   # checkov:skip=CKV_SECRET_4:Temporary build-time credentials for local database bootstrap
-  sh -c "DATABASE_URL='postgres://user:password@/db?host=/tmp' LLAMACPP_EMBEDDING_TIERS=http://host.docker.internal:8001 bootstrap" && \
+  sh -c "DATABASE_URL='postgres://user:password@/db?host=/tmp' INFINITY_TIERS=http://host.docker.internal:7997 bootstrap" && \
   pg_dump -h /tmp -U postgres -d db --clean --if-exists >/build/init.sql && \
   pg_ctl -D /tmp/pgdata stop
 

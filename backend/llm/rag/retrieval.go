@@ -204,12 +204,17 @@ func RetrieveUserModifiers(equipment []string) ([]model.Modifier, error) {
 	}
 
 	matchSQL := strings.Join(matchConditions, " OR ")
-	if err := database.Knowledge.
+	subquery := database.Knowledge.
 		Table("modifier_embeddings").
-		Select("modifier_embeddings.modifier_id, modifier_embeddings.embedding <=> ? as distance, modifiers.*",
+		Select("DISTINCT ON (modifier_embeddings.modifier_id) modifier_embeddings.modifier_id, modifier_embeddings.embedding <=> ? as distance, modifiers.*",
 			pgvector.NewVector(equipmentEmbeddings[0])).
 		Joins("JOIN modifiers ON modifiers.id = modifier_embeddings.modifier_id").
 		Where(matchSQL, matchArgs...).
+		Order("modifier_embeddings.modifier_id, distance ASC")
+
+	// wrap to re-order by distance after DISTINCT ON
+	if err := database.Knowledge.
+		Table("(?) AS unique_modifiers", subquery).
 		Order("distance ASC").
 		Scan(&results).
 		Error; err != nil {

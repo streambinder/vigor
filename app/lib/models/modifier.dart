@@ -11,10 +11,13 @@ class Modifier {
   final String id;
   @JsonKey(name: 'patterns', defaultValue: const [])
   final List<String> patterns;
+  @JsonKey(name: 'aliases')
+  final List<String>? aliases;
 
   Modifier({
     required this.id,
     required this.patterns,
+    this.aliases,
   });
 
   factory Modifier.fromJson(Map<String, dynamic> json) => _$ModifierFromJson(json);
