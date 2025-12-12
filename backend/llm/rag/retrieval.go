@@ -18,8 +18,8 @@ const (
 	MaxPromptFacts       = 5
 	MaxPromptClassics    = 3
 	MaxFactDistance      = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
-	MaxEquipmentDistance = 0.3 // Maximum cosine distance for equipment matching (stricter)
-	MaxModifierDistance  = 0.3 // Maximum cosine distance for modifier matching
+	MaxEquipmentDistance = 0.2 // Maximum cosine distance for equipment matching
+	MaxModifierDistance  = 0.2 // Maximum cosine distance for modifier matching
 )
 
 // RetrieveWorkExercises retrieves exercises for the main workout phase via RAG.
@@ -87,7 +87,7 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string) ([]mode
 			-- Exercises where ALL equipment has semantic match with user equipment
 			NOT EXISTS (
 				SELECT 1 FROM exercise_equipment ee
-				JOIN equipment_embeddings eq ON ee.equipment_embedding_id = eq.id
+				JOIN equipment_embeddings eq ON ee.equipment_id = eq.equipment_id
 				WHERE ee.exercise_id = exercises.id
 				AND NOT (%s)
 			)
@@ -226,6 +226,66 @@ func RetrieveUserModifiers(equipment []string) ([]model.Modifier, error) {
 		modifiers = append(modifiers, result.Modifier)
 	}
 	return modifiers, nil
+}
+
+// RetrieveUserEquipment retrieves equipment that matches user's available equipment names.
+func RetrieveUserEquipment(equipment []string) ([]model.Equipment, error) {
+	if len(equipment) == 0 {
+		return nil, nil
+	}
+
+	// generate embeddings for user equipment
+	equipmentEmbeddings := make([][]float32, 0, len(equipment))
+	for _, entry := range equipment {
+		vec, err := embedding.GenVector(entry)
+		if err != nil {
+			log.Warn().Err(err).Str("equipment", entry).Msg("Failed to generate embedding for equipment")
+			continue
+		}
+		equipmentEmbeddings = append(equipmentEmbeddings, vec)
+	}
+
+	if len(equipmentEmbeddings) == 0 {
+		return nil, nil
+	}
+
+	// build dynamic OR clause for equipment matching using cosine distance
+	var matchConditions []string
+	var matchArgs []interface{}
+	for _, eqEmbed := range equipmentEmbeddings {
+		matchConditions = append(matchConditions, "equipment_embeddings.embedding <=> ? < ?")
+		matchArgs = append(matchArgs, pgvector.NewVector(eqEmbed), MaxEquipmentDistance)
+	}
+
+	var results []struct {
+		EquipmentID string
+		Distance    float64
+		Equipment   model.Equipment `gorm:"embedded"`
+	}
+
+	matchSQL := strings.Join(matchConditions, " OR ")
+	subquery := database.Knowledge.
+		Table("equipment_embeddings").
+		Select("DISTINCT ON (equipment_embeddings.equipment_id) equipment_embeddings.equipment_id, equipment_embeddings.embedding <=> ? as distance, equipment.*",
+			pgvector.NewVector(equipmentEmbeddings[0])).
+		Joins("JOIN equipment ON equipment.id = equipment_embeddings.equipment_id").
+		Where(matchSQL, matchArgs...).
+		Order("equipment_embeddings.equipment_id, distance ASC")
+
+	// wrap to re-order by distance after DISTINCT ON
+	if err := database.Knowledge.
+		Table("(?) AS unique_equipment", subquery).
+		Order("distance ASC").
+		Scan(&results).
+		Error; err != nil {
+		return nil, fmt.Errorf("failed to query equipment: %w", err)
+	}
+
+	equipmentList := make([]model.Equipment, 0, len(results))
+	for _, result := range results {
+		equipmentList = append(equipmentList, result.Equipment)
+	}
+	return equipmentList, nil
 }
 
 // RetrieveWarmupExercises retrieves exercises for the warmup phase via random selection.

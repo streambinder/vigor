@@ -94,6 +94,17 @@ func postTraining(c *fiber.Ctx) error {
 		equipment = gym.Equipment
 	}
 
+	// Match user equipment to canonical equipment IDs from knowledge base
+	matchedEquipment, err := rag.RetrieveUserEquipment(equipment)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to match equipment from database")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	equipmentIDs := make([]string, 0, len(matchedEquipment))
+	for _, eq := range matchedEquipment {
+		equipmentIDs = append(equipmentIDs, eq.ID)
+	}
+
 	// Query exercises compatible with all users' profiles and equipment
 	queryExerciseStart := time.Now()
 	workExercises, err := rag.RetrieveWorkExercises(profiles, equipment)
@@ -179,7 +190,7 @@ func postTraining(c *fiber.Ctx) error {
 		workExercises,
 		warmupExercises,
 		cooldownExercises,
-		equipment,
+		equipmentIDs,
 		modifiers,
 		req.Prompt,
 		req.Duration,
@@ -200,7 +211,7 @@ func postTraining(c *fiber.Ctx) error {
 	if gym != nil {
 		training.GymID = &gym.ID
 	}
-	training.Equipment = equipment
+	training.Equipment = equipmentIDs
 
 	for i := range training.Routines {
 		for j := range training.Routines[i].Blocks {

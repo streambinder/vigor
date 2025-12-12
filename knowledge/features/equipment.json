@@ -1,0 +1,479 @@
+[
+  {
+    "id": "balance board",
+    "aliases": [
+      "balance board",
+      "tavola di equilibrio",
+      "tabla de equilibrio",
+      "planche d'équilibre",
+      "Balance Board",
+      "Gleichgewichtsbrett",
+      "prancha de equilíbrio",
+      "балансборд",
+      "доска для баланса"
+    ]
+  },
+  {
+    "id": "band",
+    "aliases": [
+      "band",
+      "elastic band",
+      "elastico",
+      "banda elástica",
+      "bande élastique",
+      "Gummiband",
+      "banda",
+      "резинка"
+    ]
+  },
+  {
+    "id": "barbell",
+    "aliases": [
+      "barbell",
+      "bilanciere",
+      "barra",
+      "barre",
+      "Langhantel",
+      "barra de pesos",
+      "штанга"
+    ]
+  },
+  {
+    "id": "bench",
+    "aliases": [
+      "bench",
+      "panca",
+      "banco",
+      "banc",
+      "Hantelbank",
+      "banco de musculação",
+      "скамья"
+    ]
+  },
+  {
+    "id": "bosu ball",
+    "aliases": [
+      "bosu ball",
+      "bosu",
+      "palla bosu",
+      "pelota bosu",
+      "ballon bosu",
+      "Bosu Ball",
+      "bola bosu",
+      "босу"
+    ]
+  },
+  {
+    "id": "cable",
+    "aliases": [
+      "cable",
+      "cable machine",
+      "cavo",
+      "polea",
+      "câble",
+      "poulie",
+      "Kabelzug",
+      "Seilzug",
+      "polia",
+      "cabo",
+      "блочный тренажер",
+      "кабель"
+    ]
+  },
+  {
+    "id": "dip station",
+    "aliases": [
+      "dip station",
+      "dip bars",
+      "parallele",
+      "stazione per dip",
+      "estación de fondos",
+      "barras paralelas",
+      "barres à dips",
+      "station de dips",
+      "Dipständer",
+      "Dipstation",
+      "estação de mergulho",
+      "брусья"
+    ]
+  },
+  {
+    "id": "dumbbell",
+    "aliases": [
+      "dumbbell",
+      "dumbbells",
+      "manubrio",
+      "manubri",
+      "mancuerna",
+      "mancuernas",
+      "haltère",
+      "haltères",
+      "Kurzhantel",
+      "Kurzhanteln",
+      "halter",
+      "halteres",
+      "гантель",
+      "гантели"
+    ]
+  },
+  {
+    "id": "elliptical machine",
+    "aliases": [
+      "elliptical machine",
+      "elliptical",
+      "ellittica",
+      "elíptica",
+      "vélo elliptique",
+      "Crosstrainer",
+      "Ellipsentrainer",
+      "elíptico",
+      "эллиптический тренажер",
+      "эллипсоид"
+    ]
+  },
+  {
+    "id": "ez barbell",
+    "aliases": [
+      "ez barbell",
+      "ez bar",
+      "curl bar",
+      "bilanciere ez",
+      "barra ez",
+      "barra z",
+      "barre ez",
+      "EZ-Stange",
+      "SZ-Stange",
+      "barra ez",
+      "ez-гриф"
+    ]
+  },
+  {
+    "id": "hammer",
+    "aliases": [
+      "hammer",
+      "sledgehammer",
+      "martello",
+      "mazza",
+      "martillo",
+      "marteau",
+      "masse",
+      "Hammer",
+      "Vorschlaghammer",
+      "martelo",
+      "кувалда",
+      "молот"
+    ]
+  },
+  {
+    "id": "kettlebell",
+    "aliases": [
+      "kettlebell",
+      "kettlebells",
+      "kettlebell",
+      "pesa rusa",
+      "kettlebell",
+      "Kugelhantel",
+      "kettlebell",
+      "гиря"
+    ]
+  },
+  {
+    "id": "leverage machine",
+    "aliases": [
+      "leverage machine",
+      "plate loaded machine",
+      "macchina a leva",
+      "máquina de palanca",
+      "machine à levier",
+      "Hebelmaschine",
+      "máquina de alavanca",
+      "рычажный тренажер"
+    ]
+  },
+  {
+    "id": "medicine ball",
+    "aliases": [
+      "medicine ball",
+      "med ball",
+      "palla medica",
+      "balón medicinal",
+      "pelota medicinal",
+      "médecine ball",
+      "ballon lesté",
+      "Medizinball",
+      "bola medicinal",
+      "медицинбол",
+      "медицинский мяч"
+    ]
+  },
+  {
+    "id": "olympic barbell",
+    "aliases": [
+      "olympic barbell",
+      "olympic bar",
+      "bilanciere olimpico",
+      "barra olímpica",
+      "barre olympique",
+      "Olympiahantel",
+      "olympische Langhantel",
+      "barra olímpica",
+      "олимпийский гриф",
+      "олимпийская штанга"
+    ]
+  },
+  {
+    "id": "pull-up bar",
+    "aliases": [
+      "pull-up bar",
+      "pull up bar",
+      "chin-up bar",
+      "sbarra",
+      "sbarra per trazioni",
+      "barra de dominadas",
+      "barra de tracción",
+      "barre de traction",
+      "Klimmzugstange",
+      "barra fixa",
+      "barra de pull-up",
+      "турник",
+      "перекладина"
+    ]
+  },
+  {
+    "id": "resistance band",
+    "aliases": [
+      "resistance band",
+      "resistance bands",
+      "elastico di resistenza",
+      "banda de resistencia",
+      "bande de résistance",
+      "élastique de musculation",
+      "Widerstandsband",
+      "Fitnessband",
+      "banda de resistência",
+      "elástico",
+      "резинка для фитнеса",
+      "эспандер"
+    ]
+  },
+  {
+    "id": "rings",
+    "aliases": [
+      "rings",
+      "gymnastic rings",
+      "gym rings",
+      "anelli",
+      "anelli da ginnastica",
+      "anillas",
+      "anillas de gimnasia",
+      "anneaux",
+      "anneaux de gymnastique",
+      "Turnringe",
+      "Gymnastikringe",
+      "argolas",
+      "argolas de ginástica",
+      "гимнастические кольца",
+      "кольца"
+    ]
+  },
+  {
+    "id": "roller",
+    "aliases": [
+      "roller",
+      "foam roller",
+      "rullo",
+      "rullo in schiuma",
+      "rodillo",
+      "rodillo de espuma",
+      "rouleau",
+      "rouleau en mousse",
+      "Faszienrolle",
+      "Schaumstoffrolle",
+      "rolo",
+      "rolo de espuma",
+      "ролик",
+      "массажный ролик"
+    ]
+  },
+  {
+    "id": "rope",
+    "aliases": [
+      "rope",
+      "jump rope",
+      "battle rope",
+      "corda",
+      "corda per saltare",
+      "cuerda",
+      "comba",
+      "corde",
+      "corde à sauter",
+      "Seil",
+      "Springseil",
+      "corda de pular",
+      "скакалка",
+      "канат"
+    ]
+  },
+  {
+    "id": "skierg machine",
+    "aliases": [
+      "skierg machine",
+      "skierg",
+      "ski erg",
+      "ski ergometer",
+      "skierg",
+      "máquina de esquí",
+      "skierg",
+      "Skiergometer",
+      "skierg",
+      "скиэрг",
+      "лыжный тренажер"
+    ]
+  },
+  {
+    "id": "sled machine",
+    "aliases": [
+      "sled machine",
+      "sled",
+      "prowler",
+      "slitta",
+      "trineo",
+      "traineau",
+      "Schlitten",
+      "trenó",
+      "сани",
+      "санки"
+    ]
+  },
+  {
+    "id": "smith machine",
+    "aliases": [
+      "smith machine",
+      "multipower",
+      "macchina smith",
+      "máquina smith",
+      "multipower",
+      "machine smith",
+      "Smith-Maschine",
+      "Multipresse",
+      "máquina smith",
+      "тренажер смита",
+      "машина смита"
+    ]
+  },
+  {
+    "id": "stability ball",
+    "aliases": [
+      "stability ball",
+      "swiss ball",
+      "exercise ball",
+      "fitball",
+      "palla svizzera",
+      "palla fitness",
+      "pelota suiza",
+      "balón de estabilidad",
+      "ballon suisse",
+      "swiss ball",
+      "Gymnastikball",
+      "Pezziball",
+      "bola suíça",
+      "фитбол",
+      "швейцарский мяч"
+    ]
+  },
+  {
+    "id": "stationary bike",
+    "aliases": [
+      "stationary bike",
+      "exercise bike",
+      "spin bike",
+      "cyclette",
+      "bici da camera",
+      "bicicleta estática",
+      "vélo d'appartement",
+      "vélo stationnaire",
+      "Heimtrainer",
+      "Ergometer",
+      "bicicleta ergométrica",
+      "велотренажер"
+    ]
+  },
+  {
+    "id": "stepmill machine",
+    "aliases": [
+      "stepmill machine",
+      "stepmill",
+      "stair climber",
+      "stepper",
+      "scala mobile",
+      "escalera infinita",
+      "escalier infini",
+      "Treppensteiger",
+      "Stepper",
+      "escada infinita",
+      "степпер",
+      "лестничный тренажер"
+    ]
+  },
+  {
+    "id": "tire",
+    "aliases": [
+      "tire",
+      "tyre",
+      "copertone",
+      "pneumatico",
+      "neumático",
+      "llanta",
+      "pneu",
+      "Reifen",
+      "pneu",
+      "покрышка",
+      "шина"
+    ]
+  },
+  {
+    "id": "trap bar",
+    "aliases": [
+      "trap bar",
+      "hex bar",
+      "bilanciere esagonale",
+      "barra hexagonal",
+      "barre hexagonale",
+      "Trap Bar",
+      "Hex-Stange",
+      "barra hexagonal",
+      "трэп-гриф",
+      "гексагональный гриф"
+    ]
+  },
+  {
+    "id": "upper body ergometer",
+    "aliases": [
+      "upper body ergometer",
+      "arm ergometer",
+      "arm bike",
+      "UBE",
+      "ergometro per braccia",
+      "ergómetro de brazos",
+      "ergomètre à bras",
+      "Armergometer",
+      "ergômetro de braço",
+      "ручной эргометр"
+    ]
+  },
+  {
+    "id": "wheel roller",
+    "aliases": [
+      "wheel roller",
+      "ab wheel",
+      "ab roller",
+      "ruota per addominali",
+      "rueda abdominal",
+      "roue abdominale",
+      "Bauchroller",
+      "AB-Wheel",
+      "roda abdominal",
+      "ролик для пресса"
+    ]
+  }
+]

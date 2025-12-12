@@ -37,9 +37,10 @@ func main() {
 	sqlDB.SetMaxOpenConns(100)
 
 	if err := gormDB.AutoMigrate(
+		&model.Equipment{},
+		&model.EquipmentEmbedding{},
 		&model.Exercise{},
 		&model.ExerciseEmbedding{},
-		&model.EquipmentEmbedding{},
 		&model.Modifier{},
 		&model.ModifierEmbedding{},
 		&model.Fact{},
@@ -50,6 +51,9 @@ func main() {
 		log.Fatalf("Failed to migrate database: %s", err)
 	}
 
+	if err := bootstrapEquipment(gormDB); err != nil {
+		log.Fatalf("Failed to inject equipment: %s", err)
+	}
 	if err := boostrapExercises(gormDB); err != nil {
 		log.Fatalf("Failed to inject exercises: %s", err)
 	}
@@ -70,10 +74,7 @@ func boostrapExercises(gormDB *gorm.DB) error {
 		return err
 	}
 
-	var (
-		rows                []model.Exercise
-		equipmentExcercises = make(map[string][]string) // map of equipment name to exercise IDs
-	)
+	var rows []model.Exercise
 	if err := json.Unmarshal(bytes, &rows); err != nil {
 		return err
 	}
@@ -97,32 +98,55 @@ func boostrapExercises(gormDB *gorm.DB) error {
 			return err
 		}
 
-		for _, equipment := range row.Equipment {
-			equipmentExcercises[equipment] = append(equipmentExcercises[equipment], row.ID)
+		// link exercise to equipment via many2many
+		if len(row.Equipment) > 0 {
+			var equipmentList []model.Equipment
+			if err := gormDB.Where("id IN ?", []string(row.Equipment)).Find(&equipmentList).Error; err != nil {
+				return err
+			}
+			if err := gormDB.Model(&row).Association("EquipmentList").Replace(&equipmentList); err != nil {
+				return err
+			}
 		}
 	}
 
-	// equipment embeddings
-	for equipment, exerciseIDs := range equipmentExcercises {
-		vector, err := embedding.GenVector(equipment)
-		if err != nil {
+	return nil
+}
+
+func bootstrapEquipment(gormDB *gorm.DB) error {
+	bytes, err := os.ReadFile(filepath.Join("features", "equipment.json"))
+	if err != nil {
+		return err
+	}
+
+	var rows []model.Equipment
+	if err := json.Unmarshal(bytes, &rows); err != nil {
+		return err
+	}
+
+	for _, row := range rows {
+		if err := gormDB.FirstOrCreate(&row, model.Equipment{ID: row.ID}).Error; err != nil {
 			return err
 		}
 
-		equipmentEmbedding := model.EquipmentEmbedding{Text: equipment}
-		if err := gormDB.FirstOrCreate(
-			&equipmentEmbedding,
-			model.EquipmentEmbedding{Text: equipment, Embedding: pgvector.NewVector(vector)},
-		).Error; err != nil {
-			return err
+		// create one embedding per alias for multilingual matching
+		aliases := row.Aliases
+		if len(aliases) == 0 {
+			aliases = []string{row.ID}
 		}
 
-		var exercises []model.Exercise
-		if err := gormDB.Where("id IN ?", exerciseIDs).Find(&exercises).Error; err != nil {
-			return err
-		}
-		if err := gormDB.Model(&equipmentEmbedding).Association("Exercises").Replace(&exercises); err != nil {
-			return err
+		for _, alias := range aliases {
+			vector, err := embedding.GenVector(alias)
+			if err != nil {
+				return err
+			}
+
+			if err := gormDB.FirstOrCreate(
+				&model.EquipmentEmbedding{EquipmentID: row.ID, Text: alias, Embedding: pgvector.NewVector(vector)},
+				model.EquipmentEmbedding{Text: alias},
+			).Error; err != nil {
+				return err
+			}
 		}
 	}
 
