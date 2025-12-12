@@ -32,8 +32,8 @@ class ApiService {
     } on FormatException {
       return ApiResponse.networkError('Bad response format');
     } catch (e) {
-      AppLogger.error('[ApiService] GET request failed: $e');
-      return ApiResponse.networkError('Unexpected error: ${e.toString()}');
+      AppLogger.error('[ApiService] GET request failed', e);
+      return ApiResponse.networkError('Something went wrong');
     }
   }
 
@@ -59,7 +59,8 @@ class ApiService {
     } on FormatException {
       return ApiResponse.networkError('Bad response format');
     } catch (e) {
-      return ApiResponse.networkError('Unexpected error: ${e.toString()}');
+      AppLogger.error('[ApiService] POST request failed', e);
+      return ApiResponse.networkError('Something went wrong');
     }
   }
 
@@ -85,7 +86,8 @@ class ApiService {
     } on FormatException {
       return ApiResponse.networkError('Bad response format');
     } catch (e) {
-      return ApiResponse.networkError('Unexpected error: ${e.toString()}');
+      AppLogger.error('[ApiService] PUT request failed', e);
+      return ApiResponse.networkError('Something went wrong');
     }
   }
 
@@ -109,7 +111,8 @@ class ApiService {
     } on FormatException {
       return ApiResponse.networkError('Bad response format');
     } catch (e) {
-      return ApiResponse.networkError('Unexpected error: ${e.toString()}');
+      AppLogger.error('[ApiService] DELETE request failed', e);
+      return ApiResponse.networkError('Something went wrong');
     }
   }
 

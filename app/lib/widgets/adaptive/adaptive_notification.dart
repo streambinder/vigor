@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../services/app_logger.dart';
 import '../../utils/platform_helper.dart';
 import '../../theme/liquid_glass_theme.dart';
 
@@ -32,10 +33,17 @@ class AdaptiveNotification {
     });
   }
 
+  /// shows an error notification with optional raw error logging
+  /// [message] is the user-friendly message to display
+  /// [rawError] is the technical error to log to console (not shown to user)
   static void showError({
     required BuildContext context,
     required String message,
+    String? rawError,
   }) {
+    if (rawError != null && rawError.isNotEmpty) {
+      AppLogger.error('[Error] $rawError');
+    }
     show(context: context, message: message, isError: true);
   }
 }

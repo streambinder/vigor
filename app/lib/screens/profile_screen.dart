@@ -57,7 +57,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
       AdaptiveNotification.showError(
         context: context,
-        message: response.error ?? 'Failed to load gyms',
+        message: 'Failed to load gyms',
+        rawError: response.error,
       );
     }
   }
@@ -94,7 +95,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else if (mounted) {
       AdaptiveNotification.showError(
         context: context,
-        message: response.error ?? 'Failed to add gym',
+        message: 'Failed to add gym',
+        rawError: response.error,
       );
     }
   }
@@ -117,7 +119,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else if (mounted) {
       AdaptiveNotification.showError(
         context: context,
-        message: response.error ?? 'Failed to update gym',
+        message: 'Failed to update gym',
+        rawError: response.error,
       );
     }
   }
@@ -154,7 +157,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       } else if (mounted) {
         AdaptiveNotification.showError(
           context: context,
-          message: response.error ?? 'Failed to delete gym',
+          message: 'Failed to delete gym',
+          rawError: response.error,
         );
       }
     }
@@ -734,8 +738,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               } else {
                                 AdaptiveNotification.showError(
                                   context: context,
-                                  message: authProvider.errorMessage ??
-                                      'Failed to delete account',
+                                  message: 'Failed to delete account',
+                                  rawError: authProvider.errorMessage,
                                 );
                               }
                             }

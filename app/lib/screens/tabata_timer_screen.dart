@@ -348,7 +348,8 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     } else if (mounted) {
       AdaptiveNotification.showError(
         context: context,
-        message: response.error ?? 'Failed to mark training as complete',
+        message: 'Failed to mark training as complete',
+        rawError: response.error,
       );
     }
   }

@@ -145,7 +145,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         } else {
           AdaptiveNotification.showError(
             context: context,
-            message: response.error ?? 'Failed to delete training',
+            message: 'Failed to delete training',
+            rawError: response.error,
           );
         }
       }
@@ -175,7 +176,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       } else {
         AdaptiveNotification.showError(
           context: context,
-          message: response.error ?? 'Failed to complete training',
+          message: 'Failed to complete training',
+          rawError: response.error,
         );
       }
     }
@@ -226,7 +228,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       } else {
         AdaptiveNotification.showError(
           context: context,
-          message: response.error ?? 'Failed to add partner',
+          message: 'Failed to add partner',
+          rawError: response.error,
         );
       }
     }
@@ -268,7 +271,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       } else {
         AdaptiveNotification.showError(
           context: context,
-          message: response.error ?? 'Failed to clone training',
+          message: 'Failed to clone training',
+          rawError: response.error,
         );
       }
     }
@@ -313,7 +317,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       } else {
         AdaptiveNotification.showError(
           context: context,
-          message: response.error ?? 'Failed to share training',
+          message: 'Failed to share training',
+          rawError: response.error,
         );
       }
     }

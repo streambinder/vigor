@@ -54,7 +54,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
       if (response.error != null) {
         AdaptiveNotification.showError(
           context: context,
-          message: response.error!,
+          message: 'Failed to load trainings',
+          rawError: response.error,
         );
       }
     }

@@ -165,7 +165,8 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
       } else if (mounted) {
         AdaptiveNotification.showError(
           context: context,
-          message: authProvider.errorMessage ?? 'Failed to update profile',
+          message: 'Failed to update profile',
+          rawError: authProvider.errorMessage,
         );
       }
     } finally {

@@ -140,7 +140,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       } else {
         AdaptiveNotification.showError(
           context: context,
-          message: response.error ?? 'Failed to generate training',
+          message: 'Failed to generate training',
+          rawError: response.error,
         );
       }
     }
