@@ -11,9 +11,7 @@ part 'profile_data.g.dart';
 class profileData {
   // Fields marked as required in the backend model
   static const List<String> requiredFields = [
-    'goals',
-    'injuries',
-    'limitations'
+    'goals'
   ];
   @JsonKey(name: 'goals', defaultValue: const [])
   final List<Goal> goals;

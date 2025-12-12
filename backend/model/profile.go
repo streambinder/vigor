@@ -26,8 +26,8 @@ type Profile struct {
 
 type profileData struct {
 	Goals       []Goal   `json:"goals" flutter:"required"`
-	Injuries    []Injury `json:"injuries" flutter:"required"`
-	Limitations []string `json:"limitations" flutter:"required"`
+	Injuries    []Injury `json:"injuries"`
+	Limitations []string `json:"limitations"`
 }
 
 // Goal represents a user's fitness objective with timeline.

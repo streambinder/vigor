@@ -48,31 +48,18 @@ class ProfileHelper {
     }
 
     // Check nested profileData required fields
+    // Only goals is required; injuries and limitations are optional
     try {
       if (profile.data.isEmpty) {
-        // If data is completely empty, all nested fields are missing
         missing['goals'] = 'Goals';
-        missing['injuries'] = 'Injuries';
-        missing['limitations'] = 'Limitations';
       } else {
         final data = profile_models.profileData.fromJson(profile.data);
-
-        // Check goals
         if (data.goals.isEmpty) {
           missing['goals'] = 'Goals';
         }
-
-        // Check injuries (can be empty as user might not have injuries)
-        // We'll mark it as missing if null, but empty list is okay
-
-        // Check limitations (can be empty as user might not have limitations)
-        // We'll mark it as missing if null, but empty list is okay
       }
     } catch (e) {
-      // If data parsing fails, consider all nested fields missing
       missing['goals'] = 'Goals';
-      missing['injuries'] = 'Injuries';
-      missing['limitations'] = 'Limitations';
     }
 
     return missing;
