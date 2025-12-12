@@ -5,8 +5,8 @@ import 'main_navigation.dart';
 import 'profile_completion_modal.dart';
 import '../utils/profile_helper.dart';
 
-/// This is the main entry screen after authentication
-/// It wraps the MainNavigation with profile completion logic
+/// Main entry screen after authentication.
+/// Handles profile completion modal on app open/resume.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
