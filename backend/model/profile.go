@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
-	"gorm.io/gorm"
 )
 
 // Profile stores user's physical attributes and fitness-related metadata.
@@ -18,9 +17,8 @@ type Profile struct {
 	Weight    float64        `json:"weight" flutter:"required"`
 	Data      datatypes.JSON `gorm:"type:jsonb" json:"data"`
 
-	CreatedAt time.Time      `json:"-"`
-	UpdatedAt time.Time      `json:"-"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 
 	UserID uuid.UUID `gorm:"type:uuid;primaryKey" json:"user_id"`
 	User   *User     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`

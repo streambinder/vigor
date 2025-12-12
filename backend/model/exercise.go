@@ -5,7 +5,6 @@ import (
 
 	"github.com/lib/pq"
 	"github.com/pgvector/pgvector-go"
-	"gorm.io/gorm"
 )
 
 type Exercise struct {
@@ -17,9 +16,8 @@ type Exercise struct {
 	Reference    string         `json:"reference"`
 	Instructions pq.StringArray `gorm:"type:text[]" json:"instructions"`
 
-	CreatedAt time.Time      `json:"-"`
-	UpdatedAt time.Time      `json:"-"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 
 	EquipmentList []Equipment `gorm:"many2many:exercise_equipment;" json:"-"`
 }
@@ -29,9 +27,8 @@ type ExerciseEmbedding struct {
 	Text      string          `gorm:"type:text;not null" json:"text"`
 	Embedding pgvector.Vector `gorm:"type:vector(384)" json:"-"`
 
-	CreatedAt time.Time      `json:"-"`
-	UpdatedAt time.Time      `json:"-"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 
 	ExerciseID string   `gorm:"type:varchar(255);not null;uniqueIndex:idx_exercise_embedding" json:"exercise_id"`
 	Exercise   Exercise `gorm:"foreignKey:ExerciseID;references:ID" json:"exercise"`

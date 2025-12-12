@@ -5,7 +5,6 @@ import (
 
 	"github.com/lib/pq"
 	"github.com/pgvector/pgvector-go"
-	"gorm.io/gorm"
 )
 
 // Modifier defines equipment that can augment exercises.
@@ -16,9 +15,8 @@ type Modifier struct {
 	Patterns pq.StringArray `gorm:"type:text[]" json:"patterns"`
 	Aliases  pq.StringArray `gorm:"type:text[]" json:"aliases,omitempty"`
 
-	CreatedAt time.Time      `json:"-"`
-	UpdatedAt time.Time      `json:"-"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 }
 
 // ModifierEmbedding stores vector embedding for modifier semantic matching.
@@ -28,9 +26,8 @@ type ModifierEmbedding struct {
 	Text      string          `gorm:"type:text;not null;uniqueIndex:idx_modifier_text" json:"text"`
 	Embedding pgvector.Vector `gorm:"type:vector(384)" json:"-"`
 
-	CreatedAt time.Time      `json:"-"`
-	UpdatedAt time.Time      `json:"-"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 
 	ModifierID string   `gorm:"type:varchar(255);not null;index:idx_modifier_embedding" json:"modifier_id"`
 	Modifier   Modifier `gorm:"foreignKey:ModifierID;references:ID" json:"modifier"`

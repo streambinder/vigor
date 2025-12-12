@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"github.com/pgvector/pgvector-go"
-	"gorm.io/gorm"
 )
 
 // FactArea defines the type of fitness knowledge.
@@ -35,9 +34,8 @@ type Fact struct {
 	Tags      pq.StringArray `gorm:"type:text[];index:idx_knowledge_tags,type:gin" json:"tags"`
 	Content   string         `gorm:"type:text;not null" json:"content"`
 
-	CreatedAt time.Time      `json:"-"`
-	UpdatedAt time.Time      `json:"-"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 }
 
 type FactEmbedding struct {
@@ -45,9 +43,8 @@ type FactEmbedding struct {
 	Text      string          `gorm:"type:text;not null" json:"text"`
 	Embedding pgvector.Vector `gorm:"type:vector(384)" json:"-"`
 
-	CreatedAt time.Time      `json:"-"`
-	UpdatedAt time.Time      `json:"-"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 
 	FactID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_fact_embedding" json:"fact_id"`
 	Fact   Fact      `gorm:"foreignKey:FactID;references:ID" json:"fact"`

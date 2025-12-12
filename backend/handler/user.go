@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/handler/middleware"
 	"github.com/streambinder/vigor/model"
@@ -81,22 +82,47 @@ func postRegister(c *fiber.Ctx) error {
 func postUnregister(c *fiber.Ctx) error {
 	userID := c.Locals("userID")
 
-	// Use hard delete (Unscoped) instead of soft delete to allow email reuse
-	// Delete all identities for this user first (prevents orphaned identities)
-	if err := database.DB.Unscoped().Where("user_id = ?", userID).Delete(&model.Identity{}).Error; err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "could not delete identities"})
+	// delete training child tables first (db-level cascades may not be set up)
+	var trainingIDs []uuid.UUID
+	database.DB.Model(&model.Training{}).Where("user_id = ?", userID).Pluck("id", &trainingIDs)
+
+	if len(trainingIDs) > 0 {
+		var routineIDs []string
+		database.DB.Table("routines").Where("training_id IN ?", trainingIDs).Pluck("id", &routineIDs)
+
+		if len(routineIDs) > 0 {
+			var blockIDs []string
+			database.DB.Table("blocks").Where("routine_id IN ?", routineIDs).Pluck("id", &blockIDs)
+
+			if len(blockIDs) > 0 {
+				database.DB.Where("block_id IN ?", blockIDs).Delete(&model.Activity{})
+			}
+			database.DB.Where("routine_id IN ?", routineIDs).Delete(&model.Block{})
+		}
+		database.DB.Where("training_id IN ?", trainingIDs).Delete(&model.Routine{})
 	}
 
-	// Delete all refresh tokens for this user (not just mark as revoked)
-	// This prevents "duplicate key" errors when the user creates a new account
-	if err := database.DB.Unscoped().Where("user_id = ?", userID).Delete(&model.RefreshToken{}).Error; err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "could not delete refresh_tokens"})
+	// delete all user-related data before deleting the user
+	deletions := []struct {
+		model any
+		name  string
+	}{
+		{&model.Partner{}, "partners"},
+		{&model.Training{}, "trainings"},
+		{&model.Gym{}, "gyms"},
+		{&model.Identity{}, "identities"},
+		{&model.RefreshToken{}, "refresh_tokens"},
+		{&model.Profile{}, "profile"},
 	}
 
-	// Hard delete the user (this will also cascade delete profile due to foreign keys)
-	// Using Unscoped() ensures the email can be reused for new accounts
-	if err := database.DB.Unscoped().Where("id = ?", userID).Delete(&model.User{}).Error; err != nil {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
+	for _, d := range deletions {
+		if err := database.DB.Where("user_id = ?", userID).Delete(d.model).Error; err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "could not delete " + d.name})
+		}
+	}
+
+	if err := database.DB.Where("id = ?", userID).Delete(&model.User{}).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "could not delete user"})
 	}
 
 	return c.JSON(fiber.Map{"message": "user deleted"})

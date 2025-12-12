@@ -5,7 +5,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
-	"gorm.io/gorm"
 )
 
 // Gym represents a user's training location with available equipment.
@@ -14,9 +13,8 @@ type Gym struct {
 	Name      string         `gorm:"not null;uniqueIndex:idx_user_gym_name" json:"name"`
 	Equipment pq.StringArray `gorm:"type:text[]" json:"equipment"`
 
-	CreatedAt time.Time      `json:"-"`
-	UpdatedAt time.Time      `json:"-"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 
 	UserID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_user_gym_name" json:"-"`
 	User   User      `gorm:"constraint:OnDelete:CASCADE;" json:"-"`

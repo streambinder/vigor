@@ -9,7 +9,6 @@ import (
 	"github.com/lib/pq"
 	"github.com/streambinder/vigor/encoder"
 	"gorm.io/datatypes"
-	"gorm.io/gorm"
 )
 
 const WeightActivityDurationPerRep = 3 // 3 seconds per rep
@@ -74,15 +73,14 @@ type Training struct {
 	Prompt      datatypes.JSON `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
 	Feedback    string         `json:"feedback" prompt:"-"`
 
-	CompletedAt *time.Time     `json:"completed_at" prompt:"-"`
-	CreatedAt   time.Time      `json:"created_at" prompt:"-"`
-	UpdatedAt   time.Time      `json:"-"`
-	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
+	CompletedAt *time.Time `json:"completed_at" prompt:"-"`
+	CreatedAt   time.Time  `json:"created_at" prompt:"-"`
+	UpdatedAt   time.Time  `json:"-"`
 
 	UserID   uuid.UUID  `gorm:"type:uuid;not null" json:"user_id" prompt:"-"`
 	User     User       `gorm:"constraint:OnDelete:CASCADE;" json:"-"`
 	ParentID *uuid.UUID `gorm:"type:uuid" json:"parent_id" prompt:"-"`
-	Parent   *Training  `gorm:"foreignKey:ParentID" json:"-"`
+	Parent   *Training  `gorm:"constraint:OnDelete:SET NULL;foreignKey:ParentID" json:"-"`
 	GymID *uuid.UUID `gorm:"type:uuid" json:"gym_id" prompt:"-"`
 	Gym   *Gym       `gorm:"constraint:OnDelete:SET NULL;" json:"gym,omitempty"`
 }
@@ -96,9 +94,8 @@ type Routine struct {
 	Rest   int     `gorm:"not null" json:"rest" prompt:"Rest seconds after this routine"`
 	Blocks []Block `json:"blocks" gorm:"foreignKey:RoutineID;constraint:OnDelete:CASCADE" prompt:"Set of blocks to be performed. A block is composed by at least 2 activities."`
 
-	CreatedAt time.Time      `json:"-"`
-	UpdatedAt time.Time      `json:"-"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 }
 
 // Block represents a block of exercises or a rest period with an ID of type UUID and an explicit FK
@@ -110,9 +107,8 @@ type Block struct {
 	Rest       int        `gorm:"not null" json:"rest" prompt:"Rest seconds between repeats"`
 	Activities []Activity `json:"activities" gorm:"foreignKey:BlockID;constraint:OnDelete:CASCADE"`
 
-	CreatedAt time.Time      `json:"-"`
-	UpdatedAt time.Time      `json:"-"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 }
 
 // Activity represents a single exercise or rest period with a UUID ID and an explicit FK
@@ -129,9 +125,8 @@ type Activity struct {
 	Detail    datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"`
 	Feedback  string         `json:"feedback" prompt:"-"`
 
-	CreatedAt time.Time      `json:"-"`
-	UpdatedAt time.Time      `json:"-"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 }
 
 // DetailType returns the exercise type from the Detail JSON field
@@ -186,7 +181,6 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 	clone.CompletedAt = nil
 	clone.CreatedAt = time.Time{}
 	clone.UpdatedAt = time.Time{}
-	clone.DeletedAt = gorm.DeletedAt{}
 	clone.GymID = nil // gym belongs to original user
 
 	for i := range clone.Routines {
@@ -194,19 +188,16 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 		clone.Routines[i].TrainingID = ""
 		clone.Routines[i].CreatedAt = time.Time{}
 		clone.Routines[i].UpdatedAt = time.Time{}
-		clone.Routines[i].DeletedAt = gorm.DeletedAt{}
 		for j := range clone.Routines[i].Blocks {
 			clone.Routines[i].Blocks[j].ID = ""
 			clone.Routines[i].Blocks[j].RoutineID = ""
 			clone.Routines[i].Blocks[j].CreatedAt = time.Time{}
 			clone.Routines[i].Blocks[j].UpdatedAt = time.Time{}
-			clone.Routines[i].Blocks[j].DeletedAt = gorm.DeletedAt{}
 			for k := range clone.Routines[i].Blocks[j].Activities {
 				clone.Routines[i].Blocks[j].Activities[k].ID = ""
 				clone.Routines[i].Blocks[j].Activities[k].BlockID = ""
 				clone.Routines[i].Blocks[j].Activities[k].CreatedAt = time.Time{}
 				clone.Routines[i].Blocks[j].Activities[k].UpdatedAt = time.Time{}
-				clone.Routines[i].Blocks[j].Activities[k].DeletedAt = gorm.DeletedAt{}
 			}
 		}
 	}
