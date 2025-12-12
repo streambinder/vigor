@@ -255,7 +255,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Welcome back!',
+                                  '${user.profile.firstName} ${user.profile.lastName}',
                                   style: PlatformHelper.useLiquidGlass
                                       ? LiquidGlassTheme.headlineStyle
                                       : const TextStyle(
@@ -277,34 +277,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                         ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // User ID
-                    Text(
-                      'Account Information',
-                      style: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.headlineStyle
-                          : const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                    ),
-                    const SizedBox(height: 8),
-                    AdaptiveCard(
-                      child: AdaptiveListTile(
-                        leading: const Icon(Icons.fingerprint),
-                        title: const Text('User ID'),
-                        subtitle: Text(user.id),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    AdaptiveCard(
-                      child: AdaptiveListTile(
-                        leading: const Icon(Icons.email),
-                        title: const Text('Email'),
-                        subtitle: Text(user.email),
                       ),
                     ),
 

@@ -9,12 +9,18 @@ part 'profile.g.dart';
 class Profile {
   // Fields marked as required in the backend model
   static const List<String> requiredFields = [
+    'first_name',
+    'last_name',
     'birthdate',
     'gender',
     'language',
     'height',
     'weight'
   ];
+  @JsonKey(name: 'first_name')
+  final String firstName;
+  @JsonKey(name: 'last_name')
+  final String lastName;
   @JsonKey(name: 'birthdate')
   final DateTime birthdate;
   @JsonKey(name: 'gender')
@@ -31,6 +37,8 @@ class Profile {
   final String userId;
 
   Profile({
+    required this.firstName,
+    required this.lastName,
     required this.birthdate,
     required this.gender,
     required this.language,

@@ -31,6 +31,8 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   bool _isSubmitting = false;
 
   // Form field controllers
+  String? _first_name;
+  String? _last_name;
   DateTime? _birthdate;
   String? _gender;
   String? _language;
@@ -50,6 +52,8 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   void initState() {
     super.initState();
     // Pre-fill with existing values if they exist and are valid
+    _first_name = widget.profile.firstName.isNotEmpty ? widget.profile.firstName : null;
+    _last_name = widget.profile.lastName.isNotEmpty ? widget.profile.lastName : null;
     final now = DateTime.now();
     final birthdate = widget.profile.birthdate;
     // Only use birthdate if it's valid (between 1900 and today)
@@ -143,6 +147,8 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
 
       final authProvider = context.read<AuthProvider>();
       final success = await authProvider.updateProfile(
+        firstName: _first_name,
+        lastName: _last_name,
         birthdate: _birthdate,
         gender: _gender,
         language: _language,
@@ -217,20 +223,17 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Birthdate
-                    _buildDateField(),
+                    // First Name and Last Name (side by side)
+                    _buildNameFields(),
 
-                    // Gender
-                    _buildGenderField(),
+                    // Birthdate and Gender (side by side)
+                    _buildBirthdateGenderFields(),
+
+                    // Height and Weight (side by side)
+                    _buildHeightWeightFields(),
 
                     // Language
                     _buildLanguageField(),
-
-                    // Height
-                    _buildHeightField(),
-
-                    // Weight
-                    _buildWeightField(),
 
                     // Goals
                     _buildGoalsSection(),
@@ -273,47 +276,52 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
     );
   }
 
-  Widget _buildDateField() {
-    final isRequired = widget.missingFields.containsKey('birthdate');
+  Widget _buildNameFields() {
+    final isFirstNameRequired = widget.missingFields.containsKey('first_name');
+    final isLastNameRequired = widget.missingFields.containsKey('last_name');
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            isRequired ? 'Birth Date *' : 'Birth Date',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+          Expanded(
+            child: TextFormField(
+              initialValue: _first_name,
+              decoration: InputDecoration(
+                labelText: isFirstNameRequired ? 'First Name *' : 'First Name',
+                border: const OutlineInputBorder(),
+              ),
+              validator: isFirstNameRequired
+                  ? (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Required';
+                      }
+                      return null;
+                    }
+                  : null,
+              onChanged: (value) {
+                _first_name = value.isNotEmpty ? value : null;
+              },
+            ),
           ),
-          const SizedBox(height: 8),
-          InkWell(
-            onTap: () async {
-              final date = await showDatePicker(
-                context: context,
-                initialDate: _birthdate ?? DateTime(2000, 1, 1),
-                firstDate: DateTime(1900),
-                lastDate: DateTime.now(),
-              );
-              if (date != null) {
-                setState(() {
-                  _birthdate = date;
-                });
-              }
-            },
-            child: InputDecorator(
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.calendar_today),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextFormField(
+              initialValue: _last_name,
+              decoration: InputDecoration(
+                labelText: isLastNameRequired ? 'Last Name *' : 'Last Name',
+                border: const OutlineInputBorder(),
               ),
-              child: Text(
-                _birthdate != null
-                    ? '${_birthdate!.day}/${_birthdate!.month}/${_birthdate!.year}'
-                    : 'Select date',
-                style: TextStyle(
-                  color: _birthdate != null
-                      ? Theme.of(context).textTheme.bodyLarge?.color
-                      : Theme.of(context).hintColor,
-                ),
-              ),
+              validator: isLastNameRequired
+                  ? (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Required';
+                      }
+                      return null;
+                    }
+                  : null,
+              onChanged: (value) {
+                _last_name = value.isNotEmpty ? value : null;
+              },
             ),
           ),
         ],
@@ -321,39 +329,74 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
     );
   }
 
-  Widget _buildGenderField() {
-    final isRequired = widget.missingFields.containsKey('gender');
+  Widget _buildBirthdateGenderFields() {
+    final isBirthdateRequired = widget.missingFields.containsKey('birthdate');
+    final isGenderRequired = widget.missingFields.containsKey('gender');
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            isRequired ? 'Gender *' : 'Gender',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            value: _gender,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: 'Select gender',
+          Expanded(
+            child: InkWell(
+              onTap: () async {
+                final date = await showDatePicker(
+                  context: context,
+                  initialDate: _birthdate ?? DateTime(2000, 1, 1),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime.now(),
+                );
+                if (date != null) {
+                  setState(() {
+                    _birthdate = date;
+                  });
+                }
+              },
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: isBirthdateRequired ? 'Birth Date *' : 'Birth Date',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: const Icon(Icons.calendar_today),
+                ),
+                child: Text(
+                  _birthdate != null
+                      ? '${_birthdate!.day}/${_birthdate!.month}/${_birthdate!.year}'
+                      : '',
+                  style: TextStyle(
+                    color: _birthdate != null
+                        ? Theme.of(context).textTheme.bodyLarge?.color
+                        : Theme.of(context).hintColor,
+                  ),
+                ),
+              ),
             ),
-            items: const [
-              DropdownMenuItem(value: 'male', child: Text('Male')),
-              DropdownMenuItem(value: 'female', child: Text('Female')),
-            ],
-            validator: isRequired ? (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please select your gender';
-              }
-              return null;
-            } : null,
-            onChanged: (value) {
-              setState(() {
-                _gender = value;
-              });
-            },
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: DropdownButtonFormField<String>(
+              value: _gender,
+              decoration: InputDecoration(
+                labelText: isGenderRequired ? 'Gender *' : 'Gender',
+                border: const OutlineInputBorder(),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'male', child: Text('Male')),
+                DropdownMenuItem(value: 'female', child: Text('Female')),
+              ],
+              validator: isGenderRequired
+                  ? (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Required';
+                      }
+                      return null;
+                    }
+                  : null,
+              onChanged: (value) {
+                setState(() {
+                  _gender = value;
+                });
+              },
+            ),
           ),
         ],
       ),
@@ -407,58 +450,65 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
     );
   }
 
-  Widget _buildHeightField() {
-    final isRequired = widget.missingFields.containsKey('height');
+  Widget _buildHeightWeightFields() {
+    final isHeightRequired = widget.missingFields.containsKey('height');
+    final isWeightRequired = widget.missingFields.containsKey('weight');
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        initialValue: _height?.toString(),
-        decoration: InputDecoration(
-          labelText: isRequired ? 'Height (cm) *' : 'Height (cm)',
-          border: const OutlineInputBorder(),
-        ),
-        keyboardType: TextInputType.number,
-        validator: isRequired ? (value) {
-          if (value == null || value.isEmpty) {
-            return 'Please enter your height';
-          }
-          final height = double.tryParse(value);
-          if (height == null || height <= 0) {
-            return 'Please enter a valid height';
-          }
-          return null;
-        } : null,
-        onChanged: (value) {
-          _height = double.tryParse(value);
-        },
-      ),
-    );
-  }
-
-  Widget _buildWeightField() {
-    final isRequired = widget.missingFields.containsKey('weight');
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        initialValue: _weight?.toString(),
-        decoration: InputDecoration(
-          labelText: isRequired ? 'Weight (kg) *' : 'Weight (kg)',
-          border: const OutlineInputBorder(),
-        ),
-        keyboardType: TextInputType.number,
-        validator: isRequired ? (value) {
-          if (value == null || value.isEmpty) {
-            return 'Please enter your weight';
-          }
-          final weight = double.tryParse(value);
-          if (weight == null || weight <= 0) {
-            return 'Please enter a valid weight';
-          }
-          return null;
-        } : null,
-        onChanged: (value) {
-          _weight = double.tryParse(value);
-        },
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              initialValue: _height?.toString(),
+              decoration: InputDecoration(
+                labelText: isHeightRequired ? 'Height (cm) *' : 'Height (cm)',
+                border: const OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+              validator: isHeightRequired
+                  ? (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Required';
+                      }
+                      final height = double.tryParse(value);
+                      if (height == null || height <= 0) {
+                        return 'Invalid';
+                      }
+                      return null;
+                    }
+                  : null,
+              onChanged: (value) {
+                _height = double.tryParse(value);
+              },
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextFormField(
+              initialValue: _weight?.toString(),
+              decoration: InputDecoration(
+                labelText: isWeightRequired ? 'Weight (kg) *' : 'Weight (kg)',
+                border: const OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+              validator: isWeightRequired
+                  ? (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Required';
+                      }
+                      final weight = double.tryParse(value);
+                      if (weight == null || weight <= 0) {
+                        return 'Invalid';
+                      }
+                      return null;
+                    }
+                  : null,
+              onChanged: (value) {
+                _weight = double.tryParse(value);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -159,6 +159,8 @@ func postUserUpdate(c *fiber.Ctx) error {
 	}
 
 	var body struct {
+		FirstName string         `json:"first_name"`
+		LastName  string         `json:"last_name"`
 		Birthdate string         `json:"birthdate"`
 		Gender    string         `json:"gender"`
 		Language  string         `json:"language"`
@@ -168,6 +170,16 @@ func postUserUpdate(c *fiber.Ctx) error {
 	}
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse JSON"})
+	}
+
+	// first_name
+	if body.FirstName != "" {
+		profile.FirstName = body.FirstName
+	}
+
+	// last_name
+	if body.LastName != "" {
+		profile.LastName = body.LastName
 	}
 
 	// birthdate

@@ -210,6 +210,8 @@ class AuthService {
 
   /// Update user profile
   Future<ApiResponse<String>> updateProfile({
+    String? firstName,
+    String? lastName,
     DateTime? birthdate,
     String? gender,
     String? language,
@@ -226,6 +228,8 @@ class AuthService {
     // Build update body with only provided fields
     final Map<String, dynamic> body = {};
 
+    if (firstName != null) body['first_name'] = firstName;
+    if (lastName != null) body['last_name'] = lastName;
     if (birthdate != null) {
       // Format as DD/MM/YYYY as expected by server
       final day = birthdate.day.toString().padLeft(2, '0');
@@ -256,7 +260,10 @@ class AuthService {
       if (refreshResponse.isSuccess) {
         // Retry with new token
         return updateProfile(
+          firstName: firstName,
+          lastName: lastName,
           birthdate: birthdate,
+          gender: gender,
           language: language,
           height: height,
           weight: weight,
