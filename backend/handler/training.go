@@ -20,7 +20,7 @@ import (
 const (
 	recentTrainingDays          = 14
 	recentTrainingMaxResults    = 5
-	recentGenerationsMaxResults = 3
+	recentGenerationsMaxResults = 5
 )
 
 // TrainingRequest represents the request body for generating a training plan.
