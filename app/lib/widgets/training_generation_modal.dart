@@ -12,6 +12,8 @@ import '../widgets/user_select_dialog.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 
+enum EquipmentMode { bodyweight, gym, custom }
+
 class TrainingGenerationModal extends StatefulWidget {
   final List<Gym> gyms;
   final Function(Training)? onSuccess;
@@ -32,6 +34,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   final _promptController = TextEditingController();
   final _equipmentInputController = TextEditingController();
 
+  EquipmentMode _equipmentMode = EquipmentMode.bodyweight;
   Gym? _selectedGym;
   bool _isGenerating = false;
   final List<UserInfo> _partners = [];
@@ -40,13 +43,14 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   @override
   void initState() {
     super.initState();
-    if (widget.gyms.isNotEmpty) {
-      final prefs = context.read<PreferencesService>();
-      final defaultName = prefs.defaultGymName;
-      _selectedGym = widget.gyms.firstWhere(
-        (g) => g.name == defaultName,
-        orElse: () => widget.gyms.first,
-      );
+    final prefs = context.read<PreferencesService>();
+    final defaultName = prefs.defaultGymName;
+    // default to gym mode if user has a default gym set, otherwise bodyweight
+    if (defaultName != null && widget.gyms.any((g) => g.name == defaultName)) {
+      _equipmentMode = EquipmentMode.gym;
+      _selectedGym = widget.gyms.firstWhere((g) => g.name == defaultName);
+    } else if (widget.gyms.isNotEmpty) {
+      _selectedGym = widget.gyms.first;
     }
   }
 
@@ -92,6 +96,192 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     });
   }
 
+  Widget _buildEquipmentSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Equipment',
+          style: PlatformHelper.useLiquidGlass
+              ? LiquidGlassTheme.captionStyle
+              : Theme.of(context).textTheme.labelMedium,
+        ),
+        const SizedBox(height: 8),
+        // ternary segmented button
+        SizedBox(
+          width: double.infinity,
+          child: SegmentedButton<EquipmentMode>(
+            segments: const [
+              ButtonSegment(
+                value: EquipmentMode.bodyweight,
+                label: Text('Bodyweight'),
+                icon: Icon(Icons.accessibility_new, size: 16),
+              ),
+              ButtonSegment(
+                value: EquipmentMode.gym,
+                label: Text('Gym'),
+                icon: Icon(Icons.fitness_center, size: 16),
+              ),
+              ButtonSegment(
+                value: EquipmentMode.custom,
+                label: Text('Custom'),
+                icon: Icon(Icons.build, size: 16),
+              ),
+            ],
+            selected: {_equipmentMode},
+            onSelectionChanged: (Set<EquipmentMode> selected) {
+              setState(() {
+                _equipmentMode = selected.first;
+              });
+            },
+            showSelectedIcon: false,
+          ),
+        ),
+        const SizedBox(height: 12),
+        // mode-specific content
+        _buildEquipmentModeContent(),
+      ],
+    );
+  }
+
+  Widget _buildEquipmentModeContent() {
+    switch (_equipmentMode) {
+      case EquipmentMode.bodyweight:
+        return Text(
+          'No equipment - bodyweight exercises only',
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontStyle: FontStyle.italic,
+            fontSize: 12,
+          ),
+        );
+      case EquipmentMode.gym:
+        return _buildGymSelector();
+      case EquipmentMode.custom:
+        return _buildCustomEquipmentInput();
+    }
+  }
+
+  Widget _buildGymSelector() {
+    if (widget.gyms.isEmpty) {
+      return Text(
+        'No gyms defined. Create one in your profile settings.',
+        style: TextStyle(
+          color: Colors.grey[600],
+          fontStyle: FontStyle.italic,
+          fontSize: 12,
+        ),
+      );
+    }
+    return Container(
+      decoration: PlatformHelper.useLiquidGlass
+          ? LiquidGlassTheme.glassDecoration(
+              borderRadius: 12,
+              border: Border.all(
+                color: Colors.white.withOpacity(0.2),
+                width: 1.5,
+              ),
+            )
+          : BoxDecoration(
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<Gym>(
+          value: _selectedGym,
+          isExpanded: true,
+          hint: Text(
+            'Select a gym',
+            style: PlatformHelper.useLiquidGlass
+                ? LiquidGlassTheme.bodyStyle.copyWith(
+                    color: Colors.white.withOpacity(0.5),
+                  )
+                : TextStyle(color: Colors.grey[600]),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          borderRadius: BorderRadius.circular(12),
+          items: widget.gyms.map((gym) {
+            return DropdownMenuItem<Gym>(
+              value: gym,
+              child: Text(
+                gym.name,
+                style: PlatformHelper.useLiquidGlass
+                    ? LiquidGlassTheme.bodyStyle
+                    : null,
+              ),
+            );
+          }).toList(),
+          onChanged: (Gym? value) {
+            setState(() {
+              _selectedGym = value;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomEquipmentInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: AdaptiveTextField(
+                controller: _equipmentInputController,
+                labelText: 'Add Equipment',
+                placeholder: 'e.g., Barbell, Dumbbells',
+                onSubmitted: (_) => _addEquipment(),
+              ),
+            ),
+            const SizedBox(width: 8),
+            AdaptiveButton(
+              onPressed: _addEquipment,
+              child: const Icon(Icons.add),
+            ),
+          ],
+        ),
+        if (_equipment.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              'Add the equipment you have available',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontStyle: FontStyle.italic,
+                fontSize: 12,
+              ),
+            ),
+          )
+        else ...[
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _equipment.map((equipment) {
+              return Chip(
+                label: Text(
+                  equipment,
+                  style: PlatformHelper.useLiquidGlass
+                      ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
+                      : null,
+                ),
+                deleteIcon: const Icon(Icons.close, size: 16),
+                onDeleted: () => _removeEquipment(equipment),
+                backgroundColor: PlatformHelper.useLiquidGlass
+                    ? LiquidGlassTheme.primaryColor.withOpacity(0.1)
+                    : null,
+              );
+            }).toList(),
+          ),
+        ],
+      ],
+    );
+  }
+
   Future<void> _generateTraining() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -105,14 +295,28 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     final trainingService = TrainingService(storageService: storage);
 
     final duration = int.parse(_durationController.text);
-    final gym = _selectedGym?.name;
     final prompt = _promptController.text.trim();
+
+    // determine gym and equipment based on selected mode
+    String gym = '';
+    List<String>? equipment;
+    switch (_equipmentMode) {
+      case EquipmentMode.bodyweight:
+        // empty gym and equipment = bodyweight only
+        break;
+      case EquipmentMode.gym:
+        gym = _selectedGym?.name ?? '';
+        break;
+      case EquipmentMode.custom:
+        equipment = _equipment.isEmpty ? null : _equipment;
+        break;
+    }
 
     final response = await trainingService.generateTraining(
       duration: duration,
-      gym: gym ?? '',
+      gym: gym,
       prompt: prompt.isEmpty ? null : prompt,
-      equipment: _equipment.isEmpty ? null : _equipment,
+      equipment: equipment,
       partners: _partners.isEmpty ? null : _partners.map((p) => p.id).toList(),
     );
 
@@ -222,140 +426,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             ),
             const SizedBox(height: 16),
 
-            // Gym selection
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Gym (optional)',
-                  style: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.captionStyle
-                      : Theme.of(context).textTheme.labelMedium,
-                ),
-                const SizedBox(height: 8),
-                Opacity(
-                  opacity: widget.gyms.isEmpty ? 0.5 : 1.0,
-                  child: Container(
-                    decoration: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.glassDecoration(
-                            borderRadius: 12,
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.2),
-                              width: 1.5,
-                            ),
-                          )
-                        : BoxDecoration(
-                            border: Border.all(
-                              color: Theme.of(context).colorScheme.outline,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<Gym>(
-                        value: _selectedGym,
-                        isExpanded: true,
-                        hint: Text(
-                          widget.gyms.isEmpty ? 'No gyms available' : 'Select a gym',
-                          style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.bodyStyle.copyWith(
-                                  color: Colors.white.withOpacity(0.5),
-                                )
-                              : TextStyle(color: Colors.grey[600]),
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        borderRadius: BorderRadius.circular(12),
-                        items: widget.gyms.map((gym) {
-                          return DropdownMenuItem<Gym>(
-                            value: gym,
-                            child: Text(
-                              gym.name,
-                              style: PlatformHelper.useLiquidGlass
-                                  ? LiquidGlassTheme.bodyStyle
-                                  : null,
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: widget.gyms.isEmpty
-                            ? null
-                            : (Gym? value) {
-                                setState(() {
-                                  _selectedGym = value;
-                                });
-                              },
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Equipment section
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Equipment',
-                  style: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.captionStyle
-                      : Theme.of(context).textTheme.labelMedium,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: AdaptiveTextField(
-                        controller: _equipmentInputController,
-                        labelText: 'Add Equipment',
-                        placeholder: 'e.g., Barbell, Dumbbells',
-                        onSubmitted: (_) => _addEquipment(),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    AdaptiveButton(
-                      onPressed: _addEquipment,
-                      child: const Icon(Icons.add),
-                    ),
-                  ],
-                ),
-                if (_equipment.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Text(
-                      _selectedGym != null
-                          ? 'Using equipment from "${_selectedGym!.name}"'
-                          : 'Bodyweight training (no equipment)',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontStyle: FontStyle.italic,
-                        fontSize: 12,
-                      ),
-                    ),
-                  )
-                else ...[
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _equipment.map((equipment) {
-                      return Chip(
-                        label: Text(
-                          equipment,
-                          style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
-                              : null,
-                        ),
-                        deleteIcon: const Icon(Icons.close, size: 16),
-                        onDeleted: () => _removeEquipment(equipment),
-                        backgroundColor: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.primaryColor.withOpacity(0.1)
-                            : null,
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ],
-            ),
+            // Equipment mode selection
+            _buildEquipmentSection(),
             const SizedBox(height: 16),
 
             // Optional prompt
