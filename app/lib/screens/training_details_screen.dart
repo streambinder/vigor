@@ -561,7 +561,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                           child: Text(
                             training.equipment.isEmpty
                                 ? 'No equipment'
-                                : training.equipment.join(', '),
+                                : training.equipment.join(' · '),
                             style: PlatformHelper.useLiquidGlass
                                 ? LiquidGlassTheme.captionStyle
                                 : Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -983,14 +983,17 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       BuildContext context, Exercise exercise, List<String> modifiers) {
     final items = <Widget>[];
 
-    for (final eq in exercise.equipment) {
-      items.add(_buildDetailChip(context, Icons.fitness_center, eq, Colors.blue.shade700));
+    if (exercise.muscles.isNotEmpty) {
+      items.add(_buildDetailChip(context, Icons.accessibility_new,
+          exercise.muscles.take(3).join(' · '), Colors.red.shade700));
     }
-    for (final muscle in exercise.muscles) {
-      items.add(_buildDetailChip(context, Icons.accessibility_new, muscle, Colors.red.shade700));
+    if (exercise.equipment.isNotEmpty) {
+      items.add(_buildDetailChip(
+          context, Icons.fitness_center, exercise.equipment.join(' · '), Colors.blue.shade700));
     }
-    for (final mod in modifiers) {
-      items.add(_buildDetailChip(context, Icons.tune, mod, Colors.green.shade700));
+    if (modifiers.isNotEmpty) {
+      items.add(_buildDetailChip(
+          context, Icons.tune, modifiers.join(' · '), Colors.green.shade700));
     }
 
     return Wrap(
@@ -1003,17 +1006,23 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   Widget _buildDetailChip(BuildContext context, IconData icon, String text, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 14, color: color),
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Icon(icon, size: 14, color: color),
+        ),
         const SizedBox(width: 4),
-        Text(
-          text,
-          style: PlatformHelper.useLiquidGlass
-              ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
-              : Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
+        Flexible(
+          child: Text(
+            text,
+            style: PlatformHelper.useLiquidGlass
+                ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
+                : Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+          ),
         ),
       ],
     );
