@@ -24,7 +24,7 @@ class TabataTimerScreen extends StatefulWidget {
 
 enum IntervalType { work, rest }
 
-class WorkoutInterval {
+class TrainingInterval {
   final IntervalType type;
   final int duration;
   final String routineName;
@@ -38,7 +38,7 @@ class WorkoutInterval {
   final int routineNumber; // Routine number (1-based)
   final int totalRoutines;
 
-  WorkoutInterval({
+  TrainingInterval({
     required this.type,
     required this.duration,
     required this.routineName,
@@ -56,7 +56,7 @@ class WorkoutInterval {
 
 class _TabataTimerScreenState extends State<TabataTimerScreen> {
   Timer? _timer;
-  late List<WorkoutInterval> _intervals;
+  late List<TrainingInterval> _intervals;
   int _currentIntervalIndex = 0;
   int _remainingSeconds = 0;
   bool _isPaused = false;
@@ -91,8 +91,8 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     super.dispose();
   }
 
-  List<WorkoutInterval> _buildIntervals() {
-    final intervals = <WorkoutInterval>[];
+  List<TrainingInterval> _buildIntervals() {
+    final intervals = <TrainingInterval>[];
     int activityCounter = 0;
     int totalActivities = 0;
 
@@ -103,8 +103,8 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
       }
     }
 
-    // Helper function to add a rest interval, merging with previous if needed
-    void addRestInterval(WorkoutInterval restInterval) {
+    // helper function to add a rest interval, merging with previous if needed
+    void addRestInterval(TrainingInterval restInterval) {
       if (intervals.isNotEmpty && intervals.last.type == IntervalType.rest) {
         // Last interval is already a rest, keep only the longer one
         if (restInterval.duration > intervals.last.duration) {
@@ -135,7 +135,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
 
             // Add work interval
             final workDuration = activity.duration > 0 ? activity.duration : 60;
-            intervals.add(WorkoutInterval(
+            intervals.add(TrainingInterval(
               type: IntervalType.work,
               duration: workDuration,
               routineName: routine.type,
@@ -152,7 +152,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
 
             // Add activity rest if exists
             if (activity.rest > 0) {
-              addRestInterval(WorkoutInterval(
+              addRestInterval(TrainingInterval(
                 type: IntervalType.rest,
                 duration: activity.rest,
                 routineName: routine.type,
@@ -169,7 +169,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
 
         // Add block rest after all repeats
         if (block.rest > 0) {
-          addRestInterval(WorkoutInterval(
+          addRestInterval(TrainingInterval(
             type: IntervalType.rest,
             duration: block.rest,
             routineName: routine.type,
@@ -185,7 +185,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
 
       // Add routine rest after all blocks
       if (routine.rest > 0) {
-        addRestInterval(WorkoutInterval(
+        addRestInterval(TrainingInterval(
           type: IntervalType.rest,
           duration: routine.rest,
           routineName: routine.type,
@@ -225,7 +225,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
 
   void _startCurrentInterval() {
     if (_currentIntervalIndex >= _intervals.length) {
-      _completeWorkout();
+      _completeTraining();
       return;
     }
 
@@ -247,8 +247,8 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
         } else {
           timer.cancel();
           if (!_hasStarted) {
-            // Initial countdown expired, start workout
-            _startWorkout();
+            // initial countdown expired, start training
+            _startTraining();
           } else {
             _onIntervalCompleted();
           }
@@ -257,8 +257,8 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     });
   }
 
-  void _startWorkout() {
-    if (_hasStarted) return; // Already started
+  void _startTraining() {
+    if (_hasStarted) return; // already started
 
     _timer?.cancel();
     setState(() {
@@ -285,7 +285,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     });
 
     if (_currentIntervalIndex >= _intervals.length) {
-      _completeWorkout();
+      _completeTraining();
     } else {
       _startCurrentInterval();
     }
@@ -316,7 +316,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     }
   }
 
-  void _completeWorkout() {
+  void _completeTraining() {
     _timer?.cancel();
     setState(() {
       _isCompleted = true;
@@ -392,7 +392,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
 
   Widget _buildStartScreen() {
     return GestureDetector(
-      onTap: _startWorkout,
+      onTap: _startTraining,
       child: Container(
         color: PlatformHelper.useLiquidGlass
             ? const Color(0xFFF5F7FA)
@@ -459,7 +459,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
             ),
             const SizedBox(height: 32),
             Text(
-              'Workout Completed!',
+              'Training Completed!',
               style: PlatformHelper.useLiquidGlass
                   ? LiquidGlassTheme.titleStyle
                   : Theme.of(context).textTheme.headlineMedium,
@@ -530,7 +530,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     );
   }
 
-  Widget _buildActivityName(WorkoutInterval interval) {
+  Widget _buildActivityName(TrainingInterval interval) {
     return Text(
       interval.activityName?.toUpperCase() ?? '',
       style: PlatformHelper.useLiquidGlass
@@ -540,7 +540,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     );
   }
 
-  Widget _buildCountersRow(WorkoutInterval interval) {
+  Widget _buildCountersRow(TrainingInterval interval) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: PlatformHelper.useLiquidGlass
@@ -618,7 +618,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     );
   }
 
-  Widget _buildActivityDisplay(WorkoutInterval interval) {
+  Widget _buildActivityDisplay(TrainingInterval interval) {
     final activity = interval.activity;
     final exercise = interval.exercise;
     final screenWidth = MediaQuery.of(context).size.width;
@@ -821,13 +821,13 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Exit Workout?'),
+        title: const Text('Exit Training?'),
         content: const Text('What would you like to do?'),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(); // Close dialog
-              Navigator.of(context).pop(); // Exit workout
+              Navigator.of(context).pop(); // exit training
             },
             child: const Text('Exit'),
           ),

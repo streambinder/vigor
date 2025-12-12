@@ -90,7 +90,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     return '$hours hr $remainingMinutes min';
   }
 
-  bool _isCompletedWorkout(Training training) {
+  bool _isCompletedTraining(Training training) {
     final completedAt = training.completedAt;
     if (completedAt == null) {
       return false;
@@ -99,9 +99,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
     return completedAt.isBefore(now);
   }
 
-  bool _isStaleWorkout(Training training) {
-    // Consider a workout stale if it's older than 7 days and not completed
-    if (_isCompletedWorkout(training)) {
+  bool _isStaleTraining(Training training) {
+    // consider a training stale if it's older than 7 days and not completed
+    if (_isCompletedTraining(training)) {
       return false;
     }
     final now = DateTime.now();
@@ -149,14 +149,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'No workouts yet',
+                'No trainings yet',
                 style: PlatformHelper.useLiquidGlass
                     ? LiquidGlassTheme.headlineStyle
                     : Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 8),
               Text(
-                'Generate your first workout from the Home tab',
+                'Generate your first training from the Home tab',
                 textAlign: TextAlign.center,
                 style: PlatformHelper.useLiquidGlass
                     ? LiquidGlassTheme.captionStyle
@@ -172,14 +172,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
   }
 
   Widget _buildTrainingsList() {
-    // Separate workouts into available and past
-    final availableWorkouts = _trainings!
-        .where((t) => !_isCompletedWorkout(t))
+    // separate trainings into available and past
+    final availableTrainings = _trainings!
+        .where((t) => !_isCompletedTraining(t))
         .toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Most recent first
 
-    final pastWorkouts = _trainings!
-        .where((t) => _isCompletedWorkout(t))
+    final pastTrainings = _trainings!
+        .where((t) => _isCompletedTraining(t))
         .toList()
       ..sort((a, b) {
         // Both should have non-null completedAt after filtering, but add safety
@@ -191,19 +191,19 @@ class _ActivityScreenState extends State<ActivityScreen> {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
-        // Available Workouts Section
+        // Available Trainings Section
         Text(
-          'Available workouts',
+          'Available trainings',
           style: PlatformHelper.useLiquidGlass
               ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
               : Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 12),
 
-        if (availableWorkouts.isEmpty)
+        if (availableTrainings.isEmpty)
           _buildEmptyAvailableState()
         else
-          ...availableWorkouts.map((training) {
+          ...availableTrainings.map((training) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12.0),
               child: _buildTrainingCard(training),
@@ -212,16 +212,16 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
         const SizedBox(height: 32),
 
-        // Past Workouts Section (only show if there are past workouts)
-        if (pastWorkouts.isNotEmpty) ...[
+        // Past Trainings Section (only show if there are past trainings)
+        if (pastTrainings.isNotEmpty) ...[
           Text(
-            'Past workouts',
+            'Past trainings',
             style: PlatformHelper.useLiquidGlass
                 ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
                 : Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 12),
-          ...pastWorkouts.map((training) {
+          ...pastTrainings.map((training) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12.0),
               child: _buildTrainingCard(training),
@@ -245,7 +245,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'No workout available. Start generating one.',
+              'No training available. Start generating one.',
               textAlign: TextAlign.center,
               style: PlatformHelper.useLiquidGlass
                   ? LiquidGlassTheme.bodyStyle.copyWith(
@@ -262,8 +262,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
   }
 
   Widget _buildTrainingCard(Training training) {
-    final isCompleted = _isCompletedWorkout(training);
-    final isStale = _isStaleWorkout(training);
+    final isCompleted = _isCompletedTraining(training);
+    final isStale = _isStaleTraining(training);
     final partnerCount = _partnerCounts[training.id] ?? 0;
     final peopleCount = 1 + partnerCount; // owner + partners
     final opacity = isCompleted ? 0.5 : 1.0;
@@ -296,7 +296,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       : Theme.of(context).textTheme.titleLarge,
                 ),
                 if (isCompleted) ...[
-                  // For completed workouts: show completion time first, then other labels
+                  // for completed trainings: show completion time first, then other labels
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -429,7 +429,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     ],
                   ),
                 ] else ...[
-                  // For available workouts: show full details
+                  // for available trainings: show full details
                   const SizedBox(height: 8),
                   Text(
                     training.description,
@@ -602,13 +602,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
                             builder: (context) => TabataTimerScreen(training: training),
                           ),
                         );
-                        // Reload trainings if workout was completed
+                        // reload trainings if training was completed
                         if (completed == true) {
                           _loadTrainings();
                         }
                       },
                       icon: const Icon(Icons.timer),
-                      label: const Text('Start Workout Timer'),
+                      label: const Text('Start Training'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: PlatformHelper.useLiquidGlass
                             ? LiquidGlassTheme.successColor

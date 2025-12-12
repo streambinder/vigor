@@ -67,8 +67,8 @@ func GenTraining(
 	}
 	response, err := getLLM(profiles).query(
 		request,
-		0.35,  // Balanced: structured output + workout variety
-		10000, // Sufficient for complex multi-routine workouts
+		0.35,  // Balanced: structured output + training variety
+		10000, // Sufficient for complex multi-routine trainings
 	)
 	if err != nil {
 		return nil, request, fmt.Errorf("failed to generate training: %s", err)

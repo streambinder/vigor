@@ -26,10 +26,10 @@ Generate a {%d duration %}-minute training session.
 
 {% endif %}{% endif %}
 {% if len(profiles) > 1 %}
-<<<PARTNER_WORKOUT>>>
-This is a partner workout for {%d len(profiles) %} participants.
+<<<PARTNER_TRAINING>>>
+This is a partner training for {%d len(profiles) %} participants.
 Apply MOST RESTRICTIVE constraints - if ANY participant has an injury/limitation, avoid those exercises for ALL participants.
-<<<END_PARTNER_WORKOUT>>>
+<<<END_PARTNER_TRAINING>>>
 
 {% endif %}
 {% for i, profile := range profiles %}
@@ -67,7 +67,7 @@ Use ONLY these exercise IDs for the warmup routine.
 <<<END_WARMUP_EXERCISES>>>
 
 <<<WORK_EXERCISES ({%d len(workExercises) %} options)>>>
-Use ONLY these exercise IDs for the work routine. Select {%d len(workExercises)/4 %}-{%d len(workExercises)/2 %} for a balanced workout.
+Use ONLY these exercise IDs for the work routine. Select {%d len(workExercises)/4 %}-{%d len(workExercises)/2 %} for a balanced training.
 {% for _, exercise := range workExercises %}
 - {%s exercise.ID %}{% if len(exercise.Equipment) > 0 %} [{% for i, eq := range exercise.Equipment %}{%s eq %}{% if i < len(exercise.Equipment)-1 %}, {% endif %}{% endfor %}]{% endif %} → {%s strings.Join(exercise.Muscles, ", ") %}{% endfor %}
 <<<END_WORK_EXERCISES>>>
@@ -85,7 +85,7 @@ Use ONLY these exercise IDs for the cooldown routine.
 {% endif %}
 
 {% if len(recentGenerations) > 0 %}
-<<<RECENT_GENERATIONS (avoid repeating names, types and workout rationale — if the user does not ask otherwise)>>>
+<<<RECENT_GENERATIONS (avoid repeating names, types and training rationale — if the user does not ask otherwise)>>>
 {% for _, training := range recentGenerations %}{%s training.Name %}
 {% endfor %}<<<END_RECENT_GENERATIONS>>>
 {% endif %}

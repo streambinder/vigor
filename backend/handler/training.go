@@ -29,7 +29,7 @@ type TrainingRequest struct {
 	Equipment []string `json:"equipment"` // List of available equipment (optional if gym is specified)
 	Gym       string   `json:"gym"`       // Name of the gym to use for equipment lookup
 	Prompt    string   `json:"prompt"`    // Specific prompt to use for generating the training plan
-	Partners  []string `json:"partners"`  // Optional partner user UUIDs for partner workouts
+	Partners  []string `json:"partners"`  // Optional partner user UUIDs for partner trainings
 }
 
 // initTraining registers training-related routes.

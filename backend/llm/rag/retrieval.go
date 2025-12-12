@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	MaxWorkExercises     = 20 // RAG-based retrieval for main workout
+	MaxWorkExercises     = 20 // RAG-based retrieval for main training
 	MaxWarmupExercises   = 8  // random selection for warmup
 	MaxCooldownExercises = 5  // random selection for cooldown
 	MaxPromptFacts       = 5
@@ -22,7 +22,7 @@ const (
 	MaxModifierDistance  = 0.2 // Maximum cosine distance for modifier matching
 )
 
-// RetrieveWorkExercises retrieves exercises for the main workout phase via RAG.
+// RetrieveWorkExercises retrieves exercises for the main training phase via RAG.
 // Filters by work types (cardio, strength, skill) and user equipment.
 func RetrieveWorkExercises(profiles []model.Profile, equipment []string) ([]model.Exercise, error) {
 	embeddingText := GenUserExercises(profiles, equipment)
@@ -155,7 +155,7 @@ func RetrieveUserFacts(profiles []model.Profile, prompt string) ([]model.Fact, e
 	return facts, nil
 }
 
-// RetrieveClassics retrieves random classic workouts for prompt enrichment.
+// RetrieveClassics retrieves random classic trainings for prompt enrichment.
 func RetrieveClassics() ([]model.Classic, error) {
 	var classics []model.Classic
 	if err := database.Knowledge.

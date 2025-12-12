@@ -673,13 +673,13 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                       builder: (context) => TabataTimerScreen(training: training),
                     ),
                   );
-                  // If the timer returned true (workout completed), refresh
+                  // if the timer returned true (training completed), refresh
                   if (completed == true && context.mounted) {
                     Navigator.of(context).pop(true);
                   }
                 },
                 icon: const Icon(Icons.timer),
-                label: const Text('Start Workout Timer'),
+                label: const Text('Start Training'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: PlatformHelper.useLiquidGlass
                       ? LiquidGlassTheme.successColor
@@ -732,7 +732,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
             // Routines
             Text(
-              'Workout Routines',
+              'Training Routines',
               style: PlatformHelper.useLiquidGlass
                   ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
                   : Theme.of(context).textTheme.titleLarge,

@@ -98,7 +98,7 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Generate a personalized workout based on your profile and goals',
+                'Generate a personalized training based on your profile and goals',
                 textAlign: TextAlign.center,
                 style: PlatformHelper.useLiquidGlass
                     ? LiquidGlassTheme.bodyStyle
@@ -110,7 +110,7 @@ class _HomePageState extends State<HomePage> {
               AdaptiveButton(
                 onPressed: _isLoadingGyms ? null : _showTrainingGenerationModal,
                 useGradient: true,
-                child: const Text('Generate Workout'),
+                child: const Text('Generate Training'),
               ),
             ],
           ),

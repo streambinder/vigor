@@ -184,7 +184,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           const AdaptiveLoadingIndicator(),
           const SizedBox(height: 24),
           Text(
-            'Generating your workout...',
+            'Generating your training...',
             style: PlatformHelper.useLiquidGlass
                 ? LiquidGlassTheme.headlineStyle
                 : Theme.of(context).textTheme.titleLarge,

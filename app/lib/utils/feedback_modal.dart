@@ -135,7 +135,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
                 child: Text(
-                  'How was your workout?',
+                  'How was your training?',
                   style: useLiquidGlass
                       ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
                       : Theme.of(context).textTheme.titleLarge,

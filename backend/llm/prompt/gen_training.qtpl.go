@@ -100,14 +100,14 @@ func StreamGenTraining(qw422016 *qt422016.Writer,
 	if len(profiles) > 1 {
 //line llm/prompt/gen_training.qtpl:28
 		qw422016.N().S(`
-<<<PARTNER_WORKOUT>>>
-This is a partner workout for `)
+<<<PARTNER_TRAINING>>>
+This is a partner training for `)
 //line llm/prompt/gen_training.qtpl:30
 		qw422016.N().D(len(profiles))
 //line llm/prompt/gen_training.qtpl:30
 		qw422016.N().S(` participants.
 Apply MOST RESTRICTIVE constraints - if ANY participant has an injury/limitation, avoid those exercises for ALL participants.
-<<<END_PARTNER_WORKOUT>>>
+<<<END_PARTNER_TRAINING>>>
 
 `)
 //line llm/prompt/gen_training.qtpl:34
@@ -367,7 +367,7 @@ Use ONLY these exercise IDs for the work routine. Select `)
 //line llm/prompt/gen_training.qtpl:70
 	qw422016.N().D(len(workExercises) / 2)
 //line llm/prompt/gen_training.qtpl:70
-	qw422016.N().S(` for a balanced workout.
+	qw422016.N().S(` for a balanced training.
 `)
 //line llm/prompt/gen_training.qtpl:71
 	for _, exercise := range workExercises {
@@ -531,7 +531,7 @@ Use ONLY these exercise IDs for the cooldown routine.
 	if len(recentGenerations) > 0 {
 //line llm/prompt/gen_training.qtpl:87
 		qw422016.N().S(`
-<<<RECENT_GENERATIONS (avoid repeating names, types and workout rationale — if the user does not ask otherwise)>>>
+<<<RECENT_GENERATIONS (avoid repeating names, types and training rationale — if the user does not ask otherwise)>>>
 `)
 //line llm/prompt/gen_training.qtpl:89
 		for _, training := range recentGenerations {
