@@ -51,6 +51,7 @@ func init() {
 type TrainingReasoning struct {
 	Constraints   []string `json:"constraints" prompt:"Active constraints from user profile (injuries, limitations, equipment restrictions, time)"`
 	Strategy      string   `json:"strategy" prompt:"1-2 sentence workout approach that respects constraints while meeting goals"`
+	FactsApplied  []string `json:"facts_applied" prompt:"How each KNOWLEDGE_FACT was applied to address user goals or work around injuries (e.g. 'DOI URL: applied X principle for Y goal/injury'). Empty array if no facts provided."`
 	TargetMuscles []string `json:"target_muscles" prompt:"Primary muscle groups this workout will target"`
 	Exercises     []string `json:"exercises" prompt:"Exercise IDs selected for this workout with brief reason each (e.g. 'push-up: chest compound')"`
 	NamingLogic   string   `json:"naming_logic" prompt:"Brief explanation connecting workout name to theme/exercises"`
@@ -69,6 +70,7 @@ type Training struct {
 	Type        string         `gorm:"not null" json:"type" prompt:"Training broad category, which can be either the sport for sports-related trainings — boxing, swimming, running, pilates, yoga, etc. —, or subtype of HIIT for HIIT — AMRAP, EMOM, etc. – or other generic terms such as strength, flexibility, etc.)"`
 	Duration    int            `gorm:"not null" json:"duration" prompt:"Total duration in seconds"`
 	Equipment   pq.StringArray `gorm:"type:text[]" json:"equipment" prompt:"-"`
+	References  pq.StringArray `gorm:"type:text[]" json:"references" prompt:"DOI URLs from KNOWLEDGE_FACTS that influenced this workout design (empty array if no facts were used)"`
 	Routines    []Routine      `gorm:"foreignKey:TrainingID" json:"routines" prompt:"Set of routines to be performed, where each comprehends the same type of activity. Standard workouts have at least 3 routines, with warmup, work, cooldown."`
 	Prompt      datatypes.JSON `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
 	Feedback    string         `json:"feedback" prompt:"-"`
@@ -81,8 +83,8 @@ type Training struct {
 	User     User       `gorm:"constraint:OnDelete:CASCADE;" json:"-"`
 	ParentID *uuid.UUID `gorm:"type:uuid" json:"parent_id" prompt:"-"`
 	Parent   *Training  `gorm:"constraint:OnDelete:SET NULL;foreignKey:ParentID" json:"-"`
-	GymID *uuid.UUID `gorm:"type:uuid" json:"gym_id" prompt:"-"`
-	Gym   *Gym       `gorm:"constraint:OnDelete:SET NULL;" json:"gym,omitempty"`
+	GymID    *uuid.UUID `gorm:"type:uuid" json:"gym_id" prompt:"-"`
+	Gym      *Gym       `gorm:"constraint:OnDelete:SET NULL;" json:"gym,omitempty"`
 }
 
 // Routine represents a section of the workout with a UUID ID and an explicit FK

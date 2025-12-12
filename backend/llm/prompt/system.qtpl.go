@@ -112,8 +112,11 @@ ACTIVITY PARAMETERS:
 - rest: 30-60s for hypertrophy, 2-3min for strength, 10-20s for circuits
 
 KNOWLEDGE FACTS:
-- Apply relevant facts from KNOWLEDGE FACTS section when provided
-- Include fact URLs in the references array when used
+- When KNOWLEDGE_FACTS are provided, apply relevant research findings to optimize the workout
+- Use facts to inform exercise selection, rep schemes, rest periods, or injury accommodations
+- For each fact applied, document in reasoning.facts_applied how it influenced the workout (e.g. "https://doi.org/...: used progressive overload principle for hypertrophy goal")
+- Include the DOI URLs of all facts you applied in the training's references array
+- Facts are especially valuable for addressing specific goals (hypertrophy, strength, endurance) and working around injuries safely
 
 EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder injury, goal: build strength):
 {
@@ -121,6 +124,7 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
     "goal_alignment": "User wants to build strength - selecting heavy compound movements with 3-6 rep ranges and 2-3min rest periods to maximize strength adaptation",
     "constraints": ["shoulder injury limits overhead pressing", "dumbbells only", "30min"],
     "strategy": "Strength-focused upper body session with horizontal pressing and pulling. Heavy loads, low reps, full recovery between sets.",
+    "facts_applied": [],
     "target_muscles": ["chest", "upper back", "biceps", "triceps"],
     "exercises": [
       "dumbbell-bench-press: horizontal press, strength-focused with 5 reps",
@@ -135,6 +139,7 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   "description": "Upper body session avoiding overhead work. Horizontal pressing and pulling with arm isolation finishers.",
   "type": "strength",
   "duration": 1800,
+  "references": [],
   "routines": [
     {
       "name": "warmup",
@@ -189,31 +194,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   ]
 }
 `)
-//line llm/prompt/system.qtpl:159
+//line llm/prompt/system.qtpl:164
 }
 
-//line llm/prompt/system.qtpl:159
+//line llm/prompt/system.qtpl:164
 func WriteSystem(qq422016 qtio422016.Writer) {
-//line llm/prompt/system.qtpl:159
+//line llm/prompt/system.qtpl:164
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:159
+//line llm/prompt/system.qtpl:164
 	StreamSystem(qw422016)
-//line llm/prompt/system.qtpl:159
+//line llm/prompt/system.qtpl:164
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:159
+//line llm/prompt/system.qtpl:164
 }
 
-//line llm/prompt/system.qtpl:159
+//line llm/prompt/system.qtpl:164
 func System() string {
-//line llm/prompt/system.qtpl:159
+//line llm/prompt/system.qtpl:164
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:159
+//line llm/prompt/system.qtpl:164
 	WriteSystem(qb422016)
-//line llm/prompt/system.qtpl:159
+//line llm/prompt/system.qtpl:164
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:159
+//line llm/prompt/system.qtpl:164
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:159
+//line llm/prompt/system.qtpl:164
 	return qs422016
-//line llm/prompt/system.qtpl:159
+//line llm/prompt/system.qtpl:164
 }

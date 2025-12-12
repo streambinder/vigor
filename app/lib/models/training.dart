@@ -24,6 +24,8 @@ class Training {
   final int duration;
   @JsonKey(name: 'equipment', defaultValue: const [])
   final List<String> equipment;
+  @JsonKey(name: 'references', defaultValue: const [])
+  final List<String> references;
   @JsonKey(name: 'routines', defaultValue: const [])
   final List<Routine> routines;
   @JsonKey(name: 'prompt')
@@ -51,6 +53,7 @@ class Training {
     required this.type,
     required this.duration,
     required this.equipment,
+    required this.references,
     required this.routines,
     required this.prompt,
     required this.feedback,

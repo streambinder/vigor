@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../config/api_config.dart';
 import '../models/training.dart';
 import '../models/routine.dart';
@@ -352,6 +353,23 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                       )).toList(),
                     ),
                   ),
+                if (r.factsApplied.isNotEmpty)
+                  _buildReasoningSection(
+                    title: 'Research Applied',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: r.factsApplied.map((f) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('• '),
+                            Expanded(child: Text(f)),
+                          ],
+                        ),
+                      )).toList(),
+                    ),
+                  ),
                 if (r.targetMuscles.isNotEmpty)
                   _buildReasoningSection(
                     title: 'Target Muscles',
@@ -410,6 +428,66 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         children: [child],
       ),
     );
+  }
+
+  Widget _buildReferencesSection(BuildContext context) {
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        leading: Icon(
+          Icons.science,
+          size: 18,
+          color: PlatformHelper.useLiquidGlass
+              ? LiquidGlassTheme.captionStyle.color
+              : Colors.grey.shade600,
+        ),
+        title: Text(
+          'References',
+          style: PlatformHelper.useLiquidGlass
+              ? LiquidGlassTheme.captionStyle
+              : Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey.shade600,
+                  ),
+        ),
+        initiallyExpanded: false,
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.only(bottom: 8),
+        children: training.references.map((url) => InkWell(
+          onTap: () => _launchUrl(url),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.link,
+                  size: 14,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    url,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      decoration: TextDecoration.underline,
+                      fontSize: 13,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        )).toList(),
+      ),
+    );
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri != null && await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   @override
@@ -571,6 +649,9 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                         ),
                       ],
                     ),
+                    // collapsible references section
+                    if (training.references.isNotEmpty)
+                      _buildReferencesSection(context),
                   ],
                 ),
               ),

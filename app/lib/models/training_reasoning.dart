@@ -11,6 +11,8 @@ class TrainingReasoning {
   final List<String> constraints;
   @JsonKey(name: 'strategy', defaultValue: '')
   final String strategy;
+  @JsonKey(name: 'facts_applied', defaultValue: const [])
+  final List<String> factsApplied;
   @JsonKey(name: 'target_muscles', defaultValue: const [])
   final List<String> targetMuscles;
   @JsonKey(name: 'exercises', defaultValue: const [])
@@ -21,6 +23,7 @@ class TrainingReasoning {
   TrainingReasoning({
     required this.constraints,
     required this.strategy,
+    required this.factsApplied,
     required this.targetMuscles,
     required this.exercises,
     required this.namingLogic,
