@@ -52,8 +52,9 @@ class _GymFormDialogState extends State<GymFormDialog> {
   void _submit() {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a gym name')),
+      AdaptiveNotification.showError(
+        context: context,
+        message: 'Please enter a gym name',
       );
       return;
     }

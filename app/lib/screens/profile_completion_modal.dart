@@ -119,16 +119,18 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
 
     // Validate required fields that aren't in the form
     if (widget.missingFields.containsKey('birthdate') && _birthdate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select your birth date')),
+      AdaptiveNotification.showError(
+        context: context,
+        message: 'Please select your birth date',
       );
       return;
     }
 
     // Ensure required list fields have at least one entry
     if (widget.missingFields.containsKey('goals') && _goals.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please add at least one goal')),
+      AdaptiveNotification.showError(
+        context: context,
+        message: 'Please add at least one goal',
       );
       return;
     }
@@ -161,11 +163,9 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
         // Close modal on success
         Navigator.of(context).pop();
       } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authProvider.errorMessage ?? 'Failed to update profile'),
-            backgroundColor: Colors.red,
-          ),
+        AdaptiveNotification.showError(
+          context: context,
+          message: authProvider.errorMessage ?? 'Failed to update profile',
         );
       }
     } finally {
