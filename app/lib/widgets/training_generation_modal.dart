@@ -30,10 +30,12 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   final _formKey = GlobalKey<FormState>();
   final _durationController = TextEditingController(text: '60');
   final _promptController = TextEditingController();
+  final _equipmentInputController = TextEditingController();
 
   Gym? _selectedGym;
   bool _isGenerating = false;
   final List<UserInfo> _partners = [];
+  final List<String> _equipment = [];
 
   @override
   void initState() {
@@ -52,7 +54,24 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   void dispose() {
     _durationController.dispose();
     _promptController.dispose();
+    _equipmentInputController.dispose();
     super.dispose();
+  }
+
+  void _addEquipment() {
+    final equipment = _equipmentInputController.text.trim();
+    if (equipment.isNotEmpty && !_equipment.contains(equipment)) {
+      setState(() {
+        _equipment.add(equipment);
+        _equipmentInputController.clear();
+      });
+    }
+  }
+
+  void _removeEquipment(String equipment) {
+    setState(() {
+      _equipment.remove(equipment);
+    });
   }
 
   Future<void> _addPartner() async {
@@ -78,10 +97,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       return;
     }
 
-    if (_selectedGym == null) {
+    // require either gym or equipment
+    if (_selectedGym == null && _equipment.isEmpty) {
       AdaptiveNotification.showError(
         context: context,
-        message: 'Please select a gym',
+        message: 'Please select a gym or add equipment',
       );
       return;
     }
@@ -94,13 +114,14 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     final trainingService = TrainingService(storageService: storage);
 
     final duration = int.parse(_durationController.text);
-    final gym = _selectedGym!.name;
+    final gym = _selectedGym?.name;
     final prompt = _promptController.text.trim();
 
     final response = await trainingService.generateTraining(
       duration: duration,
-      gym: gym,
+      gym: gym ?? '',
       prompt: prompt.isEmpty ? null : prompt,
+      equipment: _equipment.isEmpty ? null : _equipment,
       partners: _partners.isEmpty ? null : _partners.map((p) => p.id).toList(),
     );
 
@@ -214,52 +235,133 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Gym',
+                  'Gym (optional)',
                   style: PlatformHelper.useLiquidGlass
                       ? LiquidGlassTheme.captionStyle
                       : Theme.of(context).textTheme.labelMedium,
                 ),
                 const SizedBox(height: 8),
-                Container(
-                  decoration: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.glassDecoration(
-                          borderRadius: 12,
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.2),
-                            width: 1.5,
+                Opacity(
+                  opacity: widget.gyms.isEmpty ? 0.5 : 1.0,
+                  child: Container(
+                    decoration: PlatformHelper.useLiquidGlass
+                        ? LiquidGlassTheme.glassDecoration(
+                            borderRadius: 12,
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.2),
+                              width: 1.5,
+                            ),
+                          )
+                        : BoxDecoration(
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        )
-                      : BoxDecoration(
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<Gym>(
+                        value: _selectedGym,
+                        isExpanded: true,
+                        hint: Text(
+                          widget.gyms.isEmpty ? 'No gyms available' : 'Select a gym',
+                          style: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.bodyStyle.copyWith(
+                                  color: Colors.white.withOpacity(0.5),
+                                )
+                              : TextStyle(color: Colors.grey[600]),
                         ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<Gym>(
-                      value: _selectedGym,
-                      isExpanded: true,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      borderRadius: BorderRadius.circular(12),
-                      items: widget.gyms.map((gym) {
-                        return DropdownMenuItem<Gym>(
-                          value: gym,
-                          child: Text(
-                            gym.name,
-                            style: PlatformHelper.useLiquidGlass
-                                ? LiquidGlassTheme.bodyStyle
-                                : null,
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (Gym? value) {
-                        setState(() {
-                          _selectedGym = value;
-                        });
-                      },
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        borderRadius: BorderRadius.circular(12),
+                        items: widget.gyms.map((gym) {
+                          return DropdownMenuItem<Gym>(
+                            value: gym,
+                            child: Text(
+                              gym.name,
+                              style: PlatformHelper.useLiquidGlass
+                                  ? LiquidGlassTheme.bodyStyle
+                                  : null,
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: widget.gyms.isEmpty
+                            ? null
+                            : (Gym? value) {
+                                setState(() {
+                                  _selectedGym = value;
+                                });
+                              },
+                      ),
                     ),
                   ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Equipment section
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Equipment',
+                  style: PlatformHelper.useLiquidGlass
+                      ? LiquidGlassTheme.captionStyle
+                      : Theme.of(context).textTheme.labelMedium,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AdaptiveTextField(
+                        controller: _equipmentInputController,
+                        labelText: 'Add Equipment',
+                        placeholder: 'e.g., Barbell, Dumbbells',
+                        onSubmitted: (_) => _addEquipment(),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    AdaptiveButton(
+                      onPressed: _addEquipment,
+                      child: const Icon(Icons.add),
+                    ),
+                  ],
+                ),
+                if (_equipment.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      _selectedGym != null
+                          ? 'Using equipment from "${_selectedGym!.name}"'
+                          : 'No equipment added yet',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontStyle: FontStyle.italic,
+                        fontSize: 12,
+                      ),
+                    ),
+                  )
+                else ...[
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _equipment.map((equipment) {
+                      return Chip(
+                        label: Text(
+                          equipment,
+                          style: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
+                              : null,
+                        ),
+                        deleteIcon: const Icon(Icons.close, size: 16),
+                        onDeleted: () => _removeEquipment(equipment),
+                        backgroundColor: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.primaryColor.withOpacity(0.1)
+                            : null,
+                      );
+                    }).toList(),
+                  ),
+                ],
               ],
             ),
             const SizedBox(height: 16),

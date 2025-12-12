@@ -53,19 +53,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showTrainingGenerationModal() {
-    if (_gyms == null || _gyms!.isEmpty) {
-      AdaptiveNotification.showError(
-        context: context,
-        message: 'Please add a gym first from your Profile',
-      );
-      return;
-    }
-
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => TrainingGenerationModal(
-        gyms: _gyms!,
+        gyms: _gyms ?? [],
         onSuccess: (training) {
           // Navigate to the generated training details
           Navigator.of(context).push(

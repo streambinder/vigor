@@ -77,17 +77,21 @@ func postTraining(c *fiber.Ctx) error {
 		partnerUserIDs = append(partnerUserIDs, user.ID)
 	}
 
-	var (
-		gymQuery = strings.ToLower(req.Gym)
-		gym      *model.Gym
-	)
-	if err := database.DB.First(&gym, "name ilike ? and user_id = ?", gymQuery, c.Locals("userID")).Error; err != nil {
-		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "gym not found"})
+	var gym *model.Gym
+	if req.Gym != "" {
+		gymQuery := strings.ToLower(req.Gym)
+		if err := database.DB.First(&gym, "name ilike ? and user_id = ?", gymQuery, c.Locals("userID")).Error; err != nil {
+			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "gym not found"})
+		}
 	}
 
 	equipment := req.Equipment
 	if len(equipment) == 0 && gym != nil {
 		equipment = gym.Equipment
+	}
+
+	if len(equipment) == 0 {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "equipment is required when no gym is specified"})
 	}
 
 	// Match user equipment to canonical equipment IDs from knowledge base
