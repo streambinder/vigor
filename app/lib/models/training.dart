@@ -21,6 +21,8 @@ class Training {
   final String type;
   @JsonKey(name: 'duration')
   final int duration;
+  @JsonKey(name: 'equipment', defaultValue: const [])
+  final List<String> equipment;
   @JsonKey(name: 'routines', defaultValue: const [])
   final List<Routine> routines;
   @JsonKey(name: 'prompt')
@@ -35,6 +37,8 @@ class Training {
   final String userId;
   @JsonKey(name: 'parent_id')
   final String? parentId;
+  @JsonKey(name: 'gym_id')
+  final String? gymId;
 
   Training({
     required this.id,
@@ -43,6 +47,7 @@ class Training {
     required this.description,
     required this.type,
     required this.duration,
+    required this.equipment,
     required this.routines,
     required this.prompt,
     required this.feedback,
@@ -50,6 +55,7 @@ class Training {
     required this.createdAt,
     required this.userId,
     this.parentId,
+    this.gymId,
   });
 
   factory Training.fromJson(Map<String, dynamic> json) => _$TrainingFromJson(json);

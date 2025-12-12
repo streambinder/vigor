@@ -337,8 +337,44 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         ),
                         const SizedBox(width: 16),
                       ],
+                      if (training.gymId != null) ...[
+                        Icon(
+                          Icons.location_on,
+                          size: 16,
+                          color: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle.color
+                              : Colors.grey[600],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Gym',
+                          style: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle
+                              : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
+                        ),
+                        const SizedBox(width: 16),
+                      ],
                       Icon(
                         Icons.fitness_center,
+                        size: 16,
+                        color: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.captionStyle.color
+                            : Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${training.equipment.length}',
+                        style: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.captionStyle
+                            : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.grey[600],
+                                ),
+                      ),
+                      const SizedBox(width: 16),
+                      Icon(
+                        Icons.tune,
                         size: 16,
                         color: PlatformHelper.useLiquidGlass
                             ? LiquidGlassTheme.captionStyle.color
@@ -424,8 +460,44 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         ),
                         const SizedBox(width: 16),
                       ],
+                      if (training.gymId != null) ...[
+                        Icon(
+                          Icons.location_on,
+                          size: 16,
+                          color: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle.color
+                              : Colors.grey[600],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Gym',
+                          style: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle
+                              : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
+                        ),
+                        const SizedBox(width: 16),
+                      ],
                       Icon(
                         Icons.fitness_center,
+                        size: 16,
+                        color: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.captionStyle.color
+                            : Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${training.equipment.length}',
+                        style: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.captionStyle
+                            : Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.grey[600],
+                                ),
+                      ),
+                      const SizedBox(width: 16),
+                      Icon(
+                        Icons.tune,
                         size: 16,
                         color: PlatformHelper.useLiquidGlass
                             ? LiquidGlassTheme.captionStyle.color

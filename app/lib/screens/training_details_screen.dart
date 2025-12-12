@@ -516,9 +516,15 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                             icon: Icons.people,
                             text: '${1 + _partnerCount}',
                           ),
+                        if (training.gymId != null)
+                          _buildInfoLabel(
+                            context,
+                            icon: Icons.location_on,
+                            text: 'Gym',
+                          ),
                         _buildInfoLabel(
                           context,
-                          icon: Icons.fitness_center,
+                          icon: Icons.tune,
                           text: training.type,
                         ),
                         _buildInfoLabel(
@@ -537,6 +543,32 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                             icon: Icons.copy,
                             text: 'Copied',
                           ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.fitness_center,
+                          size: 18,
+                          color: PlatformHelper.useLiquidGlass
+                              ? LiquidGlassTheme.captionStyle.color
+                              : Colors.grey.shade600,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            training.equipment.isEmpty
+                                ? 'No equipment'
+                                : training.equipment.join(', '),
+                            style: PlatformHelper.useLiquidGlass
+                                ? LiquidGlassTheme.captionStyle
+                                : Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: Colors.grey.shade600,
+                                    ),
+                          ),
+                        ),
                       ],
                     ),
                   ],

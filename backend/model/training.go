@@ -69,6 +69,7 @@ type Training struct {
 	Description string         `gorm:"not null" json:"description" prompt:"Short paragraph describing how the generated program fits the user's goals and limitations. No need to mention user profile details such as age, weight, height, etc. It's highly appreciated to mention weight/reps regressions or increases based on user's feedback and/or previous trainings."`
 	Type        string         `gorm:"not null" json:"type" prompt:"Training broad category, which can be either the sport for sports-related trainings — boxing, swimming, running, pilates, yoga, etc. —, or subtype of HIIT for HIIT — AMRAP, EMOM, etc. – or other generic terms such as strength, flexibility, etc.)"`
 	Duration    int            `gorm:"not null" json:"duration" prompt:"Total duration in seconds"`
+	Equipment   pq.StringArray `gorm:"type:text[]" json:"equipment" prompt:"-"`
 	Routines    []Routine      `gorm:"foreignKey:TrainingID" json:"routines" prompt:"Set of routines to be performed, where each comprehends the same type of activity. Standard workouts have at least 3 routines, with warmup, work, cooldown."`
 	Prompt      datatypes.JSON `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
 	Feedback    string         `json:"feedback" prompt:"-"`
@@ -82,6 +83,8 @@ type Training struct {
 	User     User       `gorm:"constraint:OnDelete:CASCADE;" json:"-"`
 	ParentID *uuid.UUID `gorm:"type:uuid" json:"parent_id" prompt:"-"`
 	Parent   *Training  `gorm:"foreignKey:ParentID" json:"-"`
+	GymID    *uuid.UUID `gorm:"type:uuid" json:"gym_id" prompt:"-"`
+	Gym      *Gym       `gorm:"constraint:OnDelete:SET NULL;" json:"-"`
 }
 
 // Routine represents a section of the workout with a UUID ID and an explicit FK
@@ -184,6 +187,7 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 	clone.CreatedAt = time.Time{}
 	clone.UpdatedAt = time.Time{}
 	clone.DeletedAt = gorm.DeletedAt{}
+	clone.GymID = nil // gym belongs to original user
 
 	for i := range clone.Routines {
 		clone.Routines[i].ID = ""

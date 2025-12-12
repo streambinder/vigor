@@ -197,6 +197,10 @@ func postTraining(c *fiber.Ctx) error {
 	if promptJSON, err := json.Marshal(prompt); err == nil {
 		training.Prompt = promptJSON
 	}
+	if gym != nil {
+		training.GymID = &gym.ID
+	}
+	training.Equipment = equipment
 
 	for i := range training.Routines {
 		for j := range training.Routines[i].Blocks {
