@@ -191,24 +191,42 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       title: 'Add Partner',
     );
 
-    if (user != null && context.mounted) {
-      final storage = context.read<SecureStorageService>();
-      final trainingService = TrainingService(storageService: storage);
-      final response = await trainingService.addPartner(training.id, user.id);
+    if (user == null || !context.mounted) return;
 
-      if (context.mounted) {
-        if (response.isSuccess) {
-          _loadPartners();
-          AdaptiveNotification.show(
-            context: context,
-            message: 'Partner added successfully',
-          );
-        } else {
-          AdaptiveNotification.showError(
-            context: context,
-            message: response.error ?? 'Failed to add partner',
-          );
-        }
+    final shouldAdd = await AdaptiveAlertDialog.show<bool>(
+      context: context,
+      title: 'Add Partner',
+      content: 'Add ${user.email} as a partner to "${training.name}"?',
+      actions: [
+        AdaptiveDialogAction(
+          label: 'Cancel',
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+        AdaptiveDialogAction(
+          label: 'Add',
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
+      ],
+    );
+
+    if (shouldAdd != true || !context.mounted) return;
+
+    final storage = context.read<SecureStorageService>();
+    final trainingService = TrainingService(storageService: storage);
+    final response = await trainingService.addPartner(training.id, user.id);
+
+    if (context.mounted) {
+      if (response.isSuccess) {
+        _loadPartners();
+        AdaptiveNotification.show(
+          context: context,
+          message: 'Partner added successfully',
+        );
+      } else {
+        AdaptiveNotification.showError(
+          context: context,
+          message: response.error ?? 'Failed to add partner',
+        );
       }
     }
   }
@@ -216,6 +234,24 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   Future<void> _cloneTraining(BuildContext context) async {
     final currentUserId = context.read<AuthProvider>().currentUser?.id ?? '';
     if (currentUserId.isEmpty) return;
+
+    final shouldClone = await AdaptiveAlertDialog.show<bool>(
+      context: context,
+      title: 'Clone Training',
+      content: 'Clone "${training.name}" to your trainings?',
+      actions: [
+        AdaptiveDialogAction(
+          label: 'Cancel',
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+        AdaptiveDialogAction(
+          label: 'Clone',
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
+      ],
+    );
+
+    if (shouldClone != true || !context.mounted) return;
 
     final storage = context.read<SecureStorageService>();
     final trainingService = TrainingService(storageService: storage);
@@ -240,26 +276,44 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   Future<void> _showCopyTrainingDialog(BuildContext context) async {
     final user = await showUserSelectDialog(
       context: context,
-      title: 'Copy Training To',
+      title: 'Share with User',
     );
 
-    if (user != null && context.mounted) {
-      final storage = context.read<SecureStorageService>();
-      final trainingService = TrainingService(storageService: storage);
-      final response = await trainingService.copyTraining(training.id, user.id);
+    if (user == null || !context.mounted) return;
 
-      if (context.mounted) {
-        if (response.isSuccess) {
-          AdaptiveNotification.show(
-            context: context,
-            message: 'Training copied successfully',
-          );
-        } else {
-          AdaptiveNotification.showError(
-            context: context,
-            message: response.error ?? 'Failed to copy training',
-          );
-        }
+    final shouldShare = await AdaptiveAlertDialog.show<bool>(
+      context: context,
+      title: 'Share with User',
+      content: 'Share "${training.name}" with ${user.email}?',
+      actions: [
+        AdaptiveDialogAction(
+          label: 'Cancel',
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+        AdaptiveDialogAction(
+          label: 'Share',
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
+      ],
+    );
+
+    if (shouldShare != true || !context.mounted) return;
+
+    final storage = context.read<SecureStorageService>();
+    final trainingService = TrainingService(storageService: storage);
+    final response = await trainingService.copyTraining(training.id, user.id);
+
+    if (context.mounted) {
+      if (response.isSuccess) {
+        AdaptiveNotification.show(
+          context: context,
+          message: 'Training shared successfully',
+        );
+      } else {
+        AdaptiveNotification.showError(
+          context: context,
+          message: response.error ?? 'Failed to share training',
+        );
       }
     }
   }
@@ -396,7 +450,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
               ),
             AdaptiveIconButton(
               icon: const Icon(Icons.share),
-              tooltip: 'Share to User',
+              tooltip: 'Share with User',
               onPressed: () => _showCopyTrainingDialog(context),
             ),
             AdaptiveIconButton(
