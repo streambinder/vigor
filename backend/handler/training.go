@@ -90,19 +90,18 @@ func postTraining(c *fiber.Ctx) error {
 		equipment = gym.Equipment
 	}
 
-	if len(equipment) == 0 {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "equipment is required when no gym is specified"})
-	}
-
 	// Match user equipment to canonical equipment IDs from knowledge base
-	matchedEquipment, err := rag.RetrieveUserEquipment(equipment)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to match equipment from database")
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
-	equipmentIDs := make([]string, 0, len(matchedEquipment))
-	for _, eq := range matchedEquipment {
-		equipmentIDs = append(equipmentIDs, eq.ID)
+	// Empty equipment is valid (bodyweight-only training)
+	var equipmentIDs []string
+	if len(equipment) > 0 {
+		matchedEquipment, err := rag.RetrieveUserEquipment(equipment)
+		if err != nil {
+			log.Error().Err(err).Msg("Failed to match equipment from database")
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		}
+		for _, eq := range matchedEquipment {
+			equipmentIDs = append(equipmentIDs, eq.ID)
+		}
 	}
 
 	// Query exercises compatible with all users' profiles and equipment

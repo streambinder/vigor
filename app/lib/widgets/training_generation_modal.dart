@@ -97,15 +97,6 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       return;
     }
 
-    // require either gym or equipment
-    if (_selectedGym == null && _equipment.isEmpty) {
-      AdaptiveNotification.showError(
-        context: context,
-        message: 'Please select a gym or add equipment',
-      );
-      return;
-    }
-
     setState(() {
       _isGenerating = true;
     });
@@ -333,7 +324,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                     child: Text(
                       _selectedGym != null
                           ? 'Using equipment from "${_selectedGym!.name}"'
-                          : 'No equipment added yet',
+                          : 'Bodyweight training (no equipment)',
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontStyle: FontStyle.italic,
