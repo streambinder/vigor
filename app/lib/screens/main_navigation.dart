@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../generated/app_localizations.dart';
 import '../utils/platform_helper.dart';
 import '../widgets/navigation/liquid_glass_nav_bar.dart';
 import 'home_page.dart';
@@ -36,6 +37,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (PlatformHelper.useLiquidGlass) {
       // iOS-style with Liquid Glass navigation
       return Scaffold(
@@ -55,18 +57,18 @@ class _MainNavigationState extends State<MainNavigation> {
               child: LiquidGlassNavBar(
                 currentIndex: _currentIndex,
                 onTap: _onTabTapped,
-                items: const [
+                items: [
                   LiquidGlassNavItem(
                     icon: Icons.home_rounded,
-                    label: 'Home',
+                    label: l10n.navHome,
                   ),
                   LiquidGlassNavItem(
                     icon: Icons.show_chart_rounded,
-                    label: 'Activity',
+                    label: l10n.navActivity,
                   ),
                   LiquidGlassNavItem(
                     icon: Icons.person_rounded,
-                    label: 'Profile',
+                    label: l10n.navProfile,
                   ),
                 ],
               ),
@@ -81,21 +83,21 @@ class _MainNavigationState extends State<MainNavigation> {
         bottomNavigationBar: NavigationBar(
           selectedIndex: _currentIndex,
           onDestinationSelected: _onTabTapped,
-          destinations: const [
+          destinations: [
             NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home_rounded),
-              label: 'Home',
+              icon: const Icon(Icons.home_outlined),
+              selectedIcon: const Icon(Icons.home_rounded),
+              label: l10n.navHome,
             ),
             NavigationDestination(
-              icon: Icon(Icons.show_chart_outlined),
-              selectedIcon: Icon(Icons.show_chart_rounded),
-              label: 'Activity',
+              icon: const Icon(Icons.show_chart_outlined),
+              selectedIcon: const Icon(Icons.show_chart_rounded),
+              label: l10n.navActivity,
             ),
             NavigationDestination(
-              icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person_rounded),
-              label: 'Profile',
+              icon: const Icon(Icons.person_outline),
+              selectedIcon: const Icon(Icons.person_rounded),
+              label: l10n.navProfile,
             ),
           ],
         ),

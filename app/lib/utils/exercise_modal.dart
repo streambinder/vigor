@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../config/api_config.dart';
+import '../generated/app_localizations.dart';
 import '../models/exercise.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
@@ -84,7 +85,7 @@ class ExerciseModal {
                         if (exercise.instructions.isNotEmpty) ...[
                           const SizedBox(height: 16),
                           Text(
-                            'Instructions',
+                            AppLocalizations.of(context).instructions,
                             style: PlatformHelper.useLiquidGlass
                                 ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
                                 : Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -141,7 +142,7 @@ class ExerciseModal {
                           alignment: Alignment.centerRight,
                           child: AdaptiveTextButton(
                             onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('Close'),
+                            child: Text(AppLocalizations.of(context).close),
                           ),
                         ),
                       ],

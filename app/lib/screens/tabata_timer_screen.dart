@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../config/api_config.dart';
+import '../generated/app_localizations.dart';
 import '../models/training.dart';
 import '../models/activity.dart';
 import '../models/exercise.dart';
@@ -348,7 +349,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     } else if (mounted) {
       AdaptiveNotification.showError(
         context: context,
-        message: 'Failed to mark training as complete',
+        message: AppLocalizations.of(context).failedToMarkComplete,
         rawError: response.error,
       );
     }
@@ -391,6 +392,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
   }
 
   Widget _buildStartScreen() {
+    final l10n = AppLocalizations.of(context);
     return GestureDetector(
       onTap: _startTraining,
       child: Container(
@@ -410,7 +412,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                'Tap to start',
+                l10n.tapToStart,
                 style: PlatformHelper.useLiquidGlass
                     ? LiquidGlassTheme.headlineStyle
                     : Theme.of(context).textTheme.headlineMedium,
@@ -434,6 +436,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
   }
 
   Widget _buildCompletedScreen() {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -459,7 +462,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
             ),
             const SizedBox(height: 32),
             Text(
-              'Training Completed!',
+              l10n.trainingCompleted,
               style: PlatformHelper.useLiquidGlass
                   ? LiquidGlassTheme.titleStyle
                   : Theme.of(context).textTheme.headlineMedium,
@@ -467,7 +470,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Great job completing ${widget.training.name}',
+              l10n.greatJobCompleting(widget.training.name),
               style: PlatformHelper.useLiquidGlass
                   ? LiquidGlassTheme.bodyStyle
                   : Theme.of(context).textTheme.bodyLarge,
@@ -476,7 +479,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
             const SizedBox(height: 48),
             AdaptiveButton(
               onPressed: _showFeedbackAndComplete,
-              child: const Text('Done'),
+              child: Text(l10n.done),
             ),
           ],
         ),
@@ -541,6 +544,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
   }
 
   Widget _buildCountersRow(TrainingInterval interval) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: PlatformHelper.useLiquidGlass
@@ -564,7 +568,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
           const Icon(Icons.view_module, size: 16),
           const SizedBox(width: 4),
           Text(
-            'Block ${interval.blockNumber}/${interval.totalBlocks}',
+            l10n.blockCounter(interval.blockNumber, interval.totalBlocks),
             style: PlatformHelper.useLiquidGlass
                 ? LiquidGlassTheme.bodyStyle.copyWith(fontSize: 14)
                 : Theme.of(context).textTheme.bodyMedium,
@@ -573,7 +577,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
           const Icon(Icons.list, size: 16),
           const SizedBox(width: 4),
           Text(
-            'Routine ${interval.routineNumber}/${interval.totalRoutines}',
+            l10n.routineCounter(interval.routineNumber, interval.totalRoutines),
             style: PlatformHelper.useLiquidGlass
                 ? LiquidGlassTheme.bodyStyle.copyWith(fontSize: 14)
                 : Theme.of(context).textTheme.bodyMedium,
@@ -742,14 +746,14 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
                         ? LiquidGlassTheme.successColor
                         : Theme.of(context).colorScheme.primary,
                   ),
-                  child: const Column(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.check, size: 60, color: Colors.white),
-                      SizedBox(height: 8),
+                      const Icon(Icons.check, size: 60, color: Colors.white),
+                      const SizedBox(height: 8),
                       Text(
-                        'Complete',
-                        style: TextStyle(
+                        AppLocalizations.of(context).complete,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -818,22 +822,23 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
   }
 
   void _showExitDialog() {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Exit Training?'),
-        content: const Text('What would you like to do?'),
+        title: Text(l10n.exitTraining),
+        content: Text(l10n.whatWouldYouLikeToDo),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(); // Close dialog
               Navigator.of(context).pop(); // exit training
             },
-            child: const Text('Exit'),
+            child: Text(l10n.exit),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Continue'),
+            child: Text(l10n.continueTraining),
           ),
           TextButton(
             onPressed: () async {
@@ -845,7 +850,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
                 Navigator.of(this.context).pop(true); // Return true to indicate completion
               }
             },
-            child: const Text('Mark as Complete'),
+            child: Text(l10n.markAsComplete),
           ),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../theme/liquid_glass_theme.dart';
@@ -57,7 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
       AdaptiveNotification.showError(
         context: context,
-        message: 'Failed to load gyms',
+        message: AppLocalizations.of(context).failedToLoadGyms,
         rawError: response.error,
       );
     }
@@ -80,6 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _addGym(String name, List<String> equipment) async {
     if (_gymService == null) return;
+    final l10n = AppLocalizations.of(context);
 
     final response = await _gymService!.createGym(
       name: name,
@@ -89,13 +91,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (response.isSuccess && mounted) {
       AdaptiveNotification.show(
         context: context,
-        message: 'Gym added successfully',
+        message: l10n.gymAddedSuccessfully,
       );
       await _loadGyms();
     } else if (mounted) {
       AdaptiveNotification.showError(
         context: context,
-        message: 'Failed to add gym',
+        message: l10n.failedToAddGym,
         rawError: response.error,
       );
     }
@@ -103,6 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _updateGym(String currentName, String newName, List<String> equipment) async {
     if (_gymService == null) return;
+    final l10n = AppLocalizations.of(context);
 
     final response = await _gymService!.updateGym(
       currentName: currentName,
@@ -113,13 +116,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (response.isSuccess && mounted) {
       AdaptiveNotification.show(
         context: context,
-        message: 'Gym updated successfully',
+        message: l10n.gymUpdatedSuccessfully,
       );
       await _loadGyms();
     } else if (mounted) {
       AdaptiveNotification.showError(
         context: context,
-        message: 'Failed to update gym',
+        message: l10n.failedToUpdateGym,
         rawError: response.error,
       );
     }
@@ -127,17 +130,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _deleteGym(String name) async {
     if (_gymService == null) return;
+    final l10n = AppLocalizations.of(context);
     final shouldDelete = await AdaptiveAlertDialog.show<bool>(
       context: context,
-      title: 'Delete Gym',
-      content: 'Are you sure you want to delete "$name"?',
+      title: l10n.deleteGym,
+      content: l10n.deleteGymConfirmation(name),
       actions: [
         AdaptiveDialogAction(
-          label: 'Cancel',
+          label: l10n.cancel,
           onPressed: () => Navigator.of(context).pop(false),
         ),
         AdaptiveDialogAction(
-          label: 'Delete',
+          label: l10n.delete,
           isDestructive: true,
           onPressed: () => Navigator.of(context).pop(true),
         ),
@@ -151,13 +155,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         await _prefsService?.clearDefaultGymIfMatches(name);
         AdaptiveNotification.show(
           context: context,
-          message: 'Gym deleted successfully',
+          message: l10n.gymDeletedSuccessfully,
         );
         await _loadGyms();
       } else if (mounted) {
         AdaptiveNotification.showError(
           context: context,
-          message: 'Failed to delete gym',
+          message: l10n.failedToDeleteGym,
           rawError: response.error,
         );
       }
@@ -175,21 +179,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final user = authProvider.currentUser;
+    final l10n = AppLocalizations.of(context);
 
     return AdaptiveScaffold(
       appBar: AdaptiveAppBar(
-        title: const Text('Profile'),
+        title: Text(l10n.profile),
         actions: [
           AdaptiveIconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
+            tooltip: l10n.refresh,
             onPressed: () async {
               await authProvider.refreshUserData();
               await _loadGyms();
               if (context.mounted) {
                 AdaptiveNotification.show(
                   context: context,
-                  message: 'User data refreshed',
+                  message: l10n.userDataRefreshed,
                   duration: const Duration(seconds: 2),
                 );
               }
@@ -197,19 +202,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           AdaptiveIconButton(
             icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
+            tooltip: l10n.logout,
             onPressed: () async {
               final shouldLogout = await AdaptiveAlertDialog.show<bool>(
                 context: context,
-                title: 'Logout',
-                content: 'Are you sure you want to logout?',
+                title: l10n.logout,
+                content: l10n.logoutConfirmation,
                 actions: [
                   AdaptiveDialogAction(
-                    label: 'Cancel',
+                    label: l10n.cancel,
                     onPressed: () => Navigator.of(context).pop(false),
                   ),
                   AdaptiveDialogAction(
-                    label: 'Logout',
+                    label: l10n.logout,
                     isDestructive: true,
                     onPressed: () => Navigator.of(context).pop(true),
                   ),
@@ -299,7 +304,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     AdaptiveCard(
                       child: AdaptiveListTile(
                         leading: const Icon(Icons.cake),
-                        title: const Text('Birthdate'),
+                        title: Text(l10n.birthdate),
                         subtitle: Text(
                           _formatDate(user.profile.birthdate),
                         ),
@@ -309,7 +314,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     AdaptiveCard(
                       child: AdaptiveListTile(
                         leading: const Icon(Icons.person),
-                        title: const Text('Gender'),
+                        title: Text(l10n.gender),
                         subtitle: Text(_capitalizeFirst(user.profile.gender)),
                       ),
                     ),
@@ -317,7 +322,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     AdaptiveCard(
                       child: AdaptiveListTile(
                         leading: const Icon(Icons.language),
-                        title: const Text('Language'),
+                        title: Text(l10n.language),
                         subtitle: Text(_capitalizeFirst(user.profile.language)),
                       ),
                     ),
@@ -325,16 +330,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     AdaptiveCard(
                       child: AdaptiveListTile(
                         leading: const Icon(Icons.height),
-                        title: const Text('Height'),
-                        subtitle: Text('${user.profile.height} cm'),
+                        title: Text(l10n.height),
+                        subtitle: Text(l10n.heightWithUnit(user.profile.height)),
                       ),
                     ),
                     const SizedBox(height: 8),
                     AdaptiveCard(
                       child: AdaptiveListTile(
                         leading: const Icon(Icons.monitor_weight),
-                        title: const Text('Weight'),
-                        subtitle: Text('${user.profile.weight} kg'),
+                        title: Text(l10n.weight),
+                        subtitle: Text(l10n.weightWithUnit(user.profile.weight)),
                       ),
                     ),
 
@@ -352,7 +357,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   const Icon(Icons.flag),
                                   const SizedBox(width: 16),
                                   Text(
-                                    'Goals',
+                                    l10n.goals,
                                     style: PlatformHelper.useLiquidGlass
                                         ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
                                         : const TextStyle(
@@ -408,7 +413,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   const Icon(Icons.healing),
                                   const SizedBox(width: 16),
                                   Text(
-                                    'Injuries',
+                                    l10n.injuries,
                                     style: PlatformHelper.useLiquidGlass
                                         ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
                                         : const TextStyle(
@@ -464,7 +469,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   const Icon(Icons.warning_amber),
                                   const SizedBox(width: 16),
                                   Text(
-                                    'Limitations',
+                                    l10n.limitations,
                                     style: PlatformHelper.useLiquidGlass
                                         ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
                                         : const TextStyle(
@@ -506,7 +511,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   const Icon(Icons.favorite),
                                   const SizedBox(width: 16),
                                   Text(
-                                    'Favorites',
+                                    l10n.favorites,
                                     style: PlatformHelper.useLiquidGlass
                                         ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
                                         : const TextStyle(
@@ -577,7 +582,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'My Gyms',
+                          l10n.myGyms,
                           style: PlatformHelper.useLiquidGlass
                               ? LiquidGlassTheme.headlineStyle
                               : const TextStyle(
@@ -587,7 +592,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         AdaptiveIconButton(
                           icon: const Icon(Icons.add),
-                          tooltip: 'Add Gym',
+                          tooltip: l10n.addGym,
                           onPressed: () => _showGymDialog(),
                         ),
                       ],
@@ -609,7 +614,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'No gyms added yet',
+                                  l10n.noGymsAddedYet,
                                   style: TextStyle(
                                     color: Colors.grey[600],
                                     fontStyle: FontStyle.italic,
@@ -619,7 +624,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 TextButton.icon(
                                   onPressed: () => _showGymDialog(),
                                   icon: const Icon(Icons.add),
-                                  label: const Text('Add Your First Gym'),
+                                  label: Text(l10n.addYourFirstGym),
                                 ),
                               ],
                             ),
@@ -658,17 +663,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             size: 20,
                                             color: isDefault ? Colors.amber : null,
                                           ),
-                                          tooltip: isDefault ? 'Remove Default' : 'Set as Default',
+                                          tooltip: isDefault ? l10n.removeDefault : l10n.setAsDefault,
                                           onPressed: () => _toggleDefaultGym(gym.name),
                                         ),
                                         AdaptiveIconButton(
                                           icon: const Icon(Icons.edit, size: 20),
-                                          tooltip: 'Edit',
+                                          tooltip: l10n.edit,
                                           onPressed: () => _showGymDialog(gym: gym),
                                         ),
                                         AdaptiveIconButton(
                                           icon: const Icon(Icons.delete, size: 20),
-                                          tooltip: 'Delete',
+                                          tooltip: l10n.delete,
                                           onPressed: () => _deleteGym(gym.name),
                                         ),
                                       ],
@@ -711,7 +716,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     // Quick actions
                     Text(
-                      'Quick Actions',
+                      l10n.quickActions,
                       style: PlatformHelper.useLiquidGlass
                           ? LiquidGlassTheme.headlineStyle
                           : const TextStyle(
@@ -725,7 +730,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           AdaptiveListTile(
                             leading: const Icon(Icons.edit),
-                            title: const Text('Edit Profile'),
+                            title: Text(l10n.editProfile),
                             onTap: () {
                               showDialog(
                                 context: context,
@@ -745,7 +750,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               color: Colors.grey.withOpacity(0.5),
                             ),
                             title: Text(
-                              'Settings',
+                              l10n.settings,
                               style: TextStyle(color: Colors.grey.withOpacity(0.5)),
                             ),
                             onTap: null,
@@ -758,7 +763,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     // Danger zone
                     Text(
-                      'Danger Zone',
+                      l10n.dangerZone,
                       style: PlatformHelper.useLiquidGlass
                           ? LiquidGlassTheme.headlineStyle.copyWith(
                               color: LiquidGlassTheme.errorColor,
@@ -779,7 +784,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               : Colors.red,
                         ),
                         title: Text(
-                          'Delete Account',
+                          l10n.deleteAccount,
                           style: TextStyle(
                             color: PlatformHelper.useLiquidGlass
                                 ? LiquidGlassTheme.errorColor
@@ -790,16 +795,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           final shouldDelete =
                               await AdaptiveAlertDialog.show<bool>(
                             context: context,
-                            title: 'Delete Account',
-                            content:
-                                'Are you sure you want to delete your account? This action cannot be undone.',
+                            title: l10n.deleteAccount,
+                            content: l10n.deleteAccountConfirmation,
                             actions: [
                               AdaptiveDialogAction(
-                                label: 'Cancel',
+                                label: l10n.cancel,
                                 onPressed: () => Navigator.of(context).pop(false),
                               ),
                               AdaptiveDialogAction(
-                                label: 'Delete',
+                                label: l10n.delete,
                                 isDestructive: true,
                                 onPressed: () => Navigator.of(context).pop(true),
                               ),
@@ -812,12 +816,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               if (success) {
                                 AdaptiveNotification.show(
                                   context: context,
-                                  message: 'Account deleted successfully',
+                                  message: l10n.accountDeletedSuccessfully,
                                 );
                               } else {
                                 AdaptiveNotification.showError(
                                   context: context,
-                                  message: 'Failed to delete account',
+                                  message: l10n.failedToDeleteAccount,
                                   rawError: authProvider.errorMessage,
                                 );
                               }

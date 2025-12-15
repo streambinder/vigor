@@ -1,0 +1,379 @@
+{
+  "@@locale": "en",
+
+  "appName": "Vigor",
+  "appTagline": "Ex Sapientia Vis",
+
+  "navHome": "Home",
+  "navActivity": "Activity",
+  "navProfile": "Profile",
+
+  "storageErrorTitle": "Vigor - Storage Error",
+  "storageUnavailable": "Storage Unavailable",
+  "storageErrorMessage": "This app requires secure storage to protect your data. Please check your browser settings and try again.",
+
+  "signInWithGoogle": "Sign in with Google",
+  "signingIn": "Signing in...",
+  "failedToInitializeGoogleSignIn": "Failed to initialize Google Sign In",
+  "signInError": "Sign-in error: {message}",
+  "@signInError": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+  "googleSignInFailed": "Google sign-in failed",
+  "failedToGetAuthToken": "Failed to get authentication token",
+  "errorProcessingSignIn": "Error processing sign-in: {message}",
+  "@errorProcessingSignIn": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+  "googleSignInInitializing": "Google Sign In is still initializing...",
+
+  "readyToTrain": "Ready to train?",
+  "generateTrainingDescription": "Generate a personalized training based on your profile and goals",
+  "generateTraining": "Generate Training",
+
+  "refresh": "Refresh",
+  "logout": "Logout",
+  "userDataRefreshed": "User data refreshed",
+  "editProfile": "Edit Profile",
+  "settings": "Settings",
+
+  "deleteGym": "Delete Gym",
+  "deleteGymConfirmation": "Are you sure you want to delete \"{name}\"?",
+  "@deleteGymConfirmation": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "logoutConfirmation": "Are you sure you want to logout?",
+  "deleteAccount": "Delete Account",
+  "deleteAccountConfirmation": "Are you sure you want to delete your account? This action cannot be undone.",
+  "accountDeletedSuccessfully": "Account deleted successfully",
+  "failedToDeleteAccount": "Failed to delete account",
+
+  "failedToLoadGyms": "Failed to load gyms",
+  "gymAddedSuccessfully": "Gym added successfully",
+  "failedToAddGym": "Failed to add gym",
+  "gymUpdatedSuccessfully": "Gym updated successfully",
+  "failedToUpdateGym": "Failed to update gym",
+  "gymDeletedSuccessfully": "Gym deleted successfully",
+  "failedToDeleteGym": "Failed to delete gym",
+
+  "birthdate": "Birthdate",
+  "gender": "Gender",
+  "language": "Language",
+  "height": "Height",
+  "weight": "Weight",
+  "heightUnit": "cm",
+  "weightUnit": "kg",
+  "heightWithUnit": "{value} cm",
+  "@heightWithUnit": {
+    "placeholders": {
+      "value": {"type": "double"}
+    }
+  },
+  "weightWithUnit": "{value} kg",
+  "@weightWithUnit": {
+    "placeholders": {
+      "value": {"type": "double"}
+    }
+  },
+
+  "goals": "Goals",
+  "injuries": "Injuries",
+  "limitations": "Limitations",
+  "favorites": "Favorites",
+  "exercises": "Exercises",
+  "equipment": "Equipment",
+  "startedDate": "Started: {date}",
+  "@startedDate": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "yearLabel": "Year: {year}",
+  "@yearLabel": {
+    "placeholders": {
+      "year": {"type": "int"}
+    }
+  },
+
+  "myGyms": "My Gyms",
+  "addGym": "Add Gym",
+  "noGymsAddedYet": "No gyms added yet",
+  "addYourFirstGym": "Add Your First Gym",
+  "removeDefault": "Remove Default",
+  "setAsDefault": "Set as Default",
+  "edit": "Edit",
+
+  "quickActions": "Quick Actions",
+  "dangerZone": "Danger Zone",
+
+  "completeYourProfile": "Complete Your Profile",
+  "updateYourProfileInfo": "Update your profile information below.",
+  "pleaseCompleteProfile": "Please complete your profile. Fields marked with * are required.",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "birthDate": "Birth Date",
+  "male": "Male",
+  "female": "Female",
+  "selectLanguage": "Select language",
+  "heightCm": "Height (cm)",
+  "weightKg": "Weight (kg)",
+
+  "required": "Required",
+  "invalid": "Invalid",
+  "pleaseSelectBirthDate": "Please select your birth date",
+  "pleaseAddAtLeastOneGoal": "Please add at least one goal",
+  "pleaseSelectLanguage": "Please select your language",
+
+  "addAGoal": "Add a goal",
+  "injuryDescription": "Injury description",
+  "year": "Year",
+  "addALimitation": "Add a limitation",
+  "favoriteExercisesHint": "e.g., squats, pull-ups, running",
+  "favoriteEquipmentHint": "e.g., dumbbells, barbell, kettlebell",
+
+  "saveChanges": "Save Changes",
+  "saveProfile": "Save Profile",
+
+  "optionalLeaveEmpty": "(Optional - leave empty if none)",
+  "optionalExercisesPrefer": "(Optional - exercises you enjoy or prefer)",
+  "optionalEquipmentPrefer": "(Optional - equipment you prefer using)",
+  "favoriteExercises": "Favorite Exercises",
+  "favoriteEquipment": "Favorite Equipment",
+
+  "failedToUpdateProfile": "Failed to update profile",
+
+  "activity": "Activity",
+  "noTrainingsYet": "No trainings yet",
+  "generateFirstTraining": "Generate your first training from the Home tab",
+  "noTrainingAvailable": "No training available. Start generating one.",
+  "availableTrainings": "Available trainings",
+  "pastTrainings": "Past trainings",
+  "stale": "Stale",
+  "copied": "Copied",
+  "durationMin": "{minutes} min",
+  "@durationMin": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "durationHr": "{hours} hr",
+  "@durationHr": {
+    "placeholders": {
+      "hours": {"type": "int"}
+    }
+  },
+  "durationHrMin": "{hours} hr {minutes} min",
+  "@durationHrMin": {
+    "placeholders": {
+      "hours": {"type": "int"},
+      "minutes": {"type": "int"}
+    }
+  },
+  "failedToLoadTrainings": "Failed to load trainings",
+  "startTraining": "Start Training",
+
+  "cloneTraining": "Clone Training",
+  "addPartner": "Add Partner",
+  "shareWithUser": "Share with User",
+  "deleteTraining": "Delete Training",
+  "leaveTraining": "Leave Training",
+  "showAiReasoning": "Show AI reasoning",
+  "reportIssue": "Report issue",
+
+  "deleteTrainingConfirmation": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+  "@deleteTrainingConfirmation": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "leaveTrainingConfirmation": "Are you sure you want to leave \"{name}\"? You will no longer see this training.",
+  "@leaveTrainingConfirmation": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "addPartnerConfirmation": "Add {userName} as a partner to \"{trainingName}\"?",
+  "@addPartnerConfirmation": {
+    "placeholders": {
+      "userName": {"type": "String"},
+      "trainingName": {"type": "String"}
+    }
+  },
+  "cloneTrainingConfirmation": "Clone \"{name}\" to your trainings?",
+  "@cloneTrainingConfirmation": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "shareTrainingConfirmation": "Share \"{trainingName}\" with {userName}?",
+  "@shareTrainingConfirmation": {
+    "placeholders": {
+      "trainingName": {"type": "String"},
+      "userName": {"type": "String"}
+    }
+  },
+
+  "trainingDeletedSuccessfully": "Training deleted successfully",
+  "failedToDeleteTraining": "Failed to delete training",
+  "leftTrainingSuccessfully": "Left training successfully",
+  "partnerAddedSuccessfully": "Partner added successfully",
+  "failedToAddPartner": "Failed to add partner",
+  "trainingSharedSuccessfully": "Training shared successfully",
+  "failedToShareTraining": "Failed to share training",
+  "trainingCloned": "Training cloned",
+  "failedToCloneTraining": "Failed to clone training",
+  "trainingMarkedAsComplete": "Training marked as complete",
+  "failedToCompleteTraining": "Failed to complete training",
+  "reportSubmitted": "Report submitted",
+  "failedToSubmitReport": "Failed to submit report",
+
+  "reasoning": "Reasoning",
+  "strategy": "Strategy",
+  "progression": "Progression",
+  "constraints": "Constraints",
+  "researchApplied": "Research Applied",
+  "targetMuscles": "Target Muscles",
+  "naming": "Naming",
+
+  "trainingRoutines": "Training Routines",
+  "noEquipment": "No equipment",
+  "blockNumber": "Block {number}",
+  "@blockNumber": {
+    "placeholders": {
+      "number": {"type": "int"}
+    }
+  },
+  "repeatsCount": "{count}x",
+  "@repeatsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "durationSeconds": "{seconds}s",
+  "@durationSeconds": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "restSeconds": "{seconds}s rest",
+  "@restSeconds": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "repsCount": "{count} reps",
+  "@repsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "weightKgValue": "{value} kg",
+  "@weightKgValue": {
+    "placeholders": {
+      "value": {"type": "double"}
+    }
+  },
+  "markAsComplete": "Mark as Complete",
+  "references": "References",
+  "describeIssue": "Describe the issue with this training...",
+  "submit": "Submit",
+  "close": "Close",
+  "add": "Add",
+  "update": "Update",
+  "clone": "Clone",
+  "share": "Share",
+  "leave": "Leave",
+
+  "tapToStart": "Tap to start",
+  "trainingCompleted": "Training Completed!",
+  "greatJobCompleting": "Great job completing {name}",
+  "@greatJobCompleting": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "done": "Done",
+  "complete": "Complete",
+  "routineCounter": "Routine {current}/{total}",
+  "@routineCounter": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "blockCounter": "Block {current}/{total}",
+  "@blockCounter": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+
+  "exitTraining": "Exit Training?",
+  "whatWouldYouLikeToDo": "What would you like to do?",
+  "exit": "Exit",
+  "continueTraining": "Continue",
+
+  "failedToMarkComplete": "Failed to mark training as complete",
+
+  "durationMinutes": "Duration (minutes)",
+  "bodyweight": "Bodyweight",
+  "gym": "Gym",
+  "custom": "Custom",
+  "noEquipmentBodyweightOnly": "No equipment - bodyweight exercises only",
+  "noGymsDefinedCreateOne": "No gyms defined. Create one in your profile settings.",
+  "selectAGym": "Select a gym",
+  "addEquipment": "Add Equipment",
+  "addEquipmentAvailable": "Add the equipment you have available",
+  "includeWarmupCooldown": "Include warm-up & cooldown",
+  "equipmentPlaceholder": "e.g., Barbell, Dumbbells",
+  "customPromptOptional": "Custom Prompt (optional)",
+  "focusOnUpperBody": "e.g., Focus on upper body",
+  "trainingPartnersOptional": "Training Partners (optional)",
+
+  "generatingTraining": "Generating your training...",
+  "thisMayTakeAMoment": "This may take a moment",
+  "trainingGeneratedSuccessfully": "Training generated successfully!",
+  "failedToGenerateTraining": "Failed to generate training",
+  "generate": "Generate",
+
+  "editGym": "Edit Gym",
+  "gymName": "Gym Name",
+  "gymNamePlaceholder": "e.g., Home Gym, LA Fitness",
+  "noEquipmentAddedYet": "No equipment added yet",
+  "pleaseEnterGymName": "Please enter a gym name",
+
+  "selectUser": "Select User",
+  "searchByName": "Search by name",
+  "noUsersAvailable": "No users available",
+  "noMatchingUsers": "No matching users",
+
+  "instructions": "Instructions",
+
+  "howWasYourTraining": "How was your training?",
+  "anyAdditionalComments": "Any additional comments?",
+  "tooEasy": "Too easy",
+  "tooHard": "Too hard",
+  "flag": "Flag",
+
+  "profile": "Profile",
+
+  "languageEnglish": "English",
+  "languageItaliano": "Italiano",
+  "languageEspanol": "Español",
+  "languageFrancais": "Français",
+  "languageDeutsch": "Deutsch",
+  "languagePortugues": "Português",
+  "languageRussian": "Русский",
+  "languageChinese": "中文",
+  "languageJapanese": "日本語",
+  "languageKorean": "한국어"
+}

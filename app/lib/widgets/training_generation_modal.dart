@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../generated/app_localizations.dart';
 import '../models/gym.dart';
 import '../models/training.dart';
 import '../services/training_service.dart';
@@ -80,9 +81,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   }
 
   Future<void> _addPartner() async {
+    final l10n = AppLocalizations.of(context);
     final user = await showUserSelectDialog(
       context: context,
-      title: 'Add Partner',
+      title: l10n.addPartner,
     );
     if (user != null && !_partners.any((p) => p.id == user.id)) {
       setState(() {
@@ -98,11 +100,12 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   }
 
   Widget _buildEquipmentSection() {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Equipment',
+          l10n.equipment,
           style: PlatformHelper.useLiquidGlass
               ? LiquidGlassTheme.captionStyle
               : Theme.of(context).textTheme.labelMedium,
@@ -112,21 +115,21 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         SizedBox(
           width: double.infinity,
           child: SegmentedButton<EquipmentMode>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: EquipmentMode.bodyweight,
-                label: Text('Bodyweight'),
-                icon: Icon(Icons.accessibility_new, size: 16),
+                label: Text(l10n.bodyweight),
+                icon: const Icon(Icons.accessibility_new, size: 16),
               ),
               ButtonSegment(
                 value: EquipmentMode.gym,
-                label: Text('Gym'),
-                icon: Icon(Icons.fitness_center, size: 16),
+                label: Text(l10n.gym),
+                icon: const Icon(Icons.fitness_center, size: 16),
               ),
               ButtonSegment(
                 value: EquipmentMode.custom,
-                label: Text('Custom'),
-                icon: Icon(Icons.build, size: 16),
+                label: Text(l10n.custom),
+                icon: const Icon(Icons.build, size: 16),
               ),
             ],
             selected: {_equipmentMode},
@@ -146,10 +149,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   }
 
   Widget _buildEquipmentModeContent() {
+    final l10n = AppLocalizations.of(context);
     switch (_equipmentMode) {
       case EquipmentMode.bodyweight:
         return Text(
-          'No equipment - bodyweight exercises only',
+          l10n.noEquipmentBodyweightOnly,
           style: TextStyle(
             color: Colors.grey[600],
             fontStyle: FontStyle.italic,
@@ -164,9 +168,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   }
 
   Widget _buildGymSelector() {
+    final l10n = AppLocalizations.of(context);
     if (widget.gyms.isEmpty) {
       return Text(
-        'No gyms defined. Create one in your profile settings.',
+        l10n.noGymsDefinedCreateOne,
         style: TextStyle(
           color: Colors.grey[600],
           fontStyle: FontStyle.italic,
@@ -194,7 +199,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           value: _selectedGym,
           isExpanded: true,
           hint: Text(
-            'Select a gym',
+            l10n.selectAGym,
             style: PlatformHelper.useLiquidGlass
                 ? LiquidGlassTheme.bodyStyle.copyWith(
                     color: Colors.white.withOpacity(0.5),
@@ -225,6 +230,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   }
 
   Widget _buildCustomEquipmentInput() {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -233,8 +239,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             Expanded(
               child: AdaptiveTextField(
                 controller: _equipmentInputController,
-                labelText: 'Add Equipment',
-                placeholder: 'e.g., Barbell, Dumbbells',
+                labelText: l10n.addEquipment,
+                placeholder: l10n.equipmentPlaceholder,
                 onSubmitted: (_) => _addEquipment(),
               ),
             ),
@@ -249,7 +255,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              'Add the equipment you have available',
+              l10n.addEquipmentAvailable,
               style: TextStyle(
                 color: Colors.grey[600],
                 fontStyle: FontStyle.italic,
@@ -284,6 +290,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   }
 
   Widget _buildRoutineToggles() {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: PlatformHelper.useLiquidGlass
@@ -304,7 +311,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Include warm-up & cooldown',
+            l10n.includeWarmupCooldown,
             style: PlatformHelper.useLiquidGlass
                 ? LiquidGlassTheme.bodyStyle
                 : null,
@@ -366,13 +373,13 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         Navigator.of(context).pop();
         AdaptiveNotification.show(
           context: context,
-          message: 'Training generated successfully!',
+          message: AppLocalizations.of(context).trainingGeneratedSuccessfully,
         );
         widget.onSuccess?.call(response.data!);
       } else {
         AdaptiveNotification.showError(
           context: context,
-          message: 'Failed to generate training',
+          message: AppLocalizations.of(context).failedToGenerateTraining,
           rawError: response.error,
         );
       }
@@ -408,6 +415,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   }
 
   Widget _buildLoadingView() {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(32.0),
       child: Column(
@@ -416,14 +424,14 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           const AdaptiveLoadingIndicator(),
           const SizedBox(height: 24),
           Text(
-            'Generating your training...',
+            l10n.generatingTraining,
             style: PlatformHelper.useLiquidGlass
                 ? LiquidGlassTheme.headlineStyle
                 : Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           Text(
-            'This may take a moment',
+            l10n.thisMayTakeAMoment,
             style: PlatformHelper.useLiquidGlass
                 ? LiquidGlassTheme.captionStyle
                 : Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -436,6 +444,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   }
 
   Widget _buildFormView() {
+    final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: Form(
@@ -445,7 +454,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Generate Training',
+              l10n.generateTraining,
               style: PlatformHelper.useLiquidGlass
                   ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 24)
                   : Theme.of(context).textTheme.headlineSmall,
@@ -455,7 +464,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             // Duration field
             AdaptiveTextField(
               controller: _durationController,
-              labelText: 'Duration (minutes)',
+              labelText: l10n.durationMinutes,
               keyboardType: TextInputType.number,
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
@@ -474,8 +483,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             // Optional prompt
             AdaptiveTextField(
               controller: _promptController,
-              labelText: 'Custom Prompt (optional)',
-              placeholder: 'e.g., Focus on upper body',
+              labelText: l10n.customPromptOptional,
+              placeholder: l10n.focusOnUpperBody,
               maxLines: 3,
               minLines: 1,
             ),
@@ -486,7 +495,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Training Partners (optional)',
+                  l10n.trainingPartnersOptional,
                   style: PlatformHelper.useLiquidGlass
                       ? LiquidGlassTheme.captionStyle
                       : Theme.of(context).textTheme.labelMedium,
@@ -494,12 +503,12 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 const SizedBox(height: 8),
                 AdaptiveButton(
                   onPressed: _addPartner,
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.person_add, size: 18),
-                      SizedBox(width: 8),
-                      Text('Add Partner'),
+                      const Icon(Icons.person_add, size: 18),
+                      const SizedBox(width: 8),
+                      Text(l10n.addPartner),
                     ],
                   ),
                 ),
@@ -535,12 +544,12 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               children: [
                 AdaptiveTextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(l10n.cancel),
                 ),
                 const SizedBox(width: 12),
                 AdaptiveButton(
                   onPressed: _generateTraining,
-                  child: const Text('Generate'),
+                  child: Text(l10n.generate),
                 ),
               ],
             ),

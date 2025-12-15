@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'generated/app_localizations.dart';
 import 'providers/auth_provider.dart';
+import 'providers/locale_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/google_auth_screen.dart';
 import 'screens/home_screen.dart';
@@ -101,16 +104,27 @@ class VigorApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => AuthProvider(storage: storage),
         ),
+        ChangeNotifierProvider(
+          create: (_) => LocaleProvider(prefs),
+        ),
       ],
-      child: MaterialApp(
-        title: 'Vigor',
-        // Use Material You theme for all platforms
-        // iOS will use Liquid Glass widgets on top of Material base
-        theme: MaterialYouTheme.lightTheme,
-        darkTheme: MaterialYouTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        home: const AuthenticationWrapper(),
-        debugShowCheckedModeBanner: false,
+      child: Consumer<LocaleProvider>(
+        builder: (context, localeProvider, _) => MaterialApp(
+          title: 'Vigor',
+          locale: localeProvider.locale,
+          supportedLocales: supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          theme: MaterialYouTheme.lightTheme,
+          darkTheme: MaterialYouTheme.darkTheme,
+          themeMode: ThemeMode.system,
+          home: const AuthenticationWrapper(),
+          debugShowCheckedModeBanner: false,
+        ),
       ),
     );
   }
@@ -137,6 +151,16 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
+        // sync locale with user profile language when authenticated
+        if (authProvider.state == AuthState.authenticated) {
+          final user = authProvider.currentUser;
+          if (user != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              context.read<LocaleProvider>().setFromProfileLanguage(user.profile.language);
+            });
+          }
+        }
+
         if (authProvider.state == AuthState.initial ||
             authProvider.state == AuthState.loading) {
           return const SplashScreen();

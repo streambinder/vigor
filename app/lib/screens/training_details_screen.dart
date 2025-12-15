@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../config/api_config.dart';
+import '../generated/app_localizations.dart';
 import '../models/training.dart';
 import '../models/routine.dart';
 import '../models/block.dart';
@@ -103,14 +104,15 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   Future<void> _deleteTraining(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final currentUserId = context.read<AuthProvider>().currentUser?.id ?? '';
     final isOwner = training.userId == currentUserId;
-    final title = isOwner ? 'Delete Training' : 'Leave Training';
+    final title = isOwner ? l10n.deleteTraining : l10n.leaveTraining;
     final content = isOwner
-        ? 'Are you sure you want to delete "${training.name}"? This action cannot be undone.'
-        : 'Are you sure you want to leave "${training.name}"? You will no longer see this training.';
-    final actionLabel = isOwner ? 'Delete' : 'Leave';
-    final successMessage = isOwner ? 'Training deleted successfully' : 'Left training successfully';
+        ? l10n.deleteTrainingConfirmation(training.name)
+        : l10n.leaveTrainingConfirmation(training.name);
+    final actionLabel = isOwner ? l10n.delete : l10n.leave;
+    final successMessage = isOwner ? l10n.trainingDeletedSuccessfully : l10n.leftTrainingSuccessfully;
 
     final shouldDelete = await AdaptiveAlertDialog.show<bool>(
       context: context,
@@ -118,7 +120,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       content: content,
       actions: [
         AdaptiveDialogAction(
-          label: 'Cancel',
+          label: l10n.cancel,
           onPressed: () => Navigator.of(context).pop(false),
         ),
         AdaptiveDialogAction(
@@ -145,7 +147,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         } else {
           AdaptiveNotification.showError(
             context: context,
-            message: 'Failed to delete training',
+            message: l10n.failedToDeleteTraining,
             rawError: response.error,
           );
         }
@@ -154,6 +156,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   Future<void> _completeTraining(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final result = await FeedbackModal.show(context, training);
     if (result == null) return; // user cancelled
 
@@ -172,12 +175,12 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         Navigator.of(context).pop(true); // Return true to refresh the list
         AdaptiveNotification.show(
           context: context,
-          message: 'Training marked as complete',
+          message: l10n.trainingMarkedAsComplete,
         );
       } else {
         AdaptiveNotification.showError(
           context: context,
-          message: 'Failed to complete training',
+          message: l10n.failedToCompleteTraining,
           rawError: response.error,
         );
       }
@@ -190,24 +193,25 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   Future<void> _showAddPartnerDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final user = await showUserSelectDialog(
       context: context,
-      title: 'Add Partner',
+      title: l10n.addPartner,
     );
 
     if (user == null || !context.mounted) return;
 
     final shouldAdd = await AdaptiveAlertDialog.show<bool>(
       context: context,
-      title: 'Add Partner',
-      content: 'Add ${user.displayName} as a partner to "${training.name}"?',
+      title: l10n.addPartner,
+      content: l10n.addPartnerConfirmation(user.displayName, training.name),
       actions: [
         AdaptiveDialogAction(
-          label: 'Cancel',
+          label: l10n.cancel,
           onPressed: () => Navigator.of(context).pop(false),
         ),
         AdaptiveDialogAction(
-          label: 'Add',
+          label: l10n.add,
           onPressed: () => Navigator.of(context).pop(true),
         ),
       ],
@@ -224,12 +228,12 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         _loadPartners();
         AdaptiveNotification.show(
           context: context,
-          message: 'Partner added successfully',
+          message: l10n.partnerAddedSuccessfully,
         );
       } else {
         AdaptiveNotification.showError(
           context: context,
-          message: 'Failed to add partner',
+          message: l10n.failedToAddPartner,
           rawError: response.error,
         );
       }
@@ -237,20 +241,21 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   Future<void> _cloneTraining(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final currentUserId = context.read<AuthProvider>().currentUser?.id ?? '';
     if (currentUserId.isEmpty) return;
 
     final shouldClone = await AdaptiveAlertDialog.show<bool>(
       context: context,
-      title: 'Clone Training',
-      content: 'Clone "${training.name}" to your trainings?',
+      title: l10n.cloneTraining,
+      content: l10n.cloneTrainingConfirmation(training.name),
       actions: [
         AdaptiveDialogAction(
-          label: 'Cancel',
+          label: l10n.cancel,
           onPressed: () => Navigator.of(context).pop(false),
         ),
         AdaptiveDialogAction(
-          label: 'Clone',
+          label: l10n.clone,
           onPressed: () => Navigator.of(context).pop(true),
         ),
       ],
@@ -266,13 +271,13 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       if (response.isSuccess) {
         AdaptiveNotification.show(
           context: context,
-          message: 'Training cloned',
+          message: l10n.trainingCloned,
         );
         Navigator.of(context).pop(true);
       } else {
         AdaptiveNotification.showError(
           context: context,
-          message: 'Failed to clone training',
+          message: l10n.failedToCloneTraining,
           rawError: response.error,
         );
       }
@@ -280,24 +285,25 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   Future<void> _showCopyTrainingDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final user = await showUserSelectDialog(
       context: context,
-      title: 'Share with User',
+      title: l10n.shareWithUser,
     );
 
     if (user == null || !context.mounted) return;
 
     final shouldShare = await AdaptiveAlertDialog.show<bool>(
       context: context,
-      title: 'Share with User',
-      content: 'Share "${training.name}" with ${user.displayName}?',
+      title: l10n.shareWithUser,
+      content: l10n.shareTrainingConfirmation(training.name, user.displayName),
       actions: [
         AdaptiveDialogAction(
-          label: 'Cancel',
+          label: l10n.cancel,
           onPressed: () => Navigator.of(context).pop(false),
         ),
         AdaptiveDialogAction(
-          label: 'Share',
+          label: l10n.share,
           onPressed: () => Navigator.of(context).pop(true),
         ),
       ],
@@ -313,12 +319,12 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       if (response.isSuccess) {
         AdaptiveNotification.show(
           context: context,
-          message: 'Training shared successfully',
+          message: l10n.trainingSharedSuccessfully,
         );
       } else {
         AdaptiveNotification.showError(
           context: context,
-          message: 'Failed to share training',
+          message: l10n.failedToShareTraining,
           rawError: response.error,
         );
       }
@@ -326,12 +332,13 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   void _showReasoningDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final r = training.reasoning;
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reasoning'),
+        title: Text(l10n.reasoning),
         content: SizedBox(
           width: double.maxFinite,
           child: SingleChildScrollView(
@@ -339,12 +346,12 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildReasoningSection(
-                  title: 'Strategy',
+                  title: l10n.strategy,
                   child: Text(r.strategy),
                 ),
                 if (r.progression.summary.isNotEmpty || r.progression.adjustments.isNotEmpty)
                   _buildReasoningSection(
-                    title: 'Progression',
+                    title: l10n.progression,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -370,7 +377,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                   ),
                 if (r.constraints.isNotEmpty)
                   _buildReasoningSection(
-                    title: 'Constraints',
+                    title: l10n.constraints,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: r.constraints.map((c) => Padding(
@@ -387,7 +394,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                   ),
                 if (r.factsApplied.isNotEmpty)
                   _buildReasoningSection(
-                    title: 'Research Applied',
+                    title: l10n.researchApplied,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: r.factsApplied.map((f) => Padding(
@@ -404,7 +411,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                   ),
                 if (r.targetMuscles.isNotEmpty)
                   _buildReasoningSection(
-                    title: 'Target Muscles',
+                    title: l10n.targetMuscles,
                     child: Wrap(
                       spacing: 8,
                       runSpacing: 4,
@@ -416,7 +423,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                   ),
                 if (r.exercises.isNotEmpty)
                   _buildReasoningSection(
-                    title: 'Exercises',
+                    title: l10n.exercises,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: r.exercises.map((e) => Padding(
@@ -432,7 +439,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                     ),
                   ),
                 _buildReasoningSection(
-                  title: 'Naming',
+                  title: l10n.naming,
                   child: Text(r.namingLogic),
                 ),
               ],
@@ -442,7 +449,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Close'),
+            child: Text(l10n.close),
           ),
         ],
       ),
@@ -450,16 +457,17 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   Future<void> _showReportDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController();
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Report Issue'),
+        title: Text(l10n.reportIssue),
         content: TextField(
           controller: controller,
           maxLines: 4,
           decoration: InputDecoration(
-            hintText: 'Describe the issue with this training...',
+            hintText: l10n.describeIssue,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
           autofocus: true,
@@ -467,11 +475,11 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-            child: const Text('Submit'),
+            child: Text(l10n.submit),
           ),
         ],
       ),
@@ -485,11 +493,11 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
     if (context.mounted) {
       if (response.isSuccess) {
-        AdaptiveNotification.show(context: context, message: 'Report submitted');
+        AdaptiveNotification.show(context: context, message: l10n.reportSubmitted);
       } else {
         AdaptiveNotification.showError(
           context: context,
-          message: 'Failed to submit report',
+          message: l10n.failedToSubmitReport,
           rawError: response.error,
         );
       }
@@ -510,6 +518,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   Widget _buildReferencesSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
@@ -521,7 +530,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
               : Colors.grey.shade600,
         ),
         title: Text(
-          'References',
+          l10n.references,
           style: PlatformHelper.useLiquidGlass
               ? LiquidGlassTheme.captionStyle
               : Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -571,6 +580,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final currentUserId = context.read<AuthProvider>().currentUser?.id ?? '';
     final isOwner = training.userId == currentUserId;
 
@@ -595,19 +605,19 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           actions: [
             AdaptiveIconButton(
               icon: const Icon(Icons.copy),
-              tooltip: 'Clone Training',
+              tooltip: l10n.cloneTraining,
               onPressed: () => _cloneTraining(context),
             ),
             // only owner can add partners
             if (isOwner)
               AdaptiveIconButton(
                 icon: const Icon(Icons.person_add),
-                tooltip: 'Add Partner',
+                tooltip: l10n.addPartner,
                 onPressed: () => _showAddPartnerDialog(context),
               ),
             AdaptiveIconButton(
               icon: const Icon(Icons.share),
-              tooltip: 'Share with User',
+              tooltip: l10n.shareWithUser,
               onPressed: () => _showCopyTrainingDialog(context),
             ),
             AdaptiveIconButton(
@@ -615,7 +625,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                 Icons.delete,
                 color: isOwner ? null : Colors.grey,
               ),
-              tooltip: isOwner ? 'Delete Training' : 'Leave Training',
+              tooltip: isOwner ? l10n.deleteTraining : l10n.leaveTraining,
               onPressed: () => _deleteTraining(context),
             ),
           ],
@@ -650,7 +660,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                                 ? LiquidGlassTheme.captionStyle.color
                                 : Colors.grey,
                           ),
-                          tooltip: 'Show AI reasoning',
+                          tooltip: l10n.showAiReasoning,
                           onPressed: () => _showReasoningDialog(context),
                         ),
                         IconButton(
@@ -661,7 +671,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                                 ? LiquidGlassTheme.captionStyle.color
                                 : Colors.grey,
                           ),
-                          tooltip: 'Report issue',
+                          tooltip: l10n.reportIssue,
                           onPressed: () => _showReportDialog(context),
                         ),
                       ],
@@ -709,7 +719,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                           _buildInfoLabel(
                             context,
                             icon: Icons.copy,
-                            text: 'Copied',
+                            text: l10n.copied,
                           ),
                       ],
                     ),
@@ -728,7 +738,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                         Expanded(
                           child: Text(
                             training.equipment.isEmpty
-                                ? 'No equipment'
+                                ? l10n.noEquipment
                                 : training.equipment.join(' · '),
                             style: PlatformHelper.useLiquidGlass
                                 ? LiquidGlassTheme.captionStyle
@@ -764,7 +774,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                   }
                 },
                 icon: const Icon(Icons.timer),
-                label: const Text('Start Training'),
+                label: Text(l10n.startTraining),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: PlatformHelper.useLiquidGlass
                       ? LiquidGlassTheme.successColor
@@ -789,7 +799,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                     color: isOwner ? null : Colors.grey,
                   ),
                   label: Text(
-                    'Mark as Complete',
+                    l10n.markAsComplete,
                     style: TextStyle(
                       color: isOwner ? null : Colors.grey,
                     ),
@@ -817,7 +827,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
             // Routines
             Text(
-              'Training Routines',
+              l10n.trainingRoutines,
               style: PlatformHelper.useLiquidGlass
                   ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
                   : Theme.of(context).textTheme.titleLarge,

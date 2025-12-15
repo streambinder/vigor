@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../generated/app_localizations.dart';
 import '../models/training.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
@@ -120,6 +121,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
   @override
   Widget build(BuildContext context) {
     final useLiquidGlass = PlatformHelper.useLiquidGlass;
+    final l10n = AppLocalizations.of(context);
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -146,7 +148,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
                 child: Text(
-                  'How was your training?',
+                  l10n.howWasYourTraining,
                   style: useLiquidGlass
                       ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
                       : Theme.of(context).textTheme.titleLarge,
@@ -162,7 +164,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                         controller: _feedbackController,
                         maxLines: 1,
                         decoration: InputDecoration(
-                          hintText: 'Any additional comments?',
+                          hintText: l10n.anyAdditionalComments,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -188,12 +190,12 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                   children: [
                     AdaptiveTextButton(
                       onPressed: () => Navigator.of(context).pop(null),
-                      child: const Text('Cancel'),
+                      child: Text(l10n.cancel),
                     ),
                     const SizedBox(width: 16),
                     AdaptiveButton(
                       onPressed: _isValid ? _complete : null,
-                      child: const Text('Complete'),
+                      child: Text(l10n.complete),
                     ),
                   ],
                 ),

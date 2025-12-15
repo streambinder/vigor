@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../generated/app_localizations.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
@@ -8,6 +9,7 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AdaptiveScaffold(
       body: Center(
         child: Column(
@@ -22,7 +24,7 @@ class SplashScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Vigor',
+              l10n.appName,
               style: PlatformHelper.useLiquidGlass
                   ? LiquidGlassTheme.titleStyle
                   : const TextStyle(

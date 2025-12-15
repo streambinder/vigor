@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 
+import '../generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../services/app_logger.dart';
 import '../widgets/adaptive/adaptive.dart';
@@ -61,9 +62,11 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
       });
     } catch (e) {
       AppLogger.error('[GoogleAuthScreen] failed to initialize: $e');
-      setState(() {
-        _errorMessage = 'Failed to initialize Google Sign In';
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = AppLocalizations.of(context).failedToInitializeGoogleSignIn;
+        });
+      }
     }
   }
 
@@ -91,18 +94,19 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Sign-in error: ${error.description ?? error.code.toString()}';
+        _errorMessage = AppLocalizations.of(context).signInError(error.description ?? error.code.toString());
       });
     } else {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Sign-in error: ${error.toString()}';
+        _errorMessage = AppLocalizations.of(context).signInError(error.toString());
       });
     }
   }
 
   Future<void> _handleSignInSuccess(GoogleSignInAccount user) async {
     final authProvider = context.read<AuthProvider>();
+    final l10n = AppLocalizations.of(context);
 
     try {
       // Get authentication details (ID token only in v7.x)
@@ -115,7 +119,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
         AppLogger.warning('[GoogleAuthScreen] no ID token received');
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Failed to get authentication token';
+          _errorMessage = l10n.failedToGetAuthToken;
         });
         return;
       }
@@ -134,7 +138,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
       if (!success && mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = authProvider.errorMessage ?? 'Google sign-in failed';
+          _errorMessage = authProvider.errorMessage ?? l10n.googleSignInFailed;
         });
 
         // Sign out from Google on failure
@@ -145,7 +149,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Error processing sign-in: ${e.toString()}';
+          _errorMessage = l10n.errorProcessingSignIn(e.toString());
         });
       }
       await GoogleSignIn.instance.signOut();
@@ -157,7 +161,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
     if (!_initialized) {
       AppLogger.warning('[GoogleAuthScreen] not initialized yet');
       setState(() {
-        _errorMessage = 'Google Sign In is still initializing...';
+        _errorMessage = AppLocalizations.of(context).googleSignInInitializing;
       });
       return;
     }
@@ -192,7 +196,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Sign-in error: ${e.description ?? e.code.toString()}';
+          _errorMessage = AppLocalizations.of(context).signInError(e.description ?? e.code.toString());
         });
       }
       await GoogleSignIn.instance.signOut();
@@ -201,7 +205,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Sign-in error: ${e.toString()}';
+          _errorMessage = AppLocalizations.of(context).signInError(e.toString());
         });
       }
       await GoogleSignIn.instance.signOut();
@@ -218,6 +222,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AdaptiveScaffold(
       body: SafeArea(
         child: Center(
@@ -237,7 +242,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Vigor',
+                  l10n.appName,
                   style: PlatformHelper.useLiquidGlass
                       ? LiquidGlassTheme.titleStyle
                       : const TextStyle(
@@ -248,7 +253,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Your personal training assistant',
+                  l10n.appTagline,
                   style: PlatformHelper.useLiquidGlass
                       ? LiquidGlassTheme.bodyStyle.copyWith(
                           color: LiquidGlassTheme.captionStyle.color,
@@ -282,26 +287,26 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
                   AdaptiveButton(
                     onPressed: _isLoading ? null : _handleGoogleSignIn,
                     child: _isLoading
-                        ? const Row(
+                        ? Row(
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              SizedBox(
+                              const SizedBox(
                                 height: 20,
                                 width: 20,
                                 child: AdaptiveLoadingIndicator(),
                               ),
-                              SizedBox(width: 12),
-                              Text('Signing in...'),
+                              const SizedBox(width: 12),
+                              Text(l10n.signingIn),
                             ],
                           )
-                        : const Row(
+                        : Row(
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.login, size: 24, color: Colors.white),
-                              SizedBox(width: 12),
-                              Text('Sign in with Google'),
+                              const Icon(Icons.login, size: 24, color: Colors.white),
+                              const SizedBox(width: 12),
+                              Text(l10n.signInWithGoogle),
                             ],
                           ),
                   ),

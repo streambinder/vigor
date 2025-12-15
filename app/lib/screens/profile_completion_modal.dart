@@ -2,7 +2,9 @@ import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
+import '../providers/locale_provider.dart';
 import '../models/profile.dart';
 import '../models/goal.dart';
 import '../models/injury.dart';
@@ -136,7 +138,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
     if (widget.missingFields.containsKey('birthdate') && _birthdate == null) {
       AdaptiveNotification.showError(
         context: context,
-        message: 'Please select your birth date',
+        message: AppLocalizations.of(context).pleaseSelectBirthDate,
       );
       return;
     }
@@ -145,7 +147,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
     if (widget.missingFields.containsKey('goals') && _goals.isEmpty) {
       AdaptiveNotification.showError(
         context: context,
-        message: 'Please add at least one goal',
+        message: AppLocalizations.of(context).pleaseAddAtLeastOneGoal,
       );
       return;
     }
@@ -183,12 +185,14 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
       );
 
       if (success && mounted) {
+        // update app locale to match profile language
+        context.read<LocaleProvider>().setFromProfileLanguage(_language);
         // Close modal on success
         Navigator.of(context).pop();
       } else if (mounted) {
         AdaptiveNotification.showError(
           context: context,
-          message: 'Failed to update profile',
+          message: AppLocalizations.of(context).failedToUpdateProfile,
           rawError: authProvider.errorMessage,
         );
       }
@@ -203,6 +207,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return PopScope(
       canPop: widget.missingFields.isEmpty, // Allow dismissal when editing
       child: Dialog(
@@ -228,7 +233,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
                   children: [
                     // Header
                     Text(
-                      widget.missingFields.isEmpty ? 'Edit Profile' : 'Complete Your Profile',
+                      widget.missingFields.isEmpty ? l10n.editProfile : l10n.completeYourProfile,
                       style: PlatformHelper.useLiquidGlass
                           ? LiquidGlassTheme.titleStyle
                           : const TextStyle(
@@ -239,8 +244,8 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
                     const SizedBox(height: 8),
                     Text(
                       widget.missingFields.isEmpty
-                          ? 'Update your profile information below.'
-                          : 'Please complete your profile. Fields marked with * are required.',
+                          ? l10n.updateYourProfileInfo
+                          : l10n.pleaseCompleteProfile,
                       style: PlatformHelper.useLiquidGlass
                           ? LiquidGlassTheme.captionStyle
                           : const TextStyle(color: Colors.grey),
@@ -285,7 +290,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
                               width: 20,
                               child: AdaptiveLoadingIndicator(),
                             )
-                          : Text(widget.missingFields.isEmpty ? 'Save Changes' : 'Save Profile'),
+                          : Text(widget.missingFields.isEmpty ? l10n.saveChanges : l10n.saveProfile),
                     ),
 
                     // Cancel button (only when editing)
@@ -293,7 +298,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
                       const SizedBox(height: 12),
                       TextButton(
                         onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'),
+                        child: Text(l10n.cancel),
                       ),
                     ],
                   ],
@@ -307,6 +312,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   }
 
   Widget _buildNameFields() {
+    final l10n = AppLocalizations.of(context);
     final isFirstNameRequired = widget.missingFields.containsKey('first_name');
     final isLastNameRequired = widget.missingFields.containsKey('last_name');
     return Padding(
@@ -317,13 +323,13 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
             child: TextFormField(
               initialValue: _first_name,
               decoration: InputDecoration(
-                labelText: isFirstNameRequired ? 'First Name *' : 'First Name',
+                labelText: isFirstNameRequired ? '${l10n.firstName} *' : l10n.firstName,
                 border: const OutlineInputBorder(),
               ),
               validator: isFirstNameRequired
                   ? (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Required';
+                        return l10n.required;
                       }
                       return null;
                     }
@@ -338,13 +344,13 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
             child: TextFormField(
               initialValue: _last_name,
               decoration: InputDecoration(
-                labelText: isLastNameRequired ? 'Last Name *' : 'Last Name',
+                labelText: isLastNameRequired ? '${l10n.lastName} *' : l10n.lastName,
                 border: const OutlineInputBorder(),
               ),
               validator: isLastNameRequired
                   ? (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Required';
+                        return l10n.required;
                       }
                       return null;
                     }
@@ -360,6 +366,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   }
 
   Widget _buildBirthdateGenderFields() {
+    final l10n = AppLocalizations.of(context);
     final isBirthdateRequired = widget.missingFields.containsKey('birthdate');
     final isGenderRequired = widget.missingFields.containsKey('gender');
     return Padding(
@@ -384,7 +391,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
               },
               child: InputDecorator(
                 decoration: InputDecoration(
-                  labelText: isBirthdateRequired ? 'Birth Date *' : 'Birth Date',
+                  labelText: isBirthdateRequired ? '${l10n.birthDate} *' : l10n.birthDate,
                   border: const OutlineInputBorder(),
                   suffixIcon: const Icon(Icons.calendar_today),
                 ),
@@ -406,17 +413,17 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
             child: DropdownButtonFormField<String>(
               value: _gender,
               decoration: InputDecoration(
-                labelText: isGenderRequired ? 'Gender *' : 'Gender',
+                labelText: isGenderRequired ? '${l10n.gender} *' : l10n.gender,
                 border: const OutlineInputBorder(),
               ),
-              items: const [
-                DropdownMenuItem(value: 'male', child: Text('Male')),
-                DropdownMenuItem(value: 'female', child: Text('Female')),
+              items: [
+                DropdownMenuItem(value: 'male', child: Text(l10n.male)),
+                DropdownMenuItem(value: 'female', child: Text(l10n.female)),
               ],
               validator: isGenderRequired
                   ? (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Required';
+                        return l10n.required;
                       }
                       return null;
                     }
@@ -434,6 +441,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   }
 
   Widget _buildLanguageField() {
+    final l10n = AppLocalizations.of(context);
     final isRequired = widget.missingFields.containsKey('language');
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -441,31 +449,31 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isRequired ? 'Language *' : 'Language',
+            isRequired ? '${l10n.language} *' : l10n.language,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
             value: _language,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: 'Select language',
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              hintText: l10n.selectLanguage,
             ),
-            items: const [
-              DropdownMenuItem(value: 'english', child: Text('English')),
-              DropdownMenuItem(value: 'italiano', child: Text('Italiano')),
-              DropdownMenuItem(value: 'español', child: Text('Español')),
-              DropdownMenuItem(value: 'français', child: Text('Français')),
-              DropdownMenuItem(value: 'deutsch', child: Text('Deutsch')),
-              DropdownMenuItem(value: 'português', child: Text('Português')),
-              DropdownMenuItem(value: 'русский', child: Text('Русский')),
-              DropdownMenuItem(value: '中文', child: Text('中文')),
-              DropdownMenuItem(value: '日本語', child: Text('日本語')),
-              DropdownMenuItem(value: '한국어', child: Text('한국어')),
+            items: [
+              DropdownMenuItem(value: 'english', child: Text(l10n.languageEnglish)),
+              DropdownMenuItem(value: 'italiano', child: Text(l10n.languageItaliano)),
+              DropdownMenuItem(value: 'español', child: Text(l10n.languageEspanol)),
+              DropdownMenuItem(value: 'français', child: Text(l10n.languageFrancais)),
+              DropdownMenuItem(value: 'deutsch', child: Text(l10n.languageDeutsch)),
+              DropdownMenuItem(value: 'português', child: Text(l10n.languagePortugues)),
+              DropdownMenuItem(value: 'русский', child: Text(l10n.languageRussian)),
+              DropdownMenuItem(value: '中文', child: Text(l10n.languageChinese)),
+              DropdownMenuItem(value: '日本語', child: Text(l10n.languageJapanese)),
+              DropdownMenuItem(value: '한국어', child: Text(l10n.languageKorean)),
             ],
             validator: isRequired ? (value) {
               if (value == null || value.isEmpty) {
-                return 'Please select your language';
+                return l10n.pleaseSelectLanguage;
               }
               return null;
             } : null,
@@ -481,6 +489,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   }
 
   Widget _buildHeightWeightFields() {
+    final l10n = AppLocalizations.of(context);
     final isHeightRequired = widget.missingFields.containsKey('height');
     final isWeightRequired = widget.missingFields.containsKey('weight');
     return Padding(
@@ -491,18 +500,18 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
             child: TextFormField(
               initialValue: _height?.toString(),
               decoration: InputDecoration(
-                labelText: isHeightRequired ? 'Height (cm) *' : 'Height (cm)',
+                labelText: isHeightRequired ? '${l10n.heightCm} *' : l10n.heightCm,
                 border: const OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,
               validator: isHeightRequired
                   ? (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Required';
+                        return l10n.required;
                       }
                       final height = double.tryParse(value);
                       if (height == null || height <= 0) {
-                        return 'Invalid';
+                        return l10n.invalid;
                       }
                       return null;
                     }
@@ -517,18 +526,18 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
             child: TextFormField(
               initialValue: _weight?.toString(),
               decoration: InputDecoration(
-                labelText: isWeightRequired ? 'Weight (kg) *' : 'Weight (kg)',
+                labelText: isWeightRequired ? '${l10n.weightKg} *' : l10n.weightKg,
                 border: const OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,
               validator: isWeightRequired
                   ? (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Required';
+                        return l10n.required;
                       }
                       final weight = double.tryParse(value);
                       if (weight == null || weight <= 0) {
-                        return 'Invalid';
+                        return l10n.invalid;
                       }
                       return null;
                     }
@@ -544,6 +553,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   }
 
   Widget _buildGoalsSection() {
+    final l10n = AppLocalizations.of(context);
     final isRequired = widget.missingFields.containsKey('goals');
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -551,13 +561,13 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isRequired ? 'Goals *' : 'Goals',
+            isRequired ? '${l10n.goals} *' : l10n.goals,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           ..._goals.map((goal) => ListTile(
                 title: Text(goal.description),
-                subtitle: Text('Started: ${goal.startDate.day}/${goal.startDate.month}/${goal.startDate.year}'),
+                subtitle: Text(l10n.startedDate(_formatDate(goal.startDate))),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () {
@@ -572,9 +582,9 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
               Expanded(
                 child: TextField(
                   controller: _goalDescriptionController,
-                  decoration: const InputDecoration(
-                    hintText: 'Add a goal',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: l10n.addAGoal,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
               ),
@@ -600,7 +610,12 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
     );
   }
 
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
   Widget _buildInjuriesSection() {
+    final l10n = AppLocalizations.of(context);
     final isRequired = widget.missingFields.containsKey('injuries');
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -608,18 +623,18 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isRequired ? 'Injuries *' : 'Injuries',
+            isRequired ? '${l10n.injuries} *' : l10n.injuries,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           if (!isRequired)
-            const Text(
-              '(Optional - leave empty if none)',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+            Text(
+              l10n.optionalLeaveEmpty,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           const SizedBox(height: 8),
           ..._injuries.map((injury) => ListTile(
                 title: Text(injury.description),
-                subtitle: Text('Year: ${injury.year}'),
+                subtitle: Text(l10n.yearLabel(injury.year)),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () {
@@ -635,18 +650,18 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
                 flex: 2,
                 child: TextField(
                   controller: _injuryDescriptionController,
-                  decoration: const InputDecoration(
-                    hintText: 'Injury description',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: l10n.injuryDescription,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: TextField(
-                  decoration: const InputDecoration(
-                    hintText: 'Year',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: l10n.year,
+                    border: const OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
                   onChanged: (value) {
@@ -678,6 +693,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   }
 
   Widget _buildLimitationsSection() {
+    final l10n = AppLocalizations.of(context);
     final isRequired = widget.missingFields.containsKey('limitations');
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -685,13 +701,13 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isRequired ? 'Limitations *' : 'Limitations',
+            isRequired ? '${l10n.limitations} *' : l10n.limitations,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           if (!isRequired)
-            const Text(
-              '(Optional - leave empty if none)',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+            Text(
+              l10n.optionalLeaveEmpty,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           const SizedBox(height: 8),
           ..._limitations.map((limitation) => ListTile(
@@ -710,9 +726,9 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
               Expanded(
                 child: TextField(
                   controller: _limitationController,
-                  decoration: const InputDecoration(
-                    hintText: 'Add a limitation',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: l10n.addALimitation,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
               ),
@@ -736,18 +752,19 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   }
 
   Widget _buildFavoriteExercisesSection() {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Favorite Exercises',
-            style: TextStyle(fontWeight: FontWeight.bold),
+          Text(
+            l10n.favoriteExercises,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          const Text(
-            '(Optional - exercises you enjoy or prefer)',
-            style: TextStyle(fontSize: 12, color: Colors.grey),
+          Text(
+            l10n.optionalExercisesPrefer,
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
           ),
           const SizedBox(height: 8),
           ..._favoriteExercises.map((exercise) => ListTile(
@@ -766,9 +783,9 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
               Expanded(
                 child: TextField(
                   controller: _favoriteExerciseController,
-                  decoration: const InputDecoration(
-                    hintText: 'e.g., squats, pull-ups, running',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: l10n.favoriteExercisesHint,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
               ),
@@ -792,18 +809,19 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   }
 
   Widget _buildFavoriteEquipmentSection() {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Favorite Equipment',
-            style: TextStyle(fontWeight: FontWeight.bold),
+          Text(
+            l10n.favoriteEquipment,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          const Text(
-            '(Optional - equipment you prefer using)',
-            style: TextStyle(fontSize: 12, color: Colors.grey),
+          Text(
+            l10n.optionalEquipmentPrefer,
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
           ),
           const SizedBox(height: 8),
           ..._favoriteEquipment.map((equipment) => ListTile(
@@ -822,9 +840,9 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
               Expanded(
                 child: TextField(
                   controller: _favoriteEquipmentController,
-                  decoration: const InputDecoration(
-                    hintText: 'e.g., dumbbells, barbell, kettlebell',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: l10n.favoriteEquipmentHint,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
               ),

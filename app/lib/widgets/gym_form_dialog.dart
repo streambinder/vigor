@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../generated/app_localizations.dart';
 import '../models/gym.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../theme/liquid_glass_theme.dart';
@@ -54,7 +55,7 @@ class _GymFormDialogState extends State<GymFormDialog> {
     if (name.isEmpty) {
       AdaptiveNotification.showError(
         context: context,
-        message: 'Please enter a gym name',
+        message: AppLocalizations.of(context).pleaseEnterGymName,
       );
       return;
     }
@@ -68,6 +69,7 @@ class _GymFormDialogState extends State<GymFormDialog> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.gym != null;
+    final l10n = AppLocalizations.of(context);
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -91,7 +93,7 @@ class _GymFormDialogState extends State<GymFormDialog> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    isEditing ? 'Edit Gym' : 'Add Gym',
+                    isEditing ? l10n.editGym : l10n.addGym,
                     style: PlatformHelper.useLiquidGlass
                         ? LiquidGlassTheme.headlineStyle
                         : const TextStyle(
@@ -108,12 +110,12 @@ class _GymFormDialogState extends State<GymFormDialog> {
               const SizedBox(height: 24),
               AdaptiveTextField(
                 controller: _nameController,
-                labelText: 'Gym Name',
-                placeholder: 'e.g., Home Gym, LA Fitness',
+                labelText: l10n.gymName,
+                placeholder: l10n.gymNamePlaceholder,
               ),
               const SizedBox(height: 24),
               Text(
-                'Equipment',
+                l10n.equipment,
                 style: PlatformHelper.useLiquidGlass
                     ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
                     : const TextStyle(
@@ -127,8 +129,8 @@ class _GymFormDialogState extends State<GymFormDialog> {
                   Expanded(
                     child: AdaptiveTextField(
                       controller: _equipmentInputController,
-                      labelText: 'Add Equipment',
-                      placeholder: 'e.g., Barbell, Dumbbells',
+                      labelText: l10n.addEquipment,
+                      placeholder: l10n.equipmentPlaceholder,
                       onSubmitted: (_) => _addEquipment(),
                     ),
                   ),
@@ -145,7 +147,7 @@ class _GymFormDialogState extends State<GymFormDialog> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Center(
                     child: Text(
-                      'No equipment added yet',
+                      l10n.noEquipmentAddedYet,
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontStyle: FontStyle.italic,
@@ -174,12 +176,12 @@ class _GymFormDialogState extends State<GymFormDialog> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
+                    child: Text(l10n.cancel),
                   ),
                   const SizedBox(width: 8),
                   AdaptiveButton(
                     onPressed: _submit,
-                    child: Text(isEditing ? 'Update' : 'Add'),
+                    child: Text(isEditing ? l10n.update : l10n.add),
                   ),
                 ],
               ),

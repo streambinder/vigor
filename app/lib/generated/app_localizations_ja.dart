@@ -1,0 +1,708 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Japanese (`ja`).
+class AppLocalizationsJa extends AppLocalizations {
+  AppLocalizationsJa([String locale = 'ja']) : super(locale);
+
+  @override
+  String get appName => 'Vigor';
+
+  @override
+  String get appTagline => 'Ex Sapientia Vis';
+
+  @override
+  String get navHome => 'ホーム';
+
+  @override
+  String get navActivity => 'アクティビティ';
+
+  @override
+  String get navProfile => 'プロフィール';
+
+  @override
+  String get storageErrorTitle => 'Vigor - ストレージエラー';
+
+  @override
+  String get storageUnavailable => 'ストレージが利用できません';
+
+  @override
+  String get storageErrorMessage =>
+      'このアプリはデータを保護するためにセキュアストレージが必要です。ブラウザの設定を確認して再試行してください。';
+
+  @override
+  String get signInWithGoogle => 'Googleでサインイン';
+
+  @override
+  String get signingIn => 'サインイン中...';
+
+  @override
+  String get failedToInitializeGoogleSignIn => 'Google サインインの初期化に失敗しました';
+
+  @override
+  String signInError(String message) {
+    return 'サインインエラー：$message';
+  }
+
+  @override
+  String get googleSignInFailed => 'Googleサインインに失敗しました';
+
+  @override
+  String get failedToGetAuthToken => '認証トークンを取得できませんでした';
+
+  @override
+  String errorProcessingSignIn(String message) {
+    return 'サインイン処理エラー：$message';
+  }
+
+  @override
+  String get googleSignInInitializing => 'Google サインインはまだ初期化中です...';
+
+  @override
+  String get readyToTrain => 'トレーニングの準備はできましたか？';
+
+  @override
+  String get generateTrainingDescription =>
+      'プロフィールと目標に基づいてパーソナライズされたトレーニングを生成します';
+
+  @override
+  String get generateTraining => 'トレーニングを生成';
+
+  @override
+  String get refresh => '更新';
+
+  @override
+  String get logout => 'ログアウト';
+
+  @override
+  String get userDataRefreshed => 'ユーザーデータを更新しました';
+
+  @override
+  String get editProfile => 'プロフィールを編集';
+
+  @override
+  String get settings => '設定';
+
+  @override
+  String get deleteGym => 'ジムを削除';
+
+  @override
+  String deleteGymConfirmation(String name) {
+    return '「$name」を削除してもよろしいですか？';
+  }
+
+  @override
+  String get cancel => 'キャンセル';
+
+  @override
+  String get delete => '削除';
+
+  @override
+  String get logoutConfirmation => 'ログアウトしてもよろしいですか？';
+
+  @override
+  String get deleteAccount => 'アカウントを削除';
+
+  @override
+  String get deleteAccountConfirmation => 'アカウントを削除してもよろしいですか？この操作は元に戻せません。';
+
+  @override
+  String get accountDeletedSuccessfully => 'アカウントが正常に削除されました';
+
+  @override
+  String get failedToDeleteAccount => 'アカウントの削除に失敗しました';
+
+  @override
+  String get failedToLoadGyms => 'ジムの読み込みに失敗しました';
+
+  @override
+  String get gymAddedSuccessfully => 'ジムが正常に追加されました';
+
+  @override
+  String get failedToAddGym => 'ジムの追加に失敗しました';
+
+  @override
+  String get gymUpdatedSuccessfully => 'ジムが正常に更新されました';
+
+  @override
+  String get failedToUpdateGym => 'ジムの更新に失敗しました';
+
+  @override
+  String get gymDeletedSuccessfully => 'ジムが正常に削除されました';
+
+  @override
+  String get failedToDeleteGym => 'ジムの削除に失敗しました';
+
+  @override
+  String get birthdate => '生年月日';
+
+  @override
+  String get gender => '性別';
+
+  @override
+  String get language => '言語';
+
+  @override
+  String get height => '身長';
+
+  @override
+  String get weight => '体重';
+
+  @override
+  String get heightUnit => 'cm';
+
+  @override
+  String get weightUnit => 'kg';
+
+  @override
+  String heightWithUnit(double value) {
+    return '$value cm';
+  }
+
+  @override
+  String weightWithUnit(double value) {
+    return '$value kg';
+  }
+
+  @override
+  String get goals => '目標';
+
+  @override
+  String get injuries => '怪我';
+
+  @override
+  String get limitations => '制限';
+
+  @override
+  String get favorites => 'お気に入り';
+
+  @override
+  String get exercises => 'エクササイズ';
+
+  @override
+  String get equipment => '器具';
+
+  @override
+  String startedDate(String date) {
+    return '開始：$date';
+  }
+
+  @override
+  String yearLabel(int year) {
+    return '年：$year';
+  }
+
+  @override
+  String get myGyms => 'マイジム';
+
+  @override
+  String get addGym => 'ジムを追加';
+
+  @override
+  String get noGymsAddedYet => 'まだジムが追加されていません';
+
+  @override
+  String get addYourFirstGym => '最初のジムを追加';
+
+  @override
+  String get removeDefault => 'デフォルトを解除';
+
+  @override
+  String get setAsDefault => 'デフォルトに設定';
+
+  @override
+  String get edit => '編集';
+
+  @override
+  String get quickActions => 'クイックアクション';
+
+  @override
+  String get dangerZone => '危険ゾーン';
+
+  @override
+  String get completeYourProfile => 'プロフィールを完成させてください';
+
+  @override
+  String get updateYourProfileInfo => '以下でプロフィール情報を更新してください。';
+
+  @override
+  String get pleaseCompleteProfile => 'プロフィールを完成させてください。*が付いている項目は必須です。';
+
+  @override
+  String get firstName => '名';
+
+  @override
+  String get lastName => '姓';
+
+  @override
+  String get birthDate => '生年月日';
+
+  @override
+  String get male => '男性';
+
+  @override
+  String get female => '女性';
+
+  @override
+  String get selectLanguage => '言語を選択';
+
+  @override
+  String get heightCm => '身長（cm）';
+
+  @override
+  String get weightKg => '体重（kg）';
+
+  @override
+  String get required => '必須';
+
+  @override
+  String get invalid => '無効';
+
+  @override
+  String get pleaseSelectBirthDate => '生年月日を選択してください';
+
+  @override
+  String get pleaseAddAtLeastOneGoal => '少なくとも1つの目標を追加してください';
+
+  @override
+  String get pleaseSelectLanguage => '言語を選択してください';
+
+  @override
+  String get addAGoal => '目標を追加';
+
+  @override
+  String get injuryDescription => '怪我の説明';
+
+  @override
+  String get year => '年';
+
+  @override
+  String get addALimitation => '制限を追加';
+
+  @override
+  String get favoriteExercisesHint => '例：スクワット、懸垂、ランニング';
+
+  @override
+  String get favoriteEquipmentHint => '例：ダンベル、バーベル、ケトルベル';
+
+  @override
+  String get saveChanges => '変更を保存';
+
+  @override
+  String get saveProfile => 'プロフィールを保存';
+
+  @override
+  String get optionalLeaveEmpty => '（任意 - 該当しない場合は空欄）';
+
+  @override
+  String get optionalExercisesPrefer => '（任意 - 好きなエクササイズ）';
+
+  @override
+  String get optionalEquipmentPrefer => '（任意 - 好みの器具）';
+
+  @override
+  String get favoriteExercises => 'お気に入りのエクササイズ';
+
+  @override
+  String get favoriteEquipment => 'お気に入りの器具';
+
+  @override
+  String get failedToUpdateProfile => 'プロフィールの更新に失敗しました';
+
+  @override
+  String get activity => 'アクティビティ';
+
+  @override
+  String get noTrainingsYet => 'まだトレーニングがありません';
+
+  @override
+  String get generateFirstTraining => 'ホームタブから最初のトレーニングを生成してください';
+
+  @override
+  String get noTrainingAvailable => '利用可能なトレーニングがありません。生成を開始してください。';
+
+  @override
+  String get availableTrainings => '利用可能なトレーニング';
+
+  @override
+  String get pastTrainings => '過去のトレーニング';
+
+  @override
+  String get stale => '期限切れ';
+
+  @override
+  String get copied => 'コピー済み';
+
+  @override
+  String durationMin(int minutes) {
+    return '$minutes分';
+  }
+
+  @override
+  String durationHr(int hours) {
+    return '$hours時間';
+  }
+
+  @override
+  String durationHrMin(int hours, int minutes) {
+    return '$hours時間$minutes分';
+  }
+
+  @override
+  String get failedToLoadTrainings => 'トレーニングの読み込みに失敗しました';
+
+  @override
+  String get startTraining => 'トレーニングを開始';
+
+  @override
+  String get cloneTraining => 'トレーニングを複製';
+
+  @override
+  String get addPartner => 'パートナーを追加';
+
+  @override
+  String get shareWithUser => 'ユーザーと共有';
+
+  @override
+  String get deleteTraining => 'トレーニングを削除';
+
+  @override
+  String get leaveTraining => 'トレーニングから退出';
+
+  @override
+  String get showAiReasoning => 'AI推論を表示';
+
+  @override
+  String get reportIssue => '問題を報告';
+
+  @override
+  String deleteTrainingConfirmation(String name) {
+    return '「$name」を削除してもよろしいですか？この操作は元に戻せません。';
+  }
+
+  @override
+  String leaveTrainingConfirmation(String name) {
+    return '「$name」から退出してもよろしいですか？このトレーニングは表示されなくなります。';
+  }
+
+  @override
+  String addPartnerConfirmation(String userName, String trainingName) {
+    return '$userNameを「$trainingName」のパートナーとして追加しますか？';
+  }
+
+  @override
+  String cloneTrainingConfirmation(String name) {
+    return '「$name」をトレーニングに複製しますか？';
+  }
+
+  @override
+  String shareTrainingConfirmation(String trainingName, String userName) {
+    return '「$trainingName」を$userNameと共有しますか？';
+  }
+
+  @override
+  String get trainingDeletedSuccessfully => 'トレーニングが正常に削除されました';
+
+  @override
+  String get failedToDeleteTraining => 'トレーニングの削除に失敗しました';
+
+  @override
+  String get leftTrainingSuccessfully => 'トレーニングから正常に退出しました';
+
+  @override
+  String get partnerAddedSuccessfully => 'パートナーが正常に追加されました';
+
+  @override
+  String get failedToAddPartner => 'パートナーの追加に失敗しました';
+
+  @override
+  String get trainingSharedSuccessfully => 'トレーニングが正常に共有されました';
+
+  @override
+  String get failedToShareTraining => 'トレーニングの共有に失敗しました';
+
+  @override
+  String get trainingCloned => 'トレーニングを複製しました';
+
+  @override
+  String get failedToCloneTraining => 'トレーニングの複製に失敗しました';
+
+  @override
+  String get trainingMarkedAsComplete => 'トレーニングが完了しました';
+
+  @override
+  String get failedToCompleteTraining => 'トレーニングの完了に失敗しました';
+
+  @override
+  String get reportSubmitted => 'レポートが送信されました';
+
+  @override
+  String get failedToSubmitReport => 'レポートの送信に失敗しました';
+
+  @override
+  String get reasoning => '推論';
+
+  @override
+  String get strategy => '戦略';
+
+  @override
+  String get progression => '進行';
+
+  @override
+  String get constraints => '制約';
+
+  @override
+  String get researchApplied => '適用された研究';
+
+  @override
+  String get targetMuscles => 'ターゲット筋肉';
+
+  @override
+  String get naming => '命名';
+
+  @override
+  String get trainingRoutines => 'トレーニングルーティン';
+
+  @override
+  String get noEquipment => '器具なし';
+
+  @override
+  String blockNumber(int number) {
+    return 'ブロック $number';
+  }
+
+  @override
+  String repeatsCount(int count) {
+    return '${count}x';
+  }
+
+  @override
+  String durationSeconds(int seconds) {
+    return '$seconds秒';
+  }
+
+  @override
+  String restSeconds(int seconds) {
+    return '$seconds秒休憩';
+  }
+
+  @override
+  String repsCount(int count) {
+    return '$count回';
+  }
+
+  @override
+  String weightKgValue(double value) {
+    return '$value kg';
+  }
+
+  @override
+  String get markAsComplete => '完了としてマーク';
+
+  @override
+  String get references => '参考資料';
+
+  @override
+  String get describeIssue => 'このトレーニングの問題を説明してください...';
+
+  @override
+  String get submit => '送信';
+
+  @override
+  String get close => '閉じる';
+
+  @override
+  String get add => '追加';
+
+  @override
+  String get update => '更新';
+
+  @override
+  String get clone => '複製';
+
+  @override
+  String get share => '共有';
+
+  @override
+  String get leave => '退出';
+
+  @override
+  String get tapToStart => 'タップして開始';
+
+  @override
+  String get trainingCompleted => 'トレーニング完了！';
+
+  @override
+  String greatJobCompleting(String name) {
+    return '$nameをよく頑張りました';
+  }
+
+  @override
+  String get done => '完了';
+
+  @override
+  String get complete => '完了';
+
+  @override
+  String routineCounter(int current, int total) {
+    return 'ルーティン $current/$total';
+  }
+
+  @override
+  String blockCounter(int current, int total) {
+    return 'ブロック $current/$total';
+  }
+
+  @override
+  String get exitTraining => 'トレーニングを終了しますか？';
+
+  @override
+  String get whatWouldYouLikeToDo => 'どうしますか？';
+
+  @override
+  String get exit => '終了';
+
+  @override
+  String get continueTraining => '続行';
+
+  @override
+  String get failedToMarkComplete => 'トレーニングを完了としてマークできませんでした';
+
+  @override
+  String get durationMinutes => '時間（分）';
+
+  @override
+  String get bodyweight => '自重';
+
+  @override
+  String get gym => 'ジム';
+
+  @override
+  String get custom => 'カスタム';
+
+  @override
+  String get noEquipmentBodyweightOnly => '器具なし - 自重エクササイズのみ';
+
+  @override
+  String get noGymsDefinedCreateOne => 'ジムが定義されていません。プロフィール設定で作成してください。';
+
+  @override
+  String get selectAGym => 'ジムを選択';
+
+  @override
+  String get addEquipment => '器具を追加';
+
+  @override
+  String get addEquipmentAvailable => '利用可能な器具を追加';
+
+  @override
+  String get includeWarmupCooldown => 'ウォームアップとクールダウンを含める';
+
+  @override
+  String get equipmentPlaceholder => '例：バーベル、ダンベル';
+
+  @override
+  String get customPromptOptional => 'カスタムプロンプト（任意）';
+
+  @override
+  String get focusOnUpperBody => '例：上半身に集中';
+
+  @override
+  String get trainingPartnersOptional => 'トレーニングパートナー（任意）';
+
+  @override
+  String get generatingTraining => 'トレーニングを生成中...';
+
+  @override
+  String get thisMayTakeAMoment => '少々お待ちください';
+
+  @override
+  String get trainingGeneratedSuccessfully => 'トレーニングが正常に生成されました！';
+
+  @override
+  String get failedToGenerateTraining => 'トレーニングの生成に失敗しました';
+
+  @override
+  String get generate => '生成';
+
+  @override
+  String get editGym => 'ジムを編集';
+
+  @override
+  String get gymName => 'ジム名';
+
+  @override
+  String get gymNamePlaceholder => '例：ホームジム、エニタイム';
+
+  @override
+  String get noEquipmentAddedYet => 'まだ器具が追加されていません';
+
+  @override
+  String get pleaseEnterGymName => 'ジム名を入力してください';
+
+  @override
+  String get selectUser => 'ユーザーを選択';
+
+  @override
+  String get searchByName => '名前で検索';
+
+  @override
+  String get noUsersAvailable => '利用可能なユーザーがいません';
+
+  @override
+  String get noMatchingUsers => '一致するユーザーがいません';
+
+  @override
+  String get instructions => '手順';
+
+  @override
+  String get howWasYourTraining => 'トレーニングはいかがでしたか？';
+
+  @override
+  String get anyAdditionalComments => '追加のコメントはありますか？';
+
+  @override
+  String get tooEasy => '簡単すぎる';
+
+  @override
+  String get tooHard => '難しすぎる';
+
+  @override
+  String get flag => 'フラグ';
+
+  @override
+  String get profile => 'プロフィール';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get languageItaliano => 'Italiano';
+
+  @override
+  String get languageEspanol => 'Español';
+
+  @override
+  String get languageFrancais => 'Français';
+
+  @override
+  String get languageDeutsch => 'Deutsch';
+
+  @override
+  String get languagePortugues => 'Português';
+
+  @override
+  String get languageRussian => 'Русский';
+
+  @override
+  String get languageChinese => '中文';
+
+  @override
+  String get languageJapanese => '日本語';
+
+  @override
+  String get languageKorean => '한국어';
+}

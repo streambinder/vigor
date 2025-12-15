@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../generated/app_localizations.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/training_generation_modal.dart';
 import '../screens/training_details_screen.dart';
@@ -72,9 +73,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AdaptiveScaffold(
       appBar: AdaptiveAppBar(
-        title: const Text('Vigor'),
+        title: Text(l10n.appName),
       ),
       body: Center(
         child: Padding(
@@ -91,14 +93,14 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 24),
               Text(
-                'Ready to train?',
+                l10n.readyToTrain,
                 style: PlatformHelper.useLiquidGlass
                     ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 28)
                     : Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 12),
               Text(
-                'Generate a personalized training based on your profile and goals',
+                l10n.generateTrainingDescription,
                 textAlign: TextAlign.center,
                 style: PlatformHelper.useLiquidGlass
                     ? LiquidGlassTheme.bodyStyle
@@ -110,7 +112,7 @@ class _HomePageState extends State<HomePage> {
               AdaptiveButton(
                 onPressed: _isLoadingGyms ? null : _showTrainingGenerationModal,
                 useGradient: true,
-                child: const Text('Generate Training'),
+                child: Text(l10n.generateTraining),
               ),
             ],
           ),

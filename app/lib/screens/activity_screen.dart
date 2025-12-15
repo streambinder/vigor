@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../generated/app_localizations.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../services/training_service.dart';
 import '../services/secure_storage_service.dart';
@@ -54,7 +55,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
       if (response.error != null) {
         AdaptiveNotification.showError(
           context: context,
-          message: 'Failed to load trainings',
+          message: AppLocalizations.of(context).failedToLoadTrainings,
           rawError: response.error,
         );
       }
@@ -77,17 +78,17 @@ class _ActivityScreenState extends State<ActivityScreen> {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  String _formatDuration(int seconds) {
+  String _formatDuration(AppLocalizations l10n, int seconds) {
     final minutes = seconds ~/ 60;
     if (minutes < 60) {
-      return '$minutes min';
+      return l10n.durationMin(minutes);
     }
     final hours = minutes ~/ 60;
     final remainingMinutes = minutes % 60;
     if (remainingMinutes == 0) {
-      return '$hours hr';
+      return l10n.durationHr(hours);
     }
-    return '$hours hr $remainingMinutes min';
+    return l10n.durationHrMin(hours, remainingMinutes);
   }
 
   bool _isCompletedTraining(Training training) {
@@ -111,13 +112,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AdaptiveScaffold(
       appBar: AdaptiveAppBar(
-        title: const Text('Activity'),
+        title: Text(l10n.activity),
         actions: [
           AdaptiveIconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
+            tooltip: l10n.refresh,
             onPressed: _loadTrainings,
           ),
         ],
@@ -127,13 +129,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
         child: _isLoading
             ? const Center(child: AdaptiveLoadingIndicator())
             : _trainings == null || _trainings!.isEmpty
-                ? _buildEmptyState()
-                : _buildTrainingsList(),
+                ? _buildEmptyState(l10n)
+                : _buildTrainingsList(l10n),
       ),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppLocalizations l10n) {
     return ListView(
       padding: const EdgeInsets.all(24.0),
       children: [
@@ -149,14 +151,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'No trainings yet',
+                l10n.noTrainingsYet,
                 style: PlatformHelper.useLiquidGlass
                     ? LiquidGlassTheme.headlineStyle
                     : Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 8),
               Text(
-                'Generate your first training from the Home tab',
+                l10n.generateFirstTraining,
                 textAlign: TextAlign.center,
                 style: PlatformHelper.useLiquidGlass
                     ? LiquidGlassTheme.captionStyle
@@ -171,7 +173,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     );
   }
 
-  Widget _buildTrainingsList() {
+  Widget _buildTrainingsList(AppLocalizations l10n) {
     // separate trainings into available and past
     final availableTrainings = _trainings!
         .where((t) => !_isCompletedTraining(t))
@@ -193,7 +195,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
       children: [
         // Available Trainings Section
         Text(
-          'Available trainings',
+          l10n.availableTrainings,
           style: PlatformHelper.useLiquidGlass
               ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
               : Theme.of(context).textTheme.titleLarge,
@@ -201,12 +203,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
         const SizedBox(height: 12),
 
         if (availableTrainings.isEmpty)
-          _buildEmptyAvailableState()
+          _buildEmptyAvailableState(l10n)
         else
           ...availableTrainings.map((training) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12.0),
-              child: _buildTrainingCard(training),
+              child: _buildTrainingCard(training, l10n),
             );
           }),
 
@@ -215,7 +217,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
         // Past Trainings Section (only show if there are past trainings)
         if (pastTrainings.isNotEmpty) ...[
           Text(
-            'Past trainings',
+            l10n.pastTrainings,
             style: PlatformHelper.useLiquidGlass
                 ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
                 : Theme.of(context).textTheme.titleLarge,
@@ -224,7 +226,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
           ...pastTrainings.map((training) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12.0),
-              child: _buildTrainingCard(training),
+              child: _buildTrainingCard(training, l10n),
             );
           }),
         ],
@@ -232,7 +234,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     );
   }
 
-  Widget _buildEmptyAvailableState() {
+  Widget _buildEmptyAvailableState(AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24.0),
       child: Center(
@@ -245,7 +247,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'No training available. Start generating one.',
+              l10n.noTrainingAvailable,
               textAlign: TextAlign.center,
               style: PlatformHelper.useLiquidGlass
                   ? LiquidGlassTheme.bodyStyle.copyWith(
@@ -261,7 +263,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     );
   }
 
-  Widget _buildTrainingCard(Training training) {
+  Widget _buildTrainingCard(Training training, AppLocalizations l10n) {
     final isCompleted = _isCompletedTraining(training);
     final isStale = _isStaleTraining(training);
     final partnerCount = _partnerCounts[training.id] ?? 0;
@@ -401,7 +403,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Copied',
+                          l10n.copied,
                           style: PlatformHelper.useLiquidGlass
                               ? LiquidGlassTheme.captionStyle
                               : Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -419,7 +421,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        _formatDuration(training.duration),
+                        _formatDuration(l10n, training.duration),
                         style: PlatformHelper.useLiquidGlass
                             ? LiquidGlassTheme.captionStyle
                             : Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -524,7 +526,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Stale',
+                          l10n.stale,
                           style: PlatformHelper.useLiquidGlass
                               ? LiquidGlassTheme.captionStyle.copyWith(
                                   color: Colors.orange[700],
@@ -547,7 +549,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Copied',
+                          l10n.copied,
                           style: PlatformHelper.useLiquidGlass
                               ? LiquidGlassTheme.captionStyle
                               : Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -582,7 +584,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        _formatDuration(training.duration),
+                        _formatDuration(l10n, training.duration),
                         style: PlatformHelper.useLiquidGlass
                             ? LiquidGlassTheme.captionStyle
                             : Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -608,7 +610,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                         }
                       },
                       icon: const Icon(Icons.timer),
-                      label: const Text('Start Training'),
+                      label: Text(l10n.startTraining),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: PlatformHelper.useLiquidGlass
                             ? LiquidGlassTheme.successColor

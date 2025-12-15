@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../generated/app_localizations.dart';
 import '../services/user_service.dart';
 import '../services/secure_storage_service.dart';
 import '../theme/liquid_glass_theme.dart';
@@ -84,6 +85,7 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Dialog(
       backgroundColor: PlatformHelper.useLiquidGlass ? Colors.transparent : null,
       child: Container(
@@ -116,7 +118,7 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
                     const SizedBox(height: 12),
                     AdaptiveTextField(
                       controller: _searchController,
-                      placeholder: 'Search by name',
+                      placeholder: l10n.searchByName,
                       prefix: const Icon(Icons.search, size: 20),
                       onChanged: _filterUsers,
                     ),
@@ -124,7 +126,7 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
                 ),
               ),
               const Divider(height: 1),
-              Flexible(child: _buildContent()),
+              Flexible(child: _buildContent(l10n)),
               const Divider(height: 1),
               Padding(
                 padding: const EdgeInsets.all(12),
@@ -133,7 +135,7 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
                   children: [
                     AdaptiveTextButton(
                       onPressed: () => Navigator.of(context).pop(null),
-                      child: const Text('Cancel'),
+                      child: Text(l10n.cancel),
                     ),
                   ],
                 ),
@@ -145,7 +147,7 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(AppLocalizations l10n) {
     if (_isLoading) {
       return const Padding(
         padding: EdgeInsets.all(32),
@@ -167,7 +169,7 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
       return Padding(
         padding: const EdgeInsets.all(32),
         child: Text(
-          _users.isEmpty ? 'No users available' : 'No matching users',
+          _users.isEmpty ? l10n.noUsersAvailable : l10n.noMatchingUsers,
           style: PlatformHelper.useLiquidGlass
               ? LiquidGlassTheme.captionStyle
               : Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
