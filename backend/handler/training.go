@@ -137,6 +137,29 @@ func postTraining(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
+	// Collect favorite exercises and equipment from all profiles
+	var allFavoriteExercises, allFavoriteEquipment []string
+	for _, profile := range profiles {
+		allFavoriteExercises = append(allFavoriteExercises, profile.FavoriteExercises()...)
+		allFavoriteEquipment = append(allFavoriteEquipment, profile.FavoriteEquipment()...)
+	}
+
+	// Match favorites to canonical entities via RAG
+	favoriteExercises, err := rag.RetrieveFavoriteExercises(allFavoriteExercises)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query favorite exercises from database")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	favoriteEquipment, err := rag.RetrieveFavoriteEquipment(allFavoriteEquipment)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query favorite equipment from database")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	var favoriteEquipmentIDs []string
+	for _, eq := range favoriteEquipment {
+		favoriteEquipmentIDs = append(favoriteEquipmentIDs, eq.ID)
+	}
+
 	// Query knowledge facts related to all users' profiles
 	queryFactsStart := time.Now()
 	facts, err := rag.RetrieveUserFacts(profiles, req.Prompt)
@@ -193,6 +216,8 @@ func postTraining(c *fiber.Ctx) error {
 		cooldownExercises,
 		equipmentIDs,
 		modifiers,
+		favoriteExercises,
+		favoriteEquipmentIDs,
 		req.Prompt,
 		req.Duration,
 		recentTrainings,

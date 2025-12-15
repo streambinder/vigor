@@ -4,6 +4,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'goal.dart';
 import 'injury.dart';
+import 'preferences.dart';
 
 part 'profile_data.g.dart';
 
@@ -19,11 +20,14 @@ class profileData {
   final List<Injury> injuries;
   @JsonKey(name: 'limitations', defaultValue: const [])
   final List<String> limitations;
+  @JsonKey(name: 'preferences')
+  final Preferences? preferences;
 
   profileData({
     required this.goals,
     required this.injuries,
     required this.limitations,
+    this.preferences,
   });
 
   factory profileData.fromJson(Map<String, dynamic> json) => _$profileDataFromJson(json);

@@ -325,3 +325,121 @@ func RetrieveCooldownExercises() ([]model.Exercise, error) {
 	}
 	return exercises, nil
 }
+
+// RetrieveFavoriteExercises matches user's favorite exercise strings to canonical exercises via embeddings.
+func RetrieveFavoriteExercises(favorites []string) ([]model.Exercise, error) {
+	if len(favorites) == 0 {
+		return nil, nil
+	}
+
+	// generate embeddings for each favorite
+	favoriteEmbeddings := make([][]float32, 0, len(favorites))
+	for _, fav := range favorites {
+		vec, err := embedding.GenVector(fav)
+		if err != nil {
+			log.Warn().Err(err).Str("favorite", fav).Msg("Failed to generate embedding for favorite exercise")
+			continue
+		}
+		favoriteEmbeddings = append(favoriteEmbeddings, vec)
+	}
+
+	if len(favoriteEmbeddings) == 0 {
+		return nil, nil
+	}
+
+	// build dynamic OR clause for matching using cosine distance
+	var matchConditions []string
+	var matchArgs []interface{}
+	for _, favEmbed := range favoriteEmbeddings {
+		matchConditions = append(matchConditions, "exercise_embeddings.embedding <=> ? < ?")
+		matchArgs = append(matchArgs, pgvector.NewVector(favEmbed), MaxEquipmentDistance)
+	}
+
+	var results []struct {
+		ExerciseID string
+		Distance   float64
+		Exercise   model.Exercise `gorm:"embedded"`
+	}
+
+	matchSQL := strings.Join(matchConditions, " OR ")
+	subquery := database.Knowledge.
+		Table("exercise_embeddings").
+		Select("DISTINCT ON (exercise_embeddings.exercise_id) exercise_embeddings.exercise_id, exercise_embeddings.embedding <=> ? as distance, exercises.*",
+			pgvector.NewVector(favoriteEmbeddings[0])).
+		Joins("JOIN exercises ON exercises.id = exercise_embeddings.exercise_id").
+		Where(matchSQL, matchArgs...).
+		Order("exercise_embeddings.exercise_id, distance ASC")
+
+	if err := database.Knowledge.
+		Table("(?) AS unique_exercises", subquery).
+		Order("distance ASC").
+		Scan(&results).
+		Error; err != nil {
+		return nil, fmt.Errorf("failed to query favorite exercises: %w", err)
+	}
+
+	exercises := make([]model.Exercise, 0, len(results))
+	for _, result := range results {
+		exercises = append(exercises, result.Exercise)
+	}
+	return exercises, nil
+}
+
+// RetrieveFavoriteEquipment matches user's favorite equipment strings to canonical equipment via embeddings.
+func RetrieveFavoriteEquipment(favorites []string) ([]model.Equipment, error) {
+	if len(favorites) == 0 {
+		return nil, nil
+	}
+
+	// generate embeddings for each favorite
+	favoriteEmbeddings := make([][]float32, 0, len(favorites))
+	for _, fav := range favorites {
+		vec, err := embedding.GenVector(fav)
+		if err != nil {
+			log.Warn().Err(err).Str("favorite", fav).Msg("Failed to generate embedding for favorite equipment")
+			continue
+		}
+		favoriteEmbeddings = append(favoriteEmbeddings, vec)
+	}
+
+	if len(favoriteEmbeddings) == 0 {
+		return nil, nil
+	}
+
+	// build dynamic OR clause for matching using cosine distance
+	var matchConditions []string
+	var matchArgs []interface{}
+	for _, favEmbed := range favoriteEmbeddings {
+		matchConditions = append(matchConditions, "equipment_embeddings.embedding <=> ? < ?")
+		matchArgs = append(matchArgs, pgvector.NewVector(favEmbed), MaxEquipmentDistance)
+	}
+
+	var results []struct {
+		EquipmentID string
+		Distance    float64
+		Equipment   model.Equipment `gorm:"embedded"`
+	}
+
+	matchSQL := strings.Join(matchConditions, " OR ")
+	subquery := database.Knowledge.
+		Table("equipment_embeddings").
+		Select("DISTINCT ON (equipment_embeddings.equipment_id) equipment_embeddings.equipment_id, equipment_embeddings.embedding <=> ? as distance, equipment.*",
+			pgvector.NewVector(favoriteEmbeddings[0])).
+		Joins("JOIN equipment ON equipment.id = equipment_embeddings.equipment_id").
+		Where(matchSQL, matchArgs...).
+		Order("equipment_embeddings.equipment_id, distance ASC")
+
+	if err := database.Knowledge.
+		Table("(?) AS unique_equipment", subquery).
+		Order("distance ASC").
+		Scan(&results).
+		Error; err != nil {
+		return nil, fmt.Errorf("failed to query favorite equipment: %w", err)
+	}
+
+	equipmentList := make([]model.Equipment, 0, len(results))
+	for _, result := range results {
+		equipmentList = append(equipmentList, result.Equipment)
+	}
+	return equipmentList, nil
+}

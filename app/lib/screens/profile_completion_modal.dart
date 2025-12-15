@@ -41,12 +41,16 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   final List<Goal> _goals = [];
   final List<Injury> _injuries = [];
   final List<String> _limitations = [];
+  final List<String> _favoriteExercises = [];
+  final List<String> _favoriteEquipment = [];
 
   // Controllers for dynamic list inputs
   final _goalDescriptionController = TextEditingController();
   final _injuryDescriptionController = TextEditingController();
   int? _injuryYear;
   final _limitationController = TextEditingController();
+  final _favoriteExerciseController = TextEditingController();
+  final _favoriteEquipmentController = TextEditingController();
 
   @override
   void initState() {
@@ -81,6 +85,15 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
         if (data['limitations'] != null) {
           _limitations.addAll((data['limitations'] as List).cast<String>());
         }
+        if (data['preferences'] != null) {
+          final prefs = data['preferences'] as Map<String, dynamic>;
+          if (prefs['exercises'] != null) {
+            _favoriteExercises.addAll((prefs['exercises'] as List).cast<String>());
+          }
+          if (prefs['equipment'] != null) {
+            _favoriteEquipment.addAll((prefs['equipment'] as List).cast<String>());
+          }
+        }
       }
     } catch (e) {
       // Ignore parsing errors, start fresh
@@ -92,6 +105,8 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
     _goalDescriptionController.dispose();
     _injuryDescriptionController.dispose();
     _limitationController.dispose();
+    _favoriteExerciseController.dispose();
+    _favoriteEquipmentController.dispose();
     super.dispose();
   }
 
@@ -146,6 +161,14 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
         'injuries': _injuries.map((i) => i.toJson()).toList(),
         'limitations': _limitations,
       };
+
+      // Only include preferences if user has set any
+      if (_favoriteExercises.isNotEmpty || _favoriteEquipment.isNotEmpty) {
+        data['preferences'] = {
+          if (_favoriteExercises.isNotEmpty) 'exercises': _favoriteExercises,
+          if (_favoriteEquipment.isNotEmpty) 'equipment': _favoriteEquipment,
+        };
+      }
 
       final authProvider = context.read<AuthProvider>();
       final success = await authProvider.updateProfile(
@@ -244,6 +267,12 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
 
                     // Limitations
                     _buildLimitationsSection(),
+
+                    // Favorite Exercises
+                    _buildFavoriteExercisesSection(),
+
+                    // Favorite Equipment
+                    _buildFavoriteEquipmentSection(),
 
                     const SizedBox(height: 24),
 
@@ -695,6 +724,118 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
                     setState(() {
                       _limitations.add(_limitationController.text);
                       _limitationController.clear();
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFavoriteExercisesSection() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Favorite Exercises',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const Text(
+            '(Optional - exercises you enjoy or prefer)',
+            style: TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+          const SizedBox(height: 8),
+          ..._favoriteExercises.map((exercise) => ListTile(
+                title: Text(exercise),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                    setState(() {
+                      _favoriteExercises.remove(exercise);
+                    });
+                  },
+                ),
+              )),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _favoriteExerciseController,
+                  decoration: const InputDecoration(
+                    hintText: 'e.g., squats, pull-ups, running',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () {
+                  if (_favoriteExerciseController.text.isNotEmpty) {
+                    setState(() {
+                      _favoriteExercises.add(_favoriteExerciseController.text);
+                      _favoriteExerciseController.clear();
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFavoriteEquipmentSection() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Favorite Equipment',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const Text(
+            '(Optional - equipment you prefer using)',
+            style: TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+          const SizedBox(height: 8),
+          ..._favoriteEquipment.map((equipment) => ListTile(
+                title: Text(equipment),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                    setState(() {
+                      _favoriteEquipment.remove(equipment);
+                    });
+                  },
+                ),
+              )),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _favoriteEquipmentController,
+                  decoration: const InputDecoration(
+                    hintText: 'e.g., dumbbells, barbell, kettlebell',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () {
+                  if (_favoriteEquipmentController.text.isNotEmpty) {
+                    setState(() {
+                      _favoriteEquipment.add(_favoriteEquipmentController.text);
+                      _favoriteEquipmentController.clear();
                     });
                   }
                 },

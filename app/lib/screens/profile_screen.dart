@@ -491,6 +491,85 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ],
 
+                    // Favorites section
+                    if (_getFavoriteExercises(user.profile.data).isNotEmpty ||
+                        _getFavoriteEquipment(user.profile.data).isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      AdaptiveCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.favorite),
+                                  const SizedBox(width: 16),
+                                  Text(
+                                    'Favorites',
+                                    style: PlatformHelper.useLiquidGlass
+                                        ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
+                                        : const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (_getFavoriteExercises(user.profile.data).isNotEmpty) ...[
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                child: Text(
+                                  'Exercises',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              ..._getFavoriteExercises(user.profile.data).map((exercise) => Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('• ', style: TextStyle(fontSize: 18)),
+                                        Expanded(child: Text(exercise)),
+                                      ],
+                                    ),
+                                  )),
+                              const SizedBox(height: 8),
+                            ],
+                            if (_getFavoriteEquipment(user.profile.data).isNotEmpty) ...[
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                child: Text(
+                                  'Equipment',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              ..._getFavoriteEquipment(user.profile.data).map((equipment) => Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('• ', style: TextStyle(fontSize: 18)),
+                                        Expanded(child: Text(equipment)),
+                                      ],
+                                    ),
+                                  )),
+                              const SizedBox(height: 8),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+
                     const SizedBox(height: 24),
 
                     // Gyms section
@@ -789,6 +868,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       if (data['limitations'] != null) {
         return (data['limitations'] as List).cast<String>();
+      }
+    } catch (e) {
+      // Ignore parsing errors
+    }
+    return [];
+  }
+
+  List<String> _getFavoriteExercises(Map<String, dynamic> data) {
+    try {
+      if (data['preferences'] != null) {
+        final prefs = data['preferences'] as Map<String, dynamic>;
+        if (prefs['exercises'] != null) {
+          return (prefs['exercises'] as List).cast<String>();
+        }
+      }
+    } catch (e) {
+      // Ignore parsing errors
+    }
+    return [];
+  }
+
+  List<String> _getFavoriteEquipment(Map<String, dynamic> data) {
+    try {
+      if (data['preferences'] != null) {
+        final prefs = data['preferences'] as Map<String, dynamic>;
+        if (prefs['equipment'] != null) {
+          return (prefs['equipment'] as List).cast<String>();
+        }
       }
     } catch (e) {
       // Ignore parsing errors

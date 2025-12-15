@@ -27,9 +27,16 @@ type Profile struct {
 }
 
 type profileData struct {
-	Goals       []Goal   `json:"goals" flutter:"required"`
-	Injuries    []Injury `json:"injuries"`
-	Limitations []string `json:"limitations"`
+	Goals       []Goal       `json:"goals" flutter:"required"`
+	Injuries    []Injury     `json:"injuries"`
+	Limitations []string     `json:"limitations"`
+	Preferences *Preferences `json:"preferences,omitempty"`
+}
+
+// Preferences stores user's favorite exercises and equipment.
+type Preferences struct {
+	Exercises []string `json:"exercises,omitempty"`
+	Equipment []string `json:"equipment,omitempty"`
 }
 
 // Goal represents a user's fitness objective with timeline.
@@ -85,4 +92,22 @@ func (p *Profile) Limitations() []string {
 		return nil
 	}
 	return data.Limitations
+}
+
+// FavoriteExercises extracts the user's favorite exercises from profile data.
+func (p *Profile) FavoriteExercises() []string {
+	data, err := p.data()
+	if err != nil || data.Preferences == nil {
+		return nil
+	}
+	return data.Preferences.Exercises
+}
+
+// FavoriteEquipment extracts the user's favorite equipment from profile data.
+func (p *Profile) FavoriteEquipment() []string {
+	data, err := p.data()
+	if err != nil || data.Preferences == nil {
+		return nil
+	}
+	return data.Preferences.Equipment
 }
