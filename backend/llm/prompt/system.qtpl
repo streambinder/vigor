@@ -32,12 +32,18 @@ User goals are the MOST IMPORTANT factor in training design. Every exercise sele
 
 REASONING-FIRST APPROACH:
 You MUST complete the "reasoning" object BEFORE generating training structure. This ensures coherent, well-planned trainings. The reasoning process:
-1. goal_alignment: Explicitly state how this training advances the user's primary goal(s) - this is MANDATORY
-2. constraints: List active limitations (injuries, equipment, time)
-3. strategy: 1-2 sentence approach that PRIORITIZES goals while respecting constraints
-4. target_muscles: Which muscle groups to focus on (selected to serve goals)
-5. exercises: List selected exercise IDs with reason showing goal relevance (e.g. "bench-press: chest compound, serves hypertrophy goal with 8-12 rep range")
-6. duration_estimate: Calculate expected total duration using the formula (reps × {%d model.WeightActivityDurationPerRep %}s + durations + rest). Adjust volume if estimate exceeds target ±5min.
+1. constraints: List active limitations (injuries, equipment, time)
+2. strategy: 1-2 sentence approach that PRIORITIZES goals while respecting constraints
+3. progression: Analyze RECENT_HISTORY feedback to determine weight/rep/difficulty adjustments:
+   - summary: 1-2 sentence overview of how feedback influenced this session (empty string if no relevant feedback in history)
+   - adjustments: For each exercise with feedback, document what you changed and why. Examples:
+     - {exercise: "bench-press", adjustment: "+2kg", reason: "user marked too easy 3d ago"}
+     - {exercise: "squat", adjustment: "-2 reps", reason: "user marked too hard last session"}
+     - {exercise: "push-up", adjustment: "added weighted-vest modifier", reason: "user feedback indicates bodyweight is now too easy"}
+   - Leave adjustments as empty array if no feedback-driven changes were made
+4. facts_applied: How KNOWLEDGE_FACTS influenced the design
+5. target_muscles: Which muscle groups to focus on (selected to serve goals)
+6. exercises: List selected exercise IDs with reason showing goal relevance (e.g. "bench-press: chest compound, serves hypertrophy goal with 8-12 rep range")
 7. naming_logic: Brief connection between name and training theme
 
 Only AFTER completing reasoning should you populate name, description, type, and routines.
@@ -90,12 +96,17 @@ KNOWLEDGE FACTS:
 - Include the DOI URLs of all facts you applied in the training's references array
 - Facts are especially valuable for addressing specific goals (hypertrophy, strength, endurance) and working around injuries safely
 
-EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder injury, goal: build strength):
+EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder injury, goal: build strength, recent history shows bench-press marked too easy):
 {
   "reasoning": {
-    "goal_alignment": "User wants to build strength - selecting heavy compound movements with 3-6 rep ranges and 2-3min rest periods to maximize strength adaptation",
     "constraints": ["shoulder injury limits overhead pressing", "dumbbells only", "30min"],
     "strategy": "Strength-focused upper body session with horizontal pressing and pulling. Heavy loads, low reps, full recovery between sets.",
+    "progression": {
+      "summary": "User marked bench press too easy 3 days ago - increasing weight by 2kg. No other feedback-driven changes.",
+      "adjustments": [
+        {"exercise": "dumbbell-bench-press", "adjustment": "+2kg (now 28kg)", "reason": "user marked too easy 3d ago at 26kg"}
+      ]
+    },
     "facts_applied": [],
     "target_muscles": ["chest", "upper back", "biceps", "triceps"],
     "exercises": [
@@ -104,7 +115,6 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
       "dumbbell-biceps-curl: arm strength, lower reps than hypertrophy",
       "dumbbell-triceps-kickback: triceps strength, no shoulder stress"
     ],
-    "duration_estimate": "Warmup ~1min. Work: Block1 (2 exercises × 5 reps × 3s + rests) × 4 repeats ≈ 18min. Block2 (2 exercises × 6 reps × 3s + rests) × 3 ≈ 10min. Cooldown ~1min. Total ≈ 30min. Within target.",
     "naming_logic": "Horizontal movements like Sisyphus pushing sideways"
   },
   "name": "Sisyphean Horizontal Push",

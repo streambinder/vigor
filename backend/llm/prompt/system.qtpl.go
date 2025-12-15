@@ -76,16 +76,18 @@ User goals are the MOST IMPORTANT factor in training design. Every exercise sele
 
 REASONING-FIRST APPROACH:
 You MUST complete the "reasoning" object BEFORE generating training structure. This ensures coherent, well-planned trainings. The reasoning process:
-1. goal_alignment: Explicitly state how this training advances the user's primary goal(s) - this is MANDATORY
-2. constraints: List active limitations (injuries, equipment, time)
-3. strategy: 1-2 sentence approach that PRIORITIZES goals while respecting constraints
-4. target_muscles: Which muscle groups to focus on (selected to serve goals)
-5. exercises: List selected exercise IDs with reason showing goal relevance (e.g. "bench-press: chest compound, serves hypertrophy goal with 8-12 rep range")
-6. duration_estimate: Calculate expected total duration using the formula (reps × `)
-//line llm/prompt/system.qtpl:40
-	qw422016.N().D(model.WeightActivityDurationPerRep)
-//line llm/prompt/system.qtpl:40
-	qw422016.N().S(`s + durations + rest). Adjust volume if estimate exceeds target ±5min.
+1. constraints: List active limitations (injuries, equipment, time)
+2. strategy: 1-2 sentence approach that PRIORITIZES goals while respecting constraints
+3. progression: Analyze RECENT_HISTORY feedback to determine weight/rep/difficulty adjustments:
+   - summary: 1-2 sentence overview of how feedback influenced this session (empty string if no relevant feedback in history)
+   - adjustments: For each exercise with feedback, document what you changed and why. Examples:
+     - {exercise: "bench-press", adjustment: "+2kg", reason: "user marked too easy 3d ago"}
+     - {exercise: "squat", adjustment: "-2 reps", reason: "user marked too hard last session"}
+     - {exercise: "push-up", adjustment: "added weighted-vest modifier", reason: "user feedback indicates bodyweight is now too easy"}
+   - Leave adjustments as empty array if no feedback-driven changes were made
+4. facts_applied: How KNOWLEDGE_FACTS influenced the design
+5. target_muscles: Which muscle groups to focus on (selected to serve goals)
+6. exercises: List selected exercise IDs with reason showing goal relevance (e.g. "bench-press: chest compound, serves hypertrophy goal with 8-12 rep range")
 7. naming_logic: Brief connection between name and training theme
 
 Only AFTER completing reasoning should you populate name, description, type, and routines.
@@ -98,23 +100,23 @@ TRAINING PHILOSOPHY:
 
 TRAINING STRUCTURE (required routines in order):
 `)
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:58
 	if !skipWarmupCooldown {
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:58
 		qw422016.N().S(`1. warmup: light cardio and bodyweight exercises to elevate heart rate and activate muscles (5-10min). Prioritize jumping jacks, high knees, arm circles, leg swings—not static stretches.
 2. work: main training blocks with appropriate rest periods (bulk of duration)
 3. cooldown: static stretches targeting the specific muscles exercised during the work phase (5min). Match stretches to worked muscle groups.
 `)
-//line llm/prompt/system.qtpl:55
+//line llm/prompt/system.qtpl:61
 	} else {
-//line llm/prompt/system.qtpl:55
+//line llm/prompt/system.qtpl:61
 		qw422016.N().S(`1. work: main training blocks with appropriate rest periods (entire duration)
 
 SKIP WARMUP AND COOLDOWN: The user has requested NO warmup and NO cooldown routines. Generate ONLY the "work" routine. The routines array must contain exactly ONE routine with name "work". Do NOT include any routine named "warmup" or "cooldown".
 `)
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:64
 	}
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:64
 	qw422016.N().S(`
 
 EXERCISE SELECTION PRIORITY:
@@ -150,12 +152,17 @@ KNOWLEDGE FACTS:
 - Include the DOI URLs of all facts you applied in the training's references array
 - Facts are especially valuable for addressing specific goals (hypertrophy, strength, endurance) and working around injuries safely
 
-EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder injury, goal: build strength):
+EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder injury, goal: build strength, recent history shows bench-press marked too easy):
 {
   "reasoning": {
-    "goal_alignment": "User wants to build strength - selecting heavy compound movements with 3-6 rep ranges and 2-3min rest periods to maximize strength adaptation",
     "constraints": ["shoulder injury limits overhead pressing", "dumbbells only", "30min"],
     "strategy": "Strength-focused upper body session with horizontal pressing and pulling. Heavy loads, low reps, full recovery between sets.",
+    "progression": {
+      "summary": "User marked bench press too easy 3 days ago - increasing weight by 2kg. No other feedback-driven changes.",
+      "adjustments": [
+        {"exercise": "dumbbell-bench-press", "adjustment": "+2kg (now 28kg)", "reason": "user marked too easy 3d ago at 26kg"}
+      ]
+    },
     "facts_applied": [],
     "target_muscles": ["chest", "upper back", "biceps", "triceps"],
     "exercises": [
@@ -164,7 +171,6 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
       "dumbbell-biceps-curl: arm strength, lower reps than hypertrophy",
       "dumbbell-triceps-kickback: triceps strength, no shoulder stress"
     ],
-    "duration_estimate": "Warmup ~1min. Work: Block1 (2 exercises × 5 reps × 3s + rests) × 4 repeats ≈ 18min. Block2 (2 exercises × 6 reps × 3s + rests) × 3 ≈ 10min. Cooldown ~1min. Total ≈ 30min. Within target.",
     "naming_logic": "Horizontal movements like Sisyphus pushing sideways"
   },
   "name": "Sisyphean Horizontal Push",
@@ -226,31 +232,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   ]
 }
 `)
-//line llm/prompt/system.qtpl:168
+//line llm/prompt/system.qtpl:178
 }
 
-//line llm/prompt/system.qtpl:168
+//line llm/prompt/system.qtpl:178
 func WriteSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool) {
-//line llm/prompt/system.qtpl:168
+//line llm/prompt/system.qtpl:178
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:168
+//line llm/prompt/system.qtpl:178
 	StreamSystem(qw422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:168
+//line llm/prompt/system.qtpl:178
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:168
+//line llm/prompt/system.qtpl:178
 }
 
-//line llm/prompt/system.qtpl:168
+//line llm/prompt/system.qtpl:178
 func System(skipWarmupCooldown bool) string {
-//line llm/prompt/system.qtpl:168
+//line llm/prompt/system.qtpl:178
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:168
+//line llm/prompt/system.qtpl:178
 	WriteSystem(qb422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:168
+//line llm/prompt/system.qtpl:178
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:168
+//line llm/prompt/system.qtpl:178
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:168
+//line llm/prompt/system.qtpl:178
 	return qs422016
-//line llm/prompt/system.qtpl:168
+//line llm/prompt/system.qtpl:178
 }

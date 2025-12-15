@@ -47,14 +47,28 @@ func init() {
 	}
 }
 
+// ProgressionAdjustment captures a single progression/regression decision based on feedback.
+type ProgressionAdjustment struct {
+	Exercise   string `json:"exercise" prompt:"Exercise ID that was adjusted"`
+	Adjustment string `json:"adjustment" prompt:"What was changed (e.g. '+2kg', '-2 reps', 'added weighted vest')"`
+	Reason     string `json:"reason" prompt:"Why this adjustment was made (e.g. 'user marked too easy', 'user marked too hard', 'progressive overload')"`
+}
+
+// ProgressionReasoning captures progression/regression decisions based on user feedback.
+type ProgressionReasoning struct {
+	Summary     string                  `json:"summary" prompt:"1-2 sentence overview of how feedback from recent trainings influenced this session (empty string if no relevant feedback)"`
+	Adjustments []ProgressionAdjustment `json:"adjustments" prompt:"Individual exercise adjustments made based on user feedback. Empty array if no feedback-driven changes."`
+}
+
 // TrainingReasoning captures the model's thought process before generating training structure.
 type TrainingReasoning struct {
-	Constraints   []string `json:"constraints" prompt:"Active constraints from user profile (injuries, limitations, equipment restrictions, time)"`
-	Strategy      string   `json:"strategy" prompt:"1-2 sentence training approach that respects constraints while meeting goals"`
-	FactsApplied  []string `json:"facts_applied" prompt:"How each KNOWLEDGE_FACT was applied to address user goals or work around injuries (e.g. 'DOI URL: applied X principle for Y goal/injury'). Empty array if no facts provided."`
-	TargetMuscles []string `json:"target_muscles" prompt:"Primary muscle groups this training will target"`
-	Exercises     []string `json:"exercises" prompt:"Exercise IDs selected for this training with brief reason each (e.g. 'push-up: chest compound')"`
-	NamingLogic   string   `json:"naming_logic" prompt:"Brief explanation connecting training name to theme/exercises"`
+	Constraints   []string             `json:"constraints" prompt:"Active constraints from user profile (injuries, limitations, equipment restrictions, time)"`
+	Strategy      string               `json:"strategy" prompt:"1-2 sentence training approach that respects constraints while meeting goals"`
+	Progression   ProgressionReasoning `json:"progression" prompt:"How user feedback from recent trainings influenced exercise parameters (weight, reps, difficulty)"`
+	FactsApplied  []string             `json:"facts_applied" prompt:"How each KNOWLEDGE_FACT was applied to address user goals or work around injuries (e.g. 'DOI URL: applied X principle for Y goal/injury'). Empty array if no facts provided."`
+	TargetMuscles []string             `json:"target_muscles" prompt:"Primary muscle groups this training will target"`
+	Exercises     []string             `json:"exercises" prompt:"Exercise IDs selected for this training with brief reason each (e.g. 'push-up: chest compound')"`
+	NamingLogic   string               `json:"naming_logic" prompt:"Brief explanation connecting training name to theme/exercises"`
 }
 
 // Training represents the entire training session with a UUID ID

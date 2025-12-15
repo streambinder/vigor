@@ -342,6 +342,32 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                   title: 'Strategy',
                   child: Text(r.strategy),
                 ),
+                if (r.progression.summary.isNotEmpty || r.progression.adjustments.isNotEmpty)
+                  _buildReasoningSection(
+                    title: 'Progression',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (r.progression.summary.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(r.progression.summary),
+                          ),
+                        ...r.progression.adjustments.map((a) => Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('• '),
+                              Expanded(
+                                child: Text('${a.exercise}: ${a.adjustment} (${a.reason})'),
+                              ),
+                            ],
+                          ),
+                        )),
+                      ],
+                    ),
+                  ),
                 if (r.constraints.isNotEmpty)
                   _buildReasoningSection(
                     title: 'Constraints',
