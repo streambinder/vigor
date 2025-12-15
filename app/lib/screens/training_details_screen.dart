@@ -164,6 +164,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       training.id,
       feedback: result.feedback,
       activityFeedback: result.activityFeedback,
+      activityReports: result.activityReports,
     );
 
     if (context.mounted) {
@@ -422,6 +423,53 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     );
   }
 
+  Future<void> _showReportDialog(BuildContext context) async {
+    final controller = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Report Issue'),
+        content: TextField(
+          controller: controller,
+          maxLines: 4,
+          decoration: InputDecoration(
+            hintText: 'Describe the issue with this training...',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+            child: const Text('Submit'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == null || result.isEmpty || !context.mounted) return;
+
+    final storage = context.read<SecureStorageService>();
+    final trainingService = TrainingService(storageService: storage);
+    final response = await trainingService.createReport(training.id, result);
+
+    if (context.mounted) {
+      if (response.isSuccess) {
+        AdaptiveNotification.show(context: context, message: 'Report submitted');
+      } else {
+        AdaptiveNotification.showError(
+          context: context,
+          message: 'Failed to submit report',
+          rawError: response.error,
+        );
+      }
+    }
+  }
+
   Widget _buildReasoningSection({required String title, required Widget child}) {
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -578,6 +626,17 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                           ),
                           tooltip: 'Show AI reasoning',
                           onPressed: () => _showReasoningDialog(context),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.flag_outlined,
+                            size: 20,
+                            color: PlatformHelper.useLiquidGlass
+                                ? LiquidGlassTheme.captionStyle.color
+                                : Colors.grey,
+                          ),
+                          tooltip: 'Report issue',
+                          onPressed: () => _showReportDialog(context),
                         ),
                       ],
                     ),

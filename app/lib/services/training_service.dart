@@ -107,6 +107,7 @@ class TrainingService {
     String trainingId, {
     String? feedback,
     Map<String, String>? activityFeedback,
+    List<String>? activityReports,
   }) async {
     AppLogger.debug('[TrainingService] Completing training: $trainingId');
 
@@ -116,6 +117,9 @@ class TrainingService {
     }
     if (activityFeedback != null && activityFeedback.isNotEmpty) {
       body['activityFeedback'] = activityFeedback;
+    }
+    if (activityReports != null && activityReports.isNotEmpty) {
+      body['activityReports'] = activityReports;
     }
 
     final response = await _apiService.post('/training/complete/$trainingId', body: body.isNotEmpty ? body : null);
@@ -204,6 +208,26 @@ class TrainingService {
       AppLogger.error('[TrainingService] Failed to fetch partners: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to fetch partners',
+        response.statusCode,
+      );
+    }
+  }
+
+  Future<ApiResponse<void>> createReport(String trainingId, String content) async {
+    AppLogger.debug('[TrainingService] Creating report for training: $trainingId');
+
+    final response = await _apiService.post('/report', body: {
+      'training_id': trainingId,
+      'content': content,
+    });
+
+    if (response.isSuccess) {
+      AppLogger.info('[TrainingService] Created report for training: $trainingId');
+      return ApiResponse.success(null, response.statusCode);
+    } else {
+      AppLogger.error('[TrainingService] Failed to create report: ${response.error}');
+      return ApiResponse.error(
+        response.error ?? 'Failed to create report',
         response.statusCode,
       );
     }

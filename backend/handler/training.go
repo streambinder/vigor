@@ -39,6 +39,7 @@ func initTraining(app *fiber.App) {
 	app.Post("/training/complete/:id", middleware.Authorized(), postTrainingCompleteById)
 	app.Post("/training/partner/:id", middleware.Authorized(), postTrainingPartner)
 	app.Post("/training/copy/:id", middleware.Authorized(), postTrainingCopy)
+	app.Post("/report", middleware.Authorized(), postReport)
 	app.Get("/training", middleware.Authorized(), getTraining)
 	app.Get("/training/partners/:id", middleware.Authorized(), getTrainingPartners)
 	app.Delete("/training/:id", middleware.Authorized(), deleteTrainingById)
@@ -338,10 +339,11 @@ func postTrainingCompleteById(c *fiber.Ctx) error {
 	var body struct {
 		Feedback         string            `json:"feedback"`
 		ActivityFeedback map[string]string `json:"activityFeedback"`
+		ActivityReports  []string          `json:"activityReports"` // activity IDs to flag
 	}
 	_ = c.BodyParser(&body) // ignore error, feedback is optional for backwards compat
 
-	userID := c.Locals("userID")
+	userID := c.Locals("userID").(uuid.UUID)
 	var training model.Training
 	// load training with associations so we can update activities
 	if err := database.DB.
@@ -368,6 +370,19 @@ func postTrainingCompleteById(c *fiber.Ctx) error {
 				activity.Feedback = feedback
 				database.DB.Model(activity).Update("feedback", feedback)
 			}
+		}
+	}
+
+	// create reports for flagged activities
+	if len(body.ActivityReports) > 0 {
+		for _, activityID := range body.ActivityReports {
+			report := model.Report{
+				Content:    "Flag",
+				TrainingID: &training.ID,
+				ActivityID: &activityID,
+				UserID:     userID,
+			}
+			database.DB.Create(&report)
 		}
 	}
 
@@ -476,4 +491,42 @@ func postTrainingCopy(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(clone)
+}
+
+// postReport handles POST /report - creates a free-text report for a training
+func postReport(c *fiber.Ctx) error {
+	var body struct {
+		TrainingID string `json:"training_id"`
+		Content    string `json:"content"`
+	}
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
+	}
+	if body.TrainingID == "" || body.Content == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "training_id and content are required"})
+	}
+
+	trainingUUID, err := uuid.Parse(body.TrainingID)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid training_id"})
+	}
+
+	userID := c.Locals("userID").(uuid.UUID)
+
+	// verify user can access this training (owner or partner)
+	var training model.Training
+	if err := database.DB.First(&training, "id = ? AND (user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?))", trainingUUID, userID, userID).Error; err != nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})
+	}
+
+	report := model.Report{
+		Content:    body.Content,
+		TrainingID: &trainingUUID,
+		UserID:     userID,
+	}
+	if err := database.DB.Create(&report).Error; err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to create report"})
+	}
+
+	return c.Status(http.StatusCreated).JSON(report)
 }

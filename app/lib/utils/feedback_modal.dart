@@ -4,22 +4,27 @@ import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 import '../widgets/adaptive/adaptive.dart';
 
-enum ExerciseFeedback { none, tooEasy, tooHard }
+enum ExerciseFeedback { none, tooEasy, tooHard, flag }
 
 class FeedbackResult {
   final String feedback;
   final Map<String, String> activityFeedback;
+  final List<String> activityReports; // activity IDs flagged by user
 
-  FeedbackResult({required this.feedback, required this.activityFeedback});
+  FeedbackResult({
+    required this.feedback,
+    required this.activityFeedback,
+    required this.activityReports,
+  });
 }
 
 class FeedbackModal {
   static const _workTypes = ['cardio', 'strength', 'skill'];
 
-  /// extracts unique exercise names from work routines only (excludes warmup/cooldown and non-work activities)
-  static List<String> _getWorkExerciseNames(Training training) {
+  /// extracts unique work activities with their IDs (excludes warmup/cooldown)
+  static List<({String id, String name})> _getWorkActivities(Training training) {
     final seen = <String>{};
-    final names = <String>[];
+    final activities = <({String id, String name})>[];
     for (final routine in training.routines) {
       if (routine.type != 'work') continue;
       for (final block in routine.blocks) {
@@ -27,34 +32,33 @@ class FeedbackModal {
           final detailType = activity.detail['type'] as String? ?? '';
           if (_workTypes.contains(detailType) && !seen.contains(activity.name)) {
             seen.add(activity.name);
-            names.add(activity.name);
+            activities.add((id: activity.id, name: activity.name));
           }
         }
       }
     }
-    return names;
+    return activities;
   }
 
   /// shows the feedback modal and returns the result, or null if cancelled
   static Future<FeedbackResult?> show(BuildContext context, Training training) async {
-    final exerciseNames = _getWorkExerciseNames(training);
-    if (exerciseNames.isEmpty) {
-      // no work exercises to rate, return empty result
-      return FeedbackResult(feedback: '', activityFeedback: {});
+    final activities = _getWorkActivities(training);
+    if (activities.isEmpty) {
+      return FeedbackResult(feedback: '', activityFeedback: {}, activityReports: []);
     }
 
     return showDialog<FeedbackResult>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => _FeedbackDialogContent(exerciseNames: exerciseNames),
+      builder: (context) => _FeedbackDialogContent(activities: activities),
     );
   }
 }
 
 class _FeedbackDialogContent extends StatefulWidget {
-  final List<String> exerciseNames;
+  final List<({String id, String name})> activities;
 
-  const _FeedbackDialogContent({required this.exerciseNames});
+  const _FeedbackDialogContent({required this.activities});
 
   @override
   State<_FeedbackDialogContent> createState() => _FeedbackDialogContentState();
@@ -62,13 +66,13 @@ class _FeedbackDialogContent extends StatefulWidget {
 
 class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
   final _feedbackController = TextEditingController();
-  late final Map<String, ExerciseFeedback> _exerciseFeedback;
+  late final Map<String, ExerciseFeedback> _exerciseFeedback; // keyed by activity id
 
   @override
   void initState() {
     super.initState();
     _exerciseFeedback = {
-      for (final name in widget.exerciseNames) name: ExerciseFeedback.none,
+      for (final a in widget.activities) a.id: ExerciseFeedback.none,
     };
   }
 
@@ -79,7 +83,6 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
   }
 
   bool get _isValid {
-    // at least one explicit feedback (thumbs up/down) OR general text provided
     final hasExplicitFeedback = _exerciseFeedback.values.any(
       (f) => f != ExerciseFeedback.none,
     );
@@ -90,19 +93,27 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
   void _complete() {
     if (!_isValid) return;
     final activityFeedback = <String, String>{};
-    for (final entry in _exerciseFeedback.entries) {
-      final value = switch (entry.value) {
-        ExerciseFeedback.tooEasy => 'too easy',
-        ExerciseFeedback.tooHard => 'too hard',
-        ExerciseFeedback.none => 'ok',
-      };
-      activityFeedback[entry.key] = value;
+    final activityReports = <String>[];
+
+    for (final a in widget.activities) {
+      final fb = _exerciseFeedback[a.id]!;
+      if (fb == ExerciseFeedback.flag) {
+        activityReports.add(a.id);
+        activityFeedback[a.name] = 'ok'; // don't store flag in feedback
+      } else {
+        activityFeedback[a.name] = switch (fb) {
+          ExerciseFeedback.tooEasy => 'too easy',
+          ExerciseFeedback.tooHard => 'too hard',
+          _ => 'ok',
+        };
+      }
     }
-    // strip newlines from feedback text
+
     final feedback = _feedbackController.text.trim().replaceAll(RegExp(r'[\r\n]+'), ' ');
     Navigator.of(context).pop(FeedbackResult(
       feedback: feedback,
       activityFeedback: activityFeedback,
+      activityReports: activityReports,
     ));
   }
 
@@ -159,11 +170,11 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                         onChanged: (_) => setState(() {}),
                       ),
                       const SizedBox(height: 16),
-                      ...widget.exerciseNames.map((name) => _ExerciseFeedbackRow(
-                            name: name,
-                            feedback: _exerciseFeedback[name]!,
+                      ...widget.activities.map((a) => _ExerciseFeedbackRow(
+                            name: a.name,
+                            feedback: _exerciseFeedback[a.id]!,
                             onChanged: (feedback) {
-                              setState(() => _exerciseFeedback[name] = feedback);
+                              setState(() => _exerciseFeedback[a.id] = feedback);
                             },
                           )),
                     ],
@@ -229,7 +240,7 @@ class _ExerciseFeedbackRow extends StatelessWidget {
           const SizedBox(width: 8),
           IconButton(
             icon: Icon(
-              Icons.thumb_up,
+              Icons.thumb_up_outlined,
               color: feedback == ExerciseFeedback.tooEasy
                   ? primaryColor
                   : Colors.grey,
@@ -243,7 +254,7 @@ class _ExerciseFeedbackRow extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(
-              Icons.thumb_down,
+              Icons.thumb_down_outlined,
               color: feedback == ExerciseFeedback.tooHard
                   ? primaryColor
                   : Colors.grey,
@@ -254,6 +265,20 @@ class _ExerciseFeedbackRow extends StatelessWidget {
                   : ExerciseFeedback.tooHard,
             ),
             tooltip: 'Too hard',
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.flag_outlined,
+              color: feedback == ExerciseFeedback.flag
+                  ? Colors.orange
+                  : Colors.grey,
+            ),
+            onPressed: () => onChanged(
+              feedback == ExerciseFeedback.flag
+                  ? ExerciseFeedback.none
+                  : ExerciseFeedback.flag,
+            ),
+            tooltip: 'Flag',
           ),
         ],
       ),
