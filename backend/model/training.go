@@ -98,7 +98,7 @@ type Training struct {
 	ParentID *uuid.UUID `gorm:"type:uuid" json:"parent_id" prompt:"-"`
 	Parent   *Training  `gorm:"constraint:OnDelete:SET NULL;foreignKey:ParentID" json:"-"`
 	GymID    *uuid.UUID `gorm:"type:uuid" json:"gym_id" prompt:"-"`
-	Gym      *Gym       `gorm:"constraint:OnDelete:SET NULL;" json:"gym,omitempty"`
+	Gym      *Gym       `gorm:"constraint:OnDelete:SET NULL;" json:"gym,omitempty" prompt:"-"`
 }
 
 // Routine represents a section of the training with a UUID ID and an explicit FK
