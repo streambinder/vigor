@@ -16,8 +16,12 @@
     recentGenerations []model.Training,
     facts []model.Fact,
     classics []model.Classic,
+    skipWarmupCooldown bool,
 ) -%}
 Generate a {%d duration %}-minute training session.
+{% if skipWarmupCooldown %}
+IMPORTANT: Generate ONLY the work routine. Do NOT include warmup or cooldown routines.
+{% endif %}
 
 {% if len(profiles) > 0 %}{% code var allGoals []string; goalMap := make(map[string]bool) %}{% for _, profile := range profiles %}{% for _, goal := range profile.Goals() %}{% if !goalMap[goal.Description] %}{% code goalMap[goal.Description] = true; allGoals = append(allGoals, goal.Description) %}{% endif %}{% endfor %}{% endfor %}{% if len(allGoals) > 0 %}
 <<<USER_GOALS (PRIMARY DESIGN CRITERIA - ALL EXERCISE SELECTIONS MUST SERVE THESE GOALS)>>>
@@ -60,11 +64,13 @@ Age: {%d profile.Age() %}, Height: {%f.0 profile.Height %}cm, Weight: {%f.0 prof
 {% endfor %}<<<END_EQUIPMENT_MODIFIERS>>>
 {% endif %}
 
+{% if !skipWarmupCooldown %}
 <<<WARMUP_EXERCISES ({%d len(warmupExercises) %} options)>>>
 Use ONLY these exercise IDs for the warmup routine.
 {% for _, exercise := range warmupExercises %}
 - {%s exercise.ID %}{% if len(exercise.Equipment) > 0 %} [{% for i, eq := range exercise.Equipment %}{%s eq %}{% if i < len(exercise.Equipment)-1 %}, {% endif %}{% endfor %}]{% endif %} → {%s strings.Join(exercise.Muscles, ", ") %}{% endfor %}
 <<<END_WARMUP_EXERCISES>>>
+{% endif %}
 
 <<<WORK_EXERCISES ({%d len(workExercises) %} options)>>>
 Use ONLY these exercise IDs for the work routine. Select {%d len(workExercises)/4 %}-{%d len(workExercises)/2 %} for a balanced training.
@@ -72,11 +78,13 @@ Use ONLY these exercise IDs for the work routine. Select {%d len(workExercises)/
 - {%s exercise.ID %}{% if len(exercise.Equipment) > 0 %} [{% for i, eq := range exercise.Equipment %}{%s eq %}{% if i < len(exercise.Equipment)-1 %}, {% endif %}{% endfor %}]{% endif %} → {%s strings.Join(exercise.Muscles, ", ") %}{% endfor %}
 <<<END_WORK_EXERCISES>>>
 
+{% if !skipWarmupCooldown %}
 <<<COOLDOWN_EXERCISES ({%d len(cooldownExercises) %} options)>>>
 Use ONLY these exercise IDs for the cooldown routine.
 {% for _, exercise := range cooldownExercises %}
 - {%s exercise.ID %}{% if len(exercise.Equipment) > 0 %} [{% for i, eq := range exercise.Equipment %}{%s eq %}{% if i < len(exercise.Equipment)-1 %}, {% endif %}{% endfor %}]{% endif %} → {%s strings.Join(exercise.Muscles, ", ") %}{% endfor %}
 <<<END_COOLDOWN_EXERCISES>>>
+{% endif %}
 
 {% if len(recentTrainings) > 0 %}
 <<<RECENT_HISTORY (CRITICAL: analyze progression towards USER_GOALS, apply progressive overload, respect user feedback)>>>

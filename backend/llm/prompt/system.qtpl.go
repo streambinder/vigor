@@ -21,15 +21,31 @@ var (
 )
 
 //line llm/prompt/system.qtpl:5
-func StreamSystem(qw422016 *qt422016.Writer) {
+func StreamSystem(qw422016 *qt422016.Writer, skipWarmupCooldown bool) {
 //line llm/prompt/system.qtpl:5
 	qw422016.N().S(`You are an expert personal trainer AI creating individualized training programs.
 
 CRITICAL CONSTRAINTS:
-- For warmup: ONLY use exercise IDs from the WARMUP_EXERCISES list. Never invent exercises.
-- For work: ONLY use exercise IDs from the WORK_EXERCISES list. Never invent exercises.
-- For cooldown: ONLY use exercise IDs from the COOLDOWN_EXERCISES list. Never invent exercises.
-- Never program exercises contraindicated by user injuries or limitations.
+`)
+//line llm/prompt/system.qtpl:9
+	if !skipWarmupCooldown {
+//line llm/prompt/system.qtpl:9
+		qw422016.N().S(`- For warmup: ONLY use exercise IDs from the WARMUP_EXERCISES list. Never invent exercises.
+`)
+//line llm/prompt/system.qtpl:10
+	}
+//line llm/prompt/system.qtpl:10
+	qw422016.N().S(`- For work: ONLY use exercise IDs from the WORK_EXERCISES list. Never invent exercises.
+`)
+//line llm/prompt/system.qtpl:11
+	if !skipWarmupCooldown {
+//line llm/prompt/system.qtpl:11
+		qw422016.N().S(`- For cooldown: ONLY use exercise IDs from the COOLDOWN_EXERCISES list. Never invent exercises.
+`)
+//line llm/prompt/system.qtpl:12
+	}
+//line llm/prompt/system.qtpl:12
+	qw422016.N().S(`- Never program exercises contraindicated by user injuries or limitations.
 - Respond ONLY with valid JSON matching the schema.
 
 DURATION CALCULATION (MUST RESPECT):
@@ -81,9 +97,25 @@ TRAINING PHILOSOPHY:
 - Minimum 48h recovery between same muscle groups
 
 TRAINING STRUCTURE (required routines in order):
-1. warmup: light cardio and bodyweight exercises to elevate heart rate and activate muscles (5-10min). Prioritize jumping jacks, high knees, arm circles, leg swings—not static stretches.
+`)
+//line llm/prompt/system.qtpl:52
+	if !skipWarmupCooldown {
+//line llm/prompt/system.qtpl:52
+		qw422016.N().S(`1. warmup: light cardio and bodyweight exercises to elevate heart rate and activate muscles (5-10min). Prioritize jumping jacks, high knees, arm circles, leg swings—not static stretches.
 2. work: main training blocks with appropriate rest periods (bulk of duration)
 3. cooldown: static stretches targeting the specific muscles exercised during the work phase (5min). Match stretches to worked muscle groups.
+`)
+//line llm/prompt/system.qtpl:55
+	} else {
+//line llm/prompt/system.qtpl:55
+		qw422016.N().S(`1. work: main training blocks with appropriate rest periods (entire duration)
+
+SKIP WARMUP AND COOLDOWN: The user has requested NO warmup and NO cooldown routines. Generate ONLY the "work" routine. The routines array must contain exactly ONE routine with name "work". Do NOT include any routine named "warmup" or "cooldown".
+`)
+//line llm/prompt/system.qtpl:58
+	}
+//line llm/prompt/system.qtpl:58
+	qw422016.N().S(`
 
 EXERCISE SELECTION PRIORITY:
 1. Goal alignment: exercises that directly serve user's stated goals (MOST IMPORTANT)
@@ -194,31 +226,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   ]
 }
 `)
-//line llm/prompt/system.qtpl:164
+//line llm/prompt/system.qtpl:168
 }
 
-//line llm/prompt/system.qtpl:164
-func WriteSystem(qq422016 qtio422016.Writer) {
-//line llm/prompt/system.qtpl:164
+//line llm/prompt/system.qtpl:168
+func WriteSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool) {
+//line llm/prompt/system.qtpl:168
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:164
-	StreamSystem(qw422016)
-//line llm/prompt/system.qtpl:164
+//line llm/prompt/system.qtpl:168
+	StreamSystem(qw422016, skipWarmupCooldown)
+//line llm/prompt/system.qtpl:168
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:164
+//line llm/prompt/system.qtpl:168
 }
 
-//line llm/prompt/system.qtpl:164
-func System() string {
-//line llm/prompt/system.qtpl:164
+//line llm/prompt/system.qtpl:168
+func System(skipWarmupCooldown bool) string {
+//line llm/prompt/system.qtpl:168
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:164
-	WriteSystem(qb422016)
-//line llm/prompt/system.qtpl:164
+//line llm/prompt/system.qtpl:168
+	WriteSystem(qb422016, skipWarmupCooldown)
+//line llm/prompt/system.qtpl:168
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:164
+//line llm/prompt/system.qtpl:168
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:164
+//line llm/prompt/system.qtpl:168
 	return qs422016
-//line llm/prompt/system.qtpl:164
+//line llm/prompt/system.qtpl:168
 }

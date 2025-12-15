@@ -10,4 +10,5 @@ export 'adaptive_list_tile.dart';
 export 'adaptive_loading.dart';
 export 'adaptive_notification.dart';
 export 'adaptive_scaffold.dart';
+export 'adaptive_switch.dart';
 export 'adaptive_text_field.dart';

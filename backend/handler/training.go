@@ -25,11 +25,12 @@ const (
 
 // TrainingRequest represents the request body for generating a training plan.
 type TrainingRequest struct {
-	Duration  int      `json:"duration"`  // Duration in minutes for the training session
-	Equipment []string `json:"equipment"` // List of available equipment (optional if gym is specified)
-	Gym       string   `json:"gym"`       // Name of the gym to use for equipment lookup
-	Prompt    string   `json:"prompt"`    // Specific prompt to use for generating the training plan
-	Partners  []string `json:"partners"`  // Optional partner user UUIDs for partner trainings
+	Duration           int      `json:"duration"`           // Duration in minutes for the training session
+	Equipment          []string `json:"equipment"`          // List of available equipment (optional if gym is specified)
+	Gym                string   `json:"gym"`                // Name of the gym to use for equipment lookup
+	Prompt             string   `json:"prompt"`             // Specific prompt to use for generating the training plan
+	Partners           []string `json:"partners"`           // Optional partner user UUIDs for partner trainings
+	SkipWarmupCooldown bool     `json:"skipWarmupCooldown"` // Skip both warmup and cooldown routines
 }
 
 // initTraining registers training-related routes.
@@ -197,6 +198,7 @@ func postTraining(c *fiber.Ctx) error {
 		recentGenerations,
 		facts,
 		classics,
+		req.SkipWarmupCooldown,
 	)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to generate training via LLM")

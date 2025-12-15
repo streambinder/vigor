@@ -20,6 +20,7 @@ class TrainingService {
     String? prompt,
     List<String>? equipment,
     List<String>? partners,
+    bool? skipWarmupCooldown,
   }) async {
     AppLogger.debug('[TrainingService] Generating training with duration: $duration, gym: $gym');
 
@@ -35,6 +36,9 @@ class TrainingService {
     }
     if (partners != null && partners.isNotEmpty) {
       body['partners'] = partners;
+    }
+    if (skipWarmupCooldown == true) {
+      body['skipWarmupCooldown'] = true;
     }
 
     final response = await _apiService.post('/training', body: body);

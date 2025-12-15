@@ -47,9 +47,10 @@ func GenTraining(
 	recentGenerations []model.Training,
 	facts []model.Fact,
 	classics []model.Classic,
+	skipWarmupCooldown bool,
 ) (*model.Training, llmPrompt, error) {
 	request := llmPrompt{
-		prompt.System(),
+		prompt.System(skipWarmupCooldown),
 		prompt.GenTraining(
 			profiles,
 			workExercises,
@@ -63,6 +64,7 @@ func GenTraining(
 			recentGenerations,
 			facts,
 			classics,
+			skipWarmupCooldown,
 		),
 	}
 	response, err := getLLM(profiles).query(

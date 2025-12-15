@@ -37,6 +37,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   EquipmentMode _equipmentMode = EquipmentMode.bodyweight;
   Gym? _selectedGym;
   bool _isGenerating = false;
+  bool _includeWarmupCooldown = true;
   final List<UserInfo> _partners = [];
   final List<String> _equipment = [];
 
@@ -282,6 +283,41 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     );
   }
 
+  Widget _buildRoutineToggles() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: PlatformHelper.useLiquidGlass
+          ? LiquidGlassTheme.glassDecoration(
+              borderRadius: 12,
+              border: Border.all(
+                color: Colors.white.withOpacity(0.2),
+                width: 1.5,
+              ),
+            )
+          : BoxDecoration(
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Include warm-up & cooldown',
+            style: PlatformHelper.useLiquidGlass
+                ? LiquidGlassTheme.bodyStyle
+                : null,
+          ),
+          AdaptiveSwitch(
+            value: _includeWarmupCooldown,
+            onChanged: (value) => setState(() => _includeWarmupCooldown = value),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _generateTraining() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -318,6 +354,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       prompt: prompt.isEmpty ? null : prompt,
       equipment: equipment,
       partners: _partners.isEmpty ? null : _partners.map((p) => p.id).toList(),
+      skipWarmupCooldown: !_includeWarmupCooldown ? true : null,
     );
 
     if (mounted) {
@@ -428,6 +465,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
             // Equipment mode selection
             _buildEquipmentSection(),
+            const SizedBox(height: 16),
+
+            // Routine skip toggles
+            _buildRoutineToggles(),
             const SizedBox(height: 16),
 
             // Optional prompt
