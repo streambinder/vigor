@@ -43,6 +43,7 @@ func GenTraining(
 	modifiers []model.Modifier,
 	favoriteExercises []model.Exercise,
 	favoriteEquipment []string,
+	favoriteWorkoutTypes []string,
 	userPrompt string,
 	duration int,
 	recentTrainings []model.Training,
@@ -62,6 +63,7 @@ func GenTraining(
 			modifiers,
 			favoriteExercises,
 			favoriteEquipment,
+			favoriteWorkoutTypes,
 			userPrompt,
 			duration,
 			recentTrainings,
@@ -74,7 +76,7 @@ func GenTraining(
 	response, err := getLLM(profiles).query(
 		request,
 		0.35,  // Balanced: structured output + training variety
-		10000, // Sufficient for complex multi-routine trainings
+		16000, // High limit for complex workouts (EMOM, circuits with timing metadata)
 	)
 	if err != nil {
 		return nil, request, fmt.Errorf("failed to generate training: %s", err)

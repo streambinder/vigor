@@ -316,10 +316,41 @@ class AppLocalizationsDe extends AppLocalizations {
       '(Optional - Ausrüstung, die du bevorzugt nutzt)';
 
   @override
+  String get optionalWorkoutTypesPrefer =>
+      '(Optional - Trainingsstile, die du bevorzugst)';
+
+  @override
   String get favoriteExercises => 'Lieblingsübungen';
 
   @override
   String get favoriteEquipment => 'Lieblingsausrüstung';
+
+  @override
+  String get favoriteWorkoutTypes => 'Bevorzugte Trainingsarten';
+
+  @override
+  String get workoutTypeStrength => 'Kraft';
+
+  @override
+  String get workoutTypeCircuit => 'Zirkel';
+
+  @override
+  String get workoutTypeEmom => 'EMOM';
+
+  @override
+  String get workoutTypeAmrap => 'AMRAP';
+
+  @override
+  String get workoutTypeHiit => 'HIIT';
+
+  @override
+  String get workoutTypeForTime => 'For Time';
+
+  @override
+  String get workoutTypeEndurance => 'Ausdauer';
+
+  @override
+  String get workoutTypeMobility => 'Mobilität';
 
   @override
   String get failedToUpdateProfile => 'Profil konnte nicht aktualisiert werden';
@@ -462,6 +493,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get strategy => 'Strategie';
+
+  @override
+  String get typeSelection => 'Typauswahl';
 
   @override
   String get progression => 'Progression';

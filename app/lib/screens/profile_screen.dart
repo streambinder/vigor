@@ -498,7 +498,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     // Favorites section
                     if (_getFavoriteExercises(user.profile.data).isNotEmpty ||
-                        _getFavoriteEquipment(user.profile.data).isNotEmpty) ...[
+                        _getFavoriteEquipment(user.profile.data).isNotEmpty ||
+                        _getFavoriteWorkoutTypes(user.profile.data).isNotEmpty) ...[
                       const SizedBox(height: 8),
                       AdaptiveCard(
                         child: Column(
@@ -526,7 +527,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                                 child: Text(
-                                  'Exercises',
+                                  l10n.exercises,
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey[600],
@@ -550,7 +551,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                                 child: Text(
-                                  'Equipment',
+                                  l10n.equipment,
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey[600],
@@ -569,6 +570,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                   )),
                               const SizedBox(height: 8),
+                            ],
+                            if (_getFavoriteWorkoutTypes(user.profile.data).isNotEmpty) ...[
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                child: Text(
+                                  l10n.favoriteWorkoutTypes,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                child: Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: _getFavoriteWorkoutTypes(user.profile.data).map((type) => Chip(
+                                    label: Text(
+                                      _workoutTypeLabel(type, l10n),
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    backgroundColor: PlatformHelper.useLiquidGlass
+                                        ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
+                                        : Theme.of(context).colorScheme.secondaryContainer,
+                                  )).toList(),
+                                ),
+                              ),
                             ],
                           ],
                         ),
@@ -905,5 +936,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // Ignore parsing errors
     }
     return [];
+  }
+
+  List<String> _getFavoriteWorkoutTypes(Map<String, dynamic> data) {
+    try {
+      if (data['preferences'] != null) {
+        final prefs = data['preferences'] as Map<String, dynamic>;
+        if (prefs['workout_types'] != null) {
+          return (prefs['workout_types'] as List).cast<String>();
+        }
+      }
+    } catch (e) {
+      // Ignore parsing errors
+    }
+    return [];
+  }
+
+  String _workoutTypeLabel(String type, AppLocalizations l10n) {
+    switch (type) {
+      case 'strength':
+        return l10n.workoutTypeStrength;
+      case 'circuit':
+        return l10n.workoutTypeCircuit;
+      case 'emom':
+        return l10n.workoutTypeEmom;
+      case 'amrap':
+        return l10n.workoutTypeAmrap;
+      case 'hiit':
+        return l10n.workoutTypeHiit;
+      case 'for_time':
+        return l10n.workoutTypeForTime;
+      case 'endurance':
+        return l10n.workoutTypeEndurance;
+      case 'mobility':
+        return l10n.workoutTypeMobility;
+      default:
+        return type;
+    }
   }
 }

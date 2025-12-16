@@ -10,6 +10,8 @@ part 'training_reasoning.g.dart';
 class TrainingReasoning {
   @JsonKey(name: 'constraints', defaultValue: const [])
   final List<String> constraints;
+  @JsonKey(name: 'type_selection', defaultValue: '')
+  final String typeSelection;
   @JsonKey(name: 'strategy', defaultValue: '')
   final String strategy;
   @JsonKey(name: 'progression')
@@ -25,6 +27,7 @@ class TrainingReasoning {
 
   TrainingReasoning({
     required this.constraints,
+    required this.typeSelection,
     required this.strategy,
     required this.progression,
     required this.factsApplied,

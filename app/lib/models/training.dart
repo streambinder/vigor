@@ -32,9 +32,9 @@ class Training {
   final Map<String, dynamic> prompt;
   @JsonKey(name: 'feedback', defaultValue: '')
   final String feedback;
-  @JsonKey(name: 'completed_at')
+  @JsonKey(name: 'completed_at', toJson: _nullableDateTimeToJson)
   final DateTime? completedAt;
-  @JsonKey(name: 'created_at')
+  @JsonKey(name: 'created_at', toJson: _dateTimeToJson)
   final DateTime createdAt;
   @JsonKey(name: 'user_id', defaultValue: '')
   final String userId;
@@ -68,4 +68,8 @@ class Training {
   factory Training.fromJson(Map<String, dynamic> json) => _$TrainingFromJson(json);
 
   Map<String, dynamic> toJson() => _$TrainingToJson(this);
+
+  static String _dateTimeToJson(DateTime dt) => dt.toUtc().toIso8601String();
+
+  static String? _nullableDateTimeToJson(DateTime? dt) => dt?.toUtc().toIso8601String();
 }

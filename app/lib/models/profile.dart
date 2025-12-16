@@ -21,7 +21,7 @@ class Profile {
   final String firstName;
   @JsonKey(name: 'last_name')
   final String lastName;
-  @JsonKey(name: 'birthdate')
+  @JsonKey(name: 'birthdate', toJson: _dateTimeToJson)
   final DateTime birthdate;
   @JsonKey(name: 'gender')
   final String gender;
@@ -51,4 +51,6 @@ class Profile {
   factory Profile.fromJson(Map<String, dynamic> json) => _$ProfileFromJson(json);
 
   Map<String, dynamic> toJson() => _$ProfileToJson(this);
+
+  static String _dateTimeToJson(DateTime dt) => dt.toUtc().toIso8601String();
 }

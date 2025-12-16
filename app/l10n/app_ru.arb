@@ -110,8 +110,18 @@
   "optionalLeaveEmpty": "(Необязательно - оставьте пустым, если не применимо)",
   "optionalExercisesPrefer": "(Необязательно - упражнения, которые вам нравятся)",
   "optionalEquipmentPrefer": "(Необязательно - оборудование, которое вы предпочитаете)",
+  "optionalWorkoutTypesPrefer": "(Необязательно - предпочитаемые стили тренировок)",
   "favoriteExercises": "Любимые Упражнения",
   "favoriteEquipment": "Любимое Оборудование",
+  "favoriteWorkoutTypes": "Предпочитаемые Типы Тренировок",
+  "workoutTypeStrength": "Сила",
+  "workoutTypeCircuit": "Круговая",
+  "workoutTypeEmom": "EMOM",
+  "workoutTypeAmrap": "AMRAP",
+  "workoutTypeHiit": "HIIT",
+  "workoutTypeForTime": "На время",
+  "workoutTypeEndurance": "Выносливость",
+  "workoutTypeMobility": "Мобильность",
 
   "failedToUpdateProfile": "Не удалось обновить профиль",
 
@@ -159,6 +169,7 @@
 
   "reasoning": "Рассуждение",
   "strategy": "Стратегия",
+  "typeSelection": "Выбор Типа",
   "progression": "Прогрессия",
   "constraints": "Ограничения",
   "researchApplied": "Применённые Исследования",

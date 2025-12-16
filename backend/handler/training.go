@@ -138,11 +138,17 @@ func postTraining(c *fiber.Ctx) error {
 	}
 
 	// Collect favorite exercises and equipment from all profiles
-	var allFavoriteExercises, allFavoriteEquipment []string
+	var allFavoriteExercises, allFavoriteEquipment, allFavoriteWorkoutTypes []string
 	for _, profile := range profiles {
 		allFavoriteExercises = append(allFavoriteExercises, profile.FavoriteExercises()...)
 		allFavoriteEquipment = append(allFavoriteEquipment, profile.FavoriteEquipment()...)
+		allFavoriteWorkoutTypes = append(allFavoriteWorkoutTypes, profile.FavoriteWorkoutTypes()...)
 	}
+	log.Debug().
+		Strs("fav_exercises", allFavoriteExercises).
+		Strs("fav_equipment", allFavoriteEquipment).
+		Strs("fav_workout_types", allFavoriteWorkoutTypes).
+		Msg("Collected user favorites")
 
 	// Match favorites to canonical entities via RAG
 	favoriteExercises, err := rag.RetrieveFavoriteExercises(allFavoriteExercises)
@@ -218,6 +224,7 @@ func postTraining(c *fiber.Ctx) error {
 		modifiers,
 		favoriteExercises,
 		favoriteEquipmentIDs,
+		allFavoriteWorkoutTypes,
 		req.Prompt,
 		req.Duration,
 		recentTrainings,

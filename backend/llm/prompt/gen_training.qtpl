@@ -12,6 +12,7 @@
     modifiers []model.Modifier,
     favoriteExercises []model.Exercise,
     favoriteEquipment []string,
+    favoriteWorkoutTypes []string,
     userPrompt string,
     duration int,
     recentTrainings []model.Training,
@@ -66,44 +67,42 @@ Age: {%d profile.Age() %}, Height: {%f.0 profile.Height %}cm, Weight: {%f.0 prof
 {% endfor %}<<<END_EQUIPMENT_MODIFIERS>>>
 {% endif %}
 
-{% if len(favoriteExercises) > 0 || len(favoriteEquipment) > 0 %}
+{% if len(favoriteExercises) > 0 || len(favoriteEquipment) > 0 || len(favoriteWorkoutTypes) > 0 %}
 <<<USER_FAVORITES (when choosing between similar exercises, prefer these if available)>>>
 {% if len(favoriteExercises) > 0 %}Exercises: {% for i, ex := range favoriteExercises %}{%s ex.ID %}{% if i < len(favoriteExercises)-1 %}, {% endif %}{% endfor %}
 {% endif %}{% if len(favoriteEquipment) > 0 %}Equipment: {% for i, eq := range favoriteEquipment %}{%s eq %}{% if i < len(favoriteEquipment)-1 %}, {% endif %}{% endfor %}
+{% endif %}{% if len(favoriteWorkoutTypes) > 0 %}Workout types: {% for i, wt := range favoriteWorkoutTypes %}{%s wt %}{% if i < len(favoriteWorkoutTypes)-1 %}, {% endif %}{% endfor %}
 {% endif %}<<<END_USER_FAVORITES>>>
 {% endif %}
 
 {% if !skipWarmupCooldown %}
 <<<WARMUP_EXERCISES ({%d len(warmupExercises) %} options)>>>
 Use ONLY these exercise IDs for the warmup routine.
-{% for _, exercise := range warmupExercises %}
-- {%s exercise.ID %}{% if len(exercise.Equipment) > 0 %} [{% for i, eq := range exercise.Equipment %}{%s eq %}{% if i < len(exercise.Equipment)-1 %}, {% endif %}{% endfor %}]{% endif %} → {%s strings.Join(exercise.Muscles, ", ") %}{% endfor %}
+{% for _, exercise := range warmupExercises %}{%s exercise.ID %}, {% endfor %}
 <<<END_WARMUP_EXERCISES>>>
 {% endif %}
 
 <<<WORK_EXERCISES ({%d len(workExercises) %} options)>>>
 Use ONLY these exercise IDs for the work routine. Select {%d len(workExercises)/4 %}-{%d len(workExercises)/2 %} for a balanced training.
-{% for _, exercise := range workExercises %}
-- {%s exercise.ID %}{% if len(exercise.Equipment) > 0 %} [{% for i, eq := range exercise.Equipment %}{%s eq %}{% if i < len(exercise.Equipment)-1 %}, {% endif %}{% endfor %}]{% endif %} → {%s strings.Join(exercise.Muscles, ", ") %}{% endfor %}
+{% for _, exercise := range workExercises %}{%s exercise.ID %}, {% endfor %}
 <<<END_WORK_EXERCISES>>>
 
 {% if !skipWarmupCooldown %}
 <<<COOLDOWN_EXERCISES ({%d len(cooldownExercises) %} options)>>>
 Use ONLY these exercise IDs for the cooldown routine.
-{% for _, exercise := range cooldownExercises %}
-- {%s exercise.ID %}{% if len(exercise.Equipment) > 0 %} [{% for i, eq := range exercise.Equipment %}{%s eq %}{% if i < len(exercise.Equipment)-1 %}, {% endif %}{% endfor %}]{% endif %} → {%s strings.Join(exercise.Muscles, ", ") %}{% endfor %}
+{% for _, exercise := range cooldownExercises %}{%s exercise.ID %}, {% endfor %}
 <<<END_COOLDOWN_EXERCISES>>>
 {% endif %}
 
 {% if len(recentTrainings) > 0 %}
-<<<RECENT_HISTORY (CRITICAL: analyze progression towards USER_GOALS, apply progressive overload, respect user feedback)>>>
-{% for _, training := range recentTrainings %}{%d training.DaysSince() %}d ago{% if len(training.Feedback) > 0 %} | feedback: {%s training.Feedback %}{% endif %} | exercises: {% for _, activity := range training.Activities() %}{%s activity.Name %} ({% if activity.WeightKg > 0 %}weight: {%d activity.WeightKg %}kg{% endif %}, {% if activity.Reps > 0 %}reps: {%d activity.Reps %}{% endif %}, {% if len(activity.Feedback) > 0 %}feedback: {%s activity.Feedback %}{% endif %}) {% endfor %}
+<<<RECENT_HISTORY (analyze progression, respect feedback, VARY workout types)>>>
+{% for _, training := range recentTrainings %}{%d training.DaysSince() %}d ago | {%s training.Type %}{% if len(training.Feedback) > 0 %} | "{%s training.Feedback %}"{% endif %}{% code activitiesWithFeedback := []string{}; for _, a := range training.Activities() { if len(a.Feedback) > 0 { activitiesWithFeedback = append(activitiesWithFeedback, a.Name + ": " + a.Feedback) } } %}{% if len(activitiesWithFeedback) > 0 %} | feedback: {% for i, f := range activitiesWithFeedback %}{%s f %}{% if i < len(activitiesWithFeedback)-1 %}, {% endif %}{% endfor %}{% endif %}
 {% endfor %}<<<END_RECENT_HISTORY>>>
 {% endif %}
 
 {% if len(recentGenerations) > 0 %}
-<<<RECENT_GENERATIONS (avoid repeating names, types and training rationale — if the user does not ask otherwise)>>>
-{% for _, training := range recentGenerations %}{%s training.Name %}
+<<<RECENT_GENERATIONS (avoid repeating names and training rationale, DISTRIBUTE workout types for variety)>>>
+{% for _, training := range recentGenerations %}{%s training.Type %}: {%s training.Name %}
 {% endfor %}<<<END_RECENT_GENERATIONS>>>
 {% endif %}
 

@@ -302,10 +302,40 @@ class AppLocalizationsZh extends AppLocalizations {
   String get optionalEquipmentPrefer => '（可选 - 您偏好使用的设备）';
 
   @override
+  String get optionalWorkoutTypesPrefer => '（可选 - 您偏好的训练风格）';
+
+  @override
   String get favoriteExercises => '喜爱的练习';
 
   @override
   String get favoriteEquipment => '喜爱的设备';
+
+  @override
+  String get favoriteWorkoutTypes => '偏好的训练类型';
+
+  @override
+  String get workoutTypeStrength => '力量';
+
+  @override
+  String get workoutTypeCircuit => '循环';
+
+  @override
+  String get workoutTypeEmom => 'EMOM';
+
+  @override
+  String get workoutTypeAmrap => 'AMRAP';
+
+  @override
+  String get workoutTypeHiit => 'HIIT';
+
+  @override
+  String get workoutTypeForTime => '计时';
+
+  @override
+  String get workoutTypeEndurance => '耐力';
+
+  @override
+  String get workoutTypeMobility => '灵活性';
 
   @override
   String get failedToUpdateProfile => '更新个人资料失败';
@@ -445,6 +475,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get strategy => '策略';
+
+  @override
+  String get typeSelection => '类型选择';
 
   @override
   String get progression => '进阶';

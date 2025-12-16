@@ -13,7 +13,7 @@ class Partner {
   final String trainingId;
   @JsonKey(name: 'user_id', defaultValue: '')
   final String userId;
-  @JsonKey(name: 'created_at')
+  @JsonKey(name: 'created_at', toJson: _dateTimeToJson)
   final DateTime createdAt;
 
   Partner({
@@ -26,4 +26,6 @@ class Partner {
   factory Partner.fromJson(Map<String, dynamic> json) => _$PartnerFromJson(json);
 
   Map<String, dynamic> toJson() => _$PartnerToJson(this);
+
+  static String _dateTimeToJson(DateTime dt) => dt.toUtc().toIso8601String();
 }

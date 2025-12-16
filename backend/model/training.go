@@ -63,7 +63,8 @@ type ProgressionReasoning struct {
 // TrainingReasoning captures the model's thought process before generating training structure.
 type TrainingReasoning struct {
 	Constraints   []string             `json:"constraints" prompt:"Active constraints from user profile (injuries, limitations, equipment restrictions, time)"`
-	Strategy      string               `json:"strategy" prompt:"1-2 sentence training approach that respects constraints while meeting goals"`
+	TypeSelection string               `json:"type_selection" prompt:"Which types were used in RECENT_HISTORY/RECENT_GENERATIONS, and why a different type was chosen for variety"`
+	Strategy      string               `json:"strategy" prompt:"1-2 sentence training approach that fits the chosen type while respecting constraints and goals"`
 	Progression   ProgressionReasoning `json:"progression" prompt:"How user feedback from recent trainings influenced exercise parameters (weight, reps, difficulty)"`
 	FactsApplied  []string             `json:"facts_applied" prompt:"How each KNOWLEDGE_FACT was applied to address user goals or work around injuries (e.g. 'DOI URL: applied X principle for Y goal/injury'). Empty array if no facts provided."`
 	TargetMuscles []string             `json:"target_muscles" prompt:"Primary muscle groups this training will target"`
@@ -81,7 +82,7 @@ type Training struct {
 
 	Name        string         `gorm:"not null" json:"name" prompt:"Epic 3-4 word title inspired by classics, no special characters (e.g. Trojan War Training, Achilles Trial Run, Pius Aeneas Fitness, Son of Zeus Gains)"`
 	Description string         `gorm:"not null" json:"description" prompt:"Short paragraph describing how the generated program fits the user's goals and limitations. No need to mention user profile details such as age, weight, height, etc. It's highly appreciated to mention weight/reps regressions or increases based on user's feedback and/or previous trainings."`
-	Type        string         `gorm:"not null" json:"type" prompt:"Training broad category, which can be either the sport for sports-related trainings — boxing, swimming, running, pilates, yoga, etc. —, or subtype of HIIT for HIIT — AMRAP, EMOM, etc. – or other generic terms such as strength, flexibility, etc.)"`
+	Type        string         `gorm:"not null" json:"type" prompt:"Training type;enum:strength,circuit,emom,amrap,hiit,for_time,endurance,mobility"`
 	Duration    int            `gorm:"not null" json:"duration" prompt:"Total duration in seconds"`
 	Equipment   pq.StringArray `gorm:"type:text[]" json:"equipment" prompt:"-"`
 	References  pq.StringArray `gorm:"type:text[]" json:"references" prompt:"DOI URLs from KNOWLEDGE_FACTS that influenced this training design (empty array if no facts were used)"`

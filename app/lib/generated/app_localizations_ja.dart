@@ -304,10 +304,40 @@ class AppLocalizationsJa extends AppLocalizations {
   String get optionalEquipmentPrefer => '（任意 - 好みの器具）';
 
   @override
+  String get optionalWorkoutTypesPrefer => '（任意 - 好みのワークアウトスタイル）';
+
+  @override
   String get favoriteExercises => 'お気に入りのエクササイズ';
 
   @override
   String get favoriteEquipment => 'お気に入りの器具';
+
+  @override
+  String get favoriteWorkoutTypes => '好みのワークアウトタイプ';
+
+  @override
+  String get workoutTypeStrength => '筋力';
+
+  @override
+  String get workoutTypeCircuit => 'サーキット';
+
+  @override
+  String get workoutTypeEmom => 'EMOM';
+
+  @override
+  String get workoutTypeAmrap => 'AMRAP';
+
+  @override
+  String get workoutTypeHiit => 'HIIT';
+
+  @override
+  String get workoutTypeForTime => 'タイムトライアル';
+
+  @override
+  String get workoutTypeEndurance => '持久力';
+
+  @override
+  String get workoutTypeMobility => 'モビリティ';
 
   @override
   String get failedToUpdateProfile => 'プロフィールの更新に失敗しました';
@@ -447,6 +477,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get strategy => '戦略';
+
+  @override
+  String get typeSelection => 'タイプ選択';
 
   @override
   String get progression => '進行';

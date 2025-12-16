@@ -672,6 +672,12 @@ abstract class AppLocalizations {
   /// **'(Optional - equipment you prefer using)'**
   String get optionalEquipmentPrefer;
 
+  /// No description provided for @optionalWorkoutTypesPrefer.
+  ///
+  /// In en, this message translates to:
+  /// **'(Optional - workout styles you prefer)'**
+  String get optionalWorkoutTypesPrefer;
+
   /// No description provided for @favoriteExercises.
   ///
   /// In en, this message translates to:
@@ -683,6 +689,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Favorite Equipment'**
   String get favoriteEquipment;
+
+  /// No description provided for @favoriteWorkoutTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred Workout Types'**
+  String get favoriteWorkoutTypes;
+
+  /// No description provided for @workoutTypeStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get workoutTypeStrength;
+
+  /// No description provided for @workoutTypeCircuit.
+  ///
+  /// In en, this message translates to:
+  /// **'Circuit'**
+  String get workoutTypeCircuit;
+
+  /// No description provided for @workoutTypeEmom.
+  ///
+  /// In en, this message translates to:
+  /// **'EMOM'**
+  String get workoutTypeEmom;
+
+  /// No description provided for @workoutTypeAmrap.
+  ///
+  /// In en, this message translates to:
+  /// **'AMRAP'**
+  String get workoutTypeAmrap;
+
+  /// No description provided for @workoutTypeHiit.
+  ///
+  /// In en, this message translates to:
+  /// **'HIIT'**
+  String get workoutTypeHiit;
+
+  /// No description provided for @workoutTypeForTime.
+  ///
+  /// In en, this message translates to:
+  /// **'For Time'**
+  String get workoutTypeForTime;
+
+  /// No description provided for @workoutTypeEndurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Endurance'**
+  String get workoutTypeEndurance;
+
+  /// No description provided for @workoutTypeMobility.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobility'**
+  String get workoutTypeMobility;
 
   /// No description provided for @failedToUpdateProfile.
   ///
@@ -929,6 +989,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Strategy'**
   String get strategy;
+
+  /// No description provided for @typeSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Type Selection'**
+  String get typeSelection;
 
   /// No description provided for @progression.
   ///

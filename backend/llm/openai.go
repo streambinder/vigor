@@ -32,7 +32,8 @@ func openAIClient(host, apiKey string) openai.Client {
 
 func (llm *OpenAI) query(prompt llmPrompt, temperature float64, maxTokens int) ([]byte, error) {
 	start := time.Now()
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
 	params := openai.ChatCompletionNewParams{
 		Model: llm.model,
 		Messages: []openai.ChatCompletionMessageParamUnion{

@@ -77,18 +77,19 @@ User goals are the MOST IMPORTANT factor in training design. Every exercise sele
 REASONING-FIRST APPROACH:
 You MUST complete the "reasoning" object BEFORE generating training structure. This ensures coherent, well-planned trainings. The reasoning process:
 1. constraints: List active limitations (injuries, equipment, time)
-2. strategy: 1-2 sentence approach that PRIORITIZES goals while respecting constraints
-3. progression: Analyze RECENT_HISTORY feedback to determine weight/rep/difficulty adjustments:
+2. type_selection: Choose workout type by checking RECENT_HISTORY and RECENT_GENERATIONS types, then pick a DIFFERENT type to ensure variety. State which types were recently used and why you chose a different one. Only repeat a type if user explicitly requests it or all types have been used recently.
+3. strategy: 1-2 sentence approach that fits the CHOSEN TYPE while respecting constraints and goals
+4. progression: Analyze RECENT_HISTORY feedback to determine weight/rep/difficulty adjustments:
    - summary: 1-2 sentence overview of how feedback influenced this session (empty string if no relevant feedback in history)
    - adjustments: For each exercise with feedback, document what you changed and why. Examples:
      - {exercise: "bench-press", adjustment: "+2kg", reason: "user marked too easy 3d ago"}
      - {exercise: "squat", adjustment: "-2 reps", reason: "user marked too hard last session"}
      - {exercise: "push-up", adjustment: "added weighted-vest modifier", reason: "user feedback indicates bodyweight is now too easy"}
    - Leave adjustments as empty array if no feedback-driven changes were made
-4. facts_applied: How KNOWLEDGE_FACTS influenced the design
-5. target_muscles: Which muscle groups to focus on (selected to serve goals)
-6. exercises: List selected exercise IDs with reason showing goal relevance (e.g. "bench-press: chest compound, serves hypertrophy goal with 8-12 rep range")
-7. naming_logic: Brief connection between name and training theme
+5. facts_applied: How KNOWLEDGE_FACTS influenced the design
+6. target_muscles: Which muscle groups to focus on (selected to serve goals)
+7. exercises: List selected exercise IDs with reason showing how they fit the CHOSEN TYPE (e.g. for circuit: "push-up: bodyweight compound, quick transitions")
+8. naming_logic: Brief connection between name and training theme
 
 Only AFTER completing reasoning should you populate name, description, type, and routines.
 
@@ -98,25 +99,37 @@ TRAINING PHILOSOPHY:
 - Progressive overload: increase weight before volume before frequency
 - Minimum 48h recovery between same muscle groups
 
+TRAINING TYPES (use exactly one, prioritize variety based on RECENT_HISTORY and RECENT_GENERATIONS):
+- strength: traditional lifting with sets × reps × weight, longer rest (2-3min between sets)
+- circuit: rotate through stations with minimal rest between exercises
+- emom: every minute on the minute, fixed work at interval start, rest fills remainder
+- amrap: as many rounds as possible within time cap, track total rounds/reps
+- hiit: high-intensity intervals with structured work/rest periods (e.g. 30s on/15s off)
+- for_time: complete prescribed work as fast as possible, track total duration
+- endurance: steady-state cardio, duration-based activities
+- mobility: flexibility and recovery focus, hold times, no load
+
+When selecting type: avoid repeating types from recent trainings unless user explicitly requests it. Distribute types across sessions to ensure training variety over time.
+
 TRAINING STRUCTURE (required routines in order):
 `)
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:71
 	if !skipWarmupCooldown {
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:71
 		qw422016.N().S(`1. warmup: light cardio and bodyweight exercises to elevate heart rate and activate muscles (5-10min). Prioritize jumping jacks, high knees, arm circles, leg swings—not static stretches.
 2. work: main training blocks with appropriate rest periods (bulk of duration)
 3. cooldown: static stretches targeting the specific muscles exercised during the work phase (5min). Match stretches to worked muscle groups.
 `)
-//line llm/prompt/system.qtpl:61
+//line llm/prompt/system.qtpl:74
 	} else {
-//line llm/prompt/system.qtpl:61
+//line llm/prompt/system.qtpl:74
 		qw422016.N().S(`1. work: main training blocks with appropriate rest periods (entire duration)
 
 SKIP WARMUP AND COOLDOWN: The user has requested NO warmup and NO cooldown routines. Generate ONLY the "work" routine. The routines array must contain exactly ONE routine with name "work". Do NOT include any routine named "warmup" or "cooldown".
 `)
-//line llm/prompt/system.qtpl:64
+//line llm/prompt/system.qtpl:77
 	}
-//line llm/prompt/system.qtpl:64
+//line llm/prompt/system.qtpl:77
 	qw422016.N().S(`
 
 EXERCISE SELECTION PRIORITY:
@@ -232,31 +245,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   ]
 }
 `)
-//line llm/prompt/system.qtpl:178
+//line llm/prompt/system.qtpl:191
 }
 
-//line llm/prompt/system.qtpl:178
+//line llm/prompt/system.qtpl:191
 func WriteSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool) {
-//line llm/prompt/system.qtpl:178
+//line llm/prompt/system.qtpl:191
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:178
+//line llm/prompt/system.qtpl:191
 	StreamSystem(qw422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:178
+//line llm/prompt/system.qtpl:191
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:178
+//line llm/prompt/system.qtpl:191
 }
 
-//line llm/prompt/system.qtpl:178
+//line llm/prompt/system.qtpl:191
 func System(skipWarmupCooldown bool) string {
-//line llm/prompt/system.qtpl:178
+//line llm/prompt/system.qtpl:191
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:178
+//line llm/prompt/system.qtpl:191
 	WriteSystem(qb422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:178
+//line llm/prompt/system.qtpl:191
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:178
+//line llm/prompt/system.qtpl:191
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:178
+//line llm/prompt/system.qtpl:191
 	return qs422016
-//line llm/prompt/system.qtpl:178
+//line llm/prompt/system.qtpl:191
 }

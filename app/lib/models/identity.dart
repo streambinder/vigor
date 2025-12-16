@@ -15,9 +15,9 @@ class Identity {
   final String provider;
   @JsonKey(name: 'provider_user_id', defaultValue: '')
   final String providerUserId;
-  @JsonKey(name: 'created_at')
+  @JsonKey(name: 'created_at', toJson: _dateTimeToJson)
   final DateTime createdAt;
-  @JsonKey(name: 'updated_at')
+  @JsonKey(name: 'updated_at', toJson: _dateTimeToJson)
   final DateTime updatedAt;
 
   Identity({
@@ -32,4 +32,6 @@ class Identity {
   factory Identity.fromJson(Map<String, dynamic> json) => _$IdentityFromJson(json);
 
   Map<String, dynamic> toJson() => _$IdentityToJson(this);
+
+  static String _dateTimeToJson(DateTime dt) => dt.toUtc().toIso8601String();
 }

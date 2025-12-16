@@ -13,11 +13,11 @@ class RefreshToken {
   final String userId;
   @JsonKey(name: 'token', defaultValue: '')
   final String token;
-  @JsonKey(name: 'expires_at')
+  @JsonKey(name: 'expires_at', toJson: _dateTimeToJson)
   final DateTime expiresAt;
   @JsonKey(name: 'revoked')
   final bool revoked;
-  @JsonKey(name: 'created_at')
+  @JsonKey(name: 'created_at', toJson: _dateTimeToJson)
   final DateTime createdAt;
 
   RefreshToken({
@@ -32,4 +32,6 @@ class RefreshToken {
   factory RefreshToken.fromJson(Map<String, dynamic> json) => _$RefreshTokenFromJson(json);
 
   Map<String, dynamic> toJson() => _$RefreshTokenToJson(this);
+
+  static String _dateTimeToJson(DateTime dt) => dt.toUtc().toIso8601String();
 }

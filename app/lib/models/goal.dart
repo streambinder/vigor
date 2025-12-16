@@ -9,7 +9,7 @@ part 'goal.g.dart';
 class Goal {
   @JsonKey(name: 'description', defaultValue: '')
   final String description;
-  @JsonKey(name: 'start_date')
+  @JsonKey(name: 'start_date', toJson: _dateTimeToJson)
   final DateTime startDate;
 
   Goal({
@@ -20,4 +20,6 @@ class Goal {
   factory Goal.fromJson(Map<String, dynamic> json) => _$GoalFromJson(json);
 
   Map<String, dynamic> toJson() => _$GoalToJson(this);
+
+  static String _dateTimeToJson(DateTime dt) => dt.toUtc().toIso8601String();
 }

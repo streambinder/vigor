@@ -110,8 +110,18 @@
   "optionalLeaveEmpty": "(선택사항 - 해당 없으면 비워두세요)",
   "optionalExercisesPrefer": "(선택사항 - 좋아하거나 선호하는 운동)",
   "optionalEquipmentPrefer": "(선택사항 - 선호하는 장비)",
+  "optionalWorkoutTypesPrefer": "(선택사항 - 선호하는 운동 스타일)",
   "favoriteExercises": "좋아하는 운동",
   "favoriteEquipment": "좋아하는 장비",
+  "favoriteWorkoutTypes": "선호하는 운동 유형",
+  "workoutTypeStrength": "근력",
+  "workoutTypeCircuit": "서킷",
+  "workoutTypeEmom": "EMOM",
+  "workoutTypeAmrap": "AMRAP",
+  "workoutTypeHiit": "HIIT",
+  "workoutTypeForTime": "타임 트라이얼",
+  "workoutTypeEndurance": "지구력",
+  "workoutTypeMobility": "유연성",
 
   "failedToUpdateProfile": "프로필 업데이트 실패",
 
@@ -159,6 +169,7 @@
 
   "reasoning": "추론",
   "strategy": "전략",
+  "typeSelection": "유형 선택",
   "progression": "진행",
   "constraints": "제약",
   "researchApplied": "적용된 연구",

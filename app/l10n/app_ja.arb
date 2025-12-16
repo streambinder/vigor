@@ -110,8 +110,18 @@
   "optionalLeaveEmpty": "（任意 - 該当しない場合は空欄）",
   "optionalExercisesPrefer": "（任意 - 好きなエクササイズ）",
   "optionalEquipmentPrefer": "（任意 - 好みの器具）",
+  "optionalWorkoutTypesPrefer": "（任意 - 好みのワークアウトスタイル）",
   "favoriteExercises": "お気に入りのエクササイズ",
   "favoriteEquipment": "お気に入りの器具",
+  "favoriteWorkoutTypes": "好みのワークアウトタイプ",
+  "workoutTypeStrength": "筋力",
+  "workoutTypeCircuit": "サーキット",
+  "workoutTypeEmom": "EMOM",
+  "workoutTypeAmrap": "AMRAP",
+  "workoutTypeHiit": "HIIT",
+  "workoutTypeForTime": "タイムトライアル",
+  "workoutTypeEndurance": "持久力",
+  "workoutTypeMobility": "モビリティ",
 
   "failedToUpdateProfile": "プロフィールの更新に失敗しました",
 
@@ -159,6 +169,7 @@
 
   "reasoning": "推論",
   "strategy": "戦略",
+  "typeSelection": "タイプ選択",
   "progression": "進行",
   "constraints": "制約",
   "researchApplied": "適用された研究",

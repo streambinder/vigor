@@ -345,6 +345,28 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (r.constraints.isNotEmpty)
+                  _buildReasoningSection(
+                    title: l10n.constraints,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: r.constraints.map((c) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('• '),
+                            Expanded(child: Text(c)),
+                          ],
+                        ),
+                      )).toList(),
+                    ),
+                  ),
+                if (r.typeSelection.isNotEmpty)
+                  _buildReasoningSection(
+                    title: l10n.typeSelection,
+                    child: Text(r.typeSelection),
+                  ),
                 _buildReasoningSection(
                   title: l10n.strategy,
                   child: Text(r.strategy),
@@ -373,23 +395,6 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                           ),
                         )),
                       ],
-                    ),
-                  ),
-                if (r.constraints.isNotEmpty)
-                  _buildReasoningSection(
-                    title: l10n.constraints,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: r.constraints.map((c) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('• '),
-                            Expanded(child: Text(c)),
-                          ],
-                        ),
-                      )).toList(),
                     ),
                   ),
                 if (r.factsApplied.isNotEmpty)

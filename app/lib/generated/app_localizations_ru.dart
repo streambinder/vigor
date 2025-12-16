@@ -313,10 +313,41 @@ class AppLocalizationsRu extends AppLocalizations {
       '(Необязательно - оборудование, которое вы предпочитаете)';
 
   @override
+  String get optionalWorkoutTypesPrefer =>
+      '(Необязательно - предпочитаемые стили тренировок)';
+
+  @override
   String get favoriteExercises => 'Любимые Упражнения';
 
   @override
   String get favoriteEquipment => 'Любимое Оборудование';
+
+  @override
+  String get favoriteWorkoutTypes => 'Предпочитаемые Типы Тренировок';
+
+  @override
+  String get workoutTypeStrength => 'Сила';
+
+  @override
+  String get workoutTypeCircuit => 'Круговая';
+
+  @override
+  String get workoutTypeEmom => 'EMOM';
+
+  @override
+  String get workoutTypeAmrap => 'AMRAP';
+
+  @override
+  String get workoutTypeHiit => 'HIIT';
+
+  @override
+  String get workoutTypeForTime => 'На время';
+
+  @override
+  String get workoutTypeEndurance => 'Выносливость';
+
+  @override
+  String get workoutTypeMobility => 'Мобильность';
 
   @override
   String get failedToUpdateProfile => 'Не удалось обновить профиль';
@@ -457,6 +488,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get strategy => 'Стратегия';
+
+  @override
+  String get typeSelection => 'Выбор Типа';
 
   @override
   String get progression => 'Прогрессия';

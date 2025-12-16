@@ -110,8 +110,18 @@
   "optionalLeaveEmpty": "(Optional - leer lassen wenn nicht zutreffend)",
   "optionalExercisesPrefer": "(Optional - Übungen, die dir gefallen oder die du bevorzugst)",
   "optionalEquipmentPrefer": "(Optional - Ausrüstung, die du bevorzugt nutzt)",
+  "optionalWorkoutTypesPrefer": "(Optional - Trainingsstile, die du bevorzugst)",
   "favoriteExercises": "Lieblingsübungen",
   "favoriteEquipment": "Lieblingsausrüstung",
+  "favoriteWorkoutTypes": "Bevorzugte Trainingsarten",
+  "workoutTypeStrength": "Kraft",
+  "workoutTypeCircuit": "Zirkel",
+  "workoutTypeEmom": "EMOM",
+  "workoutTypeAmrap": "AMRAP",
+  "workoutTypeHiit": "HIIT",
+  "workoutTypeForTime": "For Time",
+  "workoutTypeEndurance": "Ausdauer",
+  "workoutTypeMobility": "Mobilität",
 
   "failedToUpdateProfile": "Profil konnte nicht aktualisiert werden",
 
@@ -159,6 +169,7 @@
 
   "reasoning": "Begründung",
   "strategy": "Strategie",
+  "typeSelection": "Typauswahl",
   "progression": "Progression",
   "constraints": "Einschränkungen",
   "researchApplied": "Angewandte Forschung",

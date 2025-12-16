@@ -17,7 +17,7 @@ class Report {
   final String? activityId;
   @JsonKey(name: 'user_id', defaultValue: '')
   final String userId;
-  @JsonKey(name: 'created_at')
+  @JsonKey(name: 'created_at', toJson: _dateTimeToJson)
   final DateTime createdAt;
 
   Report({
@@ -32,4 +32,6 @@ class Report {
   factory Report.fromJson(Map<String, dynamic> json) => _$ReportFromJson(json);
 
   Map<String, dynamic> toJson() => _$ReportToJson(this);
+
+  static String _dateTimeToJson(DateTime dt) => dt.toUtc().toIso8601String();
 }

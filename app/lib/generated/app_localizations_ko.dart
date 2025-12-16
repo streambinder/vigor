@@ -303,10 +303,40 @@ class AppLocalizationsKo extends AppLocalizations {
   String get optionalEquipmentPrefer => '(선택사항 - 선호하는 장비)';
 
   @override
+  String get optionalWorkoutTypesPrefer => '(선택사항 - 선호하는 운동 스타일)';
+
+  @override
   String get favoriteExercises => '좋아하는 운동';
 
   @override
   String get favoriteEquipment => '좋아하는 장비';
+
+  @override
+  String get favoriteWorkoutTypes => '선호하는 운동 유형';
+
+  @override
+  String get workoutTypeStrength => '근력';
+
+  @override
+  String get workoutTypeCircuit => '서킷';
+
+  @override
+  String get workoutTypeEmom => 'EMOM';
+
+  @override
+  String get workoutTypeAmrap => 'AMRAP';
+
+  @override
+  String get workoutTypeHiit => 'HIIT';
+
+  @override
+  String get workoutTypeForTime => '타임 트라이얼';
+
+  @override
+  String get workoutTypeEndurance => '지구력';
+
+  @override
+  String get workoutTypeMobility => '유연성';
 
   @override
   String get failedToUpdateProfile => '프로필 업데이트 실패';
@@ -446,6 +476,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get strategy => '전략';
+
+  @override
+  String get typeSelection => '유형 선택';
 
   @override
   String get progression => '진행';
