@@ -86,7 +86,7 @@ type Training struct {
 	Duration    int            `gorm:"not null" json:"duration" prompt:"Total duration in seconds"`
 	Equipment   pq.StringArray `gorm:"type:text[]" json:"equipment" prompt:"-"`
 	References  pq.StringArray `gorm:"type:text[]" json:"references" prompt:"DOI URLs from KNOWLEDGE_FACTS that influenced this training design (empty array if no facts were used)"`
-	Routines    []Routine      `gorm:"foreignKey:TrainingID" json:"routines" prompt:"Set of routines to be performed, where each comprehends the same type of activity. Standard trainings have at least 3 routines, with warmup, work, cooldown."`
+	Routines    []Routine      `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"routines" prompt:"Set of routines to be performed, where each comprehends the same type of activity. Standard trainings have at least 3 routines, with warmup, work, cooldown."`
 	Prompt      datatypes.JSON `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
 	Feedback    string         `json:"feedback" prompt:"-"`
 
