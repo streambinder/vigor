@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -38,13 +39,16 @@ func Logging() fiber.Handler {
 		err := c.Next()
 
 		// log request details
-		logger.Info().
+		event := logger.Info().
 			Str("method", c.Method()).
 			Str("path", c.Path()).
 			Int("status", c.Response().StatusCode()).
 			Dur("duration", time.Since(start)).
-			Str("ip", c.IP()).
-			Msg("request")
+			Str("ip", c.IP())
+		if userID, ok := c.Locals("userID").(uuid.UUID); ok && userID != uuid.Nil {
+			event.Stringer("user_id", userID)
+		}
+		event.Msg("request")
 
 		return err
 	}
