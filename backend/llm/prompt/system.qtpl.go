@@ -92,6 +92,16 @@ You MUST complete the "reasoning" object BEFORE generating training structure. T
 
 Only AFTER completing reasoning should you populate name, description, type, and routines. The name should be a concise 3-4 word title reflecting the training focus (goals and target muscles).
 
+DESCRIPTION FIELD (CRITICAL - synthesize all reasoning):
+The description must be a cohesive 3-5 sentence paragraph that narratively weaves together ALL reasoning fields. Write in second person ("you") addressing the user directly. Include:
+- Why this training type was chosen (from type_selection)
+- The strategic approach (from strategy)
+- Active constraints being respected (from constraints)
+- Progression adjustments from feedback (from progression.adjustments)
+- Applied research insights if any (from facts_applied)
+- How selected exercises target intended muscle groups to serve goals
+Do NOT use bullet points or lists. This should read as a unified, discursive explanation that gives the user a complete understanding of the training design rationale.
+
 TRAINING PHILOSOPHY:
 - Safety over intensity: skip any exercise that could aggravate listed injuries
 - Compound movements before isolation work
@@ -112,23 +122,23 @@ When selecting type: avoid repeating types from recent trainings unless user exp
 
 TRAINING STRUCTURE (required routines in order):
 `)
-//line llm/prompt/system.qtpl:70
+//line llm/prompt/system.qtpl:80
 	if !skipWarmupCooldown {
-//line llm/prompt/system.qtpl:70
+//line llm/prompt/system.qtpl:80
 		qw422016.N().S(`1. warmup: light cardio and bodyweight exercises to elevate heart rate and activate muscles (5-10min). Prioritize jumping jacks, high knees, arm circles, leg swings—not static stretches.
 2. work: main training blocks with appropriate rest periods (bulk of duration)
 3. cooldown: static stretches targeting the specific muscles exercised during the work phase (5min). Match stretches to worked muscle groups.
 `)
-//line llm/prompt/system.qtpl:73
+//line llm/prompt/system.qtpl:83
 	} else {
-//line llm/prompt/system.qtpl:73
+//line llm/prompt/system.qtpl:83
 		qw422016.N().S(`1. work: main training blocks with appropriate rest periods (entire duration)
 
 SKIP WARMUP AND COOLDOWN: The user has requested NO warmup and NO cooldown routines. Generate ONLY the "work" routine. The routines array must contain exactly ONE routine with name "work". Do NOT include any routine named "warmup" or "cooldown".
 `)
-//line llm/prompt/system.qtpl:76
+//line llm/prompt/system.qtpl:86
 	}
-//line llm/prompt/system.qtpl:76
+//line llm/prompt/system.qtpl:86
 	qw422016.N().S(`
 
 EXERCISE SELECTION PRIORITY:
@@ -186,7 +196,7 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
     ]
   },
   "name": "Upper Body Strength",
-  "description": "Upper body session avoiding overhead work. Horizontal pressing and pulling with arm isolation finishers.",
+  "description": "This strength-focused session targets your chest, upper back, and arms while respecting your shoulder injury by avoiding all overhead movements. Based on your feedback that bench press felt too easy, we've increased the weight by 2kg to continue your progressive overload. The workout emphasizes horizontal pressing and pulling with heavy loads and full recovery periods between sets, finishing with targeted arm isolation work to round out your upper body development.",
   "type": "strength",
   "duration": 1800,
   "references": [],
@@ -244,31 +254,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   ]
 }
 `)
-//line llm/prompt/system.qtpl:190
+//line llm/prompt/system.qtpl:200
 }
 
-//line llm/prompt/system.qtpl:190
+//line llm/prompt/system.qtpl:200
 func WriteSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool) {
-//line llm/prompt/system.qtpl:190
+//line llm/prompt/system.qtpl:200
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:190
+//line llm/prompt/system.qtpl:200
 	StreamSystem(qw422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:190
+//line llm/prompt/system.qtpl:200
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:190
+//line llm/prompt/system.qtpl:200
 }
 
-//line llm/prompt/system.qtpl:190
+//line llm/prompt/system.qtpl:200
 func System(skipWarmupCooldown bool) string {
-//line llm/prompt/system.qtpl:190
+//line llm/prompt/system.qtpl:200
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:190
+//line llm/prompt/system.qtpl:200
 	WriteSystem(qb422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:190
+//line llm/prompt/system.qtpl:200
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:190
+//line llm/prompt/system.qtpl:200
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:190
+//line llm/prompt/system.qtpl:200
 	return qs422016
-//line llm/prompt/system.qtpl:190
+//line llm/prompt/system.qtpl:200
 }
