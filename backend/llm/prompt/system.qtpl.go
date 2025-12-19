@@ -118,27 +118,33 @@ TRAINING TYPES (use exactly one, prioritize variety based on RECENT_HISTORY and 
 - endurance: steady-state cardio, duration-based activities
 - mobility: flexibility and recovery focus, hold times, no load
 
+EQUIPMENT-TYPE ALIGNMENT (match equipment style to training type):
+- Strength/endurance types: prefer gym equipment (barbells, dumbbells, cable machines, weight plates, benches). These support heavy loading, controlled tempos, and longer rest periods typical of powerlifting/bodybuilding.
+- Circuit/emom/amrap/hiit/for_time types: prefer calisthenics equipment (pull-up bars, push-up bars, parallettes, weighted vests, kettlebells, resistance bands). These support quick transitions, bodyweight movements, and minimal setup between exercises.
+- When user has mixed equipment, select exercises that match the chosen training type's style.
+- Bodyweight exercises fit all types but are especially suited for circuit-style workouts.
+
 When selecting type: avoid repeating types from recent trainings unless user explicitly requests it. Distribute types across sessions to ensure training variety over time.
 
 TRAINING STRUCTURE (required routines in order):
 `)
-//line llm/prompt/system.qtpl:80
+//line llm/prompt/system.qtpl:86
 	if !skipWarmupCooldown {
-//line llm/prompt/system.qtpl:80
+//line llm/prompt/system.qtpl:86
 		qw422016.N().S(`1. warmup: light cardio and bodyweight exercises to elevate heart rate and activate muscles (5-10min). Prioritize jumping jacks, high knees, arm circles, leg swings—not static stretches.
 2. work: main training blocks with appropriate rest periods (bulk of duration)
 3. cooldown: static stretches targeting the specific muscles exercised during the work phase (5min). Match stretches to worked muscle groups.
 `)
-//line llm/prompt/system.qtpl:83
+//line llm/prompt/system.qtpl:89
 	} else {
-//line llm/prompt/system.qtpl:83
+//line llm/prompt/system.qtpl:89
 		qw422016.N().S(`1. work: main training blocks with appropriate rest periods (entire duration)
 
 SKIP WARMUP AND COOLDOWN: The user has requested NO warmup and NO cooldown routines. Generate ONLY the "work" routine. The routines array must contain exactly ONE routine with name "work". Do NOT include any routine named "warmup" or "cooldown".
 `)
-//line llm/prompt/system.qtpl:86
+//line llm/prompt/system.qtpl:92
 	}
-//line llm/prompt/system.qtpl:86
+//line llm/prompt/system.qtpl:92
 	qw422016.N().S(`
 
 EXERCISE SELECTION PRIORITY:
@@ -254,31 +260,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   ]
 }
 `)
-//line llm/prompt/system.qtpl:200
+//line llm/prompt/system.qtpl:206
 }
 
-//line llm/prompt/system.qtpl:200
+//line llm/prompt/system.qtpl:206
 func WriteSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool) {
-//line llm/prompt/system.qtpl:200
+//line llm/prompt/system.qtpl:206
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:200
+//line llm/prompt/system.qtpl:206
 	StreamSystem(qw422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:200
+//line llm/prompt/system.qtpl:206
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:200
+//line llm/prompt/system.qtpl:206
 }
 
-//line llm/prompt/system.qtpl:200
+//line llm/prompt/system.qtpl:206
 func System(skipWarmupCooldown bool) string {
-//line llm/prompt/system.qtpl:200
+//line llm/prompt/system.qtpl:206
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:200
+//line llm/prompt/system.qtpl:206
 	WriteSystem(qb422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:200
+//line llm/prompt/system.qtpl:206
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:200
+//line llm/prompt/system.qtpl:206
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:200
+//line llm/prompt/system.qtpl:206
 	return qs422016
-//line llm/prompt/system.qtpl:200
+//line llm/prompt/system.qtpl:206
 }

@@ -62,12 +62,13 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string) ([]mode
 	// 3. Use subqueries to check equipment matching via exercise_equipment join table
 	// 4. Filter: bodyweight OR all equipment matches user equipment
 	// 5. Filter by exercise type for work phase
-	// 6. Order by exercise embedding distance
+	// 6. Order by: equipment-using exercises first, then by embedding distance
 	query := database.Knowledge.
 		Table("exercise_embeddings").
 		Select(`DISTINCT exercise_embeddings.exercise_id,
 		        exercise_embeddings.text,
 		        exercise_embeddings.embedding <=> ? as distance,
+		        EXISTS (SELECT 1 FROM exercise_equipment WHERE exercise_equipment.exercise_id = exercises.id) as has_equipment,
 		        exercises.*`, pgvector.NewVector(exerciseEmbedding)).
 		Joins("JOIN exercises ON exercises.id = exercise_embeddings.exercise_id").
 		Where("exercises.type IN ?", model.ActivityWorkTypes)
@@ -101,8 +102,9 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string) ([]mode
 	}
 
 	// Wrap in outer query to shuffle and limit
+	// Order by has_equipment DESC to prefer equipment-using exercises, then by semantic similarity
 	if err := database.Knowledge.
-		Table("(?) AS pool", query.Order("distance ASC").Limit(MaxWorkExercises*3)).
+		Table("(?) AS pool", query.Order("has_equipment DESC, distance ASC").Limit(MaxWorkExercises*3)).
 		Order("RANDOM()").
 		Limit(MaxWorkExercises).
 		Scan(&results).
