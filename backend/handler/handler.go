@@ -35,6 +35,7 @@ func Init() *fiber.App {
 	initOauth(app)
 	initUser(app)
 	initGym(app)
+	initEquipment(app)
 	initTraining(app)
 
 	return app

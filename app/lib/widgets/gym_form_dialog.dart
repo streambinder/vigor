@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../generated/app_localizations.dart';
 import '../models/gym.dart';
+import '../services/gym_service.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
@@ -16,9 +17,11 @@ class GymFormDialog extends StatefulWidget {
 
 class _GymFormDialogState extends State<GymFormDialog> {
   late TextEditingController _nameController;
+  final GymService _gymService = GymService();
 
   List<String> _equipment = [];
   final TextEditingController _equipmentInputController = TextEditingController();
+  bool _loadingEquipment = false;
 
   @override
   void initState() {
@@ -48,6 +51,25 @@ class _GymFormDialogState extends State<GymFormDialog> {
     setState(() {
       _equipment.remove(equipment);
     });
+  }
+
+  Future<void> _addAllEquipment() async {
+    setState(() => _loadingEquipment = true);
+    final response = await _gymService.getAvailableEquipment();
+    setState(() => _loadingEquipment = false);
+
+    if (!mounted) return;
+
+    if (response.isSuccess && response.data != null) {
+      setState(() {
+        _equipment.addAll(response.data!);
+      });
+    } else {
+      AdaptiveNotification.showError(
+        context: context,
+        message: AppLocalizations.of(context).failedToLoadEquipment,
+      );
+    }
   }
 
   void _submit() {
@@ -114,14 +136,29 @@ class _GymFormDialogState extends State<GymFormDialog> {
                 placeholder: l10n.gymNamePlaceholder,
               ),
               const SizedBox(height: 24),
-              Text(
-                l10n.equipment,
-                style: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
-                    : const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.equipment,
+                    style: PlatformHelper.useLiquidGlass
+                        ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
+                        : const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                  ),
+                  TextButton(
+                    onPressed: _loadingEquipment ? null : _addAllEquipment,
+                    child: _loadingEquipment
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(l10n.addAllEquipment),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               Row(

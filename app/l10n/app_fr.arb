@@ -236,6 +236,8 @@
   "gymNamePlaceholder": "ex. Salle Maison, Basic Fit",
   "noEquipmentAddedYet": "Aucun équipement ajouté",
   "pleaseEnterGymName": "Merci d'entrer le nom de la salle",
+  "addAllEquipment": "Tout Ajouter",
+  "failedToLoadEquipment": "Impossible de charger l'équipement",
 
   "selectUser": "Sélectionner un Utilisateur",
   "searchByName": "Rechercher par nom",

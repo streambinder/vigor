@@ -693,6 +693,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get pleaseEnterGymName => 'Пожалуйста, введите название зала';
 
   @override
+  String get addAllEquipment => 'Добавить Все';
+
+  @override
+  String get failedToLoadEquipment => 'Не удалось загрузить оборудование';
+
+  @override
   String get selectUser => 'Выбрать Пользователя';
 
   @override

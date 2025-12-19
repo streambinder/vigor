@@ -3,15 +3,39 @@ import '../models/gym.dart';
 import 'app_logger.dart';
 import 'authenticated_api_service.dart';
 import 'secure_storage_service.dart';
+import 'api_service.dart';
 
 class GymService {
   final AuthenticatedApiService _apiService;
+  final ApiService _publicApiService;
 
   GymService({
     AuthenticatedApiService? apiService,
     SecureStorageService? storageService,
-  }) : _apiService = apiService ??
-            AuthenticatedApiService(storageService: storageService);
+    ApiService? publicApiService,
+  })  : _apiService = apiService ??
+            AuthenticatedApiService(storageService: storageService),
+        _publicApiService = publicApiService ?? ApiService();
+
+  Future<ApiResponse<List<String>>> getAvailableEquipment() async {
+    AppLogger.debug('[GymService] Fetching available equipment');
+    final response = await _publicApiService.get('/equipment');
+    if (response.isSuccess && response.data != null) {
+      try {
+        final equipment = (response.data!['equipment'] as List).cast<String>();
+        AppLogger.info('[GymService] Fetched ${equipment.length} equipment');
+        return ApiResponse.success(equipment, response.statusCode);
+      } catch (e) {
+        AppLogger.error('[GymService] failed to parse equipment', e);
+        return ApiResponse.error('Failed to parse equipment', response.statusCode);
+      }
+    }
+    AppLogger.error('[GymService] Failed to fetch equipment: ${response.error}');
+    return ApiResponse.error(
+      response.error ?? 'Failed to fetch equipment',
+      response.statusCode,
+    );
+  }
 
   Future<ApiResponse<List<Gym>>> getGyms() async {
     AppLogger.debug('[GymService] Fetching gyms');

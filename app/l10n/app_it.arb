@@ -236,6 +236,8 @@
   "gymNamePlaceholder": "es. Palestra Casa, Virgin Active",
   "noEquipmentAddedYet": "Nessuna attrezzatura aggiunta",
   "pleaseEnterGymName": "Per favore inserisci il nome della palestra",
+  "addAllEquipment": "Aggiungi Tutto",
+  "failedToLoadEquipment": "Impossibile caricare le attrezzature",
 
   "selectUser": "Seleziona Utente",
   "searchByName": "Cerca per nome",

@@ -236,6 +236,8 @@
   "gymNamePlaceholder": "例如：家庭健身房、威尔士",
   "noEquipmentAddedYet": "尚未添加设备",
   "pleaseEnterGymName": "请输入健身房名称",
+  "addAllEquipment": "全部添加",
+  "failedToLoadEquipment": "加载设备失败",
 
   "selectUser": "选择用户",
   "searchByName": "按名称搜索",

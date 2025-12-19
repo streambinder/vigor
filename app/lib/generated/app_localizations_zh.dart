@@ -675,6 +675,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pleaseEnterGymName => '请输入健身房名称';
 
   @override
+  String get addAllEquipment => '全部添加';
+
+  @override
+  String get failedToLoadEquipment => '加载设备失败';
+
+  @override
   String get selectUser => '选择用户';
 
   @override

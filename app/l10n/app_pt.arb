@@ -236,6 +236,8 @@
   "gymNamePlaceholder": "ex. Ginásio Casa, Holmes Place",
   "noEquipmentAddedYet": "Nenhum equipamento adicionado",
   "pleaseEnterGymName": "Por favor, insere o nome do ginásio",
+  "addAllEquipment": "Adicionar Tudo",
+  "failedToLoadEquipment": "Falha ao carregar equipamentos",
 
   "selectUser": "Selecionar Utilizador",
   "searchByName": "Pesquisar por nome",

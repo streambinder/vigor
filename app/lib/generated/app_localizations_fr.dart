@@ -700,6 +700,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get pleaseEnterGymName => 'Merci d\'entrer le nom de la salle';
 
   @override
+  String get addAllEquipment => 'Tout Ajouter';
+
+  @override
+  String get failedToLoadEquipment => 'Impossible de charger l\'équipement';
+
+  @override
   String get selectUser => 'Sélectionner un Utilisateur';
 
   @override

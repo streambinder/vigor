@@ -236,6 +236,8 @@
   "gymNamePlaceholder": "z.B. Home Gym, McFit",
   "noEquipmentAddedYet": "Noch keine Ausrüstung hinzugefügt",
   "pleaseEnterGymName": "Bitte gib den Namen des Fitnessstudios ein",
+  "addAllEquipment": "Alle Hinzufügen",
+  "failedToLoadEquipment": "Ausrüstung konnte nicht geladen werden",
 
   "selectUser": "Benutzer Auswählen",
   "searchByName": "Nach Name suchen",

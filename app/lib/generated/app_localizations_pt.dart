@@ -693,6 +693,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get pleaseEnterGymName => 'Por favor, insere o nome do ginásio';
 
   @override
+  String get addAllEquipment => 'Adicionar Tudo';
+
+  @override
+  String get failedToLoadEquipment => 'Falha ao carregar equipamentos';
+
+  @override
   String get selectUser => 'Selecionar Utilizador';
 
   @override

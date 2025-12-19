@@ -700,6 +700,12 @@ class AppLocalizationsIt extends AppLocalizations {
       'Per favore inserisci il nome della palestra';
 
   @override
+  String get addAllEquipment => 'Aggiungi Tutto';
+
+  @override
+  String get failedToLoadEquipment => 'Impossibile caricare le attrezzature';
+
+  @override
   String get selectUser => 'Seleziona Utente';
 
   @override

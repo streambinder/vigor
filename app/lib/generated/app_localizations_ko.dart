@@ -676,6 +676,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get pleaseEnterGymName => '헬스장 이름을 입력해 주세요';
 
   @override
+  String get addAllEquipment => '모두 추가';
+
+  @override
+  String get failedToLoadEquipment => '장비를 불러오지 못했습니다';
+
+  @override
   String get selectUser => '사용자 선택';
 
   @override

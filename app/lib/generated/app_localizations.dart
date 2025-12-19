@@ -1350,6 +1350,18 @@ abstract class AppLocalizations {
   /// **'Please enter a gym name'**
   String get pleaseEnterGymName;
 
+  /// No description provided for @addAllEquipment.
+  ///
+  /// In en, this message translates to:
+  /// **'Add All'**
+  String get addAllEquipment;
+
+  /// No description provided for @failedToLoadEquipment.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load equipment'**
+  String get failedToLoadEquipment;
+
   /// No description provided for @selectUser.
   ///
   /// In en, this message translates to:

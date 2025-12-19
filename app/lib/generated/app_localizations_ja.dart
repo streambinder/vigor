@@ -677,6 +677,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pleaseEnterGymName => 'ジム名を入力してください';
 
   @override
+  String get addAllEquipment => 'すべて追加';
+
+  @override
+  String get failedToLoadEquipment => '器具の読み込みに失敗しました';
+
+  @override
   String get selectUser => 'ユーザーを選択';
 
   @override

@@ -698,6 +698,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get pleaseEnterGymName => 'Bitte gib den Namen des Fitnessstudios ein';
 
   @override
+  String get addAllEquipment => 'Alle Hinzufügen';
+
+  @override
+  String get failedToLoadEquipment => 'Ausrüstung konnte nicht geladen werden';
+
+  @override
   String get selectUser => 'Benutzer Auswählen';
 
   @override

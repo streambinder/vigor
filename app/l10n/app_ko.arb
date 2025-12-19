@@ -236,6 +236,8 @@
   "gymNamePlaceholder": "예: 홈짐, 스포애니",
   "noEquipmentAddedYet": "아직 추가된 장비가 없습니다",
   "pleaseEnterGymName": "헬스장 이름을 입력해 주세요",
+  "addAllEquipment": "모두 추가",
+  "failedToLoadEquipment": "장비를 불러오지 못했습니다",
 
   "selectUser": "사용자 선택",
   "searchByName": "이름으로 검색",

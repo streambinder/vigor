@@ -236,6 +236,8 @@
   "gymNamePlaceholder": "напр. Домашний Зал, World Class",
   "noEquipmentAddedYet": "Оборудование ещё не добавлено",
   "pleaseEnterGymName": "Пожалуйста, введите название зала",
+  "addAllEquipment": "Добавить Все",
+  "failedToLoadEquipment": "Не удалось загрузить оборудование",
 
   "selectUser": "Выбрать Пользователя",
   "searchByName": "Поиск по имени",

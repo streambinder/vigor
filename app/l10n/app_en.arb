@@ -361,6 +361,8 @@
   "gymNamePlaceholder": "e.g., Home Gym, LA Fitness",
   "noEquipmentAddedYet": "No equipment added yet",
   "pleaseEnterGymName": "Please enter a gym name",
+  "addAllEquipment": "Add All",
+  "failedToLoadEquipment": "Failed to load equipment",
 
   "selectUser": "Select User",
   "searchByName": "Search by name",

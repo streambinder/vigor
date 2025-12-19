@@ -236,6 +236,8 @@
   "gymNamePlaceholder": "例：ホームジム、エニタイム",
   "noEquipmentAddedYet": "まだ器具が追加されていません",
   "pleaseEnterGymName": "ジム名を入力してください",
+  "addAllEquipment": "すべて追加",
+  "failedToLoadEquipment": "器具の読み込みに失敗しました",
 
   "selectUser": "ユーザーを選択",
   "searchByName": "名前で検索",
