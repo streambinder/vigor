@@ -191,14 +191,17 @@ class _ActivityScreenState extends State<ActivityScreen> {
       }); // Most recent first
 
     return ListView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(20.0),
       children: [
         // Available Trainings Section
-        Text(
-          l10n.availableTrainings,
-          style: PlatformHelper.useLiquidGlass
-              ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
-              : Theme.of(context).textTheme.titleLarge,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Text(
+            l10n.availableTrainings,
+            style: PlatformHelper.useLiquidGlass
+                ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
+                : Theme.of(context).textTheme.titleLarge,
+          ),
         ),
         const SizedBox(height: 12),
 
@@ -216,11 +219,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
         // Past Trainings Section (only show if there are past trainings)
         if (pastTrainings.isNotEmpty) ...[
-          Text(
-            l10n.pastTrainings,
-            style: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
-                : Theme.of(context).textTheme.titleLarge,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              l10n.pastTrainings,
+              style: PlatformHelper.useLiquidGlass
+                  ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
+                  : Theme.of(context).textTheme.titleLarge,
+            ),
           ),
           const SizedBox(height: 12),
           ...pastTrainings.map((training) {
@@ -299,140 +305,33 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 ),
                 if (isCompleted) ...[
                   // for completed trainings: show completion time first, then other labels
-                  const SizedBox(height: 12),
-                  Row(
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 4,
                     children: [
-                      Icon(
-                        Icons.check_circle,
-                        size: 16,
+                      _buildMetaLabel(
+                        context,
+                        icon: Icons.check_circle,
+                        text: _formatDate(training.completedAt ?? training.createdAt),
                         color: PlatformHelper.useLiquidGlass
                             ? LiquidGlassTheme.successColor
                             : Colors.green[600],
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        _formatDate(training.completedAt ?? training.createdAt),
-                        style: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle.copyWith(
-                                color: LiquidGlassTheme.successColor,
-                              )
-                            : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.green[600],
-                                ),
-                      ),
-                      const SizedBox(width: 16),
-                      if (partnerCount > 0) ...[
-                        Icon(
-                          Icons.people,
-                          size: 16,
-                          color: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle.color
-                              : Colors.grey[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '$peopleCount',
-                          style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle
-                              : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
-                        ),
-                        const SizedBox(width: 16),
-                      ],
-                      if (training.gym != null) ...[
-                        Icon(
-                          Icons.location_on,
-                          size: 16,
-                          color: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle.color
-                              : Colors.grey[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          training.gym!.name,
-                          style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle
-                              : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
-                        ),
-                        const SizedBox(width: 16),
-                      ],
-                      Icon(
-                        Icons.fitness_center,
-                        size: 16,
-                        color: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle.color
-                            : Colors.grey[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${training.equipment.length}',
-                        style: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle
-                            : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                      ),
-                      const SizedBox(width: 16),
-                      Icon(
-                        Icons.tune,
-                        size: 16,
-                        color: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle.color
-                            : Colors.grey[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        training.type,
-                        style: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle
-                            : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                      ),
-                      const SizedBox(width: 16),
-                      if (training.parentId != null) ...[
-                        Icon(
-                          Icons.copy,
-                          size: 16,
-                          color: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle.color
-                              : Colors.grey[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          l10n.copied,
-                          style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle
-                              : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
-                        ),
-                        const SizedBox(width: 16),
-                      ],
-                      Icon(
-                        Icons.schedule,
-                        size: 16,
-                        color: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle.color
-                            : Colors.grey[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        _formatDuration(l10n, training.duration),
-                        style: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle
-                            : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                      ),
+                      if (partnerCount > 0)
+                        _buildMetaLabel(context, icon: Icons.people, text: '$peopleCount'),
+                      if (training.gym != null)
+                        _buildMetaLabel(context, icon: Icons.location_on, text: training.gym!.name),
+                      _buildMetaLabel(context, icon: Icons.fitness_center, text: '${training.equipment.length}'),
+                      _buildMetaLabel(context, icon: Icons.tune, text: training.type),
+                      if (training.parentId != null)
+                        _buildMetaLabel(context, icon: Icons.copy, text: l10n.copied),
+                      _buildMetaLabel(context, icon: Icons.schedule, text: _formatDuration(l10n, training.duration)),
                     ],
                   ),
                 ] else ...[
                   // for available trainings: show full details
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     training.description,
                     style: PlatformHelper.useLiquidGlass
@@ -441,159 +340,32 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 12),
-                  Row(
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 4,
                     children: [
-                      if (partnerCount > 0) ...[
-                        Icon(
-                          Icons.people,
-                          size: 16,
-                          color: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle.color
-                              : Colors.grey[600],
+                      if (partnerCount > 0)
+                        _buildMetaLabel(context, icon: Icons.people, text: '$peopleCount'),
+                      if (training.gym != null)
+                        _buildMetaLabel(context, icon: Icons.location_on, text: training.gym!.name),
+                      _buildMetaLabel(context, icon: Icons.fitness_center, text: '${training.equipment.length}'),
+                      _buildMetaLabel(context, icon: Icons.tune, text: training.type),
+                      if (isStale)
+                        _buildMetaLabel(
+                          context,
+                          icon: Icons.warning,
+                          text: l10n.stale,
+                          color: PlatformHelper.useLiquidGlass ? Colors.orange[700] : Colors.orange[600],
+                          bold: true,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '$peopleCount',
-                          style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle
-                              : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
-                        ),
-                        const SizedBox(width: 16),
-                      ],
-                      if (training.gym != null) ...[
-                        Icon(
-                          Icons.location_on,
-                          size: 16,
-                          color: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle.color
-                              : Colors.grey[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          training.gym!.name,
-                          style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle
-                              : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
-                        ),
-                        const SizedBox(width: 16),
-                      ],
-                      Icon(
-                        Icons.fitness_center,
-                        size: 16,
-                        color: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle.color
-                            : Colors.grey[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${training.equipment.length}',
-                        style: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle
-                            : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                      ),
-                      const SizedBox(width: 16),
-                      Icon(
-                        Icons.tune,
-                        size: 16,
-                        color: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle.color
-                            : Colors.grey[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        training.type,
-                        style: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle
-                            : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                      ),
-                      const SizedBox(width: 16),
-                      if (isStale) ...[
-                        Icon(
-                          Icons.warning,
-                          size: 16,
-                          color: PlatformHelper.useLiquidGlass
-                              ? Colors.orange[700]
-                              : Colors.orange[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          l10n.stale,
-                          style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle.copyWith(
-                                  color: Colors.orange[700],
-                                  fontWeight: FontWeight.w600,
-                                )
-                              : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.orange[600],
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                        ),
-                        const SizedBox(width: 16),
-                      ],
-                      if (training.parentId != null) ...[
-                        Icon(
-                          Icons.copy,
-                          size: 16,
-                          color: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle.color
-                              : Colors.grey[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          l10n.copied,
-                          style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle
-                              : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
-                        ),
-                        const SizedBox(width: 16),
-                      ],
-                      Icon(
-                        Icons.calendar_today,
-                        size: 16,
-                        color: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle.color
-                            : Colors.grey[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        _formatDate(training.createdAt),
-                        style: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle
-                            : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                      ),
-                      const SizedBox(width: 16),
-                      Icon(
-                        Icons.schedule,
-                        size: 16,
-                        color: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle.color
-                            : Colors.grey[600],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        _formatDuration(l10n, training.duration),
-                        style: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.captionStyle
-                            : Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                      ),
+                      if (training.parentId != null)
+                        _buildMetaLabel(context, icon: Icons.copy, text: l10n.copied),
+                      _buildMetaLabel(context, icon: Icons.calendar_today, text: _formatDate(training.createdAt)),
+                      _buildMetaLabel(context, icon: Icons.schedule, text: _formatDuration(l10n, training.duration)),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   // Timer button
                   SizedBox(
                     width: double.infinity,
@@ -629,6 +401,38 @@ class _ActivityScreenState extends State<ActivityScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildMetaLabel(
+    BuildContext context, {
+    required IconData icon,
+    required String text,
+    Color? color,
+    bool bold = false,
+  }) {
+    final defaultColor = PlatformHelper.useLiquidGlass
+        ? LiquidGlassTheme.captionStyle.color
+        : Colors.grey[600];
+    final labelColor = color ?? defaultColor;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: labelColor),
+        const SizedBox(width: 3),
+        Text(
+          text,
+          style: PlatformHelper.useLiquidGlass
+              ? LiquidGlassTheme.captionStyle.copyWith(
+                  color: labelColor,
+                  fontWeight: bold ? FontWeight.w600 : null,
+                )
+              : Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: labelColor,
+                    fontWeight: bold ? FontWeight.w600 : null,
+                  ),
+        ),
+      ],
     );
   }
 }

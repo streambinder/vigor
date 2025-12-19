@@ -31,7 +31,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get storageErrorMessage =>
-      'Для защиты ваших данных приложению требуется безопасное хранилище. Пожалуйста, проверьте настройки браузера и попробуйте снова.';
+      'Требуется безопасное хранилище. Проверьте настройки.';
 
   @override
   String get signInWithGoogle => 'Войти через Google';
@@ -67,8 +67,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get readyToTrain => 'Готовы тренироваться?';
 
   @override
-  String get generateTrainingDescription =>
-      'Создайте персонализированную тренировку на основе вашего профиля и целей';
+  String get generateTrainingDescription => 'Создайте тренировку под ваши цели';
 
   @override
   String get generateTraining => 'Создать Тренировку';
@@ -93,7 +92,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String deleteGymConfirmation(String name) {
-    return 'Вы уверены, что хотите удалить \"$name\"?';
+    return 'Удалить \"$name\"?';
   }
 
   @override
@@ -103,14 +102,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get delete => 'Удалить';
 
   @override
-  String get logoutConfirmation => 'Вы уверены, что хотите выйти?';
+  String get logoutConfirmation => 'Выйти?';
 
   @override
   String get deleteAccount => 'Удалить Аккаунт';
 
   @override
-  String get deleteAccountConfirmation =>
-      'Вы уверены, что хотите удалить свой аккаунт? Это действие необратимо.';
+  String get deleteAccountConfirmation => 'Удалить аккаунт? Это необратимо.';
 
   @override
   String get accountDeletedSuccessfully => 'Аккаунт успешно удалён';
@@ -199,7 +197,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get myGyms => 'Мои Залы';
+  String get myGyms => 'Залы';
 
   @override
   String get addGym => 'Добавить Зал';
@@ -229,12 +227,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get completeYourProfile => 'Заполните Свой Профиль';
 
   @override
-  String get updateYourProfileInfo =>
-      'Обновите информацию вашего профиля ниже.';
+  String get updateYourProfileInfo => 'Обновите свой профиль ниже.';
 
   @override
-  String get pleaseCompleteProfile =>
-      'Пожалуйста, заполните свой профиль. Поля, отмеченные *, обязательны.';
+  String get pleaseCompleteProfile => 'Заполните профиль. * = обязательно.';
 
   @override
   String get firstName => 'Имя';
@@ -301,20 +297,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get saveProfile => 'Сохранить Профиль';
 
   @override
-  String get optionalLeaveEmpty =>
-      '(Необязательно - оставьте пустым, если не применимо)';
+  String get optionalLeaveEmpty => '(Необязательно)';
 
   @override
-  String get optionalExercisesPrefer =>
-      '(Необязательно - упражнения, которые вам нравятся)';
+  String get optionalExercisesPrefer => '(Необязательно)';
 
   @override
-  String get optionalEquipmentPrefer =>
-      '(Необязательно - оборудование, которое вы предпочитаете)';
+  String get optionalEquipmentPrefer => '(Необязательно)';
 
   @override
-  String get optionalWorkoutTypesPrefer =>
-      '(Необязательно - предпочитаемые стили тренировок)';
+  String get optionalWorkoutTypesPrefer => '(Необязательно)';
 
   @override
   String get favoriteExercises => 'Любимые Упражнения';
@@ -359,11 +351,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noTrainingsYet => 'Тренировок пока нет';
 
   @override
-  String get generateFirstTraining =>
-      'Создайте свою первую тренировку на вкладке Главная';
+  String get generateFirstTraining => 'Создайте первую тренировку из Главной';
 
   @override
-  String get noTrainingAvailable => 'Тренировок нет. Начните создавать.';
+  String get noTrainingAvailable => 'Нет тренировок. Создайте.';
 
   @override
   String get availableTrainings => 'Доступные тренировки';
@@ -421,12 +412,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String deleteTrainingConfirmation(String name) {
-    return 'Вы уверены, что хотите удалить \"$name\"? Это действие необратимо.';
+    return 'Удалить \"$name\"? Это необратимо.';
   }
 
   @override
   String leaveTrainingConfirmation(String name) {
-    return 'Вы уверены, что хотите покинуть \"$name\"? Вы больше не увидите эту тренировку.';
+    return 'Покинуть \"$name\"? Вы больше не увидите её.';
   }
 
   @override
@@ -550,7 +541,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get references => 'Ссылки';
 
   @override
-  String get describeIssue => 'Опишите проблему с этой тренировкой...';
+  String get describeIssue => 'Опишите проблему...';
 
   @override
   String get submit => 'Отправить';
@@ -604,7 +595,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get exitTraining => 'Выйти из Тренировки?';
 
   @override
-  String get whatWouldYouLikeToDo => 'Что вы хотите сделать?';
+  String get whatWouldYouLikeToDo => 'Что делать?';
 
   @override
   String get exit => 'Выйти';
@@ -613,8 +604,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get continueTraining => 'Продолжить';
 
   @override
-  String get failedToMarkComplete =>
-      'Не удалось отметить тренировку как завершённую';
+  String get failedToMarkComplete => 'Не удалось завершить тренировку';
 
   @override
   String get durationMinutes => 'Продолжительность (минуты)';
@@ -629,12 +619,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get custom => 'Настраиваемое';
 
   @override
-  String get noEquipmentBodyweightOnly =>
-      'Без оборудования - только упражнения с собственным весом';
+  String get noEquipmentBodyweightOnly => 'Только с собственным весом';
 
   @override
-  String get noGymsDefinedCreateOne =>
-      'Залы не определены. Создайте один в настройках профиля.';
+  String get noGymsDefinedCreateOne => 'Нет залов. Создайте в профиле.';
 
   @override
   String get selectAGym => 'Выбрать зал';
@@ -643,8 +631,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get addEquipment => 'Добавить Оборудование';
 
   @override
-  String get addEquipmentAvailable =>
-      'Добавьте оборудование, которое у вас есть';
+  String get addEquipmentAvailable => 'Добавьте доступное оборудование';
 
   @override
   String get includeWarmupCooldown => 'Включить разминку и заминку';

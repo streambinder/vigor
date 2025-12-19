@@ -159,7 +159,7 @@ abstract class AppLocalizations {
   /// No description provided for @storageErrorMessage.
   ///
   /// In en, this message translates to:
-  /// **'This app requires secure storage to protect your data. Please check your browser settings and try again.'**
+  /// **'Secure storage required. Check browser settings.'**
   String get storageErrorMessage;
 
   /// No description provided for @signInWithGoogle.
@@ -219,7 +219,7 @@ abstract class AppLocalizations {
   /// No description provided for @generateTrainingDescription.
   ///
   /// In en, this message translates to:
-  /// **'Generate a personalized training based on your profile and goals'**
+  /// **'Create a workout tailored to your goals'**
   String get generateTrainingDescription;
 
   /// No description provided for @generateTraining.
@@ -267,7 +267,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteGymConfirmation.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete \"{name}\"?'**
+  /// **'Delete \"{name}\"?'**
   String deleteGymConfirmation(String name);
 
   /// No description provided for @cancel.
@@ -285,7 +285,7 @@ abstract class AppLocalizations {
   /// No description provided for @logoutConfirmation.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to logout?'**
+  /// **'Logout?'**
   String get logoutConfirmation;
 
   /// No description provided for @deleteAccount.
@@ -297,7 +297,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountConfirmation.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete your account? This action cannot be undone.'**
+  /// **'Delete your account? This cannot be undone.'**
   String get deleteAccountConfirmation;
 
   /// No description provided for @accountDeletedSuccessfully.
@@ -459,7 +459,7 @@ abstract class AppLocalizations {
   /// No description provided for @myGyms.
   ///
   /// In en, this message translates to:
-  /// **'My Gyms'**
+  /// **'Gyms'**
   String get myGyms;
 
   /// No description provided for @addGym.
@@ -519,13 +519,13 @@ abstract class AppLocalizations {
   /// No description provided for @updateYourProfileInfo.
   ///
   /// In en, this message translates to:
-  /// **'Update your profile information below.'**
+  /// **'Update your info below.'**
   String get updateYourProfileInfo;
 
   /// No description provided for @pleaseCompleteProfile.
   ///
   /// In en, this message translates to:
-  /// **'Please complete your profile. Fields marked with * are required.'**
+  /// **'Complete your profile. * = required.'**
   String get pleaseCompleteProfile;
 
   /// No description provided for @firstName.
@@ -657,25 +657,25 @@ abstract class AppLocalizations {
   /// No description provided for @optionalLeaveEmpty.
   ///
   /// In en, this message translates to:
-  /// **'(Optional - leave empty if none)'**
+  /// **'(Optional)'**
   String get optionalLeaveEmpty;
 
   /// No description provided for @optionalExercisesPrefer.
   ///
   /// In en, this message translates to:
-  /// **'(Optional - exercises you enjoy or prefer)'**
+  /// **'(Optional)'**
   String get optionalExercisesPrefer;
 
   /// No description provided for @optionalEquipmentPrefer.
   ///
   /// In en, this message translates to:
-  /// **'(Optional - equipment you prefer using)'**
+  /// **'(Optional)'**
   String get optionalEquipmentPrefer;
 
   /// No description provided for @optionalWorkoutTypesPrefer.
   ///
   /// In en, this message translates to:
-  /// **'(Optional - workout styles you prefer)'**
+  /// **'(Optional)'**
   String get optionalWorkoutTypesPrefer;
 
   /// No description provided for @favoriteExercises.
@@ -765,13 +765,13 @@ abstract class AppLocalizations {
   /// No description provided for @generateFirstTraining.
   ///
   /// In en, this message translates to:
-  /// **'Generate your first training from the Home tab'**
+  /// **'Create your first training from Home'**
   String get generateFirstTraining;
 
   /// No description provided for @noTrainingAvailable.
   ///
   /// In en, this message translates to:
-  /// **'No training available. Start generating one.'**
+  /// **'No training yet. Generate one.'**
   String get noTrainingAvailable;
 
   /// No description provided for @availableTrainings.
@@ -873,13 +873,13 @@ abstract class AppLocalizations {
   /// No description provided for @deleteTrainingConfirmation.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete \"{name}\"? This action cannot be undone.'**
+  /// **'Delete \"{name}\"? This cannot be undone.'**
   String deleteTrainingConfirmation(String name);
 
   /// No description provided for @leaveTrainingConfirmation.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to leave \"{name}\"? You will no longer see this training.'**
+  /// **'Leave \"{name}\"? You won\'t see it anymore.'**
   String leaveTrainingConfirmation(String name);
 
   /// No description provided for @addPartnerConfirmation.
@@ -957,7 +957,7 @@ abstract class AppLocalizations {
   /// No description provided for @trainingMarkedAsComplete.
   ///
   /// In en, this message translates to:
-  /// **'Training marked as complete'**
+  /// **'Training completed'**
   String get trainingMarkedAsComplete;
 
   /// No description provided for @failedToCompleteTraining.
@@ -1089,7 +1089,7 @@ abstract class AppLocalizations {
   /// No description provided for @describeIssue.
   ///
   /// In en, this message translates to:
-  /// **'Describe the issue with this training...'**
+  /// **'Describe the issue...'**
   String get describeIssue;
 
   /// No description provided for @submit.
@@ -1185,7 +1185,7 @@ abstract class AppLocalizations {
   /// No description provided for @whatWouldYouLikeToDo.
   ///
   /// In en, this message translates to:
-  /// **'What would you like to do?'**
+  /// **'What next?'**
   String get whatWouldYouLikeToDo;
 
   /// No description provided for @exit.
@@ -1203,7 +1203,7 @@ abstract class AppLocalizations {
   /// No description provided for @failedToMarkComplete.
   ///
   /// In en, this message translates to:
-  /// **'Failed to mark training as complete'**
+  /// **'Failed to complete training'**
   String get failedToMarkComplete;
 
   /// No description provided for @durationMinutes.
@@ -1233,13 +1233,13 @@ abstract class AppLocalizations {
   /// No description provided for @noEquipmentBodyweightOnly.
   ///
   /// In en, this message translates to:
-  /// **'No equipment - bodyweight exercises only'**
+  /// **'Bodyweight only'**
   String get noEquipmentBodyweightOnly;
 
   /// No description provided for @noGymsDefinedCreateOne.
   ///
   /// In en, this message translates to:
-  /// **'No gyms defined. Create one in your profile settings.'**
+  /// **'No gyms. Create one in profile.'**
   String get noGymsDefinedCreateOne;
 
   /// No description provided for @selectAGym.
@@ -1257,7 +1257,7 @@ abstract class AppLocalizations {
   /// No description provided for @addEquipmentAvailable.
   ///
   /// In en, this message translates to:
-  /// **'Add the equipment you have available'**
+  /// **'Add your available equipment'**
   String get addEquipmentAvailable;
 
   /// No description provided for @includeWarmupCooldown.

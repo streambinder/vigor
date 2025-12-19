@@ -31,7 +31,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get storageErrorMessage =>
-      'This app requires secure storage to protect your data. Please check your browser settings and try again.';
+      'Secure storage required. Check browser settings.';
 
   @override
   String get signInWithGoogle => 'Sign in with Google';
@@ -68,7 +68,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generateTrainingDescription =>
-      'Generate a personalized training based on your profile and goals';
+      'Create a workout tailored to your goals';
 
   @override
   String get generateTraining => 'Generate Training';
@@ -93,7 +93,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String deleteGymConfirmation(String name) {
-    return 'Are you sure you want to delete \"$name\"?';
+    return 'Delete \"$name\"?';
   }
 
   @override
@@ -103,14 +103,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get delete => 'Delete';
 
   @override
-  String get logoutConfirmation => 'Are you sure you want to logout?';
+  String get logoutConfirmation => 'Logout?';
 
   @override
   String get deleteAccount => 'Delete Account';
 
   @override
   String get deleteAccountConfirmation =>
-      'Are you sure you want to delete your account? This action cannot be undone.';
+      'Delete your account? This cannot be undone.';
 
   @override
   String get accountDeletedSuccessfully => 'Account deleted successfully';
@@ -199,7 +199,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get myGyms => 'My Gyms';
+  String get myGyms => 'Gyms';
 
   @override
   String get addGym => 'Add Gym';
@@ -229,11 +229,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get completeYourProfile => 'Complete Your Profile';
 
   @override
-  String get updateYourProfileInfo => 'Update your profile information below.';
+  String get updateYourProfileInfo => 'Update your info below.';
 
   @override
-  String get pleaseCompleteProfile =>
-      'Please complete your profile. Fields marked with * are required.';
+  String get pleaseCompleteProfile => 'Complete your profile. * = required.';
 
   @override
   String get firstName => 'First Name';
@@ -299,19 +298,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveProfile => 'Save Profile';
 
   @override
-  String get optionalLeaveEmpty => '(Optional - leave empty if none)';
+  String get optionalLeaveEmpty => '(Optional)';
 
   @override
-  String get optionalExercisesPrefer =>
-      '(Optional - exercises you enjoy or prefer)';
+  String get optionalExercisesPrefer => '(Optional)';
 
   @override
-  String get optionalEquipmentPrefer =>
-      '(Optional - equipment you prefer using)';
+  String get optionalEquipmentPrefer => '(Optional)';
 
   @override
-  String get optionalWorkoutTypesPrefer =>
-      '(Optional - workout styles you prefer)';
+  String get optionalWorkoutTypesPrefer => '(Optional)';
 
   @override
   String get favoriteExercises => 'Favorite Exercises';
@@ -356,12 +352,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noTrainingsYet => 'No trainings yet';
 
   @override
-  String get generateFirstTraining =>
-      'Generate your first training from the Home tab';
+  String get generateFirstTraining => 'Create your first training from Home';
 
   @override
-  String get noTrainingAvailable =>
-      'No training available. Start generating one.';
+  String get noTrainingAvailable => 'No training yet. Generate one.';
 
   @override
   String get availableTrainings => 'Available trainings';
@@ -419,12 +413,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String deleteTrainingConfirmation(String name) {
-    return 'Are you sure you want to delete \"$name\"? This action cannot be undone.';
+    return 'Delete \"$name\"? This cannot be undone.';
   }
 
   @override
   String leaveTrainingConfirmation(String name) {
-    return 'Are you sure you want to leave \"$name\"? You will no longer see this training.';
+    return 'Leave \"$name\"? You won\'t see it anymore.';
   }
 
   @override
@@ -470,7 +464,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failedToCloneTraining => 'Failed to clone training';
 
   @override
-  String get trainingMarkedAsComplete => 'Training marked as complete';
+  String get trainingMarkedAsComplete => 'Training completed';
 
   @override
   String get failedToCompleteTraining => 'Failed to complete training';
@@ -548,7 +542,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get references => 'References';
 
   @override
-  String get describeIssue => 'Describe the issue with this training...';
+  String get describeIssue => 'Describe the issue...';
 
   @override
   String get submit => 'Submit';
@@ -602,7 +596,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exitTraining => 'Exit Training?';
 
   @override
-  String get whatWouldYouLikeToDo => 'What would you like to do?';
+  String get whatWouldYouLikeToDo => 'What next?';
 
   @override
   String get exit => 'Exit';
@@ -611,7 +605,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get continueTraining => 'Continue';
 
   @override
-  String get failedToMarkComplete => 'Failed to mark training as complete';
+  String get failedToMarkComplete => 'Failed to complete training';
 
   @override
   String get durationMinutes => 'Duration (minutes)';
@@ -626,12 +620,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get custom => 'Custom';
 
   @override
-  String get noEquipmentBodyweightOnly =>
-      'No equipment - bodyweight exercises only';
+  String get noEquipmentBodyweightOnly => 'Bodyweight only';
 
   @override
-  String get noGymsDefinedCreateOne =>
-      'No gyms defined. Create one in your profile settings.';
+  String get noGymsDefinedCreateOne => 'No gyms. Create one in profile.';
 
   @override
   String get selectAGym => 'Select a gym';
@@ -640,7 +632,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addEquipment => 'Add Equipment';
 
   @override
-  String get addEquipmentAvailable => 'Add the equipment you have available';
+  String get addEquipmentAvailable => 'Add your available equipment';
 
   @override
   String get includeWarmupCooldown => 'Include warm-up & cooldown';

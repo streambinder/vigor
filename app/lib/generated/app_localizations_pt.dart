@@ -31,7 +31,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get storageErrorMessage =>
-      'Esta aplicação requer armazenamento seguro para proteger os seus dados. Por favor, verifique as configurações do navegador e tente novamente.';
+      'Requer armazenamento seguro. Verifica as configurações.';
 
   @override
   String get signInWithGoogle => 'Entrar com Google';
@@ -69,7 +69,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get generateTrainingDescription =>
-      'Gera um treino personalizado baseado no teu perfil e objetivos';
+      'Cria um treino adaptado aos teus objetivos';
 
   @override
   String get generateTraining => 'Gerar Treino';
@@ -94,7 +94,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String deleteGymConfirmation(String name) {
-    return 'Tens a certeza de que queres eliminar \"$name\"?';
+    return 'Eliminar \"$name\"?';
   }
 
   @override
@@ -104,14 +104,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get delete => 'Eliminar';
 
   @override
-  String get logoutConfirmation => 'Tens a certeza de que queres sair?';
+  String get logoutConfirmation => 'Sair?';
 
   @override
   String get deleteAccount => 'Eliminar Conta';
 
   @override
   String get deleteAccountConfirmation =>
-      'Tens a certeza de que queres eliminar a tua conta? Esta ação não pode ser desfeita.';
+      'Eliminar a conta? Não pode ser desfeito.';
 
   @override
   String get accountDeletedSuccessfully => 'Conta eliminada com sucesso';
@@ -200,7 +200,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get myGyms => 'Os Meus Ginásios';
+  String get myGyms => 'Ginásios';
 
   @override
   String get addGym => 'Adicionar Ginásio';
@@ -230,12 +230,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get completeYourProfile => 'Completa o Teu Perfil';
 
   @override
-  String get updateYourProfileInfo =>
-      'Atualiza as informações do teu perfil abaixo.';
+  String get updateYourProfileInfo => 'Atualiza o teu perfil abaixo.';
 
   @override
-  String get pleaseCompleteProfile =>
-      'Por favor, completa o teu perfil. Os campos marcados com * são obrigatórios.';
+  String get pleaseCompleteProfile => 'Completa o perfil. * = obrigatório.';
 
   @override
   String get firstName => 'Nome';
@@ -303,19 +301,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get saveProfile => 'Guardar Perfil';
 
   @override
-  String get optionalLeaveEmpty => '(Opcional - deixar vazio se não aplicável)';
+  String get optionalLeaveEmpty => '(Opcional)';
 
   @override
-  String get optionalExercisesPrefer =>
-      '(Opcional - exercícios que gostas ou preferes)';
+  String get optionalExercisesPrefer => '(Opcional)';
 
   @override
-  String get optionalEquipmentPrefer =>
-      '(Opcional - equipamento que preferes usar)';
+  String get optionalEquipmentPrefer => '(Opcional)';
 
   @override
-  String get optionalWorkoutTypesPrefer =>
-      '(Opcional - estilos de treino que preferes)';
+  String get optionalWorkoutTypesPrefer => '(Opcional)';
 
   @override
   String get favoriteExercises => 'Exercícios Favoritos';
@@ -361,11 +356,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get generateFirstTraining =>
-      'Gera o teu primeiro treino a partir do separador Início';
+      'Cria o primeiro treino a partir de Início';
 
   @override
-  String get noTrainingAvailable =>
-      'Nenhum treino disponível. Começa a gerar um.';
+  String get noTrainingAvailable => 'Sem treinos. Gera um.';
 
   @override
   String get availableTrainings => 'Treinos disponíveis';
@@ -423,12 +417,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String deleteTrainingConfirmation(String name) {
-    return 'Tens a certeza de que queres eliminar \"$name\"? Esta ação não pode ser desfeita.';
+    return 'Eliminar \"$name\"? Não pode ser desfeito.';
   }
 
   @override
   String leaveTrainingConfirmation(String name) {
-    return 'Tens a certeza de que queres abandonar \"$name\"? Não verás mais este treino.';
+    return 'Abandonar \"$name\"? Não o verás mais.';
   }
 
   @override
@@ -552,7 +546,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get references => 'Referências';
 
   @override
-  String get describeIssue => 'Descreve o problema com este treino...';
+  String get describeIssue => 'Descreve o problema...';
 
   @override
   String get submit => 'Enviar';
@@ -606,7 +600,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get exitTraining => 'Sair do Treino?';
 
   @override
-  String get whatWouldYouLikeToDo => 'O que gostarias de fazer?';
+  String get whatWouldYouLikeToDo => 'O que fazer?';
 
   @override
   String get exit => 'Sair';
@@ -615,7 +609,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get continueTraining => 'Continuar';
 
   @override
-  String get failedToMarkComplete => 'Falha ao marcar o treino como concluído';
+  String get failedToMarkComplete => 'Falha ao concluir o treino';
 
   @override
   String get durationMinutes => 'Duração (minutos)';
@@ -630,12 +624,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get custom => 'Personalizado';
 
   @override
-  String get noEquipmentBodyweightOnly =>
-      'Sem equipamento - apenas exercícios com peso corporal';
+  String get noEquipmentBodyweightOnly => 'Apenas peso corporal';
 
   @override
-  String get noGymsDefinedCreateOne =>
-      'Nenhum ginásio definido. Cria um nas configurações do teu perfil.';
+  String get noGymsDefinedCreateOne => 'Sem ginásios. Cria um no perfil.';
 
   @override
   String get selectAGym => 'Selecionar um ginásio';
@@ -644,8 +636,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get addEquipment => 'Adicionar Equipamento';
 
   @override
-  String get addEquipmentAvailable =>
-      'Adiciona o equipamento que tens disponível';
+  String get addEquipmentAvailable => 'Adiciona o teu equipamento disponível';
 
   @override
   String get includeWarmupCooldown => 'Incluir aquecimento e arrefecimento';

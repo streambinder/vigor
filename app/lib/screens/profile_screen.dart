@@ -237,7 +237,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -285,61 +285,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ],
                             ),
                           ),
+                          AdaptiveIconButton(
+                            icon: const Icon(Icons.edit),
+                            tooltip: l10n.editProfile,
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (context) => ProfileCompletionModal(
+                                  profile: user.profile,
+                                  missingFields: const {},
+                                ),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ),
 
                     // Profile section
-                    const SizedBox(height: 24),
-                    Text(
-                      'Profile',
-                      style: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.headlineStyle
-                          : const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                    ),
-                    const SizedBox(height: 8),
-                    AdaptiveCard(
-                      child: AdaptiveListTile(
-                        leading: const Icon(Icons.cake),
-                        title: Text(l10n.birthdate),
-                        subtitle: Text(
-                          _formatDate(user.profile.birthdate),
-                        ),
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        'Profile',
+                        style: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.headlineStyle
+                            : const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     AdaptiveCard(
-                      child: AdaptiveListTile(
-                        leading: const Icon(Icons.person),
-                        title: Text(l10n.gender),
-                        subtitle: Text(_capitalizeFirst(user.profile.gender)),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    AdaptiveCard(
-                      child: AdaptiveListTile(
-                        leading: const Icon(Icons.language),
-                        title: Text(l10n.language),
-                        subtitle: Text(_capitalizeFirst(user.profile.language)),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    AdaptiveCard(
-                      child: AdaptiveListTile(
-                        leading: const Icon(Icons.height),
-                        title: Text(l10n.height),
-                        subtitle: Text(l10n.heightWithUnit(user.profile.height)),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    AdaptiveCard(
-                      child: AdaptiveListTile(
-                        leading: const Icon(Icons.monitor_weight),
-                        title: Text(l10n.weight),
-                        subtitle: Text(l10n.weightWithUnit(user.profile.weight)),
+                      child: Column(
+                        children: [
+                          AdaptiveListTile(
+                            leading: const Icon(Icons.cake),
+                            title: Text(l10n.birthdate),
+                            subtitle: Text(_formatDate(user.profile.birthdate)),
+                          ),
+                          if (!PlatformHelper.useLiquidGlass) const Divider(height: 1),
+                          AdaptiveListTile(
+                            leading: const Icon(Icons.person),
+                            title: Text(l10n.gender),
+                            subtitle: Text(_capitalizeFirst(user.profile.gender)),
+                          ),
+                          if (!PlatformHelper.useLiquidGlass) const Divider(height: 1),
+                          AdaptiveListTile(
+                            leading: const Icon(Icons.language),
+                            title: Text(l10n.language),
+                            subtitle: Text(_capitalizeFirst(user.profile.language)),
+                          ),
+                          if (!PlatformHelper.useLiquidGlass) const Divider(height: 1),
+                          AdaptiveListTile(
+                            leading: const Icon(Icons.height),
+                            title: Text(l10n.height),
+                            subtitle: Text(l10n.heightWithUnit(user.profile.height)),
+                          ),
+                          if (!PlatformHelper.useLiquidGlass) const Divider(height: 1),
+                          AdaptiveListTile(
+                            leading: const Icon(Icons.monitor_weight),
+                            title: Text(l10n.weight),
+                            subtitle: Text(l10n.weightWithUnit(user.profile.weight)),
+                          ),
+                        ],
                       ),
                     ),
 
@@ -606,27 +617,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ],
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
                     // Gyms section
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          l10n.myGyms,
-                          style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.headlineStyle
-                              : const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                        ),
-                        AdaptiveIconButton(
-                          icon: const Icon(Icons.add),
-                          tooltip: l10n.addGym,
-                          onPressed: () => _showGymDialog(),
-                        ),
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            l10n.myGyms,
+                            style: PlatformHelper.useLiquidGlass
+                                ? LiquidGlassTheme.headlineStyle
+                                : const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                          ),
+                          AdaptiveIconButton(
+                            icon: const Icon(Icons.add),
+                            tooltip: l10n.addGym,
+                            onPressed: () => _showGymDialog(),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 8),
                     if (_isLoadingGyms)
@@ -743,69 +757,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           );
                       })),
 
-                    const SizedBox(height: 24),
-
-                    // Quick actions
-                    Text(
-                      l10n.quickActions,
-                      style: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.headlineStyle
-                          : const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                    ),
-                    const SizedBox(height: 8),
-                    AdaptiveCard(
-                      child: Column(
-                        children: [
-                          AdaptiveListTile(
-                            leading: const Icon(Icons.edit),
-                            title: Text(l10n.editProfile),
-                            onTap: () {
-                              showDialog(
-                                context: context,
-                                barrierDismissible: true,
-                                builder: (context) => ProfileCompletionModal(
-                                  profile: user.profile,
-                                  missingFields: const {},
-                                ),
-                              );
-                            },
-                          ),
-                          if (!PlatformHelper.useLiquidGlass)
-                            const Divider(height: 1),
-                          AdaptiveListTile(
-                            leading: Icon(
-                              Icons.settings,
-                              color: Colors.grey.withOpacity(0.5),
-                            ),
-                            title: Text(
-                              l10n.settings,
-                              style: TextStyle(color: Colors.grey.withOpacity(0.5)),
-                            ),
-                            onTap: null,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
                     // Danger zone
-                    Text(
-                      l10n.dangerZone,
-                      style: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.headlineStyle.copyWith(
-                              color: LiquidGlassTheme.errorColor,
-                            )
-                          : const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red,
-                            ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        l10n.dangerZone,
+                        style: PlatformHelper.useLiquidGlass
+                            ? LiquidGlassTheme.headlineStyle.copyWith(
+                                color: LiquidGlassTheme.errorColor,
+                              )
+                            : const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red,
+                              ),
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     AdaptiveCard(
                       child: AdaptiveListTile(
                         leading: Icon(

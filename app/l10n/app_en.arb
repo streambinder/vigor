@@ -10,7 +10,7 @@
 
   "storageErrorTitle": "Vigor - Storage Error",
   "storageUnavailable": "Storage Unavailable",
-  "storageErrorMessage": "This app requires secure storage to protect your data. Please check your browser settings and try again.",
+  "storageErrorMessage": "Secure storage required. Check browser settings.",
 
   "signInWithGoogle": "Sign in with Google",
   "signingIn": "Signing in...",
@@ -32,7 +32,7 @@
   "googleSignInInitializing": "Google Sign In is still initializing...",
 
   "readyToTrain": "Ready to train?",
-  "generateTrainingDescription": "Generate a personalized training based on your profile and goals",
+  "generateTrainingDescription": "Create a workout tailored to your goals",
   "generateTraining": "Generate Training",
 
   "refresh": "Refresh",
@@ -42,7 +42,7 @@
   "settings": "Settings",
 
   "deleteGym": "Delete Gym",
-  "deleteGymConfirmation": "Are you sure you want to delete \"{name}\"?",
+  "deleteGymConfirmation": "Delete \"{name}\"?",
   "@deleteGymConfirmation": {
     "placeholders": {
       "name": {"type": "String"}
@@ -50,9 +50,9 @@
   },
   "cancel": "Cancel",
   "delete": "Delete",
-  "logoutConfirmation": "Are you sure you want to logout?",
+  "logoutConfirmation": "Logout?",
   "deleteAccount": "Delete Account",
-  "deleteAccountConfirmation": "Are you sure you want to delete your account? This action cannot be undone.",
+  "deleteAccountConfirmation": "Delete your account? This cannot be undone.",
   "accountDeletedSuccessfully": "Account deleted successfully",
   "failedToDeleteAccount": "Failed to delete account",
 
@@ -103,7 +103,7 @@
     }
   },
 
-  "myGyms": "My Gyms",
+  "myGyms": "Gyms",
   "addGym": "Add Gym",
   "noGymsAddedYet": "No gyms added yet",
   "addYourFirstGym": "Add Your First Gym",
@@ -115,8 +115,8 @@
   "dangerZone": "Danger Zone",
 
   "completeYourProfile": "Complete Your Profile",
-  "updateYourProfileInfo": "Update your profile information below.",
-  "pleaseCompleteProfile": "Please complete your profile. Fields marked with * are required.",
+  "updateYourProfileInfo": "Update your info below.",
+  "pleaseCompleteProfile": "Complete your profile. * = required.",
   "firstName": "First Name",
   "lastName": "Last Name",
   "birthDate": "Birth Date",
@@ -142,10 +142,10 @@
   "saveChanges": "Save Changes",
   "saveProfile": "Save Profile",
 
-  "optionalLeaveEmpty": "(Optional - leave empty if none)",
-  "optionalExercisesPrefer": "(Optional - exercises you enjoy or prefer)",
-  "optionalEquipmentPrefer": "(Optional - equipment you prefer using)",
-  "optionalWorkoutTypesPrefer": "(Optional - workout styles you prefer)",
+  "optionalLeaveEmpty": "(Optional)",
+  "optionalExercisesPrefer": "(Optional)",
+  "optionalEquipmentPrefer": "(Optional)",
+  "optionalWorkoutTypesPrefer": "(Optional)",
   "favoriteExercises": "Favorite Exercises",
   "favoriteEquipment": "Favorite Equipment",
   "favoriteWorkoutTypes": "Preferred Workout Types",
@@ -162,8 +162,8 @@
 
   "activity": "Activity",
   "noTrainingsYet": "No trainings yet",
-  "generateFirstTraining": "Generate your first training from the Home tab",
-  "noTrainingAvailable": "No training available. Start generating one.",
+  "generateFirstTraining": "Create your first training from Home",
+  "noTrainingAvailable": "No training yet. Generate one.",
   "availableTrainings": "Available trainings",
   "pastTrainings": "Past trainings",
   "stale": "Stale",
@@ -198,13 +198,13 @@
   "showAiReasoning": "Show AI reasoning",
   "reportIssue": "Report issue",
 
-  "deleteTrainingConfirmation": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+  "deleteTrainingConfirmation": "Delete \"{name}\"? This cannot be undone.",
   "@deleteTrainingConfirmation": {
     "placeholders": {
       "name": {"type": "String"}
     }
   },
-  "leaveTrainingConfirmation": "Are you sure you want to leave \"{name}\"? You will no longer see this training.",
+  "leaveTrainingConfirmation": "Leave \"{name}\"? You won't see it anymore.",
   "@leaveTrainingConfirmation": {
     "placeholders": {
       "name": {"type": "String"}
@@ -240,7 +240,7 @@
   "failedToShareTraining": "Failed to share training",
   "trainingCloned": "Training cloned",
   "failedToCloneTraining": "Failed to clone training",
-  "trainingMarkedAsComplete": "Training marked as complete",
+  "trainingMarkedAsComplete": "Training completed",
   "failedToCompleteTraining": "Failed to complete training",
   "reportSubmitted": "Report submitted",
   "failedToSubmitReport": "Failed to submit report",
@@ -294,7 +294,7 @@
   },
   "markAsComplete": "Mark as Complete",
   "references": "References",
-  "describeIssue": "Describe the issue with this training...",
+  "describeIssue": "Describe the issue...",
   "submit": "Submit",
   "close": "Close",
   "add": "Add",
@@ -329,21 +329,21 @@
   },
 
   "exitTraining": "Exit Training?",
-  "whatWouldYouLikeToDo": "What would you like to do?",
+  "whatWouldYouLikeToDo": "What next?",
   "exit": "Exit",
   "continueTraining": "Continue",
 
-  "failedToMarkComplete": "Failed to mark training as complete",
+  "failedToMarkComplete": "Failed to complete training",
 
   "durationMinutes": "Duration (minutes)",
   "bodyweight": "Bodyweight",
   "gym": "Gym",
   "custom": "Custom",
-  "noEquipmentBodyweightOnly": "No equipment - bodyweight exercises only",
-  "noGymsDefinedCreateOne": "No gyms defined. Create one in your profile settings.",
+  "noEquipmentBodyweightOnly": "Bodyweight only",
+  "noGymsDefinedCreateOne": "No gyms. Create one in profile.",
   "selectAGym": "Select a gym",
   "addEquipment": "Add Equipment",
-  "addEquipmentAvailable": "Add the equipment you have available",
+  "addEquipmentAvailable": "Add your available equipment",
   "includeWarmupCooldown": "Include warm-up & cooldown",
   "equipmentPlaceholder": "e.g., Barbell, Dumbbells",
   "customPromptOptional": "Custom Prompt (optional)",

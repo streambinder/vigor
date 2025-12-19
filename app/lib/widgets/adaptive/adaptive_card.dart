@@ -35,7 +35,7 @@ class AdaptiveCard extends StatelessWidget {
 
   Widget _buildLiquidGlassCard(BuildContext context) {
     final cardChild = Container(
-      margin: margin ?? const EdgeInsets.all(12),
+      margin: margin ?? const EdgeInsets.all(4),
       padding: padding ?? const EdgeInsets.all(16),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
@@ -75,7 +75,7 @@ class AdaptiveCard extends StatelessWidget {
   Widget _buildMaterialCard(BuildContext context) {
     if (useVibrantGradient) {
       return Container(
-        margin: margin ?? const EdgeInsets.all(8),
+        margin: margin ?? const EdgeInsets.all(4),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: gradientColors ??
@@ -101,7 +101,7 @@ class AdaptiveCard extends StatelessWidget {
     }
 
     return Card(
-      margin: margin ?? const EdgeInsets.all(8),
+      margin: margin ?? const EdgeInsets.all(4),
       color: glassColor,
       child: InkWell(
         onTap: onTap,

@@ -30,7 +30,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get storageUnavailable => '存储不可用';
 
   @override
-  String get storageErrorMessage => '此应用需要安全存储来保护您的数据。请检查您的浏览器设置并重试。';
+  String get storageErrorMessage => '需要安全存储。请检查设置。';
 
   @override
   String get signInWithGoogle => '使用 Google 登录';
@@ -64,7 +64,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get readyToTrain => '准备好训练了吗？';
 
   @override
-  String get generateTrainingDescription => '根据您的个人资料和目标生成个性化训练';
+  String get generateTrainingDescription => '创建符合您目标的训练';
 
   @override
   String get generateTraining => '生成训练';
@@ -89,7 +89,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String deleteGymConfirmation(String name) {
-    return '您确定要删除「$name」吗？';
+    return '删除「$name」？';
   }
 
   @override
@@ -99,13 +99,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get delete => '删除';
 
   @override
-  String get logoutConfirmation => '您确定要退出登录吗？';
+  String get logoutConfirmation => '退出登录？';
 
   @override
   String get deleteAccount => '删除账户';
 
   @override
-  String get deleteAccountConfirmation => '您确定要删除您的账户吗？此操作无法撤销。';
+  String get deleteAccountConfirmation => '删除账户？不可撤销。';
 
   @override
   String get accountDeletedSuccessfully => '账户已成功删除';
@@ -194,7 +194,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get myGyms => '我的健身房';
+  String get myGyms => '健身房';
 
   @override
   String get addGym => '添加健身房';
@@ -224,10 +224,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get completeYourProfile => '完善您的个人资料';
 
   @override
-  String get updateYourProfileInfo => '在下方更新您的个人资料信息。';
+  String get updateYourProfileInfo => '在下方更新您的资料。';
 
   @override
-  String get pleaseCompleteProfile => '请完善您的个人资料。标有 * 的字段为必填项。';
+  String get pleaseCompleteProfile => '完善资料。* = 必填。';
 
   @override
   String get firstName => '名';
@@ -293,16 +293,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get saveProfile => '保存个人资料';
 
   @override
-  String get optionalLeaveEmpty => '（可选 - 如不适用请留空）';
+  String get optionalLeaveEmpty => '（可选）';
 
   @override
-  String get optionalExercisesPrefer => '（可选 - 您喜欢或偏好的练习）';
+  String get optionalExercisesPrefer => '（可选）';
 
   @override
-  String get optionalEquipmentPrefer => '（可选 - 您偏好使用的设备）';
+  String get optionalEquipmentPrefer => '（可选）';
 
   @override
-  String get optionalWorkoutTypesPrefer => '（可选 - 您偏好的训练风格）';
+  String get optionalWorkoutTypesPrefer => '（可选）';
 
   @override
   String get favoriteExercises => '喜爱的练习';
@@ -347,10 +347,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noTrainingsYet => '暂无训练';
 
   @override
-  String get generateFirstTraining => '从主页标签生成您的第一个训练';
+  String get generateFirstTraining => '从主页创建首个训练';
 
   @override
-  String get noTrainingAvailable => '没有可用的训练。开始生成一个。';
+  String get noTrainingAvailable => '暂无训练。生成一个。';
 
   @override
   String get availableTrainings => '可用训练';
@@ -408,12 +408,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String deleteTrainingConfirmation(String name) {
-    return '您确定要删除「$name」吗？此操作无法撤销。';
+    return '删除「$name」？不可撤销。';
   }
 
   @override
   String leaveTrainingConfirmation(String name) {
-    return '您确定要离开「$name」吗？您将不再看到此训练。';
+    return '离开「$name」？将不再显示。';
   }
 
   @override
@@ -537,7 +537,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get references => '参考';
 
   @override
-  String get describeIssue => '描述此训练的问题...';
+  String get describeIssue => '描述问题...';
 
   @override
   String get submit => '提交';
@@ -591,7 +591,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get exitTraining => '退出训练？';
 
   @override
-  String get whatWouldYouLikeToDo => '您想做什么？';
+  String get whatWouldYouLikeToDo => '下一步？';
 
   @override
   String get exit => '退出';
@@ -600,7 +600,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get continueTraining => '继续';
 
   @override
-  String get failedToMarkComplete => '标记训练为完成失败';
+  String get failedToMarkComplete => '完成训练失败';
 
   @override
   String get durationMinutes => '时长（分钟）';
@@ -615,10 +615,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get custom => '自定义';
 
   @override
-  String get noEquipmentBodyweightOnly => '无设备 - 仅自重练习';
+  String get noEquipmentBodyweightOnly => '仅自重';
 
   @override
-  String get noGymsDefinedCreateOne => '未定义健身房。请在个人资料设置中创建一个。';
+  String get noGymsDefinedCreateOne => '无健身房。在资料中创建。';
 
   @override
   String get selectAGym => '选择健身房';
@@ -627,7 +627,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get addEquipment => '添加设备';
 
   @override
-  String get addEquipmentAvailable => '添加您可用的设备';
+  String get addEquipmentAvailable => '添加可用设备';
 
   @override
   String get includeWarmupCooldown => '包含热身和放松';

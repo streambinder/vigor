@@ -30,8 +30,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get storageUnavailable => '저장소를 사용할 수 없습니다';
 
   @override
-  String get storageErrorMessage =>
-      '이 앱은 데이터를 보호하기 위해 안전한 저장소가 필요합니다. 브라우저 설정을 확인하고 다시 시도해 주세요.';
+  String get storageErrorMessage => '보안 저장소가 필요합니다. 설정을 확인하세요.';
 
   @override
   String get signInWithGoogle => 'Google로 로그인';
@@ -65,7 +64,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get readyToTrain => '운동할 준비가 되셨나요?';
 
   @override
-  String get generateTrainingDescription => '프로필과 목표를 기반으로 맞춤형 트레이닝을 생성합니다';
+  String get generateTrainingDescription => '목표에 맞는 트레이닝 생성';
 
   @override
   String get generateTraining => '트레이닝 생성';
@@ -100,13 +99,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get delete => '삭제';
 
   @override
-  String get logoutConfirmation => '로그아웃 하시겠습니까?';
+  String get logoutConfirmation => '로그아웃?';
 
   @override
   String get deleteAccount => '계정 삭제';
 
   @override
-  String get deleteAccountConfirmation => '계정을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.';
+  String get deleteAccountConfirmation => '계정을 삭제하시겠습니까? 취소 불가.';
 
   @override
   String get accountDeletedSuccessfully => '계정이 성공적으로 삭제되었습니다';
@@ -195,7 +194,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get myGyms => '내 헬스장';
+  String get myGyms => '헬스장';
 
   @override
   String get addGym => '헬스장 추가';
@@ -225,10 +224,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get completeYourProfile => '프로필을 완성하세요';
 
   @override
-  String get updateYourProfileInfo => '아래에서 프로필 정보를 업데이트하세요.';
+  String get updateYourProfileInfo => '아래에서 프로필을 업데이트하세요.';
 
   @override
-  String get pleaseCompleteProfile => '프로필을 완성해 주세요. *가 표시된 항목은 필수입니다.';
+  String get pleaseCompleteProfile => '프로필을 완성하세요. * = 필수.';
 
   @override
   String get firstName => '이름';
@@ -294,16 +293,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get saveProfile => '프로필 저장';
 
   @override
-  String get optionalLeaveEmpty => '(선택사항 - 해당 없으면 비워두세요)';
+  String get optionalLeaveEmpty => '(선택사항)';
 
   @override
-  String get optionalExercisesPrefer => '(선택사항 - 좋아하거나 선호하는 운동)';
+  String get optionalExercisesPrefer => '(선택사항)';
 
   @override
-  String get optionalEquipmentPrefer => '(선택사항 - 선호하는 장비)';
+  String get optionalEquipmentPrefer => '(선택사항)';
 
   @override
-  String get optionalWorkoutTypesPrefer => '(선택사항 - 선호하는 운동 스타일)';
+  String get optionalWorkoutTypesPrefer => '(선택사항)';
 
   @override
   String get favoriteExercises => '좋아하는 운동';
@@ -348,10 +347,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get noTrainingsYet => '아직 트레이닝이 없습니다';
 
   @override
-  String get generateFirstTraining => '홈 탭에서 첫 번째 트레이닝을 생성하세요';
+  String get generateFirstTraining => '홈에서 첫 트레이닝 생성';
 
   @override
-  String get noTrainingAvailable => '사용 가능한 트레이닝이 없습니다. 생성을 시작하세요.';
+  String get noTrainingAvailable => '트레이닝 없음. 생성하세요.';
 
   @override
   String get availableTrainings => '사용 가능한 트레이닝';
@@ -409,12 +408,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String deleteTrainingConfirmation(String name) {
-    return '\"$name\"을(를) 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.';
+    return '\"$name\" 삭제? 취소 불가.';
   }
 
   @override
   String leaveTrainingConfirmation(String name) {
-    return '\"$name\"에서 나가시겠습니까? 이 트레이닝이 더 이상 표시되지 않습니다.';
+    return '\"$name\"에서 나가기? 더 이상 표시 안 됨.';
   }
 
   @override
@@ -538,7 +537,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get references => '참조';
 
   @override
-  String get describeIssue => '이 트레이닝의 문제를 설명해 주세요...';
+  String get describeIssue => '문제를 설명해 주세요...';
 
   @override
   String get submit => '제출';
@@ -592,7 +591,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get exitTraining => '트레이닝을 종료하시겠습니까?';
 
   @override
-  String get whatWouldYouLikeToDo => '무엇을 하시겠습니까?';
+  String get whatWouldYouLikeToDo => '다음은?';
 
   @override
   String get exit => '종료';
@@ -601,7 +600,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get continueTraining => '계속';
 
   @override
-  String get failedToMarkComplete => '트레이닝을 완료로 표시하지 못했습니다';
+  String get failedToMarkComplete => '트레이닝 완료 실패';
 
   @override
   String get durationMinutes => '시간 (분)';
@@ -616,10 +615,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get custom => '사용자 정의';
 
   @override
-  String get noEquipmentBodyweightOnly => '장비 없음 - 맨몸 운동만';
+  String get noEquipmentBodyweightOnly => '맨몸만';
 
   @override
-  String get noGymsDefinedCreateOne => '정의된 헬스장이 없습니다. 프로필 설정에서 생성하세요.';
+  String get noGymsDefinedCreateOne => '헬스장 없음. 프로필에서 생성하세요.';
 
   @override
   String get selectAGym => '헬스장 선택';
@@ -628,7 +627,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get addEquipment => '장비 추가';
 
   @override
-  String get addEquipmentAvailable => '사용 가능한 장비를 추가하세요';
+  String get addEquipmentAvailable => '사용 가능한 장비 추가';
 
   @override
   String get includeWarmupCooldown => '워밍업 및 쿨다운 포함';

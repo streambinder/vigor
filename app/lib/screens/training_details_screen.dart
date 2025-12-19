@@ -605,82 +605,91 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           ),
         ),
         body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Training header
-            Text(
-              training.description,
-              style: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.bodyStyle
-                  : Theme.of(context).textTheme.bodyLarge,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                training.description,
+                style: PlatformHelper.useLiquidGlass
+                    ? LiquidGlassTheme.bodyStyle
+                    : Theme.of(context).textTheme.bodyLarge,
+              ),
             ),
             const SizedBox(height: 16),
-            Wrap(
-              spacing: 16,
-              runSpacing: 8,
-              children: [
-                if (_partnerCount > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Wrap(
+                spacing: 16,
+                runSpacing: 8,
+                children: [
+                  if (_partnerCount > 0)
+                    _buildInfoLabel(
+                      context,
+                      icon: Icons.people,
+                      text: '${1 + _partnerCount}',
+                    ),
+                  if (training.gym != null)
+                    _buildInfoLabel(
+                      context,
+                      icon: Icons.location_on,
+                      text: training.gym!.name,
+                    ),
                   _buildInfoLabel(
                     context,
-                    icon: Icons.people,
-                    text: '${1 + _partnerCount}',
+                    icon: Icons.tune,
+                    text: training.type,
                   ),
-                if (training.gym != null)
                   _buildInfoLabel(
                     context,
-                    icon: Icons.location_on,
-                    text: training.gym!.name,
+                    icon: Icons.schedule,
+                    text: _formatDuration(training.duration),
                   ),
-                _buildInfoLabel(
-                  context,
-                  icon: Icons.tune,
-                  text: training.type,
-                ),
-                _buildInfoLabel(
-                  context,
-                  icon: Icons.schedule,
-                  text: _formatDuration(training.duration),
-                ),
-                _buildInfoLabel(
-                  context,
-                  icon: Icons.calendar_today,
-                  text: _formatDate(training.completedAt ?? training.createdAt),
-                ),
-                if (training.parentId != null)
                   _buildInfoLabel(
                     context,
-                    icon: Icons.copy,
-                    text: l10n.copied,
+                    icon: Icons.calendar_today,
+                    text: _formatDate(training.completedAt ?? training.createdAt),
                   ),
-              ],
+                  if (training.parentId != null)
+                    _buildInfoLabel(
+                      context,
+                      icon: Icons.copy,
+                      text: l10n.copied,
+                    ),
+                ],
+              ),
             ),
             const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.fitness_center,
-                  size: 18,
-                  color: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.captionStyle.color
-                      : Colors.grey.shade600,
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    training.equipment.isEmpty
-                        ? l10n.noEquipment
-                        : training.equipment.join(' · '),
-                    style: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.captionStyle
-                        : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey.shade600,
-                            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.fitness_center,
+                    size: 18,
+                    color: PlatformHelper.useLiquidGlass
+                        ? LiquidGlassTheme.captionStyle.color
+                        : Colors.grey.shade600,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      training.equipment.isEmpty
+                          ? l10n.noEquipment
+                          : training.equipment.join(' · '),
+                      style: PlatformHelper.useLiquidGlass
+                          ? LiquidGlassTheme.captionStyle
+                          : Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Colors.grey.shade600,
+                              ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             // collapsible references section
             if (training.references.isNotEmpty)

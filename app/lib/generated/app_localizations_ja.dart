@@ -30,8 +30,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get storageUnavailable => 'ストレージが利用できません';
 
   @override
-  String get storageErrorMessage =>
-      'このアプリはデータを保護するためにセキュアストレージが必要です。ブラウザの設定を確認して再試行してください。';
+  String get storageErrorMessage => '安全なストレージが必要です。設定を確認してください。';
 
   @override
   String get signInWithGoogle => 'Googleでサインイン';
@@ -65,8 +64,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get readyToTrain => 'トレーニングの準備はできましたか？';
 
   @override
-  String get generateTrainingDescription =>
-      'プロフィールと目標に基づいてパーソナライズされたトレーニングを生成します';
+  String get generateTrainingDescription => '目標に合わせたトレーニングを作成';
 
   @override
   String get generateTraining => 'トレーニングを生成';
@@ -91,7 +89,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String deleteGymConfirmation(String name) {
-    return '「$name」を削除してもよろしいですか？';
+    return '「$name」を削除しますか？';
   }
 
   @override
@@ -101,13 +99,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get delete => '削除';
 
   @override
-  String get logoutConfirmation => 'ログアウトしてもよろしいですか？';
+  String get logoutConfirmation => 'ログアウトしますか？';
 
   @override
   String get deleteAccount => 'アカウントを削除';
 
   @override
-  String get deleteAccountConfirmation => 'アカウントを削除してもよろしいですか？この操作は元に戻せません。';
+  String get deleteAccountConfirmation => 'アカウントを削除しますか？元に戻せません。';
 
   @override
   String get accountDeletedSuccessfully => 'アカウントが正常に削除されました';
@@ -196,7 +194,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get myGyms => 'マイジム';
+  String get myGyms => 'ジム';
 
   @override
   String get addGym => 'ジムを追加';
@@ -226,10 +224,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get completeYourProfile => 'プロフィールを完成させてください';
 
   @override
-  String get updateYourProfileInfo => '以下でプロフィール情報を更新してください。';
+  String get updateYourProfileInfo => '以下でプロフィールを更新。';
 
   @override
-  String get pleaseCompleteProfile => 'プロフィールを完成させてください。*が付いている項目は必須です。';
+  String get pleaseCompleteProfile => 'プロフィールを完成させてください。* = 必須。';
 
   @override
   String get firstName => '名';
@@ -295,16 +293,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get saveProfile => 'プロフィールを保存';
 
   @override
-  String get optionalLeaveEmpty => '（任意 - 該当しない場合は空欄）';
+  String get optionalLeaveEmpty => '（任意）';
 
   @override
-  String get optionalExercisesPrefer => '（任意 - 好きなエクササイズ）';
+  String get optionalExercisesPrefer => '（任意）';
 
   @override
-  String get optionalEquipmentPrefer => '（任意 - 好みの器具）';
+  String get optionalEquipmentPrefer => '（任意）';
 
   @override
-  String get optionalWorkoutTypesPrefer => '（任意 - 好みのワークアウトスタイル）';
+  String get optionalWorkoutTypesPrefer => '（任意）';
 
   @override
   String get favoriteExercises => 'お気に入りのエクササイズ';
@@ -349,10 +347,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noTrainingsYet => 'まだトレーニングがありません';
 
   @override
-  String get generateFirstTraining => 'ホームタブから最初のトレーニングを生成してください';
+  String get generateFirstTraining => 'ホームから最初のトレーニングを作成';
 
   @override
-  String get noTrainingAvailable => '利用可能なトレーニングがありません。生成を開始してください。';
+  String get noTrainingAvailable => 'トレーニングがありません。生成してください。';
 
   @override
   String get availableTrainings => '利用可能なトレーニング';
@@ -410,12 +408,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String deleteTrainingConfirmation(String name) {
-    return '「$name」を削除してもよろしいですか？この操作は元に戻せません。';
+    return '「$name」を削除しますか？元に戻せません。';
   }
 
   @override
   String leaveTrainingConfirmation(String name) {
-    return '「$name」から退出してもよろしいですか？このトレーニングは表示されなくなります。';
+    return '「$name」から退出しますか？表示されなくなります。';
   }
 
   @override
@@ -539,7 +537,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get references => '参考資料';
 
   @override
-  String get describeIssue => 'このトレーニングの問題を説明してください...';
+  String get describeIssue => '問題を説明してください...';
 
   @override
   String get submit => '送信';
@@ -593,7 +591,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get exitTraining => 'トレーニングを終了しますか？';
 
   @override
-  String get whatWouldYouLikeToDo => 'どうしますか？';
+  String get whatWouldYouLikeToDo => '次は？';
 
   @override
   String get exit => '終了';
@@ -602,7 +600,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get continueTraining => '続行';
 
   @override
-  String get failedToMarkComplete => 'トレーニングを完了としてマークできませんでした';
+  String get failedToMarkComplete => 'トレーニングの完了に失敗しました';
 
   @override
   String get durationMinutes => '時間（分）';
@@ -617,10 +615,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get custom => 'カスタム';
 
   @override
-  String get noEquipmentBodyweightOnly => '器具なし - 自重エクササイズのみ';
+  String get noEquipmentBodyweightOnly => '自重のみ';
 
   @override
-  String get noGymsDefinedCreateOne => 'ジムが定義されていません。プロフィール設定で作成してください。';
+  String get noGymsDefinedCreateOne => 'ジムがありません。プロフィールで作成してください。';
 
   @override
   String get selectAGym => 'ジムを選択';

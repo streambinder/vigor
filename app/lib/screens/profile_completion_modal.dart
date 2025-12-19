@@ -241,7 +241,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
                 ),
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(16.0),
               child: Form(
                 key: _formKey,
                 child: Column(

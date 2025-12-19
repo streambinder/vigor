@@ -80,25 +80,25 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 Icons.fitness_center,
-                size: 80,
+                size: 64,
                 color: PlatformHelper.useLiquidGlass
                     ? LiquidGlassTheme.primaryColor
                     : Theme.of(context).colorScheme.primary,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Text(
                 l10n.readyToTrain,
                 style: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 28)
+                    ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 24)
                     : Theme.of(context).textTheme.headlineMedium,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Text(
                 l10n.generateTrainingDescription,
                 textAlign: TextAlign.center,
@@ -108,7 +108,7 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.grey[600],
                         ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               AdaptiveButton(
                 onPressed: _isLoadingGyms ? null : _showTrainingGenerationModal,
                 useGradient: true,
