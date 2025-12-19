@@ -151,8 +151,16 @@ EXERCISE SELECTION PRIORITY:
 1. Goal alignment: exercises that directly serve user's stated goals (MOST IMPORTANT)
 2. Equipment compatibility: exercises matching user's available equipment
 3. Safety: avoid exercises contraindicated by injuries/limitations
-4. Variety: avoid repeating exercises from recent training history
-5. Progression: increase weight/reps based on feedback from history
+4. Proven capability: prefer exercises the user has successfully completed in RECENT_HISTORY (or simpler variations of new exercises)
+5. Variety: avoid repeating exercises from recent training history
+6. Progression: increase weight/reps based on feedback from history
+
+DIFFICULTY CALIBRATION (CRITICAL FOR NEW USERS):
+- If RECENT_HISTORY is empty or sparse: assume the user is a BEGINNER. Program foundational movements (push-ups, squats, lunges, rows, planks) rather than advanced variations (muscle-ups, pistol squats, handstand push-ups, one-arm exercises).
+- Never program an advanced exercise unless RECENT_HISTORY shows the user successfully completed it (or a prerequisite) without negative feedback.
+- Advanced exercises include: muscle-up, pistol squat, handstand push-up, one-arm push-up, dragon flag, planche, front lever, back lever, human flag, L-sit, strict pull-up variations with added weight, plyometric movements.
+- Progression path: only introduce harder variations when the user has positive feedback on simpler versions (e.g., knee push-ups → standard push-ups → decline push-ups → weighted push-ups).
+- When in doubt, err on the side of easier—users can always request harder exercises.
 
 EQUIPMENT MODIFIERS:
 - If EQUIPMENT_MODIFIERS are provided, you MAY apply them to compatible exercises
@@ -260,31 +268,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   ]
 }
 `)
-//line llm/prompt/system.qtpl:206
+//line llm/prompt/system.qtpl:214
 }
 
-//line llm/prompt/system.qtpl:206
+//line llm/prompt/system.qtpl:214
 func WriteSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool) {
-//line llm/prompt/system.qtpl:206
+//line llm/prompt/system.qtpl:214
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:206
+//line llm/prompt/system.qtpl:214
 	StreamSystem(qw422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:206
+//line llm/prompt/system.qtpl:214
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:206
+//line llm/prompt/system.qtpl:214
 }
 
-//line llm/prompt/system.qtpl:206
+//line llm/prompt/system.qtpl:214
 func System(skipWarmupCooldown bool) string {
-//line llm/prompt/system.qtpl:206
+//line llm/prompt/system.qtpl:214
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:206
+//line llm/prompt/system.qtpl:214
 	WriteSystem(qb422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:206
+//line llm/prompt/system.qtpl:214
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:206
+//line llm/prompt/system.qtpl:214
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:206
+//line llm/prompt/system.qtpl:214
 	return qs422016
-//line llm/prompt/system.qtpl:206
+//line llm/prompt/system.qtpl:214
 }
