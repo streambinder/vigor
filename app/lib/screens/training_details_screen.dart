@@ -603,227 +603,195 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             ),
             onPressed: () => _navigateToActivityScreen(context),
           ),
-          actions: [
-            AdaptiveIconButton(
-              icon: const Icon(Icons.copy),
-              tooltip: l10n.cloneTraining,
-              onPressed: () => _cloneTraining(context),
-            ),
-            // only owner can add partners
-            if (isOwner)
-              AdaptiveIconButton(
-                icon: const Icon(Icons.person_add),
-                tooltip: l10n.addPartner,
-                onPressed: () => _showAddPartnerDialog(context),
-              ),
-            AdaptiveIconButton(
-              icon: const Icon(Icons.share),
-              tooltip: l10n.shareWithUser,
-              onPressed: () => _showCopyTrainingDialog(context),
-            ),
-            AdaptiveIconButton(
-              icon: Icon(
-                Icons.delete,
-                color: isOwner ? null : Colors.grey,
-              ),
-              tooltip: isOwner ? l10n.deleteTraining : l10n.leaveTraining,
-              onPressed: () => _deleteTraining(context),
-            ),
-          ],
         ),
         body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Training header card
-            AdaptiveCard(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            training.name,
-                            style: PlatformHelper.useLiquidGlass
-                                ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 24)
-                                : Theme.of(context).textTheme.headlineMedium,
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.help_outline,
-                            size: 20,
-                            color: PlatformHelper.useLiquidGlass
-                                ? LiquidGlassTheme.captionStyle.color
-                                : Colors.grey,
-                          ),
-                          tooltip: l10n.showAiReasoning,
-                          onPressed: () => _showReasoningDialog(context),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.flag_outlined,
-                            size: 20,
-                            color: PlatformHelper.useLiquidGlass
-                                ? LiquidGlassTheme.captionStyle.color
-                                : Colors.grey,
-                          ),
-                          tooltip: l10n.reportIssue,
-                          onPressed: () => _showReportDialog(context),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      training.description,
-                      style: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.bodyStyle
-                          : Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 16,
-                      runSpacing: 8,
-                      children: [
-                        if (_partnerCount > 0)
-                          _buildInfoLabel(
-                            context,
-                            icon: Icons.people,
-                            text: '${1 + _partnerCount}',
-                          ),
-                        if (training.gym != null)
-                          _buildInfoLabel(
-                            context,
-                            icon: Icons.location_on,
-                            text: training.gym!.name,
-                          ),
-                        _buildInfoLabel(
-                          context,
-                          icon: Icons.tune,
-                          text: training.type,
-                        ),
-                        _buildInfoLabel(
-                          context,
-                          icon: Icons.schedule,
-                          text: _formatDuration(training.duration),
-                        ),
-                        _buildInfoLabel(
-                          context,
-                          icon: Icons.calendar_today,
-                          text: _formatDate(training.completedAt ?? training.createdAt),
-                        ),
-                        if (training.parentId != null)
-                          _buildInfoLabel(
-                            context,
-                            icon: Icons.copy,
-                            text: l10n.copied,
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.fitness_center,
-                          size: 18,
-                          color: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle.color
-                              : Colors.grey.shade600,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            training.equipment.isEmpty
-                                ? l10n.noEquipment
-                                : training.equipment.join(' · '),
-                            style: PlatformHelper.useLiquidGlass
-                                ? LiquidGlassTheme.captionStyle
-                                : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: Colors.grey.shade600,
-                                    ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    // collapsible references section
-                    if (training.references.isNotEmpty)
-                      _buildReferencesSection(context),
-                  ],
-                ),
-              ),
+            // Training header
+            Text(
+              training.description,
+              style: PlatformHelper.useLiquidGlass
+                  ? LiquidGlassTheme.bodyStyle
+                  : Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 16),
-
-            // Start Tabata Timer button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  final completed = await Navigator.of(context).push<bool>(
-                    MaterialPageRoute(
-                      builder: (context) => TabataTimerScreen(training: training),
-                    ),
-                  );
-                  // if the timer returned true (training completed), refresh
-                  if (completed == true && context.mounted) {
-                    Navigator.of(context).pop(true);
-                  }
-                },
-                icon: const Icon(Icons.timer),
-                label: Text(l10n.startTraining),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.successColor
-                      : Colors.green[600],
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            Wrap(
+              spacing: 16,
+              runSpacing: 8,
+              children: [
+                if (_partnerCount > 0)
+                  _buildInfoLabel(
+                    context,
+                    icon: Icons.people,
+                    text: '${1 + _partnerCount}',
                   ),
+                if (training.gym != null)
+                  _buildInfoLabel(
+                    context,
+                    icon: Icons.location_on,
+                    text: training.gym!.name,
+                  ),
+                _buildInfoLabel(
+                  context,
+                  icon: Icons.tune,
+                  text: training.type,
                 ),
-              ),
+                _buildInfoLabel(
+                  context,
+                  icon: Icons.schedule,
+                  text: _formatDuration(training.duration),
+                ),
+                _buildInfoLabel(
+                  context,
+                  icon: Icons.calendar_today,
+                  text: _formatDate(training.completedAt ?? training.createdAt),
+                ),
+                if (training.parentId != null)
+                  _buildInfoLabel(
+                    context,
+                    icon: Icons.copy,
+                    text: l10n.copied,
+                  ),
+              ],
             ),
-            // Mark as Complete button (only show if not already completed, only owner can complete)
-            if (training.completedAt == null) ...[
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: isOwner ? () => _completeTraining(context) : null,
-                  icon: Icon(
-                    Icons.check_circle_outline,
-                    color: isOwner ? null : Colors.grey,
-                  ),
-                  label: Text(
-                    l10n.markAsComplete,
-                    style: TextStyle(
-                      color: isOwner ? null : Colors.grey,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.successColor
-                        : Colors.green[600],
-                    side: BorderSide(
-                      color: isOwner
-                          ? (PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.successColor
-                              : Colors.green[600]!)
-                          : Colors.grey,
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.fitness_center,
+                  size: 18,
+                  color: PlatformHelper.useLiquidGlass
+                      ? LiquidGlassTheme.captionStyle.color
+                      : Colors.grey.shade600,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    training.equipment.isEmpty
+                        ? l10n.noEquipment
+                        : training.equipment.join(' · '),
+                    style: PlatformHelper.useLiquidGlass
+                        ? LiquidGlassTheme.captionStyle
+                        : Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey.shade600,
+                            ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
+            // collapsible references section
+            if (training.references.isNotEmpty)
+              _buildReferencesSection(context),
+            const SizedBox(height: 16),
+
+            // Action buttons grid (2 per row)
+            Row(
+              children: [
+                Expanded(
+                  child: _buildActionButton(
+                    context,
+                    icon: Icons.timer,
+                    label: l10n.startTraining,
+                    onPressed: () async {
+                      final completed = await Navigator.of(context).push<bool>(
+                        MaterialPageRoute(
+                          builder: (context) => TabataTimerScreen(training: training),
+                        ),
+                      );
+                      if (completed == true && context.mounted) {
+                        Navigator.of(context).pop(true);
+                      }
+                    },
+                    isPrimary: true,
+                  ),
+                ),
+                if (training.completedAt == null) ...[
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildActionButton(
+                      context,
+                      icon: Icons.check_circle_outline,
+                      label: l10n.markAsComplete,
+                      onPressed: isOwner ? () => _completeTraining(context) : null,
+                      isPrimary: true,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildActionButton(
+                    context,
+                    icon: Icons.copy,
+                    label: l10n.cloneTraining,
+                    onPressed: () => _cloneTraining(context),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildActionButton(
+                    context,
+                    icon: Icons.share,
+                    label: l10n.shareWithUser,
+                    onPressed: () => _showCopyTrainingDialog(context),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                if (isOwner) ...[
+                  Expanded(
+                    child: _buildActionButton(
+                      context,
+                      icon: Icons.person_add,
+                      label: l10n.addPartner,
+                      onPressed: () => _showAddPartnerDialog(context),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Expanded(
+                  child: _buildActionButton(
+                    context,
+                    icon: Icons.help_outline,
+                    label: l10n.showAiReasoning,
+                    onPressed: () => _showReasoningDialog(context),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildActionButton(
+                    context,
+                    icon: Icons.flag_outlined,
+                    label: l10n.reportIssue,
+                    onPressed: () => _showReportDialog(context),
+                    isDestructive: true,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildActionButton(
+                    context,
+                    icon: Icons.delete,
+                    label: isOwner ? l10n.deleteTraining : l10n.leaveTraining,
+                    onPressed: () => _deleteTraining(context),
+                    isDestructive: true,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 24),
 
             // Routines
@@ -1157,6 +1125,45 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback? onPressed,
+    bool isDestructive = false,
+    bool isPrimary = false,
+  }) {
+    final isDisabled = onPressed == null;
+    final Color color;
+    if (isDisabled) {
+      color = Colors.grey;
+    } else if (isDestructive) {
+      color = Colors.red;
+    } else if (isPrimary) {
+      color = PlatformHelper.useLiquidGlass
+          ? LiquidGlassTheme.successColor
+          : Colors.green[600]!;
+    } else {
+      color = PlatformHelper.useLiquidGlass
+          ? LiquidGlassTheme.primaryColor
+          : Theme.of(context).colorScheme.primary;
+    }
+
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18),
+      label: Text(label, overflow: TextOverflow.ellipsis),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: color,
+        side: BorderSide(color: color.withOpacity(0.5)),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
       ),
     );
   }
