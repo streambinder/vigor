@@ -46,11 +46,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   void initState() {
     super.initState();
     final prefs = context.read<PreferencesService>();
-    final defaultName = prefs.defaultGymName;
+    final defaultId = prefs.defaultGymId;
     // default to gym mode if user has a default gym set, otherwise bodyweight
-    if (defaultName != null && widget.gyms.any((g) => g.name == defaultName)) {
+    if (defaultId != null && widget.gyms.any((g) => g.id == defaultId)) {
       _equipmentMode = EquipmentMode.gym;
-      _selectedGym = widget.gyms.firstWhere((g) => g.name == defaultName);
+      _selectedGym = widget.gyms.firstWhere((g) => g.id == defaultId);
     } else if (widget.gyms.isNotEmpty) {
       _selectedGym = widget.gyms.first;
     }
@@ -341,14 +341,14 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     final prompt = _promptController.text.trim();
 
     // determine gym and equipment based on selected mode
-    String gym = '';
+    String gymId = '';
     List<String>? equipment;
     switch (_equipmentMode) {
       case EquipmentMode.bodyweight:
         // empty gym and equipment = bodyweight only
         break;
       case EquipmentMode.gym:
-        gym = _selectedGym?.name ?? '';
+        gymId = _selectedGym?.id ?? '';
         break;
       case EquipmentMode.custom:
         equipment = _equipment.isEmpty ? null : _equipment;
@@ -357,7 +357,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
     final response = await trainingService.generateTraining(
       duration: duration,
-      gym: gym,
+      gym: gymId,
       prompt: prompt.isEmpty ? null : prompt,
       equipment: equipment,
       partners: _partners.isEmpty ? null : _partners.map((p) => p.id).toList(),

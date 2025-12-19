@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -26,7 +25,7 @@ const (
 type TrainingRequest struct {
 	Duration           int      `json:"duration"`           // Duration in minutes for the training session
 	Equipment          []string `json:"equipment"`          // List of available equipment (optional if gym is specified)
-	Gym                string   `json:"gym"`                // Name of the gym to use for equipment lookup
+	Gym                string   `json:"gym"`                // UUID of the gym to use for equipment lookup
 	Prompt             string   `json:"prompt"`             // Specific prompt to use for generating the training plan
 	Partners           []string `json:"partners"`           // Optional partner user UUIDs for partner trainings
 	SkipWarmupCooldown bool     `json:"skipWarmupCooldown"` // Skip both warmup and cooldown routines
@@ -80,8 +79,11 @@ func postTraining(c *fiber.Ctx) error {
 
 	var gym *model.Gym
 	if req.Gym != "" {
-		gymQuery := strings.ToLower(req.Gym)
-		if err := database.DB.First(&gym, "name ilike ? and user_id = ?", gymQuery, c.Locals("userID")).Error; err != nil {
+		gymID, err := uuid.Parse(req.Gym)
+		if err != nil {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid gym ID"})
+		}
+		if err := database.DB.First(&gym, "id = ? AND user_id = ?", gymID, c.Locals("userID")).Error; err != nil {
 			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "gym not found"})
 		}
 	}

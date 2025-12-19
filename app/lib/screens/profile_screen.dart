@@ -74,7 +74,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (gym == null) {
         await _addGym(result['name'], result['equipment']);
       } else {
-        await _updateGym(gym.name, result['name'], result['equipment']);
+        await _updateGym(gym.id, result['name'], result['equipment']);
       }
     }
   }
@@ -103,13 +103,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _updateGym(String currentName, String newName, List<String> equipment) async {
+  Future<void> _updateGym(String id, String name, List<String> equipment) async {
     if (_gymService == null) return;
     final l10n = AppLocalizations.of(context);
 
     final response = await _gymService!.updateGym(
-      currentName: currentName,
-      newName: newName != currentName ? newName : null,
+      id: id,
+      name: name,
       equipment: equipment,
     );
 
@@ -128,13 +128,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _deleteGym(String name) async {
+  Future<void> _deleteGym(Gym gym) async {
     if (_gymService == null) return;
     final l10n = AppLocalizations.of(context);
     final shouldDelete = await AdaptiveAlertDialog.show<bool>(
       context: context,
       title: l10n.deleteGym,
-      content: l10n.deleteGymConfirmation(name),
+      content: l10n.deleteGymConfirmation(gym.name),
       actions: [
         AdaptiveDialogAction(
           label: l10n.cancel,
@@ -149,10 +149,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (shouldDelete == true) {
-      final response = await _gymService!.deleteGym(name);
+      final response = await _gymService!.deleteGym(gym.id);
 
       if (response.isSuccess && mounted) {
-        await _prefsService?.clearDefaultGymIfMatches(name);
+        await _prefsService?.clearDefaultGymIfMatches(gym.id);
         AdaptiveNotification.show(
           context: context,
           message: l10n.gymDeletedSuccessfully,
@@ -168,10 +168,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _toggleDefaultGym(String name) async {
-    final current = _prefsService?.defaultGymName;
-    final newDefault = current == name ? null : name;
-    await _prefsService?.setDefaultGymName(newDefault);
+  Future<void> _toggleDefaultGym(String id) async {
+    final current = _prefsService?.defaultGymId;
+    final newDefault = current == id ? null : id;
+    await _prefsService?.setDefaultGymId(newDefault);
     setState(() {});
   }
 
@@ -664,7 +664,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       )
                     else
                       ...(_gyms!.map((gym) {
-                        final isDefault = _prefsService?.defaultGymName == gym.name;
+                        final isDefault = _prefsService?.defaultGymId == gym.id;
                         return Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
                             child: AdaptiveCard(
@@ -695,7 +695,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             color: isDefault ? Colors.amber : null,
                                           ),
                                           tooltip: isDefault ? l10n.removeDefault : l10n.setAsDefault,
-                                          onPressed: () => _toggleDefaultGym(gym.name),
+                                          onPressed: () => _toggleDefaultGym(gym.id),
                                         ),
                                         AdaptiveIconButton(
                                           icon: const Icon(Icons.edit, size: 20),
@@ -705,7 +705,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         AdaptiveIconButton(
                                           icon: const Icon(Icons.delete, size: 20),
                                           tooltip: l10n.delete,
-                                          onPressed: () => _deleteGym(gym.name),
+                                          onPressed: () => _deleteGym(gym),
                                         ),
                                       ],
                                     ),

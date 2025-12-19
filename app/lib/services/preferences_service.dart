@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferencesService {
-  static const String _defaultGymNameKey = 'default_gym_name';
+  static const String _defaultGymIdKey = 'default_gym_id';
   static const String _localeKey = 'app_locale';
 
   SharedPreferences? _prefs;
@@ -10,19 +10,19 @@ class PreferencesService {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  String? get defaultGymName => _prefs?.getString(_defaultGymNameKey);
+  String? get defaultGymId => _prefs?.getString(_defaultGymIdKey);
 
-  Future<void> setDefaultGymName(String? name) async {
-    if (name == null) {
-      await _prefs?.remove(_defaultGymNameKey);
+  Future<void> setDefaultGymId(String? id) async {
+    if (id == null) {
+      await _prefs?.remove(_defaultGymIdKey);
     } else {
-      await _prefs?.setString(_defaultGymNameKey, name);
+      await _prefs?.setString(_defaultGymIdKey, id);
     }
   }
 
-  Future<void> clearDefaultGymIfMatches(String name) async {
-    if (defaultGymName == name) {
-      await setDefaultGymName(null);
+  Future<void> clearDefaultGymIfMatches(String id) async {
+    if (defaultGymId == id) {
+      await setDefaultGymId(null);
     }
   }
 

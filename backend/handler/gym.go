@@ -2,9 +2,9 @@ package handler
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/handler/middleware"
 	"github.com/streambinder/vigor/model"
@@ -13,10 +13,10 @@ import (
 // initGym registers gym-related routes.
 func initGym(app *fiber.App) {
 	app.Post("/gym", middleware.Authorized(), postGym)
-	app.Get("/gym", middleware.Authorized(), getGym)
-	app.Get("/gym/:name", middleware.Authorized(), getGymByName)
-	app.Put("/gym/:name", middleware.Authorized(), putGymByName)
-	app.Delete("/gym/:name", middleware.Authorized(), deleteGymByName)
+	app.Get("/gym", middleware.Authorized(), getGyms)
+	app.Get("/gym/:id", middleware.Authorized(), getGym)
+	app.Put("/gym/:id", middleware.Authorized(), putGym)
+	app.Delete("/gym/:id", middleware.Authorized(), deleteGym)
 }
 
 // postGym handles POST /gym - creates a new gym for the authenticated user
@@ -54,8 +54,8 @@ func postGym(c *fiber.Ctx) error {
 	})
 }
 
-// getGym handles GET /gym - retrieves all gyms for the authenticated user
-func getGym(c *fiber.Ctx) error {
+// getGyms handles GET /gym - retrieves all gyms for the authenticated user
+func getGyms(c *fiber.Ctx) error {
 	var gyms []model.Gym
 	if err := database.DB.Find(&gyms, "user_id = ?", c.Locals("userID")).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -67,25 +67,29 @@ func getGym(c *fiber.Ctx) error {
 	})
 }
 
-// getGymByName handles GET /gym/:name - retrieves a specific gym by name
-func getGymByName(c *fiber.Ctx) error {
-	var (
-		gymName = strings.ToLower(c.Params("name"))
-		gym     model.Gym
-	)
-	if err := database.DB.First(&gym, "name ilike ? and user_id = ?", gymName, c.Locals("userID")).Error; err != nil {
+// getGym handles GET /gym/:id - retrieves a specific gym by ID
+func getGym(c *fiber.Ctx) error {
+	gymID, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid gym ID"})
+	}
+
+	var gym model.Gym
+	if err := database.DB.First(&gym, "id = ? AND user_id = ?", gymID, c.Locals("userID")).Error; err != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "gym not found"})
 	}
 	return c.JSON(gym)
 }
 
-// putGymByName handles PUT /gym/:name - updates a gym's details
-func putGymByName(c *fiber.Ctx) error {
-	var (
-		gymName = strings.ToLower(c.Params("name"))
-		gym     model.Gym
-	)
-	if err := database.DB.First(&gym, "name ilike ? and user_id = ?", gymName, c.Locals("userID")).Error; err != nil {
+// putGym handles PUT /gym/:id - updates a gym's details
+func putGym(c *fiber.Ctx) error {
+	gymID, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid gym ID"})
+	}
+
+	var gym model.Gym
+	if err := database.DB.First(&gym, "id = ? AND user_id = ?", gymID, c.Locals("userID")).Error; err != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "gym not found"})
 	}
 
@@ -122,13 +126,15 @@ func putGymByName(c *fiber.Ctx) error {
 	})
 }
 
-// deleteGymByName handles DELETE /gym/:name - deletes a gym
-func deleteGymByName(c *fiber.Ctx) error {
-	var (
-		gymName = strings.ToLower(c.Params("name"))
-		gym     model.Gym
-	)
-	if err := database.DB.First(&gym, "name ilike ? and user_id = ?", gymName, c.Locals("userID")).Error; err != nil {
+// deleteGym handles DELETE /gym/:id - deletes a gym
+func deleteGym(c *fiber.Ctx) error {
+	gymID, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid gym ID"})
+	}
+
+	var gym model.Gym
+	if err := database.DB.First(&gym, "id = ? AND user_id = ?", gymID, c.Locals("userID")).Error; err != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "gym not found"})
 	}
 

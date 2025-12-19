@@ -37,10 +37,10 @@ class GymService {
     }
   }
 
-  Future<ApiResponse<Gym>> getGym(String name) async {
-    AppLogger.debug('[GymService] Fetching gym: $name');
+  Future<ApiResponse<Gym>> getGym(String id) async {
+    AppLogger.debug('[GymService] Fetching gym: $id');
 
-    final response = await _apiService.get('/gym/$name');
+    final response = await _apiService.get('/gym/$id');
 
     if (response.isSuccess && response.data != null) {
       try {
@@ -93,17 +93,17 @@ class GymService {
   }
 
   Future<ApiResponse<Gym>> updateGym({
-    required String currentName,
-    String? newName,
+    required String id,
+    String? name,
     List<String>? equipment,
   }) async {
-    AppLogger.debug('[GymService] Updating gym: $currentName');
+    AppLogger.debug('[GymService] Updating gym: $id');
 
     final body = <String, dynamic>{};
-    if (newName != null) body['name'] = newName;
+    if (name != null) body['name'] = name;
     if (equipment != null) body['equipment'] = equipment;
 
-    final response = await _apiService.put('/gym/$currentName', body: body);
+    final response = await _apiService.put('/gym/$id', body: body);
 
     if (response.isSuccess && response.data != null) {
       try {
@@ -123,14 +123,14 @@ class GymService {
     }
   }
 
-  Future<ApiResponse<String>> deleteGym(String name) async {
-    AppLogger.debug('[GymService] Deleting gym: $name');
+  Future<ApiResponse<String>> deleteGym(String id) async {
+    AppLogger.debug('[GymService] Deleting gym: $id');
 
-    final response = await _apiService.delete('/gym/$name');
+    final response = await _apiService.delete('/gym/$id');
 
     if (response.isSuccess) {
       final message = response.data?['message'] as String? ?? 'Gym deleted';
-      AppLogger.info('[GymService] Deleted gym: $name');
+      AppLogger.info('[GymService] Deleted gym: $id');
       return ApiResponse.success(message, response.statusCode);
     } else {
       AppLogger.error('[GymService] Failed to delete gym: ${response.error}');
