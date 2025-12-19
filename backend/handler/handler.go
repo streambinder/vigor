@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/streambinder/vigor/handler/middleware"
 )
@@ -16,6 +17,9 @@ func Init() *fiber.App {
 
 	// Register request ID middleware
 	app.Use(requestid.New())
+
+	// Register compression middleware
+	app.Use(compress.New())
 
 	// Register CORS middleware
 	app.Use(middleware.CORS())
