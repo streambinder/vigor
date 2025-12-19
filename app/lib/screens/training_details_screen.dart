@@ -443,10 +443,6 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                       )).toList(),
                     ),
                   ),
-                _buildReasoningSection(
-                  title: l10n.naming,
-                  child: Text(r.namingLogic),
-                ),
               ],
             ),
           ),

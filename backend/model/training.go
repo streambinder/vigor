@@ -63,13 +63,12 @@ type ProgressionReasoning struct {
 // TrainingReasoning captures the model's thought process before generating training structure.
 type TrainingReasoning struct {
 	Constraints   []string             `json:"constraints" prompt:"Active constraints from user profile (injuries, limitations, equipment restrictions, time)"`
-	TypeSelection string               `json:"type_selection" prompt:"Which types were used in RECENT_HISTORY/RECENT_GENERATIONS, and why a different type was chosen for variety"`
+	TypeSelection string               `json:"type_selection" prompt:"Which types were used in RECENT_HISTORY, and why a different type was chosen for variety"`
 	Strategy      string               `json:"strategy" prompt:"1-2 sentence training approach that fits the chosen type while respecting constraints and goals"`
 	Progression   ProgressionReasoning `json:"progression" prompt:"How user feedback from recent trainings influenced exercise parameters (weight, reps, difficulty)"`
 	FactsApplied  []string             `json:"facts_applied" prompt:"How each KNOWLEDGE_FACT was applied to address user goals or work around injuries (e.g. 'DOI URL: applied X principle for Y goal/injury'). Empty array if no facts provided."`
 	TargetMuscles []string             `json:"target_muscles" prompt:"Primary muscle groups this training will target"`
 	Exercises     []string             `json:"exercises" prompt:"Exercise IDs selected for this training with brief reason each (e.g. 'push-up: chest compound')"`
-	NamingLogic   string               `json:"naming_logic" prompt:"Brief explanation connecting training name to theme/exercises"`
 }
 
 // Training represents the entire training session with a UUID ID
@@ -80,7 +79,7 @@ type Training struct {
 	// This forces coherent planning: constraints → strategy → exercises → naming.
 	Reasoning datatypes.JSONType[TrainingReasoning] `gorm:"type:jsonb,not null" json:"reasoning" prompt:"Step-by-step reasoning that led to this training design. MUST be completed before other fields."`
 
-	Name        string         `gorm:"not null" json:"name" prompt:"Epic 3-4 word title inspired by classics, no special characters (e.g. Trojan War Training, Achilles Trial Run, Pius Aeneas Fitness, Son of Zeus Gains)"`
+	Name        string         `gorm:"not null" json:"name" prompt:"Concise 3-4 word title reflecting the training focus based on goals and target muscles (e.g. Upper Body Strength, Core HIIT Circuit, Leg Day Power)"`
 	Description string         `gorm:"not null" json:"description" prompt:"Short paragraph describing how the generated program fits the user's goals and limitations. No need to mention user profile details such as age, weight, height, etc. It's highly appreciated to mention weight/reps regressions or increases based on user's feedback and/or previous trainings."`
 	Type        string         `gorm:"not null" json:"type" prompt:"Training type;enum:strength,circuit,emom,amrap,hiit,for_time,endurance,mobility"`
 	Duration    int            `gorm:"not null" json:"duration" prompt:"Total duration in seconds"`

@@ -16,9 +16,8 @@ import (
 )
 
 const (
-	recentTrainingDays          = 14
-	recentTrainingMaxResults    = 5
-	recentGenerationsMaxResults = 5
+	recentTrainingDays       = 14
+	recentTrainingMaxResults = 5
 )
 
 // TrainingRequest represents the request body for generating a training plan.
@@ -179,18 +178,6 @@ func postTraining(c *fiber.Ctx) error {
 		Dur("duration_ms", time.Since(queryFactsStart)).
 		Msg("queried facts from database")
 
-	// Query random classics for prompt enrichment
-	queryClassicsStart := time.Now()
-	classics, err := rag.RetrieveClassics()
-	if err != nil {
-		middleware.Log(c).Error().Err(err).Msg("failed to query classics from database")
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
-	middleware.Log(c).Info().
-		Int("classics_count", len(classics)).
-		Dur("duration_ms", time.Since(queryClassicsStart)).
-		Msg("queried classics from database")
-
 	// Query recent trainings to avoid repeating exercises and ensure progression
 	var recentTrainings []model.Training
 	if err := database.DB.
@@ -200,18 +187,6 @@ func postTraining(c *fiber.Ctx) error {
 		Limit(recentTrainingMaxResults).
 		Find(&recentTrainings).Error; err != nil {
 		middleware.Log(c).Error().Err(err).Msg("failed to query recent trainings from database")
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
-
-	// Query recent generated to avoid repeating exercises and ensure progression
-	var recentGenerations []model.Training
-	if err := database.DB.
-		Select("DISTINCT ON (name) *").
-		Where("user_id = ?", requestorProfile.UserID).
-		Order("name, created_at desc").
-		Limit(recentGenerationsMaxResults).
-		Find(&recentGenerations).Error; err != nil {
-		middleware.Log(c).Error().Err(err).Msg("failed to query recent generations from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -229,9 +204,7 @@ func postTraining(c *fiber.Ctx) error {
 		req.Prompt,
 		req.Duration,
 		recentTrainings,
-		recentGenerations,
 		facts,
-		classics,
 		req.SkipWarmupCooldown,
 	)
 	if err != nil {
@@ -239,6 +212,7 @@ func postTraining(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	middleware.Log(c).Info().Dur("duration_ms", time.Since(llmStart)).Msg("generated training via LLM")
+
 	training.UserID = requestorProfile.UserID
 	if promptJSON, err := json.Marshal(prompt); err == nil {
 		training.Prompt = promptJSON

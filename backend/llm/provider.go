@@ -47,9 +47,7 @@ func GenTraining(
 	userPrompt string,
 	duration int,
 	recentTrainings []model.Training,
-	recentGenerations []model.Training,
 	facts []model.Fact,
-	classics []model.Classic,
 	skipWarmupCooldown bool,
 ) (*model.Training, llmPrompt, error) {
 	request := llmPrompt{
@@ -67,9 +65,7 @@ func GenTraining(
 			userPrompt,
 			duration,
 			recentTrainings,
-			recentGenerations,
 			facts,
-			classics,
 			skipWarmupCooldown,
 		),
 	}

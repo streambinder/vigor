@@ -77,7 +77,7 @@ User goals are the MOST IMPORTANT factor in training design. Every exercise sele
 REASONING-FIRST APPROACH:
 You MUST complete the "reasoning" object BEFORE generating training structure. This ensures coherent, well-planned trainings. The reasoning process:
 1. constraints: List active limitations (injuries, equipment, time)
-2. type_selection: Choose workout type by checking RECENT_HISTORY and RECENT_GENERATIONS types, then pick a DIFFERENT type to ensure variety. State which types were recently used and why you chose a different one. Only repeat a type if user explicitly requests it or all types have been used recently.
+2. type_selection: Choose workout type by checking RECENT_HISTORY types, then pick a DIFFERENT type to ensure variety. State which types were recently used and why you chose a different one. Only repeat a type if user explicitly requests it or all types have been used recently.
 3. strategy: 1-2 sentence approach that fits the CHOSEN TYPE while respecting constraints and goals
 4. progression: Analyze RECENT_HISTORY feedback to determine weight/rep/difficulty adjustments:
    - summary: 1-2 sentence overview of how feedback influenced this session (empty string if no relevant feedback in history)
@@ -89,9 +89,8 @@ You MUST complete the "reasoning" object BEFORE generating training structure. T
 5. facts_applied: How KNOWLEDGE_FACTS influenced the design
 6. target_muscles: Which muscle groups to focus on (selected to serve goals)
 7. exercises: List selected exercise IDs with reason showing how they fit the CHOSEN TYPE (e.g. for circuit: "push-up: bodyweight compound, quick transitions")
-8. naming_logic: Brief connection between name and training theme
 
-Only AFTER completing reasoning should you populate name, description, type, and routines.
+Only AFTER completing reasoning should you populate name, description, type, and routines. The name should be a concise 3-4 word title reflecting the training focus (goals and target muscles).
 
 TRAINING PHILOSOPHY:
 - Safety over intensity: skip any exercise that could aggravate listed injuries
@@ -113,23 +112,23 @@ When selecting type: avoid repeating types from recent trainings unless user exp
 
 TRAINING STRUCTURE (required routines in order):
 `)
-//line llm/prompt/system.qtpl:71
+//line llm/prompt/system.qtpl:70
 	if !skipWarmupCooldown {
-//line llm/prompt/system.qtpl:71
+//line llm/prompt/system.qtpl:70
 		qw422016.N().S(`1. warmup: light cardio and bodyweight exercises to elevate heart rate and activate muscles (5-10min). Prioritize jumping jacks, high knees, arm circles, leg swings—not static stretches.
 2. work: main training blocks with appropriate rest periods (bulk of duration)
 3. cooldown: static stretches targeting the specific muscles exercised during the work phase (5min). Match stretches to worked muscle groups.
 `)
-//line llm/prompt/system.qtpl:74
+//line llm/prompt/system.qtpl:73
 	} else {
-//line llm/prompt/system.qtpl:74
+//line llm/prompt/system.qtpl:73
 		qw422016.N().S(`1. work: main training blocks with appropriate rest periods (entire duration)
 
 SKIP WARMUP AND COOLDOWN: The user has requested NO warmup and NO cooldown routines. Generate ONLY the "work" routine. The routines array must contain exactly ONE routine with name "work". Do NOT include any routine named "warmup" or "cooldown".
 `)
-//line llm/prompt/system.qtpl:77
+//line llm/prompt/system.qtpl:76
 	}
-//line llm/prompt/system.qtpl:77
+//line llm/prompt/system.qtpl:76
 	qw422016.N().S(`
 
 EXERCISE SELECTION PRIORITY:
@@ -169,6 +168,7 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
 {
   "reasoning": {
     "constraints": ["shoulder injury limits overhead pressing", "dumbbells only", "30min"],
+    "type_selection": "No recent history - selecting strength for user's stated goal",
     "strategy": "Strength-focused upper body session with horizontal pressing and pulling. Heavy loads, low reps, full recovery between sets.",
     "progression": {
       "summary": "User marked bench press too easy 3 days ago - increasing weight by 2kg. No other feedback-driven changes.",
@@ -183,10 +183,9 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
       "dumbbell-bent-over-row: horizontal pull, heavy loading for back strength",
       "dumbbell-biceps-curl: arm strength, lower reps than hypertrophy",
       "dumbbell-triceps-kickback: triceps strength, no shoulder stress"
-    ],
-    "naming_logic": "Horizontal movements like Sisyphus pushing sideways"
+    ]
   },
-  "name": "Sisyphean Horizontal Push",
+  "name": "Upper Body Strength",
   "description": "Upper body session avoiding overhead work. Horizontal pressing and pulling with arm isolation finishers.",
   "type": "strength",
   "duration": 1800,
@@ -245,31 +244,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   ]
 }
 `)
-//line llm/prompt/system.qtpl:191
+//line llm/prompt/system.qtpl:190
 }
 
-//line llm/prompt/system.qtpl:191
+//line llm/prompt/system.qtpl:190
 func WriteSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool) {
-//line llm/prompt/system.qtpl:191
+//line llm/prompt/system.qtpl:190
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:191
+//line llm/prompt/system.qtpl:190
 	StreamSystem(qw422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:191
+//line llm/prompt/system.qtpl:190
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:191
+//line llm/prompt/system.qtpl:190
 }
 
-//line llm/prompt/system.qtpl:191
+//line llm/prompt/system.qtpl:190
 func System(skipWarmupCooldown bool) string {
-//line llm/prompt/system.qtpl:191
+//line llm/prompt/system.qtpl:190
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:191
+//line llm/prompt/system.qtpl:190
 	WriteSystem(qb422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:191
+//line llm/prompt/system.qtpl:190
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:191
+//line llm/prompt/system.qtpl:190
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:191
+//line llm/prompt/system.qtpl:190
 	return qs422016
-//line llm/prompt/system.qtpl:191
+//line llm/prompt/system.qtpl:190
 }

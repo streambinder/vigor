@@ -16,7 +16,6 @@ const (
 	MaxWarmupExercises   = 8  // random selection for warmup
 	MaxCooldownExercises = 5  // random selection for cooldown
 	MaxPromptFacts       = 5
-	MaxPromptClassics    = 3
 	MaxFactDistance      = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
 	MaxEquipmentDistance = 0.2 // Maximum cosine distance for equipment matching
 	MaxModifierDistance  = 0.2 // Maximum cosine distance for modifier matching
@@ -153,19 +152,6 @@ func RetrieveUserFacts(profiles []model.Profile, prompt string) ([]model.Fact, e
 		facts = append(facts, result.Fact)
 	}
 	return facts, nil
-}
-
-// RetrieveClassics retrieves random classic trainings for prompt enrichment.
-func RetrieveClassics() ([]model.Classic, error) {
-	var classics []model.Classic
-	if err := database.Knowledge.
-		Order("RANDOM()").
-		Limit(MaxPromptClassics).
-		Find(&classics).
-		Error; err != nil {
-		return nil, fmt.Errorf("failed to query classics: %w", err)
-	}
-	return classics, nil
 }
 
 // RetrieveUserModifiers retrieves modifiers that match user's available equipment.

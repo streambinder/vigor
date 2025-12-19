@@ -16,9 +16,7 @@
     userPrompt string,
     duration int,
     recentTrainings []model.Training,
-    recentGenerations []model.Training,
     facts []model.Fact,
-    classics []model.Classic,
     skipWarmupCooldown bool,
 ) -%}
 Generate a {%d duration %}-minute training session.
@@ -100,22 +98,10 @@ Use ONLY these exercise IDs for the cooldown routine.
 {% endfor %}<<<END_RECENT_HISTORY>>>
 {% endif %}
 
-{% if len(recentGenerations) > 0 %}
-<<<RECENT_GENERATIONS (avoid repeating names and training rationale, DISTRIBUTE workout types for variety)>>>
-{% for _, training := range recentGenerations %}{%s training.Type %}: {%s training.Name %}
-{% endfor %}<<<END_RECENT_GENERATIONS>>>
-{% endif %}
-
 {% if len(facts) > 0 %}
 <<<KNOWLEDGE_FACTS>>>
 {% for _, fact := range facts %}[{%s fact.Reference %}] {%s fact.Content %}
 {% endfor %}<<<END_KNOWLEDGE_FACTS>>>
-{% endif %}
-
-{% if len(classics) > 0 %}
-<<<NAMING_INSPIRATION>>>
-{% for _, classic := range classics %}{%s classic.Excerpt %}
-{% endfor %}<<<END_NAMING_INSPIRATION>>>
 {% endif %}
 
 Output language: {% if len(profiles) > 0 && len(profiles[0].Language) > 0 %}{%s profiles[0].Language %}{% else %}English{% endif %}

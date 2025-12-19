@@ -22,8 +22,6 @@ class TrainingReasoning {
   final List<String> targetMuscles;
   @JsonKey(name: 'exercises', defaultValue: const [])
   final List<String> exercises;
-  @JsonKey(name: 'naming_logic', defaultValue: '')
-  final String namingLogic;
 
   TrainingReasoning({
     required this.constraints,
@@ -33,7 +31,6 @@ class TrainingReasoning {
     required this.factsApplied,
     required this.targetMuscles,
     required this.exercises,
-    required this.namingLogic,
   });
 
   factory TrainingReasoning.fromJson(Map<String, dynamic> json) => _$TrainingReasoningFromJson(json);

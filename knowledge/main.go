@@ -45,8 +45,6 @@ func main() {
 		&model.ModifierEmbedding{},
 		&model.Fact{},
 		&model.FactEmbedding{},
-		&model.Classic{},
-		&model.ClassicEmbedding{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %s", err)
 	}
@@ -62,9 +60,6 @@ func main() {
 	}
 	if err := boostrapFacts(gormDB); err != nil {
 		log.Fatalf("Failed to inject facts: %s", err)
-	}
-	if err := boostrapClassics(gormDB); err != nil {
-		log.Fatalf("Failed to inject classics: %s", err)
 	}
 }
 
@@ -218,40 +213,6 @@ func boostrapFacts(gormDB *gorm.DB) error {
 		if err := gormDB.FirstOrCreate(
 			&model.FactEmbedding{FactID: row.ID, Text: text, Embedding: pgvector.NewVector(vector)},
 			model.FactEmbedding{FactID: row.ID},
-		).Error; err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func boostrapClassics(gormDB *gorm.DB) error {
-	bytes, err := os.ReadFile(filepath.Join("features", "classics.json"))
-	if err != nil {
-		return err
-	}
-
-	var rows []model.Classic
-	if err := json.Unmarshal(bytes, &rows); err != nil {
-		return err
-	}
-
-	for i := range rows {
-		row := &rows[i]
-		if err := gormDB.FirstOrCreate(row, model.Classic{Excerpt: row.Excerpt}).Error; err != nil {
-			return err
-		}
-
-		text := rag.GenClassic(*row)
-		vector, err := embedding.GenVector(text)
-		if err != nil {
-			return err
-		}
-
-		if err := gormDB.FirstOrCreate(
-			&model.ClassicEmbedding{ClassicID: row.ID, Text: text, Embedding: pgvector.NewVector(vector)},
-			model.ClassicEmbedding{ClassicID: row.ID},
 		).Error; err != nil {
 			return err
 		}
