@@ -8,7 +8,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/handler/middleware"
 	"github.com/streambinder/vigor/llm"
@@ -98,7 +97,7 @@ func postTraining(c *fiber.Ctx) error {
 	if len(equipment) > 0 {
 		matchedEquipment, err := rag.RetrieveUserEquipment(equipment)
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to match equipment from database")
+			middleware.Log(c).Error().Err(err).Msg("failed to match equipment from database")
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
 		for _, eq := range matchedEquipment {
@@ -110,30 +109,30 @@ func postTraining(c *fiber.Ctx) error {
 	queryExerciseStart := time.Now()
 	workExercises, err := rag.RetrieveWorkExercises(profiles, equipment)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to query work exercises from database")
+		middleware.Log(c).Error().Err(err).Msg("failed to query work exercises from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	warmupExercises, err := rag.RetrieveWarmupExercises()
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to query warmup exercises from database")
+		middleware.Log(c).Error().Err(err).Msg("failed to query warmup exercises from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	cooldownExercises, err := rag.RetrieveCooldownExercises()
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to query cooldown exercises from database")
+		middleware.Log(c).Error().Err(err).Msg("failed to query cooldown exercises from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	log.Info().
+	middleware.Log(c).Info().
 		Int("work_exercise_count", len(workExercises)).
 		Int("warmup_exercise_count", len(warmupExercises)).
 		Int("cooldown_exercise_count", len(cooldownExercises)).
 		Dur("duration_ms", time.Since(queryExerciseStart)).
-		Msg("Queried exercises from database")
+		Msg("queried exercises from database")
 
 	// Query modifiers that match user's equipment
 	modifiers, err := rag.RetrieveUserModifiers(equipment)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to query modifiers from database")
+		middleware.Log(c).Error().Err(err).Msg("failed to query modifiers from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -144,7 +143,7 @@ func postTraining(c *fiber.Ctx) error {
 		allFavoriteEquipment = append(allFavoriteEquipment, profile.FavoriteEquipment()...)
 		allFavoriteWorkoutTypes = append(allFavoriteWorkoutTypes, profile.FavoriteWorkoutTypes()...)
 	}
-	log.Debug().
+	middleware.Log(c).Debug().
 		Strs("fav_exercises", allFavoriteExercises).
 		Strs("fav_equipment", allFavoriteEquipment).
 		Strs("fav_workout_types", allFavoriteWorkoutTypes).
@@ -153,12 +152,12 @@ func postTraining(c *fiber.Ctx) error {
 	// Match favorites to canonical entities via RAG
 	favoriteExercises, err := rag.RetrieveFavoriteExercises(allFavoriteExercises)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to query favorite exercises from database")
+		middleware.Log(c).Error().Err(err).Msg("failed to query favorite exercises from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	favoriteEquipment, err := rag.RetrieveFavoriteEquipment(allFavoriteEquipment)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to query favorite equipment from database")
+		middleware.Log(c).Error().Err(err).Msg("failed to query favorite equipment from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	var favoriteEquipmentIDs []string
@@ -170,25 +169,25 @@ func postTraining(c *fiber.Ctx) error {
 	queryFactsStart := time.Now()
 	facts, err := rag.RetrieveUserFacts(profiles, req.Prompt)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to query facts from database")
+		middleware.Log(c).Error().Err(err).Msg("failed to query facts from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	log.Info().
+	middleware.Log(c).Info().
 		Int("facts_count", len(facts)).
 		Dur("duration_ms", time.Since(queryFactsStart)).
-		Msg("Queried facts from database")
+		Msg("queried facts from database")
 
 	// Query random classics for prompt enrichment
 	queryClassicsStart := time.Now()
 	classics, err := rag.RetrieveClassics()
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to query classics from database")
+		middleware.Log(c).Error().Err(err).Msg("failed to query classics from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	log.Info().
+	middleware.Log(c).Info().
 		Int("classics_count", len(classics)).
 		Dur("duration_ms", time.Since(queryClassicsStart)).
-		Msg("Queried classics from database")
+		Msg("queried classics from database")
 
 	// Query recent trainings to avoid repeating exercises and ensure progression
 	var recentTrainings []model.Training
@@ -198,7 +197,7 @@ func postTraining(c *fiber.Ctx) error {
 		Order("completed_at desc").
 		Limit(recentTrainingMaxResults).
 		Find(&recentTrainings).Error; err != nil {
-		log.Error().Err(err).Msg("Failed to query recent trainings from database")
+		middleware.Log(c).Error().Err(err).Msg("failed to query recent trainings from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -210,7 +209,7 @@ func postTraining(c *fiber.Ctx) error {
 		Order("name, created_at desc").
 		Limit(recentGenerationsMaxResults).
 		Find(&recentGenerations).Error; err != nil {
-		log.Error().Err(err).Msg("Failed to query recent generations from database")
+		middleware.Log(c).Error().Err(err).Msg("failed to query recent generations from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -234,10 +233,10 @@ func postTraining(c *fiber.Ctx) error {
 		req.SkipWarmupCooldown,
 	)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to generate training via LLM")
+		middleware.Log(c).Error().Err(err).Msg("failed to generate training via LLM")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	log.Info().Dur("duration_ms", time.Since(llmStart)).Msg("Generated training via LLM")
+	middleware.Log(c).Info().Dur("duration_ms", time.Since(llmStart)).Msg("generated training via LLM")
 	training.UserID = requestorProfile.UserID
 	if promptJSON, err := json.Marshal(prompt); err == nil {
 		training.Prompt = promptJSON
@@ -254,7 +253,7 @@ func postTraining(c *fiber.Ctx) error {
 				activity := &training.Routines[i].Blocks[j].Activities[k]
 				var exercise model.Exercise
 				if err := database.Knowledge.First(&exercise, "id = ?", activity.Name).Error; err != nil {
-					log.Error().Err(err).Str("exercise", activity.Name).Msg("Failed to query exercise from database")
+					middleware.Log(c).Error().Err(err).Str("exercise", activity.Name).Msg("failed to query exercise from database")
 				}
 
 				if exerciseJSON, err := json.Marshal(exercise); err == nil {

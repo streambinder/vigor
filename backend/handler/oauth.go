@@ -8,8 +8,8 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/database"
+	"github.com/streambinder/vigor/handler/middleware"
 	"github.com/streambinder/vigor/model"
 	"github.com/streambinder/vigor/token"
 	"google.golang.org/api/idtoken"
@@ -25,67 +25,67 @@ func initOauth(app *fiber.App) {
 
 // postAuthGoogle handles POST /auth/google - authentication with Google ID token from mobile/web clients
 func postAuthGoogle(c *fiber.Ctx) error {
-	log.Debug().Msg("Received Google auth request")
+	middleware.Log(c).Debug().Msg("received google auth request")
 
 	// Parse request body
 	var body struct {
 		IDToken string `json:"id_token"`
 	}
 	if err := c.BodyParser(&body); err != nil {
-		log.Error().Err(err).Msg("Failed to parse request body")
+		middleware.Log(c).Error().Err(err).Msg("failed to parse request body")
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
 	}
 
 	if body.IDToken == "" {
-		log.Error().Msg("Missing id_token in request")
+		middleware.Log(c).Error().Msg("missing id_token in request")
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "id_token is required"})
 	}
 
-	log.Debug().Int("token_length", len(body.IDToken)).Msg("Received Google token")
+	middleware.Log(c).Debug().Int("token_length", len(body.IDToken)).Msg("received google token")
 
 	// Get Google Client ID from environment
 	googleClientID := os.Getenv("GOOGLE_CLIENT_ID")
 	if googleClientID == "" {
-		log.Error().Msg("GOOGLE_CLIENT_ID not configured")
+		middleware.Log(c).Error().Msg("GOOGLE_CLIENT_ID not configured")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Google authentication not configured"})
 	}
 
 	var email, googleUserID string
 
 	// Try to validate as ID token first
-	log.Debug().Msg("Validating as ID token")
+	middleware.Log(c).Debug().Msg("validating as ID token")
 	payload, err := idtoken.Validate(context.Background(), body.IDToken, googleClientID)
 	if err == nil {
-		log.Debug().Msg("Token validated as ID token")
+		middleware.Log(c).Debug().Msg("token validated as ID token")
 		// It's a valid ID token
 		var ok bool
 		email, ok = payload.Claims["email"].(string)
 		if !ok || email == "" {
-			log.Error().Msg("Email not found in ID token claims")
+			middleware.Log(c).Error().Msg("email not found in ID token claims")
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "email not found in token"})
 		}
 
 		googleUserID, ok = payload.Claims["sub"].(string)
 		if !ok || googleUserID == "" {
-			log.Error().Msg("User ID not found in ID token claims")
+			middleware.Log(c).Error().Msg("user ID not found in ID token claims")
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "user ID not found in token"})
 		}
-		log.Debug().Str("email", email).Str("google_id", googleUserID).Msg("Extracted claims from ID token")
+		middleware.Log(c).Debug().Str("email", email).Str("google_id", googleUserID).Msg("extracted claims from ID token")
 	} else {
-		log.Debug().Err(err).Msg("ID token validation failed, trying as access token")
+		middleware.Log(c).Debug().Err(err).Msg("ID token validation failed, trying as access token")
 		// ID token validation failed, try as access token
 		// Use Google's userinfo endpoint to validate access token and get user info
 		// Pass token in Authorization header instead of query string for better compatibility
 		req, err := http.NewRequest("GET", "https://www.googleapis.com/oauth2/v2/userinfo", nil)
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to create userinfo request")
+			middleware.Log(c).Error().Err(err).Msg("failed to create userinfo request")
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to validate token"})
 		}
 		req.Header.Set("Authorization", "Bearer "+body.IDToken)
 
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to call userinfo endpoint")
+			middleware.Log(c).Error().Err(err).Msg("failed to call userinfo endpoint")
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid token", "details": "token validation failed"})
 		}
 		defer resp.Body.Close()
@@ -93,14 +93,14 @@ func postAuthGoogle(c *fiber.Ctx) error {
 		// Read response body first so we can log it
 		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to read userinfo response")
+			middleware.Log(c).Error().Err(err).Msg("failed to read userinfo response")
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to read user info"})
 		}
 
-		log.Debug().Int("status", resp.StatusCode).Str("response", string(bodyBytes)).Msg("Received userinfo response")
+		middleware.Log(c).Debug().Int("status", resp.StatusCode).Str("response", string(bodyBytes)).Msg("received userinfo response")
 
 		if resp.StatusCode != http.StatusOK {
-			log.Error().Int("status", resp.StatusCode).Msg("Access token validation failed")
+			middleware.Log(c).Error().Int("status", resp.StatusCode).Msg("access token validation failed")
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid token", "details": "token validation failed"})
 		}
 
@@ -110,38 +110,38 @@ func postAuthGoogle(c *fiber.Ctx) error {
 		}
 
 		if err := json.Unmarshal(bodyBytes, &userInfo); err != nil {
-			log.Error().Err(err).Msg("Failed to parse userinfo JSON")
+			middleware.Log(c).Error().Err(err).Msg("failed to parse userinfo JSON")
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to parse user info"})
 		}
 
 		if userInfo.Email == "" || userInfo.ID == "" {
-			log.Error().Msg("Missing email or ID in userinfo response")
+			middleware.Log(c).Error().Msg("missing email or ID in userinfo response")
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "user info not found in response"})
 		}
 
 		email = userInfo.Email
 		googleUserID = userInfo.ID
-		log.Debug().Str("email", email).Str("google_id", googleUserID).Msg("Validated as access token")
+		middleware.Log(c).Debug().Str("email", email).Str("google_id", googleUserID).Msg("validated as access token")
 	}
 
 	var user model.User
 	var identity model.Identity
 
 	// Check if identity already exists for this Google user
-	log.Debug().Str("google_id", googleUserID).Msg("Checking for existing identity")
+	middleware.Log(c).Debug().Str("google_id", googleUserID).Msg("checking for existing identity")
 	result := database.DB.Preload("User").Where("provider = ? AND provider_user_id = ?", "google", googleUserID).First(&identity)
 
 	if result.Error == nil {
 		// Identity exists, user is returning
 		user = identity.User
-		log.Info().Str("user_id", user.ID.String()).Str("email", user.Email).Msg("Found existing user")
+		middleware.Log(c).Info().Str("user_id", user.ID.String()).Str("email", user.Email).Msg("found existing user")
 	} else {
-		log.Debug().Str("email", email).Msg("Identity not found, checking for user by email")
+		middleware.Log(c).Debug().Str("email", email).Msg("identity not found, checking for user by email")
 		// Identity doesn't exist, check if user exists with this email
 		userResult := database.DB.Where("email = ?", email).First(&user)
 
 		if userResult.Error == nil {
-			log.Debug().Str("user_id", user.ID.String()).Msg("Linking new identity to existing user")
+			middleware.Log(c).Debug().Str("user_id", user.ID.String()).Msg("linking new identity to existing user")
 			// User exists with this email, create new identity linked to existing user
 			identity = model.Identity{
 				UserID:         user.ID,
@@ -150,12 +150,12 @@ func postAuthGoogle(c *fiber.Ctx) error {
 			}
 
 			if err := database.DB.Create(&identity).Error; err != nil {
-				log.Error().Err(err).Msg("Failed to create identity")
+				middleware.Log(c).Error().Err(err).Msg("failed to create identity")
 				return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to link authentication method"})
 			}
-			log.Info().Str("user_id", user.ID.String()).Msg("Linked new Google identity to existing user")
+			middleware.Log(c).Info().Str("user_id", user.ID.String()).Msg("linked new google identity to existing user")
 		} else {
-			log.Debug().Msg("Creating new user and identity")
+			middleware.Log(c).Debug().Msg("creating new user and identity")
 			// User doesn't exist, create new user and identity
 			err := database.DB.Transaction(func(tx *gorm.DB) error {
 				user = model.User{
@@ -166,10 +166,10 @@ func postAuthGoogle(c *fiber.Ctx) error {
 				}
 
 				if err := tx.Create(&user).Error; err != nil {
-					log.Error().Err(err).Msg("Failed to create user")
+					middleware.Log(c).Error().Err(err).Msg("failed to create user")
 					return err
 				}
-				log.Debug().Str("user_id", user.ID.String()).Msg("Created new user")
+				middleware.Log(c).Debug().Str("user_id", user.ID.String()).Msg("created new user")
 
 				identity = model.Identity{
 					UserID:         user.ID,
@@ -178,30 +178,30 @@ func postAuthGoogle(c *fiber.Ctx) error {
 				}
 
 				if err := tx.Create(&identity).Error; err != nil {
-					log.Error().Err(err).Msg("Failed to create identity")
+					middleware.Log(c).Error().Err(err).Msg("failed to create identity")
 					return err
 				}
-				log.Debug().Str("identity_id", identity.ID.String()).Msg("Created new identity")
+				middleware.Log(c).Debug().Str("identity_id", identity.ID.String()).Msg("created new identity")
 
 				return nil
 			})
 			if err != nil {
-				log.Error().Err(err).Msg("Transaction failed during user creation")
+				middleware.Log(c).Error().Err(err).Msg("transaction failed during user creation")
 				return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to create user"})
 			}
-			log.Info().Str("user_id", user.ID.String()).Str("email", email).Msg("Created new user with Google identity")
+			middleware.Log(c).Info().Str("user_id", user.ID.String()).Str("email", email).Msg("created new user with google identity")
 		}
 	}
 
 	// Generate tokens for the user
-	log.Debug().Str("user_id", user.ID.String()).Msg("Generating auth tokens")
+	middleware.Log(c).Debug().Str("user_id", user.ID.String()).Msg("generating auth tokens")
 	accessToken, refreshToken, err := token.GenerateTokens(database.DB, user.ID)
 	if err != nil {
-		log.Error().Err(err).Str("user_id", user.ID.String()).Msg("Failed to generate tokens")
+		middleware.Log(c).Error().Err(err).Str("user_id", user.ID.String()).Msg("failed to generate tokens")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "could not generate tokens"})
 	}
 
-	log.Info().Str("user_id", user.ID.String()).Str("email", user.Email).Msg("Google authentication successful")
+	middleware.Log(c).Info().Str("user_id", user.ID.String()).Str("email", user.Email).Msg("google authentication successful")
 	return c.JSON(fiber.Map{
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,

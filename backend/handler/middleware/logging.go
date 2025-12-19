@@ -4,28 +4,47 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/requestid"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
+// key used to store the request-scoped logger in Fiber's Locals
+const loggerKey = "log"
+
+// Log returns a zerolog logger with request ID attached from the Fiber context.
+// Use this in handlers instead of log.* directly to include request correlation.
+func Log(c *fiber.Ctx) *zerolog.Logger {
+	if l, ok := c.Locals(loggerKey).(*zerolog.Logger); ok {
+		return l
+	}
+	// fallback if middleware not applied
+	return &log.Logger
+}
+
 // Logging returns a middleware that logs request processing time and details.
+// It also stores a request-scoped logger in c.Locals for use by handlers.
 func Logging() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		start := time.Now()
+		// get request ID from requestid middleware (must be registered before this)
+		requestID, _ := c.Locals(requestid.ConfigDefault.ContextKey).(string)
 
-		// Process request
+		// create request-scoped logger with request ID
+		logger := log.With().Str("request_id", requestID).Logger()
+		c.Locals(loggerKey, &logger)
+
+		// process request
+		start := time.Now()
 		err := c.Next()
 
-		// Calculate duration
-		duration := time.Since(start)
-
-		// Log request details
-		log.Info().
+		// log request details
+		logger.Info().
 			Str("method", c.Method()).
 			Str("path", c.Path()).
 			Int("status", c.Response().StatusCode()).
-			Dur("duration", duration).
+			Dur("duration", time.Since(start)).
 			Str("ip", c.IP()).
-			Msg("HTTP request")
+			Msg("request")
 
 		return err
 	}
