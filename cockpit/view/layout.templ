@@ -1,0 +1,75 @@
+package view
+
+templ Layout(title string) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ title }</title>
+			<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+			<style>
+				:root {
+					--bg: #0d1117;
+					--bg-card: #161b22;
+					--border: #30363d;
+					--text: #e6edf3;
+					--text-muted: #8b949e;
+					--accent: #58a6ff;
+				}
+				* { box-sizing: border-box; margin: 0; padding: 0; }
+				body {
+					font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+					background: var(--bg);
+					color: var(--text);
+					min-height: 100vh;
+					padding: 2rem;
+				}
+				h1 {
+					font-size: 1.5rem;
+					font-weight: 600;
+					margin-bottom: 2rem;
+					color: var(--text);
+				}
+				.grid {
+					display: grid;
+					grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+					gap: 1.5rem;
+					margin-bottom: 2rem;
+				}
+				.card {
+					background: var(--bg-card);
+					border: 1px solid var(--border);
+					border-radius: 8px;
+					padding: 1.5rem;
+				}
+				.card-label {
+					font-size: 0.875rem;
+					color: var(--text-muted);
+					margin-bottom: 0.5rem;
+				}
+				.card-value {
+					font-size: 2.5rem;
+					font-weight: 600;
+					color: var(--text);
+				}
+				.chart-container {
+					background: var(--bg-card);
+					border: 1px solid var(--border);
+					border-radius: 8px;
+					padding: 1.5rem;
+				}
+				.chart-title {
+					font-size: 1rem;
+					font-weight: 600;
+					margin-bottom: 1rem;
+					color: var(--text);
+				}
+				#latency-chart { min-height: 300px; }
+			</style>
+		</head>
+		<body>
+			{ children... }
+		</body>
+	</html>
+}

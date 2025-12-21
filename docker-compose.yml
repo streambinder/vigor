@@ -112,6 +112,34 @@ services:
       start_period: 10s
     networks:
       - default
+  cockpit:
+    build:
+      context: ./cockpit
+      dockerfile: Dockerfile
+    depends_on:
+      database:
+        condition: service_healthy
+      knowledge:
+        condition: service_healthy
+    environment:
+      PORT: 8080
+      DATABASE_URL: postgres://user:pass@database:5432/db?sslmode=disable
+      KNOWLEDGE_URL: postgres://user:pass@knowledge:5432/db?sslmode=disable
+      # METRICS_URL: /data/metrics.db
+      USER: admin
+      PASSWORD: admin
+    ports:
+      - 8081:8080
+    # volumes:
+    #   - ./metrics.db:/data/metrics.db:ro
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    networks:
+      - default
 
 volumes:
   db_data:
