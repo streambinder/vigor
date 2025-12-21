@@ -96,7 +96,7 @@ func postTraining(c *fiber.Ctx) error {
 	// Empty equipment is valid (bodyweight-only training)
 	var equipmentIDs []string
 	if len(equipment) > 0 {
-		matchedEquipment, err := rag.RetrieveUserEquipment(equipment)
+		matchedEquipment, err := rag.RetrieveEquipment(equipment)
 		if err != nil {
 			middleware.Log(c).Error().Err(err).Msg("failed to match equipment from database")
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
@@ -156,7 +156,7 @@ func postTraining(c *fiber.Ctx) error {
 		middleware.Log(c).Error().Err(err).Msg("failed to query favorite exercises from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	favoriteEquipment, err := rag.RetrieveFavoriteEquipment(allFavoriteEquipment)
+	favoriteEquipment, err := rag.RetrieveEquipment(allFavoriteEquipment)
 	if err != nil {
 		middleware.Log(c).Error().Err(err).Msg("failed to query favorite equipment from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})

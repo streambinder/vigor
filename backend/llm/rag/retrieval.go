@@ -158,19 +158,19 @@ func RetrieveUserModifiers(equipment []string) ([]model.Modifier, error) {
 	return result, nil
 }
 
-// RetrieveUserEquipment retrieves equipment by direct ID match.
-func RetrieveUserEquipment(equipment []string) ([]model.Equipment, error) {
-	if len(equipment) == 0 {
+// RetrieveEquipment retrieves equipment by direct ID match.
+func RetrieveEquipment(ids []string) ([]model.Equipment, error) {
+	if len(ids) == 0 {
 		return nil, nil
 	}
 
-	result := make([]model.Equipment, 0, len(equipment))
+	result := make([]model.Equipment, 0, len(ids))
 	seen := make(map[string]bool)
 
-	for _, entry := range equipment {
+	for _, id := range ids {
 		var match model.Equipment
 		if err := database.Knowledge.
-			Where("id = ?", entry).
+			Where("id = ?", id).
 			First(&match).
 			Error; err == nil {
 			if !seen[match.ID] {
@@ -278,29 +278,4 @@ func RetrieveFavoriteExercises(favorites []string) ([]model.Exercise, error) {
 		exercises = append(exercises, result.Exercise)
 	}
 	return exercises, nil
-}
-
-// RetrieveFavoriteEquipment retrieves favorite equipment by direct ID match.
-func RetrieveFavoriteEquipment(favorites []string) ([]model.Equipment, error) {
-	if len(favorites) == 0 {
-		return nil, nil
-	}
-
-	result := make([]model.Equipment, 0, len(favorites))
-	seen := make(map[string]bool)
-
-	for _, fav := range favorites {
-		var match model.Equipment
-		if err := database.Knowledge.
-			Where("id = ?", fav).
-			First(&match).
-			Error; err == nil {
-			if !seen[match.ID] {
-				seen[match.ID] = true
-				result = append(result, match)
-			}
-		}
-	}
-
-	return result, nil
 }
