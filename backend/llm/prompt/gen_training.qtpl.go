@@ -435,15 +435,7 @@ Use ONLY these exercise IDs for the warmup routine.
 	qw422016.N().D(len(workExercises))
 //line llm/prompt/gen_training.qtpl:83
 	qw422016.N().S(` options)>>>
-Use ONLY these exercise IDs for the work routine. Select `)
-//line llm/prompt/gen_training.qtpl:84
-	qw422016.N().D(len(workExercises) / 4)
-//line llm/prompt/gen_training.qtpl:84
-	qw422016.N().S(`-`)
-//line llm/prompt/gen_training.qtpl:84
-	qw422016.N().D(len(workExercises) / 2)
-//line llm/prompt/gen_training.qtpl:84
-	qw422016.N().S(` for a balanced training.
+Use ONLY these exercise IDs for the work routine.
 `)
 //line llm/prompt/gen_training.qtpl:85
 	for _, exercise := range workExercises {

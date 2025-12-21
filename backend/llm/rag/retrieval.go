@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	MaxWorkExercises     = 20  // RAG-based retrieval for main training
+	MaxWorkExercises     = 30  // RAG-based retrieval for main training
 	MaxWarmupExercises   = 8   // random selection for warmup
 	MaxCooldownExercises = 5   // random selection for cooldown
 	MaxPromptFacts       = 5

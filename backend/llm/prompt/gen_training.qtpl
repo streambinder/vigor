@@ -81,7 +81,7 @@ Use ONLY these exercise IDs for the warmup routine.
 {% endif %}
 
 <<<WORK_EXERCISES ({%d len(workExercises) %} options)>>>
-Use ONLY these exercise IDs for the work routine. Select {%d len(workExercises)/4 %}-{%d len(workExercises)/2 %} for a balanced training.
+Use ONLY these exercise IDs for the work routine.
 {% for _, exercise := range workExercises %}{%s exercise.ID %}, {% endfor %}
 <<<END_WORK_EXERCISES>>>
 
