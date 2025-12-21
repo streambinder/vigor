@@ -221,36 +221,39 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
   Widget _buildRoutineToggles() {
     final l10n = AppLocalizations.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: PlatformHelper.useLiquidGlass
-          ? LiquidGlassTheme.glassDecoration(
-              borderRadius: 12,
-              border: Border.all(
-                color: Colors.white.withOpacity(0.2),
-                width: 1.5,
+    return GestureDetector(
+      onTap: () => setState(() => _includeWarmupCooldown = !_includeWarmupCooldown),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: PlatformHelper.useLiquidGlass
+            ? LiquidGlassTheme.glassDecoration(
+                borderRadius: 12,
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1.5,
+                ),
+              )
+            : BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+                borderRadius: BorderRadius.circular(12),
               ),
-            )
-          : BoxDecoration(
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outline,
-              ),
-              borderRadius: BorderRadius.circular(12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              l10n.includeWarmupCooldown,
+              style: PlatformHelper.useLiquidGlass
+                  ? LiquidGlassTheme.bodyStyle
+                  : null,
             ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            l10n.includeWarmupCooldown,
-            style: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.bodyStyle
-                : null,
-          ),
-          AdaptiveSwitch(
-            value: _includeWarmupCooldown,
-            onChanged: (value) => setState(() => _includeWarmupCooldown = value),
-          ),
-        ],
+            AdaptiveSwitch(
+              value: _includeWarmupCooldown,
+              onChanged: (value) => setState(() => _includeWarmupCooldown = value),
+            ),
+          ],
+        ),
       ),
     );
   }
