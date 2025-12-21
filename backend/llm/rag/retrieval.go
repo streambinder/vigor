@@ -17,7 +17,7 @@ const (
 	MaxCooldownExercises = 5   // random selection for cooldown
 	MaxPromptFacts       = 5
 	MaxFactDistance      = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
-	MaxEquipmentDistance = 0.2 // Maximum cosine distance for equipment matching
+	MaxExerciseDistance = 0.2 // Maximum cosine distance for exercise matching
 )
 
 // RetrieveWorkExercises retrieves exercises for the main training phase via RAG.
@@ -247,7 +247,7 @@ func RetrieveFavoriteExercises(favorites []string) ([]model.Exercise, error) {
 	var matchArgs []interface{}
 	for _, favEmbed := range favoriteEmbeddings {
 		matchConditions = append(matchConditions, "exercise_embeddings.embedding <=> ? < ?")
-		matchArgs = append(matchArgs, pgvector.NewVector(favEmbed), MaxEquipmentDistance)
+		matchArgs = append(matchArgs, pgvector.NewVector(favEmbed), MaxExerciseDistance)
 	}
 
 	var results []struct {
