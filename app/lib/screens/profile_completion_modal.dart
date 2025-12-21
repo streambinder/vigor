@@ -9,6 +9,7 @@ import '../models/profile.dart';
 import '../models/goal.dart';
 import '../models/injury.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../widgets/equipment_selector.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 
@@ -44,7 +45,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   final List<Injury> _injuries = [];
   final List<String> _limitations = [];
   final List<String> _favoriteExercises = [];
-  final List<String> _favoriteEquipment = [];
+  List<String> _favoriteEquipment = [];
   final List<String> _favoriteWorkoutTypes = [];
 
   // Available workout types (must match backend enum)
@@ -65,7 +66,6 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   int? _injuryYear;
   final _limitationController = TextEditingController();
   final _favoriteExerciseController = TextEditingController();
-  final _favoriteEquipmentController = TextEditingController();
 
   @override
   void initState() {
@@ -124,7 +124,6 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
     _injuryDescriptionController.dispose();
     _limitationController.dispose();
     _favoriteExerciseController.dispose();
-    _favoriteEquipmentController.dispose();
     super.dispose();
   }
 
@@ -844,41 +843,9 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
             style: const TextStyle(fontSize: 12, color: Colors.grey),
           ),
           const SizedBox(height: 8),
-          ..._favoriteEquipment.map((equipment) => ListTile(
-                title: Text(equipment),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    setState(() {
-                      _favoriteEquipment.remove(equipment);
-                    });
-                  },
-                ),
-              )),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _favoriteEquipmentController,
-                  decoration: InputDecoration(
-                    hintText: l10n.favoriteEquipmentHint,
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  if (_favoriteEquipmentController.text.isNotEmpty) {
-                    setState(() {
-                      _favoriteEquipment.add(_favoriteEquipmentController.text);
-                      _favoriteEquipmentController.clear();
-                    });
-                  }
-                },
-              ),
-            ],
+          EquipmentSelector(
+            selected: _favoriteEquipment,
+            onChanged: (updated) => setState(() => _favoriteEquipment = updated),
           ),
         ],
       ),

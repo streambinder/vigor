@@ -9,6 +9,7 @@ import '../services/secure_storage_service.dart';
 import '../services/preferences_service.dart';
 import '../services/user_service.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../widgets/equipment_selector.dart';
 import '../widgets/user_select_dialog.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
@@ -33,14 +34,13 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   final _formKey = GlobalKey<FormState>();
   final _durationController = TextEditingController(text: '60');
   final _promptController = TextEditingController();
-  final _equipmentInputController = TextEditingController();
 
   EquipmentMode _equipmentMode = EquipmentMode.bodyweight;
   Gym? _selectedGym;
   bool _isGenerating = false;
   bool _includeWarmupCooldown = true;
   final List<UserInfo> _partners = [];
-  final List<String> _equipment = [];
+  List<String> _equipment = [];
 
   @override
   void initState() {
@@ -60,24 +60,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   void dispose() {
     _durationController.dispose();
     _promptController.dispose();
-    _equipmentInputController.dispose();
     super.dispose();
-  }
-
-  void _addEquipment() {
-    final equipment = _equipmentInputController.text.trim();
-    if (equipment.isNotEmpty && !_equipment.contains(equipment)) {
-      setState(() {
-        _equipment.add(equipment);
-        _equipmentInputController.clear();
-      });
-    }
-  }
-
-  void _removeEquipment(String equipment) {
-    setState(() {
-      _equipment.remove(equipment);
-    });
   }
 
   Future<void> _addPartner() async {
@@ -230,62 +213,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   }
 
   Widget _buildCustomEquipmentInput() {
-    final l10n = AppLocalizations.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: AdaptiveTextField(
-                controller: _equipmentInputController,
-                labelText: l10n.addEquipment,
-                placeholder: l10n.equipmentPlaceholder,
-                onSubmitted: (_) => _addEquipment(),
-              ),
-            ),
-            const SizedBox(width: 8),
-            AdaptiveButton(
-              onPressed: _addEquipment,
-              child: const Icon(Icons.add),
-            ),
-          ],
-        ),
-        if (_equipment.isEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              l10n.addEquipmentAvailable,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontStyle: FontStyle.italic,
-                fontSize: 12,
-              ),
-            ),
-          )
-        else ...[
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: _equipment.map((equipment) {
-              return Chip(
-                label: Text(
-                  equipment,
-                  style: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
-                      : null,
-                ),
-                deleteIcon: const Icon(Icons.close, size: 16),
-                onDeleted: () => _removeEquipment(equipment),
-                backgroundColor: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.primaryColor.withOpacity(0.1)
-                    : null,
-              );
-            }).toList(),
-          ),
-        ],
-      ],
+    return EquipmentSelector(
+      selected: _equipment,
+      onChanged: (updated) => setState(() => _equipment = updated),
     );
   }
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../generated/app_localizations.dart';
 import '../models/gym.dart';
-import '../services/gym_service.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../widgets/equipment_selector.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 
@@ -17,11 +17,7 @@ class GymFormDialog extends StatefulWidget {
 
 class _GymFormDialogState extends State<GymFormDialog> {
   late TextEditingController _nameController;
-  final GymService _gymService = GymService();
-
   List<String> _equipment = [];
-  final TextEditingController _equipmentInputController = TextEditingController();
-  bool _loadingEquipment = false;
 
   @override
   void initState() {
@@ -33,43 +29,7 @@ class _GymFormDialogState extends State<GymFormDialog> {
   @override
   void dispose() {
     _nameController.dispose();
-    _equipmentInputController.dispose();
     super.dispose();
-  }
-
-  void _addEquipment() {
-    final equipment = _equipmentInputController.text.trim();
-    if (equipment.isNotEmpty && !_equipment.contains(equipment)) {
-      setState(() {
-        _equipment.add(equipment);
-        _equipmentInputController.clear();
-      });
-    }
-  }
-
-  void _removeEquipment(String equipment) {
-    setState(() {
-      _equipment.remove(equipment);
-    });
-  }
-
-  Future<void> _addAllEquipment() async {
-    setState(() => _loadingEquipment = true);
-    final response = await _gymService.getAvailableEquipment();
-    setState(() => _loadingEquipment = false);
-
-    if (!mounted) return;
-
-    if (response.isSuccess && response.data != null) {
-      setState(() {
-        _equipment.addAll(response.data!);
-      });
-    } else {
-      AdaptiveNotification.showError(
-        context: context,
-        message: AppLocalizations.of(context).failedToLoadEquipment,
-      );
-    }
   }
 
   void _submit() {
@@ -136,77 +96,20 @@ class _GymFormDialogState extends State<GymFormDialog> {
                 placeholder: l10n.gymNamePlaceholder,
               ),
               const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    l10n.equipment,
-                    style: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
-                        : const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                  ),
-                  TextButton(
-                    onPressed: _loadingEquipment ? null : _addAllEquipment,
-                    child: _loadingEquipment
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(l10n.addAllEquipment),
-                  ),
-                ],
+              Text(
+                l10n.equipment,
+                style: PlatformHelper.useLiquidGlass
+                    ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
+                    : const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
               ),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: AdaptiveTextField(
-                      controller: _equipmentInputController,
-                      labelText: l10n.addEquipment,
-                      placeholder: l10n.equipmentPlaceholder,
-                      onSubmitted: (_) => _addEquipment(),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  AdaptiveButton(
-                    onPressed: _addEquipment,
-                    child: const Icon(Icons.add),
-                  ),
-                ],
+              EquipmentSelector(
+                selected: _equipment,
+                onChanged: (updated) => setState(() => _equipment = updated),
               ),
-              const SizedBox(height: 16),
-              if (_equipment.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Center(
-                    child: Text(
-                      l10n.noEquipmentAddedYet,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
-                )
-              else
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _equipment.map((equipment) {
-                    return Chip(
-                      label: Text(equipment),
-                      deleteIcon: const Icon(Icons.close, size: 18),
-                      onDeleted: () => _removeEquipment(equipment),
-                      backgroundColor: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
-                          : Theme.of(context).colorScheme.primaryContainer,
-                    );
-                  }).toList(),
-                ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
