@@ -11,13 +11,10 @@ class Preferences {
   final List<String>? exercises;
   @JsonKey(name: 'equipment')
   final List<String>? equipment;
-  @JsonKey(name: 'workout_types')
-  final List<String>? workoutTypes;
 
   Preferences({
     this.exercises,
     this.equipment,
-    this.workoutTypes,
   });
 
   factory Preferences.fromJson(Map<String, dynamic> json) => _$PreferencesFromJson(json);

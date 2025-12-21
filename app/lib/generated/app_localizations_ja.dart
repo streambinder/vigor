@@ -338,6 +338,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get workoutTypeMobility => 'モビリティ';
 
   @override
+  String get methodologyOptional => 'メソッド（任意）';
+
+  @override
+  String get methodologyAuto => '自動';
+
+  @override
   String get failedToUpdateProfile => 'プロフィールの更新に失敗しました';
 
   @override

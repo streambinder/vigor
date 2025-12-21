@@ -41,6 +41,18 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   bool _includeWarmupCooldown = true;
   final List<UserInfo> _partners = [];
   List<String> _equipment = [];
+  String? _methodology;
+
+  static const _methodologies = [
+    'strength',
+    'circuit',
+    'emom',
+    'amrap',
+    'hiit',
+    'for_time',
+    'endurance',
+    'mobility',
+  ];
 
   @override
   void initState() {
@@ -219,6 +231,69 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     );
   }
 
+  String _methodologyLabel(String methodology, AppLocalizations l10n) {
+    switch (methodology) {
+      case 'strength':
+        return l10n.workoutTypeStrength;
+      case 'circuit':
+        return l10n.workoutTypeCircuit;
+      case 'emom':
+        return l10n.workoutTypeEmom;
+      case 'amrap':
+        return l10n.workoutTypeAmrap;
+      case 'hiit':
+        return l10n.workoutTypeHiit;
+      case 'for_time':
+        return l10n.workoutTypeForTime;
+      case 'endurance':
+        return l10n.workoutTypeEndurance;
+      case 'mobility':
+        return l10n.workoutTypeMobility;
+      default:
+        return methodology;
+    }
+  }
+
+  Widget _buildMethodologySection() {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.methodologyOptional,
+          style: PlatformHelper.useLiquidGlass
+              ? LiquidGlassTheme.captionStyle
+              : Theme.of(context).textTheme.labelMedium,
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            // "auto" chip for unset
+            FilterChip(
+              label: Text(l10n.methodologyAuto),
+              selected: _methodology == null,
+              onSelected: (selected) {
+                if (selected) setState(() => _methodology = null);
+              },
+            ),
+            ..._methodologies.map((m) {
+              final isSelected = _methodology == m;
+              return FilterChip(
+                label: Text(_methodologyLabel(m, l10n)),
+                selected: isSelected,
+                onSelected: (selected) {
+                  setState(() => _methodology = selected ? m : null);
+                },
+              );
+            }),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildRoutineToggles() {
     final l10n = AppLocalizations.of(context);
     return GestureDetector(
@@ -295,6 +370,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       equipment: equipment,
       partners: _partners.isEmpty ? null : _partners.map((p) => p.id).toList(),
       skipWarmupCooldown: !_includeWarmupCooldown ? true : null,
+      methodology: _methodology,
     );
 
     if (mounted) {
@@ -407,6 +483,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
             // Equipment mode selection
             _buildEquipmentSection(),
+            const SizedBox(height: 16),
+
+            // Methodology selection
+            _buildMethodologySection(),
             const SizedBox(height: 16),
 
             // Routine skip toggles

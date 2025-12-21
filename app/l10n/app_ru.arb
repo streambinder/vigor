@@ -123,6 +123,9 @@
   "workoutTypeEndurance": "Выносливость",
   "workoutTypeMobility": "Мобильность",
 
+  "methodologyOptional": "Методология (необязательно)",
+  "methodologyAuto": "Авто",
+
   "failedToUpdateProfile": "Не удалось обновить профиль",
 
   "activity": "Активность",

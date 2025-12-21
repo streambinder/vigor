@@ -123,6 +123,9 @@
   "workoutTypeEndurance": "Resistência",
   "workoutTypeMobility": "Mobilidade",
 
+  "methodologyOptional": "Metodologia (opcional)",
+  "methodologyAuto": "Auto",
+
   "failedToUpdateProfile": "Falha ao atualizar o perfil",
 
   "activity": "Atividade",

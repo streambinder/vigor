@@ -744,6 +744,18 @@ abstract class AppLocalizations {
   /// **'Mobility'**
   String get workoutTypeMobility;
 
+  /// No description provided for @methodologyOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Methodology (optional)'**
+  String get methodologyOptional;
+
+  /// No description provided for @methodologyAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get methodologyAuto;
+
   /// No description provided for @failedToUpdateProfile.
   ///
   /// In en, this message translates to:

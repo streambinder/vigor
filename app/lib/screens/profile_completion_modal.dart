@@ -46,19 +46,6 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   final List<String> _limitations = [];
   final List<String> _favoriteExercises = [];
   List<String> _favoriteEquipment = [];
-  final List<String> _favoriteWorkoutTypes = [];
-
-  // Available workout types (must match backend enum)
-  static const _workoutTypes = [
-    'strength',
-    'circuit',
-    'emom',
-    'amrap',
-    'hiit',
-    'for_time',
-    'endurance',
-    'mobility',
-  ];
 
   // Controllers for dynamic list inputs
   final _goalDescriptionController = TextEditingController();
@@ -107,9 +94,6 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
           }
           if (prefs['equipment'] != null) {
             _favoriteEquipment.addAll((prefs['equipment'] as List).cast<String>());
-          }
-          if (prefs['workout_types'] != null) {
-            _favoriteWorkoutTypes.addAll((prefs['workout_types'] as List).cast<String>());
           }
         }
       }
@@ -180,11 +164,10 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
       };
 
       // Only include preferences if user has set any
-      if (_favoriteExercises.isNotEmpty || _favoriteEquipment.isNotEmpty || _favoriteWorkoutTypes.isNotEmpty) {
+      if (_favoriteExercises.isNotEmpty || _favoriteEquipment.isNotEmpty) {
         data['preferences'] = {
           if (_favoriteExercises.isNotEmpty) 'exercises': _favoriteExercises,
           if (_favoriteEquipment.isNotEmpty) 'equipment': _favoriteEquipment,
-          if (_favoriteWorkoutTypes.isNotEmpty) 'workout_types': _favoriteWorkoutTypes,
         };
       }
 
@@ -294,9 +277,6 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
 
                     // Favorite Equipment
                     _buildFavoriteEquipmentSection(),
-
-                    // Favorite Workout Types
-                    _buildFavoriteWorkoutTypesSection(),
 
                     const SizedBox(height: 24),
 
@@ -850,69 +830,5 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
         ],
       ),
     );
-  }
-
-  Widget _buildFavoriteWorkoutTypesSection() {
-    final l10n = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.favoriteWorkoutTypes,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          Text(
-            l10n.optionalWorkoutTypesPrefer,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: _workoutTypes.map((type) {
-              final isSelected = _favoriteWorkoutTypes.contains(type);
-              return FilterChip(
-                label: Text(_workoutTypeLabel(type, l10n)),
-                selected: isSelected,
-                onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      _favoriteWorkoutTypes.add(type);
-                    } else {
-                      _favoriteWorkoutTypes.remove(type);
-                    }
-                  });
-                },
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _workoutTypeLabel(String type, AppLocalizations l10n) {
-    switch (type) {
-      case 'strength':
-        return l10n.workoutTypeStrength;
-      case 'circuit':
-        return l10n.workoutTypeCircuit;
-      case 'emom':
-        return l10n.workoutTypeEmom;
-      case 'amrap':
-        return l10n.workoutTypeAmrap;
-      case 'hiit':
-        return l10n.workoutTypeHiit;
-      case 'for_time':
-        return l10n.workoutTypeForTime;
-      case 'endurance':
-        return l10n.workoutTypeEndurance;
-      case 'mobility':
-        return l10n.workoutTypeMobility;
-      default:
-        return type;
-    }
   }
 }

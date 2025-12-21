@@ -123,6 +123,9 @@
   "workoutTypeEndurance": "持久力",
   "workoutTypeMobility": "モビリティ",
 
+  "methodologyOptional": "メソッド（任意）",
+  "methodologyAuto": "自動",
+
   "failedToUpdateProfile": "プロフィールの更新に失敗しました",
 
   "activity": "アクティビティ",

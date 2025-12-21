@@ -28,6 +28,7 @@ type TrainingRequest struct {
 	Prompt             string   `json:"prompt"`             // Specific prompt to use for generating the training plan
 	Partners           []string `json:"partners"`           // Optional partner user UUIDs for partner trainings
 	SkipWarmupCooldown bool     `json:"skipWarmupCooldown"` // Skip both warmup and cooldown routines
+	Methodology        string   `json:"methodology"`        // Optional training methodology (strength, circuit, emom, amrap, hiit, for_time, endurance, mobility)
 }
 
 // initTraining registers training-related routes.
@@ -138,16 +139,14 @@ func postTraining(c *fiber.Ctx) error {
 	}
 
 	// Collect favorite exercises and equipment from all profiles
-	var allFavoriteExercises, allFavoriteEquipment, allFavoriteWorkoutTypes []string
+	var allFavoriteExercises, allFavoriteEquipment []string
 	for _, profile := range profiles {
 		allFavoriteExercises = append(allFavoriteExercises, profile.FavoriteExercises()...)
 		allFavoriteEquipment = append(allFavoriteEquipment, profile.FavoriteEquipment()...)
-		allFavoriteWorkoutTypes = append(allFavoriteWorkoutTypes, profile.FavoriteWorkoutTypes()...)
 	}
 	middleware.Log(c).Debug().
 		Strs("fav_exercises", allFavoriteExercises).
 		Strs("fav_equipment", allFavoriteEquipment).
-		Strs("fav_workout_types", allFavoriteWorkoutTypes).
 		Msg("Collected user favorites")
 
 	// Match favorites to canonical entities via RAG
@@ -200,7 +199,7 @@ func postTraining(c *fiber.Ctx) error {
 		modifiers,
 		favoriteExercises,
 		favoriteEquipmentIDs,
-		allFavoriteWorkoutTypes,
+		req.Methodology,
 		req.Prompt,
 		req.Duration,
 		recentTrainings,

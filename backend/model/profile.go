@@ -35,9 +35,8 @@ type profileData struct {
 
 // Preferences stores user's favorite exercises and equipment.
 type Preferences struct {
-	Exercises    []string `json:"exercises,omitempty"`
-	Equipment    []string `json:"equipment,omitempty"`
-	WorkoutTypes []string `json:"workout_types,omitempty"`
+	Exercises []string `json:"exercises,omitempty"`
+	Equipment []string `json:"equipment,omitempty"`
 }
 
 // Goal represents a user's fitness objective with timeline.
@@ -111,13 +110,4 @@ func (p *Profile) FavoriteEquipment() []string {
 		return nil
 	}
 	return data.Preferences.Equipment
-}
-
-// FavoriteWorkoutTypes extracts the user's preferred workout types from profile data.
-func (p *Profile) FavoriteWorkoutTypes() []string {
-	data, err := p.data()
-	if err != nil || data.Preferences == nil {
-		return nil
-	}
-	return data.Preferences.WorkoutTypes
 }

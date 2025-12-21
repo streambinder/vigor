@@ -343,6 +343,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workoutTypeMobility => 'Mobility';
 
   @override
+  String get methodologyOptional => 'Methodology (optional)';
+
+  @override
+  String get methodologyAuto => 'Auto';
+
+  @override
   String get failedToUpdateProfile => 'Failed to update profile';
 
   @override

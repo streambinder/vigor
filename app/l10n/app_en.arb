@@ -158,6 +158,9 @@
   "workoutTypeEndurance": "Endurance",
   "workoutTypeMobility": "Mobility",
 
+  "methodologyOptional": "Methodology (optional)",
+  "methodologyAuto": "Auto",
+
   "failedToUpdateProfile": "Failed to update profile",
 
   "activity": "Activity",

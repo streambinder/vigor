@@ -338,6 +338,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get workoutTypeMobility => '灵活性';
 
   @override
+  String get methodologyOptional => '方法（可选）';
+
+  @override
+  String get methodologyAuto => '自动';
+
+  @override
   String get failedToUpdateProfile => '更新个人资料失败';
 
   @override

@@ -338,6 +338,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get workoutTypeMobility => '유연성';
 
   @override
+  String get methodologyOptional => '방법론 (선택사항)';
+
+  @override
+  String get methodologyAuto => '자동';
+
+  @override
   String get failedToUpdateProfile => '프로필 업데이트 실패';
 
   @override

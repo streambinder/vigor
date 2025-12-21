@@ -123,6 +123,9 @@
   "workoutTypeEndurance": "지구력",
   "workoutTypeMobility": "유연성",
 
+  "methodologyOptional": "방법론 (선택사항)",
+  "methodologyAuto": "자동",
+
   "failedToUpdateProfile": "프로필 업데이트 실패",
 
   "activity": "활동",

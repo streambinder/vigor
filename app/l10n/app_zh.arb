@@ -123,6 +123,9 @@
   "workoutTypeEndurance": "耐力",
   "workoutTypeMobility": "灵活性",
 
+  "methodologyOptional": "方法（可选）",
+  "methodologyAuto": "自动",
+
   "failedToUpdateProfile": "更新个人资料失败",
 
   "activity": "活动",

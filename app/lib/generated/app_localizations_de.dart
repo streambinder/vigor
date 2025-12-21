@@ -347,6 +347,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get workoutTypeMobility => 'Mobilität';
 
   @override
+  String get methodologyOptional => 'Methodik (optional)';
+
+  @override
+  String get methodologyAuto => 'Auto';
+
+  @override
   String get failedToUpdateProfile => 'Profil konnte nicht aktualisiert werden';
 
   @override

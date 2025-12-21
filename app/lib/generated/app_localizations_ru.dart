@@ -342,6 +342,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get workoutTypeMobility => 'Мобильность';
 
   @override
+  String get methodologyOptional => 'Методология (необязательно)';
+
+  @override
+  String get methodologyAuto => 'Авто';
+
+  @override
   String get failedToUpdateProfile => 'Не удалось обновить профиль';
 
   @override
