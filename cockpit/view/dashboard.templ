@@ -32,7 +32,7 @@ templ Dashboard(data DashboardData) {
 		</div>
 		@templ.JSONScript("chart-data", latencyChartData(data.Latencies))
 		@latencyChartScript()
-		<div class="table-container">
+		<div class="table-container" id="trainings-container">
 			<div class="table-title">Trainings</div>
 			<table>
 				<thead>
@@ -47,9 +47,9 @@ templ Dashboard(data DashboardData) {
 						<th></th>
 					</tr>
 				</thead>
-				<tbody>
+				<tbody id="trainings-tbody">
 					for i, t := range data.Trainings {
-						<tr>
+						<tr class="training-row">
 							<td>{ t.CreatedAt.Format("Jan 2, 15:04") }</td>
 							<td>{ t.ID.String()[:8] }</td>
 							<td>{ t.User.Email }</td>
@@ -69,6 +69,9 @@ templ Dashboard(data DashboardData) {
 					}
 				</tbody>
 			</table>
+			if len(data.Trainings) > 15 {
+				<div class="pagination" id="trainings-pagination"></div>
+			}
 		</div>
 		for i, t := range data.Trainings {
 			@templ.JSONScript(fmt.Sprintf("training-%d", i), t)
@@ -83,7 +86,7 @@ templ Dashboard(data DashboardData) {
 			</div>
 		</div>
 		@modalScript()
-		<div class="table-container">
+		<div class="table-container" id="reports-container">
 			<div class="table-title">Reports</div>
 			<table>
 				<thead>
@@ -96,9 +99,9 @@ templ Dashboard(data DashboardData) {
 						<th>Activity</th>
 					</tr>
 				</thead>
-				<tbody>
+				<tbody id="reports-tbody">
 					for _, r := range data.Reports {
-						<tr>
+						<tr class="report-row">
 							<td>{ r.CreatedAt.Format("Jan 2, 15:04") }</td>
 							<td>{ ptrToStr(&r.ID) }</td>
 							<td>{ r.UserEmail }</td>
@@ -114,7 +117,11 @@ templ Dashboard(data DashboardData) {
 					}
 				</tbody>
 			</table>
+			if len(data.Reports) > 15 {
+				<div class="pagination" id="reports-pagination"></div>
+			}
 		</div>
+		@paginationScript()
 	}
 }
 
@@ -234,6 +241,47 @@ templ modalScript() {
 		document.addEventListener('keydown', function(e) {
 			if (e.key === 'Escape') closeModal();
 		});
+	</script>
+}
+
+templ paginationScript() {
+	<script>
+		(function() {
+			var pageSize = 15;
+			function setupPagination(tbodyId, rowClass, paginationId) {
+				var tbody = document.getElementById(tbodyId);
+				var pagination = document.getElementById(paginationId);
+				if (!tbody || !pagination) return;
+				var rows = tbody.querySelectorAll('.' + rowClass);
+				if (rows.length <= pageSize) return;
+				var totalPages = Math.ceil(rows.length / pageSize);
+				var currentPage = 1;
+				function render() {
+					rows.forEach(function(row, i) {
+						var page = Math.floor(i / pageSize) + 1;
+						row.style.display = page === currentPage ? '' : 'none';
+					});
+					pagination.innerHTML = '';
+					var prev = document.createElement('button');
+					prev.textContent = '←';
+					prev.disabled = currentPage === 1;
+					prev.onclick = function() { if (currentPage > 1) { currentPage--; render(); } };
+					pagination.appendChild(prev);
+					var info = document.createElement('span');
+					info.className = 'page-info';
+					info.textContent = currentPage + ' / ' + totalPages;
+					pagination.appendChild(info);
+					var next = document.createElement('button');
+					next.textContent = '→';
+					next.disabled = currentPage === totalPages;
+					next.onclick = function() { if (currentPage < totalPages) { currentPage++; render(); } };
+					pagination.appendChild(next);
+				}
+				render();
+			}
+			setupPagination('trainings-tbody', 'training-row', 'trainings-pagination');
+			setupPagination('reports-tbody', 'report-row', 'reports-pagination');
+		})();
 	</script>
 }
 

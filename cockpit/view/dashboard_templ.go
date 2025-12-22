@@ -105,12 +105,12 @@ func Dashboard(data DashboardData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " <div class=\"table-container\"><div class=\"table-title\">Trainings</div><table><thead><tr><th>Date</th><th>ID</th><th>User</th><th>Name</th><th>Type</th><th>Duration</th><th>Completed</th><th></th></tr></thead> <tbody>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " <div class=\"table-container\" id=\"trainings-container\"><div class=\"table-title\">Trainings</div><table><thead><tr><th>Date</th><th>ID</th><th>User</th><th>Name</th><th>Type</th><th>Duration</th><th>Completed</th><th></th></tr></thead> <tbody id=\"trainings-tbody\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for i, t := range data.Trainings {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<tr><td>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<tr class=\"training-row\"><td>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -229,7 +229,17 @@ func Dashboard(data DashboardData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</tbody></table></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</tbody></table>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if len(data.Trainings) > 15 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"pagination\" id=\"trainings-pagination\"></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -239,7 +249,7 @@ func Dashboard(data DashboardData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " <div id=\"modal\" class=\"modal\" onclick=\"closeModal(event)\"><div class=\"modal-content\" onclick=\"event.stopPropagation()\"><div class=\"modal-header\"><span class=\"modal-title\">Training JSON</span> <button class=\"modal-close\" onclick=\"closeModal()\">&times;</button></div><pre id=\"modal-json\"></pre></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, " <div id=\"modal\" class=\"modal\" onclick=\"closeModal(event)\"><div class=\"modal-content\" onclick=\"event.stopPropagation()\"><div class=\"modal-header\"><span class=\"modal-title\">Training JSON</span> <button class=\"modal-close\" onclick=\"closeModal()\">&times;</button></div><pre id=\"modal-json\"></pre></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -247,60 +257,34 @@ func Dashboard(data DashboardData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " <div class=\"table-container\"><div class=\"table-title\">Reports</div><table><thead><tr><th>Date</th><th>ID</th><th>User</th><th>Content</th><th>Training</th><th>Activity</th></tr></thead> <tbody>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " <div class=\"table-container\" id=\"reports-container\"><div class=\"table-title\">Reports</div><table><thead><tr><th>Date</th><th>ID</th><th>User</th><th>Content</th><th>Training</th><th>Activity</th></tr></thead> <tbody id=\"reports-tbody\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, r := range data.Reports {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<tr><td>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<tr class=\"report-row\"><td>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(r.CreatedAt.Format("Jan 2, 15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 102, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 105, Col: 47}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</td><td>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</td><td>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(ptrToStr(&r.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 103, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 106, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</td><td>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var16 string
-				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(r.UserEmail)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 104, Col: 24}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</td><td class=\"content-cell\">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var17 string
-				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(r.Content)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 105, Col: 43}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -308,40 +292,80 @@ func Dashboard(data DashboardData) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
+				var templ_7745c5c3_Var16 string
+				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(r.UserEmail)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 107, Col: 24}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</td><td class=\"content-cell\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var17 string
+				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(r.Content)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 108, Col: 43}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</td><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(ptrToStr(r.TrainingID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 106, Col: 35}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 109, Col: 35}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</td><td>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</td><td>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(ptrToStr(r.ActivityID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 107, Col: 35}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 110, Col: 35}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 			if len(data.Reports) == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<tr><td colspan=\"6\" class=\"empty-row\">No reports</td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<tr><td colspan=\"6\" class=\"empty-row\">No reports</td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</tbody></table></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</tbody></table>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if len(data.Reports) > 15 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div class=\"pagination\" id=\"reports-pagination\"></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = paginationScript().Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -391,7 +415,7 @@ func latencyChartScript() templ.Component {
 			templ_7745c5c3_Var20 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<script>\n\t\t(function() {\n\t\t\tvar chartData = JSON.parse(document.getElementById('chart-data').textContent);\n\t\t\tvar options = {\n\t\t\t\tseries: [{\n\t\t\t\t\tname: 'Avg Latency (ms)',\n\t\t\t\t\tdata: chartData.values\n\t\t\t\t}],\n\t\t\t\tchart: {\n\t\t\t\t\ttype: 'area',\n\t\t\t\t\theight: 300,\n\t\t\t\t\tbackground: 'transparent',\n\t\t\t\t\ttoolbar: { show: false },\n\t\t\t\t\tzoom: { enabled: false }\n\t\t\t\t},\n\t\t\t\tdataLabels: { enabled: false },\n\t\t\t\tstroke: { curve: 'smooth', width: 2 },\n\t\t\t\tfill: {\n\t\t\t\t\ttype: 'gradient',\n\t\t\t\t\tgradient: {\n\t\t\t\t\t\tshadeIntensity: 1,\n\t\t\t\t\t\topacityFrom: 0.4,\n\t\t\t\t\t\topacityTo: 0.1\n\t\t\t\t\t}\n\t\t\t\t},\n\t\t\t\tcolors: ['#58a6ff'],\n\t\t\t\txaxis: {\n\t\t\t\t\tcategories: chartData.labels,\n\t\t\t\t\tlabels: { style: { colors: '#8b949e' } },\n\t\t\t\t\taxisBorder: { color: '#30363d' },\n\t\t\t\t\taxisTicks: { color: '#30363d' }\n\t\t\t\t},\n\t\t\t\tyaxis: {\n\t\t\t\t\tlabels: { style: { colors: '#8b949e' } }\n\t\t\t\t},\n\t\t\t\tgrid: {\n\t\t\t\t\tborderColor: '#30363d',\n\t\t\t\t\tstrokeDashArray: 4\n\t\t\t\t},\n\t\t\t\ttooltip: {\n\t\t\t\t\ttheme: 'dark',\n\t\t\t\t\ty: { formatter: function(val) { return val + ' ms'; } }\n\t\t\t\t}\n\t\t\t};\n\t\t\tnew ApexCharts(document.querySelector(\"#latency-chart\"), options).render();\n\t\t})();\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<script>\n\t\t(function() {\n\t\t\tvar chartData = JSON.parse(document.getElementById('chart-data').textContent);\n\t\t\tvar options = {\n\t\t\t\tseries: [{\n\t\t\t\t\tname: 'Avg Latency (ms)',\n\t\t\t\t\tdata: chartData.values\n\t\t\t\t}],\n\t\t\t\tchart: {\n\t\t\t\t\ttype: 'area',\n\t\t\t\t\theight: 300,\n\t\t\t\t\tbackground: 'transparent',\n\t\t\t\t\ttoolbar: { show: false },\n\t\t\t\t\tzoom: { enabled: false }\n\t\t\t\t},\n\t\t\t\tdataLabels: { enabled: false },\n\t\t\t\tstroke: { curve: 'smooth', width: 2 },\n\t\t\t\tfill: {\n\t\t\t\t\ttype: 'gradient',\n\t\t\t\t\tgradient: {\n\t\t\t\t\t\tshadeIntensity: 1,\n\t\t\t\t\t\topacityFrom: 0.4,\n\t\t\t\t\t\topacityTo: 0.1\n\t\t\t\t\t}\n\t\t\t\t},\n\t\t\t\tcolors: ['#58a6ff'],\n\t\t\t\txaxis: {\n\t\t\t\t\tcategories: chartData.labels,\n\t\t\t\t\tlabels: { style: { colors: '#8b949e' } },\n\t\t\t\t\taxisBorder: { color: '#30363d' },\n\t\t\t\t\taxisTicks: { color: '#30363d' }\n\t\t\t\t},\n\t\t\t\tyaxis: {\n\t\t\t\t\tlabels: { style: { colors: '#8b949e' } }\n\t\t\t\t},\n\t\t\t\tgrid: {\n\t\t\t\t\tborderColor: '#30363d',\n\t\t\t\t\tstrokeDashArray: 4\n\t\t\t\t},\n\t\t\t\ttooltip: {\n\t\t\t\t\ttheme: 'dark',\n\t\t\t\t\ty: { formatter: function(val) { return val + ' ms'; } }\n\t\t\t\t}\n\t\t\t};\n\t\t\tnew ApexCharts(document.querySelector(\"#latency-chart\"), options).render();\n\t\t})();\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -468,7 +492,36 @@ func modalScript() templ.Component {
 			templ_7745c5c3_Var21 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<script>\n\t\tfunction closeModal(event) {\n\t\t\tif (event && event.target !== document.getElementById('modal')) return;\n\t\t\tdocument.getElementById('modal').classList.remove('open');\n\t\t}\n\t\tdocument.addEventListener('keydown', function(e) {\n\t\t\tif (e.key === 'Escape') closeModal();\n\t\t});\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<script>\n\t\tfunction closeModal(event) {\n\t\t\tif (event && event.target !== document.getElementById('modal')) return;\n\t\t\tdocument.getElementById('modal').classList.remove('open');\n\t\t}\n\t\tdocument.addEventListener('keydown', function(e) {\n\t\t\tif (e.key === 'Escape') closeModal();\n\t\t});\n\t</script>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func paginationScript() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var22 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var22 == nil {
+			templ_7745c5c3_Var22 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<script>\n\t\t(function() {\n\t\t\tvar pageSize = 15;\n\t\t\tfunction setupPagination(tbodyId, rowClass, paginationId) {\n\t\t\t\tvar tbody = document.getElementById(tbodyId);\n\t\t\t\tvar pagination = document.getElementById(paginationId);\n\t\t\t\tif (!tbody || !pagination) return;\n\t\t\t\tvar rows = tbody.querySelectorAll('.' + rowClass);\n\t\t\t\tif (rows.length <= pageSize) return;\n\t\t\t\tvar totalPages = Math.ceil(rows.length / pageSize);\n\t\t\t\tvar currentPage = 1;\n\t\t\t\tfunction render() {\n\t\t\t\t\trows.forEach(function(row, i) {\n\t\t\t\t\t\tvar page = Math.floor(i / pageSize) + 1;\n\t\t\t\t\t\trow.style.display = page === currentPage ? '' : 'none';\n\t\t\t\t\t});\n\t\t\t\t\tpagination.innerHTML = '';\n\t\t\t\t\tvar prev = document.createElement('button');\n\t\t\t\t\tprev.textContent = '←';\n\t\t\t\t\tprev.disabled = currentPage === 1;\n\t\t\t\t\tprev.onclick = function() { if (currentPage > 1) { currentPage--; render(); } };\n\t\t\t\t\tpagination.appendChild(prev);\n\t\t\t\t\tvar info = document.createElement('span');\n\t\t\t\t\tinfo.className = 'page-info';\n\t\t\t\t\tinfo.textContent = currentPage + ' / ' + totalPages;\n\t\t\t\t\tpagination.appendChild(info);\n\t\t\t\t\tvar next = document.createElement('button');\n\t\t\t\t\tnext.textContent = '→';\n\t\t\t\t\tnext.disabled = currentPage === totalPages;\n\t\t\t\t\tnext.onclick = function() { if (currentPage < totalPages) { currentPage++; render(); } };\n\t\t\t\t\tpagination.appendChild(next);\n\t\t\t\t}\n\t\t\t\trender();\n\t\t\t}\n\t\t\tsetupPagination('trainings-tbody', 'training-row', 'trainings-pagination');\n\t\t\tsetupPagination('reports-tbody', 'report-row', 'reports-pagination');\n\t\t})();\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
