@@ -109,14 +109,14 @@ TRAINING PHILOSOPHY:
 - Minimum 48h recovery between same muscle groups
 
 TRAINING METHODOLOGIES (use exactly one):
-- strength: traditional lifting with sets × reps × weight, longer rest (2-3min between sets). Create multiple blocks as needed, each grouping exercises with similar rest needs. Repeats = sets per exercise.
-- circuit: rotate through stations with minimal rest between exercises. Create ONE block with repeats = circuit rounds. Minimal rest between activities (10-15s), moderate rest between rounds (60-90s via block rest).
-- emom: every minute on the minute. Create ONE block where repeats = session minutes (e.g. 30min = repeats: 30). Activities in the block are completed each minute; remaining time is rest. Keep activities completable in ~40-45s.
-- amrap: as many rounds as possible within time cap. Create ONE block with repeats: 1. User repeats the block as many times as possible within session duration.
-- hiit: high-intensity intervals with structured work/rest periods. Use duration field for work time, rest field for recovery.
-- for_time: complete prescribed work as fast as possible. Repeats = target rounds. No rest fields—user moves continuously.
-- endurance: steady-state cardio, duration-based activities
-- mobility: flexibility and recovery focus, hold times, no load
+- strength: traditional lifting with sets × reps × weight, longer rest (2-3min between sets). Create multiple blocks as needed, each grouping exercises with similar rest needs. Repeats = sets per exercise. Activities MUST use reps (never duration).
+- circuit: rotate through stations with minimal rest between exercises. Create ONE block with repeats = circuit rounds. Minimal rest between activities (10-15s), moderate rest between rounds (60-90s via block rest). Activities MUST use reps; use duration only for holds/carries.
+- emom: every minute on the minute. Create ONE block where repeats = session minutes (e.g. 30min = repeats: 30). Activities in the block are completed each minute; remaining time is rest. Activities MUST use reps (most common) or duration for cardio/holds—never both 0. Choose work that takes ~40-45s to complete, leaving 15-20s rest before the next minute.
+- amrap: as many rounds as possible within time cap. Create ONE block with repeats: 1. User repeats the block as many times as possible within session duration. Activities MUST use reps (never duration).
+- hiit: high-intensity intervals with structured work/rest periods (e.g., Tabata: 20s work/10s rest × 8 rounds). Activities MUST use duration for work time; use rest field for recovery between intervals.
+- for_time: complete prescribed work as fast as possible. Repeats = target rounds. No rest fields—user moves continuously. Activities MUST use reps (never duration).
+- endurance: steady-state cardio, sustained effort. Activities MUST use duration (never reps).
+- mobility: flexibility and recovery focus, hold stretches for 15-60s per position. Activities MUST use duration (never reps), no load.
 
 EQUIPMENT-METHODOLOGY ALIGNMENT (match equipment style to training methodology):
 - Strength/endurance methodologies: prefer gym equipment (barbells, dumbbells, cable machines, weight plates, benches). These support heavy loading, controlled tempos, and longer rest periods typical of powerlifting/bodybuilding.
@@ -173,6 +173,7 @@ EQUIPMENT MODIFIERS:
 - When applying modifiers, set the "modifiers" array to the list of modifier IDs (empty array if none)
 
 ACTIVITY PARAMETERS:
+- CRITICAL: Every activity MUST have either reps > 0 OR duration > 0. Never set both to 0.
 - duration: seconds for cardio, stretches, holds (use 0 when reps > 0)
 - reps: count for strength exercises (use 0 for time-based activities)
 - weight_kg: based on history feedback, 0 for bodyweight
@@ -266,31 +267,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   ]
 }
 `)
-//line llm/prompt/system.qtpl:212
+//line llm/prompt/system.qtpl:213
 }
 
-//line llm/prompt/system.qtpl:212
+//line llm/prompt/system.qtpl:213
 func WriteSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool) {
-//line llm/prompt/system.qtpl:212
+//line llm/prompt/system.qtpl:213
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:212
+//line llm/prompt/system.qtpl:213
 	StreamSystem(qw422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:212
+//line llm/prompt/system.qtpl:213
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:212
+//line llm/prompt/system.qtpl:213
 }
 
-//line llm/prompt/system.qtpl:212
+//line llm/prompt/system.qtpl:213
 func System(skipWarmupCooldown bool) string {
-//line llm/prompt/system.qtpl:212
+//line llm/prompt/system.qtpl:213
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:212
+//line llm/prompt/system.qtpl:213
 	WriteSystem(qb422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:212
+//line llm/prompt/system.qtpl:213
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:212
+//line llm/prompt/system.qtpl:213
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:212
+//line llm/prompt/system.qtpl:213
 	return qs422016
-//line llm/prompt/system.qtpl:212
+//line llm/prompt/system.qtpl:213
 }
