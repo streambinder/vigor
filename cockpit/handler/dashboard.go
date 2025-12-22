@@ -15,6 +15,7 @@ func Dashboard(c *fiber.Ctx) error {
 	trainingCount, _ := database.GetTrainingCount()
 	avgTrainingsPerDay, _ := database.GetAvgTrainingsPerDay()
 	latencyStats, _ := database.GetLatencyStats(14)
+	trainings, _ := database.GetTrainings()
 	dbReports, _ := database.GetReports()
 
 	var latencies []view.LatencyDataPoint
@@ -47,6 +48,7 @@ func Dashboard(c *fiber.Ctx) error {
 		TrainingCount:      trainingCount,
 		AvgTrainingsPerDay: avgTrainingsPerDay,
 		Latencies:          latencies,
+		Trainings:          trainings,
 		Reports:            reports,
 	}
 

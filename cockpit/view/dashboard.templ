@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
+
+	"github.com/streambinder/vigor/model"
 )
 
 templ Dashboard(data DashboardData) {
@@ -29,6 +32,53 @@ templ Dashboard(data DashboardData) {
 		</div>
 		@templ.JSONScript("chart-data", latencyChartData(data.Latencies))
 		@latencyChartScript()
+		<div class="table-container">
+			<div class="table-title">Trainings</div>
+			<table>
+				<thead>
+					<tr>
+						<th>Date</th>
+						<th>Name</th>
+						<th>Type</th>
+						<th>Duration</th>
+						<th>Completed</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					for i, t := range data.Trainings {
+						<tr>
+							<td>{ t.CreatedAt.Format("Jan 2, 15:04") }</td>
+							<td>{ t.Name }</td>
+							<td>{ t.Type }</td>
+							<td>{ formatDuration(t.Duration) }</td>
+							<td>{ formatCompleted(t.CompletedAt) }</td>
+							<td>
+								<button class="btn-json" onclick={ showTrainingJSON(i) }>JSON</button>
+							</td>
+						</tr>
+					}
+					if len(data.Trainings) == 0 {
+						<tr>
+							<td colspan="6" class="empty-row">No trainings</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+		for i, t := range data.Trainings {
+			@templ.JSONScript(fmt.Sprintf("training-%d", i), t)
+		}
+		<div id="modal" class="modal" onclick="closeModal(event)">
+			<div class="modal-content" onclick="event.stopPropagation()">
+				<div class="modal-header">
+					<span class="modal-title">Training JSON</span>
+					<button class="modal-close" onclick="closeModal()">&times;</button>
+				</div>
+				<pre id="modal-json"></pre>
+			</div>
+		</div>
+		@modalScript()
 		<div class="table-container">
 			<div class="table-title">Reports</div>
 			<table>
@@ -151,5 +201,38 @@ func ptrToStr(s *string) string {
 	return *s
 }
 
-// silence unused import
-var _ = json.Marshal
+func formatDuration(seconds int) string {
+	return fmt.Sprintf("%dm", seconds/60)
+}
+
+func formatCompleted(t *time.Time) string {
+	if t == nil {
+		return "-"
+	}
+	return t.Format("Jan 2, 15:04")
+}
+
+script showTrainingJSON(index int) {
+	var el = document.getElementById('training-' + index);
+	var data = JSON.parse(el.textContent);
+	document.getElementById('modal-json').textContent = JSON.stringify(data, null, 2);
+	document.getElementById('modal').classList.add('open');
+}
+
+templ modalScript() {
+	<script>
+		function closeModal(event) {
+			if (event && event.target !== document.getElementById('modal')) return;
+			document.getElementById('modal').classList.remove('open');
+		}
+		document.addEventListener('keydown', function(e) {
+			if (e.key === 'Escape') closeModal();
+		});
+	</script>
+}
+
+// silence unused imports
+var (
+	_ = json.Marshal
+	_ model.Training
+)

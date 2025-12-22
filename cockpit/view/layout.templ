@@ -116,6 +116,73 @@ templ Layout(title string) {
 					color: var(--text-muted);
 					font-style: italic;
 				}
+				.btn-json {
+					background: transparent;
+					border: 1px solid var(--border);
+					color: var(--text-muted);
+					padding: 0.25rem 0.5rem;
+					border-radius: 4px;
+					cursor: pointer;
+					font-size: 0.75rem;
+				}
+				.btn-json:hover {
+					border-color: var(--accent);
+					color: var(--accent);
+				}
+				.modal {
+					display: none;
+					position: fixed;
+					top: 0;
+					left: 0;
+					width: 100%;
+					height: 100%;
+					background: rgba(0, 0, 0, 0.8);
+					z-index: 1000;
+					align-items: center;
+					justify-content: center;
+				}
+				.modal.open {
+					display: flex;
+				}
+				.modal-content {
+					background: var(--bg-card);
+					border: 1px solid var(--border);
+					border-radius: 8px;
+					max-width: 90%;
+					max-height: 90%;
+					overflow: auto;
+					display: flex;
+					flex-direction: column;
+				}
+				.modal-header {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					padding: 1rem 1.5rem;
+					border-bottom: 1px solid var(--border);
+				}
+				.modal-title {
+					font-weight: 600;
+				}
+				.modal-close {
+					background: transparent;
+					border: none;
+					color: var(--text-muted);
+					font-size: 1.5rem;
+					cursor: pointer;
+					line-height: 1;
+				}
+				.modal-close:hover {
+					color: var(--text);
+				}
+				#modal-json {
+					padding: 1.5rem;
+					margin: 0;
+					font-size: 0.75rem;
+					color: var(--text);
+					white-space: pre-wrap;
+					word-break: break-word;
+				}
 			</style>
 		</head>
 		<body>

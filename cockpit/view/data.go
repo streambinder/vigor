@@ -1,6 +1,10 @@
 package view
 
-import "time"
+import (
+	"time"
+
+	"github.com/streambinder/vigor/model"
+)
 
 type LatencyDataPoint struct {
 	Label string
@@ -22,5 +26,6 @@ type DashboardData struct {
 	TrainingCount      int64
 	AvgTrainingsPerDay float64
 	Latencies          []LatencyDataPoint
+	Trainings          []model.Training
 	Reports            []Report
 }

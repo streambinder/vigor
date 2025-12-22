@@ -1,6 +1,10 @@
 package database
 
-import "time"
+import (
+	"time"
+
+	"github.com/streambinder/vigor/model"
+)
 
 type countResult struct {
 	Count int64
@@ -67,4 +71,15 @@ func GetReports() ([]Report, error) {
 		LIMIT 100
 	`).Scan(&reports).Error
 	return reports, err
+}
+
+func GetTrainings() ([]model.Training, error) {
+	if DB == nil {
+		return nil, nil
+	}
+	var trainings []model.Training
+	err := DB.Order("created_at DESC").Limit(100).
+		Preload("Routines.Blocks.Activities").
+		Find(&trainings).Error
+	return trainings, err
 }
