@@ -16,7 +16,7 @@ func Dashboard(c *fiber.Ctx) error {
 	avgTrainingsPerDay, _ := database.GetAvgTrainingsPerDay()
 	latencyStats, _ := database.GetLatencyStats(14)
 	trainings, _ := database.GetTrainings()
-	dbReports, _ := database.GetReports()
+	reports, _ := database.GetReports()
 
 	var latencies []view.LatencyDataPoint
 	for _, s := range latencyStats {
@@ -27,19 +27,6 @@ func Dashboard(c *fiber.Ctx) error {
 		latencies = append(latencies, view.LatencyDataPoint{
 			Label: label,
 			Value: s.AvgMs,
-		})
-	}
-
-	var reports []view.Report
-	for _, r := range dbReports {
-		reports = append(reports, view.Report{
-			ID:         r.ID,
-			Content:    r.Content,
-			TrainingID: r.TrainingID,
-			ActivityID: r.ActivityID,
-			UserID:     r.UserID,
-			UserEmail:  r.UserEmail,
-			CreatedAt:  r.CreatedAt,
 		})
 	}
 

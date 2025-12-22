@@ -1,10 +1,6 @@
 package database
 
-import (
-	"time"
-
-	"github.com/streambinder/vigor/model"
-)
+import "github.com/streambinder/vigor/model"
 
 type countResult struct {
 	Count int64
@@ -48,28 +44,14 @@ func GetAvgTrainingsPerDay() (float64, error) {
 	return result.Avg, err
 }
 
-type Report struct {
-	ID         string
-	Content    string
-	TrainingID *string
-	ActivityID *string
-	UserID     string
-	UserEmail  string
-	CreatedAt  time.Time
-}
-
-func GetReports() ([]Report, error) {
+func GetReports() ([]model.Report, error) {
 	if DB == nil {
 		return nil, nil
 	}
-	var reports []Report
-	err := DB.Raw(`
-		SELECT r.id, r.content, r.training_id, r.activity_id, r.user_id, u.email as user_email, r.created_at
-		FROM reports r
-		JOIN users u ON r.user_id = u.id
-		ORDER BY r.created_at DESC
-		LIMIT 100
-	`).Scan(&reports).Error
+	var reports []model.Report
+	err := DB.Order("created_at DESC").Limit(100).
+		Preload("User").
+		Find(&reports).Error
 	return reports, err
 }
 

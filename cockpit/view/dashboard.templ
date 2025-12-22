@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/streambinder/vigor/model"
 )
 
@@ -103,10 +104,10 @@ templ Dashboard(data DashboardData) {
 					for _, r := range data.Reports {
 						<tr class="report-row">
 							<td>{ r.CreatedAt.Format("Jan 2, 15:04") }</td>
-							<td>{ ptrToStr(&r.ID) }</td>
-							<td>{ r.UserEmail }</td>
+							<td>{ r.ID.String()[:8] }</td>
+							<td>{ r.User.Email }</td>
 							<td class="content-cell">{ r.Content }</td>
-							<td>{ ptrToStr(r.TrainingID) }</td>
+							<td>{ uuidPtrToStr(r.TrainingID) }</td>
 							<td>{ ptrToStr(r.ActivityID) }</td>
 						</tr>
 					}
@@ -212,6 +213,13 @@ func ptrToStr(s *string) string {
 		return (*s)[:8]
 	}
 	return *s
+}
+
+func uuidPtrToStr(u *uuid.UUID) string {
+	if u == nil {
+		return "-"
+	}
+	return u.String()[:8]
 }
 
 func formatDuration(seconds int) string {
