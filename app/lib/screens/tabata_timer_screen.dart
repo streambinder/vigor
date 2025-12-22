@@ -130,7 +130,9 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
         // Repeat the block
         for (int repeat = 1; repeat <= block.repeats; repeat++) {
           // Go through each activity in the block
-          for (final activity in block.activities) {
+          for (int actIdx = 0; actIdx < block.activities.length; actIdx++) {
+            final activity = block.activities[actIdx];
+            final isLastActivityInRepeat = actIdx == block.activities.length - 1;
             activityCounter++;
             final exercise = _parseExercise(activity.detail);
 
@@ -151,8 +153,20 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
               totalRoutines: widget.training.routines.length,
             ));
 
-            // Add activity rest if exists
-            if (activity.rest > 0) {
+            // After last activity in a repeat, use block rest; otherwise use activity rest
+            if (isLastActivityInRepeat && block.rest > 0) {
+              addRestInterval(TrainingInterval(
+                type: IntervalType.rest,
+                duration: block.rest,
+                routineName: routine.type,
+                activityNumber: activityCounter,
+                totalActivities: totalActivities,
+                blockNumber: blockIndex,
+                totalBlocks: routine.blocks.length,
+                routineNumber: routineIndex,
+                totalRoutines: widget.training.routines.length,
+              ));
+            } else if (!isLastActivityInRepeat && activity.rest > 0) {
               addRestInterval(TrainingInterval(
                 type: IntervalType.rest,
                 duration: activity.rest,
@@ -166,21 +180,6 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
               ));
             }
           }
-        }
-
-        // Add block rest after all repeats
-        if (block.rest > 0) {
-          addRestInterval(TrainingInterval(
-            type: IntervalType.rest,
-            duration: block.rest,
-            routineName: routine.type,
-            activityNumber: activityCounter,
-            totalActivities: totalActivities,
-            blockNumber: blockIndex,
-            totalBlocks: routine.blocks.length,
-            routineNumber: routineIndex,
-            totalRoutines: widget.training.routines.length,
-          ));
         }
       }
 
