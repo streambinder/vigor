@@ -43,7 +43,7 @@ func Logging() fiber.Handler {
 			Str("method", c.Method()).
 			Str("path", c.Path()).
 			Int("status", c.Response().StatusCode()).
-			Dur("duration", time.Since(start)).
+			Dur("latency", time.Since(start)).
 			Str("ip", c.IP())
 		if userID, ok := c.Locals("userID").(uuid.UUID); ok && userID != uuid.Nil {
 			event.Stringer("user_id", userID)
