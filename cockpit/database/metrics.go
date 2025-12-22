@@ -1,6 +1,6 @@
 package database
 
-import "time"
+import "fmt"
 
 // Log represents a structured log entry from zerolog
 type Log struct {
@@ -11,17 +11,16 @@ type Log struct {
 	Data      string `gorm:"column:data"`
 	RequestID string `gorm:"column:request_id"`
 	UserID    string `gorm:"column:user_id"`
-	Duration  int64  `gorm:"column:duration_ms"`
+	Latency   int64  `gorm:"column:latency"`
 }
 
 func (Log) TableName() string { return "logs" }
 
 type LatencyPoint struct {
-	Day    time.Time
-	AvgMs  float64
-	MaxMs  int64
-	P95Ms  float64
-	Count  int64
+	Day   string
+	AvgMs float64
+	MaxMs int64
+	Count int64
 }
 
 // GetLatencyStats returns daily latency stats for training generation
@@ -31,18 +30,18 @@ func GetLatencyStats(days int) ([]LatencyPoint, error) {
 	}
 
 	var results []LatencyPoint
-	err := Metrics.Raw(`
+	err := Metrics.Raw(fmt.Sprintf(`
 		SELECT
 			date(ts, 'unixepoch') as day,
-			avg(duration_ms) as avg_ms,
-			max(duration_ms) as max_ms,
+			avg(latency) as avg_ms,
+			max(latency) as max_ms,
 			count(*) as count
 		FROM logs
 		WHERE msg = 'training generated'
-		  AND ts > unixepoch('now', ?)
+		  AND ts > unixepoch('now', '-%d days')
 		GROUP BY day
 		ORDER BY day
-	`, "-"+string(rune(days))+" days").Scan(&results).Error
+	`, days)).Scan(&results).Error
 
 	return results, err
 }

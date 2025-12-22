@@ -5,7 +5,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 RUN go run github.com/a-h/templ/cmd/templ@latest generate ./view/
-RUN CGO_ENABLED=0 go build -o cockpit main.go
+RUN CGO_ENABLED=1 go build -o cockpit main.go
 
 FROM alpine:3.22
 

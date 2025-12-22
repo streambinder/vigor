@@ -72,13 +72,13 @@ func (llm *OpenAI) query(prompt llmPrompt, temperature float64, maxTokens int) (
 		return nil, fmt.Errorf("incomplete response from %s: finish_reason=%s", llm.provider, completionChoice.FinishReason)
 	}
 
-	log.Info().Str("provider", llm.provider).Str("model", llm.model).Dur("duration_ms", time.Since(start)).Msg("LLM query completed")
+	log.Info().Str("provider", llm.provider).Str("model", llm.model).Dur("latency", time.Since(start)).Msg("LLM query completed")
 
 	var content bytes.Buffer
 	if err := json.Compact(&content, []byte(completionChoice.Message.Content)); err != nil {
 		return nil, fmt.Errorf("unable to compact response from %s: %s", llm.provider, err)
 	}
 
-	log.Debug().Str("provider", llm.provider).Dur("duration_ms", time.Since(start)).RawJSON("request", promptJSON).RawJSON("content", content.Bytes()).Msg("Received LLM response")
+	log.Debug().Str("provider", llm.provider).Dur("latency", time.Since(start)).RawJSON("request", promptJSON).RawJSON("content", content.Bytes()).Msg("Received LLM response")
 	return content.Bytes(), nil
 }

@@ -110,7 +110,7 @@ func (provider *LlamaCpp) vectorize(sequence string) ([]float32, error) {
 		Str("provider", "llamacpp").
 		Str("endpoint", endpoint).
 		Int("vector_dim", len(vector)).
-		Dur("duration_ms", time.Since(start)).
+		Dur("latency", time.Since(start)).
 		Msg("Embedding generation completed")
 
 	return vector, nil

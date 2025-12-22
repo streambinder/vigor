@@ -2,12 +2,13 @@ package view
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 )
 
 templ Dashboard(data DashboardData) {
-	@Layout("Cockpit") {
-		<h1>Cockpit</h1>
+	@Layout("Vigor Cockpit") {
+		<h1>Vigor Cockpit</h1>
 		<div class="grid">
 			<div class="card">
 				<div class="card-label">Users</div>
@@ -17,6 +18,10 @@ templ Dashboard(data DashboardData) {
 				<div class="card-label">Trainings Generated</div>
 				<div class="card-value">{ formatNumber(data.TrainingCount) }</div>
 			</div>
+			<div class="card">
+				<div class="card-label">Avg Trainings / Day</div>
+				<div class="card-value">{ formatFloat(data.AvgTrainingsPerDay) }</div>
+			</div>
 		</div>
 		<div class="chart-container">
 			<div class="chart-title">LLM Generation Latency (avg ms)</div>
@@ -24,6 +29,36 @@ templ Dashboard(data DashboardData) {
 		</div>
 		@templ.JSONScript("chart-data", latencyChartData(data.Latencies))
 		@latencyChartScript()
+		<div class="table-container">
+			<div class="table-title">Reports</div>
+			<table>
+				<thead>
+					<tr>
+						<th>Date</th>
+						<th>User</th>
+						<th>Content</th>
+						<th>Training</th>
+						<th>Activity</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, r := range data.Reports {
+						<tr>
+							<td>{ r.CreatedAt.Format("Jan 2, 15:04") }</td>
+							<td>{ r.UserEmail }</td>
+							<td class="content-cell">{ r.Content }</td>
+							<td>{ ptrToStr(r.TrainingID) }</td>
+							<td>{ ptrToStr(r.ActivityID) }</td>
+						</tr>
+					}
+					if len(data.Reports) == 0 {
+						<tr>
+							<td colspan="5" class="empty-row">No reports</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
 	}
 }
 
@@ -100,6 +135,20 @@ func formatNumber(n int64) string {
 		return strconv.FormatFloat(float64(n)/1000, 'f', 1, 64) + "K"
 	}
 	return strconv.FormatInt(n, 10)
+}
+
+func formatFloat(f float64) string {
+	return fmt.Sprintf("%.1f", f)
+}
+
+func ptrToStr(s *string) string {
+	if s == nil {
+		return "-"
+	}
+	if len(*s) > 8 {
+		return (*s)[:8]
+	}
+	return *s
 }
 
 // silence unused import

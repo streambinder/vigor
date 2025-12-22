@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 )
 
@@ -46,14 +47,14 @@ func Dashboard(data DashboardData) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Cockpit</h1><div class=\"grid\"><div class=\"card\"><div class=\"card-label\">Users</div><div class=\"card-value\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Vigor Cockpit</h1><div class=\"grid\"><div class=\"card\"><div class=\"card-label\">Users</div><div class=\"card-value\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(formatNumber(data.UserCount))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 14, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 15, Col: 58}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -66,13 +67,26 @@ func Dashboard(data DashboardData) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(formatNumber(data.TrainingCount))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 18, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 19, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></div></div><div class=\"chart-container\"><div class=\"chart-title\">LLM Generation Latency (avg ms)</div><div id=\"latency-chart\"></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></div><div class=\"card\"><div class=\"card-label\">Avg Trainings / Day</div><div class=\"card-value\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(formatFloat(data.AvgTrainingsPerDay))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 23, Col: 66}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div></div><div class=\"chart-container\"><div class=\"chart-title\">LLM Generation Latency (avg ms)</div><div id=\"latency-chart\"></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -80,7 +94,7 @@ func Dashboard(data DashboardData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -88,9 +102,94 @@ func Dashboard(data DashboardData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " <div class=\"table-container\"><div class=\"table-title\">Reports</div><table><thead><tr><th>Date</th><th>User</th><th>Content</th><th>Training</th><th>Activity</th></tr></thead> <tbody>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for _, r := range data.Reports {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<tr><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var6 string
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(r.CreatedAt.Format("Jan 2, 15:04"))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 47, Col: 47}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</td><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var7 string
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(r.UserEmail)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 48, Col: 24}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</td><td class=\"content-cell\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var8 string
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(r.Content)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 49, Col: 43}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</td><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var9 string
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(ptrToStr(r.TrainingID))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 50, Col: 35}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</td><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var10 string
+				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(ptrToStr(r.ActivityID))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 51, Col: 35}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</td></tr>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			if len(data.Reports) == 0 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<tr><td colspan=\"5\" class=\"empty-row\">No reports</td></tr>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</tbody></table></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 			return nil
 		})
-		templ_7745c5c3_Err = Layout("Cockpit").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Layout("Vigor Cockpit").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -129,12 +228,12 @@ func latencyChartScript() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var5 == nil {
-			templ_7745c5c3_Var5 = templ.NopComponent
+		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var11 == nil {
+			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<script>\n\t\t(function() {\n\t\t\tvar chartData = JSON.parse(document.getElementById('chart-data').textContent);\n\t\t\tvar options = {\n\t\t\t\tseries: [{\n\t\t\t\t\tname: 'Avg Latency (ms)',\n\t\t\t\t\tdata: chartData.values\n\t\t\t\t}],\n\t\t\t\tchart: {\n\t\t\t\t\ttype: 'area',\n\t\t\t\t\theight: 300,\n\t\t\t\t\tbackground: 'transparent',\n\t\t\t\t\ttoolbar: { show: false },\n\t\t\t\t\tzoom: { enabled: false }\n\t\t\t\t},\n\t\t\t\tdataLabels: { enabled: false },\n\t\t\t\tstroke: { curve: 'smooth', width: 2 },\n\t\t\t\tfill: {\n\t\t\t\t\ttype: 'gradient',\n\t\t\t\t\tgradient: {\n\t\t\t\t\t\tshadeIntensity: 1,\n\t\t\t\t\t\topacityFrom: 0.4,\n\t\t\t\t\t\topacityTo: 0.1\n\t\t\t\t\t}\n\t\t\t\t},\n\t\t\t\tcolors: ['#58a6ff'],\n\t\t\t\txaxis: {\n\t\t\t\t\tcategories: chartData.labels,\n\t\t\t\t\tlabels: { style: { colors: '#8b949e' } },\n\t\t\t\t\taxisBorder: { color: '#30363d' },\n\t\t\t\t\taxisTicks: { color: '#30363d' }\n\t\t\t\t},\n\t\t\t\tyaxis: {\n\t\t\t\t\tlabels: { style: { colors: '#8b949e' } }\n\t\t\t\t},\n\t\t\t\tgrid: {\n\t\t\t\t\tborderColor: '#30363d',\n\t\t\t\t\tstrokeDashArray: 4\n\t\t\t\t},\n\t\t\t\ttooltip: {\n\t\t\t\t\ttheme: 'dark',\n\t\t\t\t\ty: { formatter: function(val) { return val + ' ms'; } }\n\t\t\t\t}\n\t\t\t};\n\t\t\tnew ApexCharts(document.querySelector(\"#latency-chart\"), options).render();\n\t\t})();\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<script>\n\t\t(function() {\n\t\t\tvar chartData = JSON.parse(document.getElementById('chart-data').textContent);\n\t\t\tvar options = {\n\t\t\t\tseries: [{\n\t\t\t\t\tname: 'Avg Latency (ms)',\n\t\t\t\t\tdata: chartData.values\n\t\t\t\t}],\n\t\t\t\tchart: {\n\t\t\t\t\ttype: 'area',\n\t\t\t\t\theight: 300,\n\t\t\t\t\tbackground: 'transparent',\n\t\t\t\t\ttoolbar: { show: false },\n\t\t\t\t\tzoom: { enabled: false }\n\t\t\t\t},\n\t\t\t\tdataLabels: { enabled: false },\n\t\t\t\tstroke: { curve: 'smooth', width: 2 },\n\t\t\t\tfill: {\n\t\t\t\t\ttype: 'gradient',\n\t\t\t\t\tgradient: {\n\t\t\t\t\t\tshadeIntensity: 1,\n\t\t\t\t\t\topacityFrom: 0.4,\n\t\t\t\t\t\topacityTo: 0.1\n\t\t\t\t\t}\n\t\t\t\t},\n\t\t\t\tcolors: ['#58a6ff'],\n\t\t\t\txaxis: {\n\t\t\t\t\tcategories: chartData.labels,\n\t\t\t\t\tlabels: { style: { colors: '#8b949e' } },\n\t\t\t\t\taxisBorder: { color: '#30363d' },\n\t\t\t\t\taxisTicks: { color: '#30363d' }\n\t\t\t\t},\n\t\t\t\tyaxis: {\n\t\t\t\t\tlabels: { style: { colors: '#8b949e' } }\n\t\t\t\t},\n\t\t\t\tgrid: {\n\t\t\t\t\tborderColor: '#30363d',\n\t\t\t\t\tstrokeDashArray: 4\n\t\t\t\t},\n\t\t\t\ttooltip: {\n\t\t\t\t\ttheme: 'dark',\n\t\t\t\t\ty: { formatter: function(val) { return val + ' ms'; } }\n\t\t\t\t}\n\t\t\t};\n\t\t\tnew ApexCharts(document.querySelector(\"#latency-chart\"), options).render();\n\t\t})();\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -150,6 +249,20 @@ func formatNumber(n int64) string {
 		return strconv.FormatFloat(float64(n)/1000, 'f', 1, 64) + "K"
 	}
 	return strconv.FormatInt(n, 10)
+}
+
+func formatFloat(f float64) string {
+	return fmt.Sprintf("%.1f", f)
+}
+
+func ptrToStr(s *string) string {
+	if s == nil {
+		return "-"
+	}
+	if len(*s) > 8 {
+		return (*s)[:8]
+	}
+	return *s
 }
 
 // silence unused import

@@ -128,7 +128,7 @@ func postTraining(c *fiber.Ctx) error {
 		Int("work_exercise_count", len(workExercises)).
 		Int("warmup_exercise_count", len(warmupExercises)).
 		Int("cooldown_exercise_count", len(cooldownExercises)).
-		Dur("duration_ms", time.Since(queryExerciseStart)).
+		Dur("latency", time.Since(queryExerciseStart)).
 		Msg("queried exercises from database")
 
 	// Query modifiers that match user's equipment
@@ -174,7 +174,7 @@ func postTraining(c *fiber.Ctx) error {
 	}
 	middleware.Log(c).Info().
 		Int("facts_count", len(facts)).
-		Dur("duration_ms", time.Since(queryFactsStart)).
+		Dur("latency", time.Since(queryFactsStart)).
 		Msg("queried facts from database")
 
 	// Query recent trainings to avoid repeating exercises and ensure progression
@@ -210,7 +210,7 @@ func postTraining(c *fiber.Ctx) error {
 		middleware.Log(c).Error().Err(err).Msg("failed to generate training via LLM")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	middleware.Log(c).Info().Dur("duration_ms", time.Since(llmStart)).Msg("generated training via LLM")
+	middleware.Log(c).Info().Dur("latency", time.Since(llmStart)).Msg("training generated")
 
 	training.UserID = requestorProfile.UserID
 	if promptJSON, err := json.Marshal(prompt); err == nil {

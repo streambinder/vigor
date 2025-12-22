@@ -90,6 +90,9 @@ services:
       OPENROUTER_API_KEY: sk-or-v1-blablabla
       OPENROUTER_MODEL: openai/gpt-oss-20b:free
       GOOGLE_CLIENT_ID: 123123123-abcedfghilmnopqrstuvz.apps.googleusercontent.com
+      METRICS_URL: /data/metrics.db
+    volumes:
+      - metrics_data:/data
     networks:
       - default
   app:
@@ -125,13 +128,13 @@ services:
       PORT: 8080
       DATABASE_URL: postgres://user:pass@database:5432/db?sslmode=disable
       KNOWLEDGE_URL: postgres://user:pass@knowledge:5432/db?sslmode=disable
-      # METRICS_URL: /data/metrics.db
+      METRICS_URL: /data/metrics.db
       USER: admin
       PASSWORD: admin
     ports:
       - 8081:8080
-    # volumes:
-    #   - ./metrics.db:/data/metrics.db:ro
+    volumes:
+      - metrics_data:/data:ro
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
       interval: 30s
@@ -144,6 +147,7 @@ services:
 volumes:
   db_data:
   hf_cache:
+  metrics_data:
 
 networks:
   default:
