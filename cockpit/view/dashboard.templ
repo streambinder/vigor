@@ -38,6 +38,8 @@ templ Dashboard(data DashboardData) {
 				<thead>
 					<tr>
 						<th>Date</th>
+						<th>ID</th>
+						<th>User</th>
 						<th>Name</th>
 						<th>Type</th>
 						<th>Duration</th>
@@ -49,6 +51,8 @@ templ Dashboard(data DashboardData) {
 					for i, t := range data.Trainings {
 						<tr>
 							<td>{ t.CreatedAt.Format("Jan 2, 15:04") }</td>
+							<td>{ t.ID.String()[:8] }</td>
+							<td>{ t.User.Email }</td>
 							<td>{ t.Name }</td>
 							<td>{ t.Type }</td>
 							<td>{ formatDuration(t.Duration) }</td>
@@ -60,7 +64,7 @@ templ Dashboard(data DashboardData) {
 					}
 					if len(data.Trainings) == 0 {
 						<tr>
-							<td colspan="6" class="empty-row">No trainings</td>
+							<td colspan="8" class="empty-row">No trainings</td>
 						</tr>
 					}
 				</tbody>
@@ -85,6 +89,7 @@ templ Dashboard(data DashboardData) {
 				<thead>
 					<tr>
 						<th>Date</th>
+						<th>ID</th>
 						<th>User</th>
 						<th>Content</th>
 						<th>Training</th>
@@ -95,6 +100,7 @@ templ Dashboard(data DashboardData) {
 					for _, r := range data.Reports {
 						<tr>
 							<td>{ r.CreatedAt.Format("Jan 2, 15:04") }</td>
+							<td>{ ptrToStr(&r.ID) }</td>
 							<td>{ r.UserEmail }</td>
 							<td class="content-cell">{ r.Content }</td>
 							<td>{ ptrToStr(r.TrainingID) }</td>
@@ -103,7 +109,7 @@ templ Dashboard(data DashboardData) {
 					}
 					if len(data.Reports) == 0 {
 						<tr>
-							<td colspan="5" class="empty-row">No reports</td>
+							<td colspan="6" class="empty-row">No reports</td>
 						</tr>
 					}
 				</tbody>

@@ -79,6 +79,7 @@ func GetTrainings() ([]model.Training, error) {
 	}
 	var trainings []model.Training
 	err := DB.Order("created_at DESC").Limit(100).
+		Preload("User").
 		Preload("Routines.Blocks.Activities").
 		Find(&trainings).Error
 	return trainings, err
