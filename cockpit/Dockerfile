@@ -1,11 +1,13 @@
 FROM golang:1.24-alpine AS builder
 RUN apk add --no-cache gcc musl-dev
 WORKDIR /build
-COPY go.mod go.sum ./
-RUN go mod download
-COPY . .
-RUN go run github.com/a-h/templ/cmd/templ@latest generate ./view/
-RUN CGO_ENABLED=1 go build -o cockpit main.go
+COPY backend/go.mod backend/go.sum ./backend/
+COPY cockpit/go.mod cockpit/go.sum ./cockpit/
+RUN cd cockpit && go mod download
+COPY backend/ ./backend/
+COPY cockpit/ ./cockpit/
+RUN cd cockpit && go run github.com/a-h/templ/cmd/templ@latest generate ./view/
+RUN cd cockpit && CGO_ENABLED=1 go build -o cockpit main.go
 
 FROM alpine:3.22
 
@@ -13,7 +15,7 @@ LABEL org.opencontainers.image.source=https://github.com/streambinder/vigor
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /home/appuser
-COPY --from=builder /build/cockpit .
+COPY --from=builder /build/cockpit/cockpit .
 RUN chown -R appuser:appgroup /home/appuser
 USER appuser
 
