@@ -33,12 +33,15 @@ class TrainingDetailsScreen extends StatefulWidget {
 }
 
 class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
-  Training get training => widget.training;
+  late Training _training;
   int _partnerCount = 0;
+
+  Training get training => _training;
 
   @override
   void initState() {
     super.initState();
+    _training = widget.training;
     _loadPartners();
   }
 
@@ -502,6 +505,38 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           rawError: response.error,
         );
       }
+    }
+  }
+
+  Future<void> _shuffleActivity(Activity activity) async {
+    final l10n = AppLocalizations.of(context);
+    final storage = context.read<SecureStorageService>();
+    final trainingService = TrainingService(storageService: storage);
+
+    final response = await trainingService.shuffleActivity(activity.id);
+
+    if (!mounted) return;
+
+    if (response.isSuccess && response.data != null) {
+      // update the activity in place
+      final newActivity = response.data!;
+      for (final routine in _training.routines) {
+        for (final block in routine.blocks) {
+          final idx = block.activities.indexWhere((a) => a.id == activity.id);
+          if (idx >= 0) {
+            block.activities[idx] = newActivity;
+            setState(() {});
+            AdaptiveNotification.show(context: context, message: l10n.exerciseShuffled);
+            return;
+          }
+        }
+      }
+    } else {
+      AdaptiveNotification.showError(
+        context: context,
+        message: l10n.failedToShuffleExercise,
+        rawError: response.error,
+      );
     }
   }
 
@@ -1133,6 +1168,21 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
               ],
             ),
           ),
+          // shuffle button for non-completed trainings
+          if (training.completedAt == null)
+            IconButton(
+              icon: Icon(
+                Icons.refresh,
+                size: 20,
+                color: PlatformHelper.useLiquidGlass
+                    ? LiquidGlassTheme.primaryColor.withOpacity(0.7)
+                    : Theme.of(context).colorScheme.primary.withOpacity(0.7),
+              ),
+              onPressed: () => _shuffleActivity(activity),
+              tooltip: AppLocalizations.of(context).shuffleExercise,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            ),
         ],
       ),
     );

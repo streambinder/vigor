@@ -1,3 +1,4 @@
+import '../models/activity.dart';
 import '../models/api_response.dart';
 import '../models/partner.dart';
 import '../models/training.dart';
@@ -232,6 +233,29 @@ class TrainingService {
       AppLogger.error('[TrainingService] Failed to create report: ${response.error}');
       return ApiResponse.error(
         response.error ?? 'Failed to create report',
+        response.statusCode,
+      );
+    }
+  }
+
+  Future<ApiResponse<Activity>> shuffleActivity(String activityId) async {
+    AppLogger.debug('[TrainingService] Shuffling activity: $activityId');
+
+    final response = await _apiService.post('/activity/shuffle/$activityId');
+
+    if (response.isSuccess && response.data != null) {
+      try {
+        final activity = Activity.fromJson(response.data!);
+        AppLogger.info('[TrainingService] Shuffled activity: $activityId');
+        return ApiResponse.success(activity, response.statusCode);
+      } catch (e) {
+        AppLogger.error('[TrainingService] failed to parse shuffled activity', e);
+        return ApiResponse.error('Failed to parse shuffled activity', response.statusCode);
+      }
+    } else {
+      AppLogger.error('[TrainingService] Failed to shuffle activity: ${response.error}');
+      return ApiResponse.error(
+        response.error ?? 'Failed to shuffle activity',
         response.statusCode,
       );
     }

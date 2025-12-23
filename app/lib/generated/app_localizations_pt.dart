@@ -486,6 +486,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get failedToSubmitReport => 'Falha ao enviar o relatório';
 
   @override
+  String get shuffleExercise => 'Trocar exercício';
+
+  @override
+  String get exerciseShuffled => 'Exercício trocado';
+
+  @override
+  String get failedToShuffleExercise => 'Falha ao trocar exercício';
+
+  @override
   String get reasoning => 'Raciocínio';
 
   @override

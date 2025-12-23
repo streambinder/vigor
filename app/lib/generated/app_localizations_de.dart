@@ -488,6 +488,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get failedToSubmitReport => 'Meldung konnte nicht gesendet werden';
 
   @override
+  String get shuffleExercise => 'Übung wechseln';
+
+  @override
+  String get exerciseShuffled => 'Übung gewechselt';
+
+  @override
+  String get failedToShuffleExercise => 'Übung konnte nicht gewechselt werden';
+
+  @override
   String get reasoning => 'Begründung';
 
   @override

@@ -169,6 +169,9 @@
   "failedToCompleteTraining": "Не удалось завершить тренировку",
   "reportSubmitted": "Отчёт отправлен",
   "failedToSubmitReport": "Не удалось отправить отчёт",
+  "shuffleExercise": "Сменить упражнение",
+  "exerciseShuffled": "Упражнение изменено",
+  "failedToShuffleExercise": "Не удалось сменить упражнение",
 
   "reasoning": "Рассуждение",
   "strategy": "Стратегия",

@@ -169,6 +169,9 @@
   "failedToCompleteTraining": "Impossibile completare l'allenamento",
   "reportSubmitted": "Segnalazione inviata",
   "failedToSubmitReport": "Impossibile inviare la segnalazione",
+  "shuffleExercise": "Cambia esercizio",
+  "exerciseShuffled": "Esercizio cambiato",
+  "failedToShuffleExercise": "Impossibile cambiare esercizio",
 
   "reasoning": "Ragionamento",
   "strategy": "Strategia",

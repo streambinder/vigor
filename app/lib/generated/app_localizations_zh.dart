@@ -477,6 +477,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get failedToSubmitReport => '提交报告失败';
 
   @override
+  String get shuffleExercise => '更换动作';
+
+  @override
+  String get exerciseShuffled => '动作已更换';
+
+  @override
+  String get failedToShuffleExercise => '更换动作失败';
+
+  @override
   String get reasoning => '推理';
 
   @override

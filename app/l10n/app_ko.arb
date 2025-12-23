@@ -169,6 +169,9 @@
   "failedToCompleteTraining": "트레이닝 완료 실패",
   "reportSubmitted": "보고서가 제출되었습니다",
   "failedToSubmitReport": "보고서 제출 실패",
+  "shuffleExercise": "운동 바꾸기",
+  "exerciseShuffled": "운동이 변경됨",
+  "failedToShuffleExercise": "운동 변경 실패",
 
   "reasoning": "추론",
   "strategy": "전략",

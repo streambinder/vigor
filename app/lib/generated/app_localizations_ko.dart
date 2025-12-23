@@ -477,6 +477,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get failedToSubmitReport => '보고서 제출 실패';
 
   @override
+  String get shuffleExercise => '운동 바꾸기';
+
+  @override
+  String get exerciseShuffled => '운동이 변경됨';
+
+  @override
+  String get failedToShuffleExercise => '운동 변경 실패';
+
+  @override
   String get reasoning => '추론';
 
   @override

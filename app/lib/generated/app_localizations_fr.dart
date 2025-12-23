@@ -487,6 +487,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get failedToSubmitReport => 'Échec de l\'envoi du signalement';
 
   @override
+  String get shuffleExercise => 'Changer d\'exercice';
+
+  @override
+  String get exerciseShuffled => 'Exercice changé';
+
+  @override
+  String get failedToShuffleExercise => 'Impossible de changer d\'exercice';
+
+  @override
   String get reasoning => 'Raisonnement';
 
   @override

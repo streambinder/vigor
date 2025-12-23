@@ -481,6 +481,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get failedToSubmitReport => 'Не удалось отправить отчёт';
 
   @override
+  String get shuffleExercise => 'Сменить упражнение';
+
+  @override
+  String get exerciseShuffled => 'Упражнение изменено';
+
+  @override
+  String get failedToShuffleExercise => 'Не удалось сменить упражнение';
+
+  @override
   String get reasoning => 'Рассуждение';
 
   @override

@@ -247,6 +247,9 @@
   "failedToCompleteTraining": "Failed to complete training",
   "reportSubmitted": "Report submitted",
   "failedToSubmitReport": "Failed to submit report",
+  "shuffleExercise": "Shuffle exercise",
+  "exerciseShuffled": "Exercise shuffled",
+  "failedToShuffleExercise": "Failed to shuffle exercise",
 
   "reasoning": "Reasoning",
   "strategy": "Strategy",

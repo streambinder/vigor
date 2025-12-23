@@ -169,6 +169,9 @@
   "failedToCompleteTraining": "トレーニングの完了に失敗しました",
   "reportSubmitted": "レポートが送信されました",
   "failedToSubmitReport": "レポートの送信に失敗しました",
+  "shuffleExercise": "エクササイズを変更",
+  "exerciseShuffled": "エクササイズを変更しました",
+  "failedToShuffleExercise": "エクササイズの変更に失敗しました",
 
   "reasoning": "推論",
   "strategy": "戦略",

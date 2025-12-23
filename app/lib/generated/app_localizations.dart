@@ -990,6 +990,24 @@ abstract class AppLocalizations {
   /// **'Failed to submit report'**
   String get failedToSubmitReport;
 
+  /// No description provided for @shuffleExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Shuffle exercise'**
+  String get shuffleExercise;
+
+  /// No description provided for @exerciseShuffled.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercise shuffled'**
+  String get exerciseShuffled;
+
+  /// No description provided for @failedToShuffleExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to shuffle exercise'**
+  String get failedToShuffleExercise;
+
   /// No description provided for @reasoning.
   ///
   /// In en, this message translates to:

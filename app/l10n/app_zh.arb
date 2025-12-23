@@ -169,6 +169,9 @@
   "failedToCompleteTraining": "完成训练失败",
   "reportSubmitted": "报告已提交",
   "failedToSubmitReport": "提交报告失败",
+  "shuffleExercise": "更换动作",
+  "exerciseShuffled": "动作已更换",
+  "failedToShuffleExercise": "更换动作失败",
 
   "reasoning": "推理",
   "strategy": "策略",

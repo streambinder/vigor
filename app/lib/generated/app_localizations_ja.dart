@@ -477,6 +477,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get failedToSubmitReport => 'レポートの送信に失敗しました';
 
   @override
+  String get shuffleExercise => 'エクササイズを変更';
+
+  @override
+  String get exerciseShuffled => 'エクササイズを変更しました';
+
+  @override
+  String get failedToShuffleExercise => 'エクササイズの変更に失敗しました';
+
+  @override
   String get reasoning => '推論';
 
   @override

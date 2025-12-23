@@ -488,6 +488,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get failedToSubmitReport => 'Error al enviar el reporte';
 
   @override
+  String get shuffleExercise => 'Cambiar ejercicio';
+
+  @override
+  String get exerciseShuffled => 'Ejercicio cambiado';
+
+  @override
+  String get failedToShuffleExercise => 'Error al cambiar ejercicio';
+
+  @override
   String get reasoning => 'Razonamiento';
 
   @override
