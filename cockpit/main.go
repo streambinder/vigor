@@ -17,6 +17,7 @@ func main() {
 
 	app := fiber.New(fiber.Config{DisableStartupMessage: true})
 
+	app.Static("/static", "./static")
 	app.Get("/health", handler.Health)
 	app.Use(handler.BasicAuth())
 	app.Get("/", handler.Dashboard)

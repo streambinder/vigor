@@ -16,6 +16,7 @@ LABEL org.opencontainers.image.source=https://github.com/streambinder/vigor
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /home/appuser
 COPY --from=builder /build/cockpit/cockpit .
+COPY --from=builder /build/cockpit/static ./static
 RUN chown -R appuser:appgroup /home/appuser
 USER appuser
 
