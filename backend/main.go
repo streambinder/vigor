@@ -15,7 +15,11 @@ import (
 )
 
 func main() {
-	defer event.Init()()
+	sinkCleanup, err := event.Init()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to initialize event sink")
+	}
+	defer sinkCleanup()
 
 	if err := database.Init(); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize database")

@@ -9,17 +9,17 @@ import (
 )
 
 // Init initializes zerolog with optional metrics sink
-func Init() func() {
+func Init() (func(), error) {
 	writers := []io.Writer{os.Stdout}
 	cleanup := func() {}
 
 	if sink, err := InitDB(); err != nil {
-		log.Warn().Err(err).Msg("failed to initialize metrics sink")
+		return nil, err
 	} else if sink != nil {
 		writers = append(writers, sink)
 		cleanup = func() { sink.Close() }
 	}
 
 	log.Logger = zerolog.New(zerolog.MultiLevelWriter(writers...)).With().Timestamp().Logger()
-	return cleanup
+	return cleanup, nil
 }
