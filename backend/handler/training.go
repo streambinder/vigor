@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/streambinder/vigor/database"
+	"github.com/streambinder/vigor/event"
 	"github.com/streambinder/vigor/handler/middleware"
 	"github.com/streambinder/vigor/llm"
 	"github.com/streambinder/vigor/llm/rag"
@@ -108,7 +109,6 @@ func postTraining(c *fiber.Ctx) error {
 	}
 
 	// Query exercises compatible with all users' profiles and equipment
-	queryExerciseStart := time.Now()
 	workExercises, err := rag.RetrieveWorkExercises(profiles, equipment)
 	if err != nil {
 		middleware.Log(c).Error().Err(err).Msg("failed to query work exercises from database")
@@ -125,10 +125,9 @@ func postTraining(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	middleware.Log(c).Info().
-		Int("work_exercise_count", len(workExercises)).
-		Int("warmup_exercise_count", len(warmupExercises)).
-		Int("cooldown_exercise_count", len(cooldownExercises)).
-		Dur("latency", time.Since(queryExerciseStart)).
+		Int("work_count", len(workExercises)).
+		Int("warmup_count", len(warmupExercises)).
+		Int("cooldown_count", len(cooldownExercises)).
 		Msg("queried exercises from database")
 
 	// Query modifiers that match user's equipment
@@ -166,15 +165,13 @@ func postTraining(c *fiber.Ctx) error {
 	}
 
 	// Query knowledge facts related to all users' profiles
-	queryFactsStart := time.Now()
 	facts, err := rag.RetrieveUserFacts(profiles, req.Prompt)
 	if err != nil {
 		middleware.Log(c).Error().Err(err).Msg("failed to query facts from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	middleware.Log(c).Info().
-		Int("facts_count", len(facts)).
-		Dur("latency", time.Since(queryFactsStart)).
+		Int("count", len(facts)).
 		Msg("queried facts from database")
 
 	// Query recent trainings to avoid repeating exercises and ensure progression
@@ -190,7 +187,7 @@ func postTraining(c *fiber.Ctx) error {
 	}
 
 	llmStart := time.Now()
-	training, prompt, err := llm.GenTraining(
+	training, prompt, llmModel, err := llm.GenTraining(
 		profiles,
 		workExercises,
 		warmupExercises,
@@ -210,7 +207,14 @@ func postTraining(c *fiber.Ctx) error {
 		middleware.Log(c).Error().Err(err).Msg("failed to generate training via LLM")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	middleware.Log(c).Info().Dur("latency", time.Since(llmStart)).Msg("training generated")
+	middleware.Log(c).Info().
+		Interface("event", event.TrainingGenerationEvent{
+			LatencyEvent: event.LatencyEvent{
+				Event:   event.Event{Time: time.Now()},
+				Latency: time.Since(llmStart),
+			},
+			Model: llmModel,
+		}).Msg("training generated")
 
 	training.UserID = requestorProfile.UserID
 	if promptJSON, err := json.Marshal(prompt); err == nil {

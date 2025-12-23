@@ -6,26 +6,16 @@
 package main
 
 import (
-	"io"
 	"os"
 
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/database"
+	"github.com/streambinder/vigor/event"
 	"github.com/streambinder/vigor/handler"
-	"github.com/streambinder/vigor/metrics"
 )
 
 func main() {
-	// configure zerolog with optional metrics sink
-	writers := []io.Writer{os.Stdout}
-	if sink, err := metrics.NewSQLiteSink(); err != nil {
-		log.Warn().Err(err).Msg("failed to initialize metrics sink")
-	} else if sink != nil {
-		writers = append(writers, sink)
-		defer sink.Close()
-	}
-	log.Logger = zerolog.New(zerolog.MultiLevelWriter(writers...)).With().Timestamp().Logger()
+	defer event.Init()()
 
 	if err := database.Init(); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize database")

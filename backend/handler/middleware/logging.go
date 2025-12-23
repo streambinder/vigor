@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/streambinder/vigor/event"
 )
 
 // key used to store the request-scoped logger in Fiber's Locals
@@ -39,16 +40,22 @@ func Logging() fiber.Handler {
 		err := c.Next()
 
 		// log request details
-		event := logger.Info().
-			Str("method", c.Method()).
-			Str("path", c.Path()).
-			Int("status", c.Response().StatusCode()).
-			Dur("latency", time.Since(start)).
+		e := event.HandlerRequestEvent{
+			LatencyEvent: event.LatencyEvent{
+				Event:   event.Event{Time: time.Now()},
+				Latency: time.Since(start),
+			},
+			Method: c.Method(),
+			Path:   c.Route().Path,
+			Status: c.Response().StatusCode(),
+		}
+		ev := logger.Info().
+			Interface("event", e).
 			Str("ip", c.IP())
 		if userID, ok := c.Locals("userID").(uuid.UUID); ok && userID != uuid.Nil {
-			event.Stringer("user_id", userID)
+			ev.Stringer("user_id", userID)
 		}
-		event.Msg("request")
+		ev.Msg("request")
 
 		return err
 	}

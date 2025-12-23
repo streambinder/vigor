@@ -14,32 +14,81 @@ func Dashboard(c *fiber.Ctx) error {
 	userCount, _ := database.GetUserCount()
 	trainingCount, _ := database.GetTrainingCount()
 	avgTrainingsPerDay, _ := database.GetAvgTrainingsPerDay()
-	latencyStats, _ := database.GetLatencyStats(14)
+	trainingStats, _ := database.GetTrainingGenerationStats(14)
+	handlerStats, _ := database.GetHandlerRequestStats(14)
+	errorStats, _ := database.GetHandlerErrorStats(14)
 	trainings, _ := database.GetTrainings()
 	reports, _ := database.GetReports()
 
-	var latencies []view.LatencyDataPoint
-	for _, s := range latencyStats {
+	data := view.DashboardData{
+		UserCount:                   userCount,
+		TrainingCount:               trainingCount,
+		AvgTrainingsPerDay:          avgTrainingsPerDay,
+		TrainingGenerationLatencies: toLatencySeries(trainingStats),
+		HandlerRequestLatencies:     toLatencySeries(handlerStats),
+		HandlerRequestErrors:        toErrorSeries(errorStats),
+		Trainings:                   trainings,
+		Reports:                     reports,
+	}
+
+	return render(c, view.Dashboard(data))
+}
+
+func toLatencySeries(stats []database.LatencyPoint) []view.LatencySeries {
+	// group points by Group field, preserving day order
+	seriesMap := make(map[string][]view.LatencyDataPoint)
+	var seriesOrder []string
+
+	for _, s := range stats {
 		label := s.Day
 		if t, err := time.Parse("2006-01-02", s.Day); err == nil {
 			label = t.Format("Jan 2")
 		}
-		latencies = append(latencies, view.LatencyDataPoint{
+		if _, exists := seriesMap[s.Group]; !exists {
+			seriesOrder = append(seriesOrder, s.Group)
+		}
+		seriesMap[s.Group] = append(seriesMap[s.Group], view.LatencyDataPoint{
 			Label: label,
 			Value: s.AvgMs,
 		})
 	}
 
-	data := view.DashboardData{
-		UserCount:          userCount,
-		TrainingCount:      trainingCount,
-		AvgTrainingsPerDay: avgTrainingsPerDay,
-		Latencies:          latencies,
-		Trainings:          trainings,
-		Reports:            reports,
+	var series []view.LatencySeries
+	for _, name := range seriesOrder {
+		series = append(series, view.LatencySeries{
+			Name:   name,
+			Points: seriesMap[name],
+		})
+	}
+	return series
+}
+
+func toErrorSeries(stats []database.ErrorPoint) []view.LatencySeries {
+	seriesMap := make(map[string][]view.LatencyDataPoint)
+	var seriesOrder []string
+
+	for _, s := range stats {
+		label := s.Day
+		if t, err := time.Parse("2006-01-02", s.Day); err == nil {
+			label = t.Format("Jan 2")
+		}
+		if _, exists := seriesMap[s.Group]; !exists {
+			seriesOrder = append(seriesOrder, s.Group)
+		}
+		seriesMap[s.Group] = append(seriesMap[s.Group], view.LatencyDataPoint{
+			Label: label,
+			Value: float64(s.Count),
+		})
 	}
 
-	return render(c, view.Dashboard(data))
+	var series []view.LatencySeries
+	for _, name := range seriesOrder {
+		series = append(series, view.LatencySeries{
+			Name:   name,
+			Points: seriesMap[name],
+		})
+	}
+	return series
 }
 
 func render(c *fiber.Ctx, component templ.Component) error {

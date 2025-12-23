@@ -13,7 +13,7 @@ var providers = []LLM{}
 
 // LLM defines the interface for language model providers.
 type LLM interface {
-	query(prompt llmPrompt, temperature float64, maxTokens int) ([]byte, error)
+	query(prompt llmPrompt, temperature float64, maxTokens int) ([]byte, string, error)
 }
 
 type llmPrompt struct {
@@ -49,7 +49,7 @@ func GenTraining(
 	recentTrainings []model.Training,
 	facts []model.Fact,
 	skipWarmupCooldown bool,
-) (*model.Training, llmPrompt, error) {
+) (*model.Training, llmPrompt, string, error) {
 	request := llmPrompt{
 		prompt.System(skipWarmupCooldown),
 		prompt.GenTraining(
@@ -69,19 +69,19 @@ func GenTraining(
 			skipWarmupCooldown,
 		),
 	}
-	response, err := getLLM(profiles).query(
+	response, llmModel, err := getLLM(profiles).query(
 		request,
 		0.35,  // Balanced: structured output + training variety
 		16000, // High limit for complex workouts (EMOM, circuits with timing metadata)
 	)
 	if err != nil {
-		return nil, request, fmt.Errorf("failed to generate training: %s", err)
+		return nil, request, llmModel, fmt.Errorf("failed to generate training: %s", err)
 	}
 
 	training := &model.Training{}
 	if err := json.Unmarshal(response, &training); err != nil {
-		return nil, request, fmt.Errorf("unable to generate training for %s: %s", string(response), err)
+		return nil, request, llmModel, fmt.Errorf("unable to generate training for %s: %s", string(response), err)
 	}
 
-	return training, request, nil
+	return training, request, llmModel, nil
 }

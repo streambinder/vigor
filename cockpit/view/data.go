@@ -7,11 +7,18 @@ type LatencyDataPoint struct {
 	Value float64
 }
 
+type LatencySeries struct {
+	Name   string
+	Points []LatencyDataPoint
+}
+
 type DashboardData struct {
-	UserCount          int64
-	TrainingCount      int64
-	AvgTrainingsPerDay float64
-	Latencies          []LatencyDataPoint
-	Trainings          []model.Training
-	Reports            []model.Report
+	UserCount                   int64
+	TrainingCount               int64
+	AvgTrainingsPerDay          float64
+	TrainingGenerationLatencies []LatencySeries
+	HandlerRequestLatencies     []LatencySeries
+	HandlerRequestErrors        []LatencySeries
+	Trainings                   []model.Training
+	Reports                     []model.Report
 }

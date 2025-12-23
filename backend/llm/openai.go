@@ -30,7 +30,7 @@ func openAIClient(host, apiKey string) openai.Client {
 	)
 }
 
-func (llm *OpenAI) query(prompt llmPrompt, temperature float64, maxTokens int) ([]byte, error) {
+func (llm *OpenAI) query(prompt llmPrompt, temperature float64, maxTokens int) ([]byte, string, error) {
 	start := time.Now()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
@@ -62,23 +62,23 @@ func (llm *OpenAI) query(prompt llmPrompt, temperature float64, maxTokens int) (
 	log.Debug().Str("provider", llm.provider).Str("model", llm.model).RawJSON("request", promptJSON).Msg("Sending request to LLM")
 	completion, err := llm.client.Chat.Completions.New(ctx, params)
 	if err != nil {
-		return nil, fmt.Errorf("unable to send request to %s: %s", llm.provider, err)
+		return nil, llm.model, fmt.Errorf("unable to send request to %s: %s", llm.provider, err)
 	} else if len(completion.Choices) == 0 {
-		return nil, fmt.Errorf("no choices in %s response", llm.provider)
+		return nil, llm.model, fmt.Errorf("no choices in %s response", llm.provider)
 	}
 
 	completionChoice := completion.Choices[0]
 	if completionChoice.FinishReason != "stop" {
-		return nil, fmt.Errorf("incomplete response from %s: finish_reason=%s", llm.provider, completionChoice.FinishReason)
+		return nil, llm.model, fmt.Errorf("incomplete response from %s: finish_reason=%s", llm.provider, completionChoice.FinishReason)
 	}
 
 	log.Info().Str("provider", llm.provider).Str("model", llm.model).Dur("latency", time.Since(start)).Msg("LLM query completed")
 
 	var content bytes.Buffer
 	if err := json.Compact(&content, []byte(completionChoice.Message.Content)); err != nil {
-		return nil, fmt.Errorf("unable to compact response from %s: %s", llm.provider, err)
+		return nil, llm.model, fmt.Errorf("unable to compact response from %s: %s", llm.provider, err)
 	}
 
 	log.Debug().Str("provider", llm.provider).Dur("latency", time.Since(start)).RawJSON("request", promptJSON).RawJSON("content", content.Bytes()).Msg("Received LLM response")
-	return content.Bytes(), nil
+	return content.Bytes(), llm.model, nil
 }
