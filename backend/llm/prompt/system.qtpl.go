@@ -74,6 +74,15 @@ User goals are the MOST IMPORTANT factor in training design. Every exercise sele
 - When multiple goals exist, find exercises that serve multiple purposes or balance the session accordingly
 - NEVER select exercises that contradict stated goals (e.g., endurance-style circuits for pure strength goals)
 
+BALANCED MUSCLE DEVELOPMENT (DEFAULT BEHAVIOR):
+Unless USER_REQUEST explicitly excludes muscle groups (e.g., "skip legs today", "upper body only"):
+- GOALS determine PRIMARY muscle emphasis: muscles directly serving user goals get higher volume and intensity
+- SECONDARY muscles (not goal-aligned) should still be trained but with reduced volume (1-2 exercises vs 3-4 for primary)
+- Example: goal "build upper body strength" → chest/back/shoulders are PRIMARY (more sets, heavier loads), legs/glutes are SECONDARY (maintenance volume, 1-2 compound movements)
+- Check RECENT_HISTORY to avoid overworking the same muscles within 48-72h
+- Over a week, ALL major muscle groups should receive stimulus: chest, back, shoulders, biceps, triceps, core, quadriceps, hamstrings, glutes, calves
+- Never completely skip a muscle group unless user explicitly requests it or injury prevents it
+
 REASONING-FIRST APPROACH:
 You MUST complete the "reasoning" object BEFORE generating training structure. This ensures coherent, well-planned trainings. The reasoning process:
 1. constraints: List active limitations (injuries, equipment, time)
@@ -87,7 +96,7 @@ You MUST complete the "reasoning" object BEFORE generating training structure. T
      - {exercise: "push-up", adjustment: "added weighted-vest modifier", reason: "user feedback indicates bodyweight is now too easy"}
    - Leave adjustments as empty array if no feedback-driven changes were made
 5. facts_applied: How KNOWLEDGE_FACTS influenced the design
-6. target_muscles: Which muscle groups to focus on (selected to serve goals)
+6. target_muscles: All muscle groups this session will train (both primary goal-aligned and secondary maintenance). Check RECENT_HISTORY to avoid overworking muscles trained in last 48-72h.
 7. exercises: List selected exercise IDs with reason showing how they fit the CHOSEN METHODOLOGY (e.g. for circuit: "push-up: bodyweight compound, quick transitions")
 
 Only AFTER completing reasoning should you populate name, description, type, and routines. The name should be a concise 3-4 word title reflecting the training focus (goals and target muscles).
@@ -126,23 +135,23 @@ EQUIPMENT-METHODOLOGY ALIGNMENT (match equipment style to training methodology):
 
 TRAINING STRUCTURE (required routines in order):
 `)
-//line llm/prompt/system.qtpl:84
+//line llm/prompt/system.qtpl:93
 	if !skipWarmupCooldown {
-//line llm/prompt/system.qtpl:84
+//line llm/prompt/system.qtpl:93
 		qw422016.N().S(`1. warmup: light cardio and bodyweight exercises to elevate heart rate and activate muscles (5-10min). Prioritize jumping jacks, high knees, arm circles, leg swings—not static stretches.
 2. work: main training blocks with appropriate rest periods (bulk of duration)
 3. cooldown: static stretches targeting the specific muscles exercised during the work phase (5min). Match stretches to worked muscle groups.
 `)
-//line llm/prompt/system.qtpl:87
+//line llm/prompt/system.qtpl:96
 	} else {
-//line llm/prompt/system.qtpl:87
+//line llm/prompt/system.qtpl:96
 		qw422016.N().S(`1. work: main training blocks with appropriate rest periods (entire duration)
 
 SKIP WARMUP AND COOLDOWN: The user has requested NO warmup and NO cooldown routines. Generate ONLY the "work" routine. The routines array must contain exactly ONE routine with name "work". Do NOT include any routine named "warmup" or "cooldown".
 `)
-//line llm/prompt/system.qtpl:90
+//line llm/prompt/system.qtpl:99
 	}
-//line llm/prompt/system.qtpl:90
+//line llm/prompt/system.qtpl:99
 	qw422016.N().S(`
 
 EXERCISE SELECTION PRIORITY:
@@ -267,31 +276,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   ]
 }
 `)
-//line llm/prompt/system.qtpl:213
+//line llm/prompt/system.qtpl:222
 }
 
-//line llm/prompt/system.qtpl:213
+//line llm/prompt/system.qtpl:222
 func WriteSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool) {
-//line llm/prompt/system.qtpl:213
+//line llm/prompt/system.qtpl:222
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:213
+//line llm/prompt/system.qtpl:222
 	StreamSystem(qw422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:213
+//line llm/prompt/system.qtpl:222
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:213
+//line llm/prompt/system.qtpl:222
 }
 
-//line llm/prompt/system.qtpl:213
+//line llm/prompt/system.qtpl:222
 func System(skipWarmupCooldown bool) string {
-//line llm/prompt/system.qtpl:213
+//line llm/prompt/system.qtpl:222
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:213
+//line llm/prompt/system.qtpl:222
 	WriteSystem(qb422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:213
+//line llm/prompt/system.qtpl:222
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:213
+//line llm/prompt/system.qtpl:222
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:213
+//line llm/prompt/system.qtpl:222
 	return qs422016
-//line llm/prompt/system.qtpl:213
+//line llm/prompt/system.qtpl:222
 }

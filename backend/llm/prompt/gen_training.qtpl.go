@@ -481,7 +481,7 @@ Use ONLY these exercise IDs for the cooldown routine.
 	if len(recentTrainings) > 0 {
 //line llm/prompt/gen_training.qtpl:101
 		qw422016.N().S(`
-<<<RECENT_HISTORY (analyze progression, respect feedback, VARY workout types)>>>
+<<<RECENT_HISTORY (analyze progression, respect feedback, VARY workout types, BALANCE muscle groups)>>>
 `)
 //line llm/prompt/gen_training.qtpl:103
 		for _, training := range recentTrainings {
@@ -491,6 +491,27 @@ Use ONLY these exercise IDs for the cooldown routine.
 			qw422016.N().S(`d ago | `)
 //line llm/prompt/gen_training.qtpl:103
 			qw422016.E().S(training.Type)
+//line llm/prompt/gen_training.qtpl:103
+			targetMuscles := training.Reasoning.Data().TargetMuscles
+
+//line llm/prompt/gen_training.qtpl:103
+			if len(targetMuscles) > 0 {
+//line llm/prompt/gen_training.qtpl:103
+				qw422016.N().S(` | muscles: `)
+//line llm/prompt/gen_training.qtpl:103
+				for i, m := range targetMuscles {
+//line llm/prompt/gen_training.qtpl:103
+					qw422016.E().S(m)
+//line llm/prompt/gen_training.qtpl:103
+					if i < len(targetMuscles)-1 {
+//line llm/prompt/gen_training.qtpl:103
+						qw422016.N().S(`, `)
+//line llm/prompt/gen_training.qtpl:103
+					}
+//line llm/prompt/gen_training.qtpl:103
+				}
+//line llm/prompt/gen_training.qtpl:103
+			}
 //line llm/prompt/gen_training.qtpl:103
 			if len(training.Feedback) > 0 {
 //line llm/prompt/gen_training.qtpl:103

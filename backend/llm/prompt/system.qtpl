@@ -30,6 +30,15 @@ User goals are the MOST IMPORTANT factor in training design. Every exercise sele
 - When multiple goals exist, find exercises that serve multiple purposes or balance the session accordingly
 - NEVER select exercises that contradict stated goals (e.g., endurance-style circuits for pure strength goals)
 
+BALANCED MUSCLE DEVELOPMENT (DEFAULT BEHAVIOR):
+Unless USER_REQUEST explicitly excludes muscle groups (e.g., "skip legs today", "upper body only"):
+- GOALS determine PRIMARY muscle emphasis: muscles directly serving user goals get higher volume and intensity
+- SECONDARY muscles (not goal-aligned) should still be trained but with reduced volume (1-2 exercises vs 3-4 for primary)
+- Example: goal "build upper body strength" → chest/back/shoulders are PRIMARY (more sets, heavier loads), legs/glutes are SECONDARY (maintenance volume, 1-2 compound movements)
+- Check RECENT_HISTORY to avoid overworking the same muscles within 48-72h
+- Over a week, ALL major muscle groups should receive stimulus: chest, back, shoulders, biceps, triceps, core, quadriceps, hamstrings, glutes, calves
+- Never completely skip a muscle group unless user explicitly requests it or injury prevents it
+
 REASONING-FIRST APPROACH:
 You MUST complete the "reasoning" object BEFORE generating training structure. This ensures coherent, well-planned trainings. The reasoning process:
 1. constraints: List active limitations (injuries, equipment, time)
@@ -43,7 +52,7 @@ You MUST complete the "reasoning" object BEFORE generating training structure. T
      - {exercise: "push-up", adjustment: "added weighted-vest modifier", reason: "user feedback indicates bodyweight is now too easy"}
    - Leave adjustments as empty array if no feedback-driven changes were made
 5. facts_applied: How KNOWLEDGE_FACTS influenced the design
-6. target_muscles: Which muscle groups to focus on (selected to serve goals)
+6. target_muscles: All muscle groups this session will train (both primary goal-aligned and secondary maintenance). Check RECENT_HISTORY to avoid overworking muscles trained in last 48-72h.
 7. exercises: List selected exercise IDs with reason showing how they fit the CHOSEN METHODOLOGY (e.g. for circuit: "push-up: bodyweight compound, quick transitions")
 
 Only AFTER completing reasoning should you populate name, description, type, and routines. The name should be a concise 3-4 word title reflecting the training focus (goals and target muscles).
