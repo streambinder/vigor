@@ -120,7 +120,16 @@ TRAINING PHILOSOPHY:
 TRAINING METHODOLOGIES (use exactly one):
 - strength: traditional lifting with sets × reps × weight, longer rest (2-3min between sets). Create multiple blocks as needed, each grouping exercises with similar rest needs. Repeats = sets per exercise. Activities MUST use reps (never duration).
 - circuit: rotate through stations with minimal rest between exercises. Create ONE block with repeats = circuit rounds. Minimal rest between activities (10-15s), moderate rest between rounds (60-90s via block rest). Activities MUST use reps; use duration only for holds/carries.
-- emom: every minute on the minute. Create ONE block where repeats = session minutes (e.g. 30min = repeats: 30). Activities in the block are completed each minute; remaining time is rest. Activities MUST use reps (most common) or duration for cardio/holds—never both 0. Choose work that takes ~40-45s to complete, leaving 15-20s rest before the next minute.
+- emom: every minute on the minute. Create ONE block where repeats = session minutes (e.g. 20min = repeats: 20). All activities in the block are performed each minute; remaining time in the minute is rest. Activities MUST use reps (never duration, except for cardio/holds). CRITICAL EMOM CONSTRAINTS:
+  - MAX 1-2 exercises per minute (more defeats the purpose of EMOM)
+  - MAX 12-15 total reps per minute (ensures ~35-40s work, leaving 20-25s rest)
+  - VERIFY before finalizing: (total reps × `)
+//line llm/prompt/system.qtpl:82
+	qw422016.N().D(model.WeightActivityDurationPerRep)
+//line llm/prompt/system.qtpl:82
+	qw422016.N().S(`s) ≤ 40s
+  - For variety with multiple exercises, use ALTERNATING pattern: odd minutes = exercise A, even minutes = exercise B (set activities accordingly, e.g., 2 activities but each done on alternate minutes)
+  - If user is new or RECENT_HISTORY shows "too hard" feedback, reduce to 8-10 reps per minute for more recovery
 - amrap: as many rounds as possible within time cap. Create ONE block with repeats: 1. User repeats the block as many times as possible within session duration. Activities MUST use reps (never duration).
 - hiit: high-intensity intervals with structured work/rest periods (e.g., Tabata: 20s work/10s rest × 8 rounds). Activities MUST use duration for work time; use rest field for recovery between intervals.
 - for_time: complete prescribed work as fast as possible. Repeats = target rounds. No rest fields—user moves continuously. Activities MUST use reps (never duration).
@@ -135,23 +144,23 @@ EQUIPMENT-METHODOLOGY ALIGNMENT (match equipment style to training methodology):
 
 TRAINING STRUCTURE (required routines in order):
 `)
-//line llm/prompt/system.qtpl:93
+//line llm/prompt/system.qtpl:98
 	if !skipWarmupCooldown {
-//line llm/prompt/system.qtpl:93
+//line llm/prompt/system.qtpl:98
 		qw422016.N().S(`1. warmup: light cardio and bodyweight exercises to elevate heart rate and activate muscles (5-10min). Prioritize jumping jacks, high knees, arm circles, leg swings—not static stretches.
 2. work: main training blocks with appropriate rest periods (bulk of duration)
 3. cooldown: static stretches targeting the specific muscles exercised during the work phase (5min). Match stretches to worked muscle groups.
 `)
-//line llm/prompt/system.qtpl:96
+//line llm/prompt/system.qtpl:101
 	} else {
-//line llm/prompt/system.qtpl:96
+//line llm/prompt/system.qtpl:101
 		qw422016.N().S(`1. work: main training blocks with appropriate rest periods (entire duration)
 
 SKIP WARMUP AND COOLDOWN: The user has requested NO warmup and NO cooldown routines. Generate ONLY the "work" routine. The routines array must contain exactly ONE routine with name "work". Do NOT include any routine named "warmup" or "cooldown".
 `)
-//line llm/prompt/system.qtpl:99
+//line llm/prompt/system.qtpl:104
 	}
-//line llm/prompt/system.qtpl:99
+//line llm/prompt/system.qtpl:104
 	qw422016.N().S(`
 
 EXERCISE SELECTION PRIORITY:
@@ -276,31 +285,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   ]
 }
 `)
-//line llm/prompt/system.qtpl:222
+//line llm/prompt/system.qtpl:227
 }
 
-//line llm/prompt/system.qtpl:222
+//line llm/prompt/system.qtpl:227
 func WriteSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool) {
-//line llm/prompt/system.qtpl:222
+//line llm/prompt/system.qtpl:227
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:222
+//line llm/prompt/system.qtpl:227
 	StreamSystem(qw422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:222
+//line llm/prompt/system.qtpl:227
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:222
+//line llm/prompt/system.qtpl:227
 }
 
-//line llm/prompt/system.qtpl:222
+//line llm/prompt/system.qtpl:227
 func System(skipWarmupCooldown bool) string {
-//line llm/prompt/system.qtpl:222
+//line llm/prompt/system.qtpl:227
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:222
+//line llm/prompt/system.qtpl:227
 	WriteSystem(qb422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:222
+//line llm/prompt/system.qtpl:227
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:222
+//line llm/prompt/system.qtpl:227
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:222
+//line llm/prompt/system.qtpl:227
 	return qs422016
-//line llm/prompt/system.qtpl:222
+//line llm/prompt/system.qtpl:227
 }
