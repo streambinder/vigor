@@ -21,4 +21,5 @@ type DashboardData struct {
 	HandlerRequestErrors        []LatencySeries
 	Trainings                   []model.Training
 	Reports                     []model.Report
+	Users                       []model.User
 }

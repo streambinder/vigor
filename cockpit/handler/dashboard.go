@@ -19,6 +19,7 @@ func Dashboard(c *fiber.Ctx) error {
 	errorStats, _ := database.GetHandlerErrorStats(14)
 	trainings, _ := database.GetTrainings()
 	reports, _ := database.GetReports()
+	users, _ := database.GetUsers()
 
 	data := view.DashboardData{
 		UserCount:                   userCount,
@@ -29,6 +30,7 @@ func Dashboard(c *fiber.Ctx) error {
 		HandlerRequestErrors:        toErrorSeries(errorStats),
 		Trainings:                   trainings,
 		Reports:                     reports,
+		Users:                       users,
 	}
 
 	return render(c, view.Dashboard(data))

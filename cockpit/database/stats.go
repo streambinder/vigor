@@ -67,6 +67,17 @@ func GetTrainings() ([]model.Training, error) {
 	return trainings, err
 }
 
+func GetUsers() ([]model.User, error) {
+	if DB == nil {
+		return nil, nil
+	}
+	var users []model.User
+	err := DB.Order("created_at DESC").Limit(100).
+		Preload("Profile").
+		Find(&users).Error
+	return users, err
+}
+
 func DeleteReport(id string) error {
 	if DB == nil {
 		return nil

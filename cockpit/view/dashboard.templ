@@ -132,6 +132,37 @@ templ Dashboard(data DashboardData) {
 				<div class="pagination" id="reports-pagination"></div>
 			}
 		</div>
+		<div class="table-container" id="users-container">
+			<div class="table-title">Users</div>
+			<table>
+				<thead>
+					<tr>
+						<th>Date</th>
+						<th>ID</th>
+						<th>Email</th>
+						<th>Name</th>
+					</tr>
+				</thead>
+				<tbody id="users-tbody">
+					for _, u := range data.Users {
+						<tr class="user-row">
+							<td>{ u.CreatedAt.Format("Jan 2, 15:04") }</td>
+							<td>{ u.ID.String()[:8] }</td>
+							<td>{ u.Email }</td>
+							<td>{ u.Profile.FirstName } { u.Profile.LastName }</td>
+						</tr>
+					}
+					if len(data.Users) == 0 {
+						<tr>
+							<td colspan="4" class="empty-row">No users</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+			if len(data.Users) > 15 {
+				<div class="pagination" id="users-pagination"></div>
+			}
+		</div>
 		@paginationScript()
 	}
 }
@@ -347,6 +378,7 @@ templ paginationScript() {
 			}
 			setupPagination('trainings-tbody', 'training-row', 'trainings-pagination');
 			setupPagination('reports-tbody', 'report-row', 'reports-pagination');
+			setupPagination('users-tbody', 'user-row', 'users-pagination');
 		})();
 	</script>
 }
