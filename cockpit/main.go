@@ -21,6 +21,7 @@ func main() {
 	app.Get("/health", handler.Health)
 	app.Use(handler.BasicAuth())
 	app.Get("/", handler.Dashboard)
+	app.Delete("/report/:id", handler.DeleteReport)
 
 	port := os.Getenv("PORT")
 	if port == "" {

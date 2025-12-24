@@ -66,3 +66,10 @@ func GetTrainings() ([]model.Training, error) {
 		Find(&trainings).Error
 	return trainings, err
 }
+
+func DeleteReport(id string) error {
+	if DB == nil {
+		return nil
+	}
+	return DB.Delete(&model.Report{}, "id = ?", id).Error
+}

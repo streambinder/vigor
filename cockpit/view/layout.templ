@@ -143,6 +143,19 @@ templ Layout(title string) {
 					border-color: var(--accent);
 					color: var(--accent);
 				}
+				.btn-delete {
+					background: transparent;
+					border: 1px solid var(--border);
+					color: var(--text-muted);
+					padding: 0.25rem 0.5rem;
+					border-radius: 4px;
+					cursor: pointer;
+					font-size: 0.75rem;
+				}
+				.btn-delete:hover {
+					border-color: #f85149;
+					color: #f85149;
+				}
 				.modal {
 					display: none;
 					position: fixed;

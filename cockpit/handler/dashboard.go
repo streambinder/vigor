@@ -91,6 +91,14 @@ func toErrorSeries(stats []database.ErrorPoint) []view.LatencySeries {
 	return series
 }
 
+func DeleteReport(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if err := database.DeleteReport(id); err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+	return c.SendStatus(fiber.StatusNoContent)
+}
+
 func render(c *fiber.Ctx, component templ.Component) error {
 	c.Set("Content-Type", "text/html")
 	return adaptor.HTTPHandler(templ.Handler(component))(c)
