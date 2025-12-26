@@ -87,44 +87,51 @@ func postActivityShuffle(c *fiber.Ctx) error {
 		}
 	}
 
-	// query random replacement exercise matching type, muscles, and equipment
-	query := database.Knowledge.
-		Model(&model.Exercise{}).
-		Where("type = ?", currentExercise.Type)
-
-	// exclude all exercises already in training
-	if len(excludeIDs) > 0 {
-		query = query.Where("id NOT IN ?", excludeIDs)
-	}
-
-	// exact muscle match using PostgreSQL array operators
-	if len(currentExercise.Muscles) > 0 {
-		query = query.Where("muscles @> ? AND muscles <@ ?",
-			pq.Array(currentExercise.Muscles), pq.Array(currentExercise.Muscles))
-	} else {
-		query = query.Where("muscles IS NULL OR muscles = '{}'")
-	}
-
-	// filter by equipment compatibility
-	if len(training.Equipment) > 0 {
-		query = query.Where(`(
-			NOT EXISTS (SELECT 1 FROM exercise_equipment WHERE exercise_equipment.exercise_id = exercises.id)
-			OR
-			NOT EXISTS (
-				SELECT 1 FROM exercise_equipment ee
-				WHERE ee.exercise_id = exercises.id
-				AND ee.equipment_id NOT IN ?
-			)
-		)`, []string(training.Equipment))
-	} else {
-		query = query.Where(`NOT EXISTS (
-			SELECT 1 FROM exercise_equipment WHERE exercise_equipment.exercise_id = exercises.id
-		)`)
+	// build base query for type, exclusions, and equipment
+	baseQuery := func() *gorm.DB {
+		q := database.Knowledge.
+			Model(&model.Exercise{}).
+			Where("type = ?", currentExercise.Type)
+		if len(excludeIDs) > 0 {
+			q = q.Where("id NOT IN ?", excludeIDs)
+		}
+		if len(training.Equipment) > 0 {
+			q = q.Where(`(
+				NOT EXISTS (SELECT 1 FROM exercise_equipment WHERE exercise_equipment.exercise_id = exercises.id)
+				OR
+				NOT EXISTS (
+					SELECT 1 FROM exercise_equipment ee
+					WHERE ee.exercise_id = exercises.id
+					AND ee.equipment_id NOT IN ?
+				)
+			)`, []string(training.Equipment))
+		} else {
+			q = q.Where(`NOT EXISTS (
+				SELECT 1 FROM exercise_equipment WHERE exercise_equipment.exercise_id = exercises.id
+			)`)
+		}
+		return q
 	}
 
 	var newExercise model.Exercise
-	if err := query.Order("RANDOM()").First(&newExercise).Error; err != nil {
-		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "no alternative exercise found"})
+
+	// muscle matching: exact match OR same first muscle
+	if len(currentExercise.Muscles) > 0 {
+		err := baseQuery().
+			Where("(muscles @> ? AND muscles <@ ?) OR muscles[1] = ?",
+				pq.Array(currentExercise.Muscles), pq.Array(currentExercise.Muscles),
+				currentExercise.Muscles[0]).
+			Order("RANDOM()").First(&newExercise).Error
+		if err != nil {
+			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "no alternative exercise found"})
+		}
+	} else {
+		// no muscles: match exercises with no muscles
+		if err := baseQuery().
+			Where("muscles IS NULL OR muscles = '{}'").
+			Order("RANDOM()").First(&newExercise).Error; err != nil {
+			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "no alternative exercise found"})
+		}
 	}
 
 	// update activity with new exercise
