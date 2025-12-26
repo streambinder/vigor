@@ -1517,6 +1517,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'한국어'**
   String get languageKorean;
+
+  /// No description provided for @nextExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {name}'**
+  String nextExercise(String name);
+
+  /// No description provided for @rest.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest'**
+  String get rest;
+
+  /// No description provided for @upcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get upcoming;
 }
 
 class _AppLocalizationsDelegate

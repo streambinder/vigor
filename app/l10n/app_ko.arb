@@ -269,5 +269,9 @@
   "languageRussian": "Русский",
   "languageChinese": "中文",
   "languageJapanese": "日本語",
-  "languageKorean": "한국어"
+  "languageKorean": "한국어",
+
+  "nextExercise": "다음: {name}",
+  "rest": "휴식",
+  "upcoming": "다음 예정"
 }

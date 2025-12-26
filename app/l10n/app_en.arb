@@ -394,5 +394,14 @@
   "languageRussian": "Русский",
   "languageChinese": "中文",
   "languageJapanese": "日本語",
-  "languageKorean": "한국어"
+  "languageKorean": "한국어",
+
+  "nextExercise": "Next: {name}",
+  "@nextExercise": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "rest": "Rest",
+  "upcoming": "Upcoming"
 }

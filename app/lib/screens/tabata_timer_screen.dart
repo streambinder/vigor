@@ -503,33 +503,169 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
             ? const Color(0xFFF5F7FA)
             : Theme.of(context).scaffoldBackgroundColor,
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                // Activity name
-                if (!isRest) _buildActivityName(interval),
-                if (!isRest) const SizedBox(height: 16),
+          child: Column(
+            children: [
+              // scrollable content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    children: [
+                      // Activity name
+                      if (!isRest) _buildActivityName(interval),
+                      if (!isRest) const SizedBox(height: 16),
 
-                // Counters row (activity/block/routine)
-                if (!isRest) _buildCountersRow(interval),
-                if (!isRest) const SizedBox(height: 24),
+                      // Counters row (activity/block/routine)
+                      if (!isRest) _buildCountersRow(interval),
+                      if (!isRest) const SizedBox(height: 24),
 
-                // Main timer/activity display
-                Expanded(
-                  child: isRest
-                      ? _buildRestDisplay()
-                      : _buildActivityDisplay(interval),
+                      // Main timer/activity display
+                      isRest
+                          ? _buildRestDisplay()
+                          : _buildActivityDisplay(interval),
+
+                      const SizedBox(height: 32),
+
+                      // Upcoming exercises list
+                      _buildUpcomingList(),
+                    ],
+                  ),
                 ),
+              ),
 
-                const SizedBox(height: 16),
-
-                // Controls
-                _buildControls(),
-              ],
-            ),
+              // Controls fixed at bottom
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: _buildControls(),
+              ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildUpcomingList() {
+    final l10n = AppLocalizations.of(context);
+    final remaining = _intervals.sublist(_currentIntervalIndex + 1);
+    if (remaining.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.upcoming,
+          style: PlatformHelper.useLiquidGlass
+              ? LiquidGlassTheme.titleStyle.copyWith(fontSize: 16)
+              : Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 12),
+        ...remaining.take(10).map((interval) => _buildUpcomingItem(interval)),
+        if (remaining.length > 10)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              '+${remaining.length - 10} more',
+              style: PlatformHelper.useLiquidGlass
+                  ? LiquidGlassTheme.bodyStyle.copyWith(
+                      color: Colors.grey,
+                      fontSize: 14,
+                    )
+                  : Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey,
+                      ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildUpcomingItem(TrainingInterval interval) {
+    final l10n = AppLocalizations.of(context);
+    final isRest = interval.type == IntervalType.rest;
+    final name = isRest ? l10n.rest : (interval.activityName ?? '');
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          // small icon
+          if (!isRest &&
+              interval.exercise != null &&
+              _isValidImageUrl(interval.exercise!.reference)) ...[
+            GestureDetector(
+              onTap: () => ExerciseModal.show(context, interval.exercise!),
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: PlatformHelper.useLiquidGlass
+                        ? LiquidGlassTheme.primaryColor.withOpacity(0.3)
+                        : Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                  ),
+                ),
+                child: ClipOval(
+                  child: Image.network(
+                    _proxyImageUrl(interval.exercise!.reference),
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.fitness_center,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ] else ...[
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isRest
+                    ? Colors.blue.withOpacity(0.1)
+                    : Colors.grey.withOpacity(0.1),
+              ),
+              child: Icon(
+                isRest ? Icons.local_drink : Icons.fitness_center,
+                size: 16,
+                color: isRest ? Colors.blue : Colors.grey,
+              ),
+            ),
+          ],
+          const SizedBox(width: 12),
+          // name
+          Expanded(
+            child: Text(
+              name,
+              style: PlatformHelper.useLiquidGlass
+                  ? LiquidGlassTheme.bodyStyle.copyWith(
+                      fontWeight: isRest ? FontWeight.normal : FontWeight.w500,
+                      color: isRest ? Colors.grey : null,
+                    )
+                  : Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight:
+                            isRest ? FontWeight.normal : FontWeight.w500,
+                        color: isRest ? Colors.grey : null,
+                      ),
+            ),
+          ),
+          // duration
+          Text(
+            '${interval.duration}s',
+            style: PlatformHelper.useLiquidGlass
+                ? LiquidGlassTheme.bodyStyle.copyWith(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  )
+                : Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
+                    ),
+          ),
+        ],
       ),
     );
   }
@@ -630,11 +766,10 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     final imageSize = screenWidth * 0.5;
     final hasTimer = activity != null && activity.duration > 0;
 
-    return SingleChildScrollView(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
             // Circular exercise image (if available)
             if (exercise != null && _isValidImageUrl(exercise.reference)) ...[
               GestureDetector(
@@ -734,8 +869,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
             ],
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildControls() {

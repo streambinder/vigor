@@ -771,4 +771,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get languageKorean => '한국어';
+
+  @override
+  String nextExercise(String name) {
+    return 'Siguiente: $name';
+  }
+
+  @override
+  String get rest => 'Descanso';
+
+  @override
+  String get upcoming => 'Próximos';
 }

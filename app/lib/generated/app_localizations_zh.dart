@@ -757,4 +757,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get languageKorean => '한국어';
+
+  @override
+  String nextExercise(String name) {
+    return '下一个: $name';
+  }
+
+  @override
+  String get rest => '休息';
+
+  @override
+  String get upcoming => '即将进行';
 }

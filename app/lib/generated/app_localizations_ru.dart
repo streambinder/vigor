@@ -762,4 +762,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get languageKorean => '한국어';
+
+  @override
+  String nextExercise(String name) {
+    return 'Далее: $name';
+  }
+
+  @override
+  String get rest => 'Отдых';
+
+  @override
+  String get upcoming => 'Предстоящие';
 }
