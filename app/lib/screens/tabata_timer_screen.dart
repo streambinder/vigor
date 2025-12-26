@@ -154,13 +154,14 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
             ));
 
             // After last activity in a repeat, use block rest; otherwise use activity rest
-            // skip block rest if this is the very last block of the entire training
+            // skip rest only after the very last activity of the entire training
             final isLastRoutine = routineIndex == widget.training.routines.length;
             final isLastBlock = blockIndex == routine.blocks.length;
             final isLastRepeat = repeat == block.repeats;
-            final isLastTrainingBlock = isLastRoutine && isLastBlock && isLastRepeat;
+            final isLastActivityOfTraining =
+                isLastRoutine && isLastBlock && isLastRepeat && isLastActivityInRepeat;
 
-            if (isLastActivityInRepeat && block.rest > 0 && !isLastTrainingBlock) {
+            if (isLastActivityInRepeat && block.rest > 0 && !isLastActivityOfTraining) {
               addRestInterval(TrainingInterval(
                 type: IntervalType.rest,
                 duration: block.rest,
@@ -189,8 +190,9 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
         }
       }
 
-      // Add routine rest after all blocks
-      if (routine.rest > 0) {
+      // Add routine rest after all blocks (skip for last routine)
+      final isLastRoutine = routineIndex == widget.training.routines.length;
+      if (routine.rest > 0 && !isLastRoutine) {
         addRestInterval(TrainingInterval(
           type: IntervalType.rest,
           duration: routine.rest,
