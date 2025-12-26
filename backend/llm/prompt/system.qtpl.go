@@ -74,14 +74,17 @@ User goals are the MOST IMPORTANT factor in training design. Every exercise sele
 - When multiple goals exist, find exercises that serve multiple purposes or balance the session accordingly
 - NEVER select exercises that contradict stated goals (e.g., endurance-style circuits for pure strength goals)
 
-BALANCED MUSCLE DEVELOPMENT (DEFAULT BEHAVIOR):
-Unless USER_REQUEST explicitly excludes muscle groups (e.g., "skip legs today", "upper body only"):
-- GOALS determine PRIMARY muscle emphasis: muscles directly serving user goals get higher volume and intensity
-- SECONDARY muscles (not goal-aligned) should still be trained but with reduced volume (1-2 exercises vs 3-4 for primary)
-- Example: goal "build upper body strength" → chest/back/shoulders are PRIMARY (more sets, heavier loads), legs/glutes are SECONDARY (maintenance volume, 1-2 compound movements)
-- Check RECENT_HISTORY to avoid overworking the same muscles within 48-72h
-- Over a week, ALL major muscle groups should receive stimulus: chest, back, shoulders, biceps, triceps, core, quadriceps, hamstrings, glutes, calves
-- Never completely skip a muscle group unless user explicitly requests it or injury prevents it
+FULL-BODY MUSCLE COVERAGE (MANDATORY):
+EVERY training session MUST include exercises for ALL major muscle groups. This is NON-NEGOTIABLE.
+The ONLY exception: USER_REQUEST explicitly excludes muscle groups (e.g., "skip legs today", "upper body only", "just arms").
+- GOALS do NOT override this rule. Goals determine PRIMARY vs SECONDARY emphasis, NOT which muscles get trained.
+- GOALS determine PRIMARY emphasis: muscles directly serving user goals get higher volume and intensity (3-4 exercises)
+- SECONDARY muscles (not goal-aligned) MUST still be trained with maintenance volume (1-2 exercises minimum)
+- Example: goal "build upper body strength" → chest/back/shoulders are PRIMARY (more sets, heavier loads), legs/glutes are SECONDARY (maintenance volume, 1-2 compound movements) — but legs/glutes are STILL TRAINED
+- NEVER interpret goals like "upper body strength" or "leg day" as permission to skip other muscle groups unless USER_REQUEST says so
+- Check RECENT_HISTORY to avoid overworking the same muscles within 48-72h (reduce volume, don't skip entirely)
+- Required muscle groups per session: chest, back, shoulders, arms (biceps/triceps), core, legs (quadriceps/hamstrings/glutes/calves)
+- Only USER_REQUEST or injury/limitation can permit skipping a muscle group. Goals, preferences, and methodology cannot.
 
 REASONING-FIRST APPROACH:
 You MUST complete the "reasoning" object BEFORE generating training structure. This ensures coherent, well-planned trainings. The reasoning process:
@@ -96,7 +99,7 @@ You MUST complete the "reasoning" object BEFORE generating training structure. T
      - {exercise: "push-up", adjustment: "added weighted-vest modifier", reason: "user feedback indicates bodyweight is now too easy"}
    - Leave adjustments as empty array if no feedback-driven changes were made
 5. facts_applied: How KNOWLEDGE_FACTS influenced the design
-6. target_muscles: All muscle groups this session will train (both primary goal-aligned and secondary maintenance). Check RECENT_HISTORY to avoid overworking muscles trained in last 48-72h.
+6. target_muscles: MUST include all required muscle groups (chest, back, shoulders, arms, core, legs). Mark each as PRIMARY (goal-aligned, high volume) or SECONDARY (maintenance volume). Only omit groups if USER_REQUEST explicitly excludes them or injury prevents training them. Check RECENT_HISTORY to reduce volume (not skip) for recently-worked muscles.
 7. exercises: List selected exercise IDs with reason showing how they fit the CHOSEN METHODOLOGY (e.g. for circuit: "push-up: bodyweight compound, quick transitions")
 
 Only AFTER completing reasoning should you populate name, description, type, and routines. The name should be a concise 3-4 word title reflecting the training focus (goals and target muscles).
@@ -124,9 +127,9 @@ TRAINING METHODOLOGIES (use exactly one):
   - MAX 1-2 exercises per minute (more defeats the purpose of EMOM)
   - MAX 12-15 total reps per minute (ensures ~35-40s work, leaving 20-25s rest)
   - VERIFY before finalizing: (total reps × `)
-//line llm/prompt/system.qtpl:82
+//line llm/prompt/system.qtpl:85
 	qw422016.N().D(model.WeightActivityDurationPerRep)
-//line llm/prompt/system.qtpl:82
+//line llm/prompt/system.qtpl:85
 	qw422016.N().S(`s) ≤ 40s
   - For variety with multiple exercises, use ALTERNATING pattern: odd minutes = exercise A, even minutes = exercise B (set activities accordingly, e.g., 2 activities but each done on alternate minutes)
   - If user is new or RECENT_HISTORY shows "too hard" feedback, reduce to 8-10 reps per minute for more recovery
@@ -144,23 +147,23 @@ EQUIPMENT-METHODOLOGY ALIGNMENT (match equipment style to training methodology):
 
 TRAINING STRUCTURE (required routines in order):
 `)
-//line llm/prompt/system.qtpl:98
+//line llm/prompt/system.qtpl:101
 	if !skipWarmupCooldown {
-//line llm/prompt/system.qtpl:98
+//line llm/prompt/system.qtpl:101
 		qw422016.N().S(`1. warmup: light cardio and bodyweight exercises to elevate heart rate and activate muscles (5-10min). Prioritize jumping jacks, high knees, arm circles, leg swings—not static stretches.
 2. work: main training blocks with appropriate rest periods (bulk of duration)
 3. cooldown: static stretches targeting the specific muscles exercised during the work phase (5min). Match stretches to worked muscle groups.
 `)
-//line llm/prompt/system.qtpl:101
+//line llm/prompt/system.qtpl:104
 	} else {
-//line llm/prompt/system.qtpl:101
+//line llm/prompt/system.qtpl:104
 		qw422016.N().S(`1. work: main training blocks with appropriate rest periods (entire duration)
 
 SKIP WARMUP AND COOLDOWN: The user has requested NO warmup and NO cooldown routines. Generate ONLY the "work" routine. The routines array must contain exactly ONE routine with name "work". Do NOT include any routine named "warmup" or "cooldown".
 `)
-//line llm/prompt/system.qtpl:104
+//line llm/prompt/system.qtpl:107
 	}
-//line llm/prompt/system.qtpl:104
+//line llm/prompt/system.qtpl:107
 	qw422016.N().S(`
 
 EXERCISE SELECTION PRIORITY:
@@ -205,10 +208,10 @@ KNOWLEDGE FACTS:
 - Include the DOI URLs of all facts you applied in the training's references array
 - Facts are especially valuable for addressing specific goals (hypertrophy, strength, endurance) and working around injuries safely
 
-EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder injury, goal: build strength, recent history shows bench-press marked too easy):
+EXAMPLE OUTPUT (30min upper body focus, USER_REQUEST: "upper body only", user has shoulder injury, goal: build strength, recent history shows bench-press marked too easy):
 {
   "reasoning": {
-    "constraints": ["shoulder injury limits overhead pressing", "dumbbells only", "30min"],
+    "constraints": ["USER_REQUEST: upper body only (legs excluded)", "shoulder injury limits overhead pressing", "dumbbells only", "30min"],
     "type_selection": "No recent history - selecting strength for user's stated goal",
     "strategy": "Strength-focused upper body session with horizontal pressing and pulling. Heavy loads, low reps, full recovery between sets.",
     "progression": {
@@ -218,7 +221,7 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
       ]
     },
     "facts_applied": [],
-    "target_muscles": ["chest", "upper back", "biceps", "triceps"],
+    "target_muscles": ["chest (PRIMARY)", "back (PRIMARY)", "arms (PRIMARY)", "shoulders (SECONDARY - limited by injury)", "core (SECONDARY)", "legs (EXCLUDED per USER_REQUEST)"],
     "exercises": [
       "dumbbell-bench-press: horizontal press, strength-focused with 5 reps",
       "dumbbell-bent-over-row: horizontal pull, heavy loading for back strength",
@@ -285,31 +288,31 @@ EXAMPLE OUTPUT (30min upper body strength with dumbbells, user has shoulder inju
   ]
 }
 `)
-//line llm/prompt/system.qtpl:227
+//line llm/prompt/system.qtpl:230
 }
 
-//line llm/prompt/system.qtpl:227
+//line llm/prompt/system.qtpl:230
 func WriteSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool) {
-//line llm/prompt/system.qtpl:227
+//line llm/prompt/system.qtpl:230
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:227
+//line llm/prompt/system.qtpl:230
 	StreamSystem(qw422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:227
+//line llm/prompt/system.qtpl:230
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:227
+//line llm/prompt/system.qtpl:230
 }
 
-//line llm/prompt/system.qtpl:227
+//line llm/prompt/system.qtpl:230
 func System(skipWarmupCooldown bool) string {
-//line llm/prompt/system.qtpl:227
+//line llm/prompt/system.qtpl:230
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:227
+//line llm/prompt/system.qtpl:230
 	WriteSystem(qb422016, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:227
+//line llm/prompt/system.qtpl:230
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:227
+//line llm/prompt/system.qtpl:230
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:227
+//line llm/prompt/system.qtpl:230
 	return qs422016
-//line llm/prompt/system.qtpl:227
+//line llm/prompt/system.qtpl:230
 }
