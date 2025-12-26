@@ -49,13 +49,12 @@ func Logging() fiber.Handler {
 			Path:   c.Route().Path,
 			Status: c.Response().StatusCode(),
 		}
-		ev := logger.Info().
-			Interface("event", e).
-			Str("ip", c.IP())
+		ev := logger.Info()
 		if userID, ok := c.Locals("userID").(uuid.UUID); ok && userID != uuid.Nil {
+			e.UserID = userID.String()
 			ev.Stringer("user_id", userID)
 		}
-		ev.Msg("request")
+		ev.Interface("event", e).Str("ip", c.IP()).Msg("request")
 
 		return err
 	}

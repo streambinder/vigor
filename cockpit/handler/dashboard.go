@@ -12,8 +12,10 @@ import (
 
 func Dashboard(c *fiber.Ctx) error {
 	userCount, _ := database.GetUserCount()
+	avgActiveUsersPerDay, _ := database.GetAvgActiveUsersPerDay()
 	trainingCount, _ := database.GetTrainingCount()
 	avgTrainingsPerDay, _ := database.GetAvgTrainingsPerDay()
+	activeUsersStats, _ := database.GetActiveUsersPerDay(14)
 	trainingStats, _ := database.GetTrainingGenerationStats(14)
 	handlerStats, _ := database.GetHandlerRequestStats(14)
 	errorStats, _ := database.GetHandlerErrorStats(14)
@@ -23,8 +25,10 @@ func Dashboard(c *fiber.Ctx) error {
 
 	data := view.DashboardData{
 		UserCount:                   userCount,
+		AvgActiveUsersPerDay:        avgActiveUsersPerDay,
 		TrainingCount:               trainingCount,
 		AvgTrainingsPerDay:          avgTrainingsPerDay,
+		ActiveUsersPerDay:           toActiveUsersSeries(activeUsersStats),
 		TrainingGenerationLatencies: toLatencySeries(trainingStats),
 		HandlerRequestLatencies:     toLatencySeries(handlerStats),
 		HandlerRequestErrors:        toErrorSeries(errorStats),
@@ -91,6 +95,24 @@ func toErrorSeries(stats []database.ErrorPoint) []view.LatencySeries {
 		})
 	}
 	return series
+}
+
+func toActiveUsersSeries(stats []database.ActiveUsersPoint) []view.LatencySeries {
+	if len(stats) == 0 {
+		return nil
+	}
+	var points []view.LatencyDataPoint
+	for _, s := range stats {
+		label := s.Day
+		if t, err := time.Parse("2006-01-02", s.Day); err == nil {
+			label = t.Format("Jan 2")
+		}
+		points = append(points, view.LatencyDataPoint{
+			Label: label,
+			Value: float64(s.Count),
+		})
+	}
+	return []view.LatencySeries{{Name: "Active Users", Points: points}}
 }
 
 func DeleteReport(c *fiber.Ctx) error {

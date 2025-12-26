@@ -14,8 +14,10 @@ type LatencySeries struct {
 
 type DashboardData struct {
 	UserCount                   int64
+	AvgActiveUsersPerDay        float64
 	TrainingCount               int64
 	AvgTrainingsPerDay          float64
+	ActiveUsersPerDay           []LatencySeries
 	TrainingGenerationLatencies []LatencySeries
 	HandlerRequestLatencies     []LatencySeries
 	HandlerRequestErrors        []LatencySeries

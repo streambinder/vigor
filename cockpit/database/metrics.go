@@ -96,3 +96,53 @@ func GetHandlerErrorStats(days int) ([]ErrorPoint, error) {
 
 	return results, err
 }
+
+type ActiveUsersPoint struct {
+	Day   string
+	Count int64
+}
+
+// GetActiveUsersPerDay returns daily count of distinct active users
+func GetActiveUsersPerDay(days int) ([]ActiveUsersPoint, error) {
+	if Metrics == nil {
+		return nil, nil
+	}
+
+	stmt := &gorm.Statement{DB: Metrics}
+	_ = stmt.Parse(&event.HandlerRequestEvent{})
+
+	var results []ActiveUsersPoint
+	err := Metrics.Raw(fmt.Sprintf(`
+		SELECT
+			date(time) as day,
+			count(DISTINCT user_id) as count
+		FROM %s
+		WHERE time > datetime('now', '-%d days') AND user_id != ''
+		GROUP BY day
+		ORDER BY day
+	`, stmt.Table, days)).Scan(&results).Error
+
+	return results, err
+}
+
+// GetAvgActiveUsersPerDay returns average distinct active users per day over last 30 days
+func GetAvgActiveUsersPerDay() (float64, error) {
+	if Metrics == nil {
+		return 0, nil
+	}
+
+	stmt := &gorm.Statement{DB: Metrics}
+	_ = stmt.Parse(&event.HandlerRequestEvent{})
+
+	var result avgResult
+	err := Metrics.Raw(fmt.Sprintf(`
+		SELECT COALESCE(AVG(daily_count), 0) as avg FROM (
+			SELECT date(time) as day, count(DISTINCT user_id) as daily_count
+			FROM %s
+			WHERE time > datetime('now', '-30 days') AND user_id != ''
+			GROUP BY day
+		) daily_counts
+	`, stmt.Table)).Scan(&result).Error
+
+	return result.Avg, err
+}

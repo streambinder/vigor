@@ -16,13 +16,18 @@ templ Dashboard(data DashboardData) {
 		<div class="grid">
 			<div class="card">
 				<div class="card-label">Users</div>
-				<div class="card-value">{ formatNumber(data.UserCount) }</div>
+				<div class="card-value">{ formatNumber(data.UserCount) } <span class="card-sub">{ formatFloat(data.AvgActiveUsersPerDay) }<span class="muted">/day</span></span></div>
 			</div>
 			<div class="card">
 				<div class="card-label">Trainings</div>
 				<div class="card-value">{ formatNumber(data.TrainingCount) } <span class="card-sub">{ formatFloat(data.AvgTrainingsPerDay) }<span class="muted">/day</span></span></div>
 			</div>
 		</div>
+		<div class="chart-container">
+			<div class="chart-title">Active Users <span class="muted">(per day)</span></div>
+			<div id="active-users-chart"></div>
+		</div>
+		@templ.JSONScript("active-users-chart-data", multiSeriesChartData(data.ActiveUsersPerDay))
 		<div class="chart-container">
 			<div class="chart-title">Training Generation Latency <span class="muted">(avg ms)</span></div>
 			<div id="training-latency-chart"></div>
@@ -213,7 +218,7 @@ func multiSeriesChartData(series []LatencySeries) multiSeriesData {
 templ latencyChartScript() {
 	<script>
 		(function() {
-			function renderChart(dataId, chartId) {
+			function renderChart(dataId, chartId, suffix) {
 				var chartData = JSON.parse(document.getElementById(dataId).textContent);
 				if (!chartData.series || chartData.series.length === 0) return;
 				var series = chartData.series.map(function(s) {
@@ -249,7 +254,7 @@ templ latencyChartScript() {
 						min: 0,
 						labels: {
 							style: { colors: '#8b949e' },
-							formatter: function(val) { return val.toFixed(1); }
+							formatter: function(val) { return suffix ? val.toFixed(1) : Math.round(val); }
 						}
 					},
 					grid: {
@@ -258,7 +263,7 @@ templ latencyChartScript() {
 					},
 					tooltip: {
 						theme: 'dark',
-						y: { formatter: function(val) { return val ? val.toFixed(1) + ' ms' : '-'; } }
+						y: { formatter: function(val) { return val ? (suffix ? val.toFixed(1) + suffix : Math.round(val)) : '-'; } }
 					},
 					legend: {
 						labels: { colors: '#8b949e' }
@@ -266,9 +271,10 @@ templ latencyChartScript() {
 				};
 				new ApexCharts(document.querySelector(chartId), options).render();
 			}
-			renderChart('training-chart-data', '#training-latency-chart');
-			renderChart('handler-chart-data', '#handler-latency-chart');
-			renderChart('errors-chart-data', '#handler-errors-chart');
+			renderChart('active-users-chart-data', '#active-users-chart', '');
+			renderChart('training-chart-data', '#training-latency-chart', ' ms');
+			renderChart('handler-chart-data', '#handler-latency-chart', ' ms');
+			renderChart('errors-chart-data', '#handler-errors-chart', '');
 		})();
 	</script>
 }
