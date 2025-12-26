@@ -29,12 +29,12 @@ templ Dashboard(data DashboardData) {
 		</div>
 		@templ.JSONScript("active-users-chart-data", multiSeriesChartData(data.ActiveUsersPerDay))
 		<div class="chart-container">
-			<div class="chart-title">Training Generation Latency <span class="muted">(avg ms)</span></div>
+			<div class="chart-title">Training Generation Latency <span class="muted">(p95 ms)</span></div>
 			<div id="training-latency-chart"></div>
 		</div>
 		@templ.JSONScript("training-chart-data", multiSeriesChartData(data.TrainingGenerationLatencies))
 		<div class="chart-container">
-			<div class="chart-title">Handler Request Latency <span class="muted">(avg ms)</span></div>
+			<div class="chart-title">Handler Request Latency <span class="muted">(p95 ms)</span></div>
 			<div id="handler-latency-chart"></div>
 		</div>
 		@templ.JSONScript("handler-chart-data", multiSeriesChartData(data.HandlerRequestLatencies))

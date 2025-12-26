@@ -111,7 +111,7 @@ func Dashboard(data DashboardData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " <div class=\"chart-container\"><div class=\"chart-title\">Training Generation Latency <span class=\"muted\">(avg ms)</span></div><div id=\"training-latency-chart\"></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " <div class=\"chart-container\"><div class=\"chart-title\">Training Generation Latency <span class=\"muted\">(p95 ms)</span></div><div id=\"training-latency-chart\"></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -119,7 +119,7 @@ func Dashboard(data DashboardData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " <div class=\"chart-container\"><div class=\"chart-title\">Handler Request Latency <span class=\"muted\">(avg ms)</span></div><div id=\"handler-latency-chart\"></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " <div class=\"chart-container\"><div class=\"chart-title\">Handler Request Latency <span class=\"muted\">(p95 ms)</span></div><div id=\"handler-latency-chart\"></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

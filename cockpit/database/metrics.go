@@ -10,12 +10,11 @@ import (
 type LatencyPoint struct {
 	Day   string
 	Group string
-	AvgMs float64
-	MaxMs int64
+	P95Ms float64
 	Count int64
 }
 
-// GetTrainingGenerationStats returns daily latency stats for training generation grouped by model
+// GetTrainingGenerationStats returns daily p95 latency stats for training generation grouped by model
 func GetTrainingGenerationStats(days int) ([]LatencyPoint, error) {
 	if Metrics == nil {
 		return nil, nil
@@ -26,22 +25,26 @@ func GetTrainingGenerationStats(days int) ([]LatencyPoint, error) {
 
 	var results []LatencyPoint
 	err := Metrics.Raw(fmt.Sprintf(`
-		SELECT
-			date(time) as day,
-			model as "group",
-			avg(latency / 1000000.0) as avg_ms,
-			max(latency / 1000000) as max_ms,
-			count(*) as count
-		FROM %s
-		WHERE time > datetime('now', '-%d days')
-		GROUP BY day, model
+		WITH ranked AS (
+			SELECT
+				date(time) as day,
+				model,
+				latency / 1000000.0 as ms,
+				ROW_NUMBER() OVER (PARTITION BY date(time), model ORDER BY latency) as rn,
+				COUNT(*) OVER (PARTITION BY date(time), model) as cnt
+			FROM %s
+			WHERE time > datetime('now', '-%d days')
+		)
+		SELECT day, model as "group", ms as p95_ms, cnt as count
+		FROM ranked
+		WHERE rn = CAST(cnt * 0.95 - 0.0001 AS INTEGER) + 1
 		ORDER BY day
 	`, stmt.Table, days)).Scan(&results).Error
 
 	return results, err
 }
 
-// GetHandlerRequestStats returns daily latency stats for handler requests grouped by method and path
+// GetHandlerRequestStats returns daily p95 latency stats for handler requests grouped by method and path
 func GetHandlerRequestStats(days int) ([]LatencyPoint, error) {
 	if Metrics == nil {
 		return nil, nil
@@ -52,15 +55,19 @@ func GetHandlerRequestStats(days int) ([]LatencyPoint, error) {
 
 	var results []LatencyPoint
 	err := Metrics.Raw(fmt.Sprintf(`
-		SELECT
-			date(time) as day,
-			method || ' ' || path as "group",
-			avg(latency / 1000000.0) as avg_ms,
-			max(latency / 1000000) as max_ms,
-			count(*) as count
-		FROM %s
-		WHERE time > datetime('now', '-%d days')
-		GROUP BY day, method, path
+		WITH ranked AS (
+			SELECT
+				date(time) as day,
+				method || ' ' || path as grp,
+				latency / 1000000.0 as ms,
+				ROW_NUMBER() OVER (PARTITION BY date(time), method, path ORDER BY latency) as rn,
+				COUNT(*) OVER (PARTITION BY date(time), method, path) as cnt
+			FROM %s
+			WHERE time > datetime('now', '-%d days')
+		)
+		SELECT day, grp as "group", ms as p95_ms, cnt as count
+		FROM ranked
+		WHERE rn = CAST(cnt * 0.95 - 0.0001 AS INTEGER) + 1
 		ORDER BY day
 	`, stmt.Table, days)).Scan(&results).Error
 

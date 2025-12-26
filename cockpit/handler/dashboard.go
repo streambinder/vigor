@@ -41,58 +41,87 @@ func Dashboard(c *fiber.Ctx) error {
 }
 
 func toLatencySeries(stats []database.LatencyPoint) []view.LatencySeries {
-	// group points by Group field, preserving day order
-	seriesMap := make(map[string][]view.LatencyDataPoint)
-	var seriesOrder []string
-
-	for _, s := range stats {
-		label := s.Day
-		if t, err := time.Parse("2006-01-02", s.Day); err == nil {
-			label = t.Format("Jan 2")
-		}
-		if _, exists := seriesMap[s.Group]; !exists {
-			seriesOrder = append(seriesOrder, s.Group)
-		}
-		seriesMap[s.Group] = append(seriesMap[s.Group], view.LatencyDataPoint{
-			Label: label,
-			Value: s.AvgMs,
-		})
+	if len(stats) == 0 {
+		return nil
 	}
 
+	// collect all days and find date range
+	daySet := make(map[string]bool)
+	for _, s := range stats {
+		daySet[s.Day] = true
+	}
+	allDays := generateDayRange(daySet)
+
+	// group points by Group field
+	seriesMap := make(map[string]map[string]float64)
+	var seriesOrder []string
+	for _, s := range stats {
+		if _, exists := seriesMap[s.Group]; !exists {
+			seriesMap[s.Group] = make(map[string]float64)
+			seriesOrder = append(seriesOrder, s.Group)
+		}
+		seriesMap[s.Group][s.Day] = s.P95Ms
+	}
+
+	// build series with zero-filled gaps
 	var series []view.LatencySeries
 	for _, name := range seriesOrder {
-		series = append(series, view.LatencySeries{
-			Name:   name,
-			Points: seriesMap[name],
-		})
+		var points []view.LatencyDataPoint
+		dayValues := seriesMap[name]
+		for _, day := range allDays {
+			label := day
+			if t, err := time.Parse("2006-01-02", day); err == nil {
+				label = t.Format("Jan 2")
+			}
+			points = append(points, view.LatencyDataPoint{
+				Label: label,
+				Value: dayValues[day], // zero if missing
+			})
+		}
+		series = append(series, view.LatencySeries{Name: name, Points: points})
 	}
 	return series
 }
 
 func toErrorSeries(stats []database.ErrorPoint) []view.LatencySeries {
-	seriesMap := make(map[string][]view.LatencyDataPoint)
-	var seriesOrder []string
-
-	for _, s := range stats {
-		label := s.Day
-		if t, err := time.Parse("2006-01-02", s.Day); err == nil {
-			label = t.Format("Jan 2")
-		}
-		if _, exists := seriesMap[s.Group]; !exists {
-			seriesOrder = append(seriesOrder, s.Group)
-		}
-		seriesMap[s.Group] = append(seriesMap[s.Group], view.LatencyDataPoint{
-			Label: label,
-			Value: float64(s.Count),
-		})
+	if len(stats) == 0 {
+		return nil
 	}
 
+	// collect all days and find date range
+	daySet := make(map[string]bool)
+	for _, s := range stats {
+		daySet[s.Day] = true
+	}
+	allDays := generateDayRange(daySet)
+
+	// group points by Group field
+	seriesMap := make(map[string]map[string]float64)
+	var seriesOrder []string
+	for _, s := range stats {
+		if _, exists := seriesMap[s.Group]; !exists {
+			seriesMap[s.Group] = make(map[string]float64)
+			seriesOrder = append(seriesOrder, s.Group)
+		}
+		seriesMap[s.Group][s.Day] = float64(s.Count)
+	}
+
+	// build series with zero-filled gaps
 	var series []view.LatencySeries
 	for _, name := range seriesOrder {
-		series = append(series, view.LatencySeries{
-			Name:   name,
-			Points: seriesMap[name],
-		})
+		var points []view.LatencyDataPoint
+		dayValues := seriesMap[name]
+		for _, day := range allDays {
+			label := day
+			if t, err := time.Parse("2006-01-02", day); err == nil {
+				label = t.Format("Jan 2")
+			}
+			points = append(points, view.LatencyDataPoint{
+				Label: label,
+				Value: dayValues[day],
+			})
+		}
+		series = append(series, view.LatencySeries{Name: name, Points: points})
 	}
 	return series
 }
@@ -101,18 +130,62 @@ func toActiveUsersSeries(stats []database.ActiveUsersPoint) []view.LatencySeries
 	if len(stats) == 0 {
 		return nil
 	}
-	var points []view.LatencyDataPoint
+
+	// collect all days and find date range
+	daySet := make(map[string]bool)
+	dayValues := make(map[string]float64)
 	for _, s := range stats {
-		label := s.Day
-		if t, err := time.Parse("2006-01-02", s.Day); err == nil {
+		daySet[s.Day] = true
+		dayValues[s.Day] = float64(s.Count)
+	}
+	allDays := generateDayRange(daySet)
+
+	// build series with zero-filled gaps
+	var points []view.LatencyDataPoint
+	for _, day := range allDays {
+		label := day
+		if t, err := time.Parse("2006-01-02", day); err == nil {
 			label = t.Format("Jan 2")
 		}
 		points = append(points, view.LatencyDataPoint{
 			Label: label,
-			Value: float64(s.Count),
+			Value: dayValues[day],
 		})
 	}
 	return []view.LatencySeries{{Name: "Active Users", Points: points}}
+}
+
+// generateDayRange returns all days between min and max dates found in daySet
+func generateDayRange(daySet map[string]bool) []string {
+	if len(daySet) == 0 {
+		return nil
+	}
+
+	var minDay, maxDay time.Time
+	first := true
+	for day := range daySet {
+		t, err := time.Parse("2006-01-02", day)
+		if err != nil {
+			continue
+		}
+		if first {
+			minDay, maxDay = t, t
+			first = false
+		} else {
+			if t.Before(minDay) {
+				minDay = t
+			}
+			if t.After(maxDay) {
+				maxDay = t
+			}
+		}
+	}
+
+	var days []string
+	for d := minDay; !d.After(maxDay); d = d.AddDate(0, 0, 1) {
+		days = append(days, d.Format("2006-01-02"))
+	}
+	return days
 }
 
 func DeleteReport(c *fiber.Ctx) error {
