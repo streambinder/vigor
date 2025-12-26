@@ -609,7 +609,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
           ),
           const SizedBox(height: 24),
           Text(
-            _formatTime(_remainingSeconds),
+            '$_remainingSeconds',
             style: TextStyle(
               fontSize: 120,
               fontWeight: FontWeight.bold,
