@@ -366,10 +366,6 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     });
   }
 
-  void _confirmActivityComplete() {
-    _skipForward();
-  }
-
   String _formatTime(int seconds) {
     final minutes = seconds ~/ 60;
     final remainingSeconds = seconds % 60;
@@ -733,39 +729,6 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
                   color: PlatformHelper.useLiquidGlass
                       ? LiquidGlassTheme.primaryColor
                       : Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ],
-            // Confirmation button for reps-only activities
-            if (!hasTimer && activity != null) ...[
-              const SizedBox(height: 24),
-              SizedBox(
-                width: 200,
-                height: 200,
-                child: ElevatedButton(
-                  onPressed: _confirmActivityComplete,
-                  style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
-                    padding: const EdgeInsets.all(40),
-                    backgroundColor: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.successColor
-                        : Theme.of(context).colorScheme.primary,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.check, size: 60, color: Colors.white),
-                      const SizedBox(height: 8),
-                      Text(
-                        AppLocalizations.of(context).complete,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ],
