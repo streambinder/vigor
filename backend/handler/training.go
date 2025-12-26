@@ -177,7 +177,9 @@ func postTraining(c *fiber.Ctx) error {
 	// Query recent trainings to avoid repeating exercises and ensure progression
 	var recentTrainings []model.Training
 	if err := database.DB.
-		Preload("Routines.Blocks.Activities").
+		Preload("Routines", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Routines.Blocks", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Routines.Blocks.Activities", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Where("user_id = ? and completed_at > ?", requestorProfile.UserID, time.Now().Add(-time.Hour*24*recentTrainingDays)).
 		Order("completed_at desc").
 		Limit(recentTrainingMaxResults).
@@ -225,6 +227,15 @@ func postTraining(c *fiber.Ctx) error {
 		training.Gym = gym
 	}
 	training.Equipment = equipmentIDs
+	for i := range training.Routines {
+		training.Routines[i].Position = i
+		for j := range training.Routines[i].Blocks {
+			training.Routines[i].Blocks[j].Position = j
+			for k := range training.Routines[i].Blocks[j].Activities {
+				training.Routines[i].Blocks[j].Activities[k].Position = k
+			}
+		}
+	}
 
 	for i := range training.Routines {
 		for j := range training.Routines[i].Blocks {
@@ -272,7 +283,9 @@ func getTraining(c *fiber.Ctx) error {
 	var trainings []model.Training
 	if err := database.DB.
 		Preload("Gym").
-		Preload("Routines.Blocks.Activities").
+		Preload("Routines", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Routines.Blocks", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Routines.Blocks.Activities", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Where("user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?)", userID, userID).
 		Order("(completed_at IS NOT NULL), COALESCE(completed_at, created_at) desc").
 		Find(&trainings).Error; err != nil {
@@ -358,7 +371,9 @@ func postTrainingCompleteById(c *fiber.Ctx) error {
 	// load training with associations so we can update activities
 	if err := database.DB.
 		Preload("Gym").
-		Preload("Routines.Blocks.Activities").
+		Preload("Routines", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Routines.Blocks", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Routines.Blocks.Activities", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		First(&training, "id = ? AND (user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?))", trainingID, userID, userID).Error; err != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})
 	}
@@ -468,7 +483,9 @@ func postTrainingCopy(c *fiber.Ctx) error {
 	// load source training with all associations
 	var source model.Training
 	if err := database.DB.
-		Preload("Routines.Blocks.Activities").
+		Preload("Routines", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Routines.Blocks", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Routines.Blocks.Activities", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		First(&source, "id = ?", trainingID).Error; err != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})
 	}

@@ -106,9 +106,10 @@ type Routine struct {
 	ID         string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id" prompt:"-"`
 	TrainingID string `gorm:"index;type:uuid;not null" json:"training_id" prompt:"-"`
 
-	Type   string  `gorm:"not null" json:"name" prompt:"Routine phase;enum:warmup,work,cooldown"`
-	Rest   int     `gorm:"not null" json:"rest" prompt:"Rest seconds after this routine"`
-	Blocks []Block `json:"blocks" gorm:"foreignKey:RoutineID;constraint:OnDelete:CASCADE" prompt:"Set of blocks to be performed. A block is composed by at least 2 activities."`
+	Position int     `gorm:"not null;default:0" json:"-" prompt:"-"`
+	Type     string  `gorm:"not null" json:"name" prompt:"Routine phase;enum:warmup,work,cooldown"`
+	Rest     int     `gorm:"not null" json:"rest" prompt:"Rest seconds after this routine"`
+	Blocks   []Block `json:"blocks" gorm:"foreignKey:RoutineID;constraint:OnDelete:CASCADE" prompt:"Set of blocks to be performed. A block is composed by at least 2 activities."`
 
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
@@ -119,6 +120,7 @@ type Block struct {
 	ID        string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id" prompt:"-"`
 	RoutineID string `gorm:"index;type:uuid;not null" json:"routine_id" prompt:"-"`
 
+	Position   int        `gorm:"not null;default:0" json:"-" prompt:"-"`
 	Repeats    int        `gorm:"not null" json:"repeats" prompt:"Number of block repetitions"`
 	Rest       int        `gorm:"not null" json:"rest" prompt:"Rest seconds between repeats"`
 	Activities []Activity `json:"activities" gorm:"foreignKey:BlockID;constraint:OnDelete:CASCADE"`
@@ -132,6 +134,7 @@ type Activity struct {
 	ID      string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id" prompt:"-"`
 	BlockID string `gorm:"index;type:uuid;not null" json:"block_id" prompt:"-"`
 
+	Position  int            `gorm:"not null;default:0" json:"-" prompt:"-"`
 	Name      string         `gorm:"not null" json:"name" prompt:"Exercise ID from AVAILABLE_EXERCISES"`
 	Duration  int            `gorm:"not null" json:"duration" prompt:"Seconds (use 0 when reps > 0)"`
 	Reps      int            `gorm:"not null" json:"reps" prompt:"Repetition count (use 0 for time-based)"`

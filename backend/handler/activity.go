@@ -10,6 +10,7 @@ import (
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/handler/middleware"
 	"github.com/streambinder/vigor/model"
+	"gorm.io/gorm"
 )
 
 // initActivity registers activity-related routes.
@@ -44,7 +45,9 @@ func postActivityShuffle(c *fiber.Ctx) error {
 
 	var training model.Training
 	if err := database.DB.
-		Preload("Routines.Blocks.Activities").
+		Preload("Routines", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Routines.Blocks", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Routines.Blocks.Activities", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		First(&training, "id = ? AND (user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?))",
 			routine.TrainingID, userID, userID).Error; err != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})
