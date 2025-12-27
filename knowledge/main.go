@@ -75,25 +75,26 @@ func boostrapExercises(gormDB *gorm.DB) error {
 	}
 
 	for _, row := range rows {
-		if err := gormDB.FirstOrCreate(&row, model.Exercise{ID: row.ID}).Error; err != nil {
+		if err := gormDB.Save(&row).Error; err != nil {
 			return err
 		}
 
-		// exercise embeddings
 		text := rag.GenExercise(row)
 		vector, err := embedding.GenVector(text)
 		if err != nil {
 			return err
 		}
 
-		if err := gormDB.FirstOrCreate(
-			&model.ExerciseEmbedding{ExerciseID: row.ID, Text: text, Embedding: pgvector.NewVector(vector)},
-			model.ExerciseEmbedding{ExerciseID: row.ID},
+		gormDB.Where("exercise_id = ?", row.ID).Delete(&model.ExerciseEmbedding{})
+		if err := gormDB.Create(
+			&model.ExerciseEmbedding{
+				ExerciseID: row.ID,
+				Text:       text,
+				Embedding:  pgvector.NewVector(vector)},
 		).Error; err != nil {
 			return err
 		}
 
-		// link exercise to equipment via many2many
 		if len(row.Equipment) > 0 {
 			var equipmentList []model.Equipment
 			if err := gormDB.Where("id IN ?", []string(row.Equipment)).Find(&equipmentList).Error; err != nil {
@@ -120,11 +121,12 @@ func bootstrapEquipment(gormDB *gorm.DB) error {
 	}
 
 	for _, row := range rows {
-		if err := gormDB.FirstOrCreate(&row, model.Equipment{ID: row.ID}).Error; err != nil {
+		if err := gormDB.Save(&row).Error; err != nil {
 			return err
 		}
 
-		// create one embedding per alias for multilingual matching
+		gormDB.Where("equipment_id = ?", row.ID).Delete(&model.EquipmentEmbedding{})
+
 		aliases := row.Aliases
 		if len(aliases) == 0 {
 			aliases = []string{row.ID}
@@ -135,11 +137,12 @@ func bootstrapEquipment(gormDB *gorm.DB) error {
 			if err != nil {
 				return err
 			}
-
-			if err := gormDB.FirstOrCreate(
-				&model.EquipmentEmbedding{EquipmentID: row.ID, Text: alias, Embedding: pgvector.NewVector(vector)},
-				model.EquipmentEmbedding{Text: alias},
-			).Error; err != nil {
+			if err := gormDB.Create(
+				&model.EquipmentEmbedding{
+					EquipmentID: row.ID,
+					Text:        alias,
+					Embedding:   pgvector.NewVector(vector),
+				}).Error; err != nil {
 				return err
 			}
 		}
@@ -160,14 +163,15 @@ func bootstrapModifiers(gormDB *gorm.DB) error {
 	}
 
 	for _, row := range rows {
-		if err := gormDB.FirstOrCreate(&row, model.Modifier{ID: row.ID}).Error; err != nil {
+		if err := gormDB.Save(&row).Error; err != nil {
 			return err
 		}
 
-		// create one embedding per alias for multilingual matching
+		gormDB.Where("modifier_id = ?", row.ID).Delete(&model.ModifierEmbedding{})
+
 		aliases := row.Aliases
 		if len(aliases) == 0 {
-			aliases = []string{row.ID} // fallback to ID if no aliases
+			aliases = []string{row.ID}
 		}
 
 		for _, alias := range aliases {
@@ -175,10 +179,11 @@ func bootstrapModifiers(gormDB *gorm.DB) error {
 			if err != nil {
 				return err
 			}
-
-			if err := gormDB.FirstOrCreate(
-				&model.ModifierEmbedding{ModifierID: row.ID, Text: alias, Embedding: pgvector.NewVector(vector)},
-				model.ModifierEmbedding{Text: alias},
+			if err := gormDB.Create(
+				&model.ModifierEmbedding{
+					ModifierID: row.ID,
+					Text:       alias,
+					Embedding:  pgvector.NewVector(vector)},
 			).Error; err != nil {
 				return err
 			}
@@ -187,6 +192,7 @@ func bootstrapModifiers(gormDB *gorm.DB) error {
 
 	return nil
 }
+
 func boostrapFacts(gormDB *gorm.DB) error {
 	bytes, err := os.ReadFile(filepath.Join("features", "facts.json"))
 	if err != nil {
@@ -200,7 +206,7 @@ func boostrapFacts(gormDB *gorm.DB) error {
 
 	for i := range rows {
 		row := &rows[i]
-		if err := gormDB.FirstOrCreate(row, model.Fact{Content: row.Content}).Error; err != nil {
+		if err := gormDB.Where("content = ?", row.Content).FirstOrCreate(row).Error; err != nil {
 			return err
 		}
 
@@ -210,9 +216,11 @@ func boostrapFacts(gormDB *gorm.DB) error {
 			return err
 		}
 
-		if err := gormDB.FirstOrCreate(
-			&model.FactEmbedding{FactID: row.ID, Text: text, Embedding: pgvector.NewVector(vector)},
-			model.FactEmbedding{FactID: row.ID},
+		gormDB.Where("fact_id = ?", row.ID).Delete(&model.FactEmbedding{})
+		if err := gormDB.Create(
+			&model.FactEmbedding{FactID: row.ID,
+				Text:      text,
+				Embedding: pgvector.NewVector(vector)},
 		).Error; err != nil {
 			return err
 		}

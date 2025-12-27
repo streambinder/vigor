@@ -11,12 +11,24 @@ import (
 	"gorm.io/datatypes"
 )
 
-const WeightActivityDurationPerRep = 3 // 3 seconds per rep
+const (
+	WeightActivityDurationPerRep = 3 // 3 seconds per rep
+)
 
 var (
 	ActivityWorkTypes     = []string{"cardio", "strength", "skill"}
 	ActivityWarmupTypes   = []string{"mobility", "skill", "cardio"}
 	ActivityCooldownTypes = []string{"flexibility", "cardio", "balance"}
+)
+
+// Valid activity feedback values
+const (
+	FeedbackTooEasy = "too_easy"
+	FeedbackEasy    = "easy"
+	FeedbackOk      = "ok"
+	FeedbackHard    = "hard"
+	FeedbackTooHard = "too_hard"
+	FeedbackSkipped = "skipped"
 )
 
 // JSONSchemaFormat defines the structure for OpenRouter's structured outputs
@@ -142,7 +154,7 @@ type Activity struct {
 	Modifiers pq.StringArray `gorm:"type:text[]" json:"modifiers" prompt:"Equipment modifiers applied (empty array if none)"`
 	Rest      int            `gorm:"not null" json:"rest" prompt:"Rest seconds after this activity"`
 	Detail    datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"`
-	Feedback  string         `json:"feedback" prompt:"-"`
+	Feedback  string         `json:"feedback" prompt:"-"` // too_easy, easy, ok, hard, too_hard, skipped
 
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
@@ -157,6 +169,11 @@ func (a *Activity) DetailType() string {
 		return ""
 	}
 	return detail.Type
+}
+
+// HasFeedback returns true if the activity has any feedback recorded.
+func (a *Activity) HasFeedback() bool {
+	return a.Feedback != ""
 }
 
 func (t Training) DaysSince() int {
@@ -215,6 +232,7 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 			for k := range clone.Routines[i].Blocks[j].Activities {
 				clone.Routines[i].Blocks[j].Activities[k].ID = ""
 				clone.Routines[i].Blocks[j].Activities[k].BlockID = ""
+				clone.Routines[i].Blocks[j].Activities[k].Feedback = ""
 				clone.Routines[i].Blocks[j].Activities[k].CreatedAt = time.Time{}
 				clone.Routines[i].Blocks[j].Activities[k].UpdatedAt = time.Time{}
 			}

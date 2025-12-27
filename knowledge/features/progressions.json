@@ -1,0 +1,166 @@
+[
+  {
+    "id": "horizontal_push",
+    "aliases": [
+      "horizontal push",
+      "pushing",
+      "push exercises",
+      "spinta orizzontale",
+      "empuje horizontal",
+      "poussée horizontale",
+      "horizontales Drücken",
+      "empurrar horizontal",
+      "горизонтальный жим"
+    ]
+  },
+  {
+    "id": "horizontal_pull",
+    "aliases": [
+      "horizontal pull",
+      "pulling",
+      "row exercises",
+      "tirata orizzontale",
+      "tirón horizontal",
+      "tirage horizontal",
+      "horizontales Ziehen",
+      "puxar horizontal",
+      "горизонтальная тяга"
+    ]
+  },
+  {
+    "id": "vertical_push",
+    "aliases": [
+      "vertical push",
+      "overhead press",
+      "shoulder press",
+      "spinta verticale",
+      "empuje vertical",
+      "poussée verticale",
+      "vertikales Drücken",
+      "empurrar vertical",
+      "вертикальный жим"
+    ]
+  },
+  {
+    "id": "vertical_pull",
+    "aliases": [
+      "vertical pull",
+      "pull-up",
+      "chin-up",
+      "tirata verticale",
+      "tirón vertical",
+      "tirage vertical",
+      "vertikales Ziehen",
+      "puxar vertical",
+      "вертикальная тяга"
+    ]
+  },
+  {
+    "id": "squat",
+    "aliases": [
+      "squat",
+      "squatting",
+      "knee dominant",
+      "squat",
+      "accosciata",
+      "sentadilla",
+      "squat",
+      "Kniebeuge",
+      "agachamento",
+      "присед"
+    ]
+  },
+  {
+    "id": "hinge",
+    "aliases": [
+      "hinge",
+      "hip hinge",
+      "hip dominant",
+      "deadlift pattern",
+      "cerniera",
+      "bisagra de cadera",
+      "charnière",
+      "Hüftbeugung",
+      "dobradiça",
+      "тяга"
+    ]
+  },
+  {
+    "id": "core",
+    "aliases": [
+      "core",
+      "trunk",
+      "abdominal",
+      "stability",
+      "core",
+      "addominali",
+      "core",
+      "tronco",
+      "tronc",
+      "Rumpf",
+      "core",
+      "кор"
+    ]
+  },
+  {
+    "id": "carry",
+    "aliases": [
+      "carry",
+      "loaded carry",
+      "farmer walk",
+      "trasporto",
+      "acarreo",
+      "portage",
+      "Tragen",
+      "transporte",
+      "перенос"
+    ]
+  },
+  {
+    "id": "cardio",
+    "aliases": [
+      "cardio",
+      "conditioning",
+      "endurance",
+      "aerobic",
+      "cardio",
+      "resistenza",
+      "cardio",
+      "resistencia",
+      "cardio",
+      "endurance",
+      "Ausdauer",
+      "cardio",
+      "кардио"
+    ]
+  },
+  {
+    "id": "mobility",
+    "aliases": [
+      "mobility",
+      "flexibility",
+      "stretching",
+      "range of motion",
+      "mobilità",
+      "movilidad",
+      "mobilité",
+      "Mobilität",
+      "mobilidade",
+      "мобильность"
+    ]
+  },
+  {
+    "id": "balance",
+    "aliases": [
+      "balance",
+      "stability",
+      "proprioception",
+      "equilibrio",
+      "equilibrio",
+      "équilibre",
+      "Gleichgewicht",
+      "equilíbrio",
+      "баланс"
+    ]
+  }
+]

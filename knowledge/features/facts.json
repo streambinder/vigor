@@ -98,13 +98,7 @@
   {
     "reference": "https://doi.org/10.1249/MSS.0000000000001434",
     "area": "recovery",
-    "tags": [
-      "stress management",
-      "cortisol",
-      "recovery",
-      "adaptation",
-      "HRV"
-    ],
+    "tags": ["stress management", "cortisol", "recovery", "adaptation", "HRV"],
     "content": "Life stress outside of training significantly impacts recovery, adaptation, and performance through multiple mechanisms including elevated cortisol, reduced sleep quality, suppressed immune function, and impaired motivation. High chronic stress can lead to overtraining-like symptoms even with moderate training loads. The body does not distinguish between training stress and life stress - total stress load determines recovery needs. Stress management strategies include adequate sleep (7-9 hours), meditation or mindfulness practices (10-20 minutes daily), regular low-intensity activity for stress reduction, social connection and support systems, time management, breathing exercises, and hobbies outside of training. Heart Rate Variability (HRV) monitoring can assess stress and recovery status."
   },
   {
@@ -191,12 +185,7 @@
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000001535",
     "area": "programming",
-    "tags": [
-      "novice",
-      "linear progression",
-      "technique",
-      "adaptation"
-    ],
+    "tags": ["novice", "linear progression", "technique", "adaptation"],
     "content": "Beginners (typically first 6-12 months of training) respond differently to training than advanced lifters. Novices experience rapid 'neural adaptations' before significant muscle growth occurs. Beginners can add weight nearly every session (linear progression) using simple programs focused on compound movements. Training frequency of 3-4 days per week with full-body or upper/lower splits is ideal. Volume should be modest (3-5 sets per exercise). Technique development is the primary focus."
   },
   {
@@ -213,22 +202,13 @@
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000001942",
     "area": "programming",
-    "tags": [
-      "older adults",
-      "sarcopenia",
-      "bone density",
-      "longevity"
-    ],
+    "tags": ["older adults", "sarcopenia", "bone density", "longevity"],
     "content": "Resistance training becomes increasingly important with age to combat sarcopenia (age-related muscle loss), maintain bone density, preserve metabolic health, and maintain functional independence. Adults over 40 lose approximately 3-8% of muscle mass per decade without resistance training. Programming considerations for older adults: emphasize proper warm-up, potentially use slightly higher rep ranges (8-15), prioritize technique over heavy loads, allow longer recovery, and include balance work."
   },
   {
     "reference": "https://doi.org/10.1519/SSC.0000000000000200",
     "area": "programming",
-    "tags": [
-      "female athletes",
-      "strength training",
-      "body composition"
-    ],
+    "tags": ["female athletes", "strength training", "body composition"],
     "content": "Women respond similarly to resistance training as men in terms of relative strength gains and hypertrophy, though absolute levels differ. Women may have slightly higher endurance capacity and recovery ability in certain contexts. Common mistakes include avoiding heavy weights (women benefit from loading across all rep ranges including 1-5 reps) and excessive focus on lower body at expense of upper body development. Protein needs are similar by body weight."
   },
   {
@@ -256,12 +236,7 @@
   {
     "reference": "https://doi.org/10.1519/SSC.0000000000000296",
     "area": "programming",
-    "tags": [
-      "core training",
-      "core stability",
-      "abdominals",
-      "anti-movement"
-    ],
+    "tags": ["core training", "core stability", "abdominals", "anti-movement"],
     "content": "Effective core training emphasizes anti-movement patterns: anti-extension (resisting lumbar extension with planks, ab wheel rollouts), anti-lateral flexion (side planks, suitcase carries), and anti-rotation (Pallof presses, single-arm carries). These are more functional and safer than traditional sit-ups or crunches. Direct core work 2-3 times per week is beneficial, though compound lifts provide significant core strengthening. Strong core improves force transfer, reduces injury risk, and enhances performance."
   },
   {
@@ -324,12 +299,7 @@
   {
     "reference": "https://doi.org/10.1093/ajcn/87.5.1558S",
     "area": "nutrition",
-    "tags": [
-      "fats",
-      "hormones",
-      "testosterone",
-      "essential fatty acids"
-    ],
+    "tags": ["fats", "hormones", "testosterone", "essential fatty acids"],
     "content": "Dietary fat is essential for hormone production, including testosterone and growth hormone. Minimum fat intake should be 20-35% of total calories, with at least 0.5-1 g/kg body weight to maintain hormonal health. Very low fat diets (below 15% of calories) can suppress testosterone production by up to 10-15%. Omega-3 fatty acids (EPA and DHA) have anti-inflammatory properties that may aid recovery, with 1-3g/day being beneficial for athletes. Balance omega-6 to omega-3 ratio (ideally 4:1 or lower)."
   },
   {
@@ -346,226 +316,121 @@
   {
     "reference": "https://doi.org/10.1186/s12970-018-0215-1",
     "area": "nutrition",
-    "tags": [
-      "caloric surplus",
-      "bulking",
-      "muscle gain",
-      "fat gain"
-    ],
+    "tags": ["caloric surplus", "bulking", "muscle gain", "fat gain"],
     "content": "To build muscle, a caloric surplus is generally required. A moderate surplus of 200-500 calories above maintenance (approximately 10-20% surplus) maximizes muscle gain while minimizing fat accumulation. This typically results in 0.5-1.0% body weight gain per month for intermediate lifters. Larger surpluses (500-1000+ calories) lead to excessive fat gain. The surplus should come primarily from carbohydrates and protein. Track weight weekly and adjust calories based on rate of gain."
   },
   {
     "reference": "https://doi.org/10.1186/s12970-017-0174-y",
     "area": "nutrition",
-    "tags": [
-      "caloric deficit",
-      "cutting",
-      "fat loss",
-      "muscle preservation"
-    ],
+    "tags": ["caloric deficit", "cutting", "fat loss", "muscle preservation"],
     "content": "Fat loss requires a caloric deficit. A moderate deficit of 300-500 calories below maintenance (approximately 15-25% deficit) allows for fat loss of 0.5-1.0% body weight per week while maintaining strength and muscle. During a cut, protein intake should increase to 2.0-2.4 g/kg body weight to preserve muscle mass. Resistance training volume should be maintained or slightly reduced, while intensity should be preserved. Diet breaks (1-2 weeks at maintenance) every 8-12 weeks can help restore metabolic rate and improve adherence."
   },
   {
     "reference": "https://doi.org/10.1186/s12970-018-0242-y",
     "area": "nutrition",
-    "tags": [
-      "creatine",
-      "strength",
-      "power",
-      "muscle mass",
-      "performance"
-    ],
+    "tags": ["creatine", "strength", "power", "muscle mass", "performance"],
     "content": "Creatine monohydrate is the most extensively researched and effective supplement for increasing strength, power, and muscle mass. It works by increasing phosphocreatine stores in muscles, allowing for enhanced ATP regeneration during high-intensity efforts. Benefits include 5-15% increases in strength and power, 1-2 kg lean mass gains, and improved high-intensity exercise capacity. The standard protocol is 3-5g daily, taken at any time with or without food. Creatine is safe for healthy individuals with no significant side effects beyond possible minor water retention."
   },
   {
     "reference": "https://doi.org/10.1186/s12970-016-0142-y",
     "area": "nutrition",
-    "tags": [
-      "caffeine",
-      "performance",
-      "endurance",
-      "focus",
-      "ergogenic"
-    ],
+    "tags": ["caffeine", "performance", "endurance", "focus", "ergogenic"],
     "content": "Caffeine is a potent ergogenic aid that enhances both endurance and strength performance through central nervous system stimulation. Benefits include reduced perception of effort, increased alertness and focus, enhanced fat oxidation, and 3-7% increases in power output. Effective dosing is 3-6 mg/kg body weight (approximately 200-400mg for most people) consumed 30-60 minutes before exercise. Regular caffeine users develop tolerance, so cycling use may optimize benefits. Avoid caffeine within 6 hours of bedtime."
   },
   {
     "reference": "https://doi.org/10.1186/s12970-017-0173-z",
     "area": "nutrition",
-    "tags": [
-      "beta-alanine",
-      "carnosine",
-      "endurance",
-      "buffering"
-    ],
+    "tags": ["beta-alanine", "carnosine", "endurance", "buffering"],
     "content": "Beta-alanine is a non-essential amino acid that combines with histidine to form carnosine, which acts as an intramuscular buffer against acid accumulation. Supplementation increases muscle carnosine levels by 40-80%, improving performance in activities lasting 1-4 minutes. Effective dosing is 3-6g daily, split into doses of 1.5-2g to minimize harmless tingling. Effects require consistent supplementation for 2-4 weeks to increase carnosine levels. Combining with creatine may provide additive benefits."
   },
   {
     "reference": "https://doi.org/10.1123/ijsnem.2018-0088",
     "area": "nutrition",
-    "tags": [
-      "vitamin D",
-      "bone health",
-      "testosterone",
-      "immune function"
-    ],
+    "tags": ["vitamin D", "bone health", "testosterone", "immune function"],
     "content": "Vitamin D is crucial for bone health, immune function, testosterone production, and muscle function. Many individuals are deficient (below 30 ng/mL). Optimal levels for athletes are 40-60 ng/mL. Supplementation with vitamin D3 is more effective than D2. Dosing typically ranges from 1000-4000 IU daily. Vitamin D is fat-soluble and best absorbed with meals containing fat. Testing blood levels is recommended to establish baseline and adjust dosing."
   },
   {
     "reference": "https://doi.org/10.3390/nu8040232",
     "area": "nutrition",
-    "tags": [
-      "omega-3",
-      "fish oil",
-      "inflammation",
-      "recovery",
-      "joint health"
-    ],
+    "tags": ["omega-3", "fish oil", "inflammation", "recovery", "joint health"],
     "content": "Omega-3 fatty acids (EPA and DHA) have anti-inflammatory properties that benefit athletes through enhanced recovery, reduced muscle soreness, and improved joint health. Effective dosing is 2-3g combined EPA and DHA daily. Benefits include reduced delayed onset muscle soreness (DOMS), improved muscle protein synthesis response, and better cardiovascular health markers. Quality matters: choose supplements tested for purity with third-party certification. Vegan alternatives include algae-based EPA/DHA supplements."
   },
   {
     "reference": "https://doi.org/10.1186/s12970-015-0082-9",
     "area": "nutrition",
-    "tags": [
-      "micronutrients",
-      "vitamins",
-      "minerals",
-      "deficiency"
-    ],
+    "tags": ["micronutrients", "vitamins", "minerals", "deficiency"],
     "content": "Micronutrients are essential for energy production, recovery, immune function, and performance. Common deficiencies in athletes include iron (especially females and vegetarians), magnesium, zinc, vitamin D, and B vitamins. Best approach is obtaining micronutrients from varied, whole food diet. Supplementation should be targeted based on dietary assessment or blood testing. Magnesium (300-400mg) and zinc (15-30mg) supplementation may benefit athletes with high sweat losses. Antioxidant megadosing may actually blunt training adaptations."
   },
   {
     "reference": "https://doi.org/10.1186/s12970-014-0064-5",
     "area": "nutrition",
-    "tags": [
-      "alcohol",
-      "recovery",
-      "muscle protein synthesis",
-      "performance"
-    ],
+    "tags": ["alcohol", "recovery", "muscle protein synthesis", "performance"],
     "content": "Alcohol consumption can negatively impact training adaptations. Acute effects include impaired muscle protein synthesis (reductions of 15-25% when consumed post-workout in moderate to high amounts), disrupted sleep architecture, dehydration, and reduced glycogen resynthesis. The dose matters: small amounts (1-2 drinks occasionally) likely have minimal impact, while binge drinking significantly impairs progress. Timing matters: alcohol post-workout is particularly detrimental. Complete abstinence is optimal for maximizing training adaptations but not necessary for recreational lifters."
   },
   {
     "reference": "https://doi.org/10.1249/MSS.0000000000001764",
     "area": "nutrition",
-    "tags": [
-      "micronutrients",
-      "vegetables",
-      "fruits",
-      "fiber",
-      "antioxidants"
-    ],
+    "tags": ["micronutrients", "vegetables", "fruits", "fiber", "antioxidants"],
     "content": "Micronutrient-dense whole foods are crucial for health, recovery, and optimal performance. Vegetables and fruits provide vitamins, minerals, fiber, phytonutrients, and antioxidants. Recommendations: consume 3-5 servings of vegetables and 2-3 servings of fruit daily, prioritizing variety and color. Fiber intake of 25-35g daily supports digestive health. Dark leafy greens provide iron, calcium, vitamins. Berries are rich in antioxidants. Cruciferous vegetables contain compounds supporting hormonal health."
   },
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000001857",
     "area": "nutrition",
-    "tags": [
-      "meal frequency",
-      "intermittent fasting",
-      "feeding window"
-    ],
+    "tags": ["meal frequency", "intermittent fasting", "feeding window"],
     "content": "Total daily intake matters more than specific meal timing for most outcomes. Protein distribution across 3-6 meals optimizes muscle protein synthesis. Intermittent fasting can be effective for fat loss through caloric restriction but offers no metabolic advantage when calories are matched. IF may impair muscle gain if it limits total protein intake or forces training in fasted states. For those prioritizing muscle gain, distributing protein across the day (every 3-5 hours) is generally superior to prolonged fasting periods."
   },
   {
     "reference": "https://doi.org/10.1007/s40279-018-0860-1",
     "area": "nutrition",
-    "tags": [
-      "sodium",
-      "salt",
-      "performance",
-      "hydration",
-      "electrolytes"
-    ],
+    "tags": ["sodium", "salt", "performance", "hydration", "electrolytes"],
     "content": "Sodium is essential for fluid balance, nerve function, and muscle contraction. For athletes with high sweat rates or training in hot conditions, sodium needs may be higher than general population recommendations. Sodium losses through sweat can range from 200-2000+ mg per hour. Athletes may benefit from 3000-5000+ mg daily depending on sweat losses. Pre-loading sodium before long endurance events (500-1000mg 2-3 hours before) can enhance fluid retention and performance."
   },
   {
     "reference": "https://doi.org/10.3389/fphys.2018.01783",
     "area": "nutrition",
-    "tags": [
-      "gut health",
-      "microbiome",
-      "probiotics",
-      "prebiotics"
-    ],
+    "tags": ["gut health", "microbiome", "probiotics", "prebiotics"],
     "content": "Gut health and the microbiome influence digestion, nutrient absorption, immune function, inflammation, and even training adaptations. Strategies to support gut health: consume adequate fiber (25-35g daily) from varied sources, include fermented foods containing probiotics, consume prebiotic foods (garlic, onions, asparagus, bananas), limit excessive processed foods and artificial sweeteners, and manage stress. Poor gut health can impair nutrient absorption, increase inflammation, and compromise immune function."
   },
   {
     "reference": "https://doi.org/10.1186/s12970-019-0281-8",
     "area": "nutrition",
-    "tags": [
-      "ketogenic diet",
-      "low-carb",
-      "fat adaptation",
-      "performance"
-    ],
+    "tags": ["ketogenic diet", "low-carb", "fat adaptation", "performance"],
     "content": "Ketogenic diets (very low carbohydrate <50g/day, high fat >70% calories) induce ketosis where the body primarily uses fat and ketones for fuel. May support fat loss but no metabolic advantage when calories matched. Can impair high-intensity performance (>75% VO2 max) due to reduced glycogen availability. Likely suboptimal for strength and muscle gain compared to higher carbohydrate approaches. Generally not optimal for maximizing athletic performance or muscle gain. Cyclical ketogenic approaches may mitigate some performance drawbacks."
   },
   {
     "reference": "https://doi.org/10.1016/j.clnu.2018.11.022",
     "area": "nutrition",
-    "tags": [
-      "vegan",
-      "vegetarian",
-      "plant-based",
-      "protein",
-      "nutrients"
-    ],
+    "tags": ["vegan", "vegetarian", "plant-based", "protein", "nutrients"],
     "content": "Plant-based diets can fully support athletic performance when properly planned. Plant proteins require slightly higher total intake (1.8-2.4 g/kg) and strategic combining of sources (legumes + grains) to ensure complete amino acid profiles. Potential deficiencies to address: Vitamin B12 (supplement 500-1000 mcg daily), iron (consume with vitamin C), omega-3 (algae supplements), zinc, vitamin D, and calcium. Creatine supplementation particularly beneficial for vegetarians/vegans who have lower baseline muscle creatine."
   },
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000002133",
     "area": "technique",
-    "tags": [
-      "eccentric training",
-      "muscle damage",
-      "hypertrophy",
-      "tempo"
-    ],
+    "tags": ["eccentric training", "muscle damage", "hypertrophy", "tempo"],
     "content": "The eccentric (lowering) phase produces greater muscle damage and mechanical tension than concentric contractions. Eccentric training can produce strength gains of 10-15% greater than concentric-only training. Controlled eccentric phases (2-4 seconds) maximize time under tension and muscle growth stimulus. Eccentric-emphasized training causes more delayed onset muscle soreness (DOMS) and requires longer recovery. For most lifters, emphasizing the eccentric phase with controlled tempo provides excellent stimulus with manageable recovery demands."
   },
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000001413",
     "area": "technique",
-    "tags": [
-      "range of motion",
-      "ROM",
-      "muscle growth",
-      "joint health"
-    ],
+    "tags": ["range of motion", "ROM", "muscle growth", "joint health"],
     "content": "Training through full range of motion (ROM) is generally superior for muscle development compared to partial ROM. Full ROM exercises produce greater muscle activation across more of the muscle length. Full ROM training also maintains and improves joint mobility and flexibility. However, partial ROM has specific applications: allows heavier loads for specific positions, can work around injuries or mobility limitations. Deep squats build more complete leg development than half squats."
   },
   {
     "reference": "https://doi.org/10.1007/s40279-016-0486-0",
     "area": "technique",
-    "tags": [
-      "technique",
-      "form",
-      "injury risk",
-      "biomechanics"
-    ],
+    "tags": ["technique", "form", "injury risk", "biomechanics"],
     "content": "Proper exercise technique is crucial for maximizing results and minimizing injury risk. Key principles: maintaining neutral spine position, controlling weight through full range of motion, keeping joints aligned, breathing properly, and using appropriate loads. Common technique errors: excessive spinal rounding in deadlifts, knees caving inward in squats, bouncing weights off chest in bench press. Video analysis can help identify form issues. If form breaks down during a set, the set should be terminated. Ego lifting is a primary cause of injuries."
   },
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000001952",
     "area": "injury",
-    "tags": [
-      "warm-up",
-      "dynamic stretching",
-      "performance",
-      "injury risk"
-    ],
+    "tags": ["warm-up", "dynamic stretching", "performance", "injury risk"],
     "content": "A proper warm-up reduces injury risk and improves performance by increasing muscle temperature, joint fluid viscosity, nerve conduction velocity, and range of motion. An effective warm-up includes: 5-10 minutes of general aerobic activity, dynamic stretching and mobility drills specific to the upcoming workout, and specific warm-up sets with progressively heavier loads. Static stretching before strength training may temporarily reduce force production. Warm-up needs increase with age, in cold environments, and for heavy compound lifts."
   },
   {
     "reference": "https://doi.org/10.1007/s40279-015-0365-0",
     "area": "injury",
-    "tags": [
-      "overtraining",
-      "overreaching",
-      "fatigue management",
-      "recovery"
-    ],
+    "tags": ["overtraining", "overreaching", "fatigue management", "recovery"],
     "content": "Overtraining syndrome (OTS) results from chronic training stress without adequate recovery, leading to decreased performance, persistent fatigue, mood disturbances, elevated resting heart rate, and sleep disruption. Warning signs include persistent muscle soreness, declining performance despite training, loss of motivation, irritability, and elevated morning resting heart rate (5-10 bpm above baseline). Prevention strategies: implement proper periodization with deload weeks, monitor training volume and intensity, ensure adequate sleep (7-9 hours), maintain proper nutrition, manage life stress, and track recovery markers."
   },
   {
@@ -582,12 +447,7 @@
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000000375",
     "area": "mobility",
-    "tags": [
-      "flexibility",
-      "stretching",
-      "injury prevention",
-      "performance"
-    ],
+    "tags": ["flexibility", "stretching", "injury prevention", "performance"],
     "content": "Flexibility is passive range of motion, while mobility is active range of motion with control. Both are important for injury prevention, exercise technique, and performance. Static stretching (holding stretches for 30-60 seconds) is effective for improving flexibility when performed regularly, ideally after workouts. Each major muscle group should be stretched 2-3 times per week. Dynamic mobility work involves moving through ranges of motion actively and is better suited for warm-ups. Adequate mobility in hips, ankles, thoracic spine, and shoulders is particularly important for compound lifts."
   },
   {
@@ -615,23 +475,13 @@
   {
     "reference": "https://doi.org/10.1249/MSS.0000000000000901",
     "area": "performance",
-    "tags": [
-      "LISS",
-      "steady-state cardio",
-      "aerobic base",
-      "fat oxidation"
-    ],
+    "tags": ["LISS", "steady-state cardio", "aerobic base", "fat oxidation"],
     "content": "Low-Intensity Steady State (LISS) cardio involves maintaining a consistent, moderate pace (50-70% max heart rate) for extended periods (30-60+ minutes). LISS builds aerobic base, improves cardiovascular health, enhances recovery capacity, and increases mitochondrial density without significantly interfering with strength adaptations. LISS is less fatiguing than HIIT and can be performed more frequently (daily if desired) without compromising recovery from resistance training. While HIIT is more time-efficient, LISS has lower injury risk and better adherence."
   },
   {
     "reference": "https://doi.org/10.1080/02640414.2017.1389895",
     "area": "psychology",
-    "tags": [
-      "mindset",
-      "motivation",
-      "adherence",
-      "goal setting"
-    ],
+    "tags": ["mindset", "motivation", "adherence", "goal setting"],
     "content": "Mental approach and psychology significantly impact training success and adherence. Key principles: Set specific, measurable, achievable, relevant, time-bound (SMART) goals with both process goals and outcome goals. Focus on intrinsic motivation (training for personal growth, health, enjoyment) over extrinsic motivation for better long-term adherence. Embrace progressive improvement over perfection - consistency beats intensity. Build sustainable habits rather than relying on motivation which fluctuates. Practice self-compassion when setbacks occur. Tracking training provides objective feedback and motivation."
   },
   {
@@ -648,24 +498,13 @@
   {
     "reference": "https://doi.org/10.1007/s40279-019-01126-9",
     "area": "physiology",
-    "tags": [
-      "menstrual cycle",
-      "hormones",
-      "training adaptation",
-      "nutrition"
-    ],
+    "tags": ["menstrual cycle", "hormones", "training adaptation", "nutrition"],
     "content": "The menstrual cycle significantly influences physiology, though individual responses vary widely. Follicular phase (days 1-14): estrogen rises, generally favorable for training - strength, power, and recovery may be enhanced. Luteal phase (days 15-28): progesterone rises, metabolic rate increases slightly (50-100 calories/day higher), may experience water retention, increased inflammation, reduced insulin sensitivity. Some women benefit from emphasizing high-intensity training during follicular phase and higher volume during luteal phase. Luteal phase may require slightly higher calories and carbohydrates. Iron needs are higher due to menstrual losses."
   },
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000001952",
     "area": "biomechanics",
-    "tags": [
-      "squat",
-      "depth",
-      "bar position",
-      "joint mechanics",
-      "technique"
-    ],
+    "tags": ["squat", "depth", "bar position", "joint mechanics", "technique"],
     "content": "Squat biomechanics vary significantly based on bar position, stance width, and depth. High-bar squats (bar on upper traps) result in more upright torso and greater quadriceps activation, while low-bar squats (bar on posterior deltoids) allow more forward lean and greater posterior chain involvement. Full-depth squats (hip crease below knee) provide superior muscle development compared to partial squats but require adequate mobility. Knee valgus (knees caving inward) is a common fault that increases injury risk and should be corrected through cueing and strengthening hip abductors. Individual anatomy (femur length, hip socket depth, ankle mobility) significantly affects optimal squat form, meaning technique must be individualized rather than rigidly standardized."
   },
   {
@@ -707,13 +546,7 @@
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000001911",
     "area": "biomechanics",
-    "tags": [
-      "bench press",
-      "technique",
-      "shoulder",
-      "arch",
-      "leg drive"
-    ],
+    "tags": ["bench press", "technique", "shoulder", "arch", "leg drive"],
     "content": "Bench press biomechanics optimize force production while minimizing shoulder injury risk. Proper technique includes: scapular retraction and depression (shoulder blades pulled together and down), moderate arch in thoracic spine (not excessive lumbar arch), feet firmly planted with leg drive contributing to stability and force production, and bar path that is slightly diagonal from lower chest to over shoulders. Grip width affects muscle emphasis: wider grips (1.5-2x shoulder width) emphasize pectorals but increase shoulder strain, while narrower grips reduce shoulder stress and increase triceps involvement. The bar should touch the chest between nipples and sternum, not at the clavicle. Elbow angle relative to torso should be 45-70 degrees, not 90 degrees which creates excessive shoulder strain. Lifters with shoulder issues may benefit from narrower grip, reduced range of motion, or switching to dumbbell variations."
   },
   {
@@ -730,13 +563,7 @@
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000002095",
     "area": "biomechanics",
-    "tags": [
-      "rowing",
-      "back",
-      "scapular mechanics",
-      "pulling",
-      "posture"
-    ],
+    "tags": ["rowing", "back", "scapular mechanics", "pulling", "posture"],
     "content": "Rowing exercise biomechanics emphasize scapular control and proper sequencing for optimal back development and shoulder health. Proper rowing technique involves: initiation with scapular retraction (shoulder blades pulled together), followed by elbow flexion to complete the pull, maintaining neutral spine throughout (avoiding excessive extension or rotation), and controlling the eccentric phase with scapular protraction. Common errors include: excessive momentum and body swing, incomplete scapular retraction limiting mid-back activation, shoulder elevation (shrugging) during the pull, and excessive spinal extension attempting to achieve full contraction. Horizontal rows (cable rows, barbell rows, dumbbell rows) emphasize mid-back thickness, while vertical pulls (pull-ups, lat pulldowns) emphasize lat width. Elbow position affects muscle emphasis: elbows closer to body target lower lats and teres, while wider elbows emphasize upper back. Chin height in rows should be determined by maintaining shoulder health, not forcing chest contact with excessive extension."
   },
   {
@@ -802,25 +629,13 @@
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000002053",
     "area": "assessment",
-    "tags": [
-      "RPE",
-      "RIR",
-      "autoregulation",
-      "effort",
-      "intensity"
-    ],
+    "tags": ["RPE", "RIR", "autoregulation", "effort", "intensity"],
     "content": "Rating of Perceived Exertion (RPE) and Repetitions in Reserve (RIR) provide subjective but effective methods for autoregulating training intensity. The RPE scale for resistance training typically uses 1-10: RPE 10 = maximal effort, couldn't do another rep, RPE 9.5 = could maybe do one more rep with perfect form, RPE 9 = one rep definitely left in reserve (RIR 1), RPE 8 = two reps in reserve (RIR 2), RPE 7 = three reps in reserve (RIR 3), and so forth. Research shows experienced lifters can accurately estimate RIR within 1-2 reps on most exercises, while beginners require 6-12 weeks of practice to develop accuracy. RPE/RIR advantages: allows daily autoregulation based on readiness, requires no equipment, accounts for factors affecting strength (sleep, stress, nutrition), and prevents excessive fatigue accumulation. For hypertrophy, most sets should be RPE 7-9 (RIR 1-3), very close to or at failure. For strength, RPE 7-9.5 (RIR 0.5-3) depending on exercise and training phase. For power development, RPE 6-7.5 (RIR 2.5-4) maintaining high bar velocity. Combining RPE/RIR with objective metrics (load, velocity, volume) provides comprehensive training monitoring."
   },
   {
     "reference": "https://doi.org/10.1519/R-16854.1",
     "area": "equipment",
-    "tags": [
-      "equipment",
-      "free weights",
-      "machines",
-      "bands",
-      "selection"
-    ],
+    "tags": ["equipment", "free weights", "machines", "bands", "selection"],
     "content": "Different resistance training equipment offers distinct advantages and applications. Free weights (barbells, dumbbells) require greater stabilizer muscle activation, develop coordination and balance, allow natural movement paths, and transfer better to functional tasks and sports. However, they have steeper learning curves and higher injury risk with poor technique. Machines provide fixed movement paths reducing injury risk, allow training to failure more safely, isolate specific muscles effectively, and are more user-friendly for beginners. However, they provide less functional carryover and limited stabilizer development. Resistance bands and elastic resistance create accommodating resistance (increasing tension through range of motion), are portable and inexpensive, provide constant tension without gravity dependence, and are useful for rehabilitation and warm-ups. However, they provide less absolute loading for strength development. Optimal programming includes primarily free weights for compound movements (60-75% of exercises), machines for isolation work and when training to failure (20-30%), and bands for warm-ups, finishers, and accessory work (10-15%). Exercise selection should match training goals: strength and power favor free weights, hypertrophy can use all modalities, and rehabilitation/injury prevention often emphasizes bands and cable machines."
   },
   {
@@ -838,12 +653,7 @@
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000001763",
     "area": "equipment",
-    "tags": [
-      "equipment safety",
-      "technique",
-      "setup",
-      "maintenance"
-    ],
+    "tags": ["equipment safety", "technique", "setup", "maintenance"],
     "content": "Proper equipment setup, use, and maintenance are critical for safety and effectiveness. Barbell training setup: ensure collars are secured on all loaded barbells, check that weight is evenly distributed on both sides, verify equipment weight ratings for heavy loads, and use safety equipment (squat rack safety bars, spotter arms) appropriately. Machine usage: adjust seat height, back pads, and range limiters to match individual anthropometry, start with light weight to verify proper setup and movement path, and ensure all adjustment pins are fully inserted and locked. General safety practices: inspect equipment before use for damage (frayed cables, loose bolts, cracked plates), maintain clear training space free of tripping hazards, use appropriate footwear with stable soles (avoid running shoes for heavy lifting), and employ spotters for exercises where failure could be dangerous (bench press, squats). Equipment maintenance extends lifespan and prevents injury: wipe down equipment after use preventing corrosion, periodically check and tighten bolts on machines and racks, inspect cables and pulleys for wear, and replace damaged equipment promptly. Home gym considerations: ensure flooring can support heavy weights, bolt racks and heavy equipment to floor or wall, and invest in quality essentials (barbell, rack, bench) rather than many low-quality items."
   },
   {
@@ -1050,13 +860,7 @@
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000002095",
     "area": "performance",
-    "tags": [
-      "music",
-      "motivation",
-      "performance",
-      "preference",
-      "ergogenic"
-    ],
+    "tags": ["music", "motivation", "performance", "preference", "ergogenic"],
     "content": "Music during resistance training provides ergogenic benefits including improved motivation, reduced perceived exertion, and enhanced performance. Research shows listening to preferred music can increase: power output and bar velocity by 3-7%, total repetitions to failure by 5-10%, motivation and enjoyment of training, and strength-endurance through reduced perception of effort. Music preference matters significantly - self-selected music produces greater performance benefits than researcher-selected or non-preferred music. Mechanisms: music provides dissociative distraction from discomfort and fatigue, enhances arousal and motivation through tempo and lyrical content, entrains movement rhythm potentially improving coordination, and creates positive emotional state improving pain tolerance. Practical applications: use preferred high-tempo music (120-140 bpm) during warm-up and working sets, select music with motivating lyrics or personal significance, consider pre-exercise music listening (5-10 minutes before training) to enhance arousal and focus, use music during rest periods (respite music) to maintain motivation between sets, and individual preferences vary - experiment with different genres, tempos, and timing. Some individuals perform better in quiet environments where they can focus on internal cues, while others benefit from loud, high-energy music. Training in commercial gyms with background music may provide some benefit, but personal music via headphones allows optimization of selection and volume. For maximal effort sets (1-3 reps), some lifters prefer silence for intense focus, while others benefit from arousing music. Athletes should test music strategies in training before using in competition environments."
   },
   {

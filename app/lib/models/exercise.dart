@@ -21,6 +21,8 @@ class Exercise {
   final String reference;
   @JsonKey(name: 'instructions', defaultValue: const [])
   final List<String> instructions;
+  @JsonKey(name: 'progressions')
+  final Map<String, dynamic> progressions;
 
   Exercise({
     required this.id,
@@ -30,6 +32,7 @@ class Exercise {
     required this.muscles,
     required this.reference,
     required this.instructions,
+    required this.progressions,
   });
 
   factory Exercise.fromJson(Map<String, dynamic> json) => _$ExerciseFromJson(json);

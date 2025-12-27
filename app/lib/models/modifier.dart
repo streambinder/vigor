@@ -13,11 +13,17 @@ class Modifier {
   final List<String> patterns;
   @JsonKey(name: 'aliases')
   final List<String>? aliases;
+  @JsonKey(name: 'progression_impact')
+  final double progressionImpact;
+  @JsonKey(name: 'is_weighted')
+  final bool isWeighted;
 
   Modifier({
     required this.id,
     required this.patterns,
     this.aliases,
+    required this.progressionImpact,
+    required this.isWeighted,
   });
 
   factory Modifier.fromJson(Map<String, dynamic> json) => _$ModifierFromJson(json);

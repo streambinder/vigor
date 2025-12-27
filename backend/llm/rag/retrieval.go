@@ -2,7 +2,9 @@ package rag
 
 import (
 	"fmt"
+	"math"
 	"strings"
+	"time"
 
 	"github.com/pgvector/pgvector-go"
 	"github.com/rs/zerolog/log"
@@ -12,17 +14,40 @@ import (
 )
 
 const (
-	MaxWorkExercises     = 30  // RAG-based retrieval for main training
-	MaxWarmupExercises   = 8   // random selection for warmup
-	MaxCooldownExercises = 5   // random selection for cooldown
-	MaxPromptFacts       = 5
-	MaxFactDistance      = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
-	MaxExerciseDistance = 0.2 // Maximum cosine distance for exercise matching
+	MaxWorkExercises        = 30 // RAG-based retrieval for main training
+	MaxWarmupExercises      = 8  // random selection for warmup
+	MaxCooldownExercises    = 5  // random selection for cooldown
+	MaxPromptFacts          = 5
+	MaxFactDistance         = 0.7  // Maximum cosine distance for facts (0=identical, 2=opposite)
+	MaxExerciseDistance     = 0.2  // Maximum cosine distance for exercise matching
+	DefaultCapabilityMargin = 15.0 // Default margin for capability filtering (allows slight progression)
+	CapabilityHalfLife      = 30.0 // days after which capability decays to 50%
+	MinCapabilityRetention  = 0.3  // minimum fraction of capability retained (floor)
 )
 
 // RetrieveWorkExercises retrieves exercises for the main training phase via RAG.
-// Filters by work types (cardio, strength, skill) and user equipment.
-func RetrieveWorkExercises(profiles []model.Profile, equipment []string) ([]model.Exercise, error) {
+// Filters by work types (cardio, strength, skill), user equipment, and user capability.
+// The history parameter is used to compute user capability per movement family.
+func RetrieveWorkExercises(profiles []model.Profile, equipment []string, history []model.Training) ([]model.Exercise, error) {
+	var allExercises []model.Exercise
+	if err := database.Knowledge.Find(&allExercises).Error; err != nil {
+		return nil, fmt.Errorf("failed to load exercises: %w", err)
+	}
+	exerciseMap := make(map[string]*model.Exercise, len(allExercises))
+	for i := range allExercises {
+		exerciseMap[allExercises[i].ID] = &allExercises[i]
+	}
+
+	var allModifiers []model.Modifier
+	if err := database.Knowledge.Find(&allModifiers).Error; err != nil {
+		return nil, fmt.Errorf("failed to load modifiers: %w", err)
+	}
+	modifierMap := make(map[string]*model.Modifier, len(allModifiers))
+	for i := range allModifiers {
+		modifierMap[allModifiers[i].ID] = &allModifiers[i]
+	}
+
+	capabilities := capabilities(history, exerciseMap, modifierMap)
 	embeddingText := GenUserExercises(profiles, equipment)
 	exerciseEmbedding, err := embedding.GenVector(embeddingText)
 	if err != nil {
@@ -35,7 +60,6 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string) ([]mode
 		Distance   float64
 		Exercise   model.Exercise `gorm:"embedded"`
 	}
-
 	// Single query with joins:
 	// 1. Start from exercise_embeddings (for ordering by similarity)
 	// 2. Join to exercises
@@ -83,7 +107,7 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string) ([]mode
 	if err := database.Knowledge.
 		Table("(?) AS pool", query.Order("has_equipment DESC, distance ASC").Limit(MaxWorkExercises*3)).
 		Order("RANDOM()").
-		Limit(MaxWorkExercises).
+		Limit(MaxWorkExercises * 3). // get more candidates for capability filtering
 		Scan(&results).
 		Error; err != nil {
 		return nil, fmt.Errorf("failed to execute similarity search: %w", err)
@@ -94,7 +118,7 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string) ([]mode
 		exercises = append(exercises, result.Exercise)
 	}
 
-	return exercises, nil
+	return filterByCapability(exercises, capabilities), nil
 }
 
 // QueryUserFacts retrieves facts relevant to the users' profiles and prompt.
@@ -278,4 +302,116 @@ func RetrieveFavoriteExercises(favorites []string) ([]model.Exercise, error) {
 		exercises = append(exercises, result.Exercise)
 	}
 	return exercises, nil
+}
+
+func capabilities(history []model.Training, exercises map[string]*model.Exercise, modifiers map[string]*model.Modifier) map[string]float64 {
+	type capRecord struct {
+		value       float64
+		completedAt time.Time
+	}
+	records := make(map[string]capRecord)
+
+	for _, training := range history {
+		completedAt := training.CreatedAt
+		if training.CompletedAt != nil {
+			completedAt = *training.CompletedAt
+		}
+
+		for _, activity := range training.Activities() {
+			// only count successful completions for capability
+			feedback := activity.Feedback
+			if feedback == model.FeedbackHard || feedback == model.FeedbackTooHard || feedback == model.FeedbackSkipped {
+				continue
+			}
+
+			exercise := exercises[activity.Name]
+			if exercise == nil {
+				continue
+			}
+			progressions := exercise.GetProgressions()
+			if progressions == nil {
+				continue
+			}
+
+			modifierImpact := modifierImpact(activity.Modifiers, float64(activity.WeightKg), modifiers)
+			for family, baseOrder := range progressions {
+				effective := baseOrder + modifierImpact
+				existing, ok := records[family]
+				if !ok || effective > existing.value || (effective == existing.value && completedAt.After(existing.completedAt)) {
+					records[family] = capRecord{value: effective, completedAt: completedAt}
+				}
+			}
+		}
+	}
+
+	capabilities := make(map[string]float64)
+	for family, record := range records {
+		capabilities[family] = decayCapability(record.value, record.completedAt, time.Now())
+	}
+	return capabilities
+}
+
+// decayCapability reduces capability based on time since last completion.
+func decayCapability(capability float64, completedAt, now time.Time) float64 {
+	daysSince := now.Sub(completedAt).Hours() / 24
+	if daysSince <= 0 {
+		return capability
+	}
+	retention := math.Pow(0.5, daysSince/CapabilityHalfLife)
+	if retention < MinCapabilityRetention {
+		retention = MinCapabilityRetention
+	}
+	return capability * retention
+}
+
+// modifierImpact calculates total progression impact from applied modifiers.
+func modifierImpact(modifierIDs []string, weightKg float64, allModifiers map[string]*model.Modifier) float64 {
+	if len(modifierIDs) == 0 {
+		return 0
+	}
+	var total float64
+	for _, modifierID := range modifierIDs {
+		modifier, ok := allModifiers[modifierID]
+		if !ok {
+			continue
+		}
+		if modifier.IsWeighted {
+			total += modifier.ProgressionImpact * weightKg
+		} else {
+			total += modifier.ProgressionImpact
+		}
+	}
+	return total
+}
+
+// filterExerciseByCapability filters exercises based on user capability per family.
+func filterByCapability(exercises []model.Exercise, capabilities map[string]float64, margins ...float64) []model.Exercise {
+	margin := DefaultCapabilityMargin
+	if len(margins) > 0 {
+		margin = margins[0]
+	}
+
+	filtered := make([]model.Exercise, 0, len(exercises))
+	for _, exercise := range exercises {
+		progressions := exercise.GetProgressions()
+		if len(progressions) == 0 {
+			filtered = append(filtered, exercise)
+			continue
+		}
+		allowed := true
+		for family, order := range progressions {
+			if order > capabilities[family]+margin {
+				allowed = false
+				break
+			}
+		}
+		if allowed {
+			filtered = append(filtered, exercise)
+		}
+	}
+
+	if len(filtered) > MaxWorkExercises {
+		return filtered[:MaxWorkExercises]
+	}
+	return filtered
 }

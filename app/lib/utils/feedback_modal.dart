@@ -5,7 +5,20 @@ import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 import '../widgets/adaptive/adaptive.dart';
 
-enum ExerciseFeedback { none, tooEasy, tooHard, flag }
+// matches backend model.Feedback* constants
+enum ExerciseFeedback { none, tooEasy, easy, ok, hard, tooHard, skipped }
+
+extension ExerciseFeedbackX on ExerciseFeedback {
+  String toApiValue() => switch (this) {
+        ExerciseFeedback.tooEasy => 'too_easy',
+        ExerciseFeedback.easy => 'easy',
+        ExerciseFeedback.ok => 'ok',
+        ExerciseFeedback.hard => 'hard',
+        ExerciseFeedback.tooHard => 'too_hard',
+        ExerciseFeedback.skipped => 'skipped',
+        ExerciseFeedback.none => '',
+      };
+}
 
 class FeedbackResult {
   final String feedback;
@@ -68,6 +81,7 @@ class _FeedbackDialogContent extends StatefulWidget {
 class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
   final _feedbackController = TextEditingController();
   late final Map<String, ExerciseFeedback> _exerciseFeedback; // keyed by activity id
+  late final Set<String> _flaggedActivities; // activity IDs that are flagged
 
   @override
   void initState() {
@@ -75,6 +89,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
     _exerciseFeedback = {
       for (final a in widget.activities) a.id: ExerciseFeedback.none,
     };
+    _flaggedActivities = {};
   }
 
   @override
@@ -88,7 +103,8 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
       (f) => f != ExerciseFeedback.none,
     );
     final hasGeneralFeedback = _feedbackController.text.trim().isNotEmpty;
-    return hasExplicitFeedback || hasGeneralFeedback;
+    final hasFlags = _flaggedActivities.isNotEmpty;
+    return hasExplicitFeedback || hasGeneralFeedback || hasFlags;
   }
 
   void _complete() {
@@ -98,15 +114,12 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
 
     for (final a in widget.activities) {
       final fb = _exerciseFeedback[a.id]!;
-      if (fb == ExerciseFeedback.flag) {
+      final apiValue = fb.toApiValue();
+      if (apiValue.isNotEmpty) {
+        activityFeedback[a.name] = apiValue;
+      }
+      if (_flaggedActivities.contains(a.id)) {
         activityReports.add(a.id);
-        activityFeedback[a.name] = 'ok'; // don't store flag in feedback
-      } else {
-        activityFeedback[a.name] = switch (fb) {
-          ExerciseFeedback.tooEasy => 'too easy',
-          ExerciseFeedback.tooHard => 'too hard',
-          _ => 'ok',
-        };
       }
     }
 
@@ -175,8 +188,18 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                       ...widget.activities.map((a) => _ExerciseFeedbackRow(
                             name: a.name,
                             feedback: _exerciseFeedback[a.id]!,
-                            onChanged: (feedback) {
+                            isFlagged: _flaggedActivities.contains(a.id),
+                            onFeedbackChanged: (feedback) {
                               setState(() => _exerciseFeedback[a.id] = feedback);
+                            },
+                            onFlagChanged: (flagged) {
+                              setState(() {
+                                if (flagged) {
+                                  _flaggedActivities.add(a.id);
+                                } else {
+                                  _flaggedActivities.remove(a.id);
+                                }
+                              });
                             },
                           )),
                     ],
@@ -211,12 +234,16 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
 class _ExerciseFeedbackRow extends StatelessWidget {
   final String name;
   final ExerciseFeedback feedback;
-  final ValueChanged<ExerciseFeedback> onChanged;
+  final bool isFlagged;
+  final ValueChanged<ExerciseFeedback> onFeedbackChanged;
+  final ValueChanged<bool> onFlagChanged;
 
   const _ExerciseFeedbackRow({
     required this.name,
     required this.feedback,
-    required this.onChanged,
+    required this.isFlagged,
+    required this.onFeedbackChanged,
+    required this.onFlagChanged,
   });
 
   @override
@@ -240,47 +267,36 @@ class _ExerciseFeedbackRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
+          // too easy (thumbs up)
           IconButton(
             icon: Icon(
               Icons.thumb_up_outlined,
-              color: feedback == ExerciseFeedback.tooEasy
-                  ? primaryColor
-                  : Colors.grey,
+              color: feedback == ExerciseFeedback.tooEasy ? primaryColor : Colors.grey,
             ),
-            onPressed: () => onChanged(
-              feedback == ExerciseFeedback.tooEasy
-                  ? ExerciseFeedback.none
-                  : ExerciseFeedback.tooEasy,
+            onPressed: () => onFeedbackChanged(
+              feedback == ExerciseFeedback.tooEasy ? ExerciseFeedback.none : ExerciseFeedback.tooEasy,
             ),
             tooltip: 'Too easy',
           ),
+          // too hard (thumbs down)
           IconButton(
             icon: Icon(
               Icons.thumb_down_outlined,
-              color: feedback == ExerciseFeedback.tooHard
-                  ? primaryColor
-                  : Colors.grey,
+              color: feedback == ExerciseFeedback.tooHard ? primaryColor : Colors.grey,
             ),
-            onPressed: () => onChanged(
-              feedback == ExerciseFeedback.tooHard
-                  ? ExerciseFeedback.none
-                  : ExerciseFeedback.tooHard,
+            onPressed: () => onFeedbackChanged(
+              feedback == ExerciseFeedback.tooHard ? ExerciseFeedback.none : ExerciseFeedback.tooHard,
             ),
             tooltip: 'Too hard',
           ),
+          // flag (independent from feedback)
           IconButton(
             icon: Icon(
-              Icons.flag_outlined,
-              color: feedback == ExerciseFeedback.flag
-                  ? Colors.orange
-                  : Colors.grey,
+              isFlagged ? Icons.flag : Icons.flag_outlined,
+              color: isFlagged ? Colors.orange : Colors.grey,
             ),
-            onPressed: () => onChanged(
-              feedback == ExerciseFeedback.flag
-                  ? ExerciseFeedback.none
-                  : ExerciseFeedback.flag,
-            ),
-            tooltip: 'Flag',
+            onPressed: () => onFlagChanged(!isFlagged),
+            tooltip: 'Flag issue',
           ),
         ],
       ),

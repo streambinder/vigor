@@ -7,11 +7,13 @@
       "giubbotto zavorrato",
       "chaleco lastrado",
       "chaleco con peso",
-      "gilet lesté",
+      "gilet lest\u00e9",
       "Gewichtsweste",
       "colete com peso",
-      "утяжелённый жилет"
-    ]
+      "\u0443\u0442\u044f\u0436\u0435\u043b\u0451\u043d\u043d\u044b\u0439 \u0436\u0438\u043b\u0435\u0442"
+    ],
+    "progression_impact": 1.5,
+    "is_weighted": true
   },
   {
     "id": "parallettes",
@@ -23,9 +25,11 @@
       "parallettes",
       "Mini-Barren",
       "paralelas baixas",
-      "параллетсы",
-      "низкие брусья"
-    ]
+      "\u043f\u0430\u0440\u0430\u043b\u043b\u0435\u0442\u0441\u044b",
+      "\u043d\u0438\u0437\u043a\u0438\u0435 \u0431\u0440\u0443\u0441\u044c\u044f"
+    ],
+    "progression_impact": 10,
+    "is_weighted": false
   },
   {
     "id": "ankle weights",
@@ -38,12 +42,14 @@
       "tobilleras con peso",
       "poids de cheville",
       "lest chevilles",
-      "Fußgewichte",
-      "Knöchelgewichte",
+      "Fu\u00dfgewichte",
+      "Kn\u00f6chelgewichte",
       "pesos de tornozelo",
       "caneleiras com peso",
-      "утяжелители для ног"
-    ]
+      "\u0443\u0442\u044f\u0436\u0435\u043b\u0438\u0442\u0435\u043b\u0438 \u0434\u043b\u044f \u043d\u043e\u0433"
+    ],
+    "progression_impact": 2.0,
+    "is_weighted": true
   },
   {
     "id": "dip belt",
@@ -52,15 +58,17 @@
       "dip belt",
       "cintura per dip",
       "cintura zavorrata",
-      "cinturón de lastre",
-      "cinturón para dips",
+      "cintur\u00f3n de lastre",
+      "cintur\u00f3n para dips",
       "ceinture de lest",
-      "Dip-Gürtel",
-      "Dipgürtel",
+      "Dip-G\u00fcrtel",
+      "Dipg\u00fcrtel",
       "cinto de lastro",
       "cinto para mergulho",
-      "пояс для отягощений"
-    ]
+      "\u043f\u043e\u044f\u0441 \u0434\u043b\u044f \u043e\u0442\u044f\u0433\u043e\u0449\u0435\u043d\u0438\u0439"
+    ],
+    "progression_impact": 1.5,
+    "is_weighted": true
   },
   {
     "id": "push up bars",
@@ -72,12 +80,14 @@
       "maniglie per flessioni",
       "barras para flexiones",
       "soportes de flexiones",
-      "poignées de pompes",
-      "Liegestützgriffe",
-      "barras para flexões",
-      "apoio para flexão",
-      "упоры для отжиманий"
-    ]
+      "poign\u00e9es de pompes",
+      "Liegest\u00fctzgriffe",
+      "barras para flex\u00f5es",
+      "apoio para flex\u00e3o",
+      "\u0443\u043f\u043e\u0440\u044b \u0434\u043b\u044f \u043e\u0442\u0436\u0438\u043c\u0430\u043d\u0438\u0439"
+    ],
+    "progression_impact": 5,
+    "is_weighted": false
   },
   {
     "id": "resistance bands",
@@ -87,16 +97,18 @@
       "elastici di resistenza",
       "bande elastiche",
       "bandas de resistencia",
-      "gomas elásticas",
-      "bandes de résistance",
-      "élastiques",
-      "Widerstandsbänder",
-      "Fitnessbänder",
-      "bandas de resistência",
-      "elásticos de treino",
-      "резинки для фитнеса",
-      "эспандеры"
-    ]
+      "gomas el\u00e1sticas",
+      "bandes de r\u00e9sistance",
+      "\u00e9lastiques",
+      "Widerstandsb\u00e4nder",
+      "Fitnessb\u00e4nder",
+      "bandas de resist\u00eancia",
+      "el\u00e1sticos de treino",
+      "\u0440\u0435\u0437\u0438\u043d\u043a\u0438 \u0434\u043b\u044f \u0444\u0438\u0442\u043d\u0435\u0441\u0430",
+      "\u044d\u0441\u043f\u0430\u043d\u0434\u0435\u0440\u044b"
+    ],
+    "progression_impact": -15,
+    "is_weighted": false
   },
   {
     "id": "wrist weights",
@@ -105,14 +117,16 @@
       "wrist weights",
       "pesi per polsi",
       "polsiere con pesi",
-      "pesas de muñeca",
-      "muñequeras con peso",
+      "pesas de mu\u00f1eca",
+      "mu\u00f1equeras con peso",
       "poids de poignet",
       "lest poignets",
       "Handgelenkgewichte",
       "pesos de pulso",
-      "утяжелители для рук"
-    ]
+      "\u0443\u0442\u044f\u0436\u0435\u043b\u0438\u0442\u0435\u043b\u0438 \u0434\u043b\u044f \u0440\u0443\u043a"
+    ],
+    "progression_impact": 2.5,
+    "is_weighted": true
   },
   {
     "id": "gymnastic rings",
@@ -126,8 +140,10 @@
       "anneaux de gymnastique",
       "Turnringe",
       "Gymnastikringe",
-      "argolas de ginástica",
-      "гимнастические кольца"
-    ]
+      "argolas de gin\u00e1stica",
+      "\u0433\u0438\u043c\u043d\u0430\u0441\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u043a\u043e\u043b\u044c\u0446\u0430"
+    ],
+    "progression_impact": 15,
+    "is_weighted": false
   }
 ]

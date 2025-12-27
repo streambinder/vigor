@@ -15,6 +15,15 @@ type Modifier struct {
 	Patterns pq.StringArray `gorm:"type:text[]" json:"patterns"`
 	Aliases  pq.StringArray `gorm:"type:text[]" json:"aliases,omitempty"`
 
+	// ProgressionImpact defines how this modifier shifts exercise difficulty.
+	// For weighted modifiers (IsWeighted=true): impact per kg (e.g., 1.5 means +15 at 10kg)
+	// For non-weighted modifiers: flat impact (e.g., 10 for parallettes)
+	// Negative values indicate regression (e.g., -20 for assist bands)
+	ProgressionImpact float64 `gorm:"default:0" json:"progression_impact"`
+
+	// IsWeighted indicates if ProgressionImpact scales with weight_kg
+	IsWeighted bool `gorm:"default:false" json:"is_weighted"`
+
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
 }

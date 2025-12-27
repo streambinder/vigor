@@ -17,8 +17,9 @@ import (
 )
 
 const (
-	recentTrainingDays       = 14
+	recentTrainingDays       = 14 // recent trainings for LLM prompt context
 	recentTrainingMaxResults = 5
+	historyTrainingDays      = 365 // full year for capability computation
 )
 
 // TrainingRequest represents the request body for generating a training plan.
@@ -108,8 +109,18 @@ func postTraining(c *fiber.Ctx) error {
 		}
 	}
 
-	// Query exercises compatible with all users' profiles and equipment
-	workExercises, err := rag.RetrieveWorkExercises(profiles, equipment)
+	// Query full year of trainings for capability computation (time decay handles old entries)
+	var history []model.Training
+	if err := database.DB.
+		Preload("Routines.Blocks.Activities").
+		Where("user_id = ? and completed_at > ?", requestorProfile.UserID, time.Now().Add(-time.Hour*24*historyTrainingDays)).
+		Find(&history).Error; err != nil {
+		middleware.Log(c).Error().Err(err).Msg("failed to query capability history from database")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	// Query exercises compatible with all users' profiles, equipment, and capability
+	workExercises, err := rag.RetrieveWorkExercises(profiles, equipmentIDs, history)
 	if err != nil {
 		middleware.Log(c).Error().Err(err).Msg("failed to query work exercises from database")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})

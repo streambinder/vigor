@@ -1,10 +1,12 @@
 package model
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/lib/pq"
 	"github.com/pgvector/pgvector-go"
+	"gorm.io/datatypes"
 )
 
 type Exercise struct {
@@ -16,10 +18,24 @@ type Exercise struct {
 	Reference    string         `json:"reference"`
 	Instructions pq.StringArray `gorm:"type:text[]" json:"instructions"`
 
+	// Progressions maps movement families to progression order (0-100).
+	// Higher values indicate more advanced exercises within that family.
+	// e.g., {"horizontal_push": 50, "core": 30} for push-up
+	Progressions datatypes.JSON `gorm:"type:jsonb;default:'{}'" json:"progressions"`
+
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
 
 	EquipmentList []Equipment `gorm:"many2many:exercise_equipment;" json:"-"`
+}
+
+// GetProgressions returns the progressions map from JSONB field.
+func (e *Exercise) GetProgressions() map[string]float64 {
+	var progressions map[string]float64
+	if err := json.Unmarshal(e.Progressions, &progressions); err != nil {
+		return nil
+	}
+	return progressions
 }
 
 type ExerciseEmbedding struct {
