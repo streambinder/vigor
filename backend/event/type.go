@@ -24,7 +24,7 @@ type TrainingGenerationEvent struct {
 type HandlerRequestEvent struct {
 	LatencyEvent
 	RequestID string `gorm:"column:request_id;index" json:"-"`
-	UserID    string `gorm:"column:user_id;index" json:"-"`
+	UserID    string `gorm:"column:user_id;index" json:"user_id,omitempty"`
 	Method    string `gorm:"column:method" json:"method"`
 	Path      string `gorm:"column:path;index" json:"path"`
 	Status    int    `gorm:"column:status" json:"status"`
