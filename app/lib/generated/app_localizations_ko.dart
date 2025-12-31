@@ -768,4 +768,41 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get upcoming => '다음 예정';
+
+  @override
+  String get yourProgress => '나의 진행 상황';
+
+  @override
+  String trainingsCompleted(int count) {
+    return '$count회 훈련 완료';
+  }
+
+  @override
+  String get completedTrainings => '완료한 훈련';
+
+  @override
+  String get movementFamilies => '동작 카테고리';
+
+  @override
+  String get muscleActivity => '근육 활동';
+
+  @override
+  String get failedToLoadProgress => '진행 상황을 불러오지 못했습니다';
+
+  @override
+  String get noProgressYet => '훈련을 완료하여 진행 상황을 확인하세요';
+
+  @override
+  String get calibration => '보정';
+
+  @override
+  String get calibrationNeeded =>
+      '첫 번째 훈련을 완료하여 Vigor가 당신의 수준에 맞게 추천을 보정할 수 있도록 하세요';
+
+  @override
+  String get calibrationDescription =>
+      '보정 기간 동안 플랫폼은 피드백 데이터를 수집하여 훈련을 당신의 능력에 더 잘 맞춥니다';
+
+  @override
+  String get capabilities => '능력';
 }

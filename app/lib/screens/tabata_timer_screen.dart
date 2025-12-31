@@ -5,6 +5,7 @@ import '../config/api_config.dart';
 import '../generated/app_localizations.dart';
 import '../models/training.dart';
 import '../models/activity.dart';
+import '../models/activity_ext.dart';
 import '../models/exercise.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
@@ -142,7 +143,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
               type: IntervalType.work,
               duration: workDuration,
               routineName: routine.type,
-              activityName: activity.name,
+              activityName: activity.displayName,
               activity: activity,
               exercise: exercise,
               activityNumber: activityCounter,

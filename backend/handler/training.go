@@ -259,7 +259,6 @@ func postTraining(c *fiber.Ctx) error {
 
 				if exerciseJSON, err := json.Marshal(exercise); err == nil {
 					activity.Detail = exerciseJSON
-					activity.Name = exercise.Name
 				}
 			}
 		}

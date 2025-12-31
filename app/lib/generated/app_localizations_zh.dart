@@ -768,4 +768,39 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get upcoming => '即将进行';
+
+  @override
+  String get yourProgress => '您的进度';
+
+  @override
+  String trainingsCompleted(int count) {
+    return '已完成 $count 次训练';
+  }
+
+  @override
+  String get completedTrainings => '已完成训练';
+
+  @override
+  String get movementFamilies => '动作类别';
+
+  @override
+  String get muscleActivity => '肌肉活动';
+
+  @override
+  String get failedToLoadProgress => '加载进度失败';
+
+  @override
+  String get noProgressYet => '完成训练以查看您的进度';
+
+  @override
+  String get calibration => '校准';
+
+  @override
+  String get calibrationNeeded => '完成您的第一次训练，让Vigor根据您的水平校准推荐';
+
+  @override
+  String get calibrationDescription => '在校准期间，平台会收集您的反馈数据，以更好地将训练与您的能力相匹配';
+
+  @override
+  String get capabilities => '能力';
 }

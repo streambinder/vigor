@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../generated/app_localizations.dart';
 import '../widgets/adaptive/adaptive.dart';
-import '../widgets/training_generation_modal.dart';
-import '../screens/training_details_screen.dart';
-import '../services/gym_service.dart';
+import '../widgets/progress/progress.dart';
+import '../models/progress.dart';
+import '../services/progress_service.dart';
 import '../services/secure_storage_service.dart';
-import '../models/gym.dart';
-import '../models/training.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 
@@ -19,56 +17,45 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  GymService? _gymService;
-  List<Gym>? _gyms;
-  bool _isLoadingGyms = false;
+  ProgressService? _progressService;
+  Progress? _progress;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final storage = context.read<SecureStorageService>();
-      _gymService = GymService(storageService: storage);
-      _loadGyms();
+      _progressService = ProgressService(storageService: storage);
+      _loadProgress();
     });
   }
 
-  Future<void> _loadGyms() async {
-    if (_gymService == null) return;
+  Future<void> _loadProgress() async {
+    if (_progressService == null) return;
 
     setState(() {
-      _isLoadingGyms = true;
+      _isLoading = true;
     });
 
-    final response = await _gymService!.getGyms();
+    final response = await _progressService!.getProgress();
     if (response.isSuccess && mounted) {
       setState(() {
-        _gyms = response.data;
-        _isLoadingGyms = false;
+        _progress = response.data;
+        _isLoading = false;
       });
     } else if (mounted) {
       setState(() {
-        _isLoadingGyms = false;
+        _isLoading = false;
       });
+      if (response.error != null) {
+        AdaptiveNotification.showError(
+          context: context,
+          message: AppLocalizations.of(context).failedToLoadProgress,
+          rawError: response.error,
+        );
+      }
     }
-  }
-
-  void _showTrainingGenerationModal() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => TrainingGenerationModal(
-        gyms: _gyms ?? [],
-        onSuccess: (training) {
-          // Navigate to the generated training details
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => TrainingDetailsScreen(training: training),
-            ),
-          );
-        },
-      ),
-    );
   }
 
   @override
@@ -77,46 +64,187 @@ class _HomePageState extends State<HomePage> {
     return AdaptiveScaffold(
       appBar: AdaptiveAppBar(
         title: Text(l10n.appName),
+        actions: [
+          AdaptiveIconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: l10n.refresh,
+            onPressed: _loadProgress,
+          ),
+        ],
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
+      body: RefreshIndicator(
+        onRefresh: _loadProgress,
+        child: _isLoading
+            ? const Center(child: AdaptiveLoadingIndicator())
+            : _buildContent(l10n),
+      ),
+    );
+  }
+
+  Widget _buildContent(AppLocalizations l10n) {
+    if (_progress == null) {
+      return _buildEmptyState(l10n);
+    }
+
+    final families = ProgressService.parseFamilies(_progress!.families);
+    final trainingsComplete = _progress!.trainingsComplete ?? 0;
+
+    // show calibration message when no trainings completed
+    if (trainingsComplete == 0) {
+      return ListView(
+        padding: const EdgeInsets.all(20.0),
+        children: [
+          _buildTrainingCount(l10n),
+          const SizedBox(height: 32),
+          _buildCalibrationMessage(l10n),
+        ],
+      );
+    }
+
+    return ListView(
+      padding: const EdgeInsets.all(20.0),
+      children: [
+        // big training count
+        _buildTrainingCount(l10n),
+        const SizedBox(height: 32),
+
+        // overall calibration bar (expandable)
+        CalibrationWidget(families: families),
+        const SizedBox(height: 24),
+
+        // family capability bars
+        _buildSection(
+          l10n.capabilities,
+          FamilyProgressWidget(families: families),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTrainingCount(AppLocalizations l10n) {
+    final count = _progress?.trainingsComplete ?? 0;
+
+    return Column(
+      children: [
+        Text(
+          '$count',
+          style: PlatformHelper.useLiquidGlass
+              ? LiquidGlassTheme.titleStyle.copyWith(
+                  fontSize: 72,
+                  fontWeight: FontWeight.w700,
+                )
+              : Theme.of(context).textTheme.displayLarge?.copyWith(
+                    fontSize: 72,
+                    fontWeight: FontWeight.w700,
+                  ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          l10n.completedTrainings,
+          style: PlatformHelper.useLiquidGlass
+              ? LiquidGlassTheme.captionStyle
+              : Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSection(String title, Widget child) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            title,
+            style: PlatformHelper.useLiquidGlass
+                ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 18)
+                : Theme.of(context).textTheme.titleMedium,
+          ),
+        ),
+        const SizedBox(height: 12),
+        AdaptiveCard(
+          padding: const EdgeInsets.all(16),
+          child: child,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(AppLocalizations l10n) {
+    return ListView(
+      padding: const EdgeInsets.all(24.0),
+      children: [
+        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+        Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.fitness_center,
+                Icons.trending_up,
                 size: 64,
-                color: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.primaryColor
-                    : Theme.of(context).colorScheme.primary,
+                color: Colors.grey[400],
               ),
               const SizedBox(height: 16),
               Text(
-                l10n.readyToTrain,
+                l10n.yourProgress,
                 style: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 24)
-                    : Theme.of(context).textTheme.headlineMedium,
+                    ? LiquidGlassTheme.headlineStyle
+                    : Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 8),
               Text(
-                l10n.generateTrainingDescription,
+                l10n.noProgressYet,
                 textAlign: TextAlign.center,
                 style: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.bodyStyle
-                    : Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    ? LiquidGlassTheme.captionStyle
+                    : Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[600],
                         ),
-              ),
-              const SizedBox(height: 24),
-              AdaptiveButton(
-                onPressed: _isLoadingGyms ? null : _showTrainingGenerationModal,
-                useGradient: true,
-                child: Text(l10n.generateTraining),
               ),
             ],
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildCalibrationMessage(AppLocalizations l10n) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: PlatformHelper.useLiquidGlass
+          ? LiquidGlassTheme.glassDecoration()
+          : BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.tune,
+            size: 32,
+            color: Colors.grey.shade500,
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              l10n.calibrationNeeded,
+              style: PlatformHelper.useLiquidGlass
+                  ? LiquidGlassTheme.bodyStyle
+                  : Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+            ),
+          ),
+        ],
       ),
     );
   }

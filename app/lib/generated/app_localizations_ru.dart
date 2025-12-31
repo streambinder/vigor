@@ -773,4 +773,41 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get upcoming => 'Предстоящие';
+
+  @override
+  String get yourProgress => 'Ваш прогресс';
+
+  @override
+  String trainingsCompleted(int count) {
+    return '$count тренировок завершено';
+  }
+
+  @override
+  String get completedTrainings => 'завершённых тренировок';
+
+  @override
+  String get movementFamilies => 'Семейства движений';
+
+  @override
+  String get muscleActivity => 'Мышечная активность';
+
+  @override
+  String get failedToLoadProgress => 'Не удалось загрузить прогресс';
+
+  @override
+  String get noProgressYet => 'Завершите тренировки, чтобы увидеть прогресс';
+
+  @override
+  String get calibration => 'Калибровка';
+
+  @override
+  String get calibrationNeeded =>
+      'Завершите первую тренировку, чтобы Vigor откалибровал рекомендации под ваш уровень';
+
+  @override
+  String get calibrationDescription =>
+      'Во время калибровки платформа собирает данные из ваших отзывов, чтобы лучше подстраивать тренировки под ваши способности';
+
+  @override
+  String get capabilities => 'Возможности';
 }

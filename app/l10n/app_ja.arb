@@ -273,5 +273,17 @@
 
   "nextExercise": "次: {name}",
   "rest": "休憩",
-  "upcoming": "今後"
+  "upcoming": "今後",
+
+  "yourProgress": "進捗状況",
+  "trainingsCompleted": "{count}回のトレーニング完了",
+  "completedTrainings": "完了したトレーニング",
+  "movementFamilies": "動作カテゴリ",
+  "muscleActivity": "筋肉活動",
+  "failedToLoadProgress": "進捗の読み込みに失敗しました",
+  "noProgressYet": "トレーニングを完了して進捗を確認",
+  "calibration": "キャリブレーション",
+  "calibrationNeeded": "最初のトレーニングを完了して、Vigorがあなたのレベルに合わせた推奨を調整できるようにしましょう",
+  "calibrationDescription": "キャリブレーション中、プラットフォームはフィードバックからデータを収集し、トレーニングをあなたの能力により適合させます",
+  "capabilities": "能力"
 }

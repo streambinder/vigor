@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../generated/app_localizations.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../widgets/training_generation_modal.dart';
 import '../services/training_service.dart';
+import '../services/gym_service.dart';
 import '../services/secure_storage_service.dart';
 import '../models/training.dart';
+import '../models/gym.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 import 'training_details_screen.dart';
@@ -19,8 +22,11 @@ class ActivityScreen extends StatefulWidget {
 
 class _ActivityScreenState extends State<ActivityScreen> {
   TrainingService? _trainingService;
+  GymService? _gymService;
   List<Training>? _trainings;
+  List<Gym>? _gyms;
   bool _isLoading = false;
+  bool _isLoadingGyms = false;
   Map<String, int> _partnerCounts = {};
 
   @override
@@ -29,8 +35,48 @@ class _ActivityScreenState extends State<ActivityScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final storage = context.read<SecureStorageService>();
       _trainingService = TrainingService(storageService: storage);
+      _gymService = GymService(storageService: storage);
       _loadTrainings();
+      _loadGyms();
     });
+  }
+
+  Future<void> _loadGyms() async {
+    if (_gymService == null) return;
+
+    setState(() {
+      _isLoadingGyms = true;
+    });
+
+    final response = await _gymService!.getGyms();
+    if (response.isSuccess && mounted) {
+      setState(() {
+        _gyms = response.data;
+        _isLoadingGyms = false;
+      });
+    } else if (mounted) {
+      setState(() {
+        _isLoadingGyms = false;
+      });
+    }
+  }
+
+  void _showTrainingGenerationModal() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => TrainingGenerationModal(
+        gyms: _gyms ?? [],
+        onSuccess: (training) {
+          _loadTrainings(); // refresh the list
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => TrainingDetailsScreen(training: training),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Future<void> _loadTrainings() async {
@@ -123,6 +169,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
             onPressed: _loadTrainings,
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _isLoadingGyms ? null : _showTrainingGenerationModal,
+        icon: const Icon(Icons.add),
+        label: Text(l10n.generateTraining),
+        backgroundColor: PlatformHelper.useLiquidGlass
+            ? LiquidGlassTheme.primaryColor
+            : null,
       ),
       body: RefreshIndicator(
         onRefresh: _loadTrainings,

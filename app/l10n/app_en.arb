@@ -403,5 +403,22 @@
     }
   },
   "rest": "Rest",
-  "upcoming": "Upcoming"
+  "upcoming": "Upcoming",
+
+  "yourProgress": "Your Progress",
+  "trainingsCompleted": "{count} trainings completed",
+  "@trainingsCompleted": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "completedTrainings": "completed trainings",
+  "movementFamilies": "Movement Families",
+  "muscleActivity": "Muscle Activity",
+  "failedToLoadProgress": "Failed to load progress",
+  "noProgressYet": "Complete trainings to see your progress",
+  "calibration": "Calibration",
+  "calibrationNeeded": "Complete your first training for Vigor to calibrate recommendations to your level",
+  "calibrationDescription": "During calibration, the platform collects data from your feedback to better align trainings with your capabilities",
+  "capabilities": "Capabilities"
 }

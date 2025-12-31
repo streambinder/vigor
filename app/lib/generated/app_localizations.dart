@@ -1535,6 +1535,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upcoming'**
   String get upcoming;
+
+  /// No description provided for @yourProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Progress'**
+  String get yourProgress;
+
+  /// No description provided for @trainingsCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} trainings completed'**
+  String trainingsCompleted(int count);
+
+  /// No description provided for @completedTrainings.
+  ///
+  /// In en, this message translates to:
+  /// **'completed trainings'**
+  String get completedTrainings;
+
+  /// No description provided for @movementFamilies.
+  ///
+  /// In en, this message translates to:
+  /// **'Movement Families'**
+  String get movementFamilies;
+
+  /// No description provided for @muscleActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Muscle Activity'**
+  String get muscleActivity;
+
+  /// No description provided for @failedToLoadProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load progress'**
+  String get failedToLoadProgress;
+
+  /// No description provided for @noProgressYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete trainings to see your progress'**
+  String get noProgressYet;
+
+  /// No description provided for @calibration.
+  ///
+  /// In en, this message translates to:
+  /// **'Calibration'**
+  String get calibration;
+
+  /// No description provided for @calibrationNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your first training for Vigor to calibrate recommendations to your level'**
+  String get calibrationNeeded;
+
+  /// No description provided for @calibrationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'During calibration, the platform collects data from your feedback to better align trainings with your capabilities'**
+  String get calibrationDescription;
+
+  /// No description provided for @capabilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Capabilities'**
+  String get capabilities;
 }
 
 class _AppLocalizationsDelegate

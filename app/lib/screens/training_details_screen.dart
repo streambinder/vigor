@@ -7,6 +7,7 @@ import '../models/training.dart';
 import '../models/routine.dart';
 import '../models/block.dart';
 import '../models/activity.dart';
+import '../models/activity_ext.dart';
 import '../models/exercise.dart';
 import '../providers/auth_provider.dart';
 import '../services/training_service.dart';
@@ -1112,7 +1113,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  activity.name,
+                  activity.displayName,
                   style: PlatformHelper.useLiquidGlass
                       ? LiquidGlassTheme.bodyStyle.copyWith(
                           fontWeight: FontWeight.w600,

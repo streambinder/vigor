@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../generated/app_localizations.dart';
+import '../models/activity_ext.dart';
 import '../models/training.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
@@ -36,9 +37,9 @@ class FeedbackModal {
   static const _workTypes = ['cardio', 'strength', 'skill'];
 
   /// extracts unique work activities with their IDs (excludes warmup/cooldown)
-  static List<({String id, String name})> _getWorkActivities(Training training) {
+  static List<({String id, String exerciseId, String name})> _getWorkActivities(Training training) {
     final seen = <String>{};
-    final activities = <({String id, String name})>[];
+    final activities = <({String id, String exerciseId, String name})>[];
     for (final routine in training.routines) {
       if (routine.type != 'work') continue;
       for (final block in routine.blocks) {
@@ -46,7 +47,7 @@ class FeedbackModal {
           final detailType = activity.detail['type'] as String? ?? '';
           if (_workTypes.contains(detailType) && !seen.contains(activity.name)) {
             seen.add(activity.name);
-            activities.add((id: activity.id, name: activity.name));
+            activities.add((id: activity.id, exerciseId: activity.name, name: activity.displayName));
           }
         }
       }
@@ -70,7 +71,7 @@ class FeedbackModal {
 }
 
 class _FeedbackDialogContent extends StatefulWidget {
-  final List<({String id, String name})> activities;
+  final List<({String id, String exerciseId, String name})> activities;
 
   const _FeedbackDialogContent({required this.activities});
 
@@ -116,7 +117,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
       final fb = _exerciseFeedback[a.id]!;
       final apiValue = fb.toApiValue();
       if (apiValue.isNotEmpty) {
-        activityFeedback[a.name] = apiValue;
+        activityFeedback[a.exerciseId] = apiValue;
       }
       if (_flaggedActivities.contains(a.id)) {
         activityReports.add(a.id);

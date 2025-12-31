@@ -782,4 +782,42 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get upcoming => 'In arrivo';
+
+  @override
+  String get yourProgress => 'I tuoi progressi';
+
+  @override
+  String trainingsCompleted(int count) {
+    return '$count allenamenti completati';
+  }
+
+  @override
+  String get completedTrainings => 'allenamenti completati';
+
+  @override
+  String get movementFamilies => 'Famiglie di movimento';
+
+  @override
+  String get muscleActivity => 'Attività muscolare';
+
+  @override
+  String get failedToLoadProgress => 'Impossibile caricare i progressi';
+
+  @override
+  String get noProgressYet =>
+      'Completa gli allenamenti per vedere i tuoi progressi';
+
+  @override
+  String get calibration => 'Calibrazione';
+
+  @override
+  String get calibrationNeeded =>
+      'Completa il tuo primo allenamento perché Vigor possa calibrare le raccomandazioni al tuo livello';
+
+  @override
+  String get calibrationDescription =>
+      'Durante la calibrazione, la piattaforma raccoglie dati dai tuoi feedback per allineare meglio i tuoi allenamenti alle tue capacità';
+
+  @override
+  String get capabilities => 'Capacità';
 }

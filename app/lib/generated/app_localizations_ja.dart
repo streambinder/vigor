@@ -768,4 +768,41 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get upcoming => '今後';
+
+  @override
+  String get yourProgress => '進捗状況';
+
+  @override
+  String trainingsCompleted(int count) {
+    return '$count回のトレーニング完了';
+  }
+
+  @override
+  String get completedTrainings => '完了したトレーニング';
+
+  @override
+  String get movementFamilies => '動作カテゴリ';
+
+  @override
+  String get muscleActivity => '筋肉活動';
+
+  @override
+  String get failedToLoadProgress => '進捗の読み込みに失敗しました';
+
+  @override
+  String get noProgressYet => 'トレーニングを完了して進捗を確認';
+
+  @override
+  String get calibration => 'キャリブレーション';
+
+  @override
+  String get calibrationNeeded =>
+      '最初のトレーニングを完了して、Vigorがあなたのレベルに合わせた推奨を調整できるようにしましょう';
+
+  @override
+  String get calibrationDescription =>
+      'キャリブレーション中、プラットフォームはフィードバックからデータを収集し、トレーニングをあなたの能力により適合させます';
+
+  @override
+  String get capabilities => '能力';
 }

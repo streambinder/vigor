@@ -273,5 +273,17 @@
 
   "nextExercise": "Suivant: {name}",
   "rest": "Repos",
-  "upcoming": "À venir"
+  "upcoming": "À venir",
+
+  "yourProgress": "Vos progrès",
+  "trainingsCompleted": "{count} entraînements terminés",
+  "completedTrainings": "entraînements terminés",
+  "movementFamilies": "Familles de mouvements",
+  "muscleActivity": "Activité musculaire",
+  "failedToLoadProgress": "Impossible de charger les progrès",
+  "noProgressYet": "Terminez des entraînements pour voir vos progrès",
+  "calibration": "Calibrage",
+  "calibrationNeeded": "Terminez votre premier entraînement pour que Vigor calibre les recommandations à votre niveau",
+  "calibrationDescription": "Pendant le calibrage, la plateforme collecte des données de vos retours pour mieux adapter les entraînements à vos capacités",
+  "capabilities": "Capacités"
 }

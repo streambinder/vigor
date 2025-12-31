@@ -782,4 +782,42 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get upcoming => 'Kommend';
+
+  @override
+  String get yourProgress => 'Dein Fortschritt';
+
+  @override
+  String trainingsCompleted(int count) {
+    return '$count Trainings abgeschlossen';
+  }
+
+  @override
+  String get completedTrainings => 'abgeschlossene Trainings';
+
+  @override
+  String get movementFamilies => 'Bewegungsfamilien';
+
+  @override
+  String get muscleActivity => 'Muskelaktivität';
+
+  @override
+  String get failedToLoadProgress => 'Fortschritt konnte nicht geladen werden';
+
+  @override
+  String get noProgressYet =>
+      'Schließe Trainings ab, um deinen Fortschritt zu sehen';
+
+  @override
+  String get calibration => 'Kalibrierung';
+
+  @override
+  String get calibrationNeeded =>
+      'Absolviere dein erstes Training, damit Vigor die Empfehlungen auf dein Level abstimmen kann';
+
+  @override
+  String get calibrationDescription =>
+      'Während der Kalibrierung sammelt die Plattform Daten aus deinem Feedback, um Trainings besser auf deine Fähigkeiten abzustimmen';
+
+  @override
+  String get capabilities => 'Fähigkeiten';
 }

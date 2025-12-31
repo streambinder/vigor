@@ -273,5 +273,17 @@
 
   "nextExercise": "下一个: {name}",
   "rest": "休息",
-  "upcoming": "即将进行"
+  "upcoming": "即将进行",
+
+  "yourProgress": "您的进度",
+  "trainingsCompleted": "已完成 {count} 次训练",
+  "completedTrainings": "已完成训练",
+  "movementFamilies": "动作类别",
+  "muscleActivity": "肌肉活动",
+  "failedToLoadProgress": "加载进度失败",
+  "noProgressYet": "完成训练以查看您的进度",
+  "calibration": "校准",
+  "calibrationNeeded": "完成您的第一次训练，让Vigor根据您的水平校准推荐",
+  "calibrationDescription": "在校准期间，平台会收集您的反馈数据，以更好地将训练与您的能力相匹配",
+  "capabilities": "能力"
 }

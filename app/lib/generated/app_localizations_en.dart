@@ -774,4 +774,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get upcoming => 'Upcoming';
+
+  @override
+  String get yourProgress => 'Your Progress';
+
+  @override
+  String trainingsCompleted(int count) {
+    return '$count trainings completed';
+  }
+
+  @override
+  String get completedTrainings => 'completed trainings';
+
+  @override
+  String get movementFamilies => 'Movement Families';
+
+  @override
+  String get muscleActivity => 'Muscle Activity';
+
+  @override
+  String get failedToLoadProgress => 'Failed to load progress';
+
+  @override
+  String get noProgressYet => 'Complete trainings to see your progress';
+
+  @override
+  String get calibration => 'Calibration';
+
+  @override
+  String get calibrationNeeded =>
+      'Complete your first training for Vigor to calibrate recommendations to your level';
+
+  @override
+  String get calibrationDescription =>
+      'During calibration, the platform collects data from your feedback to better align trainings with your capabilities';
+
+  @override
+  String get capabilities => 'Capabilities';
 }

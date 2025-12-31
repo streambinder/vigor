@@ -273,5 +273,17 @@
 
   "nextExercise": "Далее: {name}",
   "rest": "Отдых",
-  "upcoming": "Предстоящие"
+  "upcoming": "Предстоящие",
+
+  "yourProgress": "Ваш прогресс",
+  "trainingsCompleted": "{count} тренировок завершено",
+  "completedTrainings": "завершённых тренировок",
+  "movementFamilies": "Семейства движений",
+  "muscleActivity": "Мышечная активность",
+  "failedToLoadProgress": "Не удалось загрузить прогресс",
+  "noProgressYet": "Завершите тренировки, чтобы увидеть прогресс",
+  "calibration": "Калибровка",
+  "calibrationNeeded": "Завершите первую тренировку, чтобы Vigor откалибровал рекомендации под ваш уровень",
+  "calibrationDescription": "Во время калибровки платформа собирает данные из ваших отзывов, чтобы лучше подстраивать тренировки под ваши способности",
+  "capabilities": "Возможности"
 }
