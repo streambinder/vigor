@@ -18,7 +18,6 @@ import (
 const (
 	recentTrainingDays       = 14
 	recentTrainingMaxResults = 5
-	historyTrainingDays      = 365
 )
 
 var (
@@ -96,15 +95,16 @@ func GenerateTraining(userID uuid.UUID, params GenerateTrainingParams) (*model.T
 		}
 	}
 
-	var history []model.Training
-	if err := database.DB.
-		Preload("Routines.Blocks.Activities").
-		Where("user_id = ? and completed_at > ?", requestorProfile.UserID, time.Now().Add(-time.Hour*24*historyTrainingDays)).
-		Find(&history).Error; err != nil {
+	capabilities, err := GetCapabilities(userID)
+	if err != nil {
+		return nil, err
+	}
+	trainingsComplete, err := GetTrainingsCompleteCount(userID)
+	if err != nil {
 		return nil, err
 	}
 
-	workExercises, err := rag.RetrieveWorkExercises(profiles, equipmentIDs, history)
+	workExercises, err := rag.RetrieveWorkExercises(profiles, equipmentIDs, capabilities, trainingsComplete)
 	if err != nil {
 		return nil, err
 	}
@@ -347,7 +347,50 @@ func CompleteTraining(userID uuid.UUID, trainingID string, params CompleteTraini
 		}
 	}
 
+	// record capabilities for owner and partners
+	if err := recordTrainingCapabilities(&training); err != nil {
+		log.Error().Err(err).Msg("failed to record capabilities")
+	}
+
 	return &training, nil
+}
+
+func recordTrainingCapabilities(training *model.Training) error {
+	var allExercises []model.Exercise
+	if err := database.Knowledge.Find(&allExercises).Error; err != nil {
+		return err
+	}
+	exerciseMap := make(map[string]*model.Exercise, len(allExercises))
+	for i := range allExercises {
+		exerciseMap[allExercises[i].ID] = &allExercises[i]
+	}
+
+	var allModifiers []model.Modifier
+	if err := database.Knowledge.Find(&allModifiers).Error; err != nil {
+		return err
+	}
+	modifierMap := make(map[string]*model.Modifier, len(allModifiers))
+	for i := range allModifiers {
+		modifierMap[allModifiers[i].ID] = &allModifiers[i]
+	}
+
+	activities := training.Activities()
+
+	// record for training owner
+	if err := RecordCapabilities(training.UserID, activities, exerciseMap, modifierMap); err != nil {
+		return err
+	}
+
+	// record for partners
+	var partners []model.Partner
+	database.DB.Where("training_id = ?", training.ID).Find(&partners)
+	for _, partner := range partners {
+		if err := RecordCapabilities(partner.UserID, activities, exerciseMap, modifierMap); err != nil {
+			log.Error().Err(err).Str("partner", partner.UserID.String()).Msg("failed to record partner capabilities")
+		}
+	}
+
+	return nil
 }
 
 // AddTrainingPartner adds a partner to an existing training.

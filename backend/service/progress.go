@@ -6,34 +6,39 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/model"
 )
 
 const (
-	ProgressHistoryDays  = 365 // full year for capability
 	MuscleImpactDays     = 14  // 14 days for muscle heat
 	MuscleImpactHalfLife = 3.0 // days after which impact decays to 50%
-	CalibrationThreshold = 5   // trainings with feedback needed for full calibration
+	CalibrationThreshold = 5   // capability records needed for full calibration
 )
 
 // GetProgress computes the complete progress for a user.
 func GetProgress(userID uuid.UUID) (model.Progress, error) {
-	var history []model.Training
-	if err := database.DB.
-		Preload("Routines.Blocks.Activities").
-		Where("user_id = ? AND completed_at > ?", userID, time.Now().Add(-time.Hour*24*ProgressHistoryDays)).
-		Find(&history).Error; err != nil {
+	// load capabilities (already decayed)
+	capabilities, err := GetCapabilities(userID)
+	if err != nil {
 		return model.Progress{}, err
 	}
-	log.Debug().Int("trainings", len(history)).Msg("progress: loaded training history")
 
+	calibration, err := GetCapabilityCalibration(userID)
+	if err != nil {
+		return model.Progress{}, err
+	}
+
+	trainingsComplete, err := GetTrainingsCompleteCount(userID)
+	if err != nil {
+		return model.Progress{}, err
+	}
+
+	// load exercises to get familyMaxes and muscle list
 	var allExercises []model.Exercise
 	if err := database.Knowledge.Find(&allExercises).Error; err != nil {
 		return model.Progress{}, err
 	}
-	log.Debug().Int("exercises", len(allExercises)).Msg("progress: loaded exercises from knowledge")
 
 	exerciseMap := make(map[string]*model.Exercise, len(allExercises))
 	familyMaxes := make(map[string]float64)
@@ -42,7 +47,6 @@ func GetProgress(userID uuid.UUID) (model.Progress, error) {
 	for i := range allExercises {
 		ex := &allExercises[i]
 		exerciseMap[ex.ID] = ex
-
 		if progs := ex.GetProgressions(); progs != nil {
 			for family, order := range progs {
 				if order > familyMaxes[family] {
@@ -50,111 +54,60 @@ func GetProgress(userID uuid.UUID) (model.Progress, error) {
 				}
 			}
 		}
-
 		for _, muscle := range ex.Muscles {
 			allMuscles[muscle] = true
 		}
 	}
 
+	// build family progress from stored capabilities
+	families := make(map[string]model.FamilyProgress)
+	for family, maxOrder := range familyMaxes {
+		cap := capabilities[family]
+		capPercent := (cap / maxOrder) * 100
+		if capPercent > 100 {
+			capPercent = 100
+		}
+
+		calCount := calibration[family]
+		calPercent := (float64(calCount) / float64(CalibrationThreshold)) * 100
+		if calPercent > 100 {
+			calPercent = 100
+		}
+
+		families[family] = model.FamilyProgress{
+			Capability:  capPercent,
+			Calibration: calPercent,
+		}
+	}
+
+	// muscle impact still computed live (14-day window is fast)
+	muscles := CalculateMuscleImpact(userID, exerciseMap, allMuscles)
+
 	return model.Progress{
-		Families:          CalculateFamilyProgress(history, exerciseMap, familyMaxes),
-		Muscles:           CalculateMuscleImpact(history, exerciseMap, allMuscles),
-		TrainingsComplete: len(history),
+		Families:          families,
+		Muscles:           muscles,
+		TrainingsComplete: trainingsComplete,
 	}, nil
 }
 
-// CalculateFamilyProgress computes capability and calibration for each movement family.
-func CalculateFamilyProgress(history []model.Training, exercises map[string]*model.Exercise, familyMaxes map[string]float64) map[string]model.FamilyProgress {
-	type familyStats struct {
-		maxCapability float64
-		feedbackCount int
-	}
-	stats := make(map[string]*familyStats)
-
-	for _, training := range history {
-		if training.CompletedAt == nil {
-			log.Debug().Str("training", training.ID.String()).Msg("progress: skipping training with nil CompletedAt")
-			continue
-		}
-		activities := training.Activities()
-		log.Debug().
-			Str("training", training.ID.String()).
-			Int("activities", len(activities)).
-			Int("routines", len(training.Routines)).
-			Msg("progress: processing training")
-
-		for _, activity := range activities {
-			exercise := exercises[activity.Name]
-			if exercise == nil {
-				log.Debug().Str("activity", activity.Name).Msg("progress: exercise not found in knowledge")
-				continue
-			}
-			progressions := exercise.GetProgressions()
-			if progressions == nil {
-				log.Debug().Str("exercise", exercise.ID).Msg("progress: exercise has no progressions")
-				continue
-			}
-
-			hasFeedback := activity.HasFeedback()
-			log.Debug().
-				Str("exercise", exercise.ID).
-				Interface("progressions", progressions).
-				Bool("hasFeedback", hasFeedback).
-				Msg("progress: processing activity")
-
-			for family, order := range progressions {
-				if stats[family] == nil {
-					stats[family] = &familyStats{}
-				}
-				if order > stats[family].maxCapability {
-					stats[family].maxCapability = order
-				}
-				if hasFeedback {
-					stats[family].feedbackCount++
-				}
-			}
-		}
-	}
-
-	result := make(map[string]model.FamilyProgress)
-	for family, maxOrder := range familyMaxes {
-		fp := model.FamilyProgress{
-			Capability:  0,
-			Calibration: 0,
-		}
-
-		if s, ok := stats[family]; ok {
-			fp.Capability = (s.maxCapability / maxOrder) * 100
-			if fp.Capability > 100 {
-				fp.Capability = 100
-			}
-
-			fp.Calibration = (float64(s.feedbackCount) / float64(CalibrationThreshold)) * 100
-			if fp.Calibration > 100 {
-				fp.Calibration = 100
-			}
-		}
-
-		result[family] = fp
-	}
-
-	return result
-}
-
 // CalculateMuscleImpact computes recency-weighted training stress for each muscle group.
-func CalculateMuscleImpact(history []model.Training, exercises map[string]*model.Exercise, allMuscles map[string]bool) map[string]model.MuscleImpact {
+func CalculateMuscleImpact(userID uuid.UUID, exercises map[string]*model.Exercise, allMuscles map[string]bool) map[string]model.MuscleImpact {
 	now := time.Now()
 	cutoff := now.Add(-time.Hour * 24 * MuscleImpactDays)
 
-	heat := make(map[string]float64)
+	var history []model.Training
+	database.DB.
+		Preload("Routines.Blocks.Activities").
+		Where("user_id = ? AND completed_at > ?", userID, cutoff).
+		Find(&history)
 
+	heat := make(map[string]float64)
 	for _, training := range history {
-		completedAt := training.CompletedAt
-		if completedAt == nil || completedAt.Before(cutoff) {
+		if training.CompletedAt == nil {
 			continue
 		}
 
-		daysSince := now.Sub(*completedAt).Hours() / 24
+		daysSince := now.Sub(*training.CompletedAt).Hours() / 24
 		decay := math.Pow(0.5, daysSince/MuscleImpactHalfLife)
 
 		for _, routine := range training.Routines {
