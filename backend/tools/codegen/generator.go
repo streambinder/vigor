@@ -10,19 +10,27 @@ import (
 
 // Generator generates Dart code from parsed structs
 type Generator struct {
-	outputDir string
-	tmpl      *template.Template
+	outputDir       string
+	modelImportPath string
+	localTypes      map[string]bool
+	tmpl            *template.Template
 }
 
 // NewGenerator creates a new generator
-func NewGenerator(outputDir string) *Generator {
+func NewGenerator(outputDir, modelImportPath string, localTypes map[string]bool) *Generator {
+	g := &Generator{
+		outputDir:       outputDir,
+		modelImportPath: modelImportPath,
+		localTypes:      localTypes,
+	}
+
 	tmpl := template.Must(template.New("dart").Funcs(template.FuncMap{
 		"toDartType":          toDartType,
 		"toSnakeCase":         toSnakeCase,
 		"toCamelCase":         toCamelCase,
 		"toClassName":         toClassName,
 		"needsImport":         needsImport,
-		"getImports":          getImports,
+		"getImports":          g.getImports,
 		"isNullable":          isNullable,
 		"defaultValue":        defaultValue,
 		"getRequiredFields":   getRequiredFields,
@@ -33,10 +41,8 @@ func NewGenerator(outputDir string) *Generator {
 		"hasNullableDateTime": hasNullableDateTime,
 	}).Parse(dartTemplate))
 
-	return &Generator{
-		outputDir: outputDir,
-		tmpl:      tmpl,
-	}
+	g.tmpl = tmpl
+	return g
 }
 
 // Generate generates a Dart file for a struct
@@ -155,7 +161,10 @@ func needsImport(field Field) bool {
 }
 
 // getImports returns all necessary imports for a struct
-func getImports(s Struct) (imports []string) {
+func (g *Generator) getImports(s Struct) []string {
+	var imports []string
+	seen := make(map[string]bool)
+
 	for _, field := range s.Fields {
 		if needsImport(field) {
 			typeName := field.CollectionOf
@@ -163,10 +172,21 @@ func getImports(s Struct) (imports []string) {
 				typeName = field.Type
 			}
 
-			imports = append(imports, toSnakeCase(mapGoTypeToDart(typeName))+".dart")
+			dartType := mapGoTypeToDart(typeName)
+			fileName := toSnakeCase(dartType) + ".dart"
+
+			// check if this type is local or needs external import
+			if g.modelImportPath != "" && !g.localTypes[dartType] {
+				fileName = g.modelImportPath + fileName
+			}
+
+			if !seen[fileName] {
+				seen[fileName] = true
+				imports = append(imports, fileName)
+			}
 		}
 	}
-	return
+	return imports
 }
 
 // isNullable checks if a field is nullable

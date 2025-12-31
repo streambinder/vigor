@@ -10,14 +10,15 @@ import (
 
 func main() {
 	var (
-		modelDir   = flag.String("models", "", "Path to Go models directory (required)")
-		outputDir  = flag.String("output", "", "Path to Dart models output directory (required)")
-		modulePath = flag.String("module", "", "Go module path for imports (e.g., github.com/dpucci/vigor/server)")
+		modelDir        = flag.String("models", "", "Path to Go models directory (required)")
+		outputDir       = flag.String("output", "", "Path to Dart models output directory (required)")
+		modulePath      = flag.String("module", "", "Go module path for imports (e.g., github.com/dpucci/vigor/server)")
+		modelImportPath = flag.String("model-import", "", "Relative import path for model types (e.g., ../models/)")
 	)
 	flag.Parse()
 
 	if *modelDir == "" || *outputDir == "" {
-		fmt.Fprintf(os.Stderr, "Usage: %s -models <go-models-dir> -output <dart-output-dir> [-module <go-module-path>]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s -models <go-models-dir> -output <dart-output-dir> [-module <go-module-path>] [-model-import <relative-path>]\n", os.Args[0])
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -46,8 +47,14 @@ func main() {
 
 	log.Printf("Found %d structs to generate", len(structs))
 
+	// Collect local type names
+	localTypes := make(map[string]bool)
+	for _, s := range structs {
+		localTypes[s.Name] = true
+	}
+
 	// Generate Dart files
-	generator := NewGenerator(absOutputDir)
+	generator := NewGenerator(absOutputDir, *modelImportPath, localTypes)
 	for _, s := range structs {
 		if err := generator.Generate(s); err != nil {
 			log.Fatalf("Failed to generate Dart for %s: %v", s.Name, err)
