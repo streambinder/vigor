@@ -21,13 +21,14 @@ const (
 )
 
 var (
-	ErrTrainingNotFound = errors.New("training not found")
-	ErrUserNotFound     = errors.New("user not found")
-	ErrAccessDenied     = errors.New("access denied")
-	ErrCannotAddSelf    = errors.New("cannot add yourself as partner")
-	ErrPartnerExists    = errors.New("partner already added")
-	ErrInvalidGym       = errors.New("gym not found")
-	ErrDurationRequired = errors.New("duration is required")
+	ErrTrainingNotFound  = errors.New("training not found")
+	ErrUserNotFound      = errors.New("user not found")
+	ErrAccessDenied      = errors.New("access denied")
+	ErrCannotAddSelf     = errors.New("cannot add yourself as partner")
+	ErrPartnerExists     = errors.New("partner already added")
+	ErrInvalidGym        = errors.New("gym not found")
+	ErrDurationRequired  = errors.New("duration is required")
+	ErrMalformedTraining = errors.New("malformed generated training")
 )
 
 // GenerateTrainingParams contains the parameters for generating a training.
@@ -183,6 +184,10 @@ func GenerateTraining(userID uuid.UUID, params GenerateTrainingParams) (*model.T
 	)
 	if err != nil {
 		return nil, err
+	}
+	if err := training.Validate(); err != nil {
+		log.Error().Err(err).Msg("generated training validation failed")
+		return nil, ErrMalformedTraining
 	}
 	log.Info().
 		Interface("event", event.TrainingGenerationEvent{

@@ -2,7 +2,9 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -183,6 +185,35 @@ func (t Training) DaysSince() int {
 		date = *t.CompletedAt
 	}
 	return int(time.Since(date).Hours() / 24)
+}
+
+// Validate checks that the training has valid structure.
+func (t *Training) Validate() error {
+	if t.Name == "" {
+		return errors.New("training name is empty")
+	}
+	if len(t.Routines) == 0 {
+		return errors.New("training has no routines")
+	}
+	for i, routine := range t.Routines {
+		if routine.Type == "" {
+			return errors.New("routine " + strconv.Itoa(i) + " has no type")
+		}
+		if len(routine.Blocks) == 0 {
+			return errors.New("routine " + strconv.Itoa(i) + " has no blocks")
+		}
+		for j, block := range routine.Blocks {
+			if len(block.Activities) == 0 {
+				return errors.New("block " + strconv.Itoa(j) + " in routine " + strconv.Itoa(i) + " has no activities")
+			}
+			for k, activity := range block.Activities {
+				if activity.ExerciseID == "" {
+					return errors.New("activity " + strconv.Itoa(k) + " in block " + strconv.Itoa(j) + " has no exercise ID")
+				}
+			}
+		}
+	}
+	return nil
 }
 
 // Activities returns pointers to work-type activities in the training, deduplicated by ExerciseID

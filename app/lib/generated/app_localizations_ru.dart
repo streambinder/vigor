@@ -671,6 +671,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get thisMayTakeAMoment => 'Это может занять некоторое время';
 
   @override
+  String generationFailedRetrying(int attempt) {
+    return 'Генерация не удалась, попытка #$attempt...';
+  }
+
+  @override
   String get trainingGeneratedSuccessfully => 'Тренировка успешно создана!';
 
   @override

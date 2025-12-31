@@ -233,6 +233,7 @@
 
   "generatingTraining": "Dein Training wird erstellt...",
   "thisMayTakeAMoment": "Dies kann einen Moment dauern",
+  "generationFailedRetrying": "Generierung fehlgeschlagen, Versuch #{attempt}...",
   "trainingGeneratedSuccessfully": "Training erfolgreich erstellt!",
   "failedToGenerateTraining": "Training konnte nicht erstellt werden",
   "generate": "Erstellen",

@@ -666,6 +666,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get thisMayTakeAMoment => '少々お待ちください';
 
   @override
+  String generationFailedRetrying(int attempt) {
+    return '生成に失敗しました、リトライ #$attempt...';
+  }
+
+  @override
   String get trainingGeneratedSuccessfully => 'トレーニングが正常に生成されました！';
 
   @override

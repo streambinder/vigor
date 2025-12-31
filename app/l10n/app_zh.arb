@@ -233,6 +233,7 @@
 
   "generatingTraining": "正在生成您的训练...",
   "thisMayTakeAMoment": "这可能需要一点时间",
+  "generationFailedRetrying": "生成失败，重试 #{attempt}...",
   "trainingGeneratedSuccessfully": "训练生成成功！",
   "failedToGenerateTraining": "生成训练失败",
   "generate": "生成",

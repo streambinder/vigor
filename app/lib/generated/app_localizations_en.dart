@@ -671,6 +671,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get thisMayTakeAMoment => 'This may take a moment';
 
   @override
+  String generationFailedRetrying(int attempt) {
+    return 'Generation failed, retrying #$attempt...';
+  }
+
+  @override
   String get trainingGeneratedSuccessfully =>
       'Training generated successfully!';
 

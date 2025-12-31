@@ -233,6 +233,7 @@
 
   "generatingTraining": "Создаём вашу тренировку...",
   "thisMayTakeAMoment": "Это может занять некоторое время",
+  "generationFailedRetrying": "Генерация не удалась, попытка #{attempt}...",
   "trainingGeneratedSuccessfully": "Тренировка успешно создана!",
   "failedToGenerateTraining": "Не удалось создать тренировку",
   "generate": "Создать",

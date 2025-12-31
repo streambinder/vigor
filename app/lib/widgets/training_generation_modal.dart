@@ -38,6 +38,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   EquipmentMode _equipmentMode = EquipmentMode.bodyweight;
   Gym? _selectedGym;
   bool _isGenerating = false;
+  int? _retryAttempt;
   bool _includeWarmupCooldown = true;
   final List<UserInfo> _partners = [];
   List<String> _equipment = [];
@@ -340,6 +341,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
     setState(() {
       _isGenerating = true;
+      _retryAttempt = null;
     });
 
     final storage = context.read<SecureStorageService>();
@@ -371,6 +373,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       partners: _partners.isEmpty ? null : _partners.map((p) => p.id).toList(),
       skipWarmupCooldown: !_includeWarmupCooldown ? true : null,
       methodology: _methodology,
+      onRetry: (attempt) {
+        if (mounted) {
+          setState(() => _retryAttempt = attempt);
+        }
+      },
     );
 
     if (mounted) {
@@ -425,6 +432,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
   Widget _buildLoadingView() {
     final l10n = AppLocalizations.of(context);
+    final statusText = _retryAttempt != null
+        ? l10n.generationFailedRetrying(_retryAttempt!)
+        : l10n.thisMayTakeAMoment;
     return Padding(
       padding: const EdgeInsets.all(32.0),
       child: Column(
@@ -440,7 +450,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           ),
           const SizedBox(height: 8),
           Text(
-            l10n.thisMayTakeAMoment,
+            statusText,
             style: PlatformHelper.useLiquidGlass
                 ? LiquidGlassTheme.captionStyle
                 : Theme.of(context).textTheme.bodyMedium?.copyWith(

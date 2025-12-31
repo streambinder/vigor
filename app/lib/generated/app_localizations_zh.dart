@@ -666,6 +666,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get thisMayTakeAMoment => '这可能需要一点时间';
 
   @override
+  String generationFailedRetrying(int attempt) {
+    return '生成失败，重试 #$attempt...';
+  }
+
+  @override
   String get trainingGeneratedSuccessfully => '训练生成成功！';
 
   @override

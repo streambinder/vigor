@@ -666,6 +666,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get thisMayTakeAMoment => '잠시 시간이 걸릴 수 있습니다';
 
   @override
+  String generationFailedRetrying(int attempt) {
+    return '생성 실패, 재시도 #$attempt...';
+  }
+
+  @override
   String get trainingGeneratedSuccessfully => '트레이닝이 성공적으로 생성되었습니다!';
 
   @override

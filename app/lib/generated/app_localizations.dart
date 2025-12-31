@@ -1332,6 +1332,12 @@ abstract class AppLocalizations {
   /// **'This may take a moment'**
   String get thisMayTakeAMoment;
 
+  /// No description provided for @generationFailedRetrying.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation failed, retrying #{attempt}...'**
+  String generationFailedRetrying(int attempt);
+
   /// No description provided for @trainingGeneratedSuccessfully.
   ///
   /// In en, this message translates to:

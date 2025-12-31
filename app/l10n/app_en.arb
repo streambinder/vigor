@@ -358,6 +358,14 @@
 
   "generatingTraining": "Generating your training...",
   "thisMayTakeAMoment": "This may take a moment",
+  "generationFailedRetrying": "Generation failed, retrying #{attempt}...",
+  "@generationFailedRetrying": {
+    "placeholders": {
+      "attempt": {
+        "type": "int"
+      }
+    }
+  },
   "trainingGeneratedSuccessfully": "Training generated successfully!",
   "failedToGenerateTraining": "Failed to generate training",
   "generate": "Generate",

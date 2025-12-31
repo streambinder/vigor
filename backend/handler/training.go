@@ -45,6 +45,9 @@ func postTraining(c *fiber.Ctx) error {
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
 		case errors.Is(err, service.ErrInvalidGym):
 			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "gym not found"})
+		case errors.Is(err, service.ErrMalformedTraining):
+			c.Set("Retry-After", "3")
+			return c.Status(http.StatusServiceUnavailable).JSON(fiber.Map{"error": "malformed generated training"})
 		default:
 			middleware.Log(c).Error().Err(err).Msg("failed to generate training")
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})

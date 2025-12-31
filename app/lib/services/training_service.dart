@@ -23,6 +23,7 @@ class TrainingService {
     List<String>? partners,
     bool? skipWarmupCooldown,
     String? methodology,
+    void Function(int attempt)? onRetry,
   }) async {
     AppLogger.debug('[TrainingService] Generating training with duration: $duration, gym: $gym');
 
@@ -46,24 +47,38 @@ class TrainingService {
       body['methodology'] = methodology;
     }
 
-    final response = await _apiService.post('/training', body: body);
+    const maxRetries = 2;
+    for (var attempt = 0; attempt <= maxRetries; attempt++) {
+      final response = await _apiService.post('/training', body: body);
 
-    if (response.isSuccess && response.data != null) {
-      try {
-        final training = Training.fromJson(response.data!);
-        AppLogger.info('[TrainingService] Generated training: ${training.id}');
-        return ApiResponse.success(training, response.statusCode);
-      } catch (e) {
-        AppLogger.error('[TrainingService] failed to parse training', e);
-        return ApiResponse.error('Failed to parse training', response.statusCode);
+      // retry on 503 (malformed training) up to maxRetries times
+      if (response.statusCode == 503 && attempt < maxRetries) {
+        AppLogger.warning('[TrainingService] Got 503, retrying (attempt ${attempt + 1})');
+        onRetry?.call(attempt + 1);
+        await Future.delayed(const Duration(seconds: 3));
+        continue;
       }
-    } else {
-      AppLogger.error('[TrainingService] Failed to generate training: ${response.error}');
-      return ApiResponse.error(
-        response.error ?? 'Failed to generate training',
-        response.statusCode,
-      );
+
+      if (response.isSuccess && response.data != null) {
+        try {
+          final training = Training.fromJson(response.data!);
+          AppLogger.info('[TrainingService] Generated training: ${training.id}');
+          return ApiResponse.success(training, response.statusCode);
+        } catch (e) {
+          AppLogger.error('[TrainingService] failed to parse training', e);
+          return ApiResponse.error('Failed to parse training', response.statusCode);
+        }
+      } else {
+        AppLogger.error('[TrainingService] Failed to generate training: ${response.error}');
+        return ApiResponse.error(
+          response.error ?? 'Failed to generate training',
+          response.statusCode,
+        );
+      }
     }
+
+    // should not reach here, but just in case
+    return ApiResponse.error('Failed to generate training after retries', 503);
   }
 
   Future<ApiResponse<List<Training>>> getTrainings() async {

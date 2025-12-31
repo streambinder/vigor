@@ -233,6 +233,7 @@
 
   "generatingTraining": "トレーニングを生成中...",
   "thisMayTakeAMoment": "少々お待ちください",
+  "generationFailedRetrying": "生成に失敗しました、リトライ #{attempt}...",
   "trainingGeneratedSuccessfully": "トレーニングが正常に生成されました！",
   "failedToGenerateTraining": "トレーニングの生成に失敗しました",
   "generate": "生成",
