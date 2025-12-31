@@ -61,10 +61,8 @@
       "squat",
       "squatting",
       "knee dominant",
-      "squat",
       "accosciata",
       "sentadilla",
-      "squat",
       "Kniebeuge",
       "agachamento",
       "присед"
@@ -92,13 +90,10 @@
       "trunk",
       "abdominal",
       "stability",
-      "core",
       "addominali",
-      "core",
       "tronco",
       "tronc",
       "Rumpf",
-      "core",
       "кор"
     ]
   },
@@ -123,14 +118,9 @@
       "conditioning",
       "endurance",
       "aerobic",
-      "cardio",
       "resistenza",
-      "cardio",
       "resistencia",
-      "cardio",
-      "endurance",
       "Ausdauer",
-      "cardio",
       "кардио"
     ]
   },
@@ -153,9 +143,7 @@
     "id": "balance",
     "aliases": [
       "balance",
-      "stability",
       "proprioception",
-      "equilibrio",
       "equilibrio",
       "équilibre",
       "Gleichgewicht",
