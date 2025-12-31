@@ -25,6 +25,22 @@ const (
 	MinCapabilityRetention  = 0.3  // minimum fraction of capability retained (floor)
 )
 
+// progressiveMargin returns a capability margin based on completed training count.
+// New users get wider margins to ensure exercise variety, gradually tightening
+// as we gather enough history for personalized capability filtering.
+func progressiveMargin(completedTrainings int) float64 {
+	switch {
+	case completedTrainings == 0:
+		return 45.0
+	case completedTrainings <= 2:
+		return 35.0
+	case completedTrainings <= 4:
+		return 25.0
+	default:
+		return DefaultCapabilityMargin
+	}
+}
+
 // RetrieveWorkExercises retrieves exercises for the main training phase via RAG.
 // Filters by work types (cardio, strength, skill), user equipment, and user capability.
 // The history parameter is used to compute user capability per movement family.
@@ -118,7 +134,7 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string, history
 		exercises = append(exercises, result.Exercise)
 	}
 
-	return filterByCapability(exercises, capabilities), nil
+	return filterByCapability(exercises, capabilities, progressiveMargin(len(history))), nil
 }
 
 // QueryUserFacts retrieves facts relevant to the users' profiles and prompt.
@@ -390,6 +406,7 @@ func filterByCapability(exercises []model.Exercise, capabilities map[string]floa
 	if len(margins) > 0 {
 		margin = margins[0]
 	}
+	log.Debug().Float64("capability_margin", margin).Msg("filtering exercises by capability")
 
 	filtered := make([]model.Exercise, 0, len(exercises))
 	for _, exercise := range exercises {
