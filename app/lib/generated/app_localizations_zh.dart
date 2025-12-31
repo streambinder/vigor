@@ -803,4 +803,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get capabilities => '能力';
+
+  @override
+  String get noTrainingsCompletedYet => '开始训练来看点什么吧';
 }

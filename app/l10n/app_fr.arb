@@ -285,5 +285,6 @@
   "calibration": "Calibrage",
   "calibrationNeeded": "Terminez votre premier entraînement pour que Vigor calibre les recommandations à votre niveau",
   "calibrationDescription": "Pendant le calibrage, la plateforme collecte des données de vos retours pour mieux adapter les entraînements à vos capacités",
-  "capabilities": "Capacités"
+  "capabilities": "Capacités",
+  "noTrainingsCompletedYet": "Commence à t'entraîner pour voir quelque chose"
 }

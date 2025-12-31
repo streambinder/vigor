@@ -1601,6 +1601,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Capabilities'**
   String get capabilities;
+
+  /// No description provided for @noTrainingsCompletedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Start training to see something here'**
+  String get noTrainingsCompletedYet;
 }
 
 class _AppLocalizationsDelegate

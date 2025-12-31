@@ -285,5 +285,6 @@
   "calibration": "キャリブレーション",
   "calibrationNeeded": "最初のトレーニングを完了して、Vigorがあなたのレベルに合わせた推奨を調整できるようにしましょう",
   "calibrationDescription": "キャリブレーション中、プラットフォームはフィードバックからデータを収集し、トレーニングをあなたの能力により適合させます",
-  "capabilities": "能力"
+  "capabilities": "能力",
+  "noTrainingsCompletedYet": "トレーニングを始めて何か表示しよう"
 }

@@ -819,4 +819,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get capabilities => 'Capacidades';
+
+  @override
+  String get noTrainingsCompletedYet => 'Empieza a entrenar para ver algo aquí';
 }

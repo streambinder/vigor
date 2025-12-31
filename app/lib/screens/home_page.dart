@@ -89,15 +89,29 @@ class _HomePageState extends State<HomePage> {
     final families = ProgressService.parseFamilies(_progress!.families);
     final trainingsComplete = _progress!.trainingsComplete ?? 0;
 
-    // show calibration message when no trainings completed
+    // show empty state when no trainings completed
     if (trainingsComplete == 0) {
-      return ListView(
-        padding: const EdgeInsets.all(20.0),
-        children: [
-          _buildTrainingCount(l10n),
-          const SizedBox(height: 32),
-          _buildCalibrationMessage(l10n),
-        ],
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.fitness_center,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.noTrainingsCompletedYet,
+              textAlign: TextAlign.center,
+              style: PlatformHelper.useLiquidGlass
+                  ? LiquidGlassTheme.captionStyle
+                  : Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+            ),
+          ],
+        ),
       );
     }
 
@@ -208,44 +222,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildCalibrationMessage(AppLocalizations l10n) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: PlatformHelper.useLiquidGlass
-          ? LiquidGlassTheme.glassDecoration()
-          : BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.tune,
-            size: 32,
-            color: Colors.grey.shade500,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              l10n.calibrationNeeded,
-              style: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.bodyStyle
-                  : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
-                      ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

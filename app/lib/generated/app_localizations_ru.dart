@@ -810,4 +810,8 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get capabilities => 'Возможности';
+
+  @override
+  String get noTrainingsCompletedYet =>
+      'Начни тренироваться, чтобы увидеть что-то здесь';
 }

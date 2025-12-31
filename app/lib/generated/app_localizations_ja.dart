@@ -805,4 +805,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get capabilities => '能力';
+
+  @override
+  String get noTrainingsCompletedYet => 'トレーニングを始めて何か表示しよう';
 }

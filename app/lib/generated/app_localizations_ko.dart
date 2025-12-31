@@ -805,4 +805,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get capabilities => '능력';
+
+  @override
+  String get noTrainingsCompletedYet => '훈련을 시작해서 여기에 뭔가 보여주세요';
 }
