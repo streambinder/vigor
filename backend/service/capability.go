@@ -115,7 +115,7 @@ func IsPositiveFeedback(feedback string) bool {
 }
 
 // RecordCapabilities writes capability records for a user based on training activities.
-func RecordCapabilities(userID uuid.UUID, activities []*model.Activity, exerciseMap map[string]*model.Exercise, modifierMap map[string]*model.Modifier) error {
+func RecordCapabilities(userID, trainingID uuid.UUID, activities []*model.Activity, exerciseMap map[string]*model.Exercise, modifierMap map[string]*model.Modifier) error {
 	// get current max per family for this user
 	currentMax := make(map[string]float64)
 	var existing []struct {
@@ -153,9 +153,10 @@ func RecordCapabilities(userID uuid.UUID, activities []*model.Activity, exercise
 			effective := baseOrder + impact
 			if effective >= currentMax[family] {
 				toInsert = append(toInsert, model.Capability{
-					UserID: userID,
-					Family: family,
-					Value:  effective,
+					UserID:     userID,
+					TrainingID: trainingID,
+					Family:     family,
+					Value:      effective,
 				})
 				// update local max for subsequent activities in same call
 				if effective > currentMax[family] {

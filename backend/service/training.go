@@ -378,7 +378,7 @@ func recordTrainingCapabilities(training *model.Training) error {
 	activities := training.Activities()
 
 	// record for training owner
-	if err := RecordCapabilities(training.UserID, activities, exerciseMap, modifierMap); err != nil {
+	if err := RecordCapabilities(training.UserID, training.ID, activities, exerciseMap, modifierMap); err != nil {
 		return err
 	}
 
@@ -386,7 +386,7 @@ func recordTrainingCapabilities(training *model.Training) error {
 	var partners []model.Partner
 	database.DB.Where("training_id = ?", training.ID).Find(&partners)
 	for _, partner := range partners {
-		if err := RecordCapabilities(partner.UserID, activities, exerciseMap, modifierMap); err != nil {
+		if err := RecordCapabilities(partner.UserID, training.ID, activities, exerciseMap, modifierMap); err != nil {
 			log.Error().Err(err).Str("partner", partner.UserID.String()).Msg("failed to record partner capabilities")
 		}
 	}

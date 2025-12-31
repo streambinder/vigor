@@ -11,6 +11,8 @@ class Capability {
   final String id;
   @JsonKey(name: 'user_id', defaultValue: '')
   final String userId;
+  @JsonKey(name: 'training_id', defaultValue: '')
+  final String trainingId;
   @JsonKey(name: 'family', defaultValue: '')
   final String family;
   @JsonKey(name: 'value')
@@ -21,6 +23,7 @@ class Capability {
   Capability({
     required this.id,
     required this.userId,
+    required this.trainingId,
     required this.family,
     required this.value,
     required this.createdAt,
