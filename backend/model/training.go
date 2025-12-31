@@ -146,9 +146,10 @@ type Activity struct {
 	ID      string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id" prompt:"-"`
 	BlockID string `gorm:"index;type:uuid;not null" json:"block_id" prompt:"-"`
 
-	Position  int            `gorm:"not null;default:0" json:"-" prompt:"-"`
-	Name      string         `gorm:"not null" json:"name" prompt:"Exercise ID from AVAILABLE_EXERCISES"`
-	Duration  int            `gorm:"not null" json:"duration" prompt:"Seconds (use 0 when reps > 0)"`
+	Position   int            `gorm:"not null;default:0" json:"-" prompt:"-"`
+	ExerciseID string         `gorm:"not null" json:"exercise_id" prompt:"Exercise ID from AVAILABLE_EXERCISES"`
+	Name       string         `gorm:"not null" json:"name" prompt:"-"`
+	Duration   int            `gorm:"not null" json:"duration" prompt:"Seconds (use 0 when reps > 0)"`
 	Reps      int            `gorm:"not null" json:"reps" prompt:"Repetition count (use 0 for time-based)"`
 	WeightKg  int            `gorm:"not null" json:"weight_kg" prompt:"Weight in kg (0 for bodyweight)"`
 	Modifiers pq.StringArray `gorm:"type:text[]" json:"modifiers" prompt:"Equipment modifiers applied (empty array if none)"`
@@ -184,7 +185,7 @@ func (t Training) DaysSince() int {
 	return int(time.Since(date).Hours() / 24)
 }
 
-// Activities returns pointers to work-type activities in the training, deduplicated by name
+// Activities returns pointers to work-type activities in the training, deduplicated by ExerciseID
 func (t *Training) Activities() []*Activity {
 	seen := make(map[string]bool)
 	var activities []*Activity
@@ -192,10 +193,10 @@ func (t *Training) Activities() []*Activity {
 		for j := range t.Routines[i].Blocks {
 			for k := range t.Routines[i].Blocks[j].Activities {
 				a := &t.Routines[i].Blocks[j].Activities[k]
-				if seen[a.Name] || !slices.Contains(ActivityWorkTypes, a.DetailType()) {
+				if seen[a.ExerciseID] || !slices.Contains(ActivityWorkTypes, a.DetailType()) {
 					continue
 				}
-				seen[a.Name] = true
+				seen[a.ExerciseID] = true
 				activities = append(activities, a)
 			}
 		}

@@ -217,9 +217,10 @@ func GenerateTraining(userID uuid.UUID, params GenerateTrainingParams) (*model.T
 			for k := range training.Routines[i].Blocks[j].Activities {
 				activity := &training.Routines[i].Blocks[j].Activities[k]
 				var exercise model.Exercise
-				if err := database.Knowledge.First(&exercise, "id = ?", activity.Name).Error; err != nil {
-					log.Error().Err(err).Str("exercise", activity.Name).Msg("failed to query exercise from database")
+				if err := database.Knowledge.First(&exercise, "id = ?", activity.ExerciseID).Error; err != nil {
+					log.Error().Err(err).Str("exercise", activity.ExerciseID).Msg("failed to query exercise from database")
 				}
+				activity.Name = exercise.Name
 				if exerciseJSON, err := json.Marshal(exercise); err == nil {
 					activity.Detail = exerciseJSON
 				}
@@ -328,7 +329,7 @@ func CompleteTraining(userID uuid.UUID, trainingID string, params CompleteTraini
 
 	if len(params.ActivityFeedback) > 0 {
 		for _, activity := range training.Activities() {
-			if feedback, ok := params.ActivityFeedback[activity.Name]; ok {
+			if feedback, ok := params.ActivityFeedback[activity.ExerciseID]; ok {
 				activity.Feedback = feedback
 				database.DB.Model(activity).Update("feedback", feedback)
 			}

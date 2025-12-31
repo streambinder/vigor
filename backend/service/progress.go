@@ -113,7 +113,7 @@ func CalculateMuscleImpact(userID uuid.UUID, exercises map[string]*model.Exercis
 		for _, routine := range training.Routines {
 			for _, block := range routine.Blocks {
 				for _, activity := range block.Activities {
-					exercise := exercises[activity.Name]
+					exercise := exercises[activity.ExerciseID]
 					if exercise == nil {
 						continue
 					}

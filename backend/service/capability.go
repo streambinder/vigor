@@ -139,7 +139,7 @@ func RecordCapabilities(userID uuid.UUID, activities []*model.Activity, exercise
 			continue
 		}
 
-		exercise := exerciseMap[activity.Name]
+		exercise := exerciseMap[activity.ExerciseID]
 		if exercise == nil {
 			continue
 		}

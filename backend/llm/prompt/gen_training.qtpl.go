@@ -526,7 +526,7 @@ Use ONLY these exercise IDs for the cooldown routine.
 			activitiesWithFeedback := []string{}
 			for _, a := range training.Activities() {
 				if len(a.Feedback) > 0 {
-					activitiesWithFeedback = append(activitiesWithFeedback, a.Name+": "+a.Feedback)
+					activitiesWithFeedback = append(activitiesWithFeedback, a.ExerciseID+": "+a.Feedback)
 				}
 			}
 

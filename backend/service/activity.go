@@ -128,6 +128,7 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		return model.Activity{}, err
 	}
 
+	activity.ExerciseID = newExercise.ID
 	activity.Name = newExercise.Name
 	activity.Detail = exerciseJSON
 	if err := database.DB.Save(&activity).Error; err != nil {
