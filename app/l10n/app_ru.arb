@@ -278,6 +278,7 @@
   "yourProgress": "Ваш прогресс",
   "trainingsCompleted": "{count} тренировок завершено",
   "completedTrainings": "завершённых тренировок",
+  "partneredTrainings": "совместных тренировок",
   "movementFamilies": "Семейства движений",
   "muscleActivity": "Мышечная активность",
   "failedToLoadProgress": "Не удалось загрузить прогресс",

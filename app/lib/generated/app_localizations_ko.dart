@@ -781,6 +781,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get completedTrainings => '완료한 훈련';
 
   @override
+  String get partneredTrainings => '파트너 훈련';
+
+  @override
   String get movementFamilies => '동작 카테고리';
 
   @override

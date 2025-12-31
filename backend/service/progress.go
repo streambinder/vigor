@@ -34,6 +34,11 @@ func GetProgress(userID uuid.UUID) (model.Progress, error) {
 		return model.Progress{}, err
 	}
 
+	partneredTrainings, err := GetPartneredTrainingsCount(userID)
+	if err != nil {
+		return model.Progress{}, err
+	}
+
 	// load exercises to get familyMaxes and muscle list
 	var allExercises []model.Exercise
 	if err := database.Knowledge.Find(&allExercises).Error; err != nil {
@@ -84,9 +89,10 @@ func GetProgress(userID uuid.UUID) (model.Progress, error) {
 	muscles := CalculateMuscleImpact(userID, exerciseMap, allMuscles)
 
 	return model.Progress{
-		Families:          families,
-		Muscles:           muscles,
-		TrainingsComplete: trainingsComplete,
+		Families:           families,
+		Muscles:            muscles,
+		Trainings:          trainingsComplete,
+		TrainingsPartnered: partneredTrainings,
 	}, nil
 }
 

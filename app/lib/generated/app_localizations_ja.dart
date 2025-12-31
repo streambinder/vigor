@@ -781,6 +781,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get completedTrainings => '完了したトレーニング';
 
   @override
+  String get partneredTrainings => 'パートナートレーニング';
+
+  @override
   String get movementFamilies => '動作カテゴリ';
 
   @override

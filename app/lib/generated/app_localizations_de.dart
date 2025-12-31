@@ -795,6 +795,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get completedTrainings => 'abgeschlossene Trainings';
 
   @override
+  String get partneredTrainings => 'Partner-Trainings';
+
+  @override
   String get movementFamilies => 'Bewegungsfamilien';
 
   @override

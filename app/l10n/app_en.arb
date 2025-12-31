@@ -413,6 +413,7 @@
     }
   },
   "completedTrainings": "completed trainings",
+  "partneredTrainings": "partnered trainings",
   "movementFamilies": "Movement Families",
   "muscleActivity": "Muscle Activity",
   "failedToLoadProgress": "Failed to load progress",

@@ -278,6 +278,7 @@
   "yourProgress": "您的进度",
   "trainingsCompleted": "已完成 {count} 次训练",
   "completedTrainings": "已完成训练",
+  "partneredTrainings": "合作训练",
   "movementFamilies": "动作类别",
   "muscleActivity": "肌肉活动",
   "failedToLoadProgress": "加载进度失败",

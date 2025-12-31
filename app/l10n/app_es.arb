@@ -278,6 +278,7 @@
   "yourProgress": "Tu progreso",
   "trainingsCompleted": "{count} entrenamientos completados",
   "completedTrainings": "entrenamientos completados",
+  "partneredTrainings": "entrenamientos en pareja",
   "movementFamilies": "Familias de movimiento",
   "muscleActivity": "Actividad muscular",
   "failedToLoadProgress": "No se pudo cargar el progreso",

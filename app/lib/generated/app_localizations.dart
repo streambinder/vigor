@@ -1554,6 +1554,12 @@ abstract class AppLocalizations {
   /// **'completed trainings'**
   String get completedTrainings;
 
+  /// No description provided for @partneredTrainings.
+  ///
+  /// In en, this message translates to:
+  /// **'partnered trainings'**
+  String get partneredTrainings;
+
   /// No description provided for @movementFamilies.
   ///
   /// In en, this message translates to:

@@ -87,10 +87,10 @@ class _HomePageState extends State<HomePage> {
     }
 
     final families = ProgressService.parseFamilies(_progress!.families);
-    final trainingsComplete = _progress!.trainingsComplete ?? 0;
+    final trainings = _progress!.trainings;
 
     // show empty state when no trainings completed
-    if (trainingsComplete == 0) {
+    if (trainings == 0) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -136,25 +136,38 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildTrainingCount(AppLocalizations l10n) {
-    final count = _progress?.trainingsComplete ?? 0;
+    final count = _progress?.trainings ?? 0;
+    final partnered = _progress?.trainingsPartnered ?? 0;
 
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        _buildCountColumn(count, l10n.completedTrainings, fontSize: 72),
+        const SizedBox(width: 32),
+        _buildCountColumn(partnered, l10n.partneredTrainings, fontSize: 48),
+      ],
+    );
+  }
+
+  Widget _buildCountColumn(int count, String label, {required double fontSize}) {
     return Column(
       children: [
         Text(
           '$count',
           style: PlatformHelper.useLiquidGlass
               ? LiquidGlassTheme.titleStyle.copyWith(
-                  fontSize: 72,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.w700,
                 )
               : Theme.of(context).textTheme.displayLarge?.copyWith(
-                    fontSize: 72,
+                    fontSize: fontSize,
                     fontWeight: FontWeight.w700,
                   ),
         ),
         const SizedBox(height: 4),
         Text(
-          l10n.completedTrainings,
+          label,
           style: PlatformHelper.useLiquidGlass
               ? LiquidGlassTheme.captionStyle
               : Theme.of(context).textTheme.bodyMedium?.copyWith(

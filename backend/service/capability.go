@@ -74,6 +74,16 @@ func GetTrainingsCompleteCount(userID uuid.UUID) (int, error) {
 	return int(count), err
 }
 
+// GetPartneredTrainingsCount returns the number of completed trainings where the user is a partner (not owner).
+func GetPartneredTrainingsCount(userID uuid.UUID) (int, error) {
+	var count int64
+	err := database.DB.Model(&model.Partner{}).
+		Joins("JOIN trainings ON trainings.id = partners.training_id").
+		Where("partners.user_id = ? AND trainings.completed_at IS NOT NULL", userID).
+		Count(&count).Error
+	return int(count), err
+}
+
 // DecayCapability reduces capability based on time since last demonstration.
 func DecayCapability(capability float64, demonstratedAt, now time.Time) float64 {
 	daysSince := now.Sub(demonstratedAt).Hours() / 24

@@ -23,7 +23,7 @@ class ProgressService {
     if (response.isSuccess && response.data != null) {
       try {
         final progress = Progress.fromJson(response.data!);
-        AppLogger.info('[ProgressService] Fetched progress: ${progress.trainingsComplete} trainings');
+        AppLogger.info('[ProgressService] Fetched progress: ${progress.trainings} trainings');
         return ApiResponse.success(progress, response.statusCode);
       } catch (e) {
         AppLogger.error('[ProgressService] failed to parse progress', e);

@@ -13,7 +13,8 @@ type MuscleImpact struct {
 
 // Progress represents the user's overall training progress.
 type Progress struct {
-	Families          map[string]FamilyProgress `json:"families"`
-	Muscles           map[string]MuscleImpact   `json:"muscles"`
-	TrainingsComplete int                       `json:"trainings_complete"`
+	Families           map[string]FamilyProgress `json:"families"`
+	Muscles            map[string]MuscleImpact   `json:"muscles"`
+	Trainings          int                       `json:"trainings"`
+	TrainingsPartnered int                       `json:"trainings_partnered"`
 }

@@ -786,6 +786,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get completedTrainings => 'завершённых тренировок';
 
   @override
+  String get partneredTrainings => 'совместных тренировок';
+
+  @override
   String get movementFamilies => 'Семейства движений';
 
   @override

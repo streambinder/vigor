@@ -790,6 +790,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get completedTrainings => 'treinos concluídos';
 
   @override
+  String get partneredTrainings => 'treinos em parceria';
+
+  @override
   String get movementFamilies => 'Famílias de movimento';
 
   @override

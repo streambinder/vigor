@@ -781,6 +781,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get completedTrainings => '已完成训练';
 
   @override
+  String get partneredTrainings => '合作训练';
+
+  @override
   String get movementFamilies => '动作类别';
 
   @override

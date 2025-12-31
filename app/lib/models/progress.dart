@@ -11,13 +11,16 @@ class Progress {
   final Map<String, dynamic> families;
   @JsonKey(name: 'muscles')
   final Map<String, dynamic> muscles;
-  @JsonKey(name: 'trainings_complete')
-  final int trainingsComplete;
+  @JsonKey(name: 'trainings')
+  final int trainings;
+  @JsonKey(name: 'trainings_partnered')
+  final int trainingsPartnered;
 
   Progress({
     required this.families,
     required this.muscles,
-    required this.trainingsComplete,
+    required this.trainings,
+    required this.trainingsPartnered,
   });
 
   factory Progress.fromJson(Map<String, dynamic> json) => _$ProgressFromJson(json);
