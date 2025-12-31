@@ -1,4 +1,4 @@
-package handler
+package service
 
 import (
 	"encoding/json"
@@ -41,7 +41,7 @@ func TestCalculateFamilyProgress(t *testing.T) {
 	now := time.Now()
 
 	t.Run("empty history returns zero progress", func(t *testing.T) {
-		result := calculateFamilyProgress(nil, nil, exercises, familyMaxes)
+		result := CalculateFamilyProgress(nil, exercises, familyMaxes)
 
 		for family, fp := range result {
 			if fp.Capability != 0 {
@@ -74,7 +74,7 @@ func TestCalculateFamilyProgress(t *testing.T) {
 			},
 		}
 
-		result := calculateFamilyProgress(nil, history, exercises, familyMaxes)
+		result := CalculateFamilyProgress(history, exercises, familyMaxes)
 
 		// horizontal_push: 50/100 = 50%
 		if result["horizontal_push"].Capability != 50 {
@@ -113,7 +113,7 @@ func TestCalculateFamilyProgress(t *testing.T) {
 			})
 		}
 
-		result := calculateFamilyProgress(nil, history, exercises, familyMaxes)
+		result := CalculateFamilyProgress(history, exercises, familyMaxes)
 
 		if result["horizontal_push"].Calibration != 100 {
 			t.Errorf("expected 100%% calibration (capped), got %v", result["horizontal_push"].Calibration)
@@ -145,7 +145,7 @@ func TestCalculateMuscleImpact(t *testing.T) {
 	now := time.Now()
 
 	t.Run("empty history returns zero heat", func(t *testing.T) {
-		result := calculateMuscleImpact(nil, exercises, allMuscles)
+		result := CalculateMuscleImpact(nil, exercises, allMuscles)
 
 		for muscle := range allMuscles {
 			if result[muscle].Heat != 0 {
@@ -174,7 +174,7 @@ func TestCalculateMuscleImpact(t *testing.T) {
 			},
 		}
 
-		result := calculateMuscleImpact(history, exercises, allMuscles)
+		result := CalculateMuscleImpact(history, exercises, allMuscles)
 
 		// chest, arms, core should have heat > 0
 		if result["chest"].Heat == 0 {
@@ -231,8 +231,8 @@ func TestCalculateMuscleImpact(t *testing.T) {
 			},
 		}
 
-		recentResult := calculateMuscleImpact(recentHistory, exercises, allMuscles)
-		olderResult := calculateMuscleImpact(olderHistory, exercises, allMuscles)
+		recentResult := CalculateMuscleImpact(recentHistory, exercises, allMuscles)
+		olderResult := CalculateMuscleImpact(olderHistory, exercises, allMuscles)
 
 		if recentResult["chest"].Heat <= olderResult["chest"].Heat {
 			t.Errorf("recent training should have more heat: recent=%v, older=%v",
