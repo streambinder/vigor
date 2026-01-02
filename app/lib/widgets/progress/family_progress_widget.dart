@@ -3,7 +3,7 @@ import '../../models/family_progress.dart';
 import '../../theme/liquid_glass_theme.dart';
 import '../../utils/platform_helper.dart';
 
-/// Displays capability progress bars for each movement family.
+/// Displays proficiency progress bars for each movement family.
 class FamilyProgressWidget extends StatelessWidget {
   final Map<String, FamilyProgress> families;
 
@@ -66,7 +66,7 @@ class FamilyProgressWidget extends StatelessWidget {
 
   Widget _buildFamilyRow(BuildContext context, String family, FamilyProgress progress) {
     final label = _familyLabels[family] ?? _formatFamilyName(family);
-    final capability = progress.capability.clamp(0.0, 100.0);
+    final proficiency = progress.proficiency.clamp(0.0, 100.0);
 
     final primaryColor = PlatformHelper.useLiquidGlass
         ? LiquidGlassTheme.primaryColor
@@ -88,7 +88,7 @@ class FamilyProgressWidget extends StatelessWidget {
           children: [
             Text(label, style: textStyle),
             Text(
-              '${capability.toInt()}%',
+              '${proficiency.toInt()}%',
               style: textStyle?.copyWith(fontWeight: FontWeight.w600),
             ),
           ],
@@ -104,7 +104,7 @@ class FamilyProgressWidget extends StatelessWidget {
               ),
             ),
             FractionallySizedBox(
-              widthFactor: capability / 100,
+              widthFactor: proficiency / 100,
               child: Container(
                 height: 6,
                 decoration: BoxDecoration(

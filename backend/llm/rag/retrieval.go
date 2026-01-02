@@ -44,8 +44,8 @@ func RetrieveAllMethodologies() ([]model.Methodology, error) {
 }
 
 // RetrieveWorkExercises retrieves exercises for the main training phase via RAG.
-// Filters by methodology families, user equipment, and user capability.
-func RetrieveWorkExercises(profiles []model.Profile, equipment []string, capabilities map[string]float64, capabilityMargin float64, methodology *model.Methodology) ([]model.Exercise, error) {
+// Filters by methodology families, user equipment, and user proficiency.
+func RetrieveWorkExercises(profiles []model.Profile, equipment []string, proficiencies map[string]float64, proficiencyMargin float64, methodology *model.Methodology) ([]model.Exercise, error) {
 	embeddingText := GenUserExercises(profiles, equipment)
 	exerciseEmbedding, err := embedding.GenVector(embeddingText)
 	if err != nil {
@@ -117,7 +117,7 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string, capabil
 		exercises = append(exercises, result.Exercise)
 	}
 
-	return filterByCapability(exercises, capabilities, methodology, capabilityMargin), nil
+	return filterByProficiency(exercises, proficiencies, methodology, proficiencyMargin), nil
 }
 
 // QueryUserFacts retrieves facts relevant to the users' profiles and prompt.
@@ -305,23 +305,23 @@ func RetrieveFavoriteExercises(favorites []string) ([]model.Exercise, error) {
 	return exercises, nil
 }
 
-// filterByCapability filters exercises based on user capability per family and methodology min scores.
-// Applies graceful degradation: if methodology min yields too few results, falls back to capability-only.
-func filterByCapability(exercises []model.Exercise, capabilities map[string]float64, methodology *model.Methodology, margin float64) []model.Exercise {
-	log.Debug().Float64("capability_margin", margin).Msg("filtering exercises by capability")
+// filterByProficiency filters exercises based on user proficiency per family and methodology min scores.
+// Applies graceful degradation: if methodology min yields too few results, falls back to proficiency-only.
+func filterByProficiency(exercises []model.Exercise, proficiencies map[string]float64, methodology *model.Methodology, margin float64) []model.Exercise {
+	log.Debug().Float64("proficiency_margin", margin).Msg("filtering exercises by proficiency")
 
 	var methodologyWork map[string]model.MethodologyWork
 	if methodology != nil {
 		methodologyWork = methodology.GetWork()
 	}
 
-	// first pass: apply both capability max and methodology min
-	filtered := filterWithConstraints(exercises, capabilities, methodologyWork, margin, true)
+	// first pass: apply both proficiency max and methodology min
+	filtered := filterWithConstraints(exercises, proficiencies, methodologyWork, margin, true)
 
 	// graceful degradation: if too few results, ignore methodology min
 	if len(filtered) < MinWorkExercises && methodologyWork != nil {
 		log.Debug().Int("count", len(filtered)).Msg("too few exercises with methodology min, falling back")
-		filtered = filterWithConstraints(exercises, capabilities, methodologyWork, margin, false)
+		filtered = filterWithConstraints(exercises, proficiencies, methodologyWork, margin, false)
 	}
 
 	if len(filtered) > MaxWorkExercises {
@@ -330,8 +330,8 @@ func filterByCapability(exercises []model.Exercise, capabilities map[string]floa
 	return filtered
 }
 
-// filterWithConstraints applies capability and optionally methodology min constraints.
-func filterWithConstraints(exercises []model.Exercise, capabilities map[string]float64, methodologyWork map[string]model.MethodologyWork, margin float64, applyMin bool) []model.Exercise {
+// filterWithConstraints applies proficiency and optionally methodology min constraints.
+func filterWithConstraints(exercises []model.Exercise, proficiencies map[string]float64, methodologyWork map[string]model.MethodologyWork, margin float64, applyMin bool) []model.Exercise {
 	filtered := make([]model.Exercise, 0, len(exercises))
 	for _, exercise := range exercises {
 		progressions := exercise.GetProgressions()
@@ -342,8 +342,8 @@ func filterWithConstraints(exercises []model.Exercise, capabilities map[string]f
 
 		allowed := true
 		for family, score := range progressions {
-			// capability max: score must be within user capability + margin
-			if score > capabilities[family]+margin {
+			// proficiency max: score must be within user proficiency + margin
+			if score > proficiencies[family]+margin {
 				allowed = false
 				break
 			}

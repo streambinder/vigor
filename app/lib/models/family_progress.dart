@@ -7,13 +7,13 @@ part 'family_progress.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class FamilyProgress {
-  @JsonKey(name: 'capability')
-  final double capability;
+  @JsonKey(name: 'proficiency')
+  final double proficiency;
   @JsonKey(name: 'calibration')
   final double calibration;
 
   FamilyProgress({
-    required this.capability,
+    required this.proficiency,
     required this.calibration,
   });
 

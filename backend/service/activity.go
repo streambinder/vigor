@@ -21,7 +21,7 @@ var (
 )
 
 // ShuffleActivity replaces an activity's exercise with a random alternative.
-// Only the training owner can shuffle; alternatives are filtered by user capability.
+// Only the training owner can shuffle; alternatives are filtered by user proficiency.
 func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error) {
 	var activity model.Activity
 	if err := database.DB.First(&activity, "id = ?", activityID).Error; err != nil {
@@ -77,8 +77,8 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		return model.Activity{}, ErrInvalidExercise
 	}
 
-	// get user capabilities and training count for progressive margin
-	capabilities, err := GetCapabilities(userID)
+	// get user proficiencies and training count for progressive margin
+	proficiencies, err := GetProficiencies(userID)
 	if err != nil {
 		return model.Activity{}, err
 	}
@@ -88,9 +88,9 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 	}
 	margin := ProgressiveMargin(trainingsComplete)
 
-	// calculate max allowed score based on user capability
-	capForFamily := capabilities[primaryFamily]
-	maxAllowed := capForFamily + margin
+	// calculate max allowed score based on user proficiency
+	profForFamily := proficiencies[primaryFamily]
+	maxAllowed := profForFamily + margin
 
 	// collect all exercise IDs from other activities in training
 	var excludeIDs []string
@@ -108,7 +108,7 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		}
 	}
 
-	// build base query matching by family with capability-based upper bound
+	// build base query matching by family with proficiency-based upper bound
 	baseQuery := func() *gorm.DB {
 		q := database.Knowledge.
 			Model(&model.Exercise{}).

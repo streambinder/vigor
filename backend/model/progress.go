@@ -2,8 +2,8 @@ package model
 
 // FamilyProgress represents user progress within a movement family.
 type FamilyProgress struct {
-	Capability  float64 `json:"capability"`  // 0-100% of family max
-	Calibration float64 `json:"calibration"` // 0-100% confidence in capability estimate
+	Proficiency float64 `json:"proficiency"` // 0-100% of family max
+	Calibration float64 `json:"calibration"` // 0-100% confidence in proficiency estimate
 }
 
 // MuscleImpact represents recent training stress on a muscle group.

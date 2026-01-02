@@ -3,35 +3,35 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
-part 'capability.g.dart';
+part 'proficiency.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-class Capability {
+class Proficiency {
   @JsonKey(name: 'id', defaultValue: '')
   final String id;
   @JsonKey(name: 'user_id', defaultValue: '')
   final String userId;
   @JsonKey(name: 'training_id', defaultValue: '')
   final String trainingId;
-  @JsonKey(name: 'family', defaultValue: '')
-  final String family;
+  @JsonKey(name: 'movement_family', defaultValue: '')
+  final String movementFamily;
   @JsonKey(name: 'value')
   final double value;
   @JsonKey(name: 'created_at', toJson: _dateTimeToJson)
   final DateTime createdAt;
 
-  Capability({
+  Proficiency({
     required this.id,
     required this.userId,
     required this.trainingId,
-    required this.family,
+    required this.movementFamily,
     required this.value,
     required this.createdAt,
   });
 
-  factory Capability.fromJson(Map<String, dynamic> json) => _$CapabilityFromJson(json);
+  factory Proficiency.fromJson(Map<String, dynamic> json) => _$ProficiencyFromJson(json);
 
-  Map<String, dynamic> toJson() => _$CapabilityToJson(this);
+  Map<String, dynamic> toJson() => _$ProficiencyToJson(this);
 
   static String _dateTimeToJson(DateTime dt) => dt.toUtc().toIso8601String();
 }

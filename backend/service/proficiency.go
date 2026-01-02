@@ -10,24 +10,24 @@ import (
 )
 
 const (
-	CapabilityHalfLife     = 30.0 // days after which capability decays to 50%
-	MinCapabilityRetention = 0.3  // minimum fraction of capability retained (floor)
+	ProficiencyHalfLife     = 30.0 // days after which proficiency decays to 50%
+	MinProficiencyRetention = 0.3  // minimum fraction of proficiency retained (floor)
 )
 
-// GetCapabilities returns decayed capabilities per family for a user.
-func GetCapabilities(userID uuid.UUID) (map[string]float64, error) {
+// GetProficiencies returns decayed proficiencies per movement family for a user.
+func GetProficiencies(userID uuid.UUID) (map[string]float64, error) {
 	var records []struct {
-		Family    string
-		Value     float64
-		CreatedAt time.Time
+		MovementFamily string
+		Value          float64
+		CreatedAt      time.Time
 	}
 
-	// get max value per family with latest timestamp for that max
+	// get max value per movement family with latest timestamp for that max
 	err := database.DB.Raw(`
-		SELECT DISTINCT ON (family) family, value, created_at
-		FROM capabilities
+		SELECT DISTINCT ON (movement_family) movement_family, value, created_at
+		FROM proficiencies
 		WHERE user_id = ?
-		ORDER BY family, value DESC, created_at DESC
+		ORDER BY movement_family, value DESC, created_at DESC
 	`, userID).Scan(&records).Error
 	if err != nil {
 		return nil, err
@@ -36,23 +36,23 @@ func GetCapabilities(userID uuid.UUID) (map[string]float64, error) {
 	now := time.Now()
 	result := make(map[string]float64)
 	for _, r := range records {
-		result[r.Family] = DecayCapability(r.Value, r.CreatedAt, now)
+		result[r.MovementFamily] = DecayProficiency(r.Value, r.CreatedAt, now)
 	}
 	return result, nil
 }
 
-// GetCapabilityCalibration returns calibration count per family (number of records).
-func GetCapabilityCalibration(userID uuid.UUID) (map[string]int, error) {
+// GetProficiencyCalibration returns calibration count per movement family (number of records).
+func GetProficiencyCalibration(userID uuid.UUID) (map[string]int, error) {
 	var counts []struct {
-		Family string
-		Count  int
+		MovementFamily string
+		Count          int
 	}
 
 	err := database.DB.Raw(`
-		SELECT family, COUNT(*) as count
-		FROM capabilities
+		SELECT movement_family, COUNT(*) as count
+		FROM proficiencies
 		WHERE user_id = ?
-		GROUP BY family
+		GROUP BY movement_family
 	`, userID).Scan(&counts).Error
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func GetCapabilityCalibration(userID uuid.UUID) (map[string]int, error) {
 
 	result := make(map[string]int)
 	for _, c := range counts {
-		result[c.Family] = c.Count
+		result[c.MovementFamily] = c.Count
 	}
 	return result, nil
 }
@@ -84,17 +84,17 @@ func GetPartneredTrainingsCount(userID uuid.UUID) (int, error) {
 	return int(count), err
 }
 
-// DecayCapability reduces capability based on time since last demonstration.
-func DecayCapability(capability float64, demonstratedAt, now time.Time) float64 {
+// DecayProficiency reduces proficiency based on time since last demonstration.
+func DecayProficiency(proficiency float64, demonstratedAt, now time.Time) float64 {
 	daysSince := now.Sub(demonstratedAt).Hours() / 24
 	if daysSince <= 0 {
-		return capability
+		return proficiency
 	}
-	retention := math.Pow(0.5, daysSince/CapabilityHalfLife)
-	if retention < MinCapabilityRetention {
-		retention = MinCapabilityRetention
+	retention := math.Pow(0.5, daysSince/ProficiencyHalfLife)
+	if retention < MinProficiencyRetention {
+		retention = MinProficiencyRetention
 	}
-	return capability * retention
+	return proficiency * retention
 }
 
 // ModifierImpact calculates total progression impact from applied modifiers.
@@ -117,9 +117,9 @@ func ModifierImpact(modifierIDs []string, weightKg float64, allModifiers map[str
 	return total
 }
 
-// ProgressiveMargin returns a capability margin based on completed training count.
+// ProgressiveMargin returns a proficiency margin based on completed training count.
 // New users get wider margins to ensure exercise variety, gradually tightening
-// as we gather enough history for personalized capability filtering.
+// as we gather enough history for personalized proficiency filtering.
 func ProgressiveMargin(completedTrainings int) float64 {
 	switch {
 	case completedTrainings == 0:
@@ -140,26 +140,26 @@ func IsPositiveFeedback(feedback string) bool {
 		feedback != model.FeedbackSkipped
 }
 
-// RecordCapabilities writes capability records for a user based on training activities.
-func RecordCapabilities(userID, trainingID uuid.UUID, activities []*model.Activity, exerciseMap map[string]*model.Exercise, modifierMap map[string]*model.Modifier) error {
-	// get current max per family for this user
+// RecordProficiencies writes proficiency records for a user based on training activities.
+func RecordProficiencies(userID, trainingID uuid.UUID, activities []*model.Activity, exerciseMap map[string]*model.Exercise, modifierMap map[string]*model.Modifier) error {
+	// get current max per movement family for this user
 	currentMax := make(map[string]float64)
 	var existing []struct {
-		Family string
-		Value  float64
+		MovementFamily string
+		Value          float64
 	}
 	database.DB.Raw(`
-		SELECT DISTINCT ON (family) family, value
-		FROM capabilities
+		SELECT DISTINCT ON (movement_family) movement_family, value
+		FROM proficiencies
 		WHERE user_id = ?
-		ORDER BY family, value DESC
+		ORDER BY movement_family, value DESC
 	`, userID).Scan(&existing)
 	for _, e := range existing {
-		currentMax[e.Family] = e.Value
+		currentMax[e.MovementFamily] = e.Value
 	}
 
 	// process activities
-	toInsert := make([]model.Capability, 0)
+	toInsert := make([]model.Proficiency, 0)
 	for _, activity := range activities {
 		if !IsPositiveFeedback(activity.Feedback) {
 			continue
@@ -178,11 +178,11 @@ func RecordCapabilities(userID, trainingID uuid.UUID, activities []*model.Activi
 		for family, baseOrder := range progressions {
 			effective := baseOrder + impact
 			if effective >= currentMax[family] {
-				toInsert = append(toInsert, model.Capability{
-					UserID:     userID,
-					TrainingID: trainingID,
-					Family:     family,
-					Value:      effective,
+				toInsert = append(toInsert, model.Proficiency{
+					UserID:         userID,
+					TrainingID:     trainingID,
+					MovementFamily: family,
+					Value:          effective,
 				})
 				// update local max for subsequent activities in same call
 				if effective > currentMax[family] {

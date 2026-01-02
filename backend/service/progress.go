@@ -13,18 +13,18 @@ import (
 const (
 	MuscleImpactDays     = 14  // 14 days for muscle heat
 	MuscleImpactHalfLife = 3.0 // days after which impact decays to 50%
-	CalibrationThreshold = 5   // capability records needed for full calibration
+	CalibrationThreshold = 5   // proficiency records needed for full calibration
 )
 
 // GetProgress computes the complete progress for a user.
 func GetProgress(userID uuid.UUID) (model.Progress, error) {
-	// load capabilities (already decayed)
-	capabilities, err := GetCapabilities(userID)
+	// load proficiencies (already decayed)
+	proficiencies, err := GetProficiencies(userID)
 	if err != nil {
 		return model.Progress{}, err
 	}
 
-	calibration, err := GetCapabilityCalibration(userID)
+	calibration, err := GetProficiencyCalibration(userID)
 	if err != nil {
 		return model.Progress{}, err
 	}
@@ -64,13 +64,13 @@ func GetProgress(userID uuid.UUID) (model.Progress, error) {
 		}
 	}
 
-	// build family progress from stored capabilities
+	// build family progress from stored proficiencies
 	families := make(map[string]model.FamilyProgress)
 	for family, maxOrder := range familyMaxes {
-		cap := capabilities[family]
-		capPercent := (cap / maxOrder) * 100
-		if capPercent > 100 {
-			capPercent = 100
+		prof := proficiencies[family]
+		profPercent := (prof / maxOrder) * 100
+		if profPercent > 100 {
+			profPercent = 100
 		}
 
 		calCount := calibration[family]
@@ -80,7 +80,7 @@ func GetProgress(userID uuid.UUID) (model.Progress, error) {
 		}
 
 		families[family] = model.FamilyProgress{
-			Capability:  capPercent,
+			Proficiency: profPercent,
 			Calibration: calPercent,
 		}
 	}

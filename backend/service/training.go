@@ -84,7 +84,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		}
 	}
 
-	capabilities, err := GetCapabilities(userID)
+	proficiencies, err := GetProficiencies(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +103,8 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		return nil, err
 	}
 
-	capabilityMargin := ProgressiveMargin(trainingsComplete)
-	workExercises, err := rag.RetrieveWorkExercises(profiles, equipmentIDs, capabilities, capabilityMargin, methodologyData)
+	proficiencyMargin := ProgressiveMargin(trainingsComplete)
+	workExercises, err := rag.RetrieveWorkExercises(profiles, equipmentIDs, proficiencies, proficiencyMargin, methodologyData)
 	if err != nil {
 		return nil, err
 	}
@@ -346,15 +346,15 @@ func CompleteTraining(userID uuid.UUID, trainingID, feedback string, activityFee
 		}
 	}
 
-	// record capabilities for owner and partners
-	if err := recordTrainingCapabilities(&training); err != nil {
-		log.Error().Err(err).Msg("failed to record capabilities")
+	// record proficiencies for owner and partners
+	if err := recordTrainingProficiencies(&training); err != nil {
+		log.Error().Err(err).Msg("failed to record proficiencies")
 	}
 
 	return &training, nil
 }
 
-func recordTrainingCapabilities(training *model.Training) error {
+func recordTrainingProficiencies(training *model.Training) error {
 	var allExercises []model.Exercise
 	if err := database.Knowledge.Find(&allExercises).Error; err != nil {
 		return err
@@ -376,7 +376,7 @@ func recordTrainingCapabilities(training *model.Training) error {
 	activities := training.Activities()
 
 	// record for training owner
-	if err := RecordCapabilities(training.UserID, training.ID, activities, exerciseMap, modifierMap); err != nil {
+	if err := RecordProficiencies(training.UserID, training.ID, activities, exerciseMap, modifierMap); err != nil {
 		return err
 	}
 
@@ -384,8 +384,8 @@ func recordTrainingCapabilities(training *model.Training) error {
 	var partners []model.Partner
 	database.DB.Where("training_id = ?", training.ID).Find(&partners)
 	for _, partner := range partners {
-		if err := RecordCapabilities(partner.UserID, training.ID, activities, exerciseMap, modifierMap); err != nil {
-			log.Error().Err(err).Str("partner", partner.UserID.String()).Msg("failed to record partner capabilities")
+		if err := RecordProficiencies(partner.UserID, training.ID, activities, exerciseMap, modifierMap); err != nil {
+			log.Error().Err(err).Str("partner", partner.UserID.String()).Msg("failed to record partner proficiencies")
 		}
 	}
 
