@@ -115,7 +115,8 @@ func GenerateTraining(userID uuid.UUID, params GenerateTrainingParams) (*model.T
 		return nil, err
 	}
 
-	workExercises, err := rag.RetrieveWorkExercises(profiles, equipmentIDs, capabilities, trainingsComplete, methodology)
+	capabilityMargin := ProgressiveMargin(trainingsComplete)
+	workExercises, err := rag.RetrieveWorkExercises(profiles, equipmentIDs, capabilities, capabilityMargin, methodology)
 	if err != nil {
 		return nil, err
 	}

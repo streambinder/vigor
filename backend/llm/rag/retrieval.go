@@ -12,32 +12,15 @@ import (
 )
 
 const (
-	MaxWorkExercises        = 30 // RAG-based retrieval for main training
-	MaxWarmupExercises      = 8  // random selection for warmup
-	MaxCooldownExercises    = 5  // random selection for cooldown
-	MaxPromptFacts          = 5
-	MaxFactDistance         = 0.7  // Maximum cosine distance for facts (0=identical, 2=opposite)
-	MaxExerciseDistance     = 0.2  // Maximum cosine distance for exercise matching
-	DefaultCapabilityMargin = 15.0 // Default margin for capability filtering (allows slight progression)
-	WarmupCooldownMaxScore  = 25   // max progression score for warmup/cooldown exercises
-	MinWorkExercises        = 10   // minimum exercises before falling back to no-min filtering
+	MaxWorkExercises       = 30 // RAG-based retrieval for main training
+	MaxWarmupExercises     = 8  // random selection for warmup
+	MaxCooldownExercises   = 5  // random selection for cooldown
+	MaxPromptFacts         = 5
+	MaxFactDistance        = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
+	MaxExerciseDistance    = 0.2 // Maximum cosine distance for exercise matching
+	WarmupCooldownMaxScore = 25  // max progression score for warmup/cooldown exercises
+	MinWorkExercises       = 10  // minimum exercises before falling back to no-min filtering
 )
-
-// progressiveMargin returns a capability margin based on completed training count.
-// New users get wider margins to ensure exercise variety, gradually tightening
-// as we gather enough history for personalized capability filtering.
-func progressiveMargin(completedTrainings int) float64 {
-	switch {
-	case completedTrainings == 0:
-		return 45.0
-	case completedTrainings <= 2:
-		return 35.0
-	case completedTrainings <= 4:
-		return 25.0
-	default:
-		return DefaultCapabilityMargin
-	}
-}
 
 // RetrieveMethodology fetches a methodology by ID from the knowledge database.
 func RetrieveMethodology(id string) (*model.Methodology, error) {
@@ -62,7 +45,7 @@ func RetrieveAllMethodologies() ([]model.Methodology, error) {
 
 // RetrieveWorkExercises retrieves exercises for the main training phase via RAG.
 // Filters by methodology families, user equipment, and user capability.
-func RetrieveWorkExercises(profiles []model.Profile, equipment []string, capabilities map[string]float64, trainingsComplete int, methodology *model.Methodology) ([]model.Exercise, error) {
+func RetrieveWorkExercises(profiles []model.Profile, equipment []string, capabilities map[string]float64, capabilityMargin float64, methodology *model.Methodology) ([]model.Exercise, error) {
 	embeddingText := GenUserExercises(profiles, equipment)
 	exerciseEmbedding, err := embedding.GenVector(embeddingText)
 	if err != nil {
@@ -134,7 +117,7 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string, capabil
 		exercises = append(exercises, result.Exercise)
 	}
 
-	return filterByCapability(exercises, capabilities, methodology, progressiveMargin(trainingsComplete)), nil
+	return filterByCapability(exercises, capabilities, methodology, capabilityMargin), nil
 }
 
 // QueryUserFacts retrieves facts relevant to the users' profiles and prompt.

@@ -17,9 +17,11 @@ var (
 	ErrTrainingCompleted  = errors.New("cannot shuffle exercises in completed training")
 	ErrNoAlternativeFound = errors.New("no alternative exercise found")
 	ErrInvalidExercise    = errors.New("activity has no valid exercise")
+	ErrNotOwner           = errors.New("only training owner can shuffle exercises")
 )
 
 // ShuffleActivity replaces an activity's exercise with a random alternative.
+// Only the training owner can shuffle; alternatives are filtered by user capability.
 func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error) {
 	var activity model.Activity
 	if err := database.DB.First(&activity, "id = ?", activityID).Error; err != nil {
@@ -41,9 +43,12 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		Preload("Routines", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Preload("Routines.Blocks", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Preload("Routines.Blocks.Activities", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
-		First(&training, "id = ? AND (user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?))",
-			routine.TrainingID, userID, userID).Error; err != nil {
+		First(&training, "id = ?", routine.TrainingID).Error; err != nil {
 		return model.Activity{}, ErrActivityNotFound
+	}
+
+	if training.UserID != userID {
+		return model.Activity{}, ErrNotOwner
 	}
 
 	if training.CompletedAt != nil {
@@ -61,16 +66,31 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 
 	// find primary family (highest score)
 	var primaryFamily string
-	var primaryScore float64
+	var maxScore float64
 	for family, score := range currentExercise.Progressions {
-		if score > primaryScore {
+		if score > maxScore {
 			primaryFamily = family
-			primaryScore = score
+			maxScore = score
 		}
 	}
 	if primaryFamily == "" {
 		return model.Activity{}, ErrInvalidExercise
 	}
+
+	// get user capabilities and training count for progressive margin
+	capabilities, err := GetCapabilities(userID)
+	if err != nil {
+		return model.Activity{}, err
+	}
+	trainingsComplete, err := GetTrainingsCompleteCount(userID)
+	if err != nil {
+		return model.Activity{}, err
+	}
+	margin := ProgressiveMargin(trainingsComplete)
+
+	// calculate max allowed score based on user capability
+	capForFamily := capabilities[primaryFamily]
+	maxAllowed := capForFamily + margin
 
 	// collect all exercise IDs from other activities in training
 	var excludeIDs []string
@@ -88,13 +108,12 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		}
 	}
 
-	// build base query matching by family and score range (+/- 15)
+	// build base query matching by family with capability-based upper bound
 	baseQuery := func() *gorm.DB {
 		q := database.Knowledge.
 			Model(&model.Exercise{}).
-			Where("exercises.progressions ? ?", primaryFamily).
-			Where(fmt.Sprintf("(exercises.progressions->>'%s')::float BETWEEN ? AND ?", primaryFamily),
-				primaryScore-15, primaryScore+15)
+			Where(fmt.Sprintf("exercises.progressions ? '%s'", primaryFamily)).
+			Where(fmt.Sprintf("(exercises.progressions->>'%s')::float <= ?", primaryFamily), maxAllowed)
 		if len(excludeIDs) > 0 {
 			q = q.Where("id NOT IN ?", excludeIDs)
 		}

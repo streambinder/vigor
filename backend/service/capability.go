@@ -117,6 +117,22 @@ func ModifierImpact(modifierIDs []string, weightKg float64, allModifiers map[str
 	return total
 }
 
+// ProgressiveMargin returns a capability margin based on completed training count.
+// New users get wider margins to ensure exercise variety, gradually tightening
+// as we gather enough history for personalized capability filtering.
+func ProgressiveMargin(completedTrainings int) float64 {
+	switch {
+	case completedTrainings == 0:
+		return 45.0
+	case completedTrainings <= 2:
+		return 35.0
+	case completedTrainings <= 4:
+		return 25.0
+	default:
+		return 15.0
+	}
+}
+
 // IsPositiveFeedback returns true if the feedback indicates successful completion.
 func IsPositiveFeedback(feedback string) bool {
 	return feedback != model.FeedbackHard &&
