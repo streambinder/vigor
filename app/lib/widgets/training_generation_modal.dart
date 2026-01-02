@@ -7,6 +7,7 @@ import '../models/gym.dart';
 import '../models/training.dart';
 import '../services/service_locator.dart';
 import '../services/preferences_service.dart';
+import '../services/user_service.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/equipment_selector.dart';
 import '../widgets/user_select_dialog.dart';
@@ -270,6 +271,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             FilterChip(
               label: Text(l10n.methodologyAuto),
               selected: _methodology == null,
+              selectedColor: VigorColors.orange.withValues(alpha: 0.3),
+              checkmarkColor: VigorColors.orange,
               onSelected: (selected) {
                 if (selected) setState(() => _methodology = null);
               },
@@ -279,6 +282,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               return FilterChip(
                 label: Text(_methodologyLabel(m, l10n)),
                 selected: isSelected,
+                selectedColor: VigorColors.orange.withValues(alpha: 0.3),
+                checkmarkColor: VigorColors.orange,
                 onSelected: (selected) {
                   setState(() => _methodology = selected ? m : null);
                 },
