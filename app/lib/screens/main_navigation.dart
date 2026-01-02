@@ -23,7 +23,8 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [
+  // use IndexedStack to preserve screen state across tab switches
+  static const List<Widget> _screens = [
     HomePage(),
     ActivityScreen(),
     ProfileScreen(),
@@ -44,10 +45,13 @@ class _MainNavigationState extends State<MainNavigation> {
         extendBody: true,
         body: Stack(
           children: [
-            // Main content with padding for the navigation bar
+            // IndexedStack preserves state across tab switches
             Padding(
               padding: const EdgeInsets.only(bottom: 100),
-              child: _screens[_currentIndex],
+              child: IndexedStack(
+                index: _currentIndex,
+                children: _screens,
+              ),
             ),
             // Liquid Glass navigation bar
             Positioned(
@@ -77,9 +81,12 @@ class _MainNavigationState extends State<MainNavigation> {
         ),
       );
     } else {
-      // Material Design navigation
+      // Material Design navigation with IndexedStack
       return Scaffold(
-        body: _screens[_currentIndex],
+        body: IndexedStack(
+          index: _currentIndex,
+          children: _screens,
+        ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: _currentIndex,
           onDestinationSelected: _onTabTapped,

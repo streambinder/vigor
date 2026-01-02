@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../config/api_config.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/training.dart';
@@ -13,6 +12,7 @@ import '../utils/platform_helper.dart';
 import '../utils/exercise_modal.dart';
 import '../utils/feedback_modal.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../widgets/cached_exercise_image.dart';
 import '../services/training_service.dart';
 import '../services/secure_storage_service.dart';
 
@@ -213,24 +213,12 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
   }
 
   Exercise? _parseExercise(Map<String, dynamic> detail) {
+    if (detail.isEmpty) return null;
     try {
-      if (detail.isEmpty) return null;
       return Exercise.fromJson(detail);
-    } catch (e) {
+    } catch (_) {
       return null;
     }
-  }
-
-  bool _isValidImageUrl(String? url) {
-    if (url == null || url.isEmpty) return false;
-    final uri = Uri.tryParse(url);
-    if (uri == null) return false;
-    return uri.hasScheme && (uri.scheme == 'http' || uri.scheme == 'https');
-  }
-
-  // proxy external image URLs through backend to avoid CORS issues on web
-  String _proxyImageUrl(String url) {
-    return '${ApiConfig.baseUrl}/proxy/image?url=${Uri.encodeComponent(url)}';
   }
 
   void _startCurrentInterval() {
@@ -583,7 +571,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
           // small icon
           if (!isRest &&
               interval.exercise != null &&
-              _isValidImageUrl(interval.exercise!.reference)) ...[
+              CachedExerciseImage.isValidUrl(interval.exercise!.reference)) ...[
             GestureDetector(
               onTap: () => ExerciseModal.show(context, interval.exercise!),
               child: Container(
@@ -595,16 +583,11 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
                     color: VigorColors.orange.withValues(alpha: 0.3),
                   ),
                 ),
-                child: ClipOval(
-                  child: Image.network(
-                    _proxyImageUrl(interval.exercise!.reference),
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Icon(
-                      Icons.fitness_center,
-                      size: 16,
-                      color: VigorColors.textMuted(context),
-                    ),
-                  ),
+                child: CachedExerciseImage(
+                  imageUrl: interval.exercise!.reference,
+                  width: 32,
+                  height: 32,
+                  isCircular: true,
                 ),
               ),
             ),
@@ -740,7 +723,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
             // Circular exercise image (if available)
-            if (exercise != null && _isValidImageUrl(exercise.reference)) ...[
+            if (exercise != null && CachedExerciseImage.isValidUrl(exercise.reference)) ...[
               GestureDetector(
                 onTap: () => ExerciseModal.show(context, exercise),
                 child: Container(
@@ -760,21 +743,11 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
                       ),
                     ],
                   ),
-                  child: ClipOval(
-                    child: Image.network(
-                      _proxyImageUrl(exercise.reference),
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: VigorColors.textMuted(context).withValues(alpha: 0.3),
-                          child: Icon(
-                            Icons.fitness_center,
-                            size: 40,
-                            color: VigorColors.textMuted(context),
-                          ),
-                        );
-                      },
-                    ),
+                  child: CachedExerciseImage(
+                    imageUrl: exercise.reference,
+                    width: imageSize,
+                    height: imageSize,
+                    isCircular: true,
                   ),
                 ),
               ),

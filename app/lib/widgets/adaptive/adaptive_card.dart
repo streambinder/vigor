@@ -40,29 +40,31 @@ class AdaptiveCard extends StatelessWidget {
     final cardChild = Container(
       margin: margin ?? VigorSpacing.paddingXs,
       padding: padding ?? VigorSpacing.paddingMd,
-      child: ClipRRect(
-        borderRadius: VigorRadius.card,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: VigorColors.glassBlur,
-            sigmaY: VigorColors.glassBlur,
-          ),
-          child: Container(
-            decoration: useVibrantGradient
-                ? LiquidGlassTheme.vibrantGradient(
-                    colors: gradientColors ??
-                        [
-                          VigorColors.orange.withValues(alpha: 0.8),
-                          VigorColors.electricBlue.withValues(alpha: 0.8),
-                        ],
-                    borderRadius: VigorRadius.md,
-                  )
-                : LiquidGlassTheme.glassDecoration(
-                    baseColor: glassColor,
-                    isDark: isDark,
-                    borderRadius: VigorRadius.md,
-                  ),
-            child: child,
+      child: RepaintBoundary(
+        child: ClipRRect(
+          borderRadius: VigorRadius.card,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(
+              sigmaX: VigorColors.glassBlur,
+              sigmaY: VigorColors.glassBlur,
+            ),
+            child: Container(
+              decoration: useVibrantGradient
+                  ? LiquidGlassTheme.vibrantGradient(
+                      colors: gradientColors ??
+                          [
+                            VigorColors.orange.withValues(alpha: 0.8),
+                            VigorColors.electricBlue.withValues(alpha: 0.8),
+                          ],
+                      borderRadius: VigorRadius.md,
+                    )
+                  : LiquidGlassTheme.glassDecoration(
+                      baseColor: glassColor,
+                      isDark: isDark,
+                      borderRadius: VigorRadius.md,
+                    ),
+              child: child,
+            ),
           ),
         ),
       ),

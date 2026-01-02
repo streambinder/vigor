@@ -129,17 +129,19 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         children: [
           // main stat with gradient text
-          ShaderMask(
-            shaderCallback: (bounds) => LinearGradient(
-              colors: [VigorColors.orange, VigorColors.electricBlue],
-            ).createShader(bounds),
-            child: Text(
-              '$trainings',
-              style: VigorTypography.display.copyWith(
-                fontSize: 80,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                height: 1,
+          RepaintBoundary(
+            child: ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [VigorColors.orange, VigorColors.electricBlue],
+              ).createShader(bounds),
+              child: Text(
+                '$trainings',
+                style: VigorTypography.display.copyWith(
+                  fontSize: 80,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  height: 1,
+                ),
               ),
             ),
           ),
@@ -210,11 +212,13 @@ class _HomePageState extends State<HomePage> {
       children: [
         Row(
           children: [
-            ShaderMask(
-              shaderCallback: (bounds) => LinearGradient(
-                colors: [VigorColors.orange, VigorColors.electricBlue],
-              ).createShader(bounds),
-              child: const Icon(Icons.show_chart, color: Colors.white, size: 24),
+            RepaintBoundary(
+              child: ShaderMask(
+                shaderCallback: (bounds) => const LinearGradient(
+                  colors: [VigorColors.orange, VigorColors.electricBlue],
+                ).createShader(bounds),
+                child: const Icon(Icons.show_chart, color: Colors.white, size: 24),
+              ),
             ),
             SizedBox(width: VigorSpacing.sm),
             Text(
@@ -257,7 +261,7 @@ class _HomePageState extends State<HomePage> {
               shape: BoxShape.circle,
             ),
             child: ShaderMask(
-              shaderCallback: (bounds) => LinearGradient(
+              shaderCallback: (bounds) => const LinearGradient(
                 colors: [VigorColors.orange, VigorColors.electricBlue],
               ).createShader(bounds),
               child: const Icon(Icons.trending_up, size: 56, color: Colors.white),
@@ -305,7 +309,7 @@ class _HomePageState extends State<HomePage> {
                   shape: BoxShape.circle,
                 ),
                 child: ShaderMask(
-                  shaderCallback: (bounds) => LinearGradient(
+                  shaderCallback: (bounds) => const LinearGradient(
                     colors: [VigorColors.orange, VigorColors.electricBlue],
                   ).createShader(bounds),
                   child: const Icon(Icons.bolt, size: 48, color: Colors.white),

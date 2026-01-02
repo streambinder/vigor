@@ -245,7 +245,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
               shape: BoxShape.circle,
             ),
             child: ShaderMask(
-              shaderCallback: (bounds) => LinearGradient(
+              shaderCallback: (bounds) => const LinearGradient(
                 colors: [VigorColors.orange, VigorColors.electricBlue],
               ).createShader(bounds),
               child: const Icon(Icons.fitness_center, size: 56, color: Colors.white),
@@ -433,10 +433,14 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     return ListView.builder(
       padding: VigorSpacing.paddingLg,
       itemCount: trainings.length,
-      itemBuilder: (context, index) => Padding(
-        padding: EdgeInsets.only(bottom: VigorSpacing.sm),
-        child: _buildTrainingCard(trainings[index], l10n, isAvailable: isAvailable),
-      ),
+      itemBuilder: (context, index) {
+        final training = trainings[index];
+        return Padding(
+          key: ValueKey(training.id),
+          padding: EdgeInsets.only(bottom: VigorSpacing.sm),
+          child: _buildTrainingCard(training, l10n, isAvailable: isAvailable),
+        );
+      },
     );
   }
 

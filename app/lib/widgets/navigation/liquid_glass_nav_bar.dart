@@ -28,37 +28,40 @@ class LiquidGlassNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return ClipRRect(
-      borderRadius: VigorRadius.navigationBar,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: VigorColors.glassBlur,
-          sigmaY: VigorColors.glassBlur,
-        ),
-        child: Container(
-          height: 70,
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.black.withValues(alpha: 0.3)
-                : Colors.white.withValues(alpha: 0.3),
-            borderRadius: VigorRadius.navigationBar,
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.white.withValues(alpha: 0.3),
-              width: 1.5,
-            ),
-            boxShadow: VigorShadows.elevation2(context),
+    // RepaintBoundary isolates the expensive blur effect
+    return RepaintBoundary(
+      child: ClipRRect(
+        borderRadius: VigorRadius.navigationBar,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: VigorColors.glassBlur,
+            sigmaY: VigorColors.glassBlur,
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(
-              items.length,
-              (index) => _buildNavItem(
-                context,
-                items[index],
-                index,
-                isDark,
+          child: Container(
+            height: 70,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.white.withValues(alpha: 0.3),
+              borderRadius: VigorRadius.navigationBar,
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.white.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
+              boxShadow: VigorShadows.elevation2(context),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(
+                items.length,
+                (index) => _buildNavItem(
+                  context,
+                  items[index],
+                  index,
+                  isDark,
+                ),
               ),
             ),
           ),

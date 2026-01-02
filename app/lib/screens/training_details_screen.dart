@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../config/api_config.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/training.dart';
@@ -13,6 +12,7 @@ import '../providers/auth_provider.dart';
 import '../services/training_service.dart';
 import '../services/secure_storage_service.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../widgets/cached_exercise_image.dart';
 import '../widgets/user_select_dialog.dart';
 import '../utils/exercise_modal.dart';
 import '../utils/feedback_modal.dart';
@@ -68,21 +68,13 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   Exercise? _parseExercise(Map<String, dynamic> detail) {
+    if (detail.isEmpty) return null;
     try {
-      if (detail.isEmpty) return null;
       return Exercise.fromJson(detail);
     } catch (_) {
       return null;
     }
   }
-
-  bool _isValidImageUrl(String? url) {
-    if (url == null || url.isEmpty) return false;
-    final uri = Uri.tryParse(url);
-    return uri != null && uri.hasScheme && (uri.scheme == 'http' || uri.scheme == 'https');
-  }
-
-  String _proxyImageUrl(String url) => '${ApiConfig.baseUrl}/proxy/image?url=${Uri.encodeComponent(url)}';
 
   Future<void> _deleteTraining(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
@@ -251,9 +243,11 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         backgroundColor: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
         title: Row(
           children: [
-            ShaderMask(
-              shaderCallback: (bounds) => LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]).createShader(bounds),
-              child: const Icon(Icons.psychology, color: Colors.white),
+            RepaintBoundary(
+              child: ShaderMask(
+                shaderCallback: (bounds) => const LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]).createShader(bounds),
+                child: const Icon(Icons.psychology, color: Colors.white),
+              ),
             ),
             SizedBox(width: VigorSpacing.sm),
             Text(l10n.reasoning, style: VigorTypography.headline.copyWith(color: VigorColors.textPrimary(ctx))),
@@ -739,9 +733,11 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   Widget _buildRoutinesHeader(AppLocalizations l10n) {
     return Row(
       children: [
-        ShaderMask(
-          shaderCallback: (bounds) => LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]).createShader(bounds),
-          child: const Icon(Icons.list_alt, color: Colors.white, size: 24),
+        RepaintBoundary(
+          child: ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]).createShader(bounds),
+            child: const Icon(Icons.list_alt, color: Colors.white, size: 24),
+          ),
         ),
         SizedBox(width: VigorSpacing.sm),
         Text(l10n.trainingRoutines, style: VigorTypography.headline.copyWith(fontSize: 20, color: VigorColors.textPrimary(context))),
@@ -867,11 +863,12 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   Widget _buildActivityRow(Activity activity, bool isDark) {
     final exercise = _parseExercise(activity.detail);
     final l10n = AppLocalizations.of(context);
+    final hasValidImage = exercise != null && CachedExerciseImage.isValidUrl(exercise.reference);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // thumbnail
+        // thumbnail with cached image
         GestureDetector(
           onTap: exercise != null ? () => ExerciseModal.show(context, exercise) : null,
           child: Container(
@@ -879,21 +876,19 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             height: 72,
             decoration: BoxDecoration(
               borderRadius: VigorRadius.radiusMd,
-              gradient: exercise == null || !_isValidImageUrl(exercise.reference)
+              gradient: !hasValidImage
                   ? LinearGradient(colors: [VigorColors.orange.withValues(alpha: 0.2), VigorColors.electricBlue.withValues(alpha: 0.2)])
                   : null,
               border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.grey.shade300),
             ),
-            child: ClipRRect(
-              borderRadius: VigorRadius.radiusMd,
-              child: exercise != null && _isValidImageUrl(exercise.reference)
-                  ? Image.network(
-                      _proxyImageUrl(exercise.reference),
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _buildPlaceholderIcon(),
-                    )
-                  : _buildPlaceholderIcon(),
-            ),
+            child: hasValidImage
+                ? CachedExerciseImage(
+                    imageUrl: exercise.reference,
+                    width: 72,
+                    height: 72,
+                    borderRadius: VigorRadius.radiusMd,
+                  )
+                : _buildPlaceholderIcon(),
           ),
         ),
         SizedBox(width: VigorSpacing.md),
@@ -926,9 +921,11 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   Widget _buildPlaceholderIcon() {
     return Center(
-      child: ShaderMask(
-        shaderCallback: (bounds) => LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]).createShader(bounds),
-        child: const Icon(Icons.fitness_center, size: 28, color: Colors.white),
+      child: RepaintBoundary(
+        child: ShaderMask(
+          shaderCallback: (bounds) => const LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]).createShader(bounds),
+          child: const Icon(Icons.fitness_center, size: 28, color: Colors.white),
+        ),
       ),
     );
   }
