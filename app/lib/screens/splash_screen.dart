@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../widgets/vigor_logo.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -16,19 +17,8 @@ class SplashScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // lightning bolt icon with gradient effect
-            ShaderMask(
-              shaderCallback: (bounds) => LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [VigorColors.orange, VigorColors.electricBlue],
-              ).createShader(bounds),
-              child: const Icon(
-                Icons.bolt,
-                size: 100,
-                color: Colors.white,
-              ),
-            ),
+            // vigor logo icon
+            const VigorLogo(size: 100),
             SizedBox(height: VigorSpacing.lg),
             Text(
               l10n.appName.toUpperCase(),

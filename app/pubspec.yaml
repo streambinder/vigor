@@ -23,6 +23,7 @@ dependencies:
   shared_preferences: ^2.2.2
   url_launcher: ^6.2.1
   cached_network_image: ^3.4.1
+  flutter_svg: ^2.0.10
 
 dev_dependencies:
   flutter_test:
@@ -37,6 +38,7 @@ flutter:
 
   assets:
     - assets/fonts/
+    - assets/icons/
 
   fonts:
     - family: Barlow

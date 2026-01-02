@@ -10,6 +10,7 @@ import '../generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../services/app_logger.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../widgets/vigor_logo.dart';
 
 // Import web-only methods when on web
 import 'package:google_sign_in_web/web_only.dart' as web_only
@@ -202,19 +203,8 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // lightning bolt with gradient
-                ShaderMask(
-                  shaderCallback: (bounds) => LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [VigorColors.orange, VigorColors.electricBlue],
-                  ).createShader(bounds),
-                  child: const Icon(
-                    Icons.bolt,
-                    size: 80,
-                    color: Colors.white,
-                  ),
-                ),
+                // vigor logo with gradient
+                const VigorLogo(size: 80),
                 SizedBox(height: VigorSpacing.md),
                 Text(
                   l10n.appName.toUpperCase(),
