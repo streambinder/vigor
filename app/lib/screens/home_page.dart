@@ -6,8 +6,7 @@ import '../models/family_progress.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/progress/progress.dart';
 import '../models/progress.dart';
-import '../services/progress_service.dart';
-import '../services/secure_storage_service.dart';
+import '../services/service_locator.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,24 +16,18 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  ProgressService? _progressService;
   Progress? _progress;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final storage = context.read<SecureStorageService>();
-      _progressService = ProgressService(storageService: storage);
-      _loadProgress();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadProgress());
   }
 
   Future<void> _loadProgress() async {
-    if (_progressService == null) return;
     setState(() => _isLoading = true);
-    final response = await _progressService!.getProgress();
+    final response = await context.read<ServiceLocator>().progressService.getProgress();
     if (response.isSuccess && mounted) {
       setState(() {
         _progress = response.data;

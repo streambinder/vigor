@@ -9,8 +9,7 @@ import '../models/block.dart';
 import '../models/activity.dart';
 import '../models/exercise.dart';
 import '../providers/auth_provider.dart';
-import '../services/training_service.dart';
-import '../services/secure_storage_service.dart';
+import '../services/service_locator.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/cached_exercise_image.dart';
 import '../widgets/user_select_dialog.dart';
@@ -42,9 +41,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   Future<void> _loadPartners() async {
-    final storage = context.read<SecureStorageService>();
-    final trainingService = TrainingService(storageService: storage);
-    final response = await trainingService.getPartners(training.id);
+    final response = await context.read<ServiceLocator>().trainingService.getPartners(training.id);
     if (response.isSuccess && mounted) {
       setState(() => _partnerCount = response.data?.length ?? 0);
     }
@@ -96,9 +93,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     );
 
     if (shouldDelete == true && context.mounted) {
-      final storage = context.read<SecureStorageService>();
-      final trainingService = TrainingService(storageService: storage);
-      final response = await trainingService.deleteTraining(training.id);
+      final response = await context.read<ServiceLocator>().trainingService.deleteTraining(training.id);
 
       if (context.mounted) {
         if (response.isSuccess) {
@@ -116,9 +111,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     final result = await FeedbackModal.show(context, training);
     if (result == null) return;
 
-    final storage = context.read<SecureStorageService>();
-    final trainingService = TrainingService(storageService: storage);
-    final response = await trainingService.completeTraining(
+    final response = await context.read<ServiceLocator>().trainingService.completeTraining(
       training.id,
       feedback: result.feedback,
       activityFeedback: result.activityFeedback,
@@ -157,9 +150,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
     if (shouldAdd != true || !context.mounted) return;
 
-    final storage = context.read<SecureStorageService>();
-    final trainingService = TrainingService(storageService: storage);
-    final response = await trainingService.addPartner(training.id, user.id);
+    final response = await context.read<ServiceLocator>().trainingService.addPartner(training.id, user.id);
 
     if (context.mounted) {
       if (response.isSuccess) {
@@ -188,9 +179,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
     if (shouldClone != true || !context.mounted) return;
 
-    final storage = context.read<SecureStorageService>();
-    final trainingService = TrainingService(storageService: storage);
-    final response = await trainingService.copyTraining(training.id, currentUserId);
+    final response = await context.read<ServiceLocator>().trainingService.copyTraining(training.id, currentUserId);
 
     if (context.mounted) {
       if (response.isSuccess) {
@@ -219,9 +208,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
     if (shouldShare != true || !context.mounted) return;
 
-    final storage = context.read<SecureStorageService>();
-    final trainingService = TrainingService(storageService: storage);
-    final response = await trainingService.copyTraining(training.id, user.id);
+    final response = await context.read<ServiceLocator>().trainingService.copyTraining(training.id, user.id);
 
     if (context.mounted) {
       if (response.isSuccess) {
@@ -427,9 +414,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
     if (result == null || result.isEmpty || !context.mounted) return;
 
-    final storage = context.read<SecureStorageService>();
-    final trainingService = TrainingService(storageService: storage);
-    final response = await trainingService.createReport(training.id, result);
+    final response = await context.read<ServiceLocator>().trainingService.createReport(training.id, result);
 
     if (context.mounted) {
       if (response.isSuccess) {
@@ -442,9 +427,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   Future<void> _shuffleActivity(Activity activity) async {
     final l10n = AppLocalizations.of(context);
-    final storage = context.read<SecureStorageService>();
-    final trainingService = TrainingService(storageService: storage);
-    final response = await trainingService.shuffleActivity(activity.id);
+    final response = await context.read<ServiceLocator>().trainingService.shuffleActivity(activity.id);
 
     if (!mounted) return;
 

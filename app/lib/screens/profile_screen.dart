@@ -7,8 +7,7 @@ import '../widgets/adaptive/adaptive.dart';
 import '../models/goal.dart';
 import '../models/injury.dart';
 import '../models/gym.dart';
-import '../services/gym_service.dart';
-import '../services/secure_storage_service.dart';
+import '../services/service_locator.dart';
 import '../services/preferences_service.dart';
 import '../widgets/gym_form_dialog.dart';
 import 'profile_completion_modal.dart';
@@ -21,27 +20,19 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  GymService? _gymService;
-  PreferencesService? _prefsService;
   List<Gym>? _gyms;
   bool _isLoadingGyms = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final storage = context.read<SecureStorageService>();
-      _gymService = GymService(storageService: storage);
-      _prefsService = context.read<PreferencesService>();
-      _loadGyms();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadGyms());
   }
 
   Future<void> _loadGyms() async {
-    if (_gymService == null) return;
     setState(() => _isLoadingGyms = true);
 
-    final response = await _gymService!.getGyms();
+    final response = await context.read<ServiceLocator>().gymService.getGyms();
     if (response.isSuccess && mounted) {
       setState(() {
         _gyms = response.data;
@@ -73,10 +64,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _addGym(String name, List<String> equipment) async {
-    if (_gymService == null) return;
     final l10n = AppLocalizations.of(context);
 
-    final response = await _gymService!.createGym(name: name, equipment: equipment);
+    final response = await context.read<ServiceLocator>().gymService.createGym(name: name, equipment: equipment);
     if (response.isSuccess && mounted) {
       AdaptiveNotification.show(context: context, message: l10n.gymAddedSuccessfully);
       await _loadGyms();
@@ -86,10 +76,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _updateGym(String id, String name, List<String> equipment) async {
-    if (_gymService == null) return;
     final l10n = AppLocalizations.of(context);
 
-    final response = await _gymService!.updateGym(id: id, name: name, equipment: equipment);
+    final response = await context.read<ServiceLocator>().gymService.updateGym(id: id, name: name, equipment: equipment);
     if (response.isSuccess && mounted) {
       AdaptiveNotification.show(context: context, message: l10n.gymUpdatedSuccessfully);
       await _loadGyms();
@@ -99,7 +88,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _deleteGym(Gym gym) async {
-    if (_gymService == null) return;
     final l10n = AppLocalizations.of(context);
     final shouldDelete = await AdaptiveAlertDialog.show<bool>(
       context: context,
@@ -112,9 +100,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (shouldDelete == true) {
-      final response = await _gymService!.deleteGym(gym.id);
+      final response = await context.read<ServiceLocator>().gymService.deleteGym(gym.id);
       if (response.isSuccess && mounted) {
-        await _prefsService?.clearDefaultGymIfMatches(gym.id);
+        await context.read<PreferencesService>().clearDefaultGymIfMatches(gym.id);
         AdaptiveNotification.show(context: context, message: l10n.gymDeletedSuccessfully);
         await _loadGyms();
       } else if (mounted) {

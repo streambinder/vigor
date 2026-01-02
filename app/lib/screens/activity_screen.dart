@@ -4,9 +4,7 @@ import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/training_generation_modal.dart';
-import '../services/training_service.dart';
-import '../services/gym_service.dart';
-import '../services/secure_storage_service.dart';
+import '../services/service_locator.dart';
 import '../models/training.dart';
 import '../models/gym.dart';
 import 'training_details_screen.dart';
@@ -20,8 +18,6 @@ class ActivityScreen extends StatefulWidget {
 }
 
 class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProviderStateMixin {
-  TrainingService? _trainingService;
-  GymService? _gymService;
   List<Training>? _trainings;
   List<Gym>? _gyms;
   bool _isLoading = false;
@@ -41,9 +37,6 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       setState(() => _selectedTab = _tabController.index);
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final storage = context.read<SecureStorageService>();
-      _trainingService = TrainingService(storageService: storage);
-      _gymService = GymService(storageService: storage);
       _loadTrainings();
       _loadGyms();
     });
@@ -56,9 +49,8 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   }
 
   Future<void> _loadGyms() async {
-    if (_gymService == null) return;
     setState(() => _isLoadingGyms = true);
-    final response = await _gymService!.getGyms();
+    final response = await context.read<ServiceLocator>().gymService.getGyms();
     if (response.isSuccess && mounted) {
       setState(() {
         _gyms = response.data;
@@ -88,9 +80,8 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   }
 
   Future<void> _loadTrainings() async {
-    if (_trainingService == null) return;
     setState(() => _isLoading = true);
-    final response = await _trainingService!.getTrainings();
+    final response = await context.read<ServiceLocator>().trainingService.getTrainings();
     if (response.isSuccess && mounted) {
       setState(() {
         _trainings = response.data;
@@ -110,9 +101,10 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   }
 
   Future<void> _loadPartnerCounts() async {
-    if (_trainingService == null || _trainings == null) return;
+    if (_trainings == null) return;
+    final trainingService = context.read<ServiceLocator>().trainingService;
     for (final training in _trainings!) {
-      final response = await _trainingService!.getPartners(training.id);
+      final response = await trainingService.getPartners(training.id);
       if (response.isSuccess && mounted) {
         setState(() => _partnerCounts[training.id] = response.data?.length ?? 0);
       }

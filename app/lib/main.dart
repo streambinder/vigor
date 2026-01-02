@@ -11,6 +11,7 @@ import 'screens/google_auth_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/secure_storage_service.dart';
 import 'services/preferences_service.dart';
+import 'services/service_locator.dart';
 import 'services/app_logger.dart';
 
 void main() async {
@@ -105,6 +106,7 @@ class VigorApp extends StatelessWidget {
       providers: [
         Provider<SecureStorageService>.value(value: storage),
         Provider<PreferencesService>.value(value: prefs),
+        Provider<ServiceLocator>(create: (_) => ServiceLocator(storage)),
         ChangeNotifierProvider(
           create: (_) => AuthProvider(storage: storage),
         ),

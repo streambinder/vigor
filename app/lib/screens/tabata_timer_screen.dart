@@ -13,8 +13,7 @@ import '../utils/exercise_modal.dart';
 import '../utils/feedback_modal.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/cached_exercise_image.dart';
-import '../services/training_service.dart';
-import '../services/secure_storage_service.dart';
+import '../services/service_locator.dart';
 
 class TabataTimerScreen extends StatefulWidget {
   final Training training;
@@ -66,7 +65,6 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
   bool _isCompleted = false;
   bool _hasStarted = false;
   List<int> _history = [];
-  TrainingService? _trainingService;
 
   @override
   void initState() {
@@ -74,11 +72,6 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     _intervals = _buildIntervals();
     // Start countdown immediately
     _startInitialCountdown();
-    // Initialize training service
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final storage = context.read<SecureStorageService>();
-      _trainingService = TrainingService(storageService: storage);
-    });
   }
 
   void _startInitialCountdown() {
@@ -334,9 +327,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
   }
 
   Future<void> _markTrainingComplete(FeedbackResult result) async {
-    if (_trainingService == null) return;
-
-    final response = await _trainingService!.completeTraining(
+    final response = await context.read<ServiceLocator>().trainingService.completeTraining(
       widget.training.id,
       feedback: result.feedback,
       activityFeedback: result.activityFeedback,

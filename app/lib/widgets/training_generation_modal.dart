@@ -5,10 +5,8 @@ import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/gym.dart';
 import '../models/training.dart';
-import '../services/training_service.dart';
-import '../services/secure_storage_service.dart';
+import '../services/service_locator.dart';
 import '../services/preferences_service.dart';
-import '../services/user_service.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/equipment_selector.dart';
 import '../widgets/user_select_dialog.dart';
@@ -341,8 +339,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       _retryAttempt = null;
     });
 
-    final storage = context.read<SecureStorageService>();
-    final trainingService = TrainingService(storageService: storage);
+    final trainingService = context.read<ServiceLocator>().trainingService;
 
     final duration = int.parse(_durationController.text);
     final prompt = _promptController.text.trim();
