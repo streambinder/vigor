@@ -28,15 +28,16 @@ func postTraining(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
 	}
 
-	training, err := service.GenerateTraining(c.Locals("userID").(uuid.UUID), service.GenerateTrainingParams{
-		Duration:           req.Duration,
-		Equipment:          req.Equipment,
-		GymID:              req.Gym,
-		Prompt:             req.Prompt,
-		Partners:           req.Partners,
-		SkipWarmupCooldown: req.SkipWarmupCooldown,
-		Methodology:        req.Methodology,
-	})
+	training, err := service.GenerateTraining(
+		c.Locals("userID").(uuid.UUID),
+		req.Duration,
+		req.Equipment,
+		req.Gym,
+		req.Prompt,
+		req.Partners,
+		req.SkipWarmupCooldown,
+		req.Methodology,
+	)
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrDurationRequired):
@@ -111,11 +112,13 @@ func postTrainingCompleteById(c *fiber.Ctx) error {
 	var req dto.PostTrainingCompleteRequest
 	_ = c.BodyParser(&req) // ignore error, feedback is optional for backwards compat
 
-	training, err := service.CompleteTraining(c.Locals("userID").(uuid.UUID), trainingID, service.CompleteTrainingParams{
-		Feedback:         req.Feedback,
-		ActivityFeedback: req.ActivityFeedback,
-		ActivityReports:  req.ActivityReports,
-	})
+	training, err := service.CompleteTraining(
+		c.Locals("userID").(uuid.UUID),
+		trainingID,
+		req.Feedback,
+		req.ActivityFeedback,
+		req.ActivityReports,
+	)
 	if err != nil {
 		if errors.Is(err, service.ErrTrainingNotFound) {
 			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})

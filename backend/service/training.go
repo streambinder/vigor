@@ -31,20 +31,9 @@ var (
 	ErrMalformedTraining = errors.New("malformed generated training")
 )
 
-// GenerateTrainingParams contains the parameters for generating a training.
-type GenerateTrainingParams struct {
-	Duration           int
-	Equipment          []string
-	GymID              string
-	Prompt             string
-	Partners           []string
-	SkipWarmupCooldown bool
-	Methodology        string
-}
-
 // GenerateTraining creates a new training for a user.
-func GenerateTraining(userID uuid.UUID, params GenerateTrainingParams) (*model.Training, error) {
-	if params.Duration <= 0 {
+func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string) (*model.Training, error) {
+	if duration <= 0 {
 		return nil, ErrDurationRequired
 	}
 
@@ -56,7 +45,7 @@ func GenerateTraining(userID uuid.UUID, params GenerateTrainingParams) (*model.T
 	profiles := []model.Profile{requestorProfile}
 	var partnerUserIDs []uuid.UUID
 
-	for _, partner := range params.Partners {
+	for _, partner := range partners {
 		partnerID, err := uuid.Parse(partner)
 		if err != nil {
 			return nil, err
@@ -70,17 +59,16 @@ func GenerateTraining(userID uuid.UUID, params GenerateTrainingParams) (*model.T
 	}
 
 	var gym *model.Gym
-	if params.GymID != "" {
-		gymID, err := uuid.Parse(params.GymID)
+	if gymID != "" {
+		gymUUID, err := uuid.Parse(gymID)
 		if err != nil {
 			return nil, err
 		}
-		if err := database.DB.First(&gym, "id = ? AND user_id = ?", gymID, userID).Error; err != nil {
+		if err := database.DB.First(&gym, "id = ? AND user_id = ?", gymUUID, userID).Error; err != nil {
 			return nil, ErrInvalidGym
 		}
 	}
 
-	equipment := params.Equipment
 	if len(equipment) == 0 && gym != nil {
 		equipment = gym.Equipment
 	}
@@ -105,7 +93,7 @@ func GenerateTraining(userID uuid.UUID, params GenerateTrainingParams) (*model.T
 		return nil, err
 	}
 
-	methodology, err := rag.RetrieveMethodology(params.Methodology)
+	methodologyData, err := rag.RetrieveMethodology(methodology)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +104,7 @@ func GenerateTraining(userID uuid.UUID, params GenerateTrainingParams) (*model.T
 	}
 
 	capabilityMargin := ProgressiveMargin(trainingsComplete)
-	workExercises, err := rag.RetrieveWorkExercises(profiles, equipmentIDs, capabilities, capabilityMargin, methodology)
+	workExercises, err := rag.RetrieveWorkExercises(profiles, equipmentIDs, capabilities, capabilityMargin, methodologyData)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +146,7 @@ func GenerateTraining(userID uuid.UUID, params GenerateTrainingParams) (*model.T
 		favoriteEquipmentIDs = append(favoriteEquipmentIDs, eq.ID)
 	}
 
-	facts, err := rag.RetrieveUserFacts(profiles, params.Prompt)
+	facts, err := rag.RetrieveUserFacts(profiles, prompt)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +165,7 @@ func GenerateTraining(userID uuid.UUID, params GenerateTrainingParams) (*model.T
 	}
 
 	llmStart := time.Now()
-	training, prompt, llmModel, err := llm.GenTraining(
+	training, llmPrompt, llmModel, err := llm.GenTraining(
 		profiles,
 		workExercises,
 		warmupExercises,
@@ -186,13 +174,13 @@ func GenerateTraining(userID uuid.UUID, params GenerateTrainingParams) (*model.T
 		modifiers,
 		favoriteExercises,
 		favoriteEquipmentIDs,
-		methodology,
+		methodologyData,
 		methodologies,
-		params.Prompt,
-		params.Duration,
+		prompt,
+		duration,
 		recentTrainings,
 		facts,
-		params.SkipWarmupCooldown,
+		skipWarmupCooldown,
 	)
 	if err != nil {
 		return nil, err
@@ -211,7 +199,7 @@ func GenerateTraining(userID uuid.UUID, params GenerateTrainingParams) (*model.T
 		}).Msg("training generated")
 
 	training.UserID = requestorProfile.UserID
-	if promptJSON, err := json.Marshal(prompt); err == nil {
+	if promptJSON, err := json.Marshal(llmPrompt); err == nil {
 		training.Prompt = promptJSON
 	}
 	if gym != nil {
@@ -317,15 +305,8 @@ func DeleteTraining(userID uuid.UUID, trainingID string) (isOwner bool, err erro
 	return false, nil
 }
 
-// CompleteTrainingParams contains parameters for completing a training.
-type CompleteTrainingParams struct {
-	Feedback         string
-	ActivityFeedback map[string]string
-	ActivityReports  []string
-}
-
 // CompleteTraining marks a training as completed.
-func CompleteTraining(userID uuid.UUID, trainingID string, params CompleteTrainingParams) (*model.Training, error) {
+func CompleteTraining(userID uuid.UUID, trainingID, feedback string, activityFeedback map[string]string, activityReports []string) (*model.Training, error) {
 	var training model.Training
 	if err := database.DB.
 		Preload("Gym").
@@ -338,23 +319,23 @@ func CompleteTraining(userID uuid.UUID, trainingID string, params CompleteTraini
 
 	now := time.Now()
 	training.CompletedAt = &now
-	training.Feedback = params.Feedback
+	training.Feedback = feedback
 
 	if err := database.DB.Save(&training).Error; err != nil {
 		return nil, err
 	}
 
-	if len(params.ActivityFeedback) > 0 {
+	if len(activityFeedback) > 0 {
 		for _, activity := range training.Activities() {
-			if feedback, ok := params.ActivityFeedback[activity.ExerciseID]; ok {
-				activity.Feedback = feedback
-				database.DB.Model(activity).Update("feedback", feedback)
+			if fb, ok := activityFeedback[activity.ExerciseID]; ok {
+				activity.Feedback = fb
+				database.DB.Model(activity).Update("feedback", fb)
 			}
 		}
 	}
 
-	if len(params.ActivityReports) > 0 {
-		for _, activityID := range params.ActivityReports {
+	if len(activityReports) > 0 {
+		for _, activityID := range activityReports {
 			report := model.Report{
 				Content:    "Flag",
 				TrainingID: &training.ID,
