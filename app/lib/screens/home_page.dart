@@ -3,10 +3,14 @@ import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/family_progress.dart';
+import '../providers/auth_provider.dart';
+import '../services/secure_storage_service.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/progress/progress.dart';
 import '../models/progress.dart';
+import '../services/progress_service.dart';
 import '../services/service_locator.dart';
+import '../widgets/vigor_logo.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,28 +22,51 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   Progress? _progress;
   bool _isLoading = false;
+  bool _hasLoadedOnce = false;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadProgress());
-  }
-
-  Future<void> _loadProgress() async {
+  Future<void> _loadProgress({int retryCount = 0}) async {
+    if (_isLoading) return;
     setState(() => _isLoading = true);
-    final response = await context.read<ServiceLocator>().progressService.getProgress();
-    if (response.isSuccess && mounted) {
-      setState(() {
-        _progress = response.data;
-        _isLoading = false;
-      });
-    } else if (mounted) {
-      setState(() => _isLoading = false);
-      if (response.error != null) {
+    _hasLoadedOnce = true;
+
+    // on web, storage may need a moment to persist after login
+    final storage = context.read<SecureStorageService>();
+    if (!await storage.hasTokens()) {
+      if (retryCount < 3) {
+        await Future.delayed(const Duration(milliseconds: 100));
+        if (mounted) {
+          setState(() => _isLoading = false);
+          _hasLoadedOnce = false;
+          _loadProgress(retryCount: retryCount + 1);
+        }
+        return;
+      }
+    }
+
+    try {
+      final response = await context.read<ServiceLocator>().progressService.getProgress();
+      if (response.isSuccess && mounted) {
+        setState(() {
+          _progress = response.data;
+          _isLoading = false;
+        });
+      } else if (mounted) {
+        setState(() => _isLoading = false);
+        if (response.error != null) {
+          AdaptiveNotification.showError(
+            context: context,
+            message: AppLocalizations.of(context).failedToLoadProgress,
+            rawError: response.error,
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
         AdaptiveNotification.showError(
           context: context,
           message: AppLocalizations.of(context).failedToLoadProgress,
-          rawError: response.error,
+          rawError: e.toString(),
         );
       }
     }
@@ -48,6 +75,12 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    // watch auth state to trigger load when authenticated
+    final authState = context.watch<AuthProvider>().state;
+    if (authState == AuthState.authenticated && !_hasLoadedOnce && !_isLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _loadProgress());
+    }
+
     return AdaptiveScaffold(
       appBar: AdaptiveAppBar(
         title: Text(l10n.appName),
@@ -286,7 +319,7 @@ class _HomePageState extends State<HomePage> {
         Center(
           child: Column(
             children: [
-              // gradient bolt icon
+              // vigor logo icon
               Container(
                 width: 100,
                 height: 100,
@@ -301,12 +334,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   shape: BoxShape.circle,
                 ),
-                child: ShaderMask(
-                  shaderCallback: (bounds) => const LinearGradient(
-                    colors: [VigorColors.orange, VigorColors.electricBlue],
-                  ).createShader(bounds),
-                  child: const Icon(Icons.bolt, size: 48, color: Colors.white),
-                ),
+                child: const Center(child: VigorLogo(size: 48)),
               ),
               SizedBox(height: VigorSpacing.lg),
               Text(

@@ -112,8 +112,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _toggleDefaultGym(String id) async {
-    final current = _prefsService?.defaultGymId;
-    await _prefsService?.setDefaultGymId(current == id ? null : id);
+    final prefs = context.read<PreferencesService>();
+    final current = prefs.defaultGymId;
+    await prefs.setDefaultGymId(current == id ? null : id);
     setState(() {});
   }
 
@@ -480,7 +481,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildGymCard(Gym gym, AppLocalizations l10n, bool isDark) {
-    final isDefault = _prefsService?.defaultGymId == gym.id;
+    final isDefault = context.read<PreferencesService>().defaultGymId == gym.id;
     return Container(
       margin: EdgeInsets.only(bottom: VigorSpacing.md),
       decoration: BoxDecoration(

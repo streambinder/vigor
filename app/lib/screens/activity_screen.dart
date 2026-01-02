@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
+import '../providers/auth_provider.dart';
+import '../services/secure_storage_service.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/training_generation_modal.dart';
 import '../services/service_locator.dart';
@@ -22,6 +24,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   List<Gym>? _gyms;
   bool _isLoading = false;
   bool _isLoadingGyms = false;
+  bool _hasLoadedOnce = false;
   final Map<String, int> _partnerCounts = {};
 
   // tab controller for available/past toggle
@@ -35,10 +38,6 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) return;
       setState(() => _selectedTab = _tabController.index);
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadTrainings();
-      _loadGyms();
     });
   }
 
@@ -79,8 +78,25 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     );
   }
 
-  Future<void> _loadTrainings() async {
+  Future<void> _loadTrainings({int retryCount = 0}) async {
+    if (_isLoading) return;
     setState(() => _isLoading = true);
+    _hasLoadedOnce = true;
+
+    // on web, storage may need a moment to persist after login
+    final storage = context.read<SecureStorageService>();
+    if (!await storage.hasTokens()) {
+      if (retryCount < 3) {
+        await Future.delayed(const Duration(milliseconds: 100));
+        if (mounted) {
+          setState(() => _isLoading = false);
+          _hasLoadedOnce = false;
+          _loadTrainings(retryCount: retryCount + 1);
+        }
+        return;
+      }
+    }
+
     final response = await context.read<ServiceLocator>().trainingService.getTrainings();
     if (response.isSuccess && mounted) {
       setState(() {
@@ -152,6 +168,15 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // watch auth state to trigger load when authenticated
+    final authState = context.watch<AuthProvider>().state;
+    if (authState == AuthState.authenticated && !_hasLoadedOnce && !_isLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadTrainings();
+        _loadGyms();
+      });
+    }
 
     return AdaptiveScaffold(
       appBar: AdaptiveAppBar(
