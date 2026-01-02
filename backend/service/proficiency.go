@@ -41,6 +41,40 @@ func GetProficiencies(userID uuid.UUID) (map[string]float64, error) {
 	return result, nil
 }
 
+// GetAverageProficiencies returns the average proficiency per movement family across multiple users.
+// for partnered workouts this balances exercises for mixed proficiency levels.
+func GetAverageProficiencies(userIDs []uuid.UUID) (map[string]float64, error) {
+	if len(userIDs) == 0 {
+		return make(map[string]float64), nil
+	}
+	if len(userIDs) == 1 {
+		return GetProficiencies(userIDs[0])
+	}
+
+	familySums := make(map[string]float64)
+	familyCounts := make(map[string]int)
+
+	for _, userID := range userIDs {
+		proficiencies, err := GetProficiencies(userID)
+		if err != nil {
+			return nil, err
+		}
+		for family, value := range proficiencies {
+			familySums[family] += value
+			familyCounts[family]++
+		}
+	}
+
+	// only include families where all users have proficiency data
+	result := make(map[string]float64)
+	for family, sum := range familySums {
+		if familyCounts[family] == len(userIDs) {
+			result[family] = sum / float64(len(userIDs))
+		}
+	}
+	return result, nil
+}
+
 // GetProficiencyCalibration returns calibration count per movement family (number of records).
 func GetProficiencyCalibration(userID uuid.UUID) (map[string]int, error) {
 	var counts []struct {

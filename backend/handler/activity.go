@@ -26,8 +26,8 @@ func postActivityShuffle(c *fiber.Ctx) error {
 		switch {
 		case errors.Is(err, service.ErrActivityNotFound):
 			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "activity not found"})
-		case errors.Is(err, service.ErrNotOwner):
-			return c.Status(http.StatusForbidden).JSON(fiber.Map{"error": "only training owner can shuffle exercises"})
+		case errors.Is(err, service.ErrNotParticipant):
+			return c.Status(http.StatusForbidden).JSON(fiber.Map{"error": "only training participants can shuffle exercises"})
 		case errors.Is(err, service.ErrTrainingCompleted):
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot shuffle exercises in completed training"})
 		case errors.Is(err, service.ErrInvalidExercise):

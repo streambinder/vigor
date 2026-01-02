@@ -17,11 +17,11 @@ var (
 	ErrTrainingCompleted  = errors.New("cannot shuffle exercises in completed training")
 	ErrNoAlternativeFound = errors.New("no alternative exercise found")
 	ErrInvalidExercise    = errors.New("activity has no valid exercise")
-	ErrNotOwner           = errors.New("only training owner can shuffle exercises")
+	ErrNotParticipant     = errors.New("only training participants can shuffle exercises")
 )
 
 // ShuffleActivity replaces an activity's exercise with a random alternative.
-// Only the training owner can shuffle; alternatives are filtered by user proficiency.
+// Training owner or partners can shuffle; alternatives are filtered by average proficiency.
 func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error) {
 	var activity model.Activity
 	if err := database.DB.First(&activity, "id = ?", activityID).Error; err != nil {
@@ -47,8 +47,20 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		return model.Activity{}, ErrActivityNotFound
 	}
 
-	if training.UserID != userID {
-		return model.Activity{}, ErrNotOwner
+	// get partners for authorization and proficiency calculation
+	var partners []model.Partner
+	database.DB.Where("training_id = ?", training.ID).Find(&partners)
+
+	// check if user is owner or partner
+	isParticipant := training.UserID == userID
+	for _, p := range partners {
+		if p.UserID == userID {
+			isParticipant = true
+			break
+		}
+	}
+	if !isParticipant {
+		return model.Activity{}, ErrNotParticipant
 	}
 
 	if training.CompletedAt != nil {
@@ -77,8 +89,13 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		return model.Activity{}, ErrInvalidExercise
 	}
 
-	// get user proficiencies and training count for progressive margin
-	proficiencies, err := GetProficiencies(userID)
+	allUserIDs := []uuid.UUID{training.UserID}
+	for _, p := range partners {
+		allUserIDs = append(allUserIDs, p.UserID)
+	}
+
+	// use average proficiency across owner + partners
+	proficiencies, err := GetAverageProficiencies(allUserIDs)
 	if err != nil {
 		return model.Activity{}, err
 	}
@@ -88,7 +105,7 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 	}
 	margin := ProgressiveMargin(trainingsComplete)
 
-	// calculate max allowed score based on user proficiency
+	// calculate max allowed score based on lowest proficiency
 	profForFamily := proficiencies[primaryFamily]
 	maxAllowed := profForFamily + margin
 

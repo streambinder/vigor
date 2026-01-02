@@ -84,7 +84,9 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		}
 	}
 
-	proficiencies, err := GetProficiencies(userID)
+	// use average proficiency across owner + partners for exercise filtering
+	allUserIDs := append([]uuid.UUID{userID}, partnerUserIDs...)
+	proficiencies, err := GetAverageProficiencies(allUserIDs)
 	if err != nil {
 		return nil, err
 	}
