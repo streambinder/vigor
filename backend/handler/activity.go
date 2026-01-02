@@ -28,8 +28,8 @@ func postActivityShuffle(c *fiber.Ctx) error {
 			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "activity not found"})
 		case errors.Is(err, service.ErrTrainingCompleted):
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot shuffle exercises in completed training"})
-		case errors.Is(err, service.ErrInvalidActivityType):
-			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "activity has no exercise type"})
+		case errors.Is(err, service.ErrInvalidExercise):
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "activity has no valid exercise"})
 		case errors.Is(err, service.ErrNoAlternativeFound):
 			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "no alternative exercise found"})
 		default:

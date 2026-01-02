@@ -43,7 +43,8 @@ func GenTraining(
 	modifiers []model.Modifier,
 	favoriteExercises []model.Exercise,
 	favoriteEquipment []string,
-	methodology string,
+	methodology *model.Methodology,
+	methodologies []model.Methodology,
 	userPrompt string,
 	duration int,
 	recentTrainings []model.Training,
@@ -51,7 +52,7 @@ func GenTraining(
 	skipWarmupCooldown bool,
 ) (*model.Training, llmPrompt, string, error) {
 	request := llmPrompt{
-		prompt.System(skipWarmupCooldown),
+		prompt.System(methodologies, skipWarmupCooldown),
 		prompt.GenTraining(
 			profiles,
 			workExercises,

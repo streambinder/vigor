@@ -1,0 +1,91 @@
+[
+  {
+    "id": "strength",
+    "name": "Strength Training",
+    "description": "Traditional lifting with sets × reps × weight, longer rest (2-3min between sets). Focus on progressive overload and compound movements. Create multiple blocks as needed, each grouping exercises with similar rest needs. Repeats = sets per exercise. Activities MUST use reps (never duration).",
+    "work": {
+      "horizontal_push": {"min": 25},
+      "horizontal_pull": {"min": 25},
+      "vertical_push": {"min": 25},
+      "vertical_pull": {"min": 25},
+      "squat": {"min": 25},
+      "hinge": {"min": 25},
+      "core": {"min": 20}
+    }
+  },
+  {
+    "id": "circuit",
+    "name": "Circuit Training",
+    "description": "Rotate through stations with minimal rest between exercises. Full-body conditioning with variety. Create ONE block with repeats = circuit rounds. Minimal rest between activities (10-15s), moderate rest between rounds (60-90s via block rest). Activities MUST use reps; use duration only for holds/carries.",
+    "work": {
+      "horizontal_push": {"min": 20},
+      "horizontal_pull": {"min": 20},
+      "squat": {"min": 20},
+      "hinge": {"min": 20},
+      "core": {"min": 15},
+      "cardio": {"min": 15}
+    }
+  },
+  {
+    "id": "emom",
+    "name": "EMOM (Every Minute on the Minute)",
+    "description": "Perform prescribed work at the start of each minute, rest remainder. Built-in pacing mechanism. Create ONE block where repeats = session minutes (e.g. 20min = repeats: 20). All activities in the block are performed each minute; remaining time in the minute is rest. Activities MUST use reps (never duration, except for cardio/holds). CRITICAL EMOM CONSTRAINTS: MAX 1-2 exercises per minute (more defeats the purpose of EMOM); MAX 12-15 total reps per minute (ensures ~35-40s work, leaving 20-25s rest); VERIFY before finalizing: (total reps × 3s) ≤ 40s; For variety with multiple exercises, use ALTERNATING pattern: odd minutes = exercise A, even minutes = exercise B (set activities accordingly, e.g., 2 activities but each done on alternate minutes); If user is new or RECENT_HISTORY shows 'too hard' feedback, reduce to 8-10 reps per minute for more recovery.",
+    "work": {
+      "horizontal_push": {"min": 20},
+      "horizontal_pull": {"min": 20},
+      "squat": {"min": 20},
+      "core": {"min": 15},
+      "cardio": {"min": 15}
+    }
+  },
+  {
+    "id": "amrap",
+    "name": "AMRAP (As Many Rounds As Possible)",
+    "description": "Complete as many rounds as possible within time cap. Self-paced intensity. Create ONE block with repeats: 1. User repeats the block as many times as possible within session duration. Activities MUST use reps (never duration).",
+    "work": {
+      "horizontal_push": {"min": 20},
+      "horizontal_pull": {"min": 20},
+      "squat": {"min": 20},
+      "hinge": {"min": 20},
+      "core": {"min": 15}
+    }
+  },
+  {
+    "id": "hiit",
+    "name": "HIIT (High-Intensity Interval Training)",
+    "description": "High-intensity intervals with structured work/rest periods. Maximize caloric burn and cardiovascular adaptation. Structure work/rest periods (e.g., Tabata: 20s work/10s rest × 8 rounds). Activities MUST use duration for work time; use rest field for recovery between intervals.",
+    "work": {
+      "cardio": {"min": 20},
+      "squat": {"min": 20},
+      "core": {"min": 15}
+    }
+  },
+  {
+    "id": "for_time",
+    "name": "For Time",
+    "description": "Complete prescribed work as fast as possible. Competition-style intensity. Repeats = target rounds. No rest fields—user moves continuously. Activities MUST use reps (never duration).",
+    "work": {
+      "horizontal_push": {"min": 20},
+      "horizontal_pull": {"min": 20},
+      "squat": {"min": 20},
+      "cardio": {"min": 15}
+    }
+  },
+  {
+    "id": "endurance",
+    "name": "Endurance Training",
+    "description": "Steady-state cardio, sustained effort. Build aerobic base and muscular endurance. Activities MUST use duration (never reps).",
+    "work": {
+      "cardio": {"min": 15},
+      "core": {"min": 10}
+    }
+  },
+  {
+    "id": "mobility",
+    "name": "Mobility Training",
+    "description": "Flexibility and range of motion focus. Hold stretches, controlled movements, recovery-oriented. Hold stretches for 15-60s per position. Activities MUST use duration (never reps), no load.",
+    "work": {
+      "mobility": {"min": 15, "max": 70}
+    }
+  }
+]

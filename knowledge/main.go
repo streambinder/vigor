@@ -45,8 +45,13 @@ func main() {
 		&model.ModifierEmbedding{},
 		&model.Fact{},
 		&model.FactEmbedding{},
+		&model.Methodology{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %s", err)
+	}
+
+	if err := bootstrapMethodologies(gormDB); err != nil {
+		log.Fatalf("Failed to inject methodologies: %s", err)
 	}
 
 	if err := bootstrapEquipment(gormDB); err != nil {
@@ -222,6 +227,42 @@ func boostrapFacts(gormDB *gorm.DB) error {
 				Text:      text,
 				Embedding: pgvector.NewVector(vector)},
 		).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// methodologyJSON mirrors the JSON structure for unmarshaling work map directly.
+type methodologyJSON struct {
+	ID          string                        `json:"id"`
+	Name        string                        `json:"name"`
+	Description string                        `json:"description"`
+	Work        map[string]model.MethodologyWork `json:"work"`
+}
+
+func bootstrapMethodologies(gormDB *gorm.DB) error {
+	bytes, err := os.ReadFile(filepath.Join("features", "methodologies.json"))
+	if err != nil {
+		return err
+	}
+
+	var rows []methodologyJSON
+	if err := json.Unmarshal(bytes, &rows); err != nil {
+		return err
+	}
+
+	for _, row := range rows {
+		methodology := model.Methodology{
+			ID:          row.ID,
+			Name:        row.Name,
+			Description: row.Description,
+		}
+		if err := methodology.SetWork(row.Work); err != nil {
+			return err
+		}
+		if err := gormDB.Save(&methodology).Error; err != nil {
 			return err
 		}
 	}

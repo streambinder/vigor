@@ -12,7 +12,7 @@
     modifiers []model.Modifier,
     favoriteExercises []model.Exercise,
     favoriteEquipment []string,
-    methodology string,
+    methodology *model.Methodology,
     userPrompt string,
     duration int,
     recentTrainings []model.Training,
@@ -65,10 +65,11 @@ Age: {%d profile.Age() %}, Height: {%f.0 profile.Height %}cm, Weight: {%f.0 prof
 {% endfor %}<<<END_EQUIPMENT_MODIFIERS>>>
 {% endif %}
 
-{% if len(methodology) > 0 %}
+{% if methodology != nil %}
 <<<METHODOLOGY>>>
-You MUST use training methodology: {%s methodology %}
-Do NOT select a different methodology. The user has explicitly requested this.
+Training type: {%s methodology.Name %}
+Description: {%s methodology.Description %}
+You MUST use this methodology. Do NOT select a different one.
 <<<END_METHODOLOGY>>>
 
 {% endif %}

@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -12,10 +13,10 @@ import (
 )
 
 var (
-	ErrActivityNotFound    = errors.New("activity not found")
-	ErrTrainingCompleted   = errors.New("cannot shuffle exercises in completed training")
-	ErrNoAlternativeFound  = errors.New("no alternative exercise found")
-	ErrInvalidActivityType = errors.New("activity has no exercise type")
+	ErrActivityNotFound   = errors.New("activity not found")
+	ErrTrainingCompleted  = errors.New("cannot shuffle exercises in completed training")
+	ErrNoAlternativeFound = errors.New("no alternative exercise found")
+	ErrInvalidExercise    = errors.New("activity has no valid exercise")
 )
 
 // ShuffleActivity replaces an activity's exercise with a random alternative.
@@ -50,16 +51,25 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 	}
 
 	var currentExercise struct {
-		ID      string   `json:"id"`
-		Type    string   `json:"type"`
-		Muscles []string `json:"muscles"`
+		ID           string             `json:"id"`
+		Muscles      []string           `json:"muscles"`
+		Progressions map[string]float64 `json:"progressions"`
 	}
 	if err := json.Unmarshal(activity.Detail, &currentExercise); err != nil {
-		return model.Activity{}, ErrInvalidActivityType
+		return model.Activity{}, ErrInvalidExercise
 	}
 
-	if currentExercise.Type == "" {
-		return model.Activity{}, ErrInvalidActivityType
+	// find primary family (highest score)
+	var primaryFamily string
+	var primaryScore float64
+	for family, score := range currentExercise.Progressions {
+		if score > primaryScore {
+			primaryFamily = family
+			primaryScore = score
+		}
+	}
+	if primaryFamily == "" {
+		return model.Activity{}, ErrInvalidExercise
 	}
 
 	// collect all exercise IDs from other activities in training
@@ -78,11 +88,13 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		}
 	}
 
-	// build base query for type, exclusions, and equipment
+	// build base query matching by family and score range (+/- 15)
 	baseQuery := func() *gorm.DB {
 		q := database.Knowledge.
 			Model(&model.Exercise{}).
-			Where("type = ?", currentExercise.Type)
+			Where("exercises.progressions ? ?", primaryFamily).
+			Where(fmt.Sprintf("(exercises.progressions->>'%s')::float BETWEEN ? AND ?", primaryFamily),
+				primaryScore-15, primaryScore+15)
 		if len(excludeIDs) > 0 {
 			q = q.Where("id NOT IN ?", excludeIDs)
 		}
@@ -113,12 +125,13 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 				currentExercise.Muscles[0]).
 			Order("RANDOM()").First(&newExercise).Error
 		if err != nil {
-			return model.Activity{}, ErrNoAlternativeFound
+			// fallback: try without muscle matching
+			if err := baseQuery().Order("RANDOM()").First(&newExercise).Error; err != nil {
+				return model.Activity{}, ErrNoAlternativeFound
+			}
 		}
 	} else {
-		if err := baseQuery().
-			Where("muscles IS NULL OR muscles = '{}'").
-			Order("RANDOM()").First(&newExercise).Error; err != nil {
+		if err := baseQuery().Order("RANDOM()").First(&newExercise).Error; err != nil {
 			return model.Activity{}, ErrNoAlternativeFound
 		}
 	}

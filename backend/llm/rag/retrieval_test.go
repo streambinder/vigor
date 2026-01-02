@@ -44,9 +44,9 @@ func TestFilterByCapability(t *testing.T) {
 		{ID: "multi-mixed", Progressions: mustJSON(map[string]float64{"core": 10, "push": 40})},
 	}
 
-	t.Run("new user with margin 45", func(t *testing.T) {
+	t.Run("new user with margin 45 no methodology", func(t *testing.T) {
 		caps := map[string]float64{} // empty capabilities
-		filtered := filterByCapability(exercises, caps, 45.0)
+		filtered := filterByCapability(exercises, caps, nil, 45.0)
 		// all exercises with all progressions <= 45 should pass
 		expected := []string{"easy", "medium", "multi-easy", "multi-mixed"}
 		if len(filtered) != len(expected) {
@@ -59,9 +59,9 @@ func TestFilterByCapability(t *testing.T) {
 		}
 	})
 
-	t.Run("experienced user with margin 15", func(t *testing.T) {
+	t.Run("experienced user with margin 15 no methodology", func(t *testing.T) {
 		caps := map[string]float64{"core": 30, "push": 20}
-		filtered := filterByCapability(exercises, caps, 15.0)
+		filtered := filterByCapability(exercises, caps, nil, 15.0)
 		// core: 30+15=45, push: 20+15=35
 		// easy: core 10 <= 45 ✓
 		// medium: core 30 <= 45 ✓
@@ -76,7 +76,7 @@ func TestFilterByCapability(t *testing.T) {
 
 	t.Run("empty capabilities with strict margin", func(t *testing.T) {
 		caps := map[string]float64{}
-		filtered := filterByCapability(exercises, caps, 15.0)
+		filtered := filterByCapability(exercises, caps, nil, 15.0)
 		// only exercises with all progressions <= 15
 		expected := []string{"easy", "multi-easy"}
 		if len(filtered) != len(expected) {
@@ -86,9 +86,61 @@ func TestFilterByCapability(t *testing.T) {
 
 	t.Run("exercise without progressions passes", func(t *testing.T) {
 		noProgs := []model.Exercise{{ID: "no-progs", Progressions: nil}}
-		filtered := filterByCapability(noProgs, map[string]float64{}, 15.0)
+		filtered := filterByCapability(noProgs, map[string]float64{}, nil, 15.0)
 		if len(filtered) != 1 {
 			t.Errorf("exercise without progressions should pass, got %d", len(filtered))
+		}
+	})
+
+	t.Run("methodology min filters low-score exercises", func(t *testing.T) {
+		// create enough exercises above the min threshold to avoid graceful degradation
+		testExercises := make([]model.Exercise, 15)
+		for i := range testExercises {
+			score := 20 + float64(i*3) // scores from 20 to 62
+			testExercises[i] = model.Exercise{
+				ID:           "ex" + string(rune('a'+i)),
+				Progressions: mustJSON(map[string]float64{"core": score}),
+			}
+		}
+		methodology := &model.Methodology{}
+		methodology.SetWork(map[string]model.MethodologyWork{
+			"core": {Min: 35}, // filters out exercises with score < 35
+		})
+		caps := map[string]float64{"core": 60}
+		filtered := filterByCapability(testExercises, caps, methodology, 15.0)
+		// with min 35 and max 75 (60+15):
+		// exercises with scores 35+ should pass (scores: 35, 38, 41, 44, 47, 50, 53, 56, 59, 62)
+		// that's 10 exercises, which is >= MinWorkExercises, so no graceful degradation
+		for _, ex := range filtered {
+			progs := ex.GetProgressions()
+			if progs["core"] < 35 {
+				t.Errorf("exercise %s with score %f should have been filtered by min 35", ex.ID, progs["core"])
+			}
+		}
+		if len(filtered) == 0 {
+			t.Error("expected some exercises to pass the filter")
+		}
+	})
+
+	t.Run("graceful degradation when min too restrictive", func(t *testing.T) {
+		// create many exercises so graceful degradation kicks in
+		manyExercises := make([]model.Exercise, 20)
+		for i := range manyExercises {
+			manyExercises[i] = model.Exercise{
+				ID:           "ex" + string(rune('a'+i)),
+				Progressions: mustJSON(map[string]float64{"core": float64(5 + i)}),
+			}
+		}
+		methodology := &model.Methodology{}
+		methodology.SetWork(map[string]model.MethodologyWork{
+			"core": {Min: 50}, // very high min, most exercises below
+		})
+		caps := map[string]float64{"core": 30}
+		filtered := filterByCapability(manyExercises, caps, methodology, 15.0)
+		// with cap 30 + margin 15 = max 45, and min 50, intersection is empty
+		// graceful degradation should return exercises without min constraint
+		if len(filtered) < MinWorkExercises {
+			t.Errorf("graceful degradation should have kicked in, got %d exercises", len(filtered))
 		}
 	})
 }

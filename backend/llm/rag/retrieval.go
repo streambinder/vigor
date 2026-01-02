@@ -19,6 +19,8 @@ const (
 	MaxFactDistance         = 0.7  // Maximum cosine distance for facts (0=identical, 2=opposite)
 	MaxExerciseDistance     = 0.2  // Maximum cosine distance for exercise matching
 	DefaultCapabilityMargin = 15.0 // Default margin for capability filtering (allows slight progression)
+	WarmupCooldownMaxScore  = 25   // max progression score for warmup/cooldown exercises
+	MinWorkExercises        = 10   // minimum exercises before falling back to no-min filtering
 )
 
 // progressiveMargin returns a capability margin based on completed training count.
@@ -37,9 +39,30 @@ func progressiveMargin(completedTrainings int) float64 {
 	}
 }
 
+// RetrieveMethodology fetches a methodology by ID from the knowledge database.
+func RetrieveMethodology(id string) (*model.Methodology, error) {
+	if id == "" {
+		return nil, nil
+	}
+	var methodology model.Methodology
+	if err := database.Knowledge.Where("id = ?", id).First(&methodology).Error; err != nil {
+		return nil, fmt.Errorf("methodology not found: %s", id)
+	}
+	return &methodology, nil
+}
+
+// RetrieveAllMethodologies fetches all methodologies from the knowledge database for system prompt.
+func RetrieveAllMethodologies() ([]model.Methodology, error) {
+	var methodologies []model.Methodology
+	if err := database.Knowledge.Order("id").Find(&methodologies).Error; err != nil {
+		return nil, fmt.Errorf("failed to retrieve methodologies: %w", err)
+	}
+	return methodologies, nil
+}
+
 // RetrieveWorkExercises retrieves exercises for the main training phase via RAG.
-// Filters by work types (cardio, strength, skill), user equipment, and user capability.
-func RetrieveWorkExercises(profiles []model.Profile, equipment []string, capabilities map[string]float64, trainingsComplete int) ([]model.Exercise, error) {
+// Filters by methodology families, user equipment, and user capability.
+func RetrieveWorkExercises(profiles []model.Profile, equipment []string, capabilities map[string]float64, trainingsComplete int, methodology *model.Methodology) ([]model.Exercise, error) {
 	embeddingText := GenUserExercises(profiles, equipment)
 	exerciseEmbedding, err := embedding.GenVector(embeddingText)
 	if err != nil {
@@ -52,13 +75,7 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string, capabil
 		Distance   float64
 		Exercise   model.Exercise `gorm:"embedded"`
 	}
-	// Single query with joins:
-	// 1. Start from exercise_embeddings (for ordering by similarity)
-	// 2. Join to exercises
-	// 3. Use subqueries to check equipment matching via exercise_equipment join table
-	// 4. Filter: bodyweight OR all equipment matches user equipment IDs
-	// 5. Filter by exercise type for work phase
-	// 6. Order by: equipment-using exercises first, then by embedding distance
+
 	query := database.Knowledge.
 		Table("exercise_embeddings").
 		Select(`DISTINCT exercise_embeddings.exercise_id,
@@ -66,20 +83,30 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string, capabil
 		        exercise_embeddings.embedding <=> ? as distance,
 		        EXISTS (SELECT 1 FROM exercise_equipment WHERE exercise_equipment.exercise_id = exercises.id) as has_equipment,
 		        exercises.*`, pgvector.NewVector(exerciseEmbedding)).
-		Joins("JOIN exercises ON exercises.id = exercise_embeddings.exercise_id").
-		Where("exercises.type IN ?", model.ActivityWorkTypes)
+		Joins("JOIN exercises ON exercises.id = exercise_embeddings.exercise_id")
 
-	// Build WHERE clause dynamically based on user equipment
+	// filter by methodology families if specified
+	if methodology != nil {
+		workFamilies := methodology.GetWork()
+		if len(workFamilies) > 0 {
+			var familyConditions []string
+			for family := range workFamilies {
+				// exercise must have this family in its progressions
+				familyConditions = append(familyConditions,
+					fmt.Sprintf("exercises.progressions ? '%s'", family))
+			}
+			query = query.Where(strings.Join(familyConditions, " OR "))
+		}
+	}
+
+	// filter by user equipment
 	if len(equipment) > 0 {
-		// Exercises where ALL required equipment is in user's equipment list
 		query = query.Where(`(
-			-- Bodyweight exercises (no equipment required)
 			NOT EXISTS (
 				SELECT 1 FROM exercise_equipment
 				WHERE exercise_equipment.exercise_id = exercises.id
 			)
 			OR
-			-- Exercises where ALL equipment is in user's list
 			NOT EXISTS (
 				SELECT 1 FROM exercise_equipment ee
 				WHERE ee.exercise_id = exercises.id
@@ -87,19 +114,16 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string, capabil
 			)
 		)`, equipment)
 	} else {
-		// No user equipment - only return bodyweight exercises
 		query = query.Where(`NOT EXISTS (
 			SELECT 1 FROM exercise_equipment
 			WHERE exercise_equipment.exercise_id = exercises.id
 		)`)
 	}
 
-	// Wrap in outer query to shuffle and limit
-	// Order by has_equipment DESC to prefer equipment-using exercises, then by semantic similarity
 	if err := database.Knowledge.
 		Table("(?) AS pool", query.Order("has_equipment DESC, distance ASC").Limit(MaxWorkExercises*3)).
 		Order("RANDOM()").
-		Limit(MaxWorkExercises * 3). // get more candidates for capability filtering
+		Limit(MaxWorkExercises * 3).
 		Scan(&results).
 		Error; err != nil {
 		return nil, fmt.Errorf("failed to execute similarity search: %w", err)
@@ -110,7 +134,7 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string, capabil
 		exercises = append(exercises, result.Exercise)
 	}
 
-	return filterByCapability(exercises, capabilities, progressiveMargin(trainingsComplete)), nil
+	return filterByCapability(exercises, capabilities, methodology, progressiveMargin(trainingsComplete)), nil
 }
 
 // QueryUserFacts retrieves facts relevant to the users' profiles and prompt.
@@ -200,11 +224,12 @@ func RetrieveEquipment(ids []string) ([]model.Equipment, error) {
 }
 
 // RetrieveWarmupExercises retrieves exercises for the warmup phase via random selection.
-// Filters by warmup types (mobility, skill, cardio) and returns bodyweight exercises only.
+// Filters by mobility family with low progression scores, bodyweight exercises only.
 func RetrieveWarmupExercises() ([]model.Exercise, error) {
 	var exercises []model.Exercise
 	if err := database.Knowledge.
-		Where("type IN ?", model.ActivityWarmupTypes).
+		Where("exercises.progressions ? 'mobility'").
+		Where(fmt.Sprintf("(exercises.progressions->>'mobility')::float < %d", WarmupCooldownMaxScore)).
 		Where(`NOT EXISTS (
 			SELECT 1 FROM exercise_equipment
 			WHERE exercise_equipment.exercise_id = exercises.id
@@ -219,11 +244,12 @@ func RetrieveWarmupExercises() ([]model.Exercise, error) {
 }
 
 // RetrieveCooldownExercises retrieves exercises for the cooldown phase via random selection.
-// Filters by cooldown types (flexibility, cardio, balance) and returns bodyweight exercises only.
+// Filters by mobility family with low progression scores, bodyweight exercises only.
 func RetrieveCooldownExercises() ([]model.Exercise, error) {
 	var exercises []model.Exercise
 	if err := database.Knowledge.
-		Where("type IN ?", model.ActivityCooldownTypes).
+		Where("exercises.progressions ? 'mobility'").
+		Where(fmt.Sprintf("(exercises.progressions->>'mobility')::float < %d", WarmupCooldownMaxScore)).
 		Where(`NOT EXISTS (
 			SELECT 1 FROM exercise_equipment
 			WHERE exercise_equipment.exercise_id = exercises.id
@@ -296,14 +322,33 @@ func RetrieveFavoriteExercises(favorites []string) ([]model.Exercise, error) {
 	return exercises, nil
 }
 
-// filterExerciseByCapability filters exercises based on user capability per family.
-func filterByCapability(exercises []model.Exercise, capabilities map[string]float64, margins ...float64) []model.Exercise {
-	margin := DefaultCapabilityMargin
-	if len(margins) > 0 {
-		margin = margins[0]
-	}
+// filterByCapability filters exercises based on user capability per family and methodology min scores.
+// Applies graceful degradation: if methodology min yields too few results, falls back to capability-only.
+func filterByCapability(exercises []model.Exercise, capabilities map[string]float64, methodology *model.Methodology, margin float64) []model.Exercise {
 	log.Debug().Float64("capability_margin", margin).Msg("filtering exercises by capability")
 
+	var methodologyWork map[string]model.MethodologyWork
+	if methodology != nil {
+		methodologyWork = methodology.GetWork()
+	}
+
+	// first pass: apply both capability max and methodology min
+	filtered := filterWithConstraints(exercises, capabilities, methodologyWork, margin, true)
+
+	// graceful degradation: if too few results, ignore methodology min
+	if len(filtered) < MinWorkExercises && methodologyWork != nil {
+		log.Debug().Int("count", len(filtered)).Msg("too few exercises with methodology min, falling back")
+		filtered = filterWithConstraints(exercises, capabilities, methodologyWork, margin, false)
+	}
+
+	if len(filtered) > MaxWorkExercises {
+		return filtered[:MaxWorkExercises]
+	}
+	return filtered
+}
+
+// filterWithConstraints applies capability and optionally methodology min constraints.
+func filterWithConstraints(exercises []model.Exercise, capabilities map[string]float64, methodologyWork map[string]model.MethodologyWork, margin float64, applyMin bool) []model.Exercise {
 	filtered := make([]model.Exercise, 0, len(exercises))
 	for _, exercise := range exercises {
 		progressions := exercise.GetProgressions()
@@ -311,20 +356,27 @@ func filterByCapability(exercises []model.Exercise, capabilities map[string]floa
 			filtered = append(filtered, exercise)
 			continue
 		}
+
 		allowed := true
-		for family, order := range progressions {
-			if order > capabilities[family]+margin {
+		for family, score := range progressions {
+			// capability max: score must be within user capability + margin
+			if score > capabilities[family]+margin {
 				allowed = false
 				break
+			}
+			// methodology min: score must be at or above methodology's min for this family
+			if applyMin && methodologyWork != nil {
+				if work, ok := methodologyWork[family]; ok && work.Min > 0 {
+					if score < float64(work.Min) {
+						allowed = false
+						break
+					}
+				}
 			}
 		}
 		if allowed {
 			filtered = append(filtered, exercise)
 		}
-	}
-
-	if len(filtered) > MaxWorkExercises {
-		return filtered[:MaxWorkExercises]
 	}
 	return filtered
 }

@@ -12,7 +12,6 @@ import (
 type Exercise struct {
 	ID           string         `gorm:"type:varchar(255);primaryKey" json:"id"`
 	Name         string         `gorm:"not null;uniqueIndex:idx_exercise_name" json:"name"`
-	Type         string         `gorm:"not null;default:'strength';index:idx_exercise_type" json:"type"`
 	Equipment    pq.StringArray `gorm:"type:text[]" json:"equipment"`
 	Muscles      pq.StringArray `gorm:"type:text[]" json:"muscles"`
 	Reference    string         `json:"reference"`

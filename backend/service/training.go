@@ -105,7 +105,17 @@ func GenerateTraining(userID uuid.UUID, params GenerateTrainingParams) (*model.T
 		return nil, err
 	}
 
-	workExercises, err := rag.RetrieveWorkExercises(profiles, equipmentIDs, capabilities, trainingsComplete)
+	methodology, err := rag.RetrieveMethodology(params.Methodology)
+	if err != nil {
+		return nil, err
+	}
+
+	methodologies, err := rag.RetrieveAllMethodologies()
+	if err != nil {
+		return nil, err
+	}
+
+	workExercises, err := rag.RetrieveWorkExercises(profiles, equipmentIDs, capabilities, trainingsComplete, methodology)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +185,8 @@ func GenerateTraining(userID uuid.UUID, params GenerateTrainingParams) (*model.T
 		modifiers,
 		favoriteExercises,
 		favoriteEquipmentIDs,
-		params.Methodology,
+		methodology,
+		methodologies,
 		params.Prompt,
 		params.Duration,
 		recentTrainings,

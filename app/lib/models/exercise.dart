@@ -11,8 +11,6 @@ class Exercise {
   final String id;
   @JsonKey(name: 'name', defaultValue: '')
   final String name;
-  @JsonKey(name: 'type', defaultValue: '')
-  final String type;
   @JsonKey(name: 'equipment', defaultValue: const [])
   final List<String> equipment;
   @JsonKey(name: 'muscles', defaultValue: const [])
@@ -27,7 +25,6 @@ class Exercise {
   Exercise({
     required this.id,
     required this.name,
-    required this.type,
     required this.equipment,
     required this.muscles,
     required this.reference,

@@ -3,7 +3,6 @@ package model
 import (
 	"encoding/json"
 	"errors"
-	"slices"
 	"strconv"
 	"time"
 
@@ -13,15 +12,7 @@ import (
 	"gorm.io/datatypes"
 )
 
-const (
-	WeightActivityDurationPerRep = 3 // 3 seconds per rep
-)
-
-var (
-	ActivityWorkTypes     = []string{"cardio", "strength", "skill"}
-	ActivityWarmupTypes   = []string{"mobility", "skill", "cardio"}
-	ActivityCooldownTypes = []string{"flexibility", "cardio", "balance"}
-)
+const WeightActivityDurationPerRep = 3 // 3 seconds per rep
 
 // Valid activity feedback values
 const (
@@ -152,26 +143,15 @@ type Activity struct {
 	ExerciseID string         `gorm:"not null" json:"exercise_id" prompt:"Exercise ID from AVAILABLE_EXERCISES"`
 	Name       string         `gorm:"not null" json:"name" prompt:"-"`
 	Duration   int            `gorm:"not null" json:"duration" prompt:"Seconds (use 0 when reps > 0)"`
-	Reps      int            `gorm:"not null" json:"reps" prompt:"Repetition count (use 0 for time-based)"`
-	WeightKg  int            `gorm:"not null" json:"weight_kg" prompt:"Weight in kg (0 for bodyweight)"`
-	Modifiers pq.StringArray `gorm:"type:text[]" json:"modifiers" prompt:"Equipment modifiers applied (empty array if none)"`
-	Rest      int            `gorm:"not null" json:"rest" prompt:"Rest seconds after this activity"`
-	Detail    datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"`
-	Feedback  string         `json:"feedback" prompt:"-"` // too_easy, easy, ok, hard, too_hard, skipped
+	Reps       int            `gorm:"not null" json:"reps" prompt:"Repetition count (use 0 for time-based)"`
+	WeightKg   int            `gorm:"not null" json:"weight_kg" prompt:"Weight in kg (0 for bodyweight)"`
+	Modifiers  pq.StringArray `gorm:"type:text[]" json:"modifiers" prompt:"Equipment modifiers applied (empty array if none)"`
+	Rest       int            `gorm:"not null" json:"rest" prompt:"Rest seconds after this activity"`
+	Detail     datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"`
+	Feedback   string         `json:"feedback" prompt:"-"` // too_easy, easy, ok, hard, too_hard, skipped
 
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
-}
-
-// DetailType returns the exercise type from the Detail JSON field
-func (a *Activity) DetailType() string {
-	var detail struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(a.Detail, &detail); err != nil {
-		return ""
-	}
-	return detail.Type
 }
 
 // HasFeedback returns true if the activity has any feedback recorded.
@@ -216,15 +196,19 @@ func (t *Training) Validate() error {
 	return nil
 }
 
-// Activities returns pointers to work-type activities in the training, deduplicated by ExerciseID
+// Activities returns unique work activities for capability tracking.
 func (t *Training) Activities() []*Activity {
 	seen := make(map[string]bool)
 	var activities []*Activity
 	for i := range t.Routines {
+		// only include activities from work routines
+		if t.Routines[i].Type != "work" {
+			continue
+		}
 		for j := range t.Routines[i].Blocks {
 			for k := range t.Routines[i].Blocks[j].Activities {
 				a := &t.Routines[i].Blocks[j].Activities[k]
-				if seen[a.ExerciseID] || !slices.Contains(ActivityWorkTypes, a.DetailType()) {
+				if seen[a.ExerciseID] {
 					continue
 				}
 				seen[a.ExerciseID] = true
