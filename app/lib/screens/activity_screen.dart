@@ -430,26 +430,24 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       );
     }
 
-    return ListView.builder(
+    return ListView.separated(
       padding: VigorSpacing.paddingLg,
       itemCount: trainings.length,
+      separatorBuilder: (_, __) => SizedBox(height: VigorSpacing.sm),
       itemBuilder: (context, index) {
         final training = trainings[index];
-        return Padding(
-          key: ValueKey(training.id),
-          padding: EdgeInsets.only(bottom: VigorSpacing.sm),
-          child: _buildTrainingCard(training, l10n, isAvailable: isAvailable),
-        );
+        return _buildTrainingCard(training, l10n, isAvailable: isAvailable, key: ValueKey(training.id));
       },
     );
   }
 
-  Widget _buildTrainingCard(Training training, AppLocalizations l10n, {required bool isAvailable}) {
+  Widget _buildTrainingCard(Training training, AppLocalizations l10n, {required bool isAvailable, Key? key}) {
     final isStale = _isStaleTraining(training);
     final partnerCount = _partnerCounts[training.id] ?? 0;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AdaptiveCard(
+      key: key,
       child: InkWell(
         onTap: () async {
           final changed = await Navigator.of(context).push<bool>(
