@@ -165,13 +165,7 @@
   },
   {
     "id": "kettlebell",
-    "aliases": [
-      "kettlebell",
-      "kettlebells",
-      "pesa rusa",
-      "Kugelhantel",
-      "гиря"
-    ]
+    "aliases": ["kettlebell", "kettlebells", "pesa rusa", "Kugelhantel", "гиря"]
   },
   {
     "id": "leverage machine",
@@ -417,6 +411,18 @@
       "Reifen",
       "покрышка",
       "шина"
+    ]
+  },
+  {
+    "id": "treadmill",
+    "aliases": [
+      "treadmill",
+      "tapis roulant",
+      "tapis-roulant",
+      "cinta de correr",
+      "Laufband",
+      "esteira",
+      "беговая дорожка"
     ]
   },
   {
