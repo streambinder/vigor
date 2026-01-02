@@ -804,6 +804,36 @@ abstract class AppLocalizations {
   /// **'Stale'**
   String get stale;
 
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// No description provided for @available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get available;
+
+  /// No description provided for @completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completed;
+
+  /// No description provided for @noPastTrainings.
+  ///
+  /// In en, this message translates to:
+  /// **'No completed trainings yet'**
+  String get noPastTrainings;
+
   /// No description provided for @copied.
   ///
   /// In en, this message translates to:

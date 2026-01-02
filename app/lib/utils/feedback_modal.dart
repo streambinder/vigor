@@ -142,7 +142,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
             ? LiquidGlassTheme.glassDecoration(
                 borderRadius: 20,
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   width: 1.5,
                 ),
               )

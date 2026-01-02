@@ -25,10 +25,14 @@ class AdaptiveScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (PlatformHelper.useLiquidGlass && useLiquidGlassBackground) {
       return Container(
         decoration: BoxDecoration(
-          gradient: LiquidGlassTheme.backgroundGradient,
+          gradient: isDark
+              ? LiquidGlassTheme.darkBackgroundGradient
+              : LiquidGlassTheme.backgroundGradient,
         ),
         child: Scaffold(
           backgroundColor: Colors.transparent,

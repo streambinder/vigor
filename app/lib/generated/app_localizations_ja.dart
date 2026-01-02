@@ -368,6 +368,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get stale => '期限切れ';
 
   @override
+  String get today => '今日';
+
+  @override
+  String get yesterday => '昨日';
+
+  @override
+  String get available => '利用可能';
+
+  @override
+  String get completed => '完了';
+
+  @override
+  String get noPastTrainings => '完了したトレーニングはまだありません';
+
+  @override
   String get copied => 'コピー済み';
 
   @override

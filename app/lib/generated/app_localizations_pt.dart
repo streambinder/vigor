@@ -377,6 +377,21 @@ class AppLocalizationsPt extends AppLocalizations {
   String get stale => 'Desatualizado';
 
   @override
+  String get today => 'Hoje';
+
+  @override
+  String get yesterday => 'Ontem';
+
+  @override
+  String get available => 'Disponível';
+
+  @override
+  String get completed => 'Concluído';
+
+  @override
+  String get noPastTrainings => 'Nenhum treino concluído ainda';
+
+  @override
   String get copied => 'Copiado';
 
   @override

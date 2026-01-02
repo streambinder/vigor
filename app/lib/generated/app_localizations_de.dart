@@ -378,6 +378,21 @@ class AppLocalizationsDe extends AppLocalizations {
   String get stale => 'Veraltet';
 
   @override
+  String get today => 'Heute';
+
+  @override
+  String get yesterday => 'Gestern';
+
+  @override
+  String get available => 'Verfügbar';
+
+  @override
+  String get completed => 'Abgeschlossen';
+
+  @override
+  String get noPastTrainings => 'Noch keine abgeschlossenen Trainings';
+
+  @override
   String get copied => 'Kopiert';
 
   @override

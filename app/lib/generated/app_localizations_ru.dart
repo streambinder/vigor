@@ -372,6 +372,21 @@ class AppLocalizationsRu extends AppLocalizations {
   String get stale => 'Устарело';
 
   @override
+  String get today => 'Сегодня';
+
+  @override
+  String get yesterday => 'Вчера';
+
+  @override
+  String get available => 'Доступно';
+
+  @override
+  String get completed => 'Завершено';
+
+  @override
+  String get noPastTrainings => 'Пока нет завершённых тренировок';
+
+  @override
   String get copied => 'Скопировано';
 
   @override

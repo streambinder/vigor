@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/training_generation_modal.dart';
@@ -8,8 +9,6 @@ import '../services/gym_service.dart';
 import '../services/secure_storage_service.dart';
 import '../models/training.dart';
 import '../models/gym.dart';
-import '../theme/liquid_glass_theme.dart';
-import '../utils/platform_helper.dart';
 import 'training_details_screen.dart';
 import 'tabata_timer_screen.dart';
 
@@ -20,18 +19,27 @@ class ActivityScreen extends StatefulWidget {
   State<ActivityScreen> createState() => _ActivityScreenState();
 }
 
-class _ActivityScreenState extends State<ActivityScreen> {
+class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProviderStateMixin {
   TrainingService? _trainingService;
   GymService? _gymService;
   List<Training>? _trainings;
   List<Gym>? _gyms;
   bool _isLoading = false;
   bool _isLoadingGyms = false;
-  Map<String, int> _partnerCounts = {};
+  final Map<String, int> _partnerCounts = {};
+
+  // tab controller for available/past toggle
+  late TabController _tabController;
+  int _selectedTab = 0;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) return;
+      setState(() => _selectedTab = _tabController.index);
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final storage = context.read<SecureStorageService>();
       _trainingService = TrainingService(storageService: storage);
@@ -41,13 +49,15 @@ class _ActivityScreenState extends State<ActivityScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadGyms() async {
     if (_gymService == null) return;
-
-    setState(() {
-      _isLoadingGyms = true;
-    });
-
+    setState(() => _isLoadingGyms = true);
     final response = await _gymService!.getGyms();
     if (response.isSuccess && mounted) {
       setState(() {
@@ -55,9 +65,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
         _isLoadingGyms = false;
       });
     } else if (mounted) {
-      setState(() {
-        _isLoadingGyms = false;
-      });
+      setState(() => _isLoadingGyms = false);
     }
   }
 
@@ -68,7 +76,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
       builder: (context) => TrainingGenerationModal(
         gyms: _gyms ?? [],
         onSuccess: (training) {
-          _loadTrainings(); // refresh the list
+          _loadTrainings();
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => TrainingDetailsScreen(training: training),
@@ -81,23 +89,16 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
   Future<void> _loadTrainings() async {
     if (_trainingService == null) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
+    setState(() => _isLoading = true);
     final response = await _trainingService!.getTrainings();
     if (response.isSuccess && mounted) {
       setState(() {
         _trainings = response.data;
         _isLoading = false;
       });
-      // load partner counts in background
       _loadPartnerCounts();
     } else if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
       if (response.error != null) {
         AdaptiveNotification.showError(
           context: context,
@@ -113,52 +114,53 @@ class _ActivityScreenState extends State<ActivityScreen> {
     for (final training in _trainings!) {
       final response = await _trainingService!.getPartners(training.id);
       if (response.isSuccess && mounted) {
-        setState(() {
-          _partnerCounts[training.id] = response.data?.length ?? 0;
-        });
+        setState(() => _partnerCounts[training.id] = response.data?.length ?? 0);
       }
     }
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    final now = DateTime.now();
+    final diff = now.difference(date).inDays;
+    if (diff == 0) return AppLocalizations.of(context).today;
+    if (diff == 1) return AppLocalizations.of(context).yesterday;
+    if (diff < 7) return '${diff}d ago';
+    return '${date.day}/${date.month}';
   }
 
-  String _formatDuration(AppLocalizations l10n, int seconds) {
+  String _formatDuration(int seconds) {
     final minutes = seconds ~/ 60;
-    if (minutes < 60) {
-      return l10n.durationMin(minutes);
-    }
+    if (minutes < 60) return '${minutes}m';
     final hours = minutes ~/ 60;
     final remainingMinutes = minutes % 60;
-    if (remainingMinutes == 0) {
-      return l10n.durationHr(hours);
-    }
-    return l10n.durationHrMin(hours, remainingMinutes);
+    return remainingMinutes == 0 ? '${hours}h' : '${hours}h ${remainingMinutes}m';
   }
 
   bool _isCompletedTraining(Training training) {
     final completedAt = training.completedAt;
-    if (completedAt == null) {
-      return false;
-    }
-    final now = DateTime.now();
-    return completedAt.isBefore(now);
+    return completedAt != null && completedAt.isBefore(DateTime.now());
   }
 
   bool _isStaleTraining(Training training) {
-    // consider a training stale if it's older than 7 days and not completed
-    if (_isCompletedTraining(training)) {
-      return false;
-    }
-    final now = DateTime.now();
-    final daysSinceCreation = now.difference(training.createdAt).inDays;
-    return daysSinceCreation >= 7;
+    if (_isCompletedTraining(training)) return false;
+    return DateTime.now().difference(training.createdAt).inDays >= 7;
   }
+
+  List<Training> get _availableTrainings => (_trainings ?? [])
+      .where((t) => !_isCompletedTraining(t))
+      .toList()
+    ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+  List<Training> get _pastTrainings => (_trainings ?? [])
+      .where((t) => _isCompletedTraining(t))
+      .toList()
+    ..sort((a, b) => (b.completedAt ?? b.createdAt).compareTo(a.completedAt ?? a.createdAt));
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return AdaptiveScaffold(
       appBar: AdaptiveAppBar(
         title: Text(l10n.activity),
@@ -170,286 +172,49 @@ class _ActivityScreenState extends State<ActivityScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _isLoadingGyms ? null : _showTrainingGenerationModal,
-        icon: const Icon(Icons.add),
-        label: Text(l10n.generateTraining),
-        backgroundColor: PlatformHelper.useLiquidGlass
-            ? LiquidGlassTheme.primaryColor
-            : null,
-      ),
+      floatingActionButton: _buildFAB(l10n),
       body: RefreshIndicator(
         onRefresh: _loadTrainings,
+        color: VigorColors.orange,
         child: _isLoading
             ? const Center(child: AdaptiveLoadingIndicator())
             : _trainings == null || _trainings!.isEmpty
                 ? _buildEmptyState(l10n)
-                : _buildTrainingsList(l10n),
+                : _buildContent(l10n, isDark),
       ),
     );
   }
 
-  Widget _buildEmptyState(AppLocalizations l10n) {
-    return ListView(
-      padding: const EdgeInsets.all(24.0),
-      children: [
-        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-        Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.fitness_center,
-                size: 64,
-                color: Colors.grey[400],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                l10n.noTrainingsYet,
-                style: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.headlineStyle
-                    : Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.generateFirstTraining,
-                textAlign: TextAlign.center,
-                style: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.captionStyle
-                    : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-              ),
-            ],
-          ),
+  Widget _buildFAB(AppLocalizations l10n) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [VigorColors.orange, VigorColors.electricBlue],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-      ],
-    );
-  }
-
-  Widget _buildTrainingsList(AppLocalizations l10n) {
-    // separate trainings into available and past
-    final availableTrainings = _trainings!
-        .where((t) => !_isCompletedTraining(t))
-        .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Most recent first
-
-    final pastTrainings = _trainings!
-        .where((t) => _isCompletedTraining(t))
-        .toList()
-      ..sort((a, b) {
-        // Both should have non-null completedAt after filtering, but add safety
-        final aDate = a.completedAt ?? a.createdAt;
-        final bDate = b.completedAt ?? b.createdAt;
-        return bDate.compareTo(aDate);
-      }); // Most recent first
-
-    return ListView(
-      padding: const EdgeInsets.all(20.0),
-      children: [
-        // Available Trainings Section
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Text(
-            l10n.availableTrainings,
-            style: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
-                : Theme.of(context).textTheme.titleLarge,
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        if (availableTrainings.isEmpty)
-          _buildEmptyAvailableState(l10n)
-        else
-          ...availableTrainings.map((training) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: _buildTrainingCard(training, l10n),
-            );
-          }),
-
-        const SizedBox(height: 32),
-
-        // Past Trainings Section (only show if there are past trainings)
-        if (pastTrainings.isNotEmpty) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              l10n.pastTrainings,
-              style: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
-                  : Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
-          const SizedBox(height: 12),
-          ...pastTrainings.map((training) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: _buildTrainingCard(training, l10n),
-            );
-          }),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildEmptyAvailableState(AppLocalizations l10n) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24.0),
-      child: Center(
-        child: Column(
-          children: [
-            Icon(
-              Icons.fitness_center,
-              size: 48,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              l10n.noTrainingAvailable,
-              textAlign: TextAlign.center,
-              style: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.bodyStyle.copyWith(
-                      color: Colors.grey[600],
-                    )
-                  : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
-                      ),
-            ),
-          ],
-        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: VigorShadows.orangeGlow,
       ),
-    );
-  }
-
-  Widget _buildTrainingCard(Training training, AppLocalizations l10n) {
-    final isCompleted = _isCompletedTraining(training);
-    final isStale = _isStaleTraining(training);
-    final partnerCount = _partnerCounts[training.id] ?? 0;
-    final peopleCount = 1 + partnerCount; // owner + partners
-    final opacity = isCompleted ? 0.5 : 1.0;
-
-    return Opacity(
-      opacity: opacity,
-      child: AdaptiveCard(
+      child: Material(
+        color: Colors.transparent,
         child: InkWell(
-          onTap: () async {
-            final changed = await Navigator.of(context).push<bool>(
-              MaterialPageRoute(
-                builder: (context) => TrainingDetailsScreen(training: training),
-              ),
-            );
-            // Refresh the list if training was deleted or completed
-            if (changed == true) {
-              _loadTrainings();
-            }
-          },
-          borderRadius: BorderRadius.circular(12),
+          onTap: _isLoadingGyms ? null : _showTrainingGenerationModal,
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
+                const Icon(Icons.bolt, color: Colors.white, size: 22),
+                const SizedBox(width: 8),
                 Text(
-                  training.name,
-                  style: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 18)
-                      : Theme.of(context).textTheme.titleLarge,
+                  l10n.generateTraining,
+                  style: VigorTypography.label.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                if (isCompleted) ...[
-                  // for completed trainings: show completion time first, then other labels
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 4,
-                    children: [
-                      _buildMetaLabel(
-                        context,
-                        icon: Icons.check_circle,
-                        text: _formatDate(training.completedAt ?? training.createdAt),
-                        color: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.successColor
-                            : Colors.green[600],
-                      ),
-                      if (partnerCount > 0)
-                        _buildMetaLabel(context, icon: Icons.people, text: '$peopleCount'),
-                      if (training.gym != null)
-                        _buildMetaLabel(context, icon: Icons.location_on, text: training.gym!.name),
-                      _buildMetaLabel(context, icon: Icons.fitness_center, text: '${training.equipment.length}'),
-                      _buildMetaLabel(context, icon: Icons.tune, text: training.type),
-                      if (training.parentId != null)
-                        _buildMetaLabel(context, icon: Icons.copy, text: l10n.copied),
-                      _buildMetaLabel(context, icon: Icons.schedule, text: _formatDuration(l10n, training.duration)),
-                    ],
-                  ),
-                ] else ...[
-                  // for available trainings: show full details
-                  const SizedBox(height: 6),
-                  Text(
-                    training.description,
-                    style: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.bodyStyle
-                        : Theme.of(context).textTheme.bodyMedium,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 4,
-                    children: [
-                      if (partnerCount > 0)
-                        _buildMetaLabel(context, icon: Icons.people, text: '$peopleCount'),
-                      if (training.gym != null)
-                        _buildMetaLabel(context, icon: Icons.location_on, text: training.gym!.name),
-                      _buildMetaLabel(context, icon: Icons.fitness_center, text: '${training.equipment.length}'),
-                      _buildMetaLabel(context, icon: Icons.tune, text: training.type),
-                      if (isStale)
-                        _buildMetaLabel(
-                          context,
-                          icon: Icons.warning,
-                          text: l10n.stale,
-                          color: PlatformHelper.useLiquidGlass ? Colors.orange[700] : Colors.orange[600],
-                          bold: true,
-                        ),
-                      if (training.parentId != null)
-                        _buildMetaLabel(context, icon: Icons.copy, text: l10n.copied),
-                      _buildMetaLabel(context, icon: Icons.calendar_today, text: _formatDate(training.createdAt)),
-                      _buildMetaLabel(context, icon: Icons.schedule, text: _formatDuration(l10n, training.duration)),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  // Timer button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () async {
-                        final completed = await Navigator.of(context).push<bool>(
-                          MaterialPageRoute(
-                            builder: (context) => TabataTimerScreen(training: training),
-                          ),
-                        );
-                        // reload trainings if training was completed
-                        if (completed == true) {
-                          _loadTrainings();
-                        }
-                      },
-                      icon: const Icon(Icons.timer),
-                      label: Text(l10n.startTraining),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.successColor
-                            : Colors.green[600],
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
@@ -458,35 +223,405 @@ class _ActivityScreenState extends State<ActivityScreen> {
     );
   }
 
-  Widget _buildMetaLabel(
-    BuildContext context, {
-    required IconData icon,
-    required String text,
-    Color? color,
-    bool bold = false,
-  }) {
-    final defaultColor = PlatformHelper.useLiquidGlass
-        ? LiquidGlassTheme.captionStyle.color
-        : Colors.grey[600];
-    final labelColor = color ?? defaultColor;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+  Widget _buildEmptyState(AppLocalizations l10n) {
+    return ListView(
+      padding: VigorSpacing.paddingLg,
       children: [
-        Icon(icon, size: 14, color: labelColor),
-        const SizedBox(width: 3),
+        SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+        // gradient icon
+        Center(
+          child: Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  VigorColors.orange.withValues(alpha: 0.2),
+                  VigorColors.electricBlue.withValues(alpha: 0.2),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              shape: BoxShape.circle,
+            ),
+            child: ShaderMask(
+              shaderCallback: (bounds) => LinearGradient(
+                colors: [VigorColors.orange, VigorColors.electricBlue],
+              ).createShader(bounds),
+              child: const Icon(Icons.fitness_center, size: 56, color: Colors.white),
+            ),
+          ),
+        ),
+        SizedBox(height: VigorSpacing.lg),
         Text(
-          text,
-          style: PlatformHelper.useLiquidGlass
-              ? LiquidGlassTheme.captionStyle.copyWith(
-                  color: labelColor,
-                  fontWeight: bold ? FontWeight.w600 : null,
-                )
-              : Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: labelColor,
-                    fontWeight: bold ? FontWeight.w600 : null,
-                  ),
+          l10n.noTrainingsYet,
+          style: VigorTypography.title.copyWith(color: VigorColors.textPrimary(context)),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: VigorSpacing.sm),
+        Text(
+          l10n.generateFirstTraining,
+          textAlign: TextAlign.center,
+          style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context)),
+        ),
+        SizedBox(height: VigorSpacing.xl),
+        // CTA button
+        Center(
+          child: AdaptiveButton(
+            onPressed: _isLoadingGyms ? null : _showTrainingGenerationModal,
+            useGradient: true,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.bolt, color: Colors.white),
+                const SizedBox(width: 8),
+                Text(l10n.generateTraining, style: const TextStyle(color: Colors.white)),
+              ],
+            ),
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildContent(AppLocalizations l10n, bool isDark) {
+    final availableCount = _availableTrainings.length;
+    final pastCount = _pastTrainings.length;
+
+    return Column(
+      children: [
+        // stats header
+        _buildStatsHeader(l10n, availableCount, pastCount),
+        // segmented control tabs
+        _buildSegmentedControl(l10n, availableCount, pastCount, isDark),
+        // training list
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildTrainingList(_availableTrainings, l10n, isAvailable: true),
+              _buildTrainingList(_pastTrainings, l10n, isAvailable: false),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsHeader(AppLocalizations l10n, int available, int past) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(VigorSpacing.lg, VigorSpacing.sm, VigorSpacing.lg, VigorSpacing.md),
+      child: Row(
+        children: [
+          _buildStatCard(
+            count: available,
+            label: l10n.availableTrainings,
+            color: VigorColors.orange,
+            icon: Icons.play_arrow,
+          ),
+          SizedBox(width: VigorSpacing.md),
+          _buildStatCard(
+            count: past,
+            label: l10n.pastTrainings,
+            color: VigorColors.success,
+            icon: Icons.check_circle,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
+    required int count,
+    required String label,
+    required Color color,
+    required IconData icon,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: VigorSpacing.paddingMd,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: VigorRadius.radiusMd,
+          border: Border.all(color: color.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 28),
+            SizedBox(width: VigorSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$count',
+                    style: VigorTypography.title.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    label,
+                    style: VigorTypography.caption.copyWith(
+                      color: color.withValues(alpha: 0.8),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSegmentedControl(AppLocalizations l10n, int available, int past, bool isDark) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: VigorSpacing.lg),
+      decoration: BoxDecoration(
+        color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+        borderRadius: VigorRadius.radiusSm,
+        border: Border.all(
+          color: isDark ? VigorColors.darkBorder : VigorColors.lightBorder,
+        ),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        indicator: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [VigorColors.orange, VigorColors.electricBlue],
+          ),
+          borderRadius: VigorRadius.radiusSm,
+        ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerHeight: 0,
+        labelColor: Colors.white,
+        unselectedLabelColor: VigorColors.textSecondary(context),
+        labelStyle: VigorTypography.label.copyWith(fontWeight: FontWeight.w600),
+        unselectedLabelStyle: VigorTypography.label,
+        tabs: [
+          Tab(text: '${l10n.available} ($available)'),
+          Tab(text: '${l10n.completed} ($past)'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTrainingList(List<Training> trainings, AppLocalizations l10n, {required bool isAvailable}) {
+    if (trainings.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isAvailable ? Icons.fitness_center : Icons.history,
+              size: 48,
+              color: VigorColors.textMuted(context),
+            ),
+            SizedBox(height: VigorSpacing.sm),
+            Text(
+              isAvailable ? l10n.noTrainingAvailable : l10n.noPastTrainings,
+              style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: VigorSpacing.paddingLg,
+      itemCount: trainings.length,
+      itemBuilder: (context, index) => Padding(
+        padding: EdgeInsets.only(bottom: VigorSpacing.sm),
+        child: _buildTrainingCard(trainings[index], l10n, isAvailable: isAvailable),
+      ),
+    );
+  }
+
+  Widget _buildTrainingCard(Training training, AppLocalizations l10n, {required bool isAvailable}) {
+    final isStale = _isStaleTraining(training);
+    final partnerCount = _partnerCounts[training.id] ?? 0;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return AdaptiveCard(
+      child: InkWell(
+        onTap: () async {
+          final changed = await Navigator.of(context).push<bool>(
+            MaterialPageRoute(builder: (context) => TrainingDetailsScreen(training: training)),
+          );
+          if (changed == true) _loadTrainings();
+        },
+        borderRadius: VigorRadius.radiusMd,
+        child: Padding(
+          padding: VigorSpacing.paddingMd,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // header row with name and status
+              Row(
+                children: [
+                  // type indicator
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: VigorColors.electricBlue.withValues(alpha: 0.15),
+                      borderRadius: VigorRadius.radiusXs,
+                    ),
+                    child: Text(
+                      training.type.toUpperCase(),
+                      style: VigorTypography.caption.copyWith(
+                        color: VigorColors.electricBlue,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: VigorSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      training.name,
+                      style: VigorTypography.headline.copyWith(
+                        fontSize: 16,
+                        color: VigorColors.textPrimary(context),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (isStale)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: VigorColors.warning.withValues(alpha: 0.15),
+                        borderRadius: VigorRadius.radiusXs,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.schedule, size: 12, color: VigorColors.warning),
+                          const SizedBox(width: 2),
+                          Text(
+                            l10n.stale,
+                            style: VigorTypography.caption.copyWith(
+                              color: VigorColors.warning,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+              if (isAvailable) ...[
+                SizedBox(height: VigorSpacing.xs),
+                Text(
+                  training.description,
+                  style: VigorTypography.body.copyWith(
+                    color: VigorColors.textSecondary(context),
+                    fontSize: 13,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+              SizedBox(height: VigorSpacing.sm),
+              // metadata row
+              Row(
+                children: [
+                  _buildChip(Icons.schedule, _formatDuration(training.duration)),
+                  SizedBox(width: VigorSpacing.sm),
+                  _buildChip(Icons.calendar_today, _formatDate(
+                    isAvailable ? training.createdAt : (training.completedAt ?? training.createdAt),
+                  )),
+                  if (partnerCount > 0) ...[
+                    SizedBox(width: VigorSpacing.sm),
+                    _buildChip(Icons.people, '${1 + partnerCount}'),
+                  ],
+                  if (training.gym != null) ...[
+                    SizedBox(width: VigorSpacing.sm),
+                    Flexible(child: _buildChip(Icons.location_on, training.gym!.name)),
+                  ],
+                ],
+              ),
+              // start button for available trainings
+              if (isAvailable) ...[
+                SizedBox(height: VigorSpacing.md),
+                SizedBox(
+                  width: double.infinity,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [VigorColors.success, VigorColors.success.withValues(alpha: 0.8)],
+                      ),
+                      borderRadius: VigorRadius.radiusSm,
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () async {
+                          final completed = await Navigator.of(context).push<bool>(
+                            MaterialPageRoute(builder: (context) => TabataTimerScreen(training: training)),
+                          );
+                          if (completed == true) _loadTrainings();
+                        },
+                        borderRadius: VigorRadius.radiusSm,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: VigorSpacing.sm),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.play_arrow, color: Colors.white, size: 20),
+                              const SizedBox(width: 6),
+                              Text(
+                                l10n.startTraining,
+                                style: VigorTypography.label.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChip(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: VigorColors.textMuted(context).withValues(alpha: 0.1),
+        borderRadius: VigorRadius.radiusXs,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: VigorColors.textSecondary(context)),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              text,
+              style: VigorTypography.caption.copyWith(
+                color: VigorColors.textSecondary(context),
+                fontSize: 11,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

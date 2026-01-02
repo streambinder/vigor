@@ -376,6 +376,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get stale => 'Obsoleto';
 
   @override
+  String get today => 'Hoy';
+
+  @override
+  String get yesterday => 'Ayer';
+
+  @override
+  String get available => 'Disponible';
+
+  @override
+  String get completed => 'Completado';
+
+  @override
+  String get noPastTrainings => 'Aún no hay entrenamientos completados';
+
+  @override
   String get copied => 'Copiado';
 
   @override

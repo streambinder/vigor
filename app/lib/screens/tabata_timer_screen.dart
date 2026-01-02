@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../config/api_config.dart';
+import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/training.dart';
 import '../models/activity.dart';
@@ -397,12 +398,11 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
 
   Widget _buildStartScreen() {
     final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: _startTraining,
       child: Container(
-        color: PlatformHelper.useLiquidGlass
-            ? const Color(0xFFF5F7FA)
-            : Theme.of(context).scaffoldBackgroundColor,
+        color: isDark ? VigorColors.darkBackground : VigorColors.lightBackground,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -410,26 +410,22 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
               Icon(
                 Icons.campaign,
                 size: 120,
-                color: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.primaryColor
-                    : Theme.of(context).colorScheme.primary,
+                color: VigorColors.orange,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: VigorSpacing.lg),
               Text(
                 l10n.tapToStart,
-                style: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.headlineStyle
-                    : Theme.of(context).textTheme.headlineMedium,
+                style: VigorTypography.headline.copyWith(
+                  color: VigorColors.textPrimary(context),
+                ),
               ),
-              const SizedBox(height: 48),
+              SizedBox(height: VigorSpacing.xxl),
               Text(
                 _formatTime(_remainingSeconds),
                 style: TextStyle(
                   fontSize: 80,
                   fontWeight: FontWeight.bold,
-                  color: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.primaryColor.withOpacity(0.5)
-                      : Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                  color: VigorColors.orange.withValues(alpha: 0.5),
                 ),
               ),
             ],
@@ -443,7 +439,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: VigorSpacing.paddingLg,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -452,35 +448,31 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
               height: 120,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.successColor.withOpacity(0.2)
-                    : Theme.of(context).colorScheme.primaryContainer,
+                color: VigorColors.success.withValues(alpha: 0.2),
               ),
               child: Icon(
                 Icons.check_circle,
                 size: 80,
-                color: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.successColor
-                    : Theme.of(context).colorScheme.primary,
+                color: VigorColors.success,
               ),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: VigorSpacing.xl),
             Text(
               l10n.trainingCompleted,
-              style: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.titleStyle
-                  : Theme.of(context).textTheme.headlineMedium,
+              style: VigorTypography.title.copyWith(
+                color: VigorColors.textPrimary(context),
+              ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: VigorSpacing.md),
             Text(
               l10n.greatJobCompleting(widget.training.name),
-              style: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.bodyStyle
-                  : Theme.of(context).textTheme.bodyLarge,
+              style: VigorTypography.body.copyWith(
+                color: VigorColors.textSecondary(context),
+              ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 48),
+            SizedBox(height: VigorSpacing.xxl),
             AdaptiveButton(
               onPressed: _showFeedbackAndComplete,
               child: Text(l10n.done),
@@ -498,36 +490,35 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
 
     final interval = _intervals[_currentIntervalIndex];
     final isRest = interval.type == IntervalType.rest;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTapUp: _handleTap,
       child: Container(
-        color: PlatformHelper.useLiquidGlass
-            ? const Color(0xFFF5F7FA)
-            : Theme.of(context).scaffoldBackgroundColor,
+        color: isDark ? VigorColors.darkBackground : VigorColors.lightBackground,
         child: SafeArea(
           child: Column(
             children: [
               // scrollable content
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24.0),
+                  padding: VigorSpacing.paddingLg,
                   child: Column(
                     children: [
                       // Activity name
                       if (!isRest) _buildActivityName(interval),
-                      if (!isRest) const SizedBox(height: 16),
+                      if (!isRest) SizedBox(height: VigorSpacing.md),
 
                       // Counters row (activity/block/routine)
                       if (!isRest) _buildCountersRow(interval),
-                      if (!isRest) const SizedBox(height: 24),
+                      if (!isRest) SizedBox(height: VigorSpacing.lg),
 
                       // Main timer/activity display
                       isRest
                           ? _buildRestDisplay()
                           : _buildActivityDisplay(interval),
 
-                      const SizedBox(height: 32),
+                      SizedBox(height: VigorSpacing.xl),
 
                       // Upcoming exercises list
                       _buildUpcomingList(),
@@ -538,7 +529,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
 
               // Controls fixed at bottom
               Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: VigorSpacing.paddingLg,
                 child: _buildControls(),
               ),
             ],
@@ -558,25 +549,22 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
       children: [
         Text(
           l10n.upcoming,
-          style: PlatformHelper.useLiquidGlass
-              ? LiquidGlassTheme.titleStyle.copyWith(fontSize: 16)
-              : Theme.of(context).textTheme.titleMedium,
+          style: VigorTypography.title.copyWith(
+            fontSize: 16,
+            color: VigorColors.textPrimary(context),
+          ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: VigorSpacing.sm),
         ...remaining.take(10).map((interval) => _buildUpcomingItem(interval)),
         if (remaining.length > 10)
           Padding(
-            padding: const EdgeInsets.only(top: 8),
+            padding: EdgeInsets.only(top: VigorSpacing.sm),
             child: Text(
               '+${remaining.length - 10} more',
-              style: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.bodyStyle.copyWith(
-                      color: Colors.grey,
-                      fontSize: 14,
-                    )
-                  : Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey,
-                      ),
+              style: VigorTypography.body.copyWith(
+                color: VigorColors.textMuted(context),
+                fontSize: 14,
+              ),
             ),
           ),
       ],
@@ -589,7 +577,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     final name = isRest ? l10n.rest : (interval.activityName ?? '');
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: EdgeInsets.symmetric(vertical: VigorSpacing.xs + 2),
       child: Row(
         children: [
           // small icon
@@ -604,19 +592,17 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.primaryColor.withOpacity(0.3)
-                        : Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                    color: VigorColors.orange.withValues(alpha: 0.3),
                   ),
                 ),
                 child: ClipOval(
                   child: Image.network(
                     _proxyImageUrl(interval.exercise!.reference),
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => const Icon(
+                    errorBuilder: (context, error, stackTrace) => Icon(
                       Icons.fitness_center,
                       size: 16,
-                      color: Colors.grey,
+                      color: VigorColors.textMuted(context),
                     ),
                   ),
                 ),
@@ -629,44 +615,34 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isRest
-                    ? Colors.blue.withOpacity(0.1)
-                    : Colors.grey.withOpacity(0.1),
+                    ? VigorColors.electricBlue.withValues(alpha: 0.1)
+                    : VigorColors.textMuted(context).withValues(alpha: 0.1),
               ),
               child: Icon(
                 isRest ? Icons.local_drink : Icons.fitness_center,
                 size: 16,
-                color: isRest ? Colors.blue : Colors.grey,
+                color: isRest ? VigorColors.electricBlue : VigorColors.textMuted(context),
               ),
             ),
           ],
-          const SizedBox(width: 12),
+          SizedBox(width: VigorSpacing.sm),
           // name
           Expanded(
             child: Text(
               name,
-              style: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.bodyStyle.copyWith(
-                      fontWeight: isRest ? FontWeight.normal : FontWeight.w500,
-                      color: isRest ? Colors.grey : null,
-                    )
-                  : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight:
-                            isRest ? FontWeight.normal : FontWeight.w500,
-                        color: isRest ? Colors.grey : null,
-                      ),
+              style: VigorTypography.body.copyWith(
+                fontWeight: isRest ? FontWeight.normal : FontWeight.w500,
+                color: isRest ? VigorColors.textMuted(context) : VigorColors.textPrimary(context),
+              ),
             ),
           ),
           // duration
           Text(
             '${interval.duration}s',
-            style: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.bodyStyle.copyWith(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  )
-                : Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey,
-                    ),
+            style: VigorTypography.body.copyWith(
+              fontSize: 14,
+              color: VigorColors.textMuted(context),
+            ),
           ),
         ],
       ),
@@ -676,22 +652,23 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
   Widget _buildActivityName(TrainingInterval interval) {
     return Text(
       interval.activityName?.toUpperCase() ?? '',
-      style: PlatformHelper.useLiquidGlass
-          ? LiquidGlassTheme.titleStyle
-          : Theme.of(context).textTheme.headlineMedium,
+      style: VigorTypography.title.copyWith(
+        color: VigorColors.textPrimary(context),
+      ),
       textAlign: TextAlign.center,
     );
   }
 
   Widget _buildCountersRow(TrainingInterval interval) {
     final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs + 2),
       decoration: PlatformHelper.useLiquidGlass
-          ? LiquidGlassTheme.glassDecoration()
+          ? LiquidGlassTheme.glassDecoration(isDark: isDark)
           : BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(12),
+              color: isDark ? VigorColors.darkSurfaceElevated : VigorColors.lightSurface,
+              borderRadius: VigorRadius.radiusMd,
             ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -700,34 +677,26 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
           const SizedBox(width: 4),
           Text(
             '${interval.activityNumber}/${interval.totalActivities}',
-            style: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.bodyStyle.copyWith(fontSize: 14)
-                : Theme.of(context).textTheme.bodyMedium,
+            style: VigorTypography.body.copyWith(fontSize: 14),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: VigorSpacing.sm),
           const Icon(Icons.view_module, size: 16),
           const SizedBox(width: 4),
           Text(
             l10n.blockCounter(interval.blockNumber, interval.totalBlocks),
-            style: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.bodyStyle.copyWith(fontSize: 14)
-                : Theme.of(context).textTheme.bodyMedium,
+            style: VigorTypography.body.copyWith(fontSize: 14),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: VigorSpacing.sm),
           const Icon(Icons.list, size: 16),
           const SizedBox(width: 4),
           Text(
             l10n.routineCounter(interval.routineNumber, interval.totalRoutines),
-            style: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.bodyStyle.copyWith(fontSize: 14)
-                : Theme.of(context).textTheme.bodyMedium,
+            style: VigorTypography.body.copyWith(fontSize: 14),
           ),
           const SizedBox(width: 4),
           Text(
             interval.routineName,
-            style: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.bodyStyle.copyWith(fontSize: 14)
-                : Theme.of(context).textTheme.bodyMedium,
+            style: VigorTypography.body.copyWith(fontSize: 14),
           ),
         ],
       ),
@@ -742,19 +711,15 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
           Icon(
             Icons.local_drink,
             size: 80,
-            color: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.primaryColor
-                : Theme.of(context).colorScheme.primary,
+            color: VigorColors.electricBlue,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: VigorSpacing.lg),
           Text(
             '$_remainingSeconds',
             style: TextStyle(
               fontSize: 120,
               fontWeight: FontWeight.bold,
-              color: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.primaryColor
-                  : Theme.of(context).colorScheme.primary,
+              color: VigorColors.electricBlue,
             ),
           ),
         ],
@@ -768,6 +733,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final imageSize = screenWidth * 0.5;
     final hasTimer = activity != null && activity.duration > 0;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Center(
       child: Column(
@@ -783,14 +749,12 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.primaryColor
-                          : Theme.of(context).colorScheme.primary,
+                      color: VigorColors.orange,
                       width: 3,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -802,11 +766,11 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
-                          color: Colors.grey[300],
-                          child: const Icon(
+                          color: VigorColors.textMuted(context).withValues(alpha: 0.3),
+                          child: Icon(
                             Icons.fitness_center,
                             size: 40,
-                            color: Colors.grey,
+                            color: VigorColors.textMuted(context),
                           ),
                         );
                       },
@@ -814,18 +778,18 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: VigorSpacing.lg),
             ],
             // Reps/kg labels between image and timer
             if (activity != null &&
                 (activity.reps > 0 || activity.weightKg > 0)) ...[
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
                 decoration: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.glassDecoration()
+                    ? LiquidGlassTheme.glassDecoration(isDark: isDark)
                     : BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceVariant,
-                        borderRadius: BorderRadius.circular(12),
+                        color: isDark ? VigorColors.darkSurfaceElevated : VigorColors.lightSurface,
+                        borderRadius: VigorRadius.radiusMd,
                       ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -835,27 +799,23 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
                       const SizedBox(width: 4),
                       Text(
                         '${activity.reps} reps',
-                        style: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.bodyStyle
-                            : Theme.of(context).textTheme.bodyLarge,
+                        style: VigorTypography.bodyLarge,
                       ),
                     ],
                     if (activity.reps > 0 && activity.weightKg > 0)
-                      const SizedBox(width: 16),
+                      SizedBox(width: VigorSpacing.md),
                     if (activity.weightKg > 0) ...[
                       const Icon(Icons.scale, size: 20),
                       const SizedBox(width: 4),
                       Text(
                         '${activity.weightKg} kg',
-                        style: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.bodyStyle
-                            : Theme.of(context).textTheme.bodyLarge,
+                        style: VigorTypography.bodyLarge,
                       ),
                     ],
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: VigorSpacing.md),
             ],
             // Large timer display (only if activity has duration)
             if (hasTimer) ...[
@@ -864,9 +824,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
                 style: TextStyle(
                   fontSize: 80,
                   fontWeight: FontWeight.bold,
-                  color: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.primaryColor
-                      : Theme.of(context).colorScheme.primary,
+                  color: VigorColors.orange,
                 ),
               ),
             ],
@@ -884,38 +842,32 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
           heroTag: 'back',
           onPressed: _history.isNotEmpty ? _skipBackward : null,
           backgroundColor: _history.isNotEmpty
-              ? (PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.primaryColor.withOpacity(0.7)
-                  : Theme.of(context).colorScheme.primary.withOpacity(0.7))
-              : Colors.grey[400],
+              ? VigorColors.orange.withValues(alpha: 0.7)
+              : VigorColors.textMuted(context),
           child: const Icon(
             Icons.skip_previous,
             color: Colors.white,
             size: 28,
           ),
         ),
-        const SizedBox(width: 24),
+        SizedBox(width: VigorSpacing.lg),
         // Pause/Play button
         FloatingActionButton.large(
           heroTag: 'pause',
           onPressed: _togglePause,
-          backgroundColor: PlatformHelper.useLiquidGlass
-              ? LiquidGlassTheme.primaryColor
-              : Theme.of(context).colorScheme.primary,
+          backgroundColor: VigorColors.orange,
           child: Icon(
             _isPaused ? Icons.play_arrow : Icons.pause,
             color: Colors.white,
             size: 36,
           ),
         ),
-        const SizedBox(width: 24),
+        SizedBox(width: VigorSpacing.lg),
         // Forward button
         FloatingActionButton(
           heroTag: 'forward',
           onPressed: _skipForward,
-          backgroundColor: PlatformHelper.useLiquidGlass
-              ? LiquidGlassTheme.primaryColor.withOpacity(0.7)
-              : Theme.of(context).colorScheme.primary.withOpacity(0.7),
+          backgroundColor: VigorColors.orange.withValues(alpha: 0.7),
           child: const Icon(
             Icons.skip_next,
             color: Colors.white,

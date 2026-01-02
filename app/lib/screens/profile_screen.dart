@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/adaptive/adaptive.dart';
-import '../theme/liquid_glass_theme.dart';
-import '../utils/platform_helper.dart';
 import '../models/goal.dart';
 import '../models/injury.dart';
 import '../models/gym.dart';
@@ -30,7 +29,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Get the storage service from provider context
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final storage = context.read<SecureStorageService>();
       _gymService = GymService(storageService: storage);
@@ -41,10 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadGyms() async {
     if (_gymService == null) return;
-
-    setState(() {
-      _isLoadingGyms = true;
-    });
+    setState(() => _isLoadingGyms = true);
 
     final response = await _gymService!.getGyms();
     if (response.isSuccess && mounted) {
@@ -53,9 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isLoadingGyms = false;
       });
     } else if (mounted) {
-      setState(() {
-        _isLoadingGyms = false;
-      });
+      setState(() => _isLoadingGyms = false);
       AdaptiveNotification.showError(
         context: context,
         message: AppLocalizations.of(context).failedToLoadGyms,
@@ -83,23 +76,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_gymService == null) return;
     final l10n = AppLocalizations.of(context);
 
-    final response = await _gymService!.createGym(
-      name: name,
-      equipment: equipment,
-    );
-
+    final response = await _gymService!.createGym(name: name, equipment: equipment);
     if (response.isSuccess && mounted) {
-      AdaptiveNotification.show(
-        context: context,
-        message: l10n.gymAddedSuccessfully,
-      );
+      AdaptiveNotification.show(context: context, message: l10n.gymAddedSuccessfully);
       await _loadGyms();
     } else if (mounted) {
-      AdaptiveNotification.showError(
-        context: context,
-        message: l10n.failedToAddGym,
-        rawError: response.error,
-      );
+      AdaptiveNotification.showError(context: context, message: l10n.failedToAddGym, rawError: response.error);
     }
   }
 
@@ -107,24 +89,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_gymService == null) return;
     final l10n = AppLocalizations.of(context);
 
-    final response = await _gymService!.updateGym(
-      id: id,
-      name: name,
-      equipment: equipment,
-    );
-
+    final response = await _gymService!.updateGym(id: id, name: name, equipment: equipment);
     if (response.isSuccess && mounted) {
-      AdaptiveNotification.show(
-        context: context,
-        message: l10n.gymUpdatedSuccessfully,
-      );
+      AdaptiveNotification.show(context: context, message: l10n.gymUpdatedSuccessfully);
       await _loadGyms();
     } else if (mounted) {
-      AdaptiveNotification.showError(
-        context: context,
-        message: l10n.failedToUpdateGym,
-        rawError: response.error,
-      );
+      AdaptiveNotification.showError(context: context, message: l10n.failedToUpdateGym, rawError: response.error);
     }
   }
 
@@ -136,42 +106,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
       title: l10n.deleteGym,
       content: l10n.deleteGymConfirmation(gym.name),
       actions: [
-        AdaptiveDialogAction(
-          label: l10n.cancel,
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        AdaptiveDialogAction(
-          label: l10n.delete,
-          isDestructive: true,
-          onPressed: () => Navigator.of(context).pop(true),
-        ),
+        AdaptiveDialogAction(label: l10n.cancel, onPressed: () => Navigator.of(context).pop(false)),
+        AdaptiveDialogAction(label: l10n.delete, isDestructive: true, onPressed: () => Navigator.of(context).pop(true)),
       ],
     );
 
     if (shouldDelete == true) {
       final response = await _gymService!.deleteGym(gym.id);
-
       if (response.isSuccess && mounted) {
         await _prefsService?.clearDefaultGymIfMatches(gym.id);
-        AdaptiveNotification.show(
-          context: context,
-          message: l10n.gymDeletedSuccessfully,
-        );
+        AdaptiveNotification.show(context: context, message: l10n.gymDeletedSuccessfully);
         await _loadGyms();
       } else if (mounted) {
-        AdaptiveNotification.showError(
-          context: context,
-          message: l10n.failedToDeleteGym,
-          rawError: response.error,
-        );
+        AdaptiveNotification.showError(context: context, message: l10n.failedToDeleteGym, rawError: response.error);
       }
     }
   }
 
   Future<void> _toggleDefaultGym(String id) async {
     final current = _prefsService?.defaultGymId;
-    final newDefault = current == id ? null : id;
-    await _prefsService?.setDefaultGymId(newDefault);
+    await _prefsService?.setDefaultGymId(current == id ? null : id);
     setState(() {});
   }
 
@@ -192,39 +146,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               await authProvider.refreshUserData();
               await _loadGyms();
               if (context.mounted) {
-                AdaptiveNotification.show(
-                  context: context,
-                  message: l10n.userDataRefreshed,
-                  duration: const Duration(seconds: 2),
-                );
+                AdaptiveNotification.show(context: context, message: l10n.userDataRefreshed, duration: const Duration(seconds: 2));
               }
             },
           ),
           AdaptiveIconButton(
             icon: const Icon(Icons.logout),
             tooltip: l10n.logout,
-            onPressed: () async {
-              final shouldLogout = await AdaptiveAlertDialog.show<bool>(
-                context: context,
-                title: l10n.logout,
-                content: l10n.logoutConfirmation,
-                actions: [
-                  AdaptiveDialogAction(
-                    label: l10n.cancel,
-                    onPressed: () => Navigator.of(context).pop(false),
-                  ),
-                  AdaptiveDialogAction(
-                    label: l10n.logout,
-                    isDestructive: true,
-                    onPressed: () => Navigator.of(context).pop(true),
-                  ),
-                ],
-              );
-
-              if (shouldLogout == true && context.mounted) {
-                await context.read<AuthProvider>().logout();
-              }
-            },
+            onPressed: () => _showLogoutDialog(context, l10n),
           ),
         ],
       ),
@@ -235,617 +164,503 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 await authProvider.refreshUserData();
                 await _loadGyms();
               },
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Welcome section
-                    AdaptiveCard(
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundColor: PlatformHelper.useLiquidGlass
-                                ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
-                                : Theme.of(context).colorScheme.primaryContainer,
-                            child: Icon(
-                              Icons.person,
-                              size: 35,
-                              color: PlatformHelper.useLiquidGlass
-                                  ? LiquidGlassTheme.primaryColor
-                                  : Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${user.profile.firstName} ${user.profile.lastName}',
-                                  style: PlatformHelper.useLiquidGlass
-                                      ? LiquidGlassTheme.headlineStyle
-                                      : const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  user.email,
-                                  style: PlatformHelper.useLiquidGlass
-                                      ? LiquidGlassTheme.captionStyle
-                                      : const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey,
-                                        ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          AdaptiveIconButton(
-                            icon: const Icon(Icons.edit),
-                            tooltip: l10n.editProfile,
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                barrierDismissible: true,
-                                builder: (context) => ProfileCompletionModal(
-                                  profile: user.profile,
-                                  missingFields: const {},
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Profile section
-                    const SizedBox(height: 16),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: Text(
-                        'Profile',
-                        style: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.headlineStyle
-                            : const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    AdaptiveCard(
-                      child: Column(
-                        children: [
-                          AdaptiveListTile(
-                            leading: const Icon(Icons.cake),
-                            title: Text(l10n.birthdate),
-                            subtitle: Text(_formatDate(user.profile.birthdate)),
-                          ),
-                          if (!PlatformHelper.useLiquidGlass) const Divider(height: 1),
-                          AdaptiveListTile(
-                            leading: const Icon(Icons.person),
-                            title: Text(l10n.gender),
-                            subtitle: Text(_capitalizeFirst(user.profile.gender)),
-                          ),
-                          if (!PlatformHelper.useLiquidGlass) const Divider(height: 1),
-                          AdaptiveListTile(
-                            leading: const Icon(Icons.language),
-                            title: Text(l10n.language),
-                            subtitle: Text(_capitalizeFirst(user.profile.language)),
-                          ),
-                          if (!PlatformHelper.useLiquidGlass) const Divider(height: 1),
-                          AdaptiveListTile(
-                            leading: const Icon(Icons.height),
-                            title: Text(l10n.height),
-                            subtitle: Text(l10n.heightWithUnit(user.profile.height)),
-                          ),
-                          if (!PlatformHelper.useLiquidGlass) const Divider(height: 1),
-                          AdaptiveListTile(
-                            leading: const Icon(Icons.monitor_weight),
-                            title: Text(l10n.weight),
-                            subtitle: Text(l10n.weightWithUnit(user.profile.weight)),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Goals section
-                    if (_getGoals(user.profile.data).isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      AdaptiveCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.flag),
-                                  const SizedBox(width: 16),
-                                  Text(
-                                    l10n.goals,
-                                    style: PlatformHelper.useLiquidGlass
-                                        ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
-                                        : const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            ..._getGoals(user.profile.data).map((goal) => Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text('• ', style: TextStyle(fontSize: 18)),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(goal.description),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Started: ${_formatDate(goal.startDate)}',
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                )),
-                            const SizedBox(height: 8),
-                          ],
-                        ),
-                      ),
-                    ],
-
-                    // Injuries section
-                    if (_getInjuries(user.profile.data).isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      AdaptiveCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.healing),
-                                  const SizedBox(width: 16),
-                                  Text(
-                                    l10n.injuries,
-                                    style: PlatformHelper.useLiquidGlass
-                                        ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
-                                        : const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            ..._getInjuries(user.profile.data).map((injury) => Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text('• ', style: TextStyle(fontSize: 18)),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(injury.description),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Year: ${injury.year}',
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                )),
-                            const SizedBox(height: 8),
-                          ],
-                        ),
-                      ),
-                    ],
-
-                    // Limitations section
-                    if (_getLimitations(user.profile.data).isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      AdaptiveCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.warning_amber),
-                                  const SizedBox(width: 16),
-                                  Text(
-                                    l10n.limitations,
-                                    style: PlatformHelper.useLiquidGlass
-                                        ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
-                                        : const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            ..._getLimitations(user.profile.data).map((limitation) => Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text('• ', style: TextStyle(fontSize: 18)),
-                                      Expanded(child: Text(limitation)),
-                                    ],
-                                  ),
-                                )),
-                            const SizedBox(height: 8),
-                          ],
-                        ),
-                      ),
-                    ],
-
-                    // Favorites section
-                    if (_getFavoriteExercises(user.profile.data).isNotEmpty ||
-                        _getFavoriteEquipment(user.profile.data).isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      AdaptiveCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.favorite),
-                                  const SizedBox(width: 16),
-                                  Text(
-                                    l10n.favorites,
-                                    style: PlatformHelper.useLiquidGlass
-                                        ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
-                                        : const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (_getFavoriteExercises(user.profile.data).isNotEmpty) ...[
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                child: Text(
-                                  l10n.exercises,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey[600],
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                              ..._getFavoriteExercises(user.profile.data).map((exercise) => Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const Text('• ', style: TextStyle(fontSize: 18)),
-                                        Expanded(child: Text(exercise)),
-                                      ],
-                                    ),
-                                  )),
-                              const SizedBox(height: 8),
-                            ],
-                            if (_getFavoriteEquipment(user.profile.data).isNotEmpty) ...[
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                child: Text(
-                                  l10n.equipment,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey[600],
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                              ..._getFavoriteEquipment(user.profile.data).map((equipment) => Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const Text('• ', style: TextStyle(fontSize: 18)),
-                                        Expanded(child: Text(equipment)),
-                                      ],
-                                    ),
-                                  )),
-                              const SizedBox(height: 8),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ],
-
-                    const SizedBox(height: 16),
-
-                    // Gyms section
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            l10n.myGyms,
-                            style: PlatformHelper.useLiquidGlass
-                                ? LiquidGlassTheme.headlineStyle
-                                : const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                          ),
-                          AdaptiveIconButton(
-                            icon: const Icon(Icons.add),
-                            tooltip: l10n.addGym,
-                            onPressed: () => _showGymDialog(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    if (_isLoadingGyms)
-                      const Center(child: AdaptiveLoadingIndicator())
-                    else if (_gyms == null || _gyms!.isEmpty)
-                      AdaptiveCard(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Center(
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.fitness_center,
-                                  size: 48,
-                                  color: Colors.grey[400],
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  l10n.noGymsAddedYet,
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                TextButton.icon(
-                                  onPressed: () => _showGymDialog(),
-                                  icon: const Icon(Icons.add),
-                                  label: Text(l10n.addYourFirstGym),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      )
-                    else
-                      ...(_gyms!.map((gym) {
-                        final isDefault = _prefsService?.defaultGymId == gym.id;
-                        return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: AdaptiveCard(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.fitness_center),
-                                        const SizedBox(width: 16),
-                                        Expanded(
-                                          child: Text(
-                                            gym.name,
-                                            style: PlatformHelper.useLiquidGlass
-                                                ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
-                                                : const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                          ),
-                                        ),
-                                        AdaptiveIconButton(
-                                          icon: Icon(
-                                            isDefault ? Icons.star : Icons.star_border,
-                                            size: 20,
-                                            color: isDefault ? Colors.amber : null,
-                                          ),
-                                          tooltip: isDefault ? l10n.removeDefault : l10n.setAsDefault,
-                                          onPressed: () => _toggleDefaultGym(gym.id),
-                                        ),
-                                        AdaptiveIconButton(
-                                          icon: const Icon(Icons.edit, size: 20),
-                                          tooltip: l10n.edit,
-                                          onPressed: () => _showGymDialog(gym: gym),
-                                        ),
-                                        AdaptiveIconButton(
-                                          icon: const Icon(Icons.delete, size: 20),
-                                          tooltip: l10n.delete,
-                                          onPressed: () => _deleteGym(gym),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  if (gym.equipment.isNotEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        left: 16.0,
-                                        right: 16.0,
-                                        bottom: 16.0,
-                                      ),
-                                      child: Wrap(
-                                        spacing: 8,
-                                        runSpacing: 8,
-                                        children: gym.equipment.map((equipment) {
-                                          return Chip(
-                                            label: Text(
-                                              equipment,
-                                              style: const TextStyle(fontSize: 12),
-                                            ),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
-                                            ),
-                                            backgroundColor: PlatformHelper.useLiquidGlass
-                                                ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
-                                                : Theme.of(context).colorScheme.secondaryContainer,
-                                          );
-                                        }).toList(),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          );
-                      })),
-
-                    const SizedBox(height: 16),
-
-                    // Danger zone
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: Text(
-                        l10n.dangerZone,
-                        style: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.headlineStyle.copyWith(
-                                color: LiquidGlassTheme.errorColor,
-                              )
-                            : const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red,
-                              ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    AdaptiveCard(
-                      child: AdaptiveListTile(
-                        leading: Icon(
-                          Icons.delete_forever,
-                          color: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.errorColor
-                              : Colors.red,
-                        ),
-                        title: Text(
-                          l10n.deleteAccount,
-                          style: TextStyle(
-                            color: PlatformHelper.useLiquidGlass
-                                ? LiquidGlassTheme.errorColor
-                                : Colors.red,
-                          ),
-                        ),
-                        onTap: () async {
-                          final shouldDelete =
-                              await AdaptiveAlertDialog.show<bool>(
-                            context: context,
-                            title: l10n.deleteAccount,
-                            content: l10n.deleteAccountConfirmation,
-                            actions: [
-                              AdaptiveDialogAction(
-                                label: l10n.cancel,
-                                onPressed: () => Navigator.of(context).pop(false),
-                              ),
-                              AdaptiveDialogAction(
-                                label: l10n.delete,
-                                isDestructive: true,
-                                onPressed: () => Navigator.of(context).pop(true),
-                              ),
-                            ],
-                          );
-
-                          if (shouldDelete == true && context.mounted) {
-                            final success = await authProvider.deleteAccount();
-                            if (context.mounted) {
-                              if (success) {
-                                AdaptiveNotification.show(
-                                  context: context,
-                                  message: l10n.accountDeletedSuccessfully,
-                                );
-                              } else {
-                                AdaptiveNotification.showError(
-                                  context: context,
-                                  message: l10n.failedToDeleteAccount,
-                                  rawError: authProvider.errorMessage,
-                                );
-                              }
-                            }
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+              color: VigorColors.orange,
+              child: ListView(
+                padding: VigorSpacing.paddingLg,
+                children: [
+                  _buildProfileHeader(user, l10n),
+                  SizedBox(height: VigorSpacing.lg),
+                  _buildQuickStats(user, l10n),
+                  SizedBox(height: VigorSpacing.xl),
+                  _buildDataSections(user, l10n),
+                  SizedBox(height: VigorSpacing.xl),
+                  _buildGymsSection(l10n),
+                  SizedBox(height: VigorSpacing.xl),
+                  _buildDangerZone(l10n, authProvider),
+                  SizedBox(height: VigorSpacing.xxl),
+                ],
               ),
             ),
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  Widget _buildProfileHeader(user, AppLocalizations l10n) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: VigorSpacing.paddingLg,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            VigorColors.orange.withValues(alpha: 0.15),
+            VigorColors.electricBlue.withValues(alpha: 0.15),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: VigorRadius.radiusLg,
+        border: Border.all(
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
+        ),
+      ),
+      child: Row(
+        children: [
+          // avatar with gradient ring
+          Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]),
+            ),
+            child: CircleAvatar(
+              radius: 36,
+              backgroundColor: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+              child: ShaderMask(
+                shaderCallback: (bounds) => LinearGradient(
+                  colors: [VigorColors.orange, VigorColors.electricBlue],
+                ).createShader(bounds),
+                child: const Icon(Icons.person, size: 40, color: Colors.white),
+              ),
+            ),
+          ),
+          SizedBox(width: VigorSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${user.profile.firstName} ${user.profile.lastName}',
+                  style: VigorTypography.headline.copyWith(
+                    fontSize: 20,
+                    color: VigorColors.textPrimary(context),
+                  ),
+                ),
+                SizedBox(height: VigorSpacing.xs),
+                Text(
+                  user.email,
+                  style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context)),
+                ),
+              ],
+            ),
+          ),
+          // edit button
+          GestureDetector(
+            onTap: () => showDialog(
+              context: context,
+              barrierDismissible: true,
+              builder: (context) => ProfileCompletionModal(profile: user.profile, missingFields: const {}),
+            ),
+            child: Container(
+              padding: VigorSpacing.paddingSm,
+              decoration: BoxDecoration(
+                color: VigorColors.orange.withValues(alpha: 0.15),
+                borderRadius: VigorRadius.radiusFull,
+              ),
+              child: Icon(Icons.edit, color: VigorColors.orange, size: 20),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  String _capitalizeFirst(String text) {
-    if (text.isEmpty) return text;
-    return text[0].toUpperCase() + text.substring(1);
+  Widget _buildQuickStats(user, AppLocalizations l10n) {
+    final age = DateTime.now().year - user.profile.birthdate.year;
+    return Wrap(
+      spacing: VigorSpacing.sm,
+      runSpacing: VigorSpacing.sm,
+      alignment: WrapAlignment.center,
+      children: [
+        _buildStatPill(Icons.cake, '$age', VigorColors.orange),
+        _buildStatPill(Icons.height, '${user.profile.height.toInt()} cm', VigorColors.electricBlue),
+        _buildStatPill(Icons.monitor_weight, '${user.profile.weight.toInt()} kg', VigorColors.success),
+        _buildStatPill(
+          user.profile.gender == 'male' ? Icons.male : Icons.female,
+          _capitalizeFirst(user.profile.gender),
+          VigorColors.warning,
+        ),
+      ],
+    );
   }
+
+  Widget _buildStatPill(IconData icon, String value, Color color) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: VigorRadius.radiusFull,
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 16),
+          SizedBox(width: VigorSpacing.xs),
+          Text(value, style: VigorTypography.label.copyWith(color: color, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDataSections(user, AppLocalizations l10n) {
+    final goals = _getGoals(user.profile.data);
+    final injuries = _getInjuries(user.profile.data);
+    final limitations = _getLimitations(user.profile.data);
+    final favExercises = _getFavoriteExercises(user.profile.data);
+    final favEquipment = _getFavoriteEquipment(user.profile.data);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      children: [
+        if (goals.isNotEmpty)
+          _buildCollapsibleSection(
+            icon: Icons.flag,
+            title: l10n.goals,
+            color: VigorColors.success,
+            isDark: isDark,
+            children: goals.map((g) => _buildListItem(g.description, subtitle: l10n.startedDate(_formatDate(g.startDate)))).toList(),
+          ),
+        if (injuries.isNotEmpty) ...[
+          SizedBox(height: VigorSpacing.md),
+          _buildCollapsibleSection(
+            icon: Icons.healing,
+            title: l10n.injuries,
+            color: VigorColors.warning,
+            isDark: isDark,
+            children: injuries.map((i) => _buildListItem(i.description, subtitle: l10n.yearLabel(i.year))).toList(),
+          ),
+        ],
+        if (limitations.isNotEmpty) ...[
+          SizedBox(height: VigorSpacing.md),
+          _buildCollapsibleSection(
+            icon: Icons.warning_amber,
+            title: l10n.limitations,
+            color: VigorColors.error,
+            isDark: isDark,
+            children: limitations.map((lim) => _buildListItem(lim)).toList(),
+          ),
+        ],
+        if (favExercises.isNotEmpty || favEquipment.isNotEmpty) ...[
+          SizedBox(height: VigorSpacing.md),
+          _buildCollapsibleSection(
+            icon: Icons.favorite,
+            title: l10n.favorites,
+            color: VigorColors.electricBlue,
+            isDark: isDark,
+            children: [
+              if (favExercises.isNotEmpty) ...[
+                Padding(
+                  padding: EdgeInsets.only(left: VigorSpacing.md, bottom: VigorSpacing.xs),
+                  child: Text(l10n.exercises, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
+                ),
+                ...favExercises.map((e) => _buildListItem(e)),
+              ],
+              if (favEquipment.isNotEmpty) ...[
+                SizedBox(height: VigorSpacing.sm),
+                Padding(
+                  padding: EdgeInsets.only(left: VigorSpacing.md, bottom: VigorSpacing.xs),
+                  child: Text(l10n.equipment, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
+                ),
+                ...favEquipment.map((e) => _buildListItem(e)),
+              ],
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildCollapsibleSection({
+    required IconData icon,
+    required String title,
+    required Color color,
+    required bool isDark,
+    required List<Widget> children,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+        borderRadius: VigorRadius.radiusMd,
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          leading: Container(
+            padding: VigorSpacing.paddingSm,
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: VigorRadius.radiusSm),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          title: Text(title, style: VigorTypography.headline.copyWith(fontSize: 16, color: VigorColors.textPrimary(context))),
+          childrenPadding: EdgeInsets.only(left: VigorSpacing.md, right: VigorSpacing.md, bottom: VigorSpacing.md),
+          children: children,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildListItem(String text, {String? subtitle}) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: VigorSpacing.xs),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: EdgeInsets.only(top: 6, right: VigorSpacing.sm),
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: VigorColors.orange, shape: BoxShape.circle),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(text, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+                if (subtitle != null)
+                  Text(subtitle, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGymsSection(AppLocalizations l10n) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // section header
+        Row(
+          children: [
+            ShaderMask(
+              shaderCallback: (bounds) => LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]).createShader(bounds),
+              child: const Icon(Icons.fitness_center, color: Colors.white, size: 24),
+            ),
+            SizedBox(width: VigorSpacing.sm),
+            Expanded(
+              child: Text(l10n.myGyms, style: VigorTypography.headline.copyWith(fontSize: 18, color: VigorColors.textPrimary(context))),
+            ),
+            // add gym button
+            GestureDetector(
+              onTap: () => _showGymDialog(),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]),
+                  borderRadius: VigorRadius.radiusFull,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.add, color: Colors.white, size: 16),
+                    SizedBox(width: VigorSpacing.xs),
+                    Text(l10n.addGym, style: VigorTypography.label.copyWith(color: Colors.white)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: VigorSpacing.md),
+        // gyms list
+        if (_isLoadingGyms)
+          const Center(child: AdaptiveLoadingIndicator())
+        else if (_gyms == null || _gyms!.isEmpty)
+          Container(
+            padding: VigorSpacing.paddingLg,
+            decoration: BoxDecoration(
+              color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+              borderRadius: VigorRadius.radiusMd,
+              border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05)),
+            ),
+            child: Column(
+              children: [
+                ShaderMask(
+                  shaderCallback: (bounds) => LinearGradient(colors: [VigorColors.orange.withValues(alpha: 0.5), VigorColors.electricBlue.withValues(alpha: 0.5)]).createShader(bounds),
+                  child: const Icon(Icons.fitness_center, size: 48, color: Colors.white),
+                ),
+                SizedBox(height: VigorSpacing.sm),
+                Text(l10n.noGymsAddedYet, style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context))),
+              ],
+            ),
+          )
+        else
+          ...(_gyms!.map((gym) => _buildGymCard(gym, l10n, isDark))),
+      ],
+    );
+  }
+
+  Widget _buildGymCard(Gym gym, AppLocalizations l10n, bool isDark) {
+    final isDefault = _prefsService?.defaultGymId == gym.id;
+    return Container(
+      margin: EdgeInsets.only(bottom: VigorSpacing.md),
+      decoration: BoxDecoration(
+        color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+        borderRadius: VigorRadius.radiusMd,
+        border: Border.all(
+          color: isDefault ? VigorColors.orange.withValues(alpha: 0.5) : (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05)),
+          width: isDefault ? 2 : 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: VigorSpacing.paddingMd,
+            child: Row(
+              children: [
+                Container(
+                  padding: VigorSpacing.paddingSm,
+                  decoration: BoxDecoration(
+                    color: VigorColors.orange.withValues(alpha: 0.15),
+                    borderRadius: VigorRadius.radiusSm,
+                  ),
+                  child: Icon(Icons.fitness_center, color: VigorColors.orange, size: 20),
+                ),
+                SizedBox(width: VigorSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(gym.name, style: VigorTypography.headline.copyWith(fontSize: 16, color: VigorColors.textPrimary(context))),
+                      if (isDefault)
+                        Container(
+                          margin: EdgeInsets.only(top: VigorSpacing.xs),
+                          padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: 2),
+                          decoration: BoxDecoration(color: VigorColors.orange, borderRadius: VigorRadius.radiusFull),
+                          child: Text('Default', style: VigorTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+                        ),
+                    ],
+                  ),
+                ),
+                // action buttons
+                _buildGymAction(isDefault ? Icons.star : Icons.star_border, isDefault ? Colors.amber : VigorColors.textSecondary(context), () => _toggleDefaultGym(gym.id)),
+                _buildGymAction(Icons.edit, VigorColors.electricBlue, () => _showGymDialog(gym: gym)),
+                _buildGymAction(Icons.delete, VigorColors.error, () => _deleteGym(gym)),
+              ],
+            ),
+          ),
+          if (gym.equipment.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.only(left: VigorSpacing.md, right: VigorSpacing.md, bottom: VigorSpacing.md),
+              child: Wrap(
+                spacing: VigorSpacing.xs,
+                runSpacing: VigorSpacing.xs,
+                children: gym.equipment.map((eq) => Container(
+                  padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+                  decoration: BoxDecoration(
+                    color: VigorColors.electricBlue.withValues(alpha: 0.15),
+                    borderRadius: VigorRadius.radiusFull,
+                  ),
+                  child: Text(eq, style: VigorTypography.caption.copyWith(color: VigorColors.electricBlue)),
+                )).toList(),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGymAction(IconData icon, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.all(VigorSpacing.sm),
+        child: Icon(icon, size: 20, color: color),
+      ),
+    );
+  }
+
+  Widget _buildDangerZone(AppLocalizations l10n, AuthProvider authProvider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.warning, color: VigorColors.error, size: 20),
+            SizedBox(width: VigorSpacing.sm),
+            Text(l10n.dangerZone, style: VigorTypography.headline.copyWith(fontSize: 16, color: VigorColors.error)),
+          ],
+        ),
+        SizedBox(height: VigorSpacing.sm),
+        Container(
+          decoration: BoxDecoration(
+            color: VigorColors.error.withValues(alpha: 0.1),
+            borderRadius: VigorRadius.radiusMd,
+            border: Border.all(color: VigorColors.error.withValues(alpha: 0.3)),
+          ),
+          child: ListTile(
+            leading: Icon(Icons.delete_forever, color: VigorColors.error),
+            title: Text(l10n.deleteAccount, style: VigorTypography.body.copyWith(color: VigorColors.error, fontWeight: FontWeight.w500)),
+            trailing: Icon(Icons.chevron_right, color: VigorColors.error),
+            onTap: () => _showDeleteAccountDialog(l10n, authProvider),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showLogoutDialog(BuildContext context, AppLocalizations l10n) async {
+    final shouldLogout = await AdaptiveAlertDialog.show<bool>(
+      context: context,
+      title: l10n.logout,
+      content: l10n.logoutConfirmation,
+      actions: [
+        AdaptiveDialogAction(label: l10n.cancel, onPressed: () => Navigator.of(context).pop(false)),
+        AdaptiveDialogAction(label: l10n.logout, isDestructive: true, onPressed: () => Navigator.of(context).pop(true)),
+      ],
+    );
+    if (shouldLogout == true && context.mounted) {
+      await context.read<AuthProvider>().logout();
+    }
+  }
+
+  Future<void> _showDeleteAccountDialog(AppLocalizations l10n, AuthProvider authProvider) async {
+    final shouldDelete = await AdaptiveAlertDialog.show<bool>(
+      context: context,
+      title: l10n.deleteAccount,
+      content: l10n.deleteAccountConfirmation,
+      actions: [
+        AdaptiveDialogAction(label: l10n.cancel, onPressed: () => Navigator.of(context).pop(false)),
+        AdaptiveDialogAction(label: l10n.delete, isDestructive: true, onPressed: () => Navigator.of(context).pop(true)),
+      ],
+    );
+
+    if (shouldDelete == true && context.mounted) {
+      final success = await authProvider.deleteAccount();
+      if (context.mounted) {
+        if (success) {
+          AdaptiveNotification.show(context: context, message: l10n.accountDeletedSuccessfully);
+        } else {
+          AdaptiveNotification.showError(context: context, message: l10n.failedToDeleteAccount, rawError: authProvider.errorMessage);
+        }
+      }
+    }
+  }
+
+  String _formatDate(DateTime date) => '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+
+  String _capitalizeFirst(String text) => text.isEmpty ? text : text[0].toUpperCase() + text.substring(1);
 
   List<Goal> _getGoals(Map<String, dynamic> data) {
     try {
-      if (data['goals'] != null) {
-        return (data['goals'] as List).map((g) => Goal.fromJson(g)).toList();
-      }
-    } catch (e) {
-      // Ignore parsing errors
-    }
+      if (data['goals'] != null) return (data['goals'] as List).map((g) => Goal.fromJson(g)).toList();
+    } catch (_) {}
     return [];
   }
 
   List<Injury> _getInjuries(Map<String, dynamic> data) {
     try {
-      if (data['injuries'] != null) {
-        return (data['injuries'] as List).map((i) => Injury.fromJson(i)).toList();
-      }
-    } catch (e) {
-      // Ignore parsing errors
-    }
+      if (data['injuries'] != null) return (data['injuries'] as List).map((i) => Injury.fromJson(i)).toList();
+    } catch (_) {}
     return [];
   }
 
   List<String> _getLimitations(Map<String, dynamic> data) {
     try {
-      if (data['limitations'] != null) {
-        return (data['limitations'] as List).cast<String>();
-      }
-    } catch (e) {
-      // Ignore parsing errors
-    }
+      if (data['limitations'] != null) return (data['limitations'] as List).cast<String>();
+    } catch (_) {}
     return [];
   }
 
@@ -853,13 +668,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       if (data['preferences'] != null) {
         final prefs = data['preferences'] as Map<String, dynamic>;
-        if (prefs['exercises'] != null) {
-          return (prefs['exercises'] as List).cast<String>();
-        }
+        if (prefs['exercises'] != null) return (prefs['exercises'] as List).cast<String>();
       }
-    } catch (e) {
-      // Ignore parsing errors
-    }
+    } catch (_) {}
     return [];
   }
 
@@ -867,13 +678,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       if (data['preferences'] != null) {
         final prefs = data['preferences'] as Map<String, dynamic>;
-        if (prefs['equipment'] != null) {
-          return (prefs['equipment'] as List).cast<String>();
-        }
+        if (prefs['equipment'] != null) return (prefs['equipment'] as List).cast<String>();
       }
-    } catch (e) {
-      // Ignore parsing errors
-    }
+    } catch (_) {}
     return [];
   }
 }

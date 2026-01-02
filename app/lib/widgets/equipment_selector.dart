@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../services/gym_service.dart';
-import '../theme/liquid_glass_theme.dart';
-import '../utils/platform_helper.dart';
 import 'adaptive/adaptive.dart';
 
 /// searchable multi-select equipment picker that fetches from /equipment
@@ -82,7 +81,6 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
   }
 
   void _deselectAll() {
-    // wipe entire list to help migration from legacy free-text equipment
     widget.onChanged([]);
   }
 
@@ -91,10 +89,10 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
     final l10n = AppLocalizations.of(context);
 
     if (_loading) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(24),
-          child: AdaptiveLoadingIndicator(),
+          padding: VigorSpacing.paddingLg,
+          child: const AdaptiveLoadingIndicator(),
         ),
       );
     }
@@ -102,16 +100,16 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
     if (_error != null) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: VigorSpacing.paddingMd,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 _error!,
-                style: TextStyle(color: Colors.red[400]),
+                style: VigorTypography.body.copyWith(color: VigorColors.error),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: VigorSpacing.sm),
               AdaptiveTextButton(
                 onPressed: () {
                   setState(() {
@@ -137,7 +135,7 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
       children: [
         // search bar + select all/none
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+          padding: EdgeInsets.symmetric(horizontal: VigorSpacing.xs),
           child: Row(
             children: [
               Expanded(
@@ -148,27 +146,28 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
                   prefix: const Icon(Icons.search, size: 20),
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: VigorSpacing.sm),
               IconButton(
                 onPressed: allVisibleSelected ? _deselectAll : _selectAll,
                 icon: Icon(
                   allVisibleSelected ? Icons.deselect : Icons.select_all,
                   size: 20,
+                  color: VigorColors.orange,
                 ),
                 tooltip: allVisibleSelected ? l10n.noEquipment : l10n.addAllEquipment,
               ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: VigorSpacing.sm),
         // equipment chips
         if (filtered.isEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: VigorSpacing.paddingMd,
             child: Text(
-              l10n.noMatchingUsers, // reusing "no matching" string
-              style: TextStyle(
-                color: Colors.grey[600],
+              l10n.noMatchingUsers,
+              style: VigorTypography.body.copyWith(
+                color: VigorColors.textMuted(context),
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -178,25 +177,20 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
             constraints: const BoxConstraints(maxHeight: 200),
             child: SingleChildScrollView(
               child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: VigorSpacing.sm,
+                runSpacing: VigorSpacing.sm,
                 children: filtered.map((equipment) {
                   final isSelected = selectedSet.contains(equipment);
                   return FilterChip(
                     label: Text(
                       equipment,
-                      style: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.captionStyle.copyWith(
-                              fontSize: 12,
-                              color: isSelected ? Colors.white : null,
-                            )
-                          : null,
+                      style: VigorTypography.caption.copyWith(
+                        color: isSelected ? Colors.white : VigorColors.textPrimary(context),
+                      ),
                     ),
                     selected: isSelected,
                     onSelected: (_) => _toggle(equipment),
-                    selectedColor: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.primaryColor
-                        : Theme.of(context).colorScheme.primaryContainer,
+                    selectedColor: VigorColors.orange,
                     checkmarkColor: Colors.white,
                   );
                 }).toList(),
@@ -206,12 +200,11 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
         // selected count
         if (widget.selected.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(top: 8),
+            padding: EdgeInsets.only(top: VigorSpacing.sm),
             child: Text(
               '${widget.selected.length} selected',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
+              style: VigorTypography.caption.copyWith(
+                color: VigorColors.textSecondary(context),
               ),
             ),
           ),

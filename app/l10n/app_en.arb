@@ -170,6 +170,11 @@
   "availableTrainings": "Available trainings",
   "pastTrainings": "Past trainings",
   "stale": "Stale",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "available": "Available",
+  "completed": "Completed",
+  "noPastTrainings": "No completed trainings yet",
   "copied": "Copied",
   "durationMin": "{minutes} min",
   "@durationMin": {

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'design/tokens.dart';
+import 'design/vigor_theme.dart';
 import 'generated/app_localizations.dart';
 import 'providers/auth_provider.dart';
 import 'providers/locale_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/google_auth_screen.dart';
 import 'screens/home_screen.dart';
-import 'theme/material_you_theme.dart';
 import 'services/secure_storage_service.dart';
 import 'services/preferences_service.dart';
 import 'services/app_logger.dart';
@@ -42,41 +43,44 @@ class StorageErrorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Vigor - Storage Error',
-      theme: MaterialYouTheme.lightTheme,
-      darkTheme: MaterialYouTheme.darkTheme,
+      theme: VigorTheme.light,
+      darkTheme: VigorTheme.dark,
       themeMode: ThemeMode.system,
       home: Scaffold(
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: VigorSpacing.paddingLg,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.error_outline,
                   size: 64,
-                  color: Colors.red,
+                  color: VigorColors.error,
                 ),
-                const SizedBox(height: 24),
-                const Text(
+                SizedBox(height: VigorSpacing.lg),
+                Text(
                   'Storage Unavailable',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                  style: VigorTypography.title.copyWith(
+                    color: VigorColors.lightTextPrimary,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: VigorSpacing.md),
                 Text(
                   error,
-                  style: const TextStyle(fontSize: 16),
+                  style: VigorTypography.body.copyWith(
+                    color: VigorColors.lightTextPrimary,
+                  ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 24),
-                const Text(
+                SizedBox(height: VigorSpacing.lg),
+                Text(
                   'This app requires secure storage to protect your data. '
                   'Please check your browser settings and try again.',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                  style: VigorTypography.body.copyWith(
+                    color: VigorColors.lightTextSecondary,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -119,8 +123,8 @@ class VigorApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          theme: MaterialYouTheme.lightTheme,
-          darkTheme: MaterialYouTheme.darkTheme,
+          theme: VigorTheme.light,
+          darkTheme: VigorTheme.dark,
           themeMode: ThemeMode.system,
           home: const AuthenticationWrapper(),
           debugShowCheckedModeBanner: false,

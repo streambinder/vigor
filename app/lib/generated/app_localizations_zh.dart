@@ -368,6 +368,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get stale => '已过期';
 
   @override
+  String get today => '今天';
+
+  @override
+  String get yesterday => '昨天';
+
+  @override
+  String get available => '可用';
+
+  @override
+  String get completed => '已完成';
+
+  @override
+  String get noPastTrainings => '暂无已完成的训练';
+
+  @override
   String get copied => '已复制';
 
   @override

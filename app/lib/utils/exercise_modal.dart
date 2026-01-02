@@ -31,7 +31,7 @@ class ExerciseModal {
               ? LiquidGlassTheme.glassDecoration(
                   borderRadius: 20,
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     width: 1.5,
                   ),
                 )
@@ -56,14 +56,14 @@ class ExerciseModal {
                         return Container(
                           height: 200,
                           color: isDark
-                              ? Colors.white.withOpacity(0.1)
+                              ? Colors.white.withValues(alpha: 0.1)
                               : Colors.grey[300],
                           child: Center(
                             child: Icon(
                               Icons.broken_image,
                               size: 64,
                               color: isDark
-                                  ? Colors.white.withOpacity(0.5)
+                                  ? Colors.white.withValues(alpha: 0.5)
                                   : Colors.grey.shade600,
                             ),
                           ),
@@ -106,7 +106,7 @@ class ExerciseModal {
                                     height: 24,
                                     decoration: BoxDecoration(
                                       color: PlatformHelper.useLiquidGlass
-                                          ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
+                                          ? LiquidGlassTheme.primaryColor.withValues(alpha: 0.2)
                                           : Theme.of(context).colorScheme.primaryContainer,
                                       shape: BoxShape.circle,
                                     ),

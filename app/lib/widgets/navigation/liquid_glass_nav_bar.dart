@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../../theme/liquid_glass_theme.dart';
+import '../../design/tokens.dart';
 
 class LiquidGlassNavItem {
   final IconData icon;
@@ -29,32 +29,26 @@ class LiquidGlassNavBar extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: VigorRadius.navigationBar,
       child: BackdropFilter(
         filter: ImageFilter.blur(
-          sigmaX: LiquidGlassTheme.glassBlur,
-          sigmaY: LiquidGlassTheme.glassBlur,
+          sigmaX: VigorColors.glassBlur,
+          sigmaY: VigorColors.glassBlur,
         ),
         child: Container(
           height: 70,
           decoration: BoxDecoration(
             color: isDark
-                ? Colors.black.withOpacity(0.3)
-                : Colors.white.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(24),
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.white.withValues(alpha: 0.3),
+            borderRadius: VigorRadius.navigationBar,
             border: Border.all(
               color: isDark
-                  ? Colors.white.withOpacity(0.1)
-                  : Colors.white.withOpacity(0.3),
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.white.withValues(alpha: 0.3),
               width: 1.5,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 30,
-                offset: const Offset(0, 10),
-              ),
-            ],
+            boxShadow: VigorShadows.elevation2(context),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -80,6 +74,9 @@ class LiquidGlassNavBar extends StatelessWidget {
     bool isDark,
   ) {
     final isSelected = currentIndex == index;
+    final unselectedColor = isDark
+        ? VigorColors.darkTextSecondary
+        : VigorColors.lightTextSecondary;
 
     return Expanded(
       child: GestureDetector(
@@ -90,44 +87,32 @@ class LiquidGlassNavBar extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Icon with selection indicator
               AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
+                duration: VigorAnimation.medium,
+                curve: VigorAnimation.defaultCurve,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? LiquidGlassTheme.primaryColor.withOpacity(0.15)
+                      ? VigorColors.orange.withValues(alpha: 0.15)
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: VigorRadius.radiusFull,
                 ),
                 child: Icon(
                   item.icon,
-                  color: isSelected
-                      ? LiquidGlassTheme.primaryColor
-                      : isDark
-                          ? Colors.white.withOpacity(0.6)
-                          : Colors.black.withOpacity(0.6),
+                  color: isSelected ? VigorColors.orange : unselectedColor,
                   size: 24,
                 ),
               ),
-              const SizedBox(height: 4),
-              // Label
+              SizedBox(height: VigorSpacing.xs),
               AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                style: TextStyle(
-                  fontSize: 11,
+                duration: VigorAnimation.medium,
+                curve: VigorAnimation.defaultCurve,
+                style: VigorTypography.caption.copyWith(
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: isSelected
-                      ? LiquidGlassTheme.primaryColor
-                      : isDark
-                          ? Colors.white.withOpacity(0.6)
-                          : Colors.black.withOpacity(0.6),
-                  letterSpacing: -0.1,
+                  color: isSelected ? VigorColors.orange : unselectedColor,
                 ),
                 child: Text(item.label),
               ),

@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../design/tokens.dart';
 import '../../utils/platform_helper.dart';
 import '../../theme/liquid_glass_theme.dart';
 
@@ -42,76 +43,79 @@ class AdaptiveAlertDialog extends StatelessWidget {
   }
 
   Widget _buildLiquidGlassDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = VigorColors.textPrimary(context);
+    final secondaryColor = VigorColors.textSecondary(context);
+
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: VigorRadius.modal,
         child: BackdropFilter(
           filter: ImageFilter.blur(
-            sigmaX: LiquidGlassTheme.glassBlur,
-            sigmaY: LiquidGlassTheme.glassBlur,
+            sigmaX: VigorColors.glassBlur,
+            sigmaY: VigorColors.glassBlur,
           ),
           child: Container(
             decoration: LiquidGlassTheme.glassDecoration(
-              borderRadius: 20,
+              borderRadius: VigorRadius.lg,
               opacity: 0.95,
+              isDark: isDark,
             ),
-            padding: const EdgeInsets.all(20),
+            padding: VigorSpacing.paddingLg,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (title != null) ...[
                   Text(
                     title!,
-                    style: LiquidGlassTheme.headlineStyle,
+                    style: VigorTypography.headline.copyWith(color: textColor),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: VigorSpacing.sm),
                 ],
                 if (content != null) ...[
                   Text(
                     content!,
-                    style: LiquidGlassTheme.bodyStyle,
+                    style: VigorTypography.body.copyWith(color: secondaryColor),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: VigorSpacing.lg),
                 ],
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: actions.map((action) {
                     return Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: EdgeInsets.symmetric(horizontal: VigorSpacing.xs),
                         child: GestureDetector(
                           onTap: action.onPressed,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            padding: EdgeInsets.symmetric(vertical: VigorSpacing.sm),
                             decoration: BoxDecoration(
                               color: action.isDestructive
-                                  ? LiquidGlassTheme.errorColor.withOpacity(0.1)
+                                  ? VigorColors.error.withValues(alpha: 0.1)
                                   : action.isDefault
-                                      ? LiquidGlassTheme.primaryColor
-                                          .withOpacity(0.9)
+                                      ? VigorColors.orange.withValues(alpha: 0.9)
                                       : Colors.transparent,
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: VigorRadius.radiusSm,
                               border: !action.isDefault
                                   ? Border.all(
                                       color: action.isDestructive
-                                          ? LiquidGlassTheme.errorColor
-                                          : Colors.white.withOpacity(0.3),
+                                          ? VigorColors.error
+                                          : VigorColors.border(context),
                                     )
                                   : null,
                             ),
                             child: Text(
                               action.label,
-                              style: TextStyle(
+                              style: VigorTypography.label.copyWith(
                                 color: action.isDefault
                                     ? Colors.white
                                     : action.isDestructive
-                                        ? LiquidGlassTheme.errorColor
-                                        : LiquidGlassTheme.primaryColor,
-                                fontSize: 17,
+                                        ? VigorColors.error
+                                        : VigorColors.orange,
                                 fontWeight: action.isDefault
                                     ? FontWeight.w600
                                     : FontWeight.w400,
@@ -140,10 +144,10 @@ class AdaptiveAlertDialog extends StatelessWidget {
           .map((action) => TextButton(
                 onPressed: action.onPressed,
                 style: action.isDestructive
-                    ? TextButton.styleFrom(
-                        foregroundColor: Theme.of(context).colorScheme.error,
-                      )
-                    : null,
+                    ? TextButton.styleFrom(foregroundColor: VigorColors.error)
+                    : action.isDefault
+                        ? TextButton.styleFrom(foregroundColor: VigorColors.orange)
+                        : null,
                 child: Text(action.label),
               ))
           .toList(),

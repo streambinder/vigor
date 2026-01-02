@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../design/tokens.dart';
 import '../../utils/platform_helper.dart';
-import '../../theme/liquid_glass_theme.dart';
 
 /// Platform-adaptive loading indicator
 class AdaptiveLoadingIndicator extends StatelessWidget {
@@ -22,7 +22,7 @@ class AdaptiveLoadingIndicator extends StatelessWidget {
         child: CircularProgressIndicator(
           value: value,
           strokeWidth: 2.5,
-          color: color ?? LiquidGlassTheme.primaryColor,
+          color: color ?? VigorColors.orange,
         ),
       );
     }
@@ -42,18 +42,18 @@ class AdaptiveLoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textColor = VigorColors.textPrimary(context);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const AdaptiveLoadingIndicator(),
           if (message != null) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: VigorSpacing.md),
             Text(
               message!,
-              style: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.bodyStyle
-                  : Theme.of(context).textTheme.bodyMedium,
+              style: VigorTypography.body.copyWith(color: textColor),
             ),
           ],
         ],

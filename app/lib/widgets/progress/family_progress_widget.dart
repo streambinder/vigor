@@ -73,7 +73,7 @@ class FamilyProgressWidget extends StatelessWidget {
         : Theme.of(context).colorScheme.primary;
 
     final trackColor = PlatformHelper.useLiquidGlass
-        ? Colors.black.withOpacity(0.5)
+        ? Colors.black.withValues(alpha: 0.5)
         : Theme.of(context).colorScheme.surfaceContainerHighest;
 
     final textStyle = PlatformHelper.useLiquidGlass

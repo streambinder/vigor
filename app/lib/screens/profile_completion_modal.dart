@@ -2,6 +2,7 @@ import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/locale_provider.dart';
@@ -207,6 +208,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return PopScope(
       canPop: widget.missingFields.isEmpty, // Allow dismissal when editing
       child: Dialog(
@@ -216,14 +218,15 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
               ? LiquidGlassTheme.glassDecoration(
                   borderRadius: 20,
                   opacity: 0.95,
+                  isDark: isDark,
                 )
               : BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
+                  color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
                   borderRadius: BorderRadius.circular(20),
                 ),
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: VigorSpacing.paddingMd,
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -233,23 +236,20 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
                     // Header
                     Text(
                       widget.missingFields.isEmpty ? l10n.editProfile : l10n.completeYourProfile,
-                      style: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.titleStyle
-                          : const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      style: VigorTypography.title.copyWith(
+                        color: VigorColors.textPrimary(context),
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: VigorSpacing.sm),
                     Text(
                       widget.missingFields.isEmpty
                           ? l10n.updateYourProfileInfo
                           : l10n.pleaseCompleteProfile,
-                      style: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.captionStyle
-                          : const TextStyle(color: Colors.grey),
+                      style: VigorTypography.caption.copyWith(
+                        color: VigorColors.textSecondary(context),
+                      ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: VigorSpacing.lg),
 
                     // First Name and Last Name (side by side)
                     _buildNameFields(),

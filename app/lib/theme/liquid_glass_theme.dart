@@ -1,49 +1,36 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../design/tokens.dart';
 
-/// Liquid Glass design system constants and utilities
+/// Liquid Glass design system for iOS
 /// Features glassmorphism with frosted blur effects, transparency, and depth
+/// Now using Vigor design tokens for consistency
 class LiquidGlassTheme {
-  // Primary colors with vibrant tones
-  static const Color primaryColor = Color(0xFF007AFF); // iOS blue
-  static const Color accentColor = Color(0xFF5E5CE6); // Purple accent
-  static const Color successColor = Color(0xFF34C759); // Green
-  static const Color errorColor = Color(0xFFFF3B30); // Red
-  static const Color warningColor = Color(0xFFFF9500); // Orange
+  // Primary colors from design tokens
+  static Color get primaryColor => VigorColors.orange;
+  static Color get accentColor => VigorColors.electricBlue;
+  static Color get successColor => VigorColors.success;
+  static Color get errorColor => VigorColors.error;
+  static Color get warningColor => VigorColors.warning;
 
-  // Glass effect parameters
-  static const double glassOpacity = 0.15;
-  static const double glassBlur = 20.0;
-  static const double glassBorderOpacity = 0.2;
+  // Glass effect parameters from design tokens
+  static double get glassOpacity => VigorColors.glassOpacityDark;
+  static double get glassBlur => VigorColors.glassBlur;
+  static double get glassBorderOpacity => VigorColors.glassBorderOpacity;
 
   // Shadows for depth
-  static List<BoxShadow> get softShadow => [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.1),
-          blurRadius: 20,
-          offset: const Offset(0, 10),
-        ),
-        BoxShadow(
-          color: Colors.black.withOpacity(0.05),
-          blurRadius: 10,
-          offset: const Offset(0, 5),
-        ),
-      ];
+  static List<BoxShadow> softShadow(BuildContext context) {
+    return VigorShadows.elevation1(context);
+  }
 
-  static List<BoxShadow> get glowShadow => [
-        BoxShadow(
-          color: primaryColor.withOpacity(0.3),
-          blurRadius: 20,
-          offset: const Offset(0, 5),
-        ),
-      ];
+  static List<BoxShadow> get glowShadow => VigorShadows.orangeGlow;
 
   // Background gradients
   static LinearGradient get backgroundGradient => LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          const Color(0xFFF5F7FA),
+          VigorColors.lightBackground,
           const Color(0xFFE8EEF5),
         ],
       );
@@ -52,28 +39,33 @@ class LiquidGlassTheme {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          const Color(0xFF1C1C1E),
-          const Color(0xFF2C2C2E),
+          VigorColors.darkBackground,
+          VigorColors.darkSurface,
         ],
       );
 
   /// Creates a glass container decoration
   static BoxDecoration glassDecoration({
     Color? baseColor,
-    double opacity = glassOpacity,
+    double? opacity,
     double borderRadius = 16,
     List<BoxShadow>? shadows,
     Border? border,
+    bool isDark = false,
   }) {
+    final effectiveOpacity = opacity ??
+        (isDark ? VigorColors.glassOpacityDark : VigorColors.glassOpacityLight);
+    final effectiveBaseColor = baseColor ?? (isDark ? Colors.black : Colors.white);
+
     return BoxDecoration(
-      color: (baseColor ?? Colors.white).withOpacity(opacity),
+      color: effectiveBaseColor.withValues(alpha: effectiveOpacity),
       borderRadius: BorderRadius.circular(borderRadius),
       border: border ??
           Border.all(
-            color: Colors.white.withOpacity(glassBorderOpacity),
+            color: Colors.white.withValues(alpha: glassBorderOpacity),
             width: 1.5,
           ),
-      boxShadow: shadows ?? softShadow,
+      boxShadow: shadows,
     );
   }
 
@@ -94,34 +86,48 @@ class LiquidGlassTheme {
     );
   }
 
-  /// Text styles for Liquid Glass
-  static const TextStyle titleStyle = TextStyle(
-    fontSize: 28,
-    fontWeight: FontWeight.bold,
-    letterSpacing: -0.5,
-    color: Color(0xFF1C1C1E),
-  );
+  /// Primary button gradient (orange energy)
+  static BoxDecoration get primaryButtonDecoration => vibrantGradient(
+        colors: [
+          VigorColors.orange,
+          VigorColors.orange.withRed(240),
+        ],
+        borderRadius: VigorRadius.sm,
+        shadows: VigorShadows.orangeGlow,
+      );
 
-  static const TextStyle headlineStyle = TextStyle(
-    fontSize: 22,
-    fontWeight: FontWeight.w600,
-    letterSpacing: -0.3,
-    color: Color(0xFF1C1C1E),
-  );
+  /// Secondary button gradient (electric blue)
+  static BoxDecoration get secondaryButtonDecoration => vibrantGradient(
+        colors: [
+          VigorColors.electricBlue,
+          VigorColors.electricBlue.withBlue(240),
+        ],
+        borderRadius: VigorRadius.sm,
+        shadows: VigorShadows.blueGlow,
+      );
 
-  static const TextStyle bodyStyle = TextStyle(
-    fontSize: 17,
-    fontWeight: FontWeight.normal,
-    letterSpacing: -0.4,
-    color: Color(0xFF3C3C43),
-  );
+  /// Text styles for Liquid Glass (using design tokens)
+  static TextStyle get titleStyle => VigorTypography.title;
+  static TextStyle get headlineStyle => VigorTypography.headline;
+  static TextStyle get bodyStyle => VigorTypography.bodyLarge;
+  static TextStyle get captionStyle => VigorTypography.caption;
 
-  static const TextStyle captionStyle = TextStyle(
-    fontSize: 13,
-    fontWeight: FontWeight.normal,
-    letterSpacing: -0.1,
-    color: Color(0xFF8E8E93),
-  );
+  /// Get theme-aware text styles
+  static TextStyle titleStyleColored(BuildContext context) {
+    return VigorTypography.titleColored(context);
+  }
+
+  static TextStyle headlineStyleColored(BuildContext context) {
+    return VigorTypography.headlineColored(context);
+  }
+
+  static TextStyle bodyStyleColored(BuildContext context) {
+    return VigorTypography.bodyLargeColored(context);
+  }
+
+  static TextStyle captionStyleColored(BuildContext context) {
+    return VigorTypography.captionColored(context);
+  }
 
   /// Material Theme (not used on iOS but kept for compatibility)
   static ThemeData get materialTheme {

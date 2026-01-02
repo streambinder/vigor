@@ -5,12 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 
+import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../services/app_logger.dart';
 import '../widgets/adaptive/adaptive.dart';
-import '../theme/liquid_glass_theme.dart';
-import '../utils/platform_helper.dart';
 
 // Import web-only methods when on web
 import 'package:google_sign_in_web/web_only.dart' as web_only
@@ -38,23 +37,16 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
   Future<void> _initializeGoogleSignIn() async {
     try {
       if (kIsWeb) {
-        // Web configuration - need to specify clientId to get ID tokens
         await GoogleSignIn.instance.initialize(
-          clientId:
-              '559332153701-0auu2d1c1q43u7kf5k12akdllo060flh.apps.googleusercontent.com',
+          clientId: '559332153701-0auu2d1c1q43u7kf5k12akdllo060flh.apps.googleusercontent.com',
         );
-
-        // On web, listen to authentication events
-        _authEventsSubscription =
-            GoogleSignIn.instance.authenticationEvents.listen(
+        _authEventsSubscription = GoogleSignIn.instance.authenticationEvents.listen(
           _handleAuthenticationEvent,
           onError: _handleAuthenticationError,
         );
       } else {
-        // Mobile configuration - use serverClientId for ID tokens
         await GoogleSignIn.instance.initialize(
-          serverClientId:
-              '559332153701-0auu2d1c1q43u7kf5k12akdllo060flh.apps.googleusercontent.com',
+          serverClientId: '559332153701-0auu2d1c1q43u7kf5k12akdllo060flh.apps.googleusercontent.com',
         );
       }
       setState(() {
@@ -72,7 +64,6 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
 
   void _handleAuthenticationEvent(GoogleSignInAuthenticationEvent event) {
     AppLogger.debug('[GoogleAuthScreen] authentication event: ${event.runtimeType}');
-
     if (event is GoogleSignInAuthenticationEventSignIn) {
       _handleSignInSuccess(event.user);
     } else if (event is GoogleSignInAuthenticationEventSignOut) {
@@ -82,16 +73,13 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
 
   void _handleAuthenticationError(Object error, StackTrace stackTrace) {
     AppLogger.error('[GoogleAuthScreen] authentication error', error, stackTrace);
-
     if (error is GoogleSignInException) {
-      // Don't show error for user cancellation
       if (error.code == GoogleSignInExceptionCode.canceled) {
         setState(() {
           _isLoading = false;
         });
         return;
       }
-
       setState(() {
         _isLoading = false;
         _errorMessage = AppLocalizations.of(context).signInError(error.description ?? error.code.toString());
@@ -109,7 +97,6 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
     final l10n = AppLocalizations.of(context);
 
     try {
-      // Get authentication details (ID token only in v7.x)
       final GoogleSignInAuthentication googleAuth = user.authentication;
       final String? idToken = googleAuth.idToken;
 
@@ -125,8 +112,6 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
       }
 
       AppLogger.info('[GoogleAuthScreen] authenticating with ID token (${idToken.length}b)');
-
-      // Send token to backend
       final success = await authProvider.loginWithGoogle(idToken: idToken);
 
       if (success) {
@@ -140,8 +125,6 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
           _isLoading = false;
           _errorMessage = authProvider.errorMessage ?? l10n.googleSignInFailed;
         });
-
-        // Sign out from Google on failure
         await GoogleSignIn.instance.signOut();
       }
     } catch (e) {
@@ -156,7 +139,6 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
     }
   }
 
-  // Mobile-only: trigger authentication flow
   Future<void> _handleGoogleSignIn() async {
     if (!_initialized) {
       AppLogger.warning('[GoogleAuthScreen] not initialized yet');
@@ -172,17 +154,12 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
     });
 
     try {
-      // Trigger Google sign-in flow with scope hint
-      final GoogleSignInAccount googleUser =
-          await GoogleSignIn.instance.authenticate(
-            scopeHint: ['email', 'profile'],
-          );
-
+      final GoogleSignInAccount googleUser = await GoogleSignIn.instance.authenticate(
+        scopeHint: ['email', 'profile'],
+      );
       await _handleSignInSuccess(googleUser);
     } on GoogleSignInException catch (e) {
       AppLogger.warning('[GoogleAuthScreen] sign-in exception: ${e.code} - ${e.description}');
-
-      // User canceled - don't show error
       if (e.code == GoogleSignInExceptionCode.canceled) {
         if (mounted) {
           setState(() {
@@ -191,8 +168,6 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
         }
         return;
       }
-
-      // Show error for other exceptions
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -212,65 +187,55 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
     }
   }
 
-  // Web-only: user clicked the Google sign-in button (loading state management)
-  void _onWebSignInButtonPressed() {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final textColor = VigorColors.textPrimary(context);
+    final secondaryColor = VigorColors.textSecondary(context);
+
     return AdaptiveScaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: VigorSpacing.paddingLg,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Logo or App Name
-                Icon(
-                  Icons.fitness_center,
-                  size: 80,
-                  color: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.primaryColor
-                      : Theme.of(context).colorScheme.primary,
+                // lightning bolt with gradient
+                ShaderMask(
+                  shaderCallback: (bounds) => LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [VigorColors.orange, VigorColors.electricBlue],
+                  ).createShader(bounds),
+                  child: const Icon(
+                    Icons.bolt,
+                    size: 80,
+                    color: Colors.white,
+                  ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: VigorSpacing.md),
                 Text(
-                  l10n.appName,
-                  style: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.titleStyle
-                      : const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  l10n.appName.toUpperCase(),
+                  style: VigorTypography.display.copyWith(
+                    color: textColor,
+                    letterSpacing: 4,
+                  ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: VigorSpacing.sm),
                 Text(
                   l10n.appTagline,
-                  style: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.bodyStyle.copyWith(
-                          color: LiquidGlassTheme.captionStyle.color,
-                        )
-                      : const TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
+                  style: VigorTypography.body.copyWith(color: secondaryColor),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 48),
+                SizedBox(height: VigorSpacing.xxl),
 
                 // Google Sign-In Button (platform-specific)
                 if (!_initialized)
                   const Center(child: AdaptiveLoadingIndicator())
                 else if (kIsWeb)
-                  // Web: Use Google's renderButton widget
                   Center(
                     child: web_only.renderButton(
                       configuration: web_only.GSIButtonConfiguration(
@@ -283,20 +248,20 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
                     ),
                   )
                 else
-                  // Mobile: Use adaptive button with authenticate()
                   AdaptiveButton(
                     onPressed: _isLoading ? null : _handleGoogleSignIn,
+                    useGradient: true,
                     child: _isLoading
                         ? Row(
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const SizedBox(
+                              SizedBox(
                                 height: 20,
                                 width: 20,
-                                child: AdaptiveLoadingIndicator(),
+                                child: AdaptiveLoadingIndicator(color: Colors.white),
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(width: VigorSpacing.sm),
                               Text(l10n.signingIn),
                             ],
                           )
@@ -305,44 +270,33 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Icon(Icons.login, size: 24, color: Colors.white),
-                              const SizedBox(width: 12),
+                              SizedBox(width: VigorSpacing.sm),
                               Text(l10n.signInWithGoogle),
                             ],
                           ),
                   ),
 
-                // Loading indicator for web (separate from button)
+                // Loading indicator for web
                 if (kIsWeb && _isLoading) ...[
-                  const SizedBox(height: 16),
-                  const Center(
-                    child: AdaptiveLoadingIndicator(),
-                  ),
+                  SizedBox(height: VigorSpacing.md),
+                  const Center(child: AdaptiveLoadingIndicator()),
                 ],
 
                 // Error message
                 if (_errorMessage != null) ...[
-                  const SizedBox(height: 16),
+                  SizedBox(height: VigorSpacing.md),
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: VigorSpacing.paddingMd,
                     decoration: BoxDecoration(
-                      color: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.errorColor.withOpacity(0.1)
-                          : Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(12),
+                      color: VigorColors.error.withValues(alpha: 0.1),
+                      borderRadius: VigorRadius.radiusMd,
                       border: Border.all(
-                        color: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.errorColor.withOpacity(0.3)
-                            : Colors.red.shade200,
+                        color: VigorColors.error.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Text(
                       _errorMessage!,
-                      style: TextStyle(
-                        color: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.errorColor
-                            : Colors.red.shade900,
-                        fontSize: 14,
-                      ),
+                      style: VigorTypography.body.copyWith(color: VigorColors.error),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -358,8 +312,6 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
   @override
   void dispose() {
     _authEventsSubscription?.cancel();
-    // Don't disconnect here - it revokes tokens that might be in use
-    // The user can sign out explicitly if needed
     super.dispose();
   }
 }

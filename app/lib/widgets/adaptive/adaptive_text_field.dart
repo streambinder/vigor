@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../design/tokens.dart';
 import '../../utils/platform_helper.dart';
 import '../../theme/liquid_glass_theme.dart';
 
@@ -53,6 +54,11 @@ class AdaptiveTextField extends StatelessWidget {
   }
 
   Widget _buildLiquidGlassField(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = VigorColors.textPrimary(context);
+    final hintColor = VigorColors.textMuted(context);
+    final labelColor = VigorColors.textSecondary(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -60,23 +66,22 @@ class AdaptiveTextField extends StatelessWidget {
         if (labelText != null) ...[
           Text(
             labelText!,
-            style: LiquidGlassTheme.captionStyle,
+            style: VigorTypography.caption.copyWith(color: labelColor),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: VigorSpacing.sm),
         ],
         ClipRRect(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: VigorRadius.input,
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Container(
               decoration: LiquidGlassTheme.glassDecoration(
-                borderRadius: 12,
+                borderRadius: VigorRadius.sm,
+                isDark: isDark,
                 border: Border.all(
                   color: errorText != null
-                      ? LiquidGlassTheme.errorColor.withOpacity(0.5)
-                      : Colors.white.withOpacity(
-                          LiquidGlassTheme.glassBorderOpacity,
-                        ),
+                      ? VigorColors.error.withValues(alpha: 0.5)
+                      : VigorColors.border(context),
                   width: 1.5,
                 ),
               ),
@@ -92,31 +97,25 @@ class AdaptiveTextField extends StatelessWidget {
                 readOnly: readOnly,
                 onTap: onTap,
                 focusNode: focusNode,
-                style: LiquidGlassTheme.bodyStyle,
+                style: VigorTypography.body.copyWith(color: textColor),
+                cursorColor: VigorColors.orange,
                 decoration: InputDecoration(
                   hintText: placeholder ?? labelText,
-                  hintStyle: LiquidGlassTheme.bodyStyle.copyWith(
-                    color: LiquidGlassTheme.captionStyle.color,
-                  ),
+                  hintStyle: VigorTypography.body.copyWith(color: hintColor),
                   prefixIcon: prefix,
                   suffixIcon: suffix,
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
+                  contentPadding: VigorSpacing.inputPadding,
                 ),
               ),
             ),
           ),
         ),
         if (errorText != null) ...[
-          const SizedBox(height: 6),
+          SizedBox(height: VigorSpacing.xs),
           Text(
             errorText!,
-            style: LiquidGlassTheme.captionStyle.copyWith(
-              color: LiquidGlassTheme.errorColor,
-            ),
+            style: VigorTypography.caption.copyWith(color: VigorColors.error),
           ),
         ],
       ],

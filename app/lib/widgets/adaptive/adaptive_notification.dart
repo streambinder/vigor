@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../design/tokens.dart';
 import '../../services/app_logger.dart';
 import '../../utils/platform_helper.dart';
-import '../../theme/liquid_glass_theme.dart';
 
 /// Platform-adaptive notification that always appears above dialogs/modals.
 /// Uses overlay with rootOverlay: true to ensure proper z-ordering.
@@ -64,9 +64,9 @@ class _NotificationWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: MediaQuery.of(context).padding.top + 16,
-      left: 16,
-      right: 16,
+      top: MediaQuery.of(context).padding.top + VigorSpacing.md,
+      left: VigorSpacing.md,
+      right: VigorSpacing.md,
       child: Material(
         color: Colors.transparent,
         child: useLiquidGlass ? _buildLiquidGlass(context) : _buildMaterial(context),
@@ -75,26 +75,34 @@ class _NotificationWidget extends StatelessWidget {
   }
 
   Widget _buildLiquidGlass(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: VigorRadius.radiusMd,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: VigorSpacing.paddingMd,
           decoration: BoxDecoration(
             color: isError
-                ? LiquidGlassTheme.errorColor.withOpacity(0.9)
-                : Colors.white.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(12),
+                ? VigorColors.error.withValues(alpha: 0.9)
+                : isDark
+                    ? VigorColors.darkSurface.withValues(alpha: 0.9)
+                    : Colors.white.withValues(alpha: 0.9),
+            borderRadius: VigorRadius.radiusMd,
             border: Border.all(
-              color: Colors.white.withOpacity(0.3),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.white.withValues(alpha: 0.3),
               width: 1,
             ),
-            boxShadow: LiquidGlassTheme.softShadow,
+            boxShadow: VigorShadows.elevation2(context),
           ),
           child: _buildContent(
-            iconColor: isError ? Colors.white : LiquidGlassTheme.successColor,
-            textColor: isError ? Colors.white : Colors.black87,
+            iconColor: isError ? Colors.white : VigorColors.success,
+            textColor: isError
+                ? Colors.white
+                : VigorColors.textPrimary(context),
           ),
         ),
       ),
@@ -104,21 +112,15 @@ class _NotificationWidget extends StatelessWidget {
   Widget _buildMaterial(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: VigorSpacing.paddingMd,
       decoration: BoxDecoration(
-        color: isError ? colorScheme.error : colorScheme.inverseSurface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: isError ? VigorColors.error : colorScheme.inverseSurface,
+        borderRadius: VigorRadius.radiusMd,
+        boxShadow: VigorShadows.elevation2(context),
       ),
       child: _buildContent(
-        iconColor: isError ? colorScheme.onError : colorScheme.onInverseSurface,
-        textColor: isError ? colorScheme.onError : colorScheme.onInverseSurface,
+        iconColor: isError ? Colors.white : colorScheme.onInverseSurface,
+        textColor: isError ? Colors.white : colorScheme.onInverseSurface,
       ),
     );
   }
@@ -130,13 +132,12 @@ class _NotificationWidget extends StatelessWidget {
           isError ? Icons.error_outline : Icons.check_circle_outline,
           color: iconColor,
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: VigorSpacing.sm),
         Expanded(
           child: Text(
             message,
-            style: TextStyle(
+            style: VigorTypography.body.copyWith(
               color: textColor,
-              fontSize: 15,
               fontWeight: FontWeight.w500,
             ),
           ),

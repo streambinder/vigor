@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../design/tokens.dart';
 import '../../utils/platform_helper.dart';
 import '../../theme/liquid_glass_theme.dart';
 
@@ -34,27 +35,32 @@ class AdaptiveCard extends StatelessWidget {
   }
 
   Widget _buildLiquidGlassCard(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final cardChild = Container(
-      margin: margin ?? const EdgeInsets.all(4),
-      padding: padding ?? const EdgeInsets.all(16),
+      margin: margin ?? VigorSpacing.paddingXs,
+      padding: padding ?? VigorSpacing.paddingMd,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: VigorRadius.card,
         child: BackdropFilter(
           filter: ImageFilter.blur(
-            sigmaX: LiquidGlassTheme.glassBlur,
-            sigmaY: LiquidGlassTheme.glassBlur,
+            sigmaX: VigorColors.glassBlur,
+            sigmaY: VigorColors.glassBlur,
           ),
           child: Container(
             decoration: useVibrantGradient
                 ? LiquidGlassTheme.vibrantGradient(
                     colors: gradientColors ??
                         [
-                          LiquidGlassTheme.primaryColor.withOpacity(0.8),
-                          LiquidGlassTheme.accentColor.withOpacity(0.8),
+                          VigorColors.orange.withValues(alpha: 0.8),
+                          VigorColors.electricBlue.withValues(alpha: 0.8),
                         ],
+                    borderRadius: VigorRadius.md,
                   )
                 : LiquidGlassTheme.glassDecoration(
                     baseColor: glassColor,
+                    isDark: isDark,
+                    borderRadius: VigorRadius.md,
                   ),
             child: child,
           ),
@@ -75,24 +81,24 @@ class AdaptiveCard extends StatelessWidget {
   Widget _buildMaterialCard(BuildContext context) {
     if (useVibrantGradient) {
       return Container(
-        margin: margin ?? const EdgeInsets.all(4),
+        margin: margin ?? VigorSpacing.paddingXs,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: gradientColors ??
                 [
-                  Theme.of(context).colorScheme.primaryContainer,
-                  Theme.of(context).colorScheme.secondaryContainer,
+                  VigorColors.orange.withValues(alpha: 0.8),
+                  VigorColors.electricBlue.withValues(alpha: 0.8),
                 ],
           ),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: VigorRadius.card,
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: VigorRadius.card,
             child: Padding(
-              padding: padding ?? const EdgeInsets.all(16),
+              padding: padding ?? VigorSpacing.paddingMd,
               child: child,
             ),
           ),
@@ -101,13 +107,13 @@ class AdaptiveCard extends StatelessWidget {
     }
 
     return Card(
-      margin: margin ?? const EdgeInsets.all(4),
+      margin: margin ?? VigorSpacing.paddingXs,
       color: glassColor,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: VigorRadius.card,
         child: Padding(
-          padding: padding ?? const EdgeInsets.all(16),
+          padding: padding ?? VigorSpacing.paddingMd,
           child: child,
         ),
       ),

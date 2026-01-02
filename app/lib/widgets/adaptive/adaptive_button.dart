@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../design/tokens.dart';
 import '../../utils/platform_helper.dart';
 import '../../theme/liquid_glass_theme.dart';
 
@@ -10,6 +11,7 @@ class AdaptiveButton extends StatelessWidget {
   final Widget child;
   final bool isDestructive;
   final bool useGradient;
+  final bool isSecondary;
 
   const AdaptiveButton({
     super.key,
@@ -17,6 +19,7 @@ class AdaptiveButton extends StatelessWidget {
     required this.child,
     this.isDestructive = false,
     this.useGradient = false,
+    this.isSecondary = false,
   });
 
   @override
@@ -29,42 +32,42 @@ class AdaptiveButton extends StatelessWidget {
 
   Widget _buildLiquidGlassButton(BuildContext context) {
     final color = isDestructive
-        ? LiquidGlassTheme.errorColor
-        : LiquidGlassTheme.primaryColor;
+        ? VigorColors.error
+        : isSecondary
+            ? VigorColors.electricBlue
+            : VigorColors.orange;
 
     return GestureDetector(
       onTap: onPressed,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: VigorRadius.button,
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          child: AnimatedContainer(
+            duration: VigorAnimation.fast,
+            padding: VigorSpacing.buttonPadding,
             decoration: useGradient
                 ? LiquidGlassTheme.vibrantGradient(
-                    colors: [
-                      color,
-                      color.withOpacity(0.8),
-                    ],
-                    borderRadius: 14,
+                    colors: [color, color.withValues(alpha: 0.8)],
+                    borderRadius: VigorRadius.sm,
                   )
                 : BoxDecoration(
-                    color: color.withOpacity(onPressed == null ? 0.5 : 0.9),
-                    borderRadius: BorderRadius.circular(14),
+                    color: color.withValues(alpha: onPressed == null ? 0.5 : 0.9),
+                    borderRadius: VigorRadius.button,
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       width: 1,
                     ),
                     boxShadow: onPressed != null
-                        ? LiquidGlassTheme.glowShadow
+                        ? (isSecondary
+                            ? VigorShadows.blueGlow
+                            : VigorShadows.orangeGlow)
                         : null,
                   ),
             child: DefaultTextStyle(
-              style: const TextStyle(
+              style: VigorTypography.label.copyWith(
                 color: Colors.white,
-                fontSize: 17,
                 fontWeight: FontWeight.w600,
-                letterSpacing: -0.4,
               ),
               child: child,
             ),
@@ -75,12 +78,22 @@ class AdaptiveButton extends StatelessWidget {
   }
 
   Widget _buildMaterialButton(BuildContext context) {
+    if (isSecondary) {
+      return FilledButton(
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          backgroundColor: VigorColors.electricBlue,
+          foregroundColor: Colors.white,
+        ),
+        child: child,
+      );
+    }
     return FilledButton(
       onPressed: onPressed,
       style: isDestructive
           ? FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
+              backgroundColor: VigorColors.error,
+              foregroundColor: Colors.white,
             )
           : null,
       child: child,
@@ -93,43 +106,49 @@ class AdaptiveTextButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final Widget child;
   final bool isDestructive;
+  final bool isSecondary;
 
   const AdaptiveTextButton({
     super.key,
     required this.onPressed,
     required this.child,
     this.isDestructive = false,
+    this.isSecondary = false,
   });
 
   @override
   Widget build(BuildContext context) {
     if (PlatformHelper.useLiquidGlass) {
+      final color = isDestructive
+          ? VigorColors.error
+          : isSecondary
+              ? VigorColors.electricBlue
+              : VigorColors.orange;
+
       return GestureDetector(
         onTap: onPressed,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: EdgeInsets.symmetric(
+            horizontal: VigorSpacing.sm,
+            vertical: VigorSpacing.sm,
+          ),
           child: DefaultTextStyle(
-            style: TextStyle(
-              color: isDestructive
-                  ? LiquidGlassTheme.errorColor
-                  : LiquidGlassTheme.primaryColor,
-              fontSize: 17,
-              fontWeight: FontWeight.w400,
-              letterSpacing: -0.4,
-            ),
+            style: VigorTypography.label.copyWith(color: color),
             child: child,
           ),
         ),
       );
     }
 
+    final color = isDestructive
+        ? VigorColors.error
+        : isSecondary
+            ? VigorColors.electricBlue
+            : null;
+
     return TextButton(
       onPressed: onPressed,
-      style: isDestructive
-          ? TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            )
-          : null,
+      style: color != null ? TextButton.styleFrom(foregroundColor: color) : null,
       child: child,
     );
   }
@@ -156,10 +175,10 @@ class AdaptiveIconButton extends StatelessWidget {
       return GestureDetector(
         onTap: onPressed,
         child: Padding(
-          padding: const EdgeInsets.all(8),
+          padding: VigorSpacing.paddingSm,
           child: IconTheme(
             data: IconThemeData(
-              color: color ?? LiquidGlassTheme.primaryColor,
+              color: color ?? VigorColors.orange,
               size: 24,
             ),
             child: icon,
@@ -172,7 +191,7 @@ class AdaptiveIconButton extends StatelessWidget {
       onPressed: onPressed,
       icon: icon,
       tooltip: tooltip,
-      color: color,
+      color: color ?? VigorColors.orange,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../design/tokens.dart';
 import '../../utils/platform_helper.dart';
 
 /// Platform-adaptive switch
@@ -20,6 +21,7 @@ class AdaptiveSwitch extends StatelessWidget {
       return CupertinoSwitch(
         value: value,
         onChanged: onChanged,
+        activeTrackColor: VigorColors.orange,
       );
     }
     return Switch(

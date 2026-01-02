@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../design/tokens.dart';
 import '../../utils/platform_helper.dart';
-import '../../theme/liquid_glass_theme.dart';
 
 /// Platform-adaptive list tile
 /// Uses Liquid Glass effect on iOS and Material ListTile on other platforms
@@ -32,16 +32,18 @@ class AdaptiveListTile extends StatelessWidget {
   }
 
   Widget _buildLiquidGlassTile(BuildContext context) {
+    final textColor = VigorColors.textPrimary(context);
+    final secondaryColor = VigorColors.textSecondary(context);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: contentPadding ??
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: contentPadding ?? VigorSpacing.listTilePadding,
         child: Row(
           children: [
             if (leading != null) ...[
               leading!,
-              const SizedBox(width: 12),
+              SizedBox(width: VigorSpacing.sm),
             ],
             Expanded(
               child: Column(
@@ -49,13 +51,13 @@ class AdaptiveListTile extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DefaultTextStyle(
-                    style: LiquidGlassTheme.bodyStyle,
+                    style: VigorTypography.body.copyWith(color: textColor),
                     child: title,
                   ),
                   if (subtitle != null) ...[
-                    const SizedBox(height: 4),
+                    SizedBox(height: VigorSpacing.xs),
                     DefaultTextStyle(
-                      style: LiquidGlassTheme.captionStyle,
+                      style: VigorTypography.caption.copyWith(color: secondaryColor),
                       child: subtitle!,
                     ),
                   ],
@@ -63,14 +65,14 @@ class AdaptiveListTile extends StatelessWidget {
               ),
             ),
             if (trailing != null) ...[
-              const SizedBox(width: 12),
+              SizedBox(width: VigorSpacing.sm),
               trailing!,
             ] else if (onTap != null) ...[
-              const SizedBox(width: 12),
+              SizedBox(width: VigorSpacing.sm),
               Icon(
                 Icons.chevron_right,
                 size: 20,
-                color: LiquidGlassTheme.captionStyle.color,
+                color: secondaryColor,
               ),
             ],
           ],

@@ -57,7 +57,7 @@ class _CalibrationWidgetState extends State<CalibrationWidget> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                   ),
                 ],
@@ -112,7 +112,7 @@ class _CalibrationWidgetState extends State<CalibrationWidget> {
               l10n.calibrationDescription,
               style: PlatformHelper.useLiquidGlass
                   ? LiquidGlassTheme.captionStyle.copyWith(
-                      color: LiquidGlassTheme.captionStyle.color?.withOpacity(0.7),
+                      color: LiquidGlassTheme.captionStyle.color?.withValues(alpha: 0.7),
                     )
                   : Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.grey.shade600,
@@ -138,7 +138,7 @@ class _CalibrationWidgetState extends State<CalibrationWidget> {
 
   Widget _buildProgressBar(double value) {
     final trackColor = PlatformHelper.useLiquidGlass
-        ? Colors.black.withOpacity(0.5)
+        ? Colors.black.withValues(alpha: 0.5)
         : Theme.of(context).colorScheme.surfaceContainerHighest;
     final fillColor = _calibrationColor(value);
 

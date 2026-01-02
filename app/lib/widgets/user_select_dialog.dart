@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../services/user_service.dart';
 import '../services/secure_storage_service.dart';
@@ -86,6 +87,7 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Dialog(
       backgroundColor: PlatformHelper.useLiquidGlass ? Colors.transparent : null,
       child: Container(
@@ -93,29 +95,34 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
         decoration: PlatformHelper.useLiquidGlass
             ? LiquidGlassTheme.glassDecoration(
                 borderRadius: 16,
-                border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+                isDark: isDark,
+                border: Border.all(
+                  color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.1),
+                  width: 1.5,
+                ),
               )
             : BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(16),
+                color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+                borderRadius: VigorRadius.radiusLg,
               ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: VigorRadius.radiusLg,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: VigorSpacing.paddingMd,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       widget.title,
-                      style: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
-                          : Theme.of(context).textTheme.titleLarge,
+                      style: VigorTypography.headline.copyWith(
+                        fontSize: 20,
+                        color: VigorColors.textPrimary(context),
+                      ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: VigorSpacing.sm),
                     AdaptiveTextField(
                       controller: _searchController,
                       placeholder: l10n.searchByName,
@@ -129,7 +136,7 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
               Flexible(child: _buildContent(l10n)),
               const Divider(height: 1),
               Padding(
-                padding: const EdgeInsets.all(12),
+                padding: VigorSpacing.paddingMd,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -149,30 +156,30 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
 
   Widget _buildContent(AppLocalizations l10n) {
     if (_isLoading) {
-      return const Padding(
-        padding: EdgeInsets.all(32),
-        child: AdaptiveLoadingIndicator(),
+      return Padding(
+        padding: VigorSpacing.paddingXl,
+        child: const AdaptiveLoadingIndicator(),
       );
     }
 
     if (_error != null) {
       return Padding(
-        padding: const EdgeInsets.all(32),
+        padding: VigorSpacing.paddingXl,
         child: Text(
           _error!,
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
+          style: TextStyle(color: VigorColors.error),
         ),
       );
     }
 
     if (_filteredUsers.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.all(32),
+        padding: VigorSpacing.paddingXl,
         child: Text(
           _users.isEmpty ? l10n.noUsersAvailable : l10n.noMatchingUsers,
-          style: PlatformHelper.useLiquidGlass
-              ? LiquidGlassTheme.captionStyle
-              : Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+          style: VigorTypography.body.copyWith(
+            color: VigorColors.textMuted(context),
+          ),
         ),
       );
     }
@@ -184,21 +191,17 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
         final user = _filteredUsers[index];
         return ListTile(
           leading: CircleAvatar(
-            backgroundColor: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.primaryColor.withOpacity(0.2)
-                : Theme.of(context).colorScheme.primaryContainer,
+            backgroundColor: VigorColors.orange.withValues(alpha: 0.2),
             child: Text(
               user.firstName.isNotEmpty ? user.firstName[0].toUpperCase() : '?',
-              style: TextStyle(
-                color: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.primaryColor
-                    : Theme.of(context).colorScheme.onPrimaryContainer,
-              ),
+              style: TextStyle(color: VigorColors.orange),
             ),
           ),
           title: Text(
             user.displayName,
-            style: PlatformHelper.useLiquidGlass ? LiquidGlassTheme.bodyStyle : null,
+            style: VigorTypography.body.copyWith(
+              color: VigorColors.textPrimary(context),
+            ),
           ),
           onTap: () => Navigator.of(context).pop(user),
         );

@@ -2,20 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../config/api_config.dart';
+import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/training.dart';
 import '../models/routine.dart';
 import '../models/block.dart';
 import '../models/activity.dart';
-import '../models/activity_ext.dart';
 import '../models/exercise.dart';
 import '../providers/auth_provider.dart';
 import '../services/training_service.dart';
 import '../services/secure_storage_service.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/user_select_dialog.dart';
-import '../theme/liquid_glass_theme.dart';
-import '../utils/platform_helper.dart';
 import '../utils/exercise_modal.dart';
 import '../utils/feedback_modal.dart';
 import 'main_navigation.dart';
@@ -24,10 +22,7 @@ import 'tabata_timer_screen.dart';
 class TrainingDetailsScreen extends StatefulWidget {
   final Training training;
 
-  const TrainingDetailsScreen({
-    super.key,
-    required this.training,
-  });
+  const TrainingDetailsScreen({super.key, required this.training});
 
   @override
   State<TrainingDetailsScreen> createState() => _TrainingDetailsScreenState();
@@ -51,46 +46,32 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     final trainingService = TrainingService(storageService: storage);
     final response = await trainingService.getPartners(training.id);
     if (response.isSuccess && mounted) {
-      setState(() {
-        _partnerCount = response.data?.length ?? 0;
-      });
+      setState(() => _partnerCount = response.data?.length ?? 0);
     }
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-  }
+  String _formatDate(DateTime date) => '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
 
   String _formatDuration(int seconds) {
     final minutes = seconds ~/ 60;
-    if (minutes < 60) {
-      return '$minutes min';
-    }
+    if (minutes < 60) return '$minutes min';
     final hours = minutes ~/ 60;
     final remainingMinutes = minutes % 60;
-    if (remainingMinutes == 0) {
-      return '$hours hr';
-    }
-    return '$hours hr $remainingMinutes min';
+    return remainingMinutes == 0 ? '$hours hr' : '$hours hr $remainingMinutes min';
   }
 
   String _formatTime(int seconds) {
-    if (seconds < 60) {
-      return '${seconds}s';
-    }
+    if (seconds < 60) return '${seconds}s';
     final minutes = seconds ~/ 60;
     final remainingSeconds = seconds % 60;
-    if (remainingSeconds == 0) {
-      return '${minutes}m';
-    }
-    return '${minutes}m ${remainingSeconds}s';
+    return remainingSeconds == 0 ? '${minutes}m' : '${minutes}m ${remainingSeconds}s';
   }
 
   Exercise? _parseExercise(Map<String, dynamic> detail) {
     try {
       if (detail.isEmpty) return null;
       return Exercise.fromJson(detail);
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }
@@ -98,23 +79,17 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   bool _isValidImageUrl(String? url) {
     if (url == null || url.isEmpty) return false;
     final uri = Uri.tryParse(url);
-    if (uri == null) return false;
-    return uri.hasScheme && (uri.scheme == 'http' || uri.scheme == 'https');
+    return uri != null && uri.hasScheme && (uri.scheme == 'http' || uri.scheme == 'https');
   }
 
-  // proxy external image URLs through backend to avoid CORS issues on web
-  String _proxyImageUrl(String url) {
-    return '${ApiConfig.baseUrl}/proxy/image?url=${Uri.encodeComponent(url)}';
-  }
+  String _proxyImageUrl(String url) => '${ApiConfig.baseUrl}/proxy/image?url=${Uri.encodeComponent(url)}';
 
   Future<void> _deleteTraining(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
     final currentUserId = context.read<AuthProvider>().currentUser?.id ?? '';
     final isOwner = training.userId == currentUserId;
     final title = isOwner ? l10n.deleteTraining : l10n.leaveTraining;
-    final content = isOwner
-        ? l10n.deleteTrainingConfirmation(training.name)
-        : l10n.leaveTrainingConfirmation(training.name);
+    final content = isOwner ? l10n.deleteTrainingConfirmation(training.name) : l10n.leaveTrainingConfirmation(training.name);
     final actionLabel = isOwner ? l10n.delete : l10n.leave;
     final successMessage = isOwner ? l10n.trainingDeletedSuccessfully : l10n.leftTrainingSuccessfully;
 
@@ -123,37 +98,22 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       title: title,
       content: content,
       actions: [
-        AdaptiveDialogAction(
-          label: l10n.cancel,
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        AdaptiveDialogAction(
-          label: actionLabel,
-          isDestructive: true,
-          onPressed: () => Navigator.of(context).pop(true),
-        ),
+        AdaptiveDialogAction(label: l10n.cancel, onPressed: () => Navigator.of(context).pop(false)),
+        AdaptiveDialogAction(label: actionLabel, isDestructive: true, onPressed: () => Navigator.of(context).pop(true)),
       ],
     );
 
     if (shouldDelete == true && context.mounted) {
       final storage = context.read<SecureStorageService>();
       final trainingService = TrainingService(storageService: storage);
-
       final response = await trainingService.deleteTraining(training.id);
 
       if (context.mounted) {
         if (response.isSuccess) {
-          Navigator.of(context).pop(true); // Return true to indicate deletion
-          AdaptiveNotification.show(
-            context: context,
-            message: successMessage,
-          );
+          Navigator.of(context).pop(true);
+          AdaptiveNotification.show(context: context, message: successMessage);
         } else {
-          AdaptiveNotification.showError(
-            context: context,
-            message: l10n.failedToDeleteTraining,
-            rawError: response.error,
-          );
+          AdaptiveNotification.showError(context: context, message: l10n.failedToDeleteTraining, rawError: response.error);
         }
       }
     }
@@ -162,11 +122,10 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   Future<void> _completeTraining(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
     final result = await FeedbackModal.show(context, training);
-    if (result == null) return; // user cancelled
+    if (result == null) return;
 
     final storage = context.read<SecureStorageService>();
     final trainingService = TrainingService(storageService: storage);
-
     final response = await trainingService.completeTraining(
       training.id,
       feedback: result.feedback,
@@ -176,33 +135,22 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
     if (context.mounted) {
       if (response.isSuccess) {
-        Navigator.of(context).pop(true); // Return true to refresh the list
-        AdaptiveNotification.show(
-          context: context,
-          message: l10n.trainingMarkedAsComplete,
-        );
+        Navigator.of(context).pop(true);
+        AdaptiveNotification.show(context: context, message: l10n.trainingMarkedAsComplete);
       } else {
-        AdaptiveNotification.showError(
-          context: context,
-          message: l10n.failedToCompleteTraining,
-          rawError: response.error,
-        );
+        AdaptiveNotification.showError(context: context, message: l10n.failedToCompleteTraining, rawError: response.error);
       }
     }
   }
 
   void _navigateToActivityScreen(BuildContext context) {
     Navigator.of(context).popUntil((route) => route.isFirst);
-    MainNavigation.navigateToTab(1); // Activity tab
+    MainNavigation.navigateToTab(1);
   }
 
   Future<void> _showAddPartnerDialog(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
-    final user = await showUserSelectDialog(
-      context: context,
-      title: l10n.addPartner,
-    );
-
+    final user = await showUserSelectDialog(context: context, title: l10n.addPartner);
     if (user == null || !context.mounted) return;
 
     final shouldAdd = await AdaptiveAlertDialog.show<bool>(
@@ -210,14 +158,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       title: l10n.addPartner,
       content: l10n.addPartnerConfirmation(user.displayName, training.name),
       actions: [
-        AdaptiveDialogAction(
-          label: l10n.cancel,
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        AdaptiveDialogAction(
-          label: l10n.add,
-          onPressed: () => Navigator.of(context).pop(true),
-        ),
+        AdaptiveDialogAction(label: l10n.cancel, onPressed: () => Navigator.of(context).pop(false)),
+        AdaptiveDialogAction(label: l10n.add, onPressed: () => Navigator.of(context).pop(true)),
       ],
     );
 
@@ -230,16 +172,9 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     if (context.mounted) {
       if (response.isSuccess) {
         _loadPartners();
-        AdaptiveNotification.show(
-          context: context,
-          message: l10n.partnerAddedSuccessfully,
-        );
+        AdaptiveNotification.show(context: context, message: l10n.partnerAddedSuccessfully);
       } else {
-        AdaptiveNotification.showError(
-          context: context,
-          message: l10n.failedToAddPartner,
-          rawError: response.error,
-        );
+        AdaptiveNotification.showError(context: context, message: l10n.failedToAddPartner, rawError: response.error);
       }
     }
   }
@@ -254,14 +189,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       title: l10n.cloneTraining,
       content: l10n.cloneTrainingConfirmation(training.name),
       actions: [
-        AdaptiveDialogAction(
-          label: l10n.cancel,
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        AdaptiveDialogAction(
-          label: l10n.clone,
-          onPressed: () => Navigator.of(context).pop(true),
-        ),
+        AdaptiveDialogAction(label: l10n.cancel, onPressed: () => Navigator.of(context).pop(false)),
+        AdaptiveDialogAction(label: l10n.clone, onPressed: () => Navigator.of(context).pop(true)),
       ],
     );
 
@@ -273,28 +202,17 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
     if (context.mounted) {
       if (response.isSuccess) {
-        AdaptiveNotification.show(
-          context: context,
-          message: l10n.trainingCloned,
-        );
+        AdaptiveNotification.show(context: context, message: l10n.trainingCloned);
         Navigator.of(context).pop(true);
       } else {
-        AdaptiveNotification.showError(
-          context: context,
-          message: l10n.failedToCloneTraining,
-          rawError: response.error,
-        );
+        AdaptiveNotification.showError(context: context, message: l10n.failedToCloneTraining, rawError: response.error);
       }
     }
   }
 
   Future<void> _showCopyTrainingDialog(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
-    final user = await showUserSelectDialog(
-      context: context,
-      title: l10n.shareWithUser,
-    );
-
+    final user = await showUserSelectDialog(context: context, title: l10n.shareWithUser);
     if (user == null || !context.mounted) return;
 
     final shouldShare = await AdaptiveAlertDialog.show<bool>(
@@ -302,14 +220,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       title: l10n.shareWithUser,
       content: l10n.shareTrainingConfirmation(training.name, user.displayName),
       actions: [
-        AdaptiveDialogAction(
-          label: l10n.cancel,
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        AdaptiveDialogAction(
-          label: l10n.share,
-          onPressed: () => Navigator.of(context).pop(true),
-        ),
+        AdaptiveDialogAction(label: l10n.cancel, onPressed: () => Navigator.of(context).pop(false)),
+        AdaptiveDialogAction(label: l10n.share, onPressed: () => Navigator.of(context).pop(true)),
       ],
     );
 
@@ -321,16 +233,9 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
     if (context.mounted) {
       if (response.isSuccess) {
-        AdaptiveNotification.show(
-          context: context,
-          message: l10n.trainingSharedSuccessfully,
-        );
+        AdaptiveNotification.show(context: context, message: l10n.trainingSharedSuccessfully);
       } else {
-        AdaptiveNotification.showError(
-          context: context,
-          message: l10n.failedToShareTraining,
-          rawError: response.error,
-        );
+        AdaptiveNotification.showError(context: context, message: l10n.failedToShareTraining, rawError: response.error);
       }
     }
   }
@@ -338,115 +243,36 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   void _showReasoningDialog(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final r = training.reasoning;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.reasoning),
+        backgroundColor: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+        title: Row(
+          children: [
+            ShaderMask(
+              shaderCallback: (bounds) => LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]).createShader(bounds),
+              child: const Icon(Icons.psychology, color: Colors.white),
+            ),
+            SizedBox(width: VigorSpacing.sm),
+            Text(l10n.reasoning, style: VigorTypography.headline.copyWith(color: VigorColors.textPrimary(ctx))),
+          ],
+        ),
         content: SizedBox(
           width: double.maxFinite,
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (r.constraints.isNotEmpty)
-                  _buildReasoningSection(
-                    title: l10n.constraints,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: r.constraints.map((c) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('• '),
-                            Expanded(child: Text(c)),
-                          ],
-                        ),
-                      )).toList(),
-                    ),
-                  ),
-                if (r.typeSelection.isNotEmpty)
-                  _buildReasoningSection(
-                    title: l10n.typeSelection,
-                    child: Text(r.typeSelection),
-                  ),
-                _buildReasoningSection(
-                  title: l10n.strategy,
-                  child: Text(r.strategy),
-                ),
+                if (r.constraints.isNotEmpty) _buildReasoningSection(title: l10n.constraints, items: r.constraints, color: VigorColors.warning),
+                if (r.typeSelection.isNotEmpty) _buildReasoningText(title: l10n.typeSelection, text: r.typeSelection, color: VigorColors.electricBlue),
+                _buildReasoningText(title: l10n.strategy, text: r.strategy, color: VigorColors.success),
                 if (r.progression.summary.isNotEmpty || r.progression.adjustments.isNotEmpty)
-                  _buildReasoningSection(
-                    title: l10n.progression,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (r.progression.summary.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Text(r.progression.summary),
-                          ),
-                        ...r.progression.adjustments.map((a) => Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('• '),
-                              Expanded(
-                                child: Text('${a.exercise}: ${a.adjustment} (${a.reason})'),
-                              ),
-                            ],
-                          ),
-                        )),
-                      ],
-                    ),
-                  ),
-                if (r.factsApplied.isNotEmpty)
-                  _buildReasoningSection(
-                    title: l10n.researchApplied,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: r.factsApplied.map((f) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('• '),
-                            Expanded(child: Text(f)),
-                          ],
-                        ),
-                      )).toList(),
-                    ),
-                  ),
-                if (r.targetMuscles.isNotEmpty)
-                  _buildReasoningSection(
-                    title: l10n.targetMuscles,
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      children: r.targetMuscles.map((m) => Chip(
-                        label: Text(m),
-                        visualDensity: VisualDensity.compact,
-                      )).toList(),
-                    ),
-                  ),
-                if (r.exercises.isNotEmpty)
-                  _buildReasoningSection(
-                    title: l10n.exercises,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: r.exercises.map((e) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('• '),
-                            Expanded(child: Text(e)),
-                          ],
-                        ),
-                      )).toList(),
-                    ),
-                  ),
+                  _buildProgressionSection(l10n, r),
+                if (r.factsApplied.isNotEmpty) _buildReasoningSection(title: l10n.researchApplied, items: r.factsApplied, color: Colors.purple),
+                if (r.targetMuscles.isNotEmpty) _buildMuscleChips(l10n, r.targetMuscles),
+                if (r.exercises.isNotEmpty) _buildReasoningSection(title: l10n.exercises, items: r.exercises, color: VigorColors.orange),
               ],
             ),
           ),
@@ -454,7 +280,128 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(l10n.close),
+            child: Text(l10n.close, style: TextStyle(color: VigorColors.orange)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReasoningSection({required String title, required List<String> items, required Color color}) {
+    return Container(
+      margin: EdgeInsets.only(bottom: VigorSpacing.md),
+      padding: VigorSpacing.paddingMd,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: VigorRadius.radiusMd,
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: VigorTypography.label.copyWith(color: color, fontWeight: FontWeight.w600)),
+          SizedBox(height: VigorSpacing.sm),
+          ...items.map((item) => Padding(
+            padding: EdgeInsets.only(bottom: VigorSpacing.xs),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(top: 6, right: VigorSpacing.sm),
+                  width: 5,
+                  height: 5,
+                  decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                ),
+                Expanded(child: Text(item, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)))),
+              ],
+            ),
+          )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReasoningText({required String title, required String text, required Color color}) {
+    return Container(
+      margin: EdgeInsets.only(bottom: VigorSpacing.md),
+      padding: VigorSpacing.paddingMd,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: VigorRadius.radiusMd,
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: VigorTypography.label.copyWith(color: color, fontWeight: FontWeight.w600)),
+          SizedBox(height: VigorSpacing.sm),
+          Text(text, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressionSection(AppLocalizations l10n, reasoning) {
+    return Container(
+      margin: EdgeInsets.only(bottom: VigorSpacing.md),
+      padding: VigorSpacing.paddingMd,
+      decoration: BoxDecoration(
+        color: VigorColors.electricBlue.withValues(alpha: 0.1),
+        borderRadius: VigorRadius.radiusMd,
+        border: Border.all(color: VigorColors.electricBlue.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.progression, style: VigorTypography.label.copyWith(color: VigorColors.electricBlue, fontWeight: FontWeight.w600)),
+          SizedBox(height: VigorSpacing.sm),
+          if (reasoning.progression.summary.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.only(bottom: VigorSpacing.sm),
+              child: Text(reasoning.progression.summary, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+            ),
+          ...reasoning.progression.adjustments.map((a) => Padding(
+            padding: EdgeInsets.only(bottom: VigorSpacing.xs),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(top: 6, right: VigorSpacing.sm),
+                  width: 5,
+                  height: 5,
+                  decoration: BoxDecoration(color: VigorColors.electricBlue, shape: BoxShape.circle),
+                ),
+                Expanded(child: Text('${a.exercise}: ${a.adjustment} (${a.reason})', style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)))),
+              ],
+            ),
+          )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMuscleChips(AppLocalizations l10n, List<String> muscles) {
+    return Container(
+      margin: EdgeInsets.only(bottom: VigorSpacing.md),
+      padding: VigorSpacing.paddingMd,
+      decoration: BoxDecoration(
+        color: Colors.red.withValues(alpha: 0.1),
+        borderRadius: VigorRadius.radiusMd,
+        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.targetMuscles, style: VigorTypography.label.copyWith(color: Colors.red.shade700, fontWeight: FontWeight.w600)),
+          SizedBox(height: VigorSpacing.sm),
+          Wrap(
+            spacing: VigorSpacing.xs,
+            runSpacing: VigorSpacing.xs,
+            children: muscles.map((m) => Container(
+              padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+              decoration: BoxDecoration(color: Colors.red.shade700, borderRadius: VigorRadius.radiusFull),
+              child: Text(m, style: VigorTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w500)),
+            )).toList(),
           ),
         ],
       ),
@@ -473,19 +420,13 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           maxLines: 4,
           decoration: InputDecoration(
             hintText: l10n.describeIssue,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            border: OutlineInputBorder(borderRadius: VigorRadius.radiusMd),
           ),
           autofocus: true,
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-            child: Text(l10n.submit),
-          ),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(l10n.cancel)),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(controller.text.trim()), child: Text(l10n.submit)),
         ],
       ),
     );
@@ -500,11 +441,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       if (response.isSuccess) {
         AdaptiveNotification.show(context: context, message: l10n.reportSubmitted);
       } else {
-        AdaptiveNotification.showError(
-          context: context,
-          message: l10n.failedToSubmitReport,
-          rawError: response.error,
-        );
+        AdaptiveNotification.showError(context: context, message: l10n.failedToSubmitReport, rawError: response.error);
       }
     }
   }
@@ -513,13 +450,11 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     final l10n = AppLocalizations.of(context);
     final storage = context.read<SecureStorageService>();
     final trainingService = TrainingService(storageService: storage);
-
     final response = await trainingService.shuffleActivity(activity.id);
 
     if (!mounted) return;
 
     if (response.isSuccess && response.data != null) {
-      // update the activity in place
       final newActivity = response.data!;
       for (final routine in _training.routines) {
         for (final block in routine.blocks) {
@@ -533,79 +468,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         }
       }
     } else {
-      AdaptiveNotification.showError(
-        context: context,
-        message: l10n.failedToShuffleExercise,
-        rawError: response.error,
-      );
+      AdaptiveNotification.showError(context: context, message: l10n.failedToShuffleExercise, rawError: response.error);
     }
-  }
-
-  Widget _buildReasoningSection({required String title, required Widget child}) {
-    return Theme(
-      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-        initiallyExpanded: false,
-        tilePadding: EdgeInsets.zero,
-        childrenPadding: const EdgeInsets.only(bottom: 8),
-        children: [child],
-      ),
-    );
-  }
-
-  Widget _buildReferencesSection(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Theme(
-      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        leading: Icon(
-          Icons.science,
-          size: 18,
-          color: PlatformHelper.useLiquidGlass
-              ? LiquidGlassTheme.captionStyle.color
-              : Colors.grey.shade600,
-        ),
-        title: Text(
-          l10n.references,
-          style: PlatformHelper.useLiquidGlass
-              ? LiquidGlassTheme.captionStyle
-              : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade600,
-                  ),
-        ),
-        initiallyExpanded: false,
-        tilePadding: EdgeInsets.zero,
-        childrenPadding: const EdgeInsets.only(bottom: 8),
-        children: training.references.map((url) => InkWell(
-          onTap: () => _launchUrl(url),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.link,
-                  size: 14,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    url,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      decoration: TextDecoration.underline,
-                      fontSize: 13,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        )).toList(),
-      ),
-    );
   }
 
   Future<void> _launchUrl(String url) async {
@@ -620,728 +484,505 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     final l10n = AppLocalizations.of(context);
     final currentUserId = context.read<AuthProvider>().currentUser?.id ?? '';
     final isOwner = training.userId == currentUserId;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) {
-          _navigateToActivityScreen(context);
-        }
+        if (!didPop) _navigateToActivityScreen(context);
       },
       child: AdaptiveScaffold(
         appBar: AdaptiveAppBar(
           title: Text(training.name),
           automaticallyImplyLeading: false,
           leading: IconButton(
-            icon: Icon(
-              PlatformHelper.useLiquidGlass ? Icons.arrow_back_ios : Icons.arrow_back,
-              color: PlatformHelper.useLiquidGlass ? LiquidGlassTheme.primaryColor : null,
-            ),
+            icon: Icon(Icons.arrow_back_ios, color: VigorColors.orange),
             onPressed: () => _navigateToActivityScreen(context),
           ),
         ),
-        body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        body: ListView(
+          padding: VigorSpacing.paddingLg,
           children: [
-            // Training header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Text(
-                training.description,
-                style: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.bodyStyle
-                    : Theme.of(context).textTheme.bodyLarge,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Wrap(
-                spacing: 16,
-                runSpacing: 8,
-                children: [
-                  if (_partnerCount > 0)
-                    _buildInfoLabel(
-                      context,
-                      icon: Icons.people,
-                      text: '${1 + _partnerCount}',
-                    ),
-                  if (training.gym != null)
-                    _buildInfoLabel(
-                      context,
-                      icon: Icons.location_on,
-                      text: training.gym!.name,
-                    ),
-                  _buildInfoLabel(
-                    context,
-                    icon: Icons.tune,
-                    text: training.type,
-                  ),
-                  _buildInfoLabel(
-                    context,
-                    icon: Icons.schedule,
-                    text: _formatDuration(training.duration),
-                  ),
-                  _buildInfoLabel(
-                    context,
-                    icon: Icons.calendar_today,
-                    text: _formatDate(training.completedAt ?? training.createdAt),
-                  ),
-                  if (training.parentId != null)
-                    _buildInfoLabel(
-                      context,
-                      icon: Icons.copy,
-                      text: l10n.copied,
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.fitness_center,
-                    size: 18,
-                    color: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.captionStyle.color
-                        : Colors.grey.shade600,
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      training.equipment.isEmpty
-                          ? l10n.noEquipment
-                          : training.equipment.join(' · '),
-                      style: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.captionStyle
-                          : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Colors.grey.shade600,
-                              ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // collapsible references section
-            if (training.references.isNotEmpty)
-              _buildReferencesSection(context),
-            const SizedBox(height: 16),
-
-            // Action buttons grid (2 per row)
-            Row(
-              children: [
-                Expanded(
-                  child: _buildActionButton(
-                    context,
-                    icon: Icons.timer,
-                    label: l10n.startTraining,
-                    onPressed: () async {
-                      final completed = await Navigator.of(context).push<bool>(
-                        MaterialPageRoute(
-                          builder: (context) => TabataTimerScreen(training: training),
-                        ),
-                      );
-                      if (completed == true && context.mounted) {
-                        Navigator.of(context).pop(true);
-                      }
-                    },
-                    isPrimary: true,
-                  ),
-                ),
-                if (training.completedAt == null) ...[
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildActionButton(
-                      context,
-                      icon: Icons.check_circle_outline,
-                      label: l10n.markAsComplete,
-                      onPressed: isOwner ? () => _completeTraining(context) : null,
-                      isPrimary: true,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildActionButton(
-                    context,
-                    icon: Icons.copy,
-                    label: l10n.cloneTraining,
-                    onPressed: () => _cloneTraining(context),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildActionButton(
-                    context,
-                    icon: Icons.share,
-                    label: l10n.shareWithUser,
-                    onPressed: () => _showCopyTrainingDialog(context),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                if (isOwner) ...[
-                  Expanded(
-                    child: _buildActionButton(
-                      context,
-                      icon: Icons.person_add,
-                      label: l10n.addPartner,
-                      onPressed: () => _showAddPartnerDialog(context),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-                Expanded(
-                  child: _buildActionButton(
-                    context,
-                    icon: Icons.help_outline,
-                    label: l10n.showAiReasoning,
-                    onPressed: () => _showReasoningDialog(context),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildActionButton(
-                    context,
-                    icon: Icons.flag_outlined,
-                    label: l10n.reportIssue,
-                    onPressed: () => _showReportDialog(context),
-                    isDestructive: true,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildActionButton(
-                    context,
-                    icon: Icons.delete,
-                    label: isOwner ? l10n.deleteTraining : l10n.leaveTraining,
-                    onPressed: () => _deleteTraining(context),
-                    isDestructive: true,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Routines
-            Text(
-              l10n.trainingRoutines,
-              style: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
-                  : Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 12),
-            ...training.routines.map((routine) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: _buildRoutineCard(context, routine),
-              );
-            }),
+            _buildHeader(l10n, isDark),
+            SizedBox(height: VigorSpacing.lg),
+            _buildMetadataChips(l10n),
+            if (training.references.isNotEmpty) ...[
+              SizedBox(height: VigorSpacing.md),
+              _buildReferencesSection(l10n),
+            ],
+            SizedBox(height: VigorSpacing.lg),
+            _buildPrimaryActions(l10n, isOwner),
+            SizedBox(height: VigorSpacing.sm),
+            _buildSecondaryActions(l10n, isOwner),
+            SizedBox(height: VigorSpacing.sm),
+            _buildDangerActions(l10n, isOwner),
+            SizedBox(height: VigorSpacing.xl),
+            _buildRoutinesHeader(l10n),
+            SizedBox(height: VigorSpacing.md),
+            ...training.routines.map((routine) => Padding(
+              padding: EdgeInsets.only(bottom: VigorSpacing.md),
+              child: _buildRoutineCard(routine, isDark),
+            )),
+            SizedBox(height: VigorSpacing.xxl),
           ],
         ),
       ),
-    ),
     );
   }
 
-  Widget _buildRoutineCard(BuildContext context, Routine routine) {
-    return AdaptiveCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    routine.type.toUpperCase(),
-                    style: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 18)
-                        : Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                  ),
+  Widget _buildHeader(AppLocalizations l10n, bool isDark) {
+    return Container(
+      padding: VigorSpacing.paddingLg,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [VigorColors.orange.withValues(alpha: 0.15), VigorColors.electricBlue.withValues(alpha: 0.15)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: VigorRadius.radiusLg,
+        border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(training.description, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context), height: 1.5)),
+          if (training.equipment.isNotEmpty) ...[
+            SizedBox(height: VigorSpacing.md),
+            Wrap(
+              spacing: VigorSpacing.xs,
+              runSpacing: VigorSpacing.xs,
+              children: training.equipment.map((eq) => Container(
+                padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+                decoration: BoxDecoration(
+                  color: VigorColors.electricBlue.withValues(alpha: 0.15),
+                  borderRadius: VigorRadius.radiusFull,
+                  border: Border.all(color: VigorColors.electricBlue.withValues(alpha: 0.3)),
                 ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.fitness_center, size: 12, color: VigorColors.electricBlue),
+                    SizedBox(width: VigorSpacing.xs),
+                    Text(eq, style: VigorTypography.caption.copyWith(color: VigorColors.electricBlue)),
+                  ],
+                ),
+              )).toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetadataChips(AppLocalizations l10n) {
+    return Wrap(
+      spacing: VigorSpacing.sm,
+      runSpacing: VigorSpacing.sm,
+      children: [
+        if (_partnerCount > 0) _buildMetaChip(Icons.people, '${1 + _partnerCount}', VigorColors.electricBlue),
+        if (training.gym != null) _buildMetaChip(Icons.location_on, training.gym!.name, VigorColors.success),
+        _buildMetaChip(Icons.tune, training.type, VigorColors.orange),
+        _buildMetaChip(Icons.schedule, _formatDuration(training.duration), VigorColors.warning),
+        _buildMetaChip(Icons.calendar_today, _formatDate(training.completedAt ?? training.createdAt), VigorColors.textSecondary(context)),
+        if (training.parentId != null) _buildMetaChip(Icons.copy, l10n.copied, Colors.purple),
+      ],
+    );
+  }
+
+  Widget _buildMetaChip(IconData icon, String text, Color color) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: VigorRadius.radiusFull,
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          SizedBox(width: VigorSpacing.xs),
+          Text(text, style: VigorTypography.caption.copyWith(color: color, fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReferencesSection(AppLocalizations l10n) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+        borderRadius: VigorRadius.radiusMd,
+        border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05)),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          leading: Icon(Icons.science, size: 20, color: VigorColors.electricBlue),
+          title: Text(l10n.references, style: VigorTypography.label.copyWith(color: VigorColors.textSecondary(context))),
+          childrenPadding: EdgeInsets.only(left: VigorSpacing.md, right: VigorSpacing.md, bottom: VigorSpacing.md),
+          children: training.references.map((url) => GestureDetector(
+            onTap: () => _launchUrl(url),
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: VigorSpacing.xs),
+              child: Row(
+                children: [
+                  Icon(Icons.link, size: 14, color: VigorColors.electricBlue),
+                  SizedBox(width: VigorSpacing.sm),
+                  Expanded(
+                    child: Text(url, style: VigorTypography.caption.copyWith(color: VigorColors.electricBlue, decoration: TextDecoration.underline), overflow: TextOverflow.ellipsis),
+                  ),
+                ],
+              ),
+            ),
+          )).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrimaryActions(AppLocalizations l10n, bool isOwner) {
+    return Row(
+      children: [
+        Expanded(child: _buildGradientButton(Icons.timer, l10n.startTraining, () async {
+          final completed = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (context) => TabataTimerScreen(training: training)));
+          if (completed == true && context.mounted) Navigator.of(context).pop(true);
+        })),
+        if (training.completedAt == null) ...[
+          SizedBox(width: VigorSpacing.sm),
+          Expanded(child: _buildGradientButton(Icons.check_circle_outline, l10n.markAsComplete, isOwner ? () => _completeTraining(context) : null)),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildGradientButton(IconData icon, String label, VoidCallback? onPressed) {
+    final isDisabled = onPressed == null;
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: VigorSpacing.md),
+        decoration: BoxDecoration(
+          gradient: isDisabled ? null : LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]),
+          color: isDisabled ? VigorColors.textMuted(context).withValues(alpha: 0.3) : null,
+          borderRadius: VigorRadius.radiusMd,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18, color: isDisabled ? VigorColors.textMuted(context) : Colors.white),
+            SizedBox(width: VigorSpacing.sm),
+            Flexible(child: Text(label, style: VigorTypography.label.copyWith(color: isDisabled ? VigorColors.textMuted(context) : Colors.white), overflow: TextOverflow.ellipsis)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSecondaryActions(AppLocalizations l10n, bool isOwner) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: _buildOutlineButton(Icons.copy, l10n.cloneTraining, VigorColors.orange, () => _cloneTraining(context))),
+            SizedBox(width: VigorSpacing.sm),
+            Expanded(child: _buildOutlineButton(Icons.share, l10n.shareWithUser, VigorColors.electricBlue, () => _showCopyTrainingDialog(context))),
+          ],
+        ),
+        SizedBox(height: VigorSpacing.sm),
+        Row(
+          children: [
+            if (isOwner) ...[
+              Expanded(child: _buildOutlineButton(Icons.person_add, l10n.addPartner, VigorColors.success, () => _showAddPartnerDialog(context))),
+              SizedBox(width: VigorSpacing.sm),
+            ],
+            Expanded(child: _buildOutlineButton(Icons.psychology, l10n.showAiReasoning, Colors.purple, () => _showReasoningDialog(context))),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDangerActions(AppLocalizations l10n, bool isOwner) {
+    return Row(
+      children: [
+        Expanded(child: _buildOutlineButton(Icons.flag_outlined, l10n.reportIssue, VigorColors.warning, () => _showReportDialog(context))),
+        SizedBox(width: VigorSpacing.sm),
+        Expanded(child: _buildOutlineButton(Icons.delete, isOwner ? l10n.deleteTraining : l10n.leaveTraining, VigorColors.error, () => _deleteTraining(context))),
+      ],
+    );
+  }
+
+  Widget _buildOutlineButton(IconData icon, String label, Color color, VoidCallback onPressed) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: VigorSpacing.sm + 2),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: VigorRadius.radiusMd,
+          border: Border.all(color: color.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: color),
+            SizedBox(width: VigorSpacing.xs),
+            Flexible(child: Text(label, style: VigorTypography.caption.copyWith(color: color, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoutinesHeader(AppLocalizations l10n) {
+    return Row(
+      children: [
+        ShaderMask(
+          shaderCallback: (bounds) => LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]).createShader(bounds),
+          child: const Icon(Icons.list_alt, color: Colors.white, size: 24),
+        ),
+        SizedBox(width: VigorSpacing.sm),
+        Text(l10n.trainingRoutines, style: VigorTypography.headline.copyWith(fontSize: 20, color: VigorColors.textPrimary(context))),
+      ],
+    );
+  }
+
+  Widget _buildRoutineCard(Routine routine, bool isDark) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+        borderRadius: VigorRadius.radiusLg,
+        border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // routine header
+          Container(
+            padding: VigorSpacing.paddingMd,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [VigorColors.orange.withValues(alpha: 0.1), Colors.transparent],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(VigorRadius.lg), topRight: Radius.circular(VigorRadius.lg)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.xs),
+                  decoration: BoxDecoration(gradient: LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]), borderRadius: VigorRadius.radiusFull),
+                  child: Text(routine.type.toUpperCase(), style: VigorTypography.label.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+                const Spacer(),
                 if (routine.rest > 0)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: Colors.orange.withOpacity(0.3),
-                      ),
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+                    decoration: BoxDecoration(color: VigorColors.warning.withValues(alpha: 0.15), borderRadius: VigorRadius.radiusFull, border: Border.all(color: VigorColors.warning.withValues(alpha: 0.3))),
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.timer,
-                          size: 14,
-                          color: Colors.orange.shade700,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${routine.rest}s rest',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.orange.shade700,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        Icon(Icons.timer, size: 12, color: VigorColors.warning),
+                        SizedBox(width: VigorSpacing.xs),
+                        Text('${routine.rest}s', style: VigorTypography.caption.copyWith(color: VigorColors.warning, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 16),
-            ...routine.blocks.asMap().entries.map((entry) {
-              final blockIndex = entry.key;
-              final block = entry.value;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12.0),
-                child: _buildBlockCard(context, block, blockIndex + 1, routine.blocks.length),
-              );
-            }),
-          ],
-        ),
+          ),
+          // blocks
+          Padding(
+            padding: VigorSpacing.paddingMd,
+            child: Column(
+              children: routine.blocks.asMap().entries.map((entry) => Padding(
+                padding: EdgeInsets.only(bottom: entry.key < routine.blocks.length - 1 ? VigorSpacing.md : 0),
+                child: _buildBlockCard(entry.value, entry.key + 1, routine.blocks.length, isDark),
+              )).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildBlockCard(BuildContext context, Block block, int blockNumber, int totalBlocks) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Widget _buildBlockCard(Block block, int blockNumber, int totalBlocks, bool isDark) {
     final showBlockLabel = totalBlocks > 1;
 
     return Container(
+      padding: VigorSpacing.paddingMd,
       decoration: BoxDecoration(
-        color: PlatformHelper.useLiquidGlass
-            ? Colors.white.withOpacity(0.05)
-            : isDark
-                ? Colors.white.withOpacity(0.08)
-                : Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: PlatformHelper.useLiquidGlass
-              ? Colors.white.withOpacity(0.1)
-              : isDark
-                  ? Colors.white.withOpacity(0.15)
-                  : Colors.grey[200]!,
-        ),
+        color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
+        borderRadius: VigorRadius.radiusMd,
+        border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.shade200),
       ),
-      padding: const EdgeInsets.all(12.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (showBlockLabel || block.repeats > 1 || block.rest > 0)
+          if (showBlockLabel || block.repeats > 1 || block.rest > 0) ...[
             Row(
               children: [
                 if (showBlockLabel)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: PlatformHelper.useLiquidGlass
-                          ? LiquidGlassTheme.primaryColor.withOpacity(0.15)
-                          : Theme.of(context).colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      'Block $blockNumber',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.primaryColor
-                            : Theme.of(context).colorScheme.secondary,
-                      ),
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+                    decoration: BoxDecoration(color: VigorColors.orange.withValues(alpha: 0.15), borderRadius: VigorRadius.radiusSm),
+                    child: Text('Block $blockNumber', style: VigorTypography.caption.copyWith(fontWeight: FontWeight.bold, color: VigorColors.orange)),
                   ),
                 const Spacer(),
-              if (block.repeats > 1)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.repeat,
-                        size: 12,
-                        color: Colors.blue.shade700,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${block.repeats}x',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              if (block.rest > 0) ...[
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    '${block.rest}s',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange.shade700,
+                if (block.repeats > 1)
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+                    decoration: BoxDecoration(color: VigorColors.electricBlue.withValues(alpha: 0.15), borderRadius: VigorRadius.radiusSm),
+                    child: Row(
+                      children: [
+                        Icon(Icons.repeat, size: 12, color: VigorColors.electricBlue),
+                        SizedBox(width: VigorSpacing.xs),
+                        Text('${block.repeats}x', style: VigorTypography.caption.copyWith(fontWeight: FontWeight.bold, color: VigorColors.electricBlue)),
+                      ],
                     ),
                   ),
-                ),
-              ],
-              ],
-            ),
-          if (showBlockLabel || block.repeats > 1 || block.rest > 0)
-            const SizedBox(height: 12),
-          ...block.activities.map((activity) => _buildActivityRow(context, activity)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActivityRow(BuildContext context, Activity activity) {
-    final exercise = _parseExercise(activity.detail);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Exercise image thumbnail (if available)
-          if (exercise != null && _isValidImageUrl(exercise.reference)) ...[
-            GestureDetector(
-              onTap: () => ExerciseModal.show(context, exercise),
-              child: Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: PlatformHelper.useLiquidGlass
-                        ? Colors.white.withOpacity(0.2)
-                        : Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white.withOpacity(0.2)
-                            : Colors.grey.shade300,
+                if (block.rest > 0) ...[
+                  SizedBox(width: VigorSpacing.sm),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+                    decoration: BoxDecoration(color: VigorColors.warning.withValues(alpha: 0.15), borderRadius: VigorRadius.radiusSm),
+                    child: Text('${block.rest}s', style: VigorTypography.caption.copyWith(fontWeight: FontWeight.bold, color: VigorColors.warning)),
                   ),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    _proxyImageUrl(exercise.reference),
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      final isDark = Theme.of(context).brightness == Brightness.dark;
-                      return Container(
-                        color: isDark
-                            ? Colors.white.withOpacity(0.1)
-                            : Colors.grey.shade200,
-                        child: Icon(
-                          Icons.broken_image,
-                          size: 24,
-                          color: isDark
-                              ? Colors.white.withOpacity(0.5)
-                              : Colors.grey.shade600,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-          ] else ...[
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: PlatformHelper.useLiquidGlass
-                    ? Colors.white.withOpacity(0.1)
-                    : Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withOpacity(0.1)
-                        : Colors.grey.shade200,
-                border: Border.all(
-                  color: PlatformHelper.useLiquidGlass
-                      ? Colors.white.withOpacity(0.2)
-                      : Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white.withOpacity(0.2)
-                          : Colors.grey.shade300,
-                ),
-              ),
-              child: Icon(
-                Icons.fitness_center,
-                size: 24,
-                color: PlatformHelper.useLiquidGlass
-                    ? Colors.white.withOpacity(0.4)
-                    : Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withOpacity(0.4)
-                        : Colors.grey.shade500,
-              ),
-            ),
-            const SizedBox(width: 12),
-          ],
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  activity.displayName,
-                  style: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.bodyStyle.copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                        )
-                      : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                ),
-                // Exercise details from parsed detail field
-                if (exercise != null &&
-                    (exercise.equipment.isNotEmpty ||
-                        exercise.muscles.isNotEmpty ||
-                        activity.modifiers.isNotEmpty)) ...[
-                  const SizedBox(height: 8),
-                  _buildExerciseDetailsRow(context, exercise, activity.modifiers),
                 ],
-                const SizedBox(height: 6),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  children: [
-                    if (activity.reps > 0)
-                      _buildActivityTag(
-                        context,
-                        icon: Icons.repeat,
-                        label: '${activity.reps} reps',
-                        color: Colors.purple.shade400,
-                      ),
-                    if (activity.weightKg > 0)
-                      _buildActivityTag(
-                        context,
-                        icon: Icons.fitness_center,
-                        label: '${activity.weightKg} kg',
-                        color: Colors.red.shade700,
-                      ),
-                    if (activity.duration > 0)
-                      _buildActivityTag(
-                        context,
-                        icon: Icons.timer,
-                        label: _formatTime(activity.duration),
-                        color: Colors.blue.shade700,
-                      ),
-                    if (activity.rest > 0)
-                      _buildActivityTag(
-                        context,
-                        icon: Icons.hourglass_bottom,
-                        label: '${activity.rest}s rest',
-                        color: Colors.orange.shade700,
-                      ),
-                  ],
-                ),
               ],
             ),
-          ),
-          // shuffle button for non-completed trainings
-          if (training.completedAt == null)
-            IconButton(
-              icon: Icon(
-                Icons.refresh,
-                size: 20,
-                color: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.primaryColor.withOpacity(0.7)
-                    : Theme.of(context).colorScheme.primary.withOpacity(0.7),
-              ),
-              onPressed: () => _shuffleActivity(activity),
-              tooltip: AppLocalizations.of(context).shuffleExercise,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            ),
+            SizedBox(height: VigorSpacing.md),
+          ],
+          ...block.activities.asMap().entries.map((entry) => Padding(
+            padding: EdgeInsets.only(bottom: entry.key < block.activities.length - 1 ? VigorSpacing.md : 0),
+            child: _buildActivityRow(entry.value, isDark),
+          )),
         ],
       ),
     );
   }
 
-  Widget _buildActionButton(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required VoidCallback? onPressed,
-    bool isDestructive = false,
-    bool isPrimary = false,
-  }) {
-    final isDisabled = onPressed == null;
-    final Color color;
-    if (isDisabled) {
-      color = Colors.grey;
-    } else if (isDestructive) {
-      color = Colors.red;
-    } else if (isPrimary) {
-      color = PlatformHelper.useLiquidGlass
-          ? LiquidGlassTheme.successColor
-          : Colors.green[600]!;
-    } else {
-      color = PlatformHelper.useLiquidGlass
-          ? LiquidGlassTheme.primaryColor
-          : Theme.of(context).colorScheme.primary;
-    }
+  Widget _buildActivityRow(Activity activity, bool isDark) {
+    final exercise = _parseExercise(activity.detail);
+    final l10n = AppLocalizations.of(context);
 
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 18),
-      label: Text(label, overflow: TextOverflow.ellipsis),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: color,
-        side: BorderSide(color: color.withOpacity(0.5)),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildExerciseDetailsRow(
-      BuildContext context, Exercise exercise, List<String> modifiers) {
-    final items = <Widget>[];
-
-    if (exercise.muscles.isNotEmpty) {
-      items.add(_buildDetailChip(context, Icons.accessibility_new,
-          exercise.muscles.take(3).join(' · '), Colors.red.shade700));
-    }
-    if (exercise.equipment.isNotEmpty) {
-      items.add(_buildDetailChip(
-          context, Icons.fitness_center, exercise.equipment.join(' · '), Colors.blue.shade700));
-    }
-    if (modifiers.isNotEmpty) {
-      items.add(_buildDetailChip(
-          context, Icons.tune, modifiers.join(' · '), Colors.green.shade700));
-    }
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 4,
-      children: items,
-    );
-  }
-
-  Widget _buildDetailChip(BuildContext context, IconData icon, String text, Color color) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Icon(icon, size: 14, color: color),
-        ),
-        const SizedBox(width: 4),
-        Flexible(
-          child: Text(
-            text,
-            style: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
-                : Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
+        // thumbnail
+        GestureDetector(
+          onTap: exercise != null ? () => ExerciseModal.show(context, exercise) : null,
+          child: Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              borderRadius: VigorRadius.radiusMd,
+              gradient: exercise == null || !_isValidImageUrl(exercise.reference)
+                  ? LinearGradient(colors: [VigorColors.orange.withValues(alpha: 0.2), VigorColors.electricBlue.withValues(alpha: 0.2)])
+                  : null,
+              border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.grey.shade300),
+            ),
+            child: ClipRRect(
+              borderRadius: VigorRadius.radiusMd,
+              child: exercise != null && _isValidImageUrl(exercise.reference)
+                  ? Image.network(
+                      _proxyImageUrl(exercise.reference),
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _buildPlaceholderIcon(),
+                    )
+                  : _buildPlaceholderIcon(),
+            ),
           ),
         ),
+        SizedBox(width: VigorSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(activity.name, style: VigorTypography.body.copyWith(fontWeight: FontWeight.w600, color: VigorColors.textPrimary(context))),
+              if (exercise != null && (exercise.equipment.isNotEmpty || exercise.muscles.isNotEmpty || activity.modifiers.isNotEmpty)) ...[
+                SizedBox(height: VigorSpacing.xs),
+                _buildExerciseDetails(exercise, activity.modifiers),
+              ],
+              SizedBox(height: VigorSpacing.sm),
+              _buildActivityTags(activity),
+            ],
+          ),
+        ),
+        if (training.completedAt == null)
+          GestureDetector(
+            onTap: () => _shuffleActivity(activity),
+            child: Container(
+              padding: VigorSpacing.paddingSm,
+              decoration: BoxDecoration(color: VigorColors.orange.withValues(alpha: 0.15), borderRadius: VigorRadius.radiusFull),
+              child: Icon(Icons.refresh, size: 18, color: VigorColors.orange),
+            ),
+          ),
       ],
     );
   }
 
-  Widget _buildInfoLabel(
-    BuildContext context, {
-    required IconData icon,
-    required String text,
-    Color? color,
-  }) {
-    final defaultColor = PlatformHelper.useLiquidGlass
-        ? LiquidGlassTheme.captionStyle.color
-        : Colors.grey.shade600;
-    final labelColor = color ?? defaultColor;
+  Widget _buildPlaceholderIcon() {
+    return Center(
+      child: ShaderMask(
+        shaderCallback: (bounds) => LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]).createShader(bounds),
+        child: const Icon(Icons.fitness_center, size: 28, color: Colors.white),
+      ),
+    );
+  }
 
+  Widget _buildExerciseDetails(Exercise exercise, List<String> modifiers) {
+    return Wrap(
+      spacing: VigorSpacing.sm,
+      runSpacing: VigorSpacing.xs,
+      children: [
+        if (exercise.muscles.isNotEmpty) _buildDetailChip(Icons.accessibility_new, exercise.muscles.take(2).join(' · '), Colors.red.shade600),
+        if (exercise.equipment.isNotEmpty) _buildDetailChip(Icons.fitness_center, exercise.equipment.join(' · '), VigorColors.electricBlue),
+        if (modifiers.isNotEmpty) _buildDetailChip(Icons.tune, modifiers.join(' · '), VigorColors.success),
+      ],
+    );
+  }
+
+  Widget _buildDetailChip(IconData icon, String text, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 18, color: labelColor),
-        const SizedBox(width: 6),
-        Text(
-          text,
-          style: PlatformHelper.useLiquidGlass
-              ? LiquidGlassTheme.captionStyle.copyWith(
-                  color: labelColor,
-                  fontWeight: color != null ? FontWeight.w600 : null,
-                )
-              : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: labelColor,
-                    fontWeight: color != null ? FontWeight.w600 : null,
-                  ),
-        ),
+        Icon(icon, size: 12, color: color),
+        SizedBox(width: VigorSpacing.xs),
+        Flexible(child: Text(text, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context)), overflow: TextOverflow.ellipsis)),
       ],
     );
   }
 
-  Widget _buildActivityTag(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
+  Widget _buildActivityTags(Activity activity) {
+    return Wrap(
+      spacing: VigorSpacing.xs,
+      runSpacing: VigorSpacing.xs,
+      children: [
+        if (activity.reps > 0) _buildTag(Icons.repeat, '${activity.reps}', Colors.purple),
+        if (activity.weightKg > 0) _buildTag(Icons.fitness_center, '${activity.weightKg}kg', Colors.red.shade700),
+        if (activity.duration > 0) _buildTag(Icons.timer, _formatTime(activity.duration), VigorColors.electricBlue),
+        if (activity.rest > 0) _buildTag(Icons.hourglass_bottom, '${activity.rest}s', VigorColors.warning),
+      ],
+    );
+  }
+
+  Widget _buildTag(IconData icon, String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1,
-        ),
+        color: color.withValues(alpha: 0.15),
+        borderRadius: VigorRadius.radiusSm,
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 12,
-            color: color,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
+          Icon(icon, size: 11, color: color),
+          SizedBox(width: VigorSpacing.xs),
+          Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
         ],
       ),
     );

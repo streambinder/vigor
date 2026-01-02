@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/gym.dart';
-import '../widgets/adaptive/adaptive.dart';
-import '../widgets/equipment_selector.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
+import '../widgets/adaptive/adaptive.dart';
+import '../widgets/equipment_selector.dart';
 
 class GymFormDialog extends StatefulWidget {
   final Gym? gym;
@@ -52,18 +53,21 @@ class _GymFormDialogState extends State<GymFormDialog> {
   Widget build(BuildContext context) {
     final isEditing = widget.gym != null;
     final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = VigorColors.textPrimary(context);
 
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: VigorRadius.modal,
       ),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
         constraints: const BoxConstraints(maxWidth: 500),
-        padding: const EdgeInsets.all(24),
+        padding: VigorSpacing.paddingLg,
         decoration: PlatformHelper.useLiquidGlass
             ? LiquidGlassTheme.glassDecoration(
-                borderRadius: 20,
+                borderRadius: VigorRadius.lg,
+                isDark: isDark,
               )
             : null,
         child: SingleChildScrollView(
@@ -76,49 +80,42 @@ class _GymFormDialogState extends State<GymFormDialog> {
                 children: [
                   Text(
                     isEditing ? l10n.editGym : l10n.addGym,
-                    style: PlatformHelper.useLiquidGlass
-                        ? LiquidGlassTheme.headlineStyle
-                        : const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    style: VigorTypography.headline.copyWith(color: textColor),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: Icon(Icons.close, color: VigorColors.textSecondary(context)),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: VigorSpacing.lg),
               AdaptiveTextField(
                 controller: _nameController,
                 labelText: l10n.gymName,
                 placeholder: l10n.gymNamePlaceholder,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: VigorSpacing.lg),
               Text(
                 l10n.equipment,
-                style: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
-                    : const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                style: VigorTypography.label.copyWith(
+                  color: textColor,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: VigorSpacing.sm),
               EquipmentSelector(
                 selected: _equipment,
                 onChanged: (updated) => setState(() => _equipment = updated),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: VigorSpacing.lg),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  AdaptiveTextButton(
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text(l10n.cancel),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: VigorSpacing.sm),
                   AdaptiveButton(
                     onPressed: _submit,
                     child: Text(isEditing ? l10n.update : l10n.add),

@@ -368,6 +368,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get stale => '만료됨';
 
   @override
+  String get today => '오늘';
+
+  @override
+  String get yesterday => '어제';
+
+  @override
+  String get available => '이용 가능';
+
+  @override
+  String get completed => '완료됨';
+
+  @override
+  String get noPastTrainings => '완료된 훈련이 아직 없습니다';
+
+  @override
   String get copied => '복사됨';
 
   @override

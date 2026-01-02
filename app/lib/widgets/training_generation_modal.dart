@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/gym.dart';
 import '../models/training.dart';
@@ -102,11 +103,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       children: [
         Text(
           l10n.equipment,
-          style: PlatformHelper.useLiquidGlass
-              ? LiquidGlassTheme.captionStyle
-              : Theme.of(context).textTheme.labelMedium,
+          style: VigorTypography.caption.copyWith(
+            color: VigorColors.textSecondary(context),
+          ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: VigorSpacing.sm),
         // ternary segmented button
         SizedBox(
           width: double.infinity,
@@ -137,7 +138,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             showSelectedIcon: false,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: VigorSpacing.sm),
         // mode-specific content
         _buildEquipmentModeContent(),
       ],
@@ -150,10 +151,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       case EquipmentMode.bodyweight:
         return Text(
           l10n.noEquipmentBodyweightOnly,
-          style: TextStyle(
-            color: Colors.grey[600],
+          style: VigorTypography.caption.copyWith(
+            color: VigorColors.textSecondary(context),
             fontStyle: FontStyle.italic,
-            fontSize: 12,
           ),
         );
       case EquipmentMode.gym:
@@ -165,13 +165,13 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
   Widget _buildGymSelector() {
     final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (widget.gyms.isEmpty) {
       return Text(
         l10n.noGymsDefinedCreateOne,
-        style: TextStyle(
-          color: Colors.grey[600],
+        style: VigorTypography.caption.copyWith(
+          color: VigorColors.textSecondary(context),
           fontStyle: FontStyle.italic,
-          fontSize: 12,
         ),
       );
     }
@@ -179,16 +179,17 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       decoration: PlatformHelper.useLiquidGlass
           ? LiquidGlassTheme.glassDecoration(
               borderRadius: 12,
+              isDark: isDark,
               border: Border.all(
-                color: Colors.white.withOpacity(0.2),
+                color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.1),
                 width: 1.5,
               ),
             )
           : BoxDecoration(
               border: Border.all(
-                color: Theme.of(context).colorScheme.outline,
+                color: VigorColors.darkBorder,
               ),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: VigorRadius.radiusMd,
             ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<Gym>(
@@ -196,22 +197,18 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           isExpanded: true,
           hint: Text(
             l10n.selectAGym,
-            style: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.bodyStyle.copyWith(
-                    color: Colors.white.withOpacity(0.5),
-                  )
-                : TextStyle(color: Colors.grey[600]),
+            style: VigorTypography.body.copyWith(
+              color: VigorColors.textMuted(context),
+            ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          borderRadius: BorderRadius.circular(12),
+          padding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.xs),
+          borderRadius: VigorRadius.radiusMd,
           items: widget.gyms.map((gym) {
             return DropdownMenuItem<Gym>(
               value: gym,
               child: Text(
                 gym.name,
-                style: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.bodyStyle
-                    : null,
+                style: VigorTypography.body,
               ),
             );
           }).toList(),
@@ -262,11 +259,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       children: [
         Text(
           l10n.methodologyOptional,
-          style: PlatformHelper.useLiquidGlass
-              ? LiquidGlassTheme.captionStyle
-              : Theme.of(context).textTheme.labelMedium,
+          style: VigorTypography.caption.copyWith(
+            color: VigorColors.textSecondary(context),
+          ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: VigorSpacing.sm),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -297,32 +294,32 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
   Widget _buildRoutineToggles() {
     final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: () => setState(() => _includeWarmupCooldown = !_includeWarmupCooldown),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.sm),
         decoration: PlatformHelper.useLiquidGlass
             ? LiquidGlassTheme.glassDecoration(
                 borderRadius: 12,
+                isDark: isDark,
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.2),
+                  color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.1),
                   width: 1.5,
                 ),
               )
             : BoxDecoration(
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outline,
+                  color: VigorColors.darkBorder,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: VigorRadius.radiusMd,
               ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               l10n.includeWarmupCooldown,
-              style: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.bodyStyle
-                  : null,
+              style: VigorTypography.body,
             ),
             AdaptiveSwitch(
               value: _includeWarmupCooldown,
@@ -404,6 +401,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
@@ -411,13 +409,14 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         decoration: PlatformHelper.useLiquidGlass
             ? LiquidGlassTheme.glassDecoration(
                 borderRadius: 20,
+                isDark: isDark,
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.2),
+                  color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.1),
                   width: 1.5,
                 ),
               )
             : BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
+                color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
                 borderRadius: BorderRadius.circular(20),
               ),
         child: ClipRRect(
@@ -436,26 +435,24 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         ? l10n.generationFailedRetrying(_retryAttempt!)
         : l10n.thisMayTakeAMoment;
     return Padding(
-      padding: const EdgeInsets.all(32.0),
+      padding: VigorSpacing.paddingXl,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const AdaptiveLoadingIndicator(),
-          const SizedBox(height: 24),
+          SizedBox(height: VigorSpacing.lg),
           Text(
             l10n.generatingTraining,
-            style: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.headlineStyle
-                : Theme.of(context).textTheme.titleLarge,
+            style: VigorTypography.headline.copyWith(
+              color: VigorColors.textPrimary(context),
+            ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: VigorSpacing.sm),
           Text(
             statusText,
-            style: PlatformHelper.useLiquidGlass
-                ? LiquidGlassTheme.captionStyle
-                : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey,
-                    ),
+            style: VigorTypography.caption.copyWith(
+              color: VigorColors.textSecondary(context),
+            ),
           ),
         ],
       ),
@@ -465,7 +462,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   Widget _buildFormView() {
     final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
+      padding: VigorSpacing.paddingLg,
       child: Form(
         key: _formKey,
         child: Column(
@@ -474,11 +471,12 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           children: [
             Text(
               l10n.generateTraining,
-              style: PlatformHelper.useLiquidGlass
-                  ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 24)
-                  : Theme.of(context).textTheme.headlineSmall,
+              style: VigorTypography.headline.copyWith(
+                fontSize: 24,
+                color: VigorColors.textPrimary(context),
+              ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: VigorSpacing.lg),
 
             // Duration field
             AdaptiveTextField(
@@ -489,19 +487,19 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 FilteringTextInputFormatter.digitsOnly,
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: VigorSpacing.md),
 
             // Equipment mode selection
             _buildEquipmentSection(),
-            const SizedBox(height: 16),
+            SizedBox(height: VigorSpacing.md),
 
             // Methodology selection
             _buildMethodologySection(),
-            const SizedBox(height: 16),
+            SizedBox(height: VigorSpacing.md),
 
             // Routine skip toggles
             _buildRoutineToggles(),
-            const SizedBox(height: 16),
+            SizedBox(height: VigorSpacing.md),
 
             // Optional prompt
             AdaptiveTextField(
@@ -511,7 +509,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               maxLines: 3,
               minLines: 1,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: VigorSpacing.md),
 
             // Partners section
             Column(
@@ -519,24 +517,24 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               children: [
                 Text(
                   l10n.trainingPartnersOptional,
-                  style: PlatformHelper.useLiquidGlass
-                      ? LiquidGlassTheme.captionStyle
-                      : Theme.of(context).textTheme.labelMedium,
+                  style: VigorTypography.caption.copyWith(
+                    color: VigorColors.textSecondary(context),
+                  ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: VigorSpacing.sm),
                 AdaptiveButton(
                   onPressed: _addPartner,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(Icons.person_add, size: 18),
-                      const SizedBox(width: 8),
+                      SizedBox(width: VigorSpacing.sm),
                       Text(l10n.addPartner),
                     ],
                   ),
                 ),
                 if (_partners.isNotEmpty) ...[
-                  const SizedBox(height: 8),
+                  SizedBox(height: VigorSpacing.sm),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -544,22 +542,18 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                       return Chip(
                         label: Text(
                           partner.displayName,
-                          style: PlatformHelper.useLiquidGlass
-                              ? LiquidGlassTheme.captionStyle.copyWith(fontSize: 12)
-                              : null,
+                          style: VigorTypography.caption,
                         ),
                         deleteIcon: const Icon(Icons.close, size: 16),
                         onDeleted: () => _removePartner(partner),
-                        backgroundColor: PlatformHelper.useLiquidGlass
-                            ? LiquidGlassTheme.primaryColor.withOpacity(0.1)
-                            : null,
+                        backgroundColor: VigorColors.orange.withValues(alpha: 0.1),
                       );
                     }).toList(),
                   ),
                 ],
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: VigorSpacing.lg),
 
             // Action buttons
             Row(
@@ -569,7 +563,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(l10n.cancel),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: VigorSpacing.sm),
                 AdaptiveButton(
                   onPressed: _generateTraining,
                   child: Text(l10n.generate),
