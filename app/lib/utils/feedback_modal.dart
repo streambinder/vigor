@@ -34,9 +34,7 @@ class FeedbackResult {
 }
 
 class FeedbackModal {
-  static const _workTypes = ['cardio', 'strength', 'skill'];
-
-  /// extracts unique work activities with their IDs (excludes warmup/cooldown)
+  /// extracts unique activities from work routines
   static List<({String id, String exerciseId, String name})> _getWorkActivities(Training training) {
     final seen = <String>{};
     final activities = <({String id, String exerciseId, String name})>[];
@@ -44,10 +42,9 @@ class FeedbackModal {
       if (routine.type != 'work') continue;
       for (final block in routine.blocks) {
         for (final activity in block.activities) {
-          final detailType = activity.detail['type'] as String? ?? '';
-          if (_workTypes.contains(detailType) && !seen.contains(activity.name)) {
-            seen.add(activity.name);
-            activities.add((id: activity.id, exerciseId: activity.name, name: activity.displayName));
+          if (!seen.contains(activity.exerciseId)) {
+            seen.add(activity.exerciseId);
+            activities.add((id: activity.id, exerciseId: activity.exerciseId, name: activity.displayName));
           }
         }
       }
