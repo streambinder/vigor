@@ -216,6 +216,11 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		training.Gym = gym
 	}
 	training.Equipment = equipmentIDs
+	for _, profile := range profiles {
+		for _, goal := range profile.Goals() {
+			training.Goals = append(training.Goals, goal.Description)
+		}
+	}
 	for i := range training.Routines {
 		training.Routines[i].Position = i
 		for j := range training.Routines[i].Blocks {

@@ -546,6 +546,29 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
               )).toList(),
             ),
           ],
+          if (training.goals.isNotEmpty) ...[
+            SizedBox(height: VigorSpacing.md),
+            Wrap(
+              spacing: VigorSpacing.xs,
+              runSpacing: VigorSpacing.xs,
+              children: training.goals.map((goal) => Container(
+                padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+                decoration: BoxDecoration(
+                  color: VigorColors.success.withValues(alpha: 0.15),
+                  borderRadius: VigorRadius.radiusFull,
+                  border: Border.all(color: VigorColors.success.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.track_changes, size: 12, color: VigorColors.success),
+                    SizedBox(width: VigorSpacing.xs),
+                    Text(goal, style: VigorTypography.caption.copyWith(color: VigorColors.success)),
+                  ],
+                ),
+              )).toList(),
+            ),
+          ],
         ],
       ),
     );
