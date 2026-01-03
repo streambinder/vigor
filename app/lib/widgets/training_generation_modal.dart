@@ -296,10 +296,15 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           children: [
             // "auto" chip for unset
             FilterChip(
-              label: Text(l10n.methodologyAuto),
+              label: Text(
+                l10n.methodologyAuto,
+                style: VigorTypography.caption.copyWith(
+                  color: _methodology == null ? Colors.white : VigorColors.textPrimary(context),
+                ),
+              ),
               selected: _methodology == null,
-              selectedColor: VigorColors.orange.withValues(alpha: 0.3),
-              checkmarkColor: VigorColors.orange,
+              selectedColor: VigorColors.orange,
+              checkmarkColor: Colors.white,
               onSelected: (selected) {
                 if (selected) setState(() => _methodology = null);
               },
@@ -307,10 +312,15 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             ..._methodologies.map((m) {
               final isSelected = _methodology == m;
               return FilterChip(
-                label: Text(_methodologyLabel(m, l10n)),
+                label: Text(
+                  _methodologyLabel(m, l10n),
+                  style: VigorTypography.caption.copyWith(
+                    color: isSelected ? Colors.white : VigorColors.textPrimary(context),
+                  ),
+                ),
                 selected: isSelected,
-                selectedColor: VigorColors.orange.withValues(alpha: 0.3),
-                checkmarkColor: VigorColors.orange,
+                selectedColor: VigorColors.orange,
+                checkmarkColor: Colors.white,
                 onSelected: (selected) {
                   setState(() => _methodology = selected ? m : null);
                 },
@@ -348,10 +358,15 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           children: _availableGoals.map((goal) {
             final isSelected = _selectedGoals.contains(goal);
             return FilterChip(
-              label: Text(_goalLabel(goal)),
+              label: Text(
+                _goalLabel(goal),
+                style: VigorTypography.caption.copyWith(
+                  color: isSelected ? Colors.white : VigorColors.textPrimary(context),
+                ),
+              ),
               selected: isSelected,
-              selectedColor: VigorColors.orange.withValues(alpha: 0.3),
-              checkmarkColor: VigorColors.orange,
+              selectedColor: VigorColors.orange,
+              checkmarkColor: Colors.white,
               onSelected: (selected) {
                 setState(() {
                   if (selected) {
