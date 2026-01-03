@@ -91,7 +91,7 @@ VigorShadows.orangeGlow         // CTA glow effect
 ### App
 
 ```bash
-SRC="assets/vigor-app-icon.svg"
+SRC="design/vigor-app-icon.svg"
 
 # iOS
 IOS_DIR="app/ios/Runner/Assets.xcassets/AppIcon.appiconset"
@@ -131,7 +131,7 @@ magick -background none "$SRC" -resize 512x512 "$WEB_DIR/icons/Icon-maskable-512
 ### Cockpit
 
 ```bash
-SRC="assets/vigor-cockpit-icon.svg"
+SRC="design/vigor-cockpit-icon.svg"
 
 magick -background none "$SRC" -resize 32x32 "cockpit/static/favicon.png"
 magick -background none "$SRC" -resize 180x180 "cockpit/static/apple-touch-icon.png"
