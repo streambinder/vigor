@@ -58,11 +58,17 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		partnerUserIDs = append(partnerUserIDs, user.ID)
 	}
 
-	// use provided goals if any, otherwise fall back to profile goals
+	// use provided goals if any, otherwise fall back to profile goals (deduplicated across partners)
 	effectiveGoals := goals
 	if len(effectiveGoals) == 0 {
+		seen := make(map[string]bool)
 		for _, profile := range profiles {
-			effectiveGoals = append(effectiveGoals, profile.Goals()...)
+			for _, goal := range profile.Goals() {
+				if !seen[goal] {
+					seen[goal] = true
+					effectiveGoals = append(effectiveGoals, goal)
+				}
+			}
 		}
 	}
 
