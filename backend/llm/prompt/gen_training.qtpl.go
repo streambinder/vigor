@@ -26,6 +26,7 @@ var (
 //line llm/prompt/gen_training.qtpl:6
 func StreamGenTraining(qw422016 *qt422016.Writer,
 	profiles []model.Profile,
+	goals []string,
 	workExercises []model.Exercise,
 	warmupExercises []model.Exercise,
 	cooldownExercises []model.Exercise,
@@ -40,145 +41,100 @@ func StreamGenTraining(qw422016 *qt422016.Writer,
 	facts []model.Fact,
 	skipWarmupCooldown bool,
 ) {
-//line llm/prompt/gen_training.qtpl:21
+//line llm/prompt/gen_training.qtpl:22
 	qw422016.N().S(`Generate a `)
-//line llm/prompt/gen_training.qtpl:22
+//line llm/prompt/gen_training.qtpl:23
 	qw422016.N().D(duration)
-//line llm/prompt/gen_training.qtpl:22
+//line llm/prompt/gen_training.qtpl:23
 	qw422016.N().S(`-minute training session.
 `)
-//line llm/prompt/gen_training.qtpl:23
+//line llm/prompt/gen_training.qtpl:24
 	if skipWarmupCooldown {
-//line llm/prompt/gen_training.qtpl:23
+//line llm/prompt/gen_training.qtpl:24
 		qw422016.N().S(`
 IMPORTANT: Generate ONLY the work routine. Do NOT include warmup or cooldown routines.
 `)
-//line llm/prompt/gen_training.qtpl:25
+//line llm/prompt/gen_training.qtpl:26
 	}
-//line llm/prompt/gen_training.qtpl:25
+//line llm/prompt/gen_training.qtpl:26
 	qw422016.N().S(`
 
 `)
-//line llm/prompt/gen_training.qtpl:27
-	if len(profiles) > 0 {
-//line llm/prompt/gen_training.qtpl:27
-		var allGoals []string
-		goalMap := make(map[string]bool)
-
-//line llm/prompt/gen_training.qtpl:27
-		for _, profile := range profiles {
-//line llm/prompt/gen_training.qtpl:27
-			for _, goal := range profile.Goals() {
-//line llm/prompt/gen_training.qtpl:27
-				if !goalMap[goal] {
-//line llm/prompt/gen_training.qtpl:27
-					goalMap[goal] = true
-					allGoals = append(allGoals, goal)
-
-//line llm/prompt/gen_training.qtpl:27
-				}
-//line llm/prompt/gen_training.qtpl:27
-			}
-//line llm/prompt/gen_training.qtpl:27
-		}
-//line llm/prompt/gen_training.qtpl:27
-		if len(allGoals) > 0 {
-//line llm/prompt/gen_training.qtpl:27
-			qw422016.N().S(`
+//line llm/prompt/gen_training.qtpl:28
+	if len(goals) > 0 {
+//line llm/prompt/gen_training.qtpl:28
+		qw422016.N().S(`
 <<<USER_GOALS (PRIMARY DESIGN CRITERIA - ALL EXERCISE SELECTIONS MUST SERVE THESE GOALS)>>>
 `)
-//line llm/prompt/gen_training.qtpl:29
-			for _, goal := range allGoals {
-//line llm/prompt/gen_training.qtpl:29
-				qw422016.N().S(`- `)
-//line llm/prompt/gen_training.qtpl:29
-				qw422016.E().S(goal)
-//line llm/prompt/gen_training.qtpl:29
-				qw422016.N().S(`
+//line llm/prompt/gen_training.qtpl:30
+		for _, goal := range goals {
+//line llm/prompt/gen_training.qtpl:30
+			qw422016.N().S(`- `)
+//line llm/prompt/gen_training.qtpl:30
+			qw422016.E().S(goal)
+//line llm/prompt/gen_training.qtpl:30
+			qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:30
-			}
-//line llm/prompt/gen_training.qtpl:30
-			qw422016.N().S(`<<<END_USER_GOALS>>>
+//line llm/prompt/gen_training.qtpl:31
+		}
+//line llm/prompt/gen_training.qtpl:31
+		qw422016.N().S(`<<<END_USER_GOALS>>>
 
 `)
-//line llm/prompt/gen_training.qtpl:32
-		}
-//line llm/prompt/gen_training.qtpl:32
+//line llm/prompt/gen_training.qtpl:33
 	}
-//line llm/prompt/gen_training.qtpl:32
+//line llm/prompt/gen_training.qtpl:33
 	qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:33
+//line llm/prompt/gen_training.qtpl:34
 	if len(profiles) > 1 {
-//line llm/prompt/gen_training.qtpl:33
+//line llm/prompt/gen_training.qtpl:34
 		qw422016.N().S(`
 <<<PARTNER_TRAINING>>>
 This is a partner training for `)
-//line llm/prompt/gen_training.qtpl:35
+//line llm/prompt/gen_training.qtpl:36
 		qw422016.N().D(len(profiles))
-//line llm/prompt/gen_training.qtpl:35
+//line llm/prompt/gen_training.qtpl:36
 		qw422016.N().S(` participants.
 Apply MOST RESTRICTIVE constraints - if ANY participant has an injury/limitation, avoid those exercises for ALL participants.
 <<<END_PARTNER_TRAINING>>>
 
 `)
-//line llm/prompt/gen_training.qtpl:39
+//line llm/prompt/gen_training.qtpl:40
 	}
-//line llm/prompt/gen_training.qtpl:39
+//line llm/prompt/gen_training.qtpl:40
 	qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:40
+//line llm/prompt/gen_training.qtpl:41
 	for i, profile := range profiles {
-//line llm/prompt/gen_training.qtpl:40
+//line llm/prompt/gen_training.qtpl:41
 		qw422016.N().S(`
 <<<USER_PROFILE`)
-//line llm/prompt/gen_training.qtpl:41
+//line llm/prompt/gen_training.qtpl:42
 		if len(profiles) > 1 {
-//line llm/prompt/gen_training.qtpl:41
+//line llm/prompt/gen_training.qtpl:42
 			qw422016.N().S(` #`)
-//line llm/prompt/gen_training.qtpl:41
+//line llm/prompt/gen_training.qtpl:42
 			qw422016.N().D(i + 1)
-//line llm/prompt/gen_training.qtpl:41
+//line llm/prompt/gen_training.qtpl:42
 		}
-//line llm/prompt/gen_training.qtpl:41
+//line llm/prompt/gen_training.qtpl:42
 		qw422016.N().S(`>>>
 Age: `)
-//line llm/prompt/gen_training.qtpl:42
+//line llm/prompt/gen_training.qtpl:43
 		qw422016.N().D(profile.Age())
-//line llm/prompt/gen_training.qtpl:42
+//line llm/prompt/gen_training.qtpl:43
 		qw422016.N().S(`, Height: `)
-//line llm/prompt/gen_training.qtpl:42
+//line llm/prompt/gen_training.qtpl:43
 		qw422016.N().FPrec(profile.Height, 0)
-//line llm/prompt/gen_training.qtpl:42
+//line llm/prompt/gen_training.qtpl:43
 		qw422016.N().S(`cm, Weight: `)
-//line llm/prompt/gen_training.qtpl:42
+//line llm/prompt/gen_training.qtpl:43
 		qw422016.N().FPrec(profile.Weight, 0)
-//line llm/prompt/gen_training.qtpl:42
+//line llm/prompt/gen_training.qtpl:43
 		qw422016.N().S(`kg, Gender: `)
-//line llm/prompt/gen_training.qtpl:42
+//line llm/prompt/gen_training.qtpl:43
 		qw422016.E().S(profile.Gender)
-//line llm/prompt/gen_training.qtpl:42
-		qw422016.N().S(`
-`)
-//line llm/prompt/gen_training.qtpl:43
-		if len(profile.Goals()) > 0 {
-//line llm/prompt/gen_training.qtpl:43
-			qw422016.N().S(`Goals: `)
-//line llm/prompt/gen_training.qtpl:43
-			for j, goal := range profile.Goals() {
-//line llm/prompt/gen_training.qtpl:43
-				qw422016.E().S(goal)
-//line llm/prompt/gen_training.qtpl:43
-				if j < len(profile.Goals())-1 {
-//line llm/prompt/gen_training.qtpl:43
-					qw422016.N().S(`, `)
-//line llm/prompt/gen_training.qtpl:43
-				}
-//line llm/prompt/gen_training.qtpl:43
-			}
-//line llm/prompt/gen_training.qtpl:43
-		}
 //line llm/prompt/gen_training.qtpl:43
 		qw422016.N().S(`
 `)
@@ -616,6 +572,7 @@ Output language: `)
 //line llm/prompt/gen_training.qtpl:115
 func WriteGenTraining(qq422016 qtio422016.Writer,
 	profiles []model.Profile,
+	goals []string,
 	workExercises []model.Exercise,
 	warmupExercises []model.Exercise,
 	cooldownExercises []model.Exercise,
@@ -633,7 +590,7 @@ func WriteGenTraining(qq422016 qtio422016.Writer,
 //line llm/prompt/gen_training.qtpl:115
 	qw422016 := qt422016.AcquireWriter(qq422016)
 //line llm/prompt/gen_training.qtpl:115
-	StreamGenTraining(qw422016, profiles, workExercises, warmupExercises, cooldownExercises, equipment, modifiers, favoriteExercises, favoriteEquipment, methodology, userPrompt, duration, recentTrainings, facts, skipWarmupCooldown)
+	StreamGenTraining(qw422016, profiles, goals, workExercises, warmupExercises, cooldownExercises, equipment, modifiers, favoriteExercises, favoriteEquipment, methodology, userPrompt, duration, recentTrainings, facts, skipWarmupCooldown)
 //line llm/prompt/gen_training.qtpl:115
 	qt422016.ReleaseWriter(qw422016)
 //line llm/prompt/gen_training.qtpl:115
@@ -642,6 +599,7 @@ func WriteGenTraining(qq422016 qtio422016.Writer,
 //line llm/prompt/gen_training.qtpl:115
 func GenTraining(
 	profiles []model.Profile,
+	goals []string,
 	workExercises []model.Exercise,
 	warmupExercises []model.Exercise,
 	cooldownExercises []model.Exercise,
@@ -659,7 +617,7 @@ func GenTraining(
 //line llm/prompt/gen_training.qtpl:115
 	qb422016 := qt422016.AcquireByteBuffer()
 //line llm/prompt/gen_training.qtpl:115
-	WriteGenTraining(qb422016, profiles, workExercises, warmupExercises, cooldownExercises, equipment, modifiers, favoriteExercises, favoriteEquipment, methodology, userPrompt, duration, recentTrainings, facts, skipWarmupCooldown)
+	WriteGenTraining(qb422016, profiles, goals, workExercises, warmupExercises, cooldownExercises, equipment, modifiers, favoriteExercises, favoriteEquipment, methodology, userPrompt, duration, recentTrainings, facts, skipWarmupCooldown)
 //line llm/prompt/gen_training.qtpl:115
 	qs422016 := string(qb422016.B)
 //line llm/prompt/gen_training.qtpl:115

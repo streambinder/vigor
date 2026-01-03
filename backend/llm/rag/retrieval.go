@@ -45,8 +45,8 @@ func RetrieveAllMethodologies() ([]model.Methodology, error) {
 
 // RetrieveWorkExercises retrieves exercises for the main training phase via RAG.
 // Filters by methodology families, user equipment, and user proficiency.
-func RetrieveWorkExercises(profiles []model.Profile, equipment []string, proficiencies map[string]float64, proficiencyMargin float64, methodology *model.Methodology) ([]model.Exercise, error) {
-	embeddingText := GenUserExercises(profiles, equipment)
+func RetrieveWorkExercises(profiles []model.Profile, goals []string, equipment []string, proficiencies map[string]float64, proficiencyMargin float64, methodology *model.Methodology) ([]model.Exercise, error) {
+	embeddingText := GenUserExercises(profiles, goals, equipment)
 	exerciseEmbedding, err := embedding.GenVector(embeddingText)
 	if err != nil {
 		return nil, err
@@ -121,8 +121,8 @@ func RetrieveWorkExercises(profiles []model.Profile, equipment []string, profici
 }
 
 // QueryUserFacts retrieves facts relevant to the users' profiles and prompt.
-func RetrieveUserFacts(profiles []model.Profile, prompt string) ([]model.Fact, error) {
-	embeddingText := GenUserFacts(profiles, prompt)
+func RetrieveUserFacts(profiles []model.Profile, goals []string, prompt string) ([]model.Fact, error) {
+	embeddingText := GenUserFacts(profiles, goals, prompt)
 	embedding, err := embedding.GenVector(embeddingText)
 	if err != nil {
 		return nil, err

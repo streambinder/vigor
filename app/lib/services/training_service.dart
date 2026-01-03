@@ -23,6 +23,7 @@ class TrainingService {
     List<String>? partners,
     bool? skipWarmupCooldown,
     String? methodology,
+    List<String>? goals,
     void Function(int attempt)? onRetry,
   }) async {
     AppLogger.debug('[TrainingService] Generating training with duration: $duration, gym: $gym');
@@ -45,6 +46,9 @@ class TrainingService {
     }
     if (methodology != null && methodology.isNotEmpty) {
       body['methodology'] = methodology;
+    }
+    if (goals != null && goals.isNotEmpty) {
+      body['goals'] = goals;
     }
 
     const maxRetries = 2;

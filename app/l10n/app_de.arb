@@ -125,6 +125,7 @@
 
   "methodologyOptional": "Methodik (optional)",
   "methodologyAuto": "Auto",
+  "goalsOptional": "Ziele (optional)",
 
   "failedToUpdateProfile": "Profil konnte nicht aktualisiert werden",
 

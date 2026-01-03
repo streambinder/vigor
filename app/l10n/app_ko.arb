@@ -125,6 +125,7 @@
 
   "methodologyOptional": "방법론 (선택사항)",
   "methodologyAuto": "자동",
+  "goalsOptional": "목표 (선택사항)",
 
   "failedToUpdateProfile": "프로필 업데이트 실패",
 

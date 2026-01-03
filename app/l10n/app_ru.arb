@@ -125,6 +125,7 @@
 
   "methodologyOptional": "Методология (необязательно)",
   "methodologyAuto": "Авто",
+  "goalsOptional": "Цели (необязательно)",
 
   "failedToUpdateProfile": "Не удалось обновить профиль",
 

@@ -160,6 +160,7 @@
 
   "methodologyOptional": "Methodology (optional)",
   "methodologyAuto": "Auto",
+  "goalsOptional": "Goals (optional)",
 
   "failedToUpdateProfile": "Failed to update profile",
 

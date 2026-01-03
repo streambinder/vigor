@@ -756,6 +756,12 @@ abstract class AppLocalizations {
   /// **'Auto'**
   String get methodologyAuto;
 
+  /// No description provided for @goalsOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals (optional)'**
+  String get goalsOptional;
+
   /// No description provided for @failedToUpdateProfile.
   ///
   /// In en, this message translates to:

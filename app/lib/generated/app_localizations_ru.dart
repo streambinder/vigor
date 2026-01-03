@@ -348,6 +348,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get methodologyAuto => 'Авто';
 
   @override
+  String get goalsOptional => 'Цели (необязательно)';
+
+  @override
   String get failedToUpdateProfile => 'Не удалось обновить профиль';
 
   @override

@@ -349,6 +349,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get methodologyAuto => 'Auto';
 
   @override
+  String get goalsOptional => 'Goals (optional)';
+
+  @override
   String get failedToUpdateProfile => 'Failed to update profile';
 
   @override

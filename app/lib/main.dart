@@ -106,7 +106,7 @@ class VigorApp extends StatelessWidget {
       providers: [
         Provider<SecureStorageService>.value(value: storage),
         Provider<PreferencesService>.value(value: prefs),
-        Provider<ServiceLocator>(create: (_) => ServiceLocator(storage)),
+        ChangeNotifierProvider<ServiceLocator>(create: (_) => ServiceLocator(storage)),
         ChangeNotifierProvider(
           create: (_) => AuthProvider(storage: storage),
         ),

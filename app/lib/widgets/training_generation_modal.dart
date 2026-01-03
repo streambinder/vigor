@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/gym.dart';
+import '../models/profile_data.dart' as profile_models;
 import '../models/training.dart';
+import '../providers/auth_provider.dart';
 import '../services/service_locator.dart';
 import '../services/preferences_service.dart';
 import '../services/user_service.dart';
@@ -43,6 +45,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   final List<UserInfo> _partners = [];
   List<String> _equipment = [];
   String? _methodology;
+  List<String> _availableGoals = [];
+  Set<String> _selectedGoals = {};
 
   static const _methodologies = [
     'strength',
@@ -66,6 +70,29 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       _selectedGym = widget.gyms.firstWhere((g) => g.id == defaultId);
     } else if (widget.gyms.isNotEmpty) {
       _selectedGym = widget.gyms.first;
+    }
+    _loadGoals();
+  }
+
+  Future<void> _loadGoals() async {
+    final gymService = context.read<ServiceLocator>().gymService;
+    final response = await gymService.getAvailableGoals();
+    if (!mounted) return;
+    if (response.isSuccess && response.data != null) {
+      setState(() {
+        _availableGoals = response.data!;
+      });
+    }
+
+    // default-select user's current profile goals
+    final profile = context.read<AuthProvider>().currentUser?.profile;
+    if (profile != null && profile.data.isNotEmpty) {
+      try {
+        final profileData = profile_models.profileData.fromJson(profile.data);
+        setState(() {
+          _selectedGoals = profileData.goals.toSet();
+        });
+      } catch (_) {}
     }
   }
 
@@ -295,6 +322,52 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     );
   }
 
+  String _goalLabel(String goal) {
+    // format goal id to human-readable: muscle_building -> Muscle Building
+    return goal.split('_').map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}').join(' ');
+  }
+
+  Widget _buildGoalsSection() {
+    final l10n = AppLocalizations.of(context);
+    if (_availableGoals.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.goalsOptional,
+          style: VigorTypography.caption.copyWith(
+            color: VigorColors.textSecondary(context),
+          ),
+        ),
+        SizedBox(height: VigorSpacing.sm),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _availableGoals.map((goal) {
+            final isSelected = _selectedGoals.contains(goal);
+            return FilterChip(
+              label: Text(_goalLabel(goal)),
+              selected: isSelected,
+              selectedColor: VigorColors.orange.withValues(alpha: 0.3),
+              checkmarkColor: VigorColors.orange,
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    _selectedGoals.add(goal);
+                  } else {
+                    _selectedGoals.remove(goal);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
   Widget _buildRoutineToggles() {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -372,6 +445,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       partners: _partners.isEmpty ? null : _partners.map((p) => p.id).toList(),
       skipWarmupCooldown: !_includeWarmupCooldown ? true : null,
       methodology: _methodology,
+      goals: _selectedGoals.isEmpty ? null : _selectedGoals.toList(),
       onRetry: (attempt) {
         if (mounted) {
           setState(() => _retryAttempt = attempt);
@@ -498,6 +572,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             // Methodology selection
             _buildMethodologySection(),
             SizedBox(height: VigorSpacing.md),
+
+            // Goals selection
+            _buildGoalsSection(),
+            if (_availableGoals.isNotEmpty) SizedBox(height: VigorSpacing.md),
 
             // Routine skip toggles
             _buildRoutineToggles(),

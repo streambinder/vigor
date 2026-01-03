@@ -32,7 +32,7 @@ var (
 )
 
 // GenerateTraining creates a new training for a user.
-func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string) (*model.Training, error) {
+func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string) (*model.Training, error) {
 	if duration <= 0 {
 		return nil, ErrDurationRequired
 	}
@@ -56,6 +56,14 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		}
 		profiles = append(profiles, user.Profile)
 		partnerUserIDs = append(partnerUserIDs, user.ID)
+	}
+
+	// use provided goals if any, otherwise fall back to profile goals
+	effectiveGoals := goals
+	if len(effectiveGoals) == 0 {
+		for _, profile := range profiles {
+			effectiveGoals = append(effectiveGoals, profile.Goals()...)
+		}
 	}
 
 	var gym *model.Gym
@@ -113,7 +121,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	}
 
 	proficiencyMargin := ProgressiveMargin(trainingsComplete)
-	workExercises, err := rag.RetrieveWorkExercises(profiles, equipmentIDs, proficiencies, proficiencyMargin, methodologyData)
+	workExercises, err := rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +163,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		favoriteEquipmentIDs = append(favoriteEquipmentIDs, eq.ID)
 	}
 
-	facts, err := rag.RetrieveUserFacts(profiles, prompt)
+	facts, err := rag.RetrieveUserFacts(profiles, effectiveGoals, prompt)
 	if err != nil {
 		return nil, err
 	}
@@ -176,6 +184,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	llmStart := time.Now()
 	training, llmPrompt, llmModel, err := llm.GenTraining(
 		profiles,
+		effectiveGoals,
 		workExercises,
 		warmupExercises,
 		cooldownExercises,
@@ -216,9 +225,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		training.Gym = gym
 	}
 	training.Equipment = equipmentIDs
-	for _, profile := range profiles {
-		training.Goals = append(training.Goals, profile.Goals()...)
-	}
+	training.Goals = effectiveGoals
 	for i := range training.Routines {
 		training.Routines[i].Position = i
 		for j := range training.Routines[i].Blocks {

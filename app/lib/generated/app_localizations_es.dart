@@ -351,6 +351,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get methodologyAuto => 'Auto';
 
   @override
+  String get goalsOptional => 'Objetivos (opcional)';
+
+  @override
   String get failedToUpdateProfile => 'Error al actualizar el perfil';
 
   @override

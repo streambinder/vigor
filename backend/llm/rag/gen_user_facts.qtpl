@@ -2,7 +2,7 @@
 
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func GenUserFacts(profiles []model.Profile, prompt string) -%}
+{% func GenUserFacts(profiles []model.Profile, goals []string, prompt string) -%}
 {% collapsespace %}
 
 Knowledge for:
@@ -11,13 +11,15 @@ Knowledge for:
 	goalSet := make(map[string]bool)
 	injurySet := make(map[string]bool)
 	limitationSet := make(map[string]bool)
-	for _, profile := range profiles {
-		for _, goal := range profile.Goals() {
-			if !goalSet[goal] {
-				goalSet[goal] = true
-				allGoals = append(allGoals, goal)
-			}
+	// use provided goals directly
+	for _, goal := range goals {
+		if !goalSet[goal] {
+			goalSet[goal] = true
+			allGoals = append(allGoals, goal)
 		}
+	}
+	// extract injuries and limitations from profiles
+	for _, profile := range profiles {
 		for _, injury := range profile.Injuries() {
 			if !injurySet[injury.Description] {
 				injurySet[injury.Description] = true

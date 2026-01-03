@@ -11,6 +11,7 @@ type PostTrainingRequest struct {
 	Partners           []string `json:"partners"`
 	SkipWarmupCooldown bool     `json:"skipWarmupCooldown"`
 	Methodology        string   `json:"methodology"`
+	Goals              []string `json:"goals"`
 }
 
 // PostTrainingResponse represents the response for POST /training

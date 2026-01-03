@@ -20,6 +20,8 @@ PostTrainingRequest _$PostTrainingRequestFromJson(
       [],
   skipWarmupCooldown: json['skipWarmupCooldown'] as bool,
   methodology: json['methodology'] as String? ?? '',
+  goals:
+      (json['goals'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
 );
 
 Map<String, dynamic> _$PostTrainingRequestToJson(
@@ -32,4 +34,5 @@ Map<String, dynamic> _$PostTrainingRequestToJson(
   'partners': instance.partners,
   'skipWarmupCooldown': instance.skipWarmupCooldown,
   'methodology': instance.methodology,
+  'goals': instance.goals,
 };

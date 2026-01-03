@@ -37,6 +37,7 @@ func postTraining(c *fiber.Ctx) error {
 		req.Partners,
 		req.SkipWarmupCooldown,
 		req.Methodology,
+		req.Goals,
 	)
 	if err != nil {
 		switch {

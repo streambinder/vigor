@@ -344,6 +344,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get methodologyAuto => '自動';
 
   @override
+  String get goalsOptional => '目標（任意）';
+
+  @override
   String get failedToUpdateProfile => 'プロフィールの更新に失敗しました';
 
   @override
