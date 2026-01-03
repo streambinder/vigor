@@ -7,19 +7,20 @@ part 'goal.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Goal {
-  @JsonKey(name: 'description', defaultValue: '')
-  final String description;
-  @JsonKey(name: 'start_date', toJson: _dateTimeToJson)
-  final DateTime startDate;
+  @JsonKey(name: 'id', defaultValue: '')
+  final String id;
+  @JsonKey(name: 'description')
+  final String? description;
+  @JsonKey(name: 'aliases')
+  final List<String>? aliases;
 
   Goal({
-    required this.description,
-    required this.startDate,
+    required this.id,
+    this.description,
+    this.aliases,
   });
 
   factory Goal.fromJson(Map<String, dynamic> json) => _$GoalFromJson(json);
 
   Map<String, dynamic> toJson() => _$GoalToJson(this);
-
-  static String _dateTimeToJson(DateTime dt) => dt.toUtc().toIso8601String();
 }

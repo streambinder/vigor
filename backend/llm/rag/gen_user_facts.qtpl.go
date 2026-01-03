@@ -31,9 +31,9 @@ func StreamGenUserFacts(qw422016 *qt422016.Writer, profiles []model.Profile, pro
 	limitationSet := make(map[string]bool)
 	for _, profile := range profiles {
 		for _, goal := range profile.Goals() {
-			if !goalSet[goal.Description] {
-				goalSet[goal.Description] = true
-				allGoals = append(allGoals, goal.Description)
+			if !goalSet[goal] {
+				goalSet[goal] = true
+				allGoals = append(allGoals, goal)
 			}
 		}
 		for _, injury := range profile.Injuries() {

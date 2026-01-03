@@ -7,10 +7,10 @@ import '../generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../providers/locale_provider.dart';
 import '../models/profile.dart';
-import '../models/goal.dart';
 import '../models/injury.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/equipment_selector.dart';
+import '../widgets/goal_selector.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 
@@ -42,14 +42,13 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   String? _language;
   double? _height;
   double? _weight;
-  final List<Goal> _goals = [];
+  List<String> _goals = [];
   final List<Injury> _injuries = [];
   final List<String> _limitations = [];
   final List<String> _favoriteExercises = [];
   List<String> _favoriteEquipment = [];
 
   // Controllers for dynamic list inputs
-  final _goalDescriptionController = TextEditingController();
   final _injuryDescriptionController = TextEditingController();
   int? _injuryYear;
   final _limitationController = TextEditingController();
@@ -80,7 +79,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
       if (widget.profile.data.isNotEmpty) {
         final data = widget.profile.data;
         if (data['goals'] != null) {
-          _goals.addAll((data['goals'] as List).map((g) => Goal.fromJson(g)));
+          _goals = (data['goals'] as List).cast<String>();
         }
         if (data['injuries'] != null) {
           _injuries.addAll((data['injuries'] as List).map((i) => Injury.fromJson(i)));
@@ -105,7 +104,6 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
 
   @override
   void dispose() {
-    _goalDescriptionController.dispose();
     _injuryDescriptionController.dispose();
     _limitationController.dispose();
     _favoriteExerciseController.dispose();
@@ -159,7 +157,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
     try {
       // Build profile data
       final Map<String, dynamic> data = {
-        'goals': _goals.map((g) => g.toJson()).toList(),
+        'goals': _goals,
         'injuries': _injuries.map((i) => i.toJson()).toList(),
         'limitations': _limitations,
       };
@@ -564,53 +562,13 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          ..._goals.map((goal) => ListTile(
-                title: Text(goal.description),
-                subtitle: Text(l10n.startedDate(_formatDate(goal.startDate))),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    setState(() {
-                      _goals.remove(goal);
-                    });
-                  },
-                ),
-              )),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _goalDescriptionController,
-                  decoration: InputDecoration(
-                    hintText: l10n.addAGoal,
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  if (_goalDescriptionController.text.isNotEmpty) {
-                    setState(() {
-                      _goals.add(Goal(
-                        description: _goalDescriptionController.text,
-                        startDate: DateTime.now(),
-                      ));
-                      _goalDescriptionController.clear();
-                    });
-                  }
-                },
-              ),
-            ],
+          GoalSelector(
+            selected: _goals,
+            onChanged: (updated) => setState(() => _goals = updated),
           ),
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
   }
 
   Widget _buildInjuriesSection() {

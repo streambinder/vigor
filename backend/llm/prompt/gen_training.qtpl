@@ -24,7 +24,7 @@ Generate a {%d duration %}-minute training session.
 IMPORTANT: Generate ONLY the work routine. Do NOT include warmup or cooldown routines.
 {% endif %}
 
-{% if len(profiles) > 0 %}{% code var allGoals []string; goalMap := make(map[string]bool) %}{% for _, profile := range profiles %}{% for _, goal := range profile.Goals() %}{% if !goalMap[goal.Description] %}{% code goalMap[goal.Description] = true; allGoals = append(allGoals, goal.Description) %}{% endif %}{% endfor %}{% endfor %}{% if len(allGoals) > 0 %}
+{% if len(profiles) > 0 %}{% code var allGoals []string; goalMap := make(map[string]bool) %}{% for _, profile := range profiles %}{% for _, goal := range profile.Goals() %}{% if !goalMap[goal] %}{% code goalMap[goal] = true; allGoals = append(allGoals, goal) %}{% endif %}{% endfor %}{% endfor %}{% if len(allGoals) > 0 %}
 <<<USER_GOALS (PRIMARY DESIGN CRITERIA - ALL EXERCISE SELECTIONS MUST SERVE THESE GOALS)>>>
 {% for _, goal := range allGoals %}- {%s goal %}
 {% endfor %}<<<END_USER_GOALS>>>
@@ -40,7 +40,7 @@ Apply MOST RESTRICTIVE constraints - if ANY participant has an injury/limitation
 {% for i, profile := range profiles %}
 <<<USER_PROFILE{% if len(profiles) > 1 %} #{%d i+1 %}{% endif %}>>>
 Age: {%d profile.Age() %}, Height: {%f.0 profile.Height %}cm, Weight: {%f.0 profile.Weight %}kg, Gender: {%s profile.Gender %}
-{% if len(profile.Goals()) > 0 %}Goals: {% for j, goal := range profile.Goals() %}{%s goal.Description %}{% if j < len(profile.Goals())-1 %}, {% endif %}{% endfor %}{% endif %}
+{% if len(profile.Goals()) > 0 %}Goals: {% for j, goal := range profile.Goals() %}{%s goal %}{% if j < len(profile.Goals())-1 %}, {% endif %}{% endfor %}{% endif %}
 {% if len(profile.Injuries()) > 0 %}Injuries (AVOID): {% for j, injury := range profile.Injuries() %}{%s injury.Description %} ({%d injury.Year %}){% if j < len(profile.Injuries())-1 %}, {% endif %}{% endfor %}{% endif %}
 {% if len(profile.Limitations()) > 0 %}Limitations: {% for j, limitation := range profile.Limitations() %}{%s limitation %}{% if j < len(profile.Limitations())-1 %}, {% endif %}{% endfor %}{% endif %}
 <<<END_USER_PROFILE{% if len(profiles) > 1 %} #{%d i+1 %}{% endif %}>>>

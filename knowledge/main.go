@@ -41,6 +41,8 @@ func main() {
 		&model.EquipmentEmbedding{},
 		&model.Exercise{},
 		&model.ExerciseEmbedding{},
+		&model.Goal{},
+		&model.GoalEmbedding{},
 		&model.Modifier{},
 		&model.ModifierEmbedding{},
 		&model.Fact{},
@@ -52,6 +54,10 @@ func main() {
 
 	if err := bootstrapMethodologies(gormDB); err != nil {
 		log.Fatalf("Failed to inject methodologies: %s", err)
+	}
+
+	if err := bootstrapGoals(gormDB); err != nil {
+		log.Fatalf("Failed to inject goals: %s", err)
 	}
 
 	if err := bootstrapEquipment(gormDB); err != nil {
@@ -147,6 +153,65 @@ func bootstrapEquipment(gormDB *gorm.DB) error {
 					EquipmentID: row.ID,
 					Text:        alias,
 					Embedding:   pgvector.NewVector(vector),
+				}).Error; err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func bootstrapGoals(gormDB *gorm.DB) error {
+	bytes, err := os.ReadFile(filepath.Join("features", "goals.json"))
+	if err != nil {
+		return err
+	}
+
+	var rows []model.Goal
+	if err := json.Unmarshal(bytes, &rows); err != nil {
+		return err
+	}
+
+	for _, row := range rows {
+		if err := gormDB.Save(&row).Error; err != nil {
+			return err
+		}
+
+		gormDB.Where("goal_id = ?", row.ID).Delete(&model.GoalEmbedding{})
+
+		// generate embedding for description
+		if row.Description != "" {
+			vector, err := embedding.GenVector(row.Description)
+			if err != nil {
+				return err
+			}
+			if err := gormDB.Create(
+				&model.GoalEmbedding{
+					GoalID:    row.ID,
+					Text:      row.Description,
+					Embedding: pgvector.NewVector(vector),
+				}).Error; err != nil {
+				return err
+			}
+		}
+
+		// generate embeddings for aliases
+		aliases := row.Aliases
+		if len(aliases) == 0 {
+			aliases = []string{row.ID}
+		}
+
+		for _, alias := range aliases {
+			vector, err := embedding.GenVector(alias)
+			if err != nil {
+				return err
+			}
+			if err := gormDB.Create(
+				&model.GoalEmbedding{
+					GoalID:    row.ID,
+					Text:      alias,
+					Embedding: pgvector.NewVector(vector),
 				}).Error; err != nil {
 				return err
 			}

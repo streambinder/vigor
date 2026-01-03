@@ -70,10 +70,10 @@ IMPORTANT: Generate ONLY the work routine. Do NOT include warmup or cooldown rou
 //line llm/prompt/gen_training.qtpl:27
 			for _, goal := range profile.Goals() {
 //line llm/prompt/gen_training.qtpl:27
-				if !goalMap[goal.Description] {
+				if !goalMap[goal] {
 //line llm/prompt/gen_training.qtpl:27
-					goalMap[goal.Description] = true
-					allGoals = append(allGoals, goal.Description)
+					goalMap[goal] = true
+					allGoals = append(allGoals, goal)
 
 //line llm/prompt/gen_training.qtpl:27
 				}
@@ -168,7 +168,7 @@ Age: `)
 //line llm/prompt/gen_training.qtpl:43
 			for j, goal := range profile.Goals() {
 //line llm/prompt/gen_training.qtpl:43
-				qw422016.E().S(goal.Description)
+				qw422016.E().S(goal)
 //line llm/prompt/gen_training.qtpl:43
 				if j < len(profile.Goals())-1 {
 //line llm/prompt/gen_training.qtpl:43

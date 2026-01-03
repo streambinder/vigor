@@ -37,6 +37,26 @@ class GymService {
     );
   }
 
+  Future<ApiResponse<List<String>>> getAvailableGoals() async {
+    AppLogger.debug('[GymService] Fetching available goals');
+    final response = await _publicApiService.get('/goals');
+    if (response.isSuccess && response.data != null) {
+      try {
+        final goals = (response.data!['goals'] as List).cast<String>();
+        AppLogger.info('[GymService] Fetched ${goals.length} goals');
+        return ApiResponse.success(goals, response.statusCode);
+      } catch (e) {
+        AppLogger.error('[GymService] failed to parse goals', e);
+        return ApiResponse.error('Failed to parse goals', response.statusCode);
+      }
+    }
+    AppLogger.error('[GymService] Failed to fetch goals: ${response.error}');
+    return ApiResponse.error(
+      response.error ?? 'Failed to fetch goals',
+      response.statusCode,
+    );
+  }
+
   Future<ApiResponse<List<Gym>>> getGyms() async {
     AppLogger.debug('[GymService] Fetching gyms');
 

@@ -4,7 +4,6 @@ import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/adaptive/adaptive.dart';
-import '../models/goal.dart';
 import '../models/injury.dart';
 import '../models/gym.dart';
 import '../services/service_locator.dart';
@@ -306,7 +305,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: l10n.goals,
             color: VigorColors.success,
             isDark: isDark,
-            children: goals.map((g) => _buildListItem(g.description, subtitle: l10n.startedDate(_formatDate(g.startDate)))).toList(),
+            children: goals.map((g) => _buildListItem(g)).toList(),
           ),
         if (injuries.isNotEmpty) ...[
           SizedBox(height: VigorSpacing.md),
@@ -632,9 +631,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String _capitalizeFirst(String text) => text.isEmpty ? text : text[0].toUpperCase() + text.substring(1);
 
-  List<Goal> _getGoals(Map<String, dynamic> data) {
+  List<String> _getGoals(Map<String, dynamic> data) {
     try {
-      if (data['goals'] != null) return (data['goals'] as List).map((g) => Goal.fromJson(g)).toList();
+      if (data['goals'] != null) return (data['goals'] as List).cast<String>();
     } catch (_) {}
     return [];
   }

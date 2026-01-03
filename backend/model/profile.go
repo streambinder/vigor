@@ -27,7 +27,7 @@ type Profile struct {
 }
 
 type profileData struct {
-	Goals       []Goal       `json:"goals" flutter:"required"`
+	Goals       []string     `json:"goals" flutter:"required"`
 	Injuries    []Injury     `json:"injuries"`
 	Limitations []string     `json:"limitations"`
 	Preferences *Preferences `json:"preferences,omitempty"`
@@ -37,12 +37,6 @@ type profileData struct {
 type Preferences struct {
 	Exercises []string `json:"exercises,omitempty"`
 	Equipment []string `json:"equipment,omitempty"`
-}
-
-// Goal represents a user's fitness objective with timeline.
-type Goal struct {
-	Description string    `json:"description"`
-	StartDate   time.Time `json:"start_date"`
 }
 
 // Injury records a user's past injury for training considerations.
@@ -68,7 +62,7 @@ func (p *Profile) data() (profileData, error) {
 }
 
 // Goals extracts the user's fitness goals from profile data.
-func (p *Profile) Goals() []Goal {
+func (p *Profile) Goals() []string {
 	data, err := p.data()
 	if err != nil {
 		return nil
