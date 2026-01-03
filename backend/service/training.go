@@ -32,7 +32,7 @@ var (
 )
 
 // GenerateTraining creates a new training for a user.
-func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string) (*model.Training, error) {
+func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string) (*model.Training, error) {
 	if duration <= 0 {
 		return nil, ErrDurationRequired
 	}
@@ -127,7 +127,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	}
 
 	proficiencyMargin := ProgressiveMargin(trainingsComplete)
-	workExercises, err := rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData)
+	workExercises, err := rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles)
 	if err != nil {
 		return nil, err
 	}

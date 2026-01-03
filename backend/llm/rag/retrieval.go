@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/lib/pq"
 	"github.com/pgvector/pgvector-go"
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/database"
@@ -44,8 +45,8 @@ func RetrieveAllMethodologies() ([]model.Methodology, error) {
 }
 
 // RetrieveWorkExercises retrieves exercises for the main training phase via RAG.
-// Filters by methodology families, user equipment, and user proficiency.
-func RetrieveWorkExercises(profiles []model.Profile, goals []string, equipment []string, proficiencies map[string]float64, proficiencyMargin float64, methodology *model.Methodology) ([]model.Exercise, error) {
+// Filters by methodology families, user equipment, user proficiency, and target muscles.
+func RetrieveWorkExercises(profiles []model.Profile, goals []string, equipment []string, proficiencies map[string]float64, proficiencyMargin float64, methodology *model.Methodology, muscles []string) ([]model.Exercise, error) {
 	embeddingText := GenUserExercises(profiles, goals, equipment)
 	exerciseEmbedding, err := embedding.GenVector(embeddingText)
 	if err != nil {
@@ -101,6 +102,11 @@ func RetrieveWorkExercises(profiles []model.Profile, goals []string, equipment [
 			SELECT 1 FROM exercise_equipment
 			WHERE exercise_equipment.exercise_id = exercises.id
 		)`)
+	}
+
+	// filter by target muscles if specified
+	if len(muscles) > 0 {
+		query = query.Where("exercises.muscles && ?", pq.Array(muscles))
 	}
 
 	if err := database.Knowledge.

@@ -762,6 +762,18 @@ abstract class AppLocalizations {
   /// **'Goals (optional)'**
   String get goalsOptional;
 
+  /// No description provided for @musclesOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Muscles (optional)'**
+  String get musclesOptional;
+
+  /// No description provided for @musclesAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get musclesAuto;
+
   /// No description provided for @failedToUpdateProfile.
   ///
   /// In en, this message translates to:

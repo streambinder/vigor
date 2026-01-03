@@ -161,6 +161,8 @@
   "methodologyOptional": "Methodology (optional)",
   "methodologyAuto": "Auto",
   "goalsOptional": "Goals (optional)",
+  "musclesOptional": "Muscles (optional)",
+  "musclesAuto": "Auto",
 
   "failedToUpdateProfile": "Failed to update profile",
 

@@ -22,6 +22,9 @@ PostTrainingRequest _$PostTrainingRequestFromJson(
   methodology: json['methodology'] as String? ?? '',
   goals:
       (json['goals'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+  muscles:
+      (json['muscles'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      [],
 );
 
 Map<String, dynamic> _$PostTrainingRequestToJson(
@@ -35,4 +38,5 @@ Map<String, dynamic> _$PostTrainingRequestToJson(
   'skipWarmupCooldown': instance.skipWarmupCooldown,
   'methodology': instance.methodology,
   'goals': instance.goals,
+  'muscles': instance.muscles,
 };

@@ -347,6 +347,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get goalsOptional => '目標（任意）';
 
   @override
+  String get musclesOptional => '筋肉（任意）';
+
+  @override
+  String get musclesAuto => '自動';
+
+  @override
   String get failedToUpdateProfile => 'プロフィールの更新に失敗しました';
 
   @override

@@ -126,6 +126,8 @@
   "methodologyOptional": "Metodología (opcional)",
   "methodologyAuto": "Auto",
   "goalsOptional": "Objetivos (opcional)",
+  "musclesOptional": "Músculos (opcional)",
+  "musclesAuto": "Auto",
 
   "failedToUpdateProfile": "Error al actualizar el perfil",
 

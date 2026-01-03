@@ -355,6 +355,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get goalsOptional => 'Objetivos (opcional)';
 
   @override
+  String get musclesOptional => 'Músculos (opcional)';
+
+  @override
+  String get musclesAuto => 'Auto';
+
+  @override
   String get failedToUpdateProfile => 'Falha ao atualizar o perfil';
 
   @override

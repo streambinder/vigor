@@ -57,6 +57,26 @@ class GymService {
     );
   }
 
+  Future<ApiResponse<List<String>>> getAvailableMuscles() async {
+    AppLogger.debug('[GymService] Fetching available muscles');
+    final response = await _publicApiService.get('/muscles');
+    if (response.isSuccess && response.data != null) {
+      try {
+        final muscles = (response.data!['muscles'] as List).cast<String>();
+        AppLogger.info('[GymService] Fetched ${muscles.length} muscles');
+        return ApiResponse.success(muscles, response.statusCode);
+      } catch (e) {
+        AppLogger.error('[GymService] failed to parse muscles', e);
+        return ApiResponse.error('Failed to parse muscles', response.statusCode);
+      }
+    }
+    AppLogger.error('[GymService] Failed to fetch muscles: ${response.error}');
+    return ApiResponse.error(
+      response.error ?? 'Failed to fetch muscles',
+      response.statusCode,
+    );
+  }
+
   Future<ApiResponse<List<Gym>>> getGyms() async {
     AppLogger.debug('[GymService] Fetching gyms');
 

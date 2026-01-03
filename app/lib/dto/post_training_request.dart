@@ -23,6 +23,8 @@ class PostTrainingRequest {
   final String methodology;
   @JsonKey(name: 'goals', defaultValue: const [])
   final List<String> goals;
+  @JsonKey(name: 'muscles', defaultValue: const [])
+  final List<String> muscles;
 
   PostTrainingRequest({
     required this.duration,
@@ -33,6 +35,7 @@ class PostTrainingRequest {
     required this.skipWarmupCooldown,
     required this.methodology,
     required this.goals,
+    required this.muscles,
   });
 
   factory PostTrainingRequest.fromJson(Map<String, dynamic> json) => _$PostTrainingRequestFromJson(json);

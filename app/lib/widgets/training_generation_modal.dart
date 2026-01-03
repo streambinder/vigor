@@ -47,6 +47,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   String? _methodology;
   List<String> _availableGoals = [];
   Set<String> _selectedGoals = {};
+  List<String> _availableMuscles = [];
+  Set<String> _selectedMuscles = {};
 
   static const _methodologies = [
     'strength',
@@ -72,6 +74,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       _selectedGym = widget.gyms.first;
     }
     _loadGoals();
+    _loadMuscles();
   }
 
   Future<void> _loadGoals() async {
@@ -93,6 +96,17 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           _selectedGoals = profileData.goals.toSet();
         });
       } catch (_) {}
+    }
+  }
+
+  Future<void> _loadMuscles() async {
+    final gymService = context.read<ServiceLocator>().gymService;
+    final response = await gymService.getAvailableMuscles();
+    if (!mounted) return;
+    if (response.isSuccess && response.data != null) {
+      setState(() {
+        _availableMuscles = response.data!;
+      });
     }
   }
 
@@ -383,6 +397,74 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     );
   }
 
+  String _muscleLabel(String muscle) {
+    // format muscle id to human-readable: chest -> Chest
+    return muscle.split('_').map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}').join(' ');
+  }
+
+  Widget _buildMusclesSection() {
+    final l10n = AppLocalizations.of(context);
+    if (_availableMuscles.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.musclesOptional,
+          style: VigorTypography.caption.copyWith(
+            color: VigorColors.textSecondary(context),
+          ),
+        ),
+        SizedBox(height: VigorSpacing.sm),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            // "auto" chip for unset (no muscle filter)
+            FilterChip(
+              label: Text(
+                l10n.musclesAuto,
+                style: VigorTypography.caption.copyWith(
+                  color: _selectedMuscles.isEmpty ? Colors.white : VigorColors.textPrimary(context),
+                ),
+              ),
+              selected: _selectedMuscles.isEmpty,
+              selectedColor: VigorColors.orange,
+              checkmarkColor: Colors.white,
+              onSelected: (selected) {
+                if (selected) setState(() => _selectedMuscles.clear());
+              },
+            ),
+            ..._availableMuscles.map((muscle) {
+              final isSelected = _selectedMuscles.contains(muscle);
+              return FilterChip(
+                label: Text(
+                  _muscleLabel(muscle),
+                  style: VigorTypography.caption.copyWith(
+                    color: isSelected ? Colors.white : VigorColors.textPrimary(context),
+                  ),
+                ),
+                selected: isSelected,
+                selectedColor: VigorColors.orange,
+                checkmarkColor: Colors.white,
+                onSelected: (selected) {
+                  setState(() {
+                    if (selected) {
+                      _selectedMuscles.add(muscle);
+                    } else {
+                      _selectedMuscles.remove(muscle);
+                    }
+                  });
+                },
+              );
+            }),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildRoutineToggles() {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -461,6 +543,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       skipWarmupCooldown: !_includeWarmupCooldown ? true : null,
       methodology: _methodology,
       goals: _selectedGoals.isEmpty ? null : _selectedGoals.toList(),
+      muscles: _selectedMuscles.isEmpty ? null : _selectedMuscles.toList(),
       onRetry: (attempt) {
         if (mounted) {
           setState(() => _retryAttempt = attempt);
@@ -591,6 +674,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             // Goals selection
             _buildGoalsSection(),
             if (_availableGoals.isNotEmpty) SizedBox(height: VigorSpacing.md),
+
+            // Muscles selection
+            _buildMusclesSection(),
+            if (_availableMuscles.isNotEmpty) SizedBox(height: VigorSpacing.md),
 
             // Routine skip toggles
             _buildRoutineToggles(),

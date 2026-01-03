@@ -352,6 +352,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalsOptional => 'Goals (optional)';
 
   @override
+  String get musclesOptional => 'Muscles (optional)';
+
+  @override
+  String get musclesAuto => 'Auto';
+
+  @override
   String get failedToUpdateProfile => 'Failed to update profile';
 
   @override

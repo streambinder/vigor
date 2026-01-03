@@ -126,6 +126,8 @@
   "methodologyOptional": "Методология (необязательно)",
   "methodologyAuto": "Авто",
   "goalsOptional": "Цели (необязательно)",
+  "musclesOptional": "Мышцы (необязательно)",
+  "musclesAuto": "Авто",
 
   "failedToUpdateProfile": "Не удалось обновить профиль",
 

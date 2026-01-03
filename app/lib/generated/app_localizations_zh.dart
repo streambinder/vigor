@@ -347,6 +347,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get goalsOptional => '目标（可选）';
 
   @override
+  String get musclesOptional => '肌肉（可选）';
+
+  @override
+  String get musclesAuto => '自动';
+
+  @override
   String get failedToUpdateProfile => '更新个人资料失败';
 
   @override
