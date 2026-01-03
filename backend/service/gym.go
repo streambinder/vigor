@@ -13,6 +13,20 @@ var (
 	ErrGymNotFound      = errors.New("gym not found")
 )
 
+// PartnerEquipment is dynamically added for trainings with 2+ participants and should not be user-registered
+const PartnerEquipment = "partner"
+
+// stripPartnerEquipment removes the "partner" equipment from a slice since it's dynamically added
+func stripPartnerEquipment(equipment []string) []string {
+	result := make([]string, 0, len(equipment))
+	for _, e := range equipment {
+		if e != PartnerEquipment {
+			result = append(result, e)
+		}
+	}
+	return result
+}
+
 // CreateGym creates a new gym for a user.
 func CreateGym(userID uuid.UUID, name string, equipment []string) (model.Gym, error) {
 	if err := database.DB.First(&model.Gym{}, "user_id = ? AND name = ?", userID, name).Error; err == nil {
@@ -21,7 +35,7 @@ func CreateGym(userID uuid.UUID, name string, equipment []string) (model.Gym, er
 
 	gym := model.Gym{
 		Name:      name,
-		Equipment: equipment,
+		Equipment: stripPartnerEquipment(equipment),
 		UserID:    userID,
 	}
 	if err := database.DB.Create(&gym).Error; err != nil {
@@ -69,7 +83,7 @@ func UpdateGym(userID, gymID uuid.UUID, params UpdateGymParams) (model.Gym, erro
 		gym.Name = *params.Name
 	}
 	if params.Equipment != nil {
-		gym.Equipment = *params.Equipment
+		gym.Equipment = stripPartnerEquipment(*params.Equipment)
 	}
 
 	if err := database.DB.Save(&gym).Error; err != nil {

@@ -72,6 +72,8 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	if len(equipment) == 0 && gym != nil {
 		equipment = gym.Equipment
 	}
+	// strip partner equipment from user input - it's dynamically added based on partner count
+	equipment = stripPartnerEquipment(equipment)
 
 	var equipmentIDs []string
 	if len(equipment) > 0 {
@@ -82,6 +84,11 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		for _, eq := range matchedEquipment {
 			equipmentIDs = append(equipmentIDs, eq.ID)
 		}
+	}
+
+	// dynamically add partner equipment when training has 2+ participants
+	if len(partnerUserIDs) > 0 {
+		equipmentIDs = append(equipmentIDs, PartnerEquipment)
 	}
 
 	// use average proficiency across owner + partners for exercise filtering

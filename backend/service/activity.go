@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -125,6 +126,15 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		}
 	}
 
+	// build equipment list, dynamically adding partner equipment if training has partners
+	equipment := []string(training.Equipment)
+	if len(partners) > 0 {
+		hasPartner := slices.Contains(equipment, PartnerEquipment)
+		if !hasPartner {
+			equipment = append(equipment, PartnerEquipment)
+		}
+	}
+
 	// build base query matching by family with proficiency-based upper bound
 	baseQuery := func() *gorm.DB {
 		q := database.Knowledge.
@@ -134,7 +144,7 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		if len(excludeIDs) > 0 {
 			q = q.Where("id NOT IN ?", excludeIDs)
 		}
-		if len(training.Equipment) > 0 {
+		if len(equipment) > 0 {
 			q = q.Where(`(
 				NOT EXISTS (SELECT 1 FROM exercise_equipment WHERE exercise_equipment.exercise_id = exercises.id)
 				OR
@@ -143,7 +153,7 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 					WHERE ee.exercise_id = exercises.id
 					AND ee.equipment_id NOT IN ?
 				)
-			)`, []string(training.Equipment))
+			)`, equipment)
 		} else {
 			q = q.Where(`NOT EXISTS (
 				SELECT 1 FROM exercise_equipment WHERE exercise_equipment.exercise_id = exercises.id

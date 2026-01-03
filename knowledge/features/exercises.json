@@ -719,7 +719,7 @@
   {
     "id": "assisted-prone-lying-quads-stretch",
     "name": "Assisted Prone Lying Quads Stretch",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["glutes", "legs"],
     "reference": "https://static.exercisedb.dev/media/YUYAMEj.gif",
     "instructions": [
@@ -1407,7 +1407,7 @@
   {
     "id": "assisted-hanging-knee-raise",
     "name": "Assisted Hanging Knee Raise",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["core"],
     "reference": "https://static.exercisedb.dev/media/03lzqwk.gif",
     "instructions": [
@@ -1915,7 +1915,7 @@
   {
     "id": "assisted-prone-rectus-femoris-stretch",
     "name": "Assisted Prone Rectus Femoris Stretch",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["core", "legs"],
     "reference": "https://static.exercisedb.dev/media/2Ryn564.gif",
     "instructions": [
@@ -2314,7 +2314,7 @@
   {
     "id": "assisted-lying-glutes-stretch",
     "name": "Assisted Lying Glutes Stretch",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["glutes", "legs"],
     "reference": "https://static.exercisedb.dev/media/yn0LjwL.gif",
     "instructions": [
@@ -2365,7 +2365,7 @@
   {
     "id": "assisted-hanging-knee-raise-with-throw-down",
     "name": "Assisted Hanging Knee Raise With Throw Down",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["core", "back"],
     "reference": "https://static.exercisedb.dev/media/8K0w2yA.gif",
     "instructions": [
@@ -2641,7 +2641,7 @@
   {
     "id": "assisted-lying-leg-raise-with-lateral-throw-down",
     "name": "Assisted Lying Leg Raise With Lateral Throw Down",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["core"],
     "reference": "https://static.exercisedb.dev/media/UGhRD1A.gif",
     "instructions": [
@@ -3375,7 +3375,7 @@
   {
     "id": "assisted-lying-leg-raise-with-throw-down",
     "name": "Assisted Lying Leg Raise With Throw Down",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["core", "legs"],
     "reference": "https://static.exercisedb.dev/media/VX5YKR5.gif",
     "instructions": [
@@ -3954,7 +3954,7 @@
   {
     "id": "assisted-side-lying-adductor-stretch",
     "name": "Assisted Side Lying Adductor Stretch",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["legs", "glutes"],
     "reference": "https://static.exercisedb.dev/media/hC6oYY5.gif",
     "instructions": [
@@ -7011,7 +7011,7 @@
   {
     "id": "assisted-seated-pectoralis-major-stretch-with-stability-ball",
     "name": "Assisted Seated Pectoralis Major Stretch With Stability Ball",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["shoulders", "chest"],
     "reference": "https://static.exercisedb.dev/media/RoV1Rfa.gif",
     "instructions": [
@@ -7882,7 +7882,7 @@
   {
     "id": "assisted-prone-hamstring",
     "name": "Assisted Prone Hamstring",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["glutes", "legs"],
     "reference": "https://static.exercisedb.dev/media/VedGSby.gif",
     "instructions": [
@@ -12719,7 +12719,7 @@
   {
     "id": "assisted-sit-up",
     "name": "Assisted Sit-Up",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["core"],
     "reference": "https://static.exercisedb.dev/media/aumB2IV.gif",
     "instructions": [
@@ -14207,7 +14207,7 @@
   {
     "id": "assisted-standing-triceps-extension-with-towel",
     "name": "Assisted Standing Triceps Extension (With Towel)",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["shoulders", "arms"],
     "reference": "https://static.exercisedb.dev/media/7HcfMBP.gif",
     "instructions": [
@@ -15203,7 +15203,7 @@
   {
     "id": "assisted-lying-gluteus-and-piriformis-stretch",
     "name": "Assisted Lying Gluteus And Piriformis Stretch",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["glutes", "legs"],
     "reference": "https://static.exercisedb.dev/media/RQNVT10.gif",
     "instructions": [
@@ -19726,7 +19726,7 @@
   {
     "id": "behind-head-chest-stretch",
     "name": "Behind Head Chest Stretch",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["shoulders", "chest"],
     "reference": "https://static.exercisedb.dev/media/QoHIhPl.gif",
     "instructions": [
@@ -19779,7 +19779,7 @@
   {
     "id": "assisted-lying-calves-stretch",
     "name": "Assisted Lying Calves Stretch",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["legs"],
     "reference": "https://static.exercisedb.dev/media/GxDwDX0.gif",
     "instructions": [
@@ -24902,7 +24902,7 @@
   {
     "id": "flexible-assisted-prone-hamstring",
     "name": "Flexible Assisted Prone Hamstring",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["glutes", "legs"],
     "reference": "https://static.exercisedb.dev/media/fBnPpzd.gif",
     "instructions": [
@@ -25469,7 +25469,7 @@
   {
     "id": "isolation-assisted-seated-pectoralis-major-stretch-with-stability-ball",
     "name": "Isolation Assisted Seated Pectoralis Major Stretch With Stability Ball",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["shoulders", "chest"],
     "reference": "https://static.exercisedb.dev/media/Aj9vWh7.gif",
     "instructions": [
@@ -26814,7 +26814,7 @@
   {
     "id": "assisted-standing-triceps-extension-with-towel-with-horizontal",
     "name": "Assisted Standing Triceps Extension (With Towel) With Horizontal",
-    "equipment": ["assisted"],
+    "equipment": ["partner"],
     "muscles": ["shoulders", "arms"],
     "reference": "https://static.exercisedb.dev/media/7R4NIjL.gif",
     "instructions": [
