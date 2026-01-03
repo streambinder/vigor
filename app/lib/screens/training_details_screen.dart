@@ -245,6 +245,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (r.constraints.isNotEmpty) _buildReasoningSection(title: l10n.constraints, items: r.constraints, color: VigorColors.warning),
                 if (r.typeSelection.isNotEmpty) _buildReasoningText(title: l10n.typeSelection, text: r.typeSelection, color: VigorColors.electricBlue),
