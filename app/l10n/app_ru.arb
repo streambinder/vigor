@@ -128,6 +128,7 @@
   "goalsOptional": "Цели (необязательно)",
   "musclesOptional": "Мышцы (необязательно)",
   "musclesAuto": "Авто",
+  "advancedSettings": "Дополнительно",
 
   "failedToUpdateProfile": "Не удалось обновить профиль",
 

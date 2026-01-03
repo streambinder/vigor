@@ -353,6 +353,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get musclesAuto => '自动';
 
   @override
+  String get advancedSettings => '高级';
+
+  @override
   String get failedToUpdateProfile => '更新个人资料失败';
 
   @override

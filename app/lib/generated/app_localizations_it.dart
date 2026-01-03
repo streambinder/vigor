@@ -361,6 +361,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get musclesAuto => 'Auto';
 
   @override
+  String get advancedSettings => 'Avanzate';
+
+  @override
   String get failedToUpdateProfile => 'Impossibile aggiornare il profilo';
 
   @override

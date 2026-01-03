@@ -774,6 +774,12 @@ abstract class AppLocalizations {
   /// **'Auto'**
   String get musclesAuto;
 
+  /// No description provided for @advancedSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get advancedSettings;
+
   /// No description provided for @failedToUpdateProfile.
   ///
   /// In en, this message translates to:

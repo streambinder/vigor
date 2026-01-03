@@ -163,6 +163,7 @@
   "goalsOptional": "Goals (optional)",
   "musclesOptional": "Muscles (optional)",
   "musclesAuto": "Auto",
+  "advancedSettings": "Advanced",
 
   "failedToUpdateProfile": "Failed to update profile",
 

@@ -50,6 +50,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   List<String> _availableMuscles = [];
   Set<String> _selectedMuscles = {};
   List<String> _availableMethodologies = [];
+  bool _advancedExpanded = false;
 
   @override
   void initState() {
@@ -469,7 +470,85 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     );
   }
 
-  Widget _buildRoutineToggles() {
+  Widget _buildAdvancedHeader() {
+    final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return GestureDetector(
+      onTap: () => setState(() => _advancedExpanded = !_advancedExpanded),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.08),
+              width: 1,
+            ),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.tune,
+              size: 18,
+              color: VigorColors.textSecondary(context),
+            ),
+            SizedBox(width: VigorSpacing.sm),
+            Text(
+              l10n.advancedSettings,
+              style: VigorTypography.label.copyWith(
+                color: VigorColors.textSecondary(context),
+              ),
+            ),
+            const Spacer(),
+            AnimatedRotation(
+              turns: _advancedExpanded ? 0.5 : 0,
+              duration: VigorAnimation.fast,
+              child: Icon(
+                Icons.keyboard_arrow_down,
+                size: 20,
+                color: VigorColors.textSecondary(context),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAdvancedContent() {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Custom prompt
+        AdaptiveTextField(
+          controller: _promptController,
+          labelText: l10n.customPromptOptional,
+          placeholder: l10n.focusOnUpperBody,
+          maxLines: 2,
+          minLines: 1,
+        ),
+        SizedBox(height: VigorSpacing.md),
+
+        // Warmup/cooldown toggle
+        _buildWarmupToggle(),
+        SizedBox(height: VigorSpacing.md),
+
+        // Methodology selection
+        _buildMethodologySection(),
+        if (_availableMethodologies.isNotEmpty) SizedBox(height: VigorSpacing.md),
+
+        // Goals selection
+        _buildGoalsSection(),
+        if (_availableGoals.isNotEmpty) SizedBox(height: VigorSpacing.md),
+
+        // Muscles selection
+        _buildMusclesSection(),
+      ],
+    );
+  }
+
+  Widget _buildWarmupToggle() {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
@@ -486,9 +565,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 ),
               )
             : BoxDecoration(
-                border: Border.all(
-                  color: VigorColors.darkBorder,
-                ),
+                border: Border.all(color: VigorColors.darkBorder),
                 borderRadius: VigorRadius.radiusMd,
               ),
         child: Row(
@@ -505,6 +582,55 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildPartnersSection() {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              l10n.trainingPartnersOptional,
+              style: VigorTypography.caption.copyWith(
+                color: VigorColors.textSecondary(context),
+              ),
+            ),
+            const Spacer(),
+            AdaptiveButton(
+              onPressed: _addPartner,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.person_add, size: 16),
+                  SizedBox(width: VigorSpacing.xs),
+                  Text(l10n.add),
+                ],
+              ),
+            ),
+          ],
+        ),
+        if (_partners.isNotEmpty) ...[
+          SizedBox(height: VigorSpacing.sm),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _partners.map((partner) {
+              return Chip(
+                label: Text(
+                  partner.displayName,
+                  style: VigorTypography.caption,
+                ),
+                deleteIcon: const Icon(Icons.close, size: 16),
+                onDeleted: () => _removePartner(partner),
+                backgroundColor: VigorColors.orange.withValues(alpha: 0.1),
+              );
+            }).toList(),
+          ),
+        ],
+      ],
     );
   }
 
@@ -693,73 +819,22 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             _buildEquipmentSection(),
             SizedBox(height: VigorSpacing.md),
 
-            // Methodology selection
-            _buildMethodologySection(),
-            if (_availableMethodologies.isNotEmpty) SizedBox(height: VigorSpacing.md),
-
-            // Goals selection
-            _buildGoalsSection(),
-            if (_availableGoals.isNotEmpty) SizedBox(height: VigorSpacing.md),
-
-            // Muscles selection
-            _buildMusclesSection(),
-            if (_availableMuscles.isNotEmpty) SizedBox(height: VigorSpacing.md),
-
-            // Routine skip toggles
-            _buildRoutineToggles(),
-            SizedBox(height: VigorSpacing.md),
-
-            // Optional prompt
-            AdaptiveTextField(
-              controller: _promptController,
-              labelText: l10n.customPromptOptional,
-              placeholder: l10n.focusOnUpperBody,
-              maxLines: 3,
-              minLines: 1,
-            ),
-            SizedBox(height: VigorSpacing.md),
-
             // Partners section
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.trainingPartnersOptional,
-                  style: VigorTypography.caption.copyWith(
-                    color: VigorColors.textSecondary(context),
-                  ),
-                ),
-                SizedBox(height: VigorSpacing.sm),
-                AdaptiveButton(
-                  onPressed: _addPartner,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.person_add, size: 18),
-                      SizedBox(width: VigorSpacing.sm),
-                      Text(l10n.addPartner),
-                    ],
-                  ),
-                ),
-                if (_partners.isNotEmpty) ...[
-                  SizedBox(height: VigorSpacing.sm),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _partners.map((partner) {
-                      return Chip(
-                        label: Text(
-                          partner.displayName,
-                          style: VigorTypography.caption,
-                        ),
-                        deleteIcon: const Icon(Icons.close, size: 16),
-                        onDeleted: () => _removePartner(partner),
-                        backgroundColor: VigorColors.orange.withValues(alpha: 0.1),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ],
+            _buildPartnersSection(),
+            SizedBox(height: VigorSpacing.md),
+
+            // Advanced settings collapsible
+            _buildAdvancedHeader(),
+            AnimatedSize(
+              duration: VigorAnimation.medium,
+              curve: VigorAnimation.defaultCurve,
+              alignment: Alignment.topCenter,
+              child: _advancedExpanded
+                  ? Padding(
+                      padding: EdgeInsets.only(top: VigorSpacing.md),
+                      child: _buildAdvancedContent(),
+                    )
+                  : const SizedBox.shrink(),
             ),
             SizedBox(height: VigorSpacing.lg),
 

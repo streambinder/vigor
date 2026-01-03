@@ -128,6 +128,7 @@
   "goalsOptional": "목표 (선택사항)",
   "musclesOptional": "근육 (선택사항)",
   "musclesAuto": "자동",
+  "advancedSettings": "고급",
 
   "failedToUpdateProfile": "프로필 업데이트 실패",
 

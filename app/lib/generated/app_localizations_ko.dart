@@ -353,6 +353,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get musclesAuto => '자동';
 
   @override
+  String get advancedSettings => '고급';
+
+  @override
   String get failedToUpdateProfile => '프로필 업데이트 실패';
 
   @override

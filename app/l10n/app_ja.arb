@@ -128,6 +128,7 @@
   "goalsOptional": "目標（任意）",
   "musclesOptional": "筋肉（任意）",
   "musclesAuto": "自動",
+  "advancedSettings": "詳細設定",
 
   "failedToUpdateProfile": "プロフィールの更新に失敗しました",
 

@@ -357,6 +357,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get musclesAuto => 'Авто';
 
   @override
+  String get advancedSettings => 'Дополнительно';
+
+  @override
   String get failedToUpdateProfile => 'Не удалось обновить профиль';
 
   @override

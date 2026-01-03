@@ -128,6 +128,7 @@
   "goalsOptional": "Objetivos (opcional)",
   "musclesOptional": "Músculos (opcional)",
   "musclesAuto": "Auto",
+  "advancedSettings": "Avançado",
 
   "failedToUpdateProfile": "Falha ao atualizar o perfil",
 

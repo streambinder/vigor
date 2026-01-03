@@ -353,6 +353,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get musclesAuto => '自動';
 
   @override
+  String get advancedSettings => '詳細設定';
+
+  @override
   String get failedToUpdateProfile => 'プロフィールの更新に失敗しました';
 
   @override
