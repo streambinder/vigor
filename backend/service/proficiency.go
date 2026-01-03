@@ -99,23 +99,42 @@ func GetProficiencyCalibration(userID uuid.UUID) (map[string]int, error) {
 	return result, nil
 }
 
-// GetTrainingsCompleteCount returns the number of completed trainings for a user.
+// GetTrainingsCompleteCount returns the number of completed trainings for a user,
+// including trainings they own and trainings where they participated as a partner.
 func GetTrainingsCompleteCount(userID uuid.UUID) (int, error) {
-	var count int64
-	err := database.DB.Model(&model.Training{}).
+	var ownedCount, partneredCount int64
+	if err := database.DB.Model(&model.Training{}).
 		Where("user_id = ? AND completed_at IS NOT NULL", userID).
-		Count(&count).Error
-	return int(count), err
-}
-
-// GetPartneredTrainingsCount returns the number of completed trainings where the user is a partner (not owner).
-func GetPartneredTrainingsCount(userID uuid.UUID) (int, error) {
-	var count int64
-	err := database.DB.Model(&model.Partner{}).
+		Count(&ownedCount).Error; err != nil {
+		return 0, err
+	}
+	if err := database.DB.Model(&model.Partner{}).
 		Joins("JOIN trainings ON trainings.id = partners.training_id").
 		Where("partners.user_id = ? AND trainings.completed_at IS NOT NULL", userID).
-		Count(&count).Error
-	return int(count), err
+		Count(&partneredCount).Error; err != nil {
+		return 0, err
+	}
+	return int(ownedCount + partneredCount), nil
+}
+
+// GetPartneredTrainingsCount returns the number of completed partnered trainings,
+// including trainings the user owns with partners and trainings where they're a partner.
+func GetPartneredTrainingsCount(userID uuid.UUID) (int, error) {
+	var ownedWithPartners, asPartner int64
+	// trainings user owns that have at least one partner
+	if err := database.DB.Model(&model.Training{}).
+		Where("user_id = ? AND completed_at IS NOT NULL AND EXISTS (SELECT 1 FROM partners WHERE partners.training_id = trainings.id)", userID).
+		Count(&ownedWithPartners).Error; err != nil {
+		return 0, err
+	}
+	// trainings where user participated as partner
+	if err := database.DB.Model(&model.Partner{}).
+		Joins("JOIN trainings ON trainings.id = partners.training_id").
+		Where("partners.user_id = ? AND trainings.completed_at IS NOT NULL", userID).
+		Count(&asPartner).Error; err != nil {
+		return 0, err
+	}
+	return int(ownedWithPartners + asPartner), nil
 }
 
 // DecayProficiency reduces proficiency based on time since last demonstration.
