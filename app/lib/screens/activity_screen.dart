@@ -63,7 +63,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   void _showTrainingGenerationModal() {
     showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (context) => TrainingGenerationModal(
         gyms: _gyms ?? [],
         onSuccess: (training) {

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'main_navigation.dart';
-import 'profile_completion_modal.dart';
+import 'profile_edit_screen.dart';
 import '../utils/profile_helper.dart';
 
 /// Main entry screen after authentication.
-/// Handles profile completion modal on app open/resume.
+/// Handles profile completion screen on app open/resume.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -16,7 +16,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _hasCheckedProfile = false;
-  bool _isModalCurrentlyShown = false;
+  bool _isCompletionScreenShown = false;
   AuthState? _previousAuthState;
 
   @override
@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed && !_isModalCurrentlyShown) {
+    if (state == AppLifecycleState.resumed && !_isCompletionScreenShown) {
       setState(() {
         _hasCheckedProfile = false;
       });
@@ -46,14 +46,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _previousAuthState = currentState;
       if (currentState != AuthState.authenticated) {
         _hasCheckedProfile = false;
-        _isModalCurrentlyShown = false;
+        _isCompletionScreenShown = false;
       }
     }
   }
 
-  void _checkAndShowProfileModal(AuthProvider authProvider) {
+  void _checkAndShowProfileCompletion(AuthProvider authProvider) {
     if (!_hasCheckedProfile &&
-        !_isModalCurrentlyShown &&
+        !_isCompletionScreenShown &&
         authProvider.state == AuthState.authenticated &&
         authProvider.currentUser != null) {
       _hasCheckedProfile = true;
@@ -62,21 +62,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       final missingFields = ProfileHelper.getMissingRequiredFields(profile);
 
       if (missingFields.isNotEmpty) {
-        _isModalCurrentlyShown = true;
+        _isCompletionScreenShown = true;
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => ProfileCompletionModal(
-                profile: profile,
-                missingFields: missingFields,
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => ProfileEditScreen(
+                  profile: profile,
+                  missingFields: missingFields,
+                ),
               ),
             ).then((_) {
               if (mounted) {
                 setState(() {
-                  _isModalCurrentlyShown = false;
+                  _isCompletionScreenShown = false;
                   _hasCheckedProfile = false;
                 });
               }
@@ -92,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         _resetProfileCheckOnAuthChange(authProvider.state);
-        _checkAndShowProfileModal(authProvider);
+        _checkAndShowProfileCompletion(authProvider);
 
         return MainNavigation(key: MainNavigation.navKey);
       },

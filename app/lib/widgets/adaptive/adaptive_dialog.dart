@@ -26,6 +26,7 @@ class AdaptiveAlertDialog extends StatelessWidget {
   }) {
     return showDialog<T>(
       context: context,
+      barrierDismissible: true,
       builder: (context) => AdaptiveAlertDialog(
         title: title,
         content: content,

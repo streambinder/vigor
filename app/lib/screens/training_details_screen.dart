@@ -226,6 +226,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
     showDialog(
       context: context,
+      barrierDismissible: true,
       builder: (ctx) => AlertDialog(
         backgroundColor: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
         title: Row(
@@ -395,6 +396,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     final controller = TextEditingController();
     final result = await showDialog<String>(
       context: context,
+      barrierDismissible: true,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.reportIssue),
         content: TextField(

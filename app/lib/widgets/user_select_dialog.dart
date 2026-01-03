@@ -16,6 +16,7 @@ Future<UserInfo?> showUserSelectDialog({
 }) async {
   return showDialog<UserInfo>(
     context: context,
+    barrierDismissible: true,
     builder: (ctx) => _UserSelectDialog(
       title: title,
       excludeUserId: excludeUserId,

@@ -9,7 +9,7 @@ import '../models/gym.dart';
 import '../services/service_locator.dart';
 import '../services/preferences_service.dart';
 import '../widgets/gym_form_dialog.dart';
-import 'profile_completion_modal.dart';
+import 'profile_edit_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -50,6 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _showGymDialog({Gym? gym}) async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
+      barrierDismissible: true,
       builder: (context) => GymFormDialog(gym: gym),
     );
 
@@ -232,11 +233,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           // edit button
           GestureDetector(
-            onTap: () => showDialog(
-              context: context,
-              barrierDismissible: true,
-              builder: (context) => ProfileCompletionModal(profile: user.profile, missingFields: const {}),
-            ),
+            onTap: () async {
+              final result = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(builder: (_) => ProfileEditScreen(profile: user.profile)),
+              );
+              if (result == true && context.mounted) {
+                context.read<AuthProvider>().refreshUserData();
+              }
+            },
             child: Container(
               padding: VigorSpacing.paddingSm,
               decoration: BoxDecoration(
@@ -305,7 +309,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: l10n.goals,
             color: VigorColors.success,
             isDark: isDark,
-            children: goals.map((g) => _buildListItem(g)).toList(),
+            children: [_buildChipWrap(goals, VigorColors.success)],
           ),
         if (injuries.isNotEmpty) ...[
           SizedBox(height: VigorSpacing.md),
@@ -324,7 +328,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: l10n.limitations,
             color: VigorColors.error,
             isDark: isDark,
-            children: limitations.map((lim) => _buildListItem(lim)).toList(),
+            children: [_buildChipWrap(limitations, VigorColors.error)],
           ),
         ],
         if (favExercises.isNotEmpty || favEquipment.isNotEmpty) ...[
@@ -336,19 +340,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
             isDark: isDark,
             children: [
               if (favExercises.isNotEmpty) ...[
-                Padding(
-                  padding: EdgeInsets.only(left: VigorSpacing.md, bottom: VigorSpacing.xs),
-                  child: Text(l10n.exercises, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: VigorSpacing.sm),
+                    child: Text(l10n.exercises, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
+                  ),
                 ),
-                ...favExercises.map((e) => _buildListItem(e)),
+                _buildChipWrap(favExercises, VigorColors.electricBlue),
               ],
               if (favEquipment.isNotEmpty) ...[
-                SizedBox(height: VigorSpacing.sm),
-                Padding(
-                  padding: EdgeInsets.only(left: VigorSpacing.md, bottom: VigorSpacing.xs),
-                  child: Text(l10n.equipment, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
+                SizedBox(height: VigorSpacing.md),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: VigorSpacing.sm),
+                    child: Text(l10n.equipment, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
+                  ),
                 ),
-                ...favEquipment.map((e) => _buildListItem(e)),
+                _buildChipWrap(favEquipment, VigorColors.electricBlue),
               ],
             ],
           ),
@@ -409,6 +419,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildChipWrap(List<String> items, Color color) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Wrap(
+        spacing: VigorSpacing.xs,
+        runSpacing: VigorSpacing.xs,
+        children: items.map((item) => Container(
+          padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.15),
+            borderRadius: VigorRadius.radiusFull,
+          ),
+          child: Text(item, style: VigorTypography.caption.copyWith(color: color)),
+        )).toList(),
       ),
     );
   }
@@ -626,8 +654,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     }
   }
-
-  String _formatDate(DateTime date) => '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
 
   String _capitalizeFirst(String text) => text.isEmpty ? text : text[0].toUpperCase() + text.substring(1);
 

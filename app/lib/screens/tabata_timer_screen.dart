@@ -846,6 +846,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
     final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
+      barrierDismissible: true,
       builder: (context) => AlertDialog(
         title: Text(l10n.exitTraining),
         content: Text(l10n.whatWouldYouLikeToDo),
