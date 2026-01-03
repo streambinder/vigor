@@ -74,7 +74,7 @@ class AdaptiveAlertDialog extends StatelessWidget {
                     style: VigorTypography.headline.copyWith(color: textColor),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: VigorSpacing.sm),
+                  const SizedBox(height: VigorSpacing.sm),
                 ],
                 if (content != null) ...[
                   Text(
@@ -82,18 +82,18 @@ class AdaptiveAlertDialog extends StatelessWidget {
                     style: VigorTypography.body.copyWith(color: secondaryColor),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: VigorSpacing.lg),
+                  const SizedBox(height: VigorSpacing.lg),
                 ],
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: actions.map((action) {
                     return Expanded(
                       child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: VigorSpacing.xs),
+                        padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.xs),
                         child: GestureDetector(
                           onTap: action.onPressed,
                           child: Container(
-                            padding: EdgeInsets.symmetric(vertical: VigorSpacing.sm),
+                            padding: const EdgeInsets.symmetric(vertical: VigorSpacing.sm),
                             decoration: BoxDecoration(
                               color: action.isDestructive
                                   ? VigorColors.error.withValues(alpha: 0.1)

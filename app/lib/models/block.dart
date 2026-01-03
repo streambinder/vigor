@@ -16,7 +16,7 @@ class Block {
   final int repeats;
   @JsonKey(name: 'rest')
   final int rest;
-  @JsonKey(name: 'activities', defaultValue: const [])
+  @JsonKey(name: 'activities', defaultValue: [])
   final List<Activity> activities;
 
   Block({

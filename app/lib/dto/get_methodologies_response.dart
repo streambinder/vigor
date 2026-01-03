@@ -7,7 +7,7 @@ part 'get_methodologies_response.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class GetMethodologiesResponse {
-  @JsonKey(name: 'methodologies', defaultValue: const [])
+  @JsonKey(name: 'methodologies', defaultValue: [])
   final List<String> methodologies;
 
   GetMethodologiesResponse({

@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../design/tokens.dart';
 
@@ -26,16 +25,16 @@ class LiquidGlassTheme {
   static List<BoxShadow> get glowShadow => VigorShadows.orangeGlow;
 
   // Background gradients
-  static LinearGradient get backgroundGradient => LinearGradient(
+  static LinearGradient get backgroundGradient => const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
           VigorColors.lightBackground,
-          const Color(0xFFE8EEF5),
+          Color(0xFFE8EEF5),
         ],
       );
 
-  static LinearGradient get darkBackgroundGradient => LinearGradient(
+  static LinearGradient get darkBackgroundGradient => const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [

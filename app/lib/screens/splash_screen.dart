@@ -19,7 +19,7 @@ class SplashScreen extends StatelessWidget {
           children: [
             // vigor logo icon
             const VigorLogo(size: 100),
-            SizedBox(height: VigorSpacing.lg),
+            const SizedBox(height: VigorSpacing.lg),
             Text(
               l10n.appName.toUpperCase(),
               style: VigorTypography.display.copyWith(
@@ -27,7 +27,7 @@ class SplashScreen extends StatelessWidget {
                 letterSpacing: 4,
               ),
             ),
-            SizedBox(height: VigorSpacing.md),
+            const SizedBox(height: VigorSpacing.md),
             const AdaptiveLoadingIndicator(),
           ],
         ),

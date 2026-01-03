@@ -6,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../models/injury.dart';
 import '../models/gym.dart';
+import '../models/user.dart';
 import '../services/service_locator.dart';
 import '../services/preferences_service.dart';
 import '../widgets/gym_form_dialog.dart';
@@ -89,6 +90,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _deleteGym(Gym gym) async {
     final l10n = AppLocalizations.of(context);
+    final gymService = context.read<ServiceLocator>().gymService;
+    final prefsService = context.read<PreferencesService>();
     final shouldDelete = await AdaptiveAlertDialog.show<bool>(
       context: context,
       title: l10n.deleteGym,
@@ -98,14 +101,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         AdaptiveDialogAction(label: l10n.delete, isDestructive: true, onPressed: () => Navigator.of(context).pop(true)),
       ],
     );
+    if (!mounted) return;
 
     if (shouldDelete == true) {
-      final response = await context.read<ServiceLocator>().gymService.deleteGym(gym.id);
-      if (response.isSuccess && mounted) {
-        await context.read<PreferencesService>().clearDefaultGymIfMatches(gym.id);
+      final response = await gymService.deleteGym(gym.id);
+      if (!mounted) return;
+      if (response.isSuccess) {
+        await prefsService.clearDefaultGymIfMatches(gym.id);
+        if (!mounted) return;
         AdaptiveNotification.show(context: context, message: l10n.gymDeletedSuccessfully);
         await _loadGyms();
-      } else if (mounted) {
+      } else {
         AdaptiveNotification.showError(context: context, message: l10n.failedToDeleteGym, rawError: response.error);
       }
     }
@@ -158,22 +164,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 padding: VigorSpacing.paddingLg,
                 children: [
                   _buildProfileHeader(user, l10n),
-                  SizedBox(height: VigorSpacing.lg),
+                  const SizedBox(height: VigorSpacing.lg),
                   _buildQuickStats(user, l10n),
-                  SizedBox(height: VigorSpacing.xl),
+                  const SizedBox(height: VigorSpacing.xl),
                   _buildDataSections(user, l10n),
-                  SizedBox(height: VigorSpacing.xl),
+                  const SizedBox(height: VigorSpacing.xl),
                   _buildGymsSection(l10n),
-                  SizedBox(height: VigorSpacing.xl),
+                  const SizedBox(height: VigorSpacing.xl),
                   _buildDangerZone(l10n, authProvider),
-                  SizedBox(height: VigorSpacing.xxl),
+                  const SizedBox(height: VigorSpacing.xxl),
                 ],
               ),
             ),
     );
   }
 
-  Widget _buildProfileHeader(user, AppLocalizations l10n) {
+  Widget _buildProfileHeader(User user, AppLocalizations l10n) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: VigorSpacing.paddingLg,
@@ -196,7 +202,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // avatar with gradient ring
           Container(
             padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]),
             ),
@@ -204,14 +210,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               radius: 36,
               backgroundColor: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
               child: ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
+                shaderCallback: (bounds) => const LinearGradient(
                   colors: [VigorColors.orange, VigorColors.electricBlue],
                 ).createShader(bounds),
                 child: const Icon(Icons.person, size: 40, color: Colors.white),
               ),
             ),
           ),
-          SizedBox(width: VigorSpacing.md),
+          const SizedBox(width: VigorSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,7 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: VigorColors.textPrimary(context),
                   ),
                 ),
-                SizedBox(height: VigorSpacing.xs),
+                const SizedBox(height: VigorSpacing.xs),
                 Text(
                   user.email,
                   style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context)),
@@ -237,7 +243,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               final result = await Navigator.of(context).push<bool>(
                 MaterialPageRoute(builder: (_) => ProfileEditScreen(profile: user.profile)),
               );
-              if (result == true && context.mounted) {
+              if (result == true && mounted) {
                 context.read<AuthProvider>().refreshUserData();
               }
             },
@@ -247,7 +253,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 color: VigorColors.orange.withValues(alpha: 0.15),
                 borderRadius: VigorRadius.radiusFull,
               ),
-              child: Icon(Icons.edit, color: VigorColors.orange, size: 20),
+              child: const Icon(Icons.edit, color: VigorColors.orange, size: 20),
             ),
           ),
         ],
@@ -255,7 +261,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildQuickStats(user, AppLocalizations l10n) {
+  Widget _buildQuickStats(User user, AppLocalizations l10n) {
     final age = DateTime.now().year - user.profile.birthdate.year;
     return Wrap(
       spacing: VigorSpacing.sm,
@@ -276,7 +282,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildStatPill(IconData icon, String value, Color color) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
+      padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: VigorRadius.radiusFull,
@@ -286,14 +292,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, color: color, size: 16),
-          SizedBox(width: VigorSpacing.xs),
+          const SizedBox(width: VigorSpacing.xs),
           Text(value, style: VigorTypography.label.copyWith(color: color, fontWeight: FontWeight.w600)),
         ],
       ),
     );
   }
 
-  Widget _buildDataSections(user, AppLocalizations l10n) {
+  Widget _buildDataSections(User user, AppLocalizations l10n) {
     final goals = _getGoals(user.profile.data);
     final injuries = _getInjuries(user.profile.data);
     final limitations = _getLimitations(user.profile.data);
@@ -312,7 +318,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [_buildChipWrap(goals, VigorColors.success)],
           ),
         if (injuries.isNotEmpty) ...[
-          SizedBox(height: VigorSpacing.md),
+          const SizedBox(height: VigorSpacing.md),
           _buildCollapsibleSection(
             icon: Icons.healing,
             title: l10n.injuries,
@@ -322,7 +328,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
         if (limitations.isNotEmpty) ...[
-          SizedBox(height: VigorSpacing.md),
+          const SizedBox(height: VigorSpacing.md),
           _buildCollapsibleSection(
             icon: Icons.warning_amber,
             title: l10n.limitations,
@@ -332,7 +338,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
         if (favExercises.isNotEmpty || favEquipment.isNotEmpty) ...[
-          SizedBox(height: VigorSpacing.md),
+          const SizedBox(height: VigorSpacing.md),
           _buildCollapsibleSection(
             icon: Icons.favorite,
             title: l10n.favorites,
@@ -343,18 +349,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
-                    padding: EdgeInsets.only(bottom: VigorSpacing.sm),
+                    padding: const EdgeInsets.only(bottom: VigorSpacing.sm),
                     child: Text(l10n.exercises, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
                   ),
                 ),
                 _buildChipWrap(favExercises, VigorColors.electricBlue),
               ],
               if (favEquipment.isNotEmpty) ...[
-                SizedBox(height: VigorSpacing.md),
+                const SizedBox(height: VigorSpacing.md),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
-                    padding: EdgeInsets.only(bottom: VigorSpacing.sm),
+                    padding: const EdgeInsets.only(bottom: VigorSpacing.sm),
                     child: Text(l10n.equipment, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
                   ),
                 ),
@@ -389,7 +395,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Icon(icon, color: color, size: 20),
           ),
           title: Text(title, style: VigorTypography.headline.copyWith(fontSize: 16, color: VigorColors.textPrimary(context))),
-          childrenPadding: EdgeInsets.only(left: VigorSpacing.md, right: VigorSpacing.md, bottom: VigorSpacing.md),
+          childrenPadding: const EdgeInsets.only(left: VigorSpacing.md, right: VigorSpacing.md, bottom: VigorSpacing.md),
           children: children,
         ),
       ),
@@ -398,15 +404,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildListItem(String text, {String? subtitle}) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: VigorSpacing.xs),
+      padding: const EdgeInsets.symmetric(vertical: VigorSpacing.xs),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            margin: EdgeInsets.only(top: 6, right: VigorSpacing.sm),
+            margin: const EdgeInsets.only(top: 6, right: VigorSpacing.sm),
             width: 6,
             height: 6,
-            decoration: BoxDecoration(color: VigorColors.orange, shape: BoxShape.circle),
+            decoration: const BoxDecoration(color: VigorColors.orange, shape: BoxShape.circle),
           ),
           Expanded(
             child: Column(
@@ -430,7 +436,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         spacing: VigorSpacing.xs,
         runSpacing: VigorSpacing.xs,
         children: items.map((item) => Container(
-          padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+          padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.15),
             borderRadius: VigorRadius.radiusFull,
@@ -450,10 +456,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Row(
           children: [
             ShaderMask(
-              shaderCallback: (bounds) => LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]).createShader(bounds),
+              shaderCallback: (bounds) => const LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]).createShader(bounds),
               child: const Icon(Icons.fitness_center, color: Colors.white, size: 24),
             ),
-            SizedBox(width: VigorSpacing.sm),
+            const SizedBox(width: VigorSpacing.sm),
             Expanded(
               child: Text(l10n.myGyms, style: VigorTypography.headline.copyWith(fontSize: 18, color: VigorColors.textPrimary(context))),
             ),
@@ -461,8 +467,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             GestureDetector(
               onTap: () => _showGymDialog(),
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]),
                   borderRadius: VigorRadius.radiusFull,
                 ),
@@ -470,7 +476,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.add, color: Colors.white, size: 16),
-                    SizedBox(width: VigorSpacing.xs),
+                    const SizedBox(width: VigorSpacing.xs),
                     Text(l10n.addGym, style: VigorTypography.label.copyWith(color: Colors.white)),
                   ],
                 ),
@@ -478,7 +484,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
         ),
-        SizedBox(height: VigorSpacing.md),
+        const SizedBox(height: VigorSpacing.md),
         // gyms list
         if (_isLoadingGyms)
           const Center(child: AdaptiveLoadingIndicator())
@@ -496,7 +502,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   shaderCallback: (bounds) => LinearGradient(colors: [VigorColors.orange.withValues(alpha: 0.5), VigorColors.electricBlue.withValues(alpha: 0.5)]).createShader(bounds),
                   child: const Icon(Icons.fitness_center, size: 48, color: Colors.white),
                 ),
-                SizedBox(height: VigorSpacing.sm),
+                const SizedBox(height: VigorSpacing.sm),
                 Text(l10n.noGymsAddedYet, style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context))),
               ],
             ),
@@ -510,7 +516,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildGymCard(Gym gym, AppLocalizations l10n, bool isDark) {
     final isDefault = context.read<PreferencesService>().defaultGymId == gym.id;
     return Container(
-      margin: EdgeInsets.only(bottom: VigorSpacing.md),
+      margin: const EdgeInsets.only(bottom: VigorSpacing.md),
       decoration: BoxDecoration(
         color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
         borderRadius: VigorRadius.radiusMd,
@@ -532,9 +538,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: VigorColors.orange.withValues(alpha: 0.15),
                     borderRadius: VigorRadius.radiusSm,
                   ),
-                  child: Icon(Icons.fitness_center, color: VigorColors.orange, size: 20),
+                  child: const Icon(Icons.fitness_center, color: VigorColors.orange, size: 20),
                 ),
-                SizedBox(width: VigorSpacing.md),
+                const SizedBox(width: VigorSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -542,9 +548,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Text(gym.name, style: VigorTypography.headline.copyWith(fontSize: 16, color: VigorColors.textPrimary(context))),
                       if (isDefault)
                         Container(
-                          margin: EdgeInsets.only(top: VigorSpacing.xs),
-                          padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: 2),
-                          decoration: BoxDecoration(color: VigorColors.orange, borderRadius: VigorRadius.radiusFull),
+                          margin: const EdgeInsets.only(top: VigorSpacing.xs),
+                          padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: 2),
+                          decoration: const BoxDecoration(color: VigorColors.orange, borderRadius: VigorRadius.radiusFull),
                           child: Text('Default', style: VigorTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
                         ),
                     ],
@@ -559,12 +565,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           if (gym.equipment.isNotEmpty)
             Padding(
-              padding: EdgeInsets.only(left: VigorSpacing.md, right: VigorSpacing.md, bottom: VigorSpacing.md),
+              padding: const EdgeInsets.only(left: VigorSpacing.md, right: VigorSpacing.md, bottom: VigorSpacing.md),
               child: Wrap(
                 spacing: VigorSpacing.xs,
                 runSpacing: VigorSpacing.xs,
                 children: gym.equipment.map((eq) => Container(
-                  padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+                  padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
                   decoration: BoxDecoration(
                     color: VigorColors.electricBlue.withValues(alpha: 0.15),
                     borderRadius: VigorRadius.radiusFull,
@@ -582,7 +588,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Padding(
-        padding: EdgeInsets.all(VigorSpacing.sm),
+        padding: const EdgeInsets.all(VigorSpacing.sm),
         child: Icon(icon, size: 20, color: color),
       ),
     );
@@ -594,12 +600,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Row(
           children: [
-            Icon(Icons.warning, color: VigorColors.error, size: 20),
-            SizedBox(width: VigorSpacing.sm),
+            const Icon(Icons.warning, color: VigorColors.error, size: 20),
+            const SizedBox(width: VigorSpacing.sm),
             Text(l10n.dangerZone, style: VigorTypography.headline.copyWith(fontSize: 16, color: VigorColors.error)),
           ],
         ),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         Container(
           decoration: BoxDecoration(
             color: VigorColors.error.withValues(alpha: 0.1),
@@ -607,9 +613,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             border: Border.all(color: VigorColors.error.withValues(alpha: 0.3)),
           ),
           child: ListTile(
-            leading: Icon(Icons.delete_forever, color: VigorColors.error),
+            leading: const Icon(Icons.delete_forever, color: VigorColors.error),
             title: Text(l10n.deleteAccount, style: VigorTypography.body.copyWith(color: VigorColors.error, fontWeight: FontWeight.w500)),
-            trailing: Icon(Icons.chevron_right, color: VigorColors.error),
+            trailing: const Icon(Icons.chevron_right, color: VigorColors.error),
             onTap: () => _showDeleteAccountDialog(l10n, authProvider),
           ),
         ),
@@ -643,9 +649,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ],
     );
 
-    if (shouldDelete == true && context.mounted) {
+    if (shouldDelete == true && mounted) {
       final success = await authProvider.deleteAccount();
-      if (context.mounted) {
+      if (mounted) {
         if (success) {
           AdaptiveNotification.show(context: context, message: l10n.accountDeletedSuccessfully);
         } else {

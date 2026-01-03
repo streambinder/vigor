@@ -9,7 +9,7 @@ import 'profile_screen.dart';
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
 
-  static final GlobalKey<_MainNavigationState> navKey = GlobalKey();
+  static final GlobalKey<MainNavigationState> navKey = GlobalKey();
 
   /// Navigate to a specific tab by index
   static void navigateToTab(int index) {
@@ -17,10 +17,10 @@ class MainNavigation extends StatefulWidget {
   }
 
   @override
-  State<MainNavigation> createState() => _MainNavigationState();
+  State<MainNavigation> createState() => MainNavigationState();
 }
 
-class _MainNavigationState extends State<MainNavigation> {
+class MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
   // use IndexedStack to preserve screen state across tab switches

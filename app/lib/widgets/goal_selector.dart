@@ -89,10 +89,10 @@ class _GoalSelectorState extends State<GoalSelector> {
     final l10n = AppLocalizations.of(context);
 
     if (_loading) {
-      return Center(
+      return const Center(
         child: Padding(
           padding: VigorSpacing.paddingLg,
-          child: const AdaptiveLoadingIndicator(),
+          child: AdaptiveLoadingIndicator(),
         ),
       );
     }
@@ -109,7 +109,7 @@ class _GoalSelectorState extends State<GoalSelector> {
                 style: VigorTypography.body.copyWith(color: VigorColors.error),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: VigorSpacing.sm),
+              const SizedBox(height: VigorSpacing.sm),
               AdaptiveTextButton(
                 onPressed: () {
                   setState(() {
@@ -135,7 +135,7 @@ class _GoalSelectorState extends State<GoalSelector> {
       children: [
         // search bar + select all/none
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: VigorSpacing.xs),
+          padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.xs),
           child: Row(
             children: [
               Expanded(
@@ -146,7 +146,7 @@ class _GoalSelectorState extends State<GoalSelector> {
                   prefix: const Icon(Icons.search, size: 20),
                 ),
               ),
-              SizedBox(width: VigorSpacing.sm),
+              const SizedBox(width: VigorSpacing.sm),
               IconButton(
                 onPressed: allVisibleSelected ? _deselectAll : _selectAll,
                 icon: Icon(
@@ -159,7 +159,7 @@ class _GoalSelectorState extends State<GoalSelector> {
             ],
           ),
         ),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         // goal chips
         if (filtered.isEmpty)
           Padding(
@@ -200,7 +200,7 @@ class _GoalSelectorState extends State<GoalSelector> {
         // selected count
         if (widget.selected.isNotEmpty)
           Padding(
-            padding: EdgeInsets.only(top: VigorSpacing.sm),
+            padding: const EdgeInsets.only(top: VigorSpacing.sm),
             child: Text(
               '${widget.selected.length} selected',
               style: VigorTypography.caption.copyWith(

@@ -89,10 +89,10 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
     final l10n = AppLocalizations.of(context);
 
     if (_loading) {
-      return Center(
+      return const Center(
         child: Padding(
           padding: VigorSpacing.paddingLg,
-          child: const AdaptiveLoadingIndicator(),
+          child: AdaptiveLoadingIndicator(),
         ),
       );
     }
@@ -109,7 +109,7 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
                 style: VigorTypography.body.copyWith(color: VigorColors.error),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: VigorSpacing.sm),
+              const SizedBox(height: VigorSpacing.sm),
               AdaptiveTextButton(
                 onPressed: () {
                   setState(() {
@@ -135,7 +135,7 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
       children: [
         // search bar + select all/none
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: VigorSpacing.xs),
+          padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.xs),
           child: Row(
             children: [
               Expanded(
@@ -146,7 +146,7 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
                   prefix: const Icon(Icons.search, size: 20),
                 ),
               ),
-              SizedBox(width: VigorSpacing.sm),
+              const SizedBox(width: VigorSpacing.sm),
               IconButton(
                 onPressed: allVisibleSelected ? _deselectAll : _selectAll,
                 icon: Icon(
@@ -159,7 +159,7 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
             ],
           ),
         ),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         // equipment chips
         if (filtered.isEmpty)
           Padding(
@@ -200,7 +200,7 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
         // selected count
         if (widget.selected.isNotEmpty)
           Padding(
-            padding: EdgeInsets.only(top: VigorSpacing.sm),
+            padding: const EdgeInsets.only(top: VigorSpacing.sm),
             child: Text(
               '${widget.selected.length} selected',
               style: VigorTypography.caption.copyWith(

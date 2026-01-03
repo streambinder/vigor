@@ -8,7 +8,7 @@ part 'get_training_response.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class GetTrainingResponse {
-  @JsonKey(name: 'trainings', defaultValue: const [])
+  @JsonKey(name: 'trainings', defaultValue: [])
   final List<Training> trainings;
 
   GetTrainingResponse({

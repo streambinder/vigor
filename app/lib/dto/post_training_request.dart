@@ -9,21 +9,21 @@ part 'post_training_request.g.dart';
 class PostTrainingRequest {
   @JsonKey(name: 'duration')
   final int duration;
-  @JsonKey(name: 'equipment', defaultValue: const [])
+  @JsonKey(name: 'equipment', defaultValue: [])
   final List<String> equipment;
   @JsonKey(name: 'gym', defaultValue: '')
   final String gym;
   @JsonKey(name: 'prompt', defaultValue: '')
   final String prompt;
-  @JsonKey(name: 'partners', defaultValue: const [])
+  @JsonKey(name: 'partners', defaultValue: [])
   final List<String> partners;
   @JsonKey(name: 'skipWarmupCooldown')
   final bool skipWarmupCooldown;
   @JsonKey(name: 'methodology', defaultValue: '')
   final String methodology;
-  @JsonKey(name: 'goals', defaultValue: const [])
+  @JsonKey(name: 'goals', defaultValue: [])
   final List<String> goals;
-  @JsonKey(name: 'muscles', defaultValue: const [])
+  @JsonKey(name: 'muscles', defaultValue: [])
   final List<String> muscles;
 
   PostTrainingRequest({

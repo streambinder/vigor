@@ -29,7 +29,6 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
 
   // tab controller for available/past toggle
   late TabController _tabController;
-  int _selectedTab = 0;
 
   @override
   void initState() {
@@ -37,7 +36,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) return;
-      setState(() => _selectedTab = _tabController.index);
+      setState(() {});
     });
   }
 
@@ -85,6 +84,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
 
     // on web, storage may need a moment to persist after login
     final storage = context.read<SecureStorageService>();
+    final trainingService = context.read<ServiceLocator>().trainingService;
     if (!await storage.hasTokens()) {
       if (retryCount < 3) {
         await Future.delayed(const Duration(milliseconds: 100));
@@ -97,7 +97,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       }
     }
 
-    final response = await context.read<ServiceLocator>().trainingService.getTrainings();
+    final response = await trainingService.getTrainings();
     if (response.isSuccess && mounted) {
       setState(() {
         _trainings = response.data;
@@ -205,7 +205,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   Widget _buildFAB(AppLocalizations l10n) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [VigorColors.orange, VigorColors.electricBlue],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -269,19 +269,19 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
             ),
           ),
         ),
-        SizedBox(height: VigorSpacing.lg),
+        const SizedBox(height: VigorSpacing.lg),
         Text(
           l10n.noTrainingsYet,
           style: VigorTypography.title.copyWith(color: VigorColors.textPrimary(context)),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         Text(
           l10n.generateFirstTraining,
           textAlign: TextAlign.center,
           style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context)),
         ),
-        SizedBox(height: VigorSpacing.xl),
+        const SizedBox(height: VigorSpacing.xl),
         // CTA button
         Center(
           child: AdaptiveButton(
@@ -327,7 +327,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
 
   Widget _buildStatsHeader(AppLocalizations l10n, int available, int past) {
     return Container(
-      padding: EdgeInsets.fromLTRB(VigorSpacing.lg, VigorSpacing.sm, VigorSpacing.lg, VigorSpacing.md),
+      padding: const EdgeInsets.fromLTRB(VigorSpacing.lg, VigorSpacing.sm, VigorSpacing.lg, VigorSpacing.md),
       child: Row(
         children: [
           _buildStatCard(
@@ -336,7 +336,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
             color: VigorColors.orange,
             icon: Icons.play_arrow,
           ),
-          SizedBox(width: VigorSpacing.md),
+          const SizedBox(width: VigorSpacing.md),
           _buildStatCard(
             count: past,
             label: l10n.pastTrainings,
@@ -365,7 +365,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
         child: Row(
           children: [
             Icon(icon, color: color, size: 28),
-            SizedBox(width: VigorSpacing.sm),
+            const SizedBox(width: VigorSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -396,7 +396,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
 
   Widget _buildSegmentedControl(AppLocalizations l10n, int available, int past, bool isDark) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: VigorSpacing.lg),
+      margin: const EdgeInsets.symmetric(horizontal: VigorSpacing.lg),
       decoration: BoxDecoration(
         color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
         borderRadius: VigorRadius.radiusSm,
@@ -406,7 +406,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       ),
       child: TabBar(
         controller: _tabController,
-        indicator: BoxDecoration(
+        indicator: const BoxDecoration(
           gradient: LinearGradient(
             colors: [VigorColors.orange, VigorColors.electricBlue],
           ),
@@ -437,7 +437,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
               size: 48,
               color: VigorColors.textMuted(context),
             ),
-            SizedBox(height: VigorSpacing.sm),
+            const SizedBox(height: VigorSpacing.sm),
             Text(
               isAvailable ? l10n.noTrainingAvailable : l10n.noPastTrainings,
               style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context)),
@@ -450,7 +450,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     return ListView.separated(
       padding: VigorSpacing.paddingLg,
       itemCount: trainings.length,
-      separatorBuilder: (_, __) => SizedBox(height: VigorSpacing.sm),
+      separatorBuilder: (_, _) => const SizedBox(height: VigorSpacing.sm),
       itemBuilder: (context, index) {
         final training = trainings[index];
         return _buildTrainingCard(training, l10n, isAvailable: isAvailable, key: ValueKey(training.id));
@@ -461,7 +461,6 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   Widget _buildTrainingCard(Training training, AppLocalizations l10n, {required bool isAvailable, Key? key}) {
     final isStale = _isStaleTraining(training);
     final partnerCount = _partnerCounts[training.id] ?? 0;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AdaptiveCard(
       key: key,
@@ -497,7 +496,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                       ),
                     ),
                   ),
-                  SizedBox(width: VigorSpacing.sm),
+                  const SizedBox(width: VigorSpacing.sm),
                   Expanded(
                     child: Text(
                       training.name,
@@ -519,7 +518,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.schedule, size: 12, color: VigorColors.warning),
+                          const Icon(Icons.schedule, size: 12, color: VigorColors.warning),
                           const SizedBox(width: 2),
                           Text(
                             l10n.stale,
@@ -535,7 +534,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                 ],
               ),
               if (isAvailable) ...[
-                SizedBox(height: VigorSpacing.xs),
+                const SizedBox(height: VigorSpacing.xs),
                 Text(
                   training.description,
                   style: VigorTypography.body.copyWith(
@@ -546,28 +545,28 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
-              SizedBox(height: VigorSpacing.sm),
+              const SizedBox(height: VigorSpacing.sm),
               // metadata row
               Row(
                 children: [
                   _buildChip(Icons.schedule, _formatDuration(training.duration)),
-                  SizedBox(width: VigorSpacing.sm),
+                  const SizedBox(width: VigorSpacing.sm),
                   _buildChip(Icons.calendar_today, _formatDate(
                     isAvailable ? training.createdAt : (training.completedAt ?? training.createdAt),
                   )),
                   if (partnerCount > 0) ...[
-                    SizedBox(width: VigorSpacing.sm),
+                    const SizedBox(width: VigorSpacing.sm),
                     _buildChip(Icons.people, '${1 + partnerCount}'),
                   ],
                   if (training.gym != null) ...[
-                    SizedBox(width: VigorSpacing.sm),
+                    const SizedBox(width: VigorSpacing.sm),
                     Flexible(child: _buildChip(Icons.location_on, training.gym!.name)),
                   ],
                 ],
               ),
               // start button for available trainings
               if (isAvailable) ...[
-                SizedBox(height: VigorSpacing.md),
+                const SizedBox(height: VigorSpacing.md),
                 SizedBox(
                   width: double.infinity,
                   child: Container(
@@ -588,7 +587,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                         },
                         borderRadius: VigorRadius.radiusSm,
                         child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: VigorSpacing.sm),
+                          padding: const EdgeInsets.symmetric(vertical: VigorSpacing.sm),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

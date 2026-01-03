@@ -1,6 +1,8 @@
-/// Platform-adaptive widgets library
+/// Platform-adaptive widgets library.
+///
 /// Automatically uses Liquid Glass design on iOS
-/// and Material You design on Android, Web, and other platforms
+/// and Material You design on Android, Web, and other platforms.
+library;
 
 export 'adaptive_app_bar.dart';
 export 'adaptive_button.dart';

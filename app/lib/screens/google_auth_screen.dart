@@ -205,7 +205,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
               children: [
                 // vigor logo with gradient
                 const VigorLogo(size: 80),
-                SizedBox(height: VigorSpacing.md),
+                const SizedBox(height: VigorSpacing.md),
                 Text(
                   l10n.appName.toUpperCase(),
                   style: VigorTypography.display.copyWith(
@@ -214,13 +214,13 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: VigorSpacing.sm),
+                const SizedBox(height: VigorSpacing.sm),
                 Text(
                   l10n.appTagline,
                   style: VigorTypography.body.copyWith(color: secondaryColor),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: VigorSpacing.xxl),
+                const SizedBox(height: VigorSpacing.xxl),
 
                 // Google Sign-In Button (platform-specific)
                 if (!_initialized)
@@ -246,12 +246,12 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              SizedBox(
+                              const SizedBox(
                                 height: 20,
                                 width: 20,
                                 child: AdaptiveLoadingIndicator(color: Colors.white),
                               ),
-                              SizedBox(width: VigorSpacing.sm),
+                              const SizedBox(width: VigorSpacing.sm),
                               Text(l10n.signingIn),
                             ],
                           )
@@ -260,7 +260,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Icon(Icons.login, size: 24, color: Colors.white),
-                              SizedBox(width: VigorSpacing.sm),
+                              const SizedBox(width: VigorSpacing.sm),
                               Text(l10n.signInWithGoogle),
                             ],
                           ),
@@ -268,13 +268,13 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
 
                 // Loading indicator for web
                 if (kIsWeb && _isLoading) ...[
-                  SizedBox(height: VigorSpacing.md),
+                  const SizedBox(height: VigorSpacing.md),
                   const Center(child: AdaptiveLoadingIndicator()),
                 ],
 
                 // Error message
                 if (_errorMessage != null) ...[
-                  SizedBox(height: VigorSpacing.md),
+                  const SizedBox(height: VigorSpacing.md),
                   Container(
                     padding: VigorSpacing.paddingMd,
                     decoration: BoxDecoration(

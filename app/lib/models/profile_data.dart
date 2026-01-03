@@ -8,28 +8,28 @@ import 'preferences.dart';
 part 'profile_data.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-class profileData {
+class ProfileData {
   // Fields marked as required in the backend model
   static const List<String> requiredFields = [
     'goals'
   ];
-  @JsonKey(name: 'goals', defaultValue: const [])
+  @JsonKey(name: 'goals', defaultValue: [])
   final List<String> goals;
-  @JsonKey(name: 'injuries', defaultValue: const [])
+  @JsonKey(name: 'injuries', defaultValue: [])
   final List<Injury> injuries;
-  @JsonKey(name: 'limitations', defaultValue: const [])
+  @JsonKey(name: 'limitations', defaultValue: [])
   final List<String> limitations;
   @JsonKey(name: 'preferences')
   final Preferences? preferences;
 
-  profileData({
+  ProfileData({
     required this.goals,
     required this.injuries,
     required this.limitations,
     this.preferences,
   });
 
-  factory profileData.fromJson(Map<String, dynamic> json) => _$profileDataFromJson(json);
+  factory ProfileData.fromJson(Map<String, dynamic> json) => _$ProfileDataFromJson(json);
 
-  Map<String, dynamic> toJson() => _$profileDataToJson(this);
+  Map<String, dynamic> toJson() => _$ProfileDataToJson(this);
 }

@@ -129,7 +129,7 @@ class VigorTheme {
 
   // Card theme
   static CardThemeData _cardTheme() {
-    return CardThemeData(
+    return const CardThemeData(
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: VigorRadius.card),
       clipBehavior: Clip.antiAlias,
@@ -157,15 +157,15 @@ class VigorTheme {
         borderRadius: VigorRadius.input,
         borderSide: BorderSide(color: borderColor),
       ),
-      focusedBorder: OutlineInputBorder(
+      focusedBorder: const OutlineInputBorder(
         borderRadius: VigorRadius.input,
         borderSide: BorderSide(color: VigorColors.orange, width: 2),
       ),
-      errorBorder: OutlineInputBorder(
+      errorBorder: const OutlineInputBorder(
         borderRadius: VigorRadius.input,
         borderSide: BorderSide(color: VigorColors.error),
       ),
-      focusedErrorBorder: OutlineInputBorder(
+      focusedErrorBorder: const OutlineInputBorder(
         borderRadius: VigorRadius.input,
         borderSide: BorderSide(color: VigorColors.error, width: 2),
       ),
@@ -185,7 +185,7 @@ class VigorTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: VigorColors.orange,
         foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: VigorRadius.button),
+        shape: const RoundedRectangleBorder(borderRadius: VigorRadius.button),
         padding: VigorSpacing.buttonPadding,
         elevation: 0,
         textStyle: VigorTypography.label,
@@ -199,7 +199,7 @@ class VigorTheme {
       style: FilledButton.styleFrom(
         backgroundColor: VigorColors.orange,
         foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: VigorRadius.button),
+        shape: const RoundedRectangleBorder(borderRadius: VigorRadius.button),
         padding: VigorSpacing.buttonPadding,
         textStyle: VigorTypography.label,
       ),
@@ -211,8 +211,8 @@ class VigorTheme {
     return TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: VigorColors.orange,
-        shape: RoundedRectangleBorder(borderRadius: VigorRadius.button),
-        padding: EdgeInsets.symmetric(
+        shape: const RoundedRectangleBorder(borderRadius: VigorRadius.button),
+        padding: const EdgeInsets.symmetric(
           horizontal: VigorSpacing.md,
           vertical: VigorSpacing.sm,
         ),
@@ -231,7 +231,7 @@ class VigorTheme {
       style: OutlinedButton.styleFrom(
         foregroundColor: VigorColors.orange,
         side: BorderSide(color: borderColor),
-        shape: RoundedRectangleBorder(borderRadius: VigorRadius.button),
+        shape: const RoundedRectangleBorder(borderRadius: VigorRadius.button),
         padding: VigorSpacing.buttonPadding,
         textStyle: VigorTypography.label,
       ),
@@ -240,7 +240,7 @@ class VigorTheme {
 
   // Dialog theme
   static DialogThemeData _dialogTheme() {
-    return DialogThemeData(
+    return const DialogThemeData(
       shape: RoundedRectangleBorder(borderRadius: VigorRadius.modal),
       elevation: 0,
     );
@@ -276,7 +276,7 @@ class VigorTheme {
 
   // List tile theme
   static ListTileThemeData _listTileTheme() {
-    return ListTileThemeData(
+    return const ListTileThemeData(
       contentPadding: VigorSpacing.listTilePadding,
       shape: RoundedRectangleBorder(borderRadius: VigorRadius.radiusSm),
     );
@@ -308,7 +308,7 @@ class VigorTheme {
       }),
       iconTheme: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
-          return IconThemeData(color: VigorColors.orange, size: 24);
+          return const IconThemeData(color: VigorColors.orange, size: 24);
         }
         return IconThemeData(
           color: brightness == Brightness.dark
@@ -347,7 +347,7 @@ class VigorTheme {
           : VigorColors.lightSurface,
       selectedColor: VigorColors.orange.withValues(alpha: 0.15),
       labelStyle: VigorTypography.label,
-      shape: RoundedRectangleBorder(borderRadius: VigorRadius.chip),
+      shape: const RoundedRectangleBorder(borderRadius: VigorRadius.chip),
       side: BorderSide(
         color: brightness == Brightness.dark
             ? VigorColors.darkBorder
@@ -358,7 +358,7 @@ class VigorTheme {
 
   // Progress indicator theme
   static ProgressIndicatorThemeData _progressIndicatorTheme() {
-    return ProgressIndicatorThemeData(
+    return const ProgressIndicatorThemeData(
       color: VigorColors.orange,
       linearTrackColor: VigorColors.darkBorder,
       circularTrackColor: VigorColors.darkBorder,

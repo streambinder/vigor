@@ -13,7 +13,7 @@ class Fact {
   final String reference;
   @JsonKey(name: 'area', defaultValue: '')
   final String area;
-  @JsonKey(name: 'tags', defaultValue: const [])
+  @JsonKey(name: 'tags', defaultValue: [])
   final List<String> tags;
   @JsonKey(name: 'content', defaultValue: '')
   final String content;

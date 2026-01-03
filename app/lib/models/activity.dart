@@ -21,7 +21,7 @@ class Activity {
   final int reps;
   @JsonKey(name: 'weight_kg')
   final int weightKg;
-  @JsonKey(name: 'modifiers', defaultValue: const [])
+  @JsonKey(name: 'modifiers', defaultValue: [])
   final List<String> modifiers;
   @JsonKey(name: 'rest')
   final int rest;

@@ -68,7 +68,7 @@ class AdaptiveTextField extends StatelessWidget {
             labelText!,
             style: VigorTypography.caption.copyWith(color: labelColor),
           ),
-          SizedBox(height: VigorSpacing.sm),
+          const SizedBox(height: VigorSpacing.sm),
         ],
         ClipRRect(
           borderRadius: VigorRadius.input,
@@ -112,7 +112,7 @@ class AdaptiveTextField extends StatelessWidget {
           ),
         ),
         if (errorText != null) ...[
-          SizedBox(height: VigorSpacing.xs),
+          const SizedBox(height: VigorSpacing.xs),
           Text(
             errorText!,
             style: VigorTypography.caption.copyWith(color: VigorColors.error),

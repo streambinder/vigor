@@ -8,7 +8,7 @@ part 'get_users_response.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class GetUsersResponse {
-  @JsonKey(name: 'users', defaultValue: const [])
+  @JsonKey(name: 'users', defaultValue: [])
   final List<UserSummary> users;
 
   GetUsersResponse({

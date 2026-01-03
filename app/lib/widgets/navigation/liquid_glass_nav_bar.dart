@@ -109,7 +109,7 @@ class LiquidGlassNavBar extends StatelessWidget {
                   size: 24,
                 ),
               ),
-              SizedBox(height: VigorSpacing.xs),
+              const SizedBox(height: VigorSpacing.xs),
               AnimatedDefaultTextStyle(
                 duration: VigorAnimation.medium,
                 curve: VigorAnimation.defaultCurve,

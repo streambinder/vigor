@@ -57,7 +57,7 @@ class _GymFormDialogState extends State<GymFormDialog> {
     final textColor = VigorColors.textPrimary(context);
 
     return Dialog(
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: VigorRadius.modal,
       ),
       child: Container(
@@ -88,13 +88,13 @@ class _GymFormDialogState extends State<GymFormDialog> {
                   ),
                 ],
               ),
-              SizedBox(height: VigorSpacing.lg),
+              const SizedBox(height: VigorSpacing.lg),
               AdaptiveTextField(
                 controller: _nameController,
                 labelText: l10n.gymName,
                 placeholder: l10n.gymNamePlaceholder,
               ),
-              SizedBox(height: VigorSpacing.lg),
+              const SizedBox(height: VigorSpacing.lg),
               Text(
                 l10n.equipment,
                 style: VigorTypography.label.copyWith(
@@ -102,12 +102,12 @@ class _GymFormDialogState extends State<GymFormDialog> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              SizedBox(height: VigorSpacing.sm),
+              const SizedBox(height: VigorSpacing.sm),
               EquipmentSelector(
                 selected: _equipment,
                 onChanged: (updated) => setState(() => _equipment = updated),
               ),
-              SizedBox(height: VigorSpacing.lg),
+              const SizedBox(height: VigorSpacing.lg),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -115,7 +115,7 @@ class _GymFormDialogState extends State<GymFormDialog> {
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text(l10n.cancel),
                   ),
-                  SizedBox(width: VigorSpacing.sm),
+                  const SizedBox(width: VigorSpacing.sm),
                   AdaptiveButton(
                     onPressed: _submit,
                     child: Text(isEditing ? l10n.update : l10n.add),

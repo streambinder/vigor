@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
 
     // on web, storage may need a moment to persist after login
     final storage = context.read<SecureStorageService>();
+    final progressService = context.read<ServiceLocator>().progressService;
     if (!await storage.hasTokens()) {
       if (retryCount < 3) {
         await Future.delayed(const Duration(milliseconds: 100));
@@ -44,7 +45,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     try {
-      final response = await context.read<ServiceLocator>().progressService.getProgress();
+      final response = await progressService.getProgress();
       if (response.isSuccess && mounted) {
         setState(() {
           _progress = response.data;
@@ -119,10 +120,10 @@ class _HomePageState extends State<HomePage> {
       children: [
         // hero stats section
         _buildHeroStats(l10n),
-        SizedBox(height: VigorSpacing.xl),
+        const SizedBox(height: VigorSpacing.xl),
         // calibration section
         CalibrationWidget(families: families),
-        SizedBox(height: VigorSpacing.lg),
+        const SizedBox(height: VigorSpacing.lg),
         // capabilities section
         _buildCapabilitiesSection(l10n, families),
       ],
@@ -171,7 +172,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          SizedBox(height: VigorSpacing.xs),
+          const SizedBox(height: VigorSpacing.xs),
           Text(
             l10n.completedTrainings,
             style: VigorTypography.body.copyWith(
@@ -179,7 +180,7 @@ class _HomePageState extends State<HomePage> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: VigorSpacing.lg),
+          const SizedBox(height: VigorSpacing.lg),
           // secondary stat
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -204,7 +205,7 @@ class _HomePageState extends State<HomePage> {
     required Color color,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
+      padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: VigorRadius.radiusFull,
@@ -214,7 +215,7 @@ class _HomePageState extends State<HomePage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, color: color, size: 18),
-          SizedBox(width: VigorSpacing.sm),
+          const SizedBox(width: VigorSpacing.sm),
           Text(
             '$value',
             style: VigorTypography.headline.copyWith(
@@ -222,7 +223,7 @@ class _HomePageState extends State<HomePage> {
               fontWeight: FontWeight.w700,
             ),
           ),
-          SizedBox(width: VigorSpacing.xs),
+          const SizedBox(width: VigorSpacing.xs),
           Text(
             label,
             style: VigorTypography.caption.copyWith(color: color),
@@ -246,7 +247,7 @@ class _HomePageState extends State<HomePage> {
                 child: const Icon(Icons.show_chart, color: Colors.white, size: 24),
               ),
             ),
-            SizedBox(width: VigorSpacing.sm),
+            const SizedBox(width: VigorSpacing.sm),
             Text(
               l10n.capabilities,
               style: VigorTypography.headline.copyWith(
@@ -256,7 +257,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         AdaptiveCard(
           padding: VigorSpacing.paddingMd,
           child: FamilyProgressWidget(families: families),
@@ -294,13 +295,13 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-        SizedBox(height: VigorSpacing.lg),
+        const SizedBox(height: VigorSpacing.lg),
         Text(
           l10n.yourProgress,
           style: VigorTypography.title.copyWith(color: VigorColors.textPrimary(context)),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         Text(
           l10n.noProgressYet,
           textAlign: TextAlign.center,
@@ -336,7 +337,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: const Center(child: VigorLogo(size: 48)),
               ),
-              SizedBox(height: VigorSpacing.lg),
+              const SizedBox(height: VigorSpacing.lg),
               Text(
                 l10n.readyToTrain,
                 style: VigorTypography.title.copyWith(
@@ -344,9 +345,9 @@ class _HomePageState extends State<HomePage> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: VigorSpacing.sm),
+              const SizedBox(height: VigorSpacing.sm),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: VigorSpacing.xl),
+                padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.xl),
                 child: Text(
                   l10n.noTrainingsCompletedYet,
                   textAlign: TextAlign.center,
@@ -358,7 +359,7 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-        SizedBox(height: VigorSpacing.xxl),
+        const SizedBox(height: VigorSpacing.xxl),
         // info cards
         _buildInfoCard(
           icon: Icons.auto_awesome,
@@ -366,14 +367,14 @@ class _HomePageState extends State<HomePage> {
           description: 'Personalized workouts generated by AI based on your goals and equipment',
           gradient: [VigorColors.orange, VigorColors.orange.withValues(alpha: 0.7)],
         ),
-        SizedBox(height: VigorSpacing.md),
+        const SizedBox(height: VigorSpacing.md),
         _buildInfoCard(
           icon: Icons.trending_up,
           title: 'Track Progress',
           description: 'Monitor your capabilities across movement families as you train',
           gradient: [VigorColors.electricBlue, VigorColors.electricBlue.withValues(alpha: 0.7)],
         ),
-        SizedBox(height: VigorSpacing.md),
+        const SizedBox(height: VigorSpacing.md),
         _buildInfoCard(
           icon: Icons.people,
           title: 'Train Together',
@@ -412,7 +413,7 @@ class _HomePageState extends State<HomePage> {
             ),
             child: Icon(icon, color: Colors.white, size: 24),
           ),
-          SizedBox(width: VigorSpacing.md),
+          const SizedBox(width: VigorSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -424,7 +425,7 @@ class _HomePageState extends State<HomePage> {
                     color: VigorColors.textPrimary(context),
                   ),
                 ),
-                SizedBox(height: VigorSpacing.xs),
+                const SizedBox(height: VigorSpacing.xs),
                 Text(
                   description,
                   style: VigorTypography.caption.copyWith(

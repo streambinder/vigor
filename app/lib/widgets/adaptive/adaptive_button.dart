@@ -128,7 +128,7 @@ class AdaptiveTextButton extends StatelessWidget {
       return GestureDetector(
         onTap: onPressed,
         child: Padding(
-          padding: EdgeInsets.symmetric(
+          padding: const EdgeInsets.symmetric(
             horizontal: VigorSpacing.sm,
             vertical: VigorSpacing.sm,
           ),

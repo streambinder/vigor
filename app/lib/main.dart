@@ -54,12 +54,12 @@ class StorageErrorApp extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.error_outline,
                   size: 64,
                   color: VigorColors.error,
                 ),
-                SizedBox(height: VigorSpacing.lg),
+                const SizedBox(height: VigorSpacing.lg),
                 Text(
                   'Storage Unavailable',
                   style: VigorTypography.title.copyWith(
@@ -67,7 +67,7 @@ class StorageErrorApp extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: VigorSpacing.md),
+                const SizedBox(height: VigorSpacing.md),
                 Text(
                   error,
                   style: VigorTypography.body.copyWith(
@@ -75,7 +75,7 @@ class StorageErrorApp extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: VigorSpacing.lg),
+                const SizedBox(height: VigorSpacing.lg),
                 Text(
                   'This app requires secure storage to protect your data. '
                   'Please check your browser settings and try again.',

@@ -9,7 +9,7 @@ part 'post_gym_request.g.dart';
 class PostGymRequest {
   @JsonKey(name: 'name', defaultValue: '')
   final String name;
-  @JsonKey(name: 'equipment', defaultValue: const [])
+  @JsonKey(name: 'equipment', defaultValue: [])
   final List<String> equipment;
 
   PostGymRequest({

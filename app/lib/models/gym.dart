@@ -11,7 +11,7 @@ class Gym {
   final String id;
   @JsonKey(name: 'name', defaultValue: '')
   final String name;
-  @JsonKey(name: 'equipment', defaultValue: const [])
+  @JsonKey(name: 'equipment', defaultValue: [])
   final List<String> equipment;
 
   Gym({

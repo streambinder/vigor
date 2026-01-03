@@ -11,7 +11,7 @@ class PostTrainingCompleteRequest {
   final String feedback;
   @JsonKey(name: 'activityFeedback')
   final Map<String, dynamic> activityFeedback;
-  @JsonKey(name: 'activityReports', defaultValue: const [])
+  @JsonKey(name: 'activityReports', defaultValue: [])
   final List<String> activityReports;
 
   PostTrainingCompleteRequest({

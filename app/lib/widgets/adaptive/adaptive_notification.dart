@@ -132,7 +132,7 @@ class _NotificationWidget extends StatelessWidget {
           isError ? Icons.error_outline : Icons.check_circle_outline,
           color: iconColor,
         ),
-        SizedBox(width: VigorSpacing.sm),
+        const SizedBox(width: VigorSpacing.sm),
         Expanded(
           child: Text(
             message,

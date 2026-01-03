@@ -50,7 +50,7 @@ class AdaptiveLoadingScreen extends StatelessWidget {
         children: [
           const AdaptiveLoadingIndicator(),
           if (message != null) ...[
-            SizedBox(height: VigorSpacing.md),
+            const SizedBox(height: VigorSpacing.md),
             Text(
               message!,
               style: VigorTypography.body.copyWith(color: textColor),

@@ -8,7 +8,7 @@ part 'training_reasoning.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class TrainingReasoning {
-  @JsonKey(name: 'constraints', defaultValue: const [])
+  @JsonKey(name: 'constraints', defaultValue: [])
   final List<String> constraints;
   @JsonKey(name: 'type_selection', defaultValue: '')
   final String typeSelection;
@@ -16,11 +16,11 @@ class TrainingReasoning {
   final String strategy;
   @JsonKey(name: 'progression')
   final ProgressionReasoning progression;
-  @JsonKey(name: 'facts_applied', defaultValue: const [])
+  @JsonKey(name: 'facts_applied', defaultValue: [])
   final List<String> factsApplied;
-  @JsonKey(name: 'target_muscles', defaultValue: const [])
+  @JsonKey(name: 'target_muscles', defaultValue: [])
   final List<String> targetMuscles;
-  @JsonKey(name: 'exercises', defaultValue: const [])
+  @JsonKey(name: 'exercises', defaultValue: [])
   final List<String> exercises;
 
   TrainingReasoning({

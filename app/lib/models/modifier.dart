@@ -9,7 +9,7 @@ part 'modifier.g.dart';
 class Modifier {
   @JsonKey(name: 'id', defaultValue: '')
   final String id;
-  @JsonKey(name: 'patterns', defaultValue: const [])
+  @JsonKey(name: 'patterns', defaultValue: [])
   final List<String> patterns;
   @JsonKey(name: 'aliases')
   final List<String>? aliases;

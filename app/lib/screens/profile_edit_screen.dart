@@ -217,7 +217,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   l10n.pleaseCompleteProfile,
                   style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context)),
                 ),
-                SizedBox(height: VigorSpacing.lg),
+                const SizedBox(height: VigorSpacing.lg),
               ],
               _buildSection(
                 title: 'Personal Details', // TODO: add l10n.personalDetails
@@ -225,21 +225,21 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 color: VigorColors.orange,
                 children: [_buildPersonalDetailsContent(l10n)],
               ),
-              SizedBox(height: VigorSpacing.xl),
+              const SizedBox(height: VigorSpacing.xl),
               _buildSection(
                 title: 'Health & Goals', // TODO: add l10n.healthAndGoals
                 icon: Icons.fitness_center,
                 color: VigorColors.success,
                 children: [_buildHealthGoalsContent(l10n)],
               ),
-              SizedBox(height: VigorSpacing.xl),
+              const SizedBox(height: VigorSpacing.xl),
               _buildSection(
                 title: l10n.favorites, // using existing 'Preferences' equivalent
                 icon: Icons.favorite,
                 color: VigorColors.electricBlue,
                 children: [_buildPreferencesContent(l10n)],
               ),
-              SizedBox(height: VigorSpacing.xxl),
+              const SizedBox(height: VigorSpacing.xxl),
             ],
           ),
         ),
@@ -267,7 +267,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.all(VigorSpacing.lg),
+            padding: const EdgeInsets.all(VigorSpacing.lg),
             child: Row(
               children: [
                 Container(
@@ -278,7 +278,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   ),
                   child: Icon(icon, color: color, size: 20),
                 ),
-                SizedBox(width: VigorSpacing.md),
+                const SizedBox(width: VigorSpacing.md),
                 Text(
                   title,
                   style: VigorTypography.headline.copyWith(
@@ -291,7 +291,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           ),
           Divider(height: 1, color: VigorColors.border(context)),
           Padding(
-            padding: EdgeInsets.all(VigorSpacing.lg),
+            padding: const EdgeInsets.all(VigorSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: children,
@@ -317,7 +317,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 required: true,
               ),
             ),
-            SizedBox(width: VigorSpacing.md),
+            const SizedBox(width: VigorSpacing.md),
             Expanded(
               child: _buildTextField(
                 label: l10n.lastName,
@@ -328,22 +328,22 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             ),
           ],
         ),
-        SizedBox(height: VigorSpacing.lg),
+        const SizedBox(height: VigorSpacing.lg),
 
         // birthdate / gender
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(child: _buildBirthdatePicker(l10n)),
-            SizedBox(width: VigorSpacing.md),
+            const SizedBox(width: VigorSpacing.md),
             Expanded(child: _buildGenderDropdown(l10n)),
           ],
         ),
-        SizedBox(height: VigorSpacing.lg),
+        const SizedBox(height: VigorSpacing.lg),
 
         // language
         _buildLanguageDropdown(l10n),
-        SizedBox(height: VigorSpacing.xl),
+        const SizedBox(height: VigorSpacing.xl),
 
         // height slider
         _buildSliderField(
@@ -355,7 +355,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           unit: l10n.heightUnit,
           onChanged: (v) => setState(() => _height = v),
         ),
-        SizedBox(height: VigorSpacing.lg),
+        const SizedBox(height: VigorSpacing.lg),
 
         // weight slider
         _buildSliderField(
@@ -377,12 +377,12 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       children: [
         // goals
         _buildFieldLabel(l10n.goals, required: true),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         GoalSelector(
           selected: _goals,
           onChanged: (updated) => setState(() => _goals = updated),
         ),
-        SizedBox(height: VigorSpacing.xl),
+        const SizedBox(height: VigorSpacing.xl),
 
         // injuries
         _buildListInputSection(
@@ -392,7 +392,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           onRemove: (idx) => setState(() => _injuries.removeAt(idx)),
           inputBuilder: _buildInjuryInput,
         ),
-        SizedBox(height: VigorSpacing.xl),
+        const SizedBox(height: VigorSpacing.xl),
 
         // limitations
         _buildListInputSection(
@@ -440,11 +440,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             },
           ),
         ),
-        SizedBox(height: VigorSpacing.xl),
+        const SizedBox(height: VigorSpacing.xl),
 
         // favorite equipment
         _buildFieldLabel(l10n.favoriteEquipment, hint: l10n.optionalEquipmentPrefer),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         EquipmentSelector(
           selected: _favoriteEquipment,
           onChanged: (updated) => setState(() => _favoriteEquipment = updated),
@@ -464,11 +464,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildFieldLabel(label, required: required),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         TextFormField(
           initialValue: value,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
           ),
           style: VigorTypography.body,
@@ -496,7 +496,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           ),
         ),
         if (hint != null) ...[
-          SizedBox(width: VigorSpacing.sm),
+          const SizedBox(width: VigorSpacing.sm),
           Text(
             hint,
             style: VigorTypography.caption.copyWith(color: VigorColors.textMuted(context)),
@@ -511,7 +511,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildFieldLabel(l10n.birthDate, required: true),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         InkWell(
           onTap: () async {
             final date = await showDatePicker(
@@ -526,7 +526,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           child: InputDecorator(
             decoration: InputDecoration(
               border: const OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
+              contentPadding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
               suffixIcon: Icon(Icons.calendar_today, size: 18, color: VigorColors.textMuted(context)),
             ),
             child: Text(
@@ -550,11 +550,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildFieldLabel(l10n.gender, required: true),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         DropdownButtonFormField<String>(
-          value: _gender,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
+          initialValue: _gender,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
           ),
           style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)),
@@ -590,11 +590,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildFieldLabel(l10n.language, required: true),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         DropdownButtonFormField<String>(
-          value: _language,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
+          initialValue: _language,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
           ),
           style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)),
@@ -634,7 +634,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               ),
             ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.xs),
+              padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.xs),
               decoration: BoxDecoration(
                 color: VigorColors.orange.withValues(alpha: 0.15),
                 borderRadius: VigorRadius.radiusFull,
@@ -646,7 +646,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             ),
           ],
         ),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
             activeTrackColor: VigorColors.orange,
@@ -691,7 +691,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildFieldLabel(label, hint: hint),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         // existing items as chips
         if (items.isNotEmpty)
           Wrap(
@@ -710,7 +710,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               );
             }).toList(),
           ),
-        SizedBox(height: VigorSpacing.md),
+        const SizedBox(height: VigorSpacing.md),
         inputBuilder(),
       ],
     );
@@ -730,12 +730,12 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               hintText: l10n.injuryDescription,
               hintStyle: VigorTypography.body.copyWith(color: VigorColors.textMuted(context)),
               border: const OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
+              contentPadding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
             ),
             style: VigorTypography.body,
           ),
         ),
-        SizedBox(width: VigorSpacing.sm),
+        const SizedBox(width: VigorSpacing.sm),
         Expanded(
           flex: 1,
           child: TextField(
@@ -744,13 +744,13 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               hintText: l10n.year,
               hintStyle: VigorTypography.body.copyWith(color: VigorColors.textMuted(context)),
               border: const OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
+              contentPadding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
             ),
             style: VigorTypography.body,
             keyboardType: TextInputType.number,
           ),
         ),
-        SizedBox(width: VigorSpacing.sm),
+        const SizedBox(width: VigorSpacing.sm),
         SizedBox(
           height: 48,
           child: AdaptiveButton(
@@ -788,13 +788,13 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               hintText: placeholder,
               hintStyle: VigorTypography.body.copyWith(color: VigorColors.textMuted(context)),
               border: const OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
+              contentPadding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
             ),
             style: VigorTypography.body,
             onSubmitted: (_) => onAdd(),
           ),
         ),
-        SizedBox(width: VigorSpacing.sm),
+        const SizedBox(width: VigorSpacing.sm),
         SizedBox(
           height: 48,
           child: AdaptiveButton(

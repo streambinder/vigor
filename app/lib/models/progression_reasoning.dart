@@ -10,7 +10,7 @@ part 'progression_reasoning.g.dart';
 class ProgressionReasoning {
   @JsonKey(name: 'summary', defaultValue: '')
   final String summary;
-  @JsonKey(name: 'adjustments', defaultValue: const [])
+  @JsonKey(name: 'adjustments', defaultValue: [])
   final List<ProgressionAdjustment> adjustments;
 
   ProgressionReasoning({

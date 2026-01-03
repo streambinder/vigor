@@ -48,7 +48,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   List<String> _availableGoals = [];
   Set<String> _selectedGoals = {};
   List<String> _availableMuscles = [];
-  Set<String> _selectedMuscles = {};
+  final Set<String> _selectedMuscles = {};
   List<String> _availableMethodologies = [];
   bool _advancedExpanded = false;
 
@@ -83,7 +83,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     final profile = context.read<AuthProvider>().currentUser?.profile;
     if (profile != null && profile.data.isNotEmpty) {
       try {
-        final profileData = profile_models.profileData.fromJson(profile.data);
+        final profileData = profile_models.ProfileData.fromJson(profile.data);
         setState(() {
           _selectedGoals = profileData.goals.toSet();
         });
@@ -149,7 +149,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             color: VigorColors.textSecondary(context),
           ),
         ),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         // ternary segmented button
         SizedBox(
           width: double.infinity,
@@ -180,7 +180,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             showSelectedIcon: false,
           ),
         ),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         // mode-specific content
         _buildEquipmentModeContent(),
       ],
@@ -243,7 +243,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               color: VigorColors.textMuted(context),
             ),
           ),
-          padding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.xs),
+          padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.xs),
           borderRadius: VigorRadius.radiusMd,
           items: widget.gyms.map((gym) {
             return DropdownMenuItem<Gym>(
@@ -308,7 +308,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             color: VigorColors.textSecondary(context),
           ),
         ),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -370,7 +370,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             color: VigorColors.textSecondary(context),
           ),
         ),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -421,7 +421,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             color: VigorColors.textSecondary(context),
           ),
         ),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -476,7 +476,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     return GestureDetector(
       onTap: () => setState(() => _advancedExpanded = !_advancedExpanded),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
+        padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
         decoration: BoxDecoration(
           border: Border(
             top: BorderSide(
@@ -492,7 +492,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               size: 18,
               color: VigorColors.textSecondary(context),
             ),
-            SizedBox(width: VigorSpacing.sm),
+            const SizedBox(width: VigorSpacing.sm),
             Text(
               l10n.advancedSettings,
               style: VigorTypography.label.copyWith(
@@ -528,19 +528,19 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           maxLines: 2,
           minLines: 1,
         ),
-        SizedBox(height: VigorSpacing.md),
+        const SizedBox(height: VigorSpacing.md),
 
         // Warmup/cooldown toggle
         _buildWarmupToggle(),
-        SizedBox(height: VigorSpacing.md),
+        const SizedBox(height: VigorSpacing.md),
 
         // Methodology selection
         _buildMethodologySection(),
-        if (_availableMethodologies.isNotEmpty) SizedBox(height: VigorSpacing.md),
+        if (_availableMethodologies.isNotEmpty) const SizedBox(height: VigorSpacing.md),
 
         // Goals selection
         _buildGoalsSection(),
-        if (_availableGoals.isNotEmpty) SizedBox(height: VigorSpacing.md),
+        if (_availableGoals.isNotEmpty) const SizedBox(height: VigorSpacing.md),
 
         // Muscles selection
         _buildMusclesSection(),
@@ -554,7 +554,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     return GestureDetector(
       onTap: () => setState(() => _includeWarmupCooldown = !_includeWarmupCooldown),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.sm),
+        padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.sm),
         decoration: PlatformHelper.useLiquidGlass
             ? LiquidGlassTheme.glassDecoration(
                 borderRadius: 12,
@@ -605,7 +605,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(Icons.person_add, size: 16),
-                  SizedBox(width: VigorSpacing.xs),
+                  const SizedBox(width: VigorSpacing.xs),
                   Text(l10n.add),
                 ],
               ),
@@ -613,7 +613,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           ],
         ),
         if (_partners.isNotEmpty) ...[
-          SizedBox(height: VigorSpacing.sm),
+          const SizedBox(height: VigorSpacing.sm),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -743,14 +743,14 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         mainAxisSize: MainAxisSize.min,
         children: [
           const AdaptiveLoadingIndicator(),
-          SizedBox(height: VigorSpacing.lg),
+          const SizedBox(height: VigorSpacing.lg),
           Text(
             l10n.generatingTraining,
             style: VigorTypography.headline.copyWith(
               color: VigorColors.textPrimary(context),
             ),
           ),
-          SizedBox(height: VigorSpacing.sm),
+          const SizedBox(height: VigorSpacing.sm),
           Text(
             statusText,
             style: VigorTypography.caption.copyWith(
@@ -779,7 +779,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 color: VigorColors.textPrimary(context),
               ),
             ),
-            SizedBox(height: VigorSpacing.lg),
+            const SizedBox(height: VigorSpacing.lg),
 
             // Duration slider
             Column(
@@ -813,15 +813,15 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 ),
               ],
             ),
-            SizedBox(height: VigorSpacing.md),
+            const SizedBox(height: VigorSpacing.md),
 
             // Equipment mode selection
             _buildEquipmentSection(),
-            SizedBox(height: VigorSpacing.md),
+            const SizedBox(height: VigorSpacing.md),
 
             // Partners section
             _buildPartnersSection(),
-            SizedBox(height: VigorSpacing.md),
+            const SizedBox(height: VigorSpacing.md),
 
             // Advanced settings collapsible
             _buildAdvancedHeader(),
@@ -831,12 +831,12 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               alignment: Alignment.topCenter,
               child: _advancedExpanded
                   ? Padding(
-                      padding: EdgeInsets.only(top: VigorSpacing.md),
+                      padding: const EdgeInsets.only(top: VigorSpacing.md),
                       child: _buildAdvancedContent(),
                     )
                   : const SizedBox.shrink(),
             ),
-            SizedBox(height: VigorSpacing.lg),
+            const SizedBox(height: VigorSpacing.lg),
 
             // Action buttons
             Row(
@@ -846,7 +846,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(l10n.cancel),
                 ),
-                SizedBox(width: VigorSpacing.sm),
+                const SizedBox(width: VigorSpacing.sm),
                 AdaptiveButton(
                   onPressed: _generateTraining,
                   child: Text(l10n.generate),

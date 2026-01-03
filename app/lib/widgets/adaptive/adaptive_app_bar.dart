@@ -60,7 +60,7 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
             bottom: false,
             child: Container(
               height: kToolbarHeight,
-              padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm),
+              padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm),
               child: Row(
                 children: [
                   if (leading != null)

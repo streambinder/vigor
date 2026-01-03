@@ -46,8 +46,8 @@ class CachedExerciseImage extends StatelessWidget {
       memCacheHeight: height != null ? (height! * 2).toInt() : null,
       fadeInDuration: VigorAnimation.fast,
       fadeOutDuration: VigorAnimation.fast,
-      placeholder: (_, __) => _buildPlaceholder(),
-      errorWidget: (_, __, ___) => _buildPlaceholder(),
+      placeholder: (_, _) => _buildPlaceholder(),
+      errorWidget: (_, _, _) => _buildPlaceholder(),
     );
 
     if (isCircular) {

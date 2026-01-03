@@ -108,10 +108,11 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   Future<void> _completeTraining(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
+    final trainingService = context.read<ServiceLocator>().trainingService;
     final result = await FeedbackModal.show(context, training);
     if (result == null) return;
 
-    final response = await context.read<ServiceLocator>().trainingService.completeTraining(
+    final response = await trainingService.completeTraining(
       training.id,
       feedback: result.feedback,
       activityFeedback: result.activityFeedback,
@@ -237,7 +238,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                 child: const Icon(Icons.psychology, color: Colors.white),
               ),
             ),
-            SizedBox(width: VigorSpacing.sm),
+            const SizedBox(width: VigorSpacing.sm),
             Text(l10n.reasoning, style: VigorTypography.headline.copyWith(color: VigorColors.textPrimary(ctx))),
           ],
         ),
@@ -263,7 +264,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(l10n.close, style: TextStyle(color: VigorColors.orange)),
+            child: Text(l10n.close, style: const TextStyle(color: VigorColors.orange)),
           ),
         ],
       ),
@@ -272,7 +273,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   Widget _buildReasoningSection({required String title, required List<String> items, required Color color}) {
     return Container(
-      margin: EdgeInsets.only(bottom: VigorSpacing.md),
+      margin: const EdgeInsets.only(bottom: VigorSpacing.md),
       padding: VigorSpacing.paddingMd,
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
@@ -283,14 +284,14 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: VigorTypography.label.copyWith(color: color, fontWeight: FontWeight.w600)),
-          SizedBox(height: VigorSpacing.sm),
+          const SizedBox(height: VigorSpacing.sm),
           ...items.map((item) => Padding(
-            padding: EdgeInsets.only(bottom: VigorSpacing.xs),
+            padding: const EdgeInsets.only(bottom: VigorSpacing.xs),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  margin: EdgeInsets.only(top: 6, right: VigorSpacing.sm),
+                  margin: const EdgeInsets.only(top: 6, right: VigorSpacing.sm),
                   width: 5,
                   height: 5,
                   decoration: BoxDecoration(color: color, shape: BoxShape.circle),
@@ -306,7 +307,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   Widget _buildReasoningText({required String title, required String text, required Color color}) {
     return Container(
-      margin: EdgeInsets.only(bottom: VigorSpacing.md),
+      margin: const EdgeInsets.only(bottom: VigorSpacing.md),
       padding: VigorSpacing.paddingMd,
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
@@ -317,7 +318,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: VigorTypography.label.copyWith(color: color, fontWeight: FontWeight.w600)),
-          SizedBox(height: VigorSpacing.sm),
+          const SizedBox(height: VigorSpacing.sm),
           Text(text, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
         ],
       ),
@@ -326,7 +327,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   Widget _buildProgressionSection(AppLocalizations l10n, reasoning) {
     return Container(
-      margin: EdgeInsets.only(bottom: VigorSpacing.md),
+      margin: const EdgeInsets.only(bottom: VigorSpacing.md),
       padding: VigorSpacing.paddingMd,
       decoration: BoxDecoration(
         color: VigorColors.electricBlue.withValues(alpha: 0.1),
@@ -337,22 +338,22 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(l10n.progression, style: VigorTypography.label.copyWith(color: VigorColors.electricBlue, fontWeight: FontWeight.w600)),
-          SizedBox(height: VigorSpacing.sm),
+          const SizedBox(height: VigorSpacing.sm),
           if (reasoning.progression.summary.isNotEmpty)
             Padding(
-              padding: EdgeInsets.only(bottom: VigorSpacing.sm),
+              padding: const EdgeInsets.only(bottom: VigorSpacing.sm),
               child: Text(reasoning.progression.summary, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
             ),
           ...reasoning.progression.adjustments.map((a) => Padding(
-            padding: EdgeInsets.only(bottom: VigorSpacing.xs),
+            padding: const EdgeInsets.only(bottom: VigorSpacing.xs),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  margin: EdgeInsets.only(top: 6, right: VigorSpacing.sm),
+                  margin: const EdgeInsets.only(top: 6, right: VigorSpacing.sm),
                   width: 5,
                   height: 5,
-                  decoration: BoxDecoration(color: VigorColors.electricBlue, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(color: VigorColors.electricBlue, shape: BoxShape.circle),
                 ),
                 Expanded(child: Text('${a.exercise}: ${a.adjustment} (${a.reason})', style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)))),
               ],
@@ -365,7 +366,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   Widget _buildMuscleChips(AppLocalizations l10n, List<String> muscles) {
     return Container(
-      margin: EdgeInsets.only(bottom: VigorSpacing.md),
+      margin: const EdgeInsets.only(bottom: VigorSpacing.md),
       padding: VigorSpacing.paddingMd,
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.1),
@@ -376,12 +377,12 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(l10n.targetMuscles, style: VigorTypography.label.copyWith(color: Colors.red.shade700, fontWeight: FontWeight.w600)),
-          SizedBox(height: VigorSpacing.sm),
+          const SizedBox(height: VigorSpacing.sm),
           Wrap(
             spacing: VigorSpacing.xs,
             runSpacing: VigorSpacing.xs,
             children: muscles.map((m) => Container(
-              padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+              padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
               decoration: BoxDecoration(color: Colors.red.shade700, borderRadius: VigorRadius.radiusFull),
               child: Text(m, style: VigorTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w500)),
             )).toList(),
@@ -404,7 +405,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           maxLines: 4,
           decoration: InputDecoration(
             hintText: l10n.describeIssue,
-            border: OutlineInputBorder(borderRadius: VigorRadius.radiusMd),
+            border: const OutlineInputBorder(borderRadius: VigorRadius.radiusMd),
           ),
           autofocus: true,
         ),
@@ -476,7 +477,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           title: Text(training.name),
           automaticallyImplyLeading: false,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios, color: VigorColors.orange),
+            icon: const Icon(Icons.arrow_back_ios, color: VigorColors.orange),
             onPressed: () => _navigateToActivityScreen(context),
           ),
         ),
@@ -484,26 +485,26 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           padding: VigorSpacing.paddingLg,
           children: [
             _buildHeader(l10n, isDark),
-            SizedBox(height: VigorSpacing.lg),
+            const SizedBox(height: VigorSpacing.lg),
             _buildMetadataChips(l10n),
             if (training.references.isNotEmpty) ...[
-              SizedBox(height: VigorSpacing.md),
+              const SizedBox(height: VigorSpacing.md),
               _buildReferencesSection(l10n),
             ],
-            SizedBox(height: VigorSpacing.lg),
+            const SizedBox(height: VigorSpacing.lg),
             _buildPrimaryActions(l10n, isOwner),
-            SizedBox(height: VigorSpacing.sm),
+            const SizedBox(height: VigorSpacing.sm),
             _buildSecondaryActions(l10n, isOwner),
-            SizedBox(height: VigorSpacing.sm),
+            const SizedBox(height: VigorSpacing.sm),
             _buildDangerActions(l10n, isOwner),
-            SizedBox(height: VigorSpacing.xl),
+            const SizedBox(height: VigorSpacing.xl),
             _buildRoutinesHeader(l10n),
-            SizedBox(height: VigorSpacing.md),
+            const SizedBox(height: VigorSpacing.md),
             ...training.routines.map((routine) => Padding(
-              padding: EdgeInsets.only(bottom: VigorSpacing.md),
+              padding: const EdgeInsets.only(bottom: VigorSpacing.md),
               child: _buildRoutineCard(routine, isDark),
             )),
-            SizedBox(height: VigorSpacing.xxl),
+            const SizedBox(height: VigorSpacing.xxl),
           ],
         ),
       ),
@@ -527,12 +528,12 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         children: [
           Text(training.description, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context), height: 1.5)),
           if (training.equipment.isNotEmpty) ...[
-            SizedBox(height: VigorSpacing.md),
+            const SizedBox(height: VigorSpacing.md),
             Wrap(
               spacing: VigorSpacing.xs,
               runSpacing: VigorSpacing.xs,
               children: training.equipment.map((eq) => Container(
-                padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+                padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
                 decoration: BoxDecoration(
                   color: VigorColors.electricBlue.withValues(alpha: 0.15),
                   borderRadius: VigorRadius.radiusFull,
@@ -541,8 +542,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.fitness_center, size: 12, color: VigorColors.electricBlue),
-                    SizedBox(width: VigorSpacing.xs),
+                    const Icon(Icons.fitness_center, size: 12, color: VigorColors.electricBlue),
+                    const SizedBox(width: VigorSpacing.xs),
                     Text(eq, style: VigorTypography.caption.copyWith(color: VigorColors.electricBlue)),
                   ],
                 ),
@@ -550,12 +551,12 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             ),
           ],
           if (training.goals.isNotEmpty) ...[
-            SizedBox(height: VigorSpacing.md),
+            const SizedBox(height: VigorSpacing.md),
             Wrap(
               spacing: VigorSpacing.xs,
               runSpacing: VigorSpacing.xs,
               children: training.goals.map((goal) => Container(
-                padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+                padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
                 decoration: BoxDecoration(
                   color: VigorColors.success.withValues(alpha: 0.15),
                   borderRadius: VigorRadius.radiusFull,
@@ -564,8 +565,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.track_changes, size: 12, color: VigorColors.success),
-                    SizedBox(width: VigorSpacing.xs),
+                    const Icon(Icons.track_changes, size: 12, color: VigorColors.success),
+                    const SizedBox(width: VigorSpacing.xs),
                     Text(goal, style: VigorTypography.caption.copyWith(color: VigorColors.success)),
                   ],
                 ),
@@ -594,7 +595,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   Widget _buildMetaChip(IconData icon, String text, Color color) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
+      padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: VigorRadius.radiusFull,
@@ -604,7 +605,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: color),
-          SizedBox(width: VigorSpacing.xs),
+          const SizedBox(width: VigorSpacing.xs),
           Text(text, style: VigorTypography.caption.copyWith(color: color, fontWeight: FontWeight.w500)),
         ],
       ),
@@ -622,17 +623,17 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-          leading: Icon(Icons.science, size: 20, color: VigorColors.electricBlue),
+          leading: const Icon(Icons.science, size: 20, color: VigorColors.electricBlue),
           title: Text(l10n.references, style: VigorTypography.label.copyWith(color: VigorColors.textSecondary(context))),
-          childrenPadding: EdgeInsets.only(left: VigorSpacing.md, right: VigorSpacing.md, bottom: VigorSpacing.md),
+          childrenPadding: const EdgeInsets.only(left: VigorSpacing.md, right: VigorSpacing.md, bottom: VigorSpacing.md),
           children: training.references.map((url) => GestureDetector(
             onTap: () => _launchUrl(url),
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: VigorSpacing.xs),
+              padding: const EdgeInsets.symmetric(vertical: VigorSpacing.xs),
               child: Row(
                 children: [
-                  Icon(Icons.link, size: 14, color: VigorColors.electricBlue),
-                  SizedBox(width: VigorSpacing.sm),
+                  const Icon(Icons.link, size: 14, color: VigorColors.electricBlue),
+                  const SizedBox(width: VigorSpacing.sm),
                   Expanded(
                     child: Text(url, style: VigorTypography.caption.copyWith(color: VigorColors.electricBlue, decoration: TextDecoration.underline), overflow: TextOverflow.ellipsis),
                   ),
@@ -650,10 +651,10 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       children: [
         Expanded(child: _buildGradientButton(Icons.timer, l10n.startTraining, () async {
           final completed = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (context) => TabataTimerScreen(training: training)));
-          if (completed == true && context.mounted) Navigator.of(context).pop(true);
+          if (completed == true && mounted) Navigator.of(context).pop(true);
         })),
         if (training.completedAt == null) ...[
-          SizedBox(width: VigorSpacing.sm),
+          const SizedBox(width: VigorSpacing.sm),
           Expanded(child: _buildGradientButton(Icons.check_circle_outline, l10n.markAsComplete, isOwner ? () => _completeTraining(context) : null)),
         ],
       ],
@@ -665,9 +666,9 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: VigorSpacing.md),
+        padding: const EdgeInsets.symmetric(vertical: VigorSpacing.md),
         decoration: BoxDecoration(
-          gradient: isDisabled ? null : LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]),
+          gradient: isDisabled ? null : const LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]),
           color: isDisabled ? VigorColors.textMuted(context).withValues(alpha: 0.3) : null,
           borderRadius: VigorRadius.radiusMd,
         ),
@@ -675,7 +676,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 18, color: isDisabled ? VigorColors.textMuted(context) : Colors.white),
-            SizedBox(width: VigorSpacing.sm),
+            const SizedBox(width: VigorSpacing.sm),
             Flexible(child: Text(label, style: VigorTypography.label.copyWith(color: isDisabled ? VigorColors.textMuted(context) : Colors.white), overflow: TextOverflow.ellipsis)),
           ],
         ),
@@ -689,16 +690,16 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         Row(
           children: [
             Expanded(child: _buildOutlineButton(Icons.copy, l10n.cloneTraining, VigorColors.orange, () => _cloneTraining(context))),
-            SizedBox(width: VigorSpacing.sm),
+            const SizedBox(width: VigorSpacing.sm),
             Expanded(child: _buildOutlineButton(Icons.share, l10n.shareWithUser, VigorColors.electricBlue, () => _showCopyTrainingDialog(context))),
           ],
         ),
-        SizedBox(height: VigorSpacing.sm),
+        const SizedBox(height: VigorSpacing.sm),
         Row(
           children: [
             if (isOwner) ...[
               Expanded(child: _buildOutlineButton(Icons.person_add, l10n.addPartner, VigorColors.success, () => _showAddPartnerDialog(context))),
-              SizedBox(width: VigorSpacing.sm),
+              const SizedBox(width: VigorSpacing.sm),
             ],
             Expanded(child: _buildOutlineButton(Icons.psychology, l10n.showAiReasoning, Colors.purple, () => _showReasoningDialog(context))),
           ],
@@ -711,7 +712,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     return Row(
       children: [
         Expanded(child: _buildOutlineButton(Icons.flag_outlined, l10n.reportIssue, VigorColors.warning, () => _showReportDialog(context))),
-        SizedBox(width: VigorSpacing.sm),
+        const SizedBox(width: VigorSpacing.sm),
         Expanded(child: _buildOutlineButton(Icons.delete, isOwner ? l10n.deleteTraining : l10n.leaveTraining, VigorColors.error, () => _deleteTraining(context))),
       ],
     );
@@ -721,7 +722,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: VigorSpacing.sm + 2),
+        padding: const EdgeInsets.symmetric(vertical: VigorSpacing.sm + 2),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: VigorRadius.radiusMd,
@@ -731,7 +732,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 16, color: color),
-            SizedBox(width: VigorSpacing.xs),
+            const SizedBox(width: VigorSpacing.xs),
             Flexible(child: Text(label, style: VigorTypography.caption.copyWith(color: color, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis)),
           ],
         ),
@@ -748,7 +749,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             child: const Icon(Icons.list_alt, color: Colors.white, size: 24),
           ),
         ),
-        SizedBox(width: VigorSpacing.sm),
+        const SizedBox(width: VigorSpacing.sm),
         Text(l10n.trainingRoutines, style: VigorTypography.headline.copyWith(fontSize: 20, color: VigorColors.textPrimary(context))),
       ],
     );
@@ -773,24 +774,24 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
-              borderRadius: BorderRadius.only(topLeft: Radius.circular(VigorRadius.lg), topRight: Radius.circular(VigorRadius.lg)),
+              borderRadius: const BorderRadius.only(topLeft: Radius.circular(VigorRadius.lg), topRight: Radius.circular(VigorRadius.lg)),
             ),
             child: Row(
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.xs),
-                  decoration: BoxDecoration(gradient: LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]), borderRadius: VigorRadius.radiusFull),
+                  padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.xs),
+                  decoration: const BoxDecoration(gradient: LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]), borderRadius: VigorRadius.radiusFull),
                   child: Text(routine.type.toUpperCase(), style: VigorTypography.label.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
                 const Spacer(),
                 if (routine.rest > 0)
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+                    padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
                     decoration: BoxDecoration(color: VigorColors.warning.withValues(alpha: 0.15), borderRadius: VigorRadius.radiusFull, border: Border.all(color: VigorColors.warning.withValues(alpha: 0.3))),
                     child: Row(
                       children: [
-                        Icon(Icons.timer, size: 12, color: VigorColors.warning),
-                        SizedBox(width: VigorSpacing.xs),
+                        const Icon(Icons.timer, size: 12, color: VigorColors.warning),
+                        const SizedBox(width: VigorSpacing.xs),
                         Text('${routine.rest}s', style: VigorTypography.caption.copyWith(color: VigorColors.warning, fontWeight: FontWeight.w600)),
                       ],
                     ),
@@ -831,34 +832,34 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
               children: [
                 if (showBlockLabel)
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+                    padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
                     decoration: BoxDecoration(color: VigorColors.orange.withValues(alpha: 0.15), borderRadius: VigorRadius.radiusSm),
                     child: Text('Block $blockNumber', style: VigorTypography.caption.copyWith(fontWeight: FontWeight.bold, color: VigorColors.orange)),
                   ),
                 const Spacer(),
                 if (block.repeats > 1)
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+                    padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
                     decoration: BoxDecoration(color: VigorColors.electricBlue.withValues(alpha: 0.15), borderRadius: VigorRadius.radiusSm),
                     child: Row(
                       children: [
-                        Icon(Icons.repeat, size: 12, color: VigorColors.electricBlue),
-                        SizedBox(width: VigorSpacing.xs),
+                        const Icon(Icons.repeat, size: 12, color: VigorColors.electricBlue),
+                        const SizedBox(width: VigorSpacing.xs),
                         Text('${block.repeats}x', style: VigorTypography.caption.copyWith(fontWeight: FontWeight.bold, color: VigorColors.electricBlue)),
                       ],
                     ),
                   ),
                 if (block.rest > 0) ...[
-                  SizedBox(width: VigorSpacing.sm),
+                  const SizedBox(width: VigorSpacing.sm),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+                    padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
                     decoration: BoxDecoration(color: VigorColors.warning.withValues(alpha: 0.15), borderRadius: VigorRadius.radiusSm),
                     child: Text('${block.rest}s', style: VigorTypography.caption.copyWith(fontWeight: FontWeight.bold, color: VigorColors.warning)),
                   ),
                 ],
               ],
             ),
-            SizedBox(height: VigorSpacing.md),
+            const SizedBox(height: VigorSpacing.md),
           ],
           ...block.activities.asMap().entries.map((entry) => Padding(
             padding: EdgeInsets.only(bottom: entry.key < block.activities.length - 1 ? VigorSpacing.md : 0),
@@ -871,7 +872,6 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   Widget _buildActivityRow(Activity activity, bool isDark) {
     final exercise = _parseExercise(activity.detail);
-    final l10n = AppLocalizations.of(context);
     final hasValidImage = exercise != null && CachedExerciseImage.isValidUrl(exercise.reference);
 
     return Row(
@@ -900,17 +900,17 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                 : _buildPlaceholderIcon(),
           ),
         ),
-        SizedBox(width: VigorSpacing.md),
+        const SizedBox(width: VigorSpacing.md),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(activity.name, style: VigorTypography.body.copyWith(fontWeight: FontWeight.w600, color: VigorColors.textPrimary(context))),
               if (exercise != null && (exercise.equipment.isNotEmpty || exercise.muscles.isNotEmpty || activity.modifiers.isNotEmpty)) ...[
-                SizedBox(height: VigorSpacing.xs),
+                const SizedBox(height: VigorSpacing.xs),
                 _buildExerciseDetails(exercise, activity.modifiers),
               ],
-              SizedBox(height: VigorSpacing.sm),
+              const SizedBox(height: VigorSpacing.sm),
               _buildActivityTags(activity),
             ],
           ),
@@ -921,7 +921,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             child: Container(
               padding: VigorSpacing.paddingSm,
               decoration: BoxDecoration(color: VigorColors.orange.withValues(alpha: 0.15), borderRadius: VigorRadius.radiusFull),
-              child: Icon(Icons.refresh, size: 18, color: VigorColors.orange),
+              child: const Icon(Icons.refresh, size: 18, color: VigorColors.orange),
             ),
           ),
       ],
@@ -956,7 +956,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 12, color: color),
-        SizedBox(width: VigorSpacing.xs),
+        const SizedBox(width: VigorSpacing.xs),
         Flexible(child: Text(text, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context)), overflow: TextOverflow.ellipsis)),
       ],
     );
@@ -977,7 +977,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   Widget _buildTag(IconData icon, String label, Color color) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+      padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: VigorRadius.radiusSm,
@@ -987,7 +987,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 11, color: color),
-          SizedBox(width: VigorSpacing.xs),
+          const SizedBox(width: VigorSpacing.xs),
           Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
         ],
       ),

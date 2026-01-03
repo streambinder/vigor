@@ -53,7 +53,7 @@ class ProfileHelper {
       if (profile.data.isEmpty) {
         missing['goals'] = 'Goals';
       } else {
-        final data = profile_models.profileData.fromJson(profile.data);
+        final data = profile_models.ProfileData.fromJson(profile.data);
         if (data.goals.isEmpty) {
           missing['goals'] = 'Goals';
         }

@@ -7,7 +7,7 @@ part 'get_muscles_response.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class GetMusclesResponse {
-  @JsonKey(name: 'muscles', defaultValue: const [])
+  @JsonKey(name: 'muscles', defaultValue: [])
   final List<String> muscles;
 
   GetMusclesResponse({

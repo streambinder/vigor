@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../design/tokens.dart';
 import '../../utils/platform_helper.dart';
@@ -43,7 +42,7 @@ class AdaptiveListTile extends StatelessWidget {
           children: [
             if (leading != null) ...[
               leading!,
-              SizedBox(width: VigorSpacing.sm),
+              const SizedBox(width: VigorSpacing.sm),
             ],
             Expanded(
               child: Column(
@@ -55,7 +54,7 @@ class AdaptiveListTile extends StatelessWidget {
                     child: title,
                   ),
                   if (subtitle != null) ...[
-                    SizedBox(height: VigorSpacing.xs),
+                    const SizedBox(height: VigorSpacing.xs),
                     DefaultTextStyle(
                       style: VigorTypography.caption.copyWith(color: secondaryColor),
                       child: subtitle!,
@@ -65,10 +64,10 @@ class AdaptiveListTile extends StatelessWidget {
               ),
             ),
             if (trailing != null) ...[
-              SizedBox(width: VigorSpacing.sm),
+              const SizedBox(width: VigorSpacing.sm),
               trailing!,
             ] else if (onTap != null) ...[
-              SizedBox(width: VigorSpacing.sm),
+              const SizedBox(width: VigorSpacing.sm),
               Icon(
                 Icons.chevron_right,
                 size: 20,

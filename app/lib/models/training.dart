@@ -22,13 +22,13 @@ class Training {
   final String type;
   @JsonKey(name: 'duration')
   final int duration;
-  @JsonKey(name: 'equipment', defaultValue: const [])
+  @JsonKey(name: 'equipment', defaultValue: [])
   final List<String> equipment;
-  @JsonKey(name: 'goals', defaultValue: const [])
+  @JsonKey(name: 'goals', defaultValue: [])
   final List<String> goals;
-  @JsonKey(name: 'references', defaultValue: const [])
+  @JsonKey(name: 'references', defaultValue: [])
   final List<String> references;
-  @JsonKey(name: 'routines', defaultValue: const [])
+  @JsonKey(name: 'routines', defaultValue: [])
   final List<Routine> routines;
   @JsonKey(name: 'prompt')
   final Map<String, dynamic> prompt;

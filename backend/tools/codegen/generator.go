@@ -274,7 +274,7 @@ import '{{ $import }}';
 part '{{ toSnakeCase .Name }}.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-class {{ .Name }} {
+class {{ toClassName .Name }} {
 {{- $requiredFields := getRequiredFields . }}
 {{- if $requiredFields }}
   // Fields marked as required in the backend model
@@ -287,19 +287,19 @@ class {{ .Name }} {
 {{- end }}
 
 {{- range .Fields }}
-  @JsonKey(name: '{{ .JsonTag }}'{{- if needsListDefault . }}, defaultValue: const []{{- else if needsStringDefault . }}, defaultValue: ''{{- end }}{{- if isDateTime .Type }}{{- if .IsOptional }}, toJson: _nullableDateTimeToJson{{- else }}, toJson: _dateTimeToJson{{- end }}{{- end }})
+  @JsonKey(name: '{{ .JsonTag }}'{{- if needsListDefault . }}, defaultValue: []{{- else if needsStringDefault . }}, defaultValue: ''{{- end }}{{- if isDateTime .Type }}{{- if .IsOptional }}, toJson: _nullableDateTimeToJson{{- else }}, toJson: _dateTimeToJson{{- end }}{{- end }})
   final {{ toDartType .Type .IsOptional .IsCollection .CollectionOf }} {{ toCamelCase .Name }};
 {{- end }}
 
-  {{ .Name }}({
+  {{ toClassName .Name }}({
 {{- range .Fields }}
     {{ defaultValue . }}this.{{ toCamelCase .Name }},
 {{- end }}
   });
 
-  factory {{ .Name }}.fromJson(Map<String, dynamic> json) => _${{ .Name }}FromJson(json);
+  factory {{ toClassName .Name }}.fromJson(Map<String, dynamic> json) => _${{ toClassName .Name }}FromJson(json);
 
-  Map<String, dynamic> toJson() => _${{ .Name }}ToJson(this);
+  Map<String, dynamic> toJson() => _${{ toClassName .Name }}ToJson(this);
 {{- if hasDateTime . }}
 
   static String _dateTimeToJson(DateTime dt) => dt.toUtc().toIso8601String();

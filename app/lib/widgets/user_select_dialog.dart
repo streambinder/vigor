@@ -123,7 +123,7 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
                         color: VigorColors.textPrimary(context),
                       ),
                     ),
-                    SizedBox(height: VigorSpacing.sm),
+                    const SizedBox(height: VigorSpacing.sm),
                     AdaptiveTextField(
                       controller: _searchController,
                       placeholder: l10n.searchByName,
@@ -157,9 +157,9 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
 
   Widget _buildContent(AppLocalizations l10n) {
     if (_isLoading) {
-      return Padding(
+      return const Padding(
         padding: VigorSpacing.paddingXl,
-        child: const AdaptiveLoadingIndicator(),
+        child: AdaptiveLoadingIndicator(),
       );
     }
 
@@ -168,7 +168,7 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
         padding: VigorSpacing.paddingXl,
         child: Text(
           _error!,
-          style: TextStyle(color: VigorColors.error),
+          style: const TextStyle(color: VigorColors.error),
         ),
       );
     }
@@ -195,7 +195,7 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
             backgroundColor: VigorColors.orange.withValues(alpha: 0.2),
             child: Text(
               user.firstName.isNotEmpty ? user.firstName[0].toUpperCase() : '?',
-              style: TextStyle(color: VigorColors.orange),
+              style: const TextStyle(color: VigorColors.orange),
             ),
           ),
           title: Text(

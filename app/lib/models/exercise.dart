@@ -11,13 +11,13 @@ class Exercise {
   final String id;
   @JsonKey(name: 'name', defaultValue: '')
   final String name;
-  @JsonKey(name: 'equipment', defaultValue: const [])
+  @JsonKey(name: 'equipment', defaultValue: [])
   final List<String> equipment;
-  @JsonKey(name: 'muscles', defaultValue: const [])
+  @JsonKey(name: 'muscles', defaultValue: [])
   final List<String> muscles;
   @JsonKey(name: 'reference', defaultValue: '')
   final String reference;
-  @JsonKey(name: 'instructions', defaultValue: const [])
+  @JsonKey(name: 'instructions', defaultValue: [])
   final List<String> instructions;
   @JsonKey(name: 'progressions')
   final Map<String, dynamic> progressions;
