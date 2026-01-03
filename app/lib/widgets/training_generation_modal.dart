@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
@@ -34,8 +33,9 @@ class TrainingGenerationModal extends StatefulWidget {
 
 class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   final _formKey = GlobalKey<FormState>();
-  final _durationController = TextEditingController(text: '60');
   final _promptController = TextEditingController();
+
+  int _duration = 60; // minutes, range: 10-180
 
   EquipmentMode _equipmentMode = EquipmentMode.bodyweight;
   Gym? _selectedGym;
@@ -112,7 +112,6 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
   @override
   void dispose() {
-    _durationController.dispose();
     _promptController.dispose();
     super.dispose();
   }
@@ -516,7 +515,6 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
     final trainingService = context.read<ServiceLocator>().trainingService;
 
-    final duration = int.parse(_durationController.text);
     final prompt = _promptController.text.trim();
 
     // determine gym and equipment based on selected mode
@@ -535,7 +533,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     }
 
     final response = await trainingService.generateTraining(
-      duration: duration,
+      duration: _duration,
       gym: gymId,
       prompt: prompt.isEmpty ? null : prompt,
       equipment: equipment,
@@ -652,13 +650,36 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             ),
             SizedBox(height: VigorSpacing.lg),
 
-            // Duration field
-            AdaptiveTextField(
-              controller: _durationController,
-              labelText: l10n.durationMinutes,
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
+            // Duration slider
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n.durationMinutes,
+                      style: VigorTypography.caption.copyWith(
+                        color: VigorColors.textSecondary(context),
+                      ),
+                    ),
+                    Text(
+                      '$_duration min',
+                      style: VigorTypography.body.copyWith(
+                        color: VigorColors.orange,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                Slider(
+                  value: _duration.toDouble(),
+                  min: 10,
+                  max: 180,
+                  divisions: 34, // (180-10)/5 = 34 steps of 5 minutes
+                  activeColor: VigorColors.orange,
+                  onChanged: (value) => setState(() => _duration = value.round()),
+                ),
               ],
             ),
             SizedBox(height: VigorSpacing.md),

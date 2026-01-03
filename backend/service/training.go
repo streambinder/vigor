@@ -21,20 +21,24 @@ const (
 )
 
 var (
-	ErrTrainingNotFound  = errors.New("training not found")
-	ErrUserNotFound      = errors.New("user not found")
-	ErrAccessDenied      = errors.New("access denied")
-	ErrCannotAddSelf     = errors.New("cannot add yourself as partner")
-	ErrPartnerExists     = errors.New("partner already added")
-	ErrInvalidGym        = errors.New("gym not found")
-	ErrDurationRequired  = errors.New("duration is required")
-	ErrMalformedTraining = errors.New("malformed generated training")
+	ErrTrainingNotFound    = errors.New("training not found")
+	ErrUserNotFound        = errors.New("user not found")
+	ErrAccessDenied        = errors.New("access denied")
+	ErrCannotAddSelf       = errors.New("cannot add yourself as partner")
+	ErrPartnerExists       = errors.New("partner already added")
+	ErrInvalidGym          = errors.New("gym not found")
+	ErrDurationRequired    = errors.New("duration is required")
+	ErrDurationOutOfRange  = errors.New("duration must be between 10 and 180 minutes")
+	ErrMalformedTraining   = errors.New("malformed generated training")
 )
 
 // GenerateTraining creates a new training for a user.
 func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string) (*model.Training, error) {
 	if duration <= 0 {
 		return nil, ErrDurationRequired
+	}
+	if duration < 10 || duration > 180 {
+		return nil, ErrDurationOutOfRange
 	}
 
 	var requestorProfile model.Profile
