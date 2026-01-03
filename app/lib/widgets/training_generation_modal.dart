@@ -49,17 +49,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   Set<String> _selectedGoals = {};
   List<String> _availableMuscles = [];
   Set<String> _selectedMuscles = {};
-
-  static const _methodologies = [
-    'strength',
-    'circuit',
-    'emom',
-    'amrap',
-    'hiit',
-    'for_time',
-    'endurance',
-    'mobility',
-  ];
+  List<String> _availableMethodologies = [];
 
   @override
   void initState() {
@@ -75,6 +65,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     }
     _loadGoals();
     _loadMuscles();
+    _loadMethodologies();
   }
 
   Future<void> _loadGoals() async {
@@ -106,6 +97,17 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     if (response.isSuccess && response.data != null) {
       setState(() {
         _availableMuscles = response.data!;
+      });
+    }
+  }
+
+  Future<void> _loadMethodologies() async {
+    final gymService = context.read<ServiceLocator>().gymService;
+    final response = await gymService.getAvailableMethodologies();
+    if (!mounted) return;
+    if (response.isSuccess && response.data != null) {
+      setState(() {
+        _availableMethodologies = response.data!;
       });
     }
   }
@@ -293,6 +295,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
   Widget _buildMethodologySection() {
     final l10n = AppLocalizations.of(context);
+    if (_availableMethodologies.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -322,7 +327,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 if (selected) setState(() => _methodology = null);
               },
             ),
-            ..._methodologies.map((m) {
+            ..._availableMethodologies.map((m) {
               final isSelected = _methodology == m;
               return FilterChip(
                 label: Text(
@@ -690,7 +695,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
             // Methodology selection
             _buildMethodologySection(),
-            SizedBox(height: VigorSpacing.md),
+            if (_availableMethodologies.isNotEmpty) SizedBox(height: VigorSpacing.md),
 
             // Goals selection
             _buildGoalsSection(),

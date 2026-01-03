@@ -77,6 +77,26 @@ class GymService {
     );
   }
 
+  Future<ApiResponse<List<String>>> getAvailableMethodologies() async {
+    AppLogger.debug('[GymService] Fetching available methodologies');
+    final response = await _publicApiService.get('/methodologies');
+    if (response.isSuccess && response.data != null) {
+      try {
+        final methodologies = (response.data!['methodologies'] as List).cast<String>();
+        AppLogger.info('[GymService] Fetched ${methodologies.length} methodologies');
+        return ApiResponse.success(methodologies, response.statusCode);
+      } catch (e) {
+        AppLogger.error('[GymService] failed to parse methodologies', e);
+        return ApiResponse.error('Failed to parse methodologies', response.statusCode);
+      }
+    }
+    AppLogger.error('[GymService] Failed to fetch methodologies: ${response.error}');
+    return ApiResponse.error(
+      response.error ?? 'Failed to fetch methodologies',
+      response.statusCode,
+    );
+  }
+
   Future<ApiResponse<List<Gym>>> getGyms() async {
     AppLogger.debug('[GymService] Fetching gyms');
 
