@@ -76,6 +76,8 @@ func GetReports() ([]model.Report, error) {
 	var reports []model.Report
 	err := DB.Order("created_at DESC").Limit(100).
 		Preload("User").
+		Preload("Training.Routines.Blocks.Activities").
+		Preload("Activity").
 		Find(&reports).Error
 	return reports, err
 }

@@ -97,7 +97,7 @@ templ Dashboard(data DashboardData) {
 		<div id="modal" class="modal" onclick="closeModal(event)">
 			<div class="modal-content" onclick="event.stopPropagation()">
 				<div class="modal-header">
-					<span class="modal-title">Training JSON</span>
+					<span class="modal-title">JSON</span>
 					<button class="modal-close" onclick="closeModal()">&times;</button>
 				</div>
 				<pre id="modal-json"></pre>
@@ -120,7 +120,7 @@ templ Dashboard(data DashboardData) {
 						</tr>
 					</thead>
 					<tbody id="reports-tbody">
-						for _, r := range data.Reports {
+						for i, r := range data.Reports {
 							<tr class="report-row" id={ "report-" + r.ID.String() }>
 								<td>{ r.CreatedAt.Format("Jan 2, 15:04") }</td>
 								<td>{ r.ID.String()[:8] }</td>
@@ -129,6 +129,11 @@ templ Dashboard(data DashboardData) {
 								<td>{ uuidPtrToStr(r.TrainingID) }</td>
 								<td>{ ptrToStr(r.ActivityID) }</td>
 								<td>
+									if r.Activity != nil {
+										<button class="btn-json" onclick={ showReportJSON(i, "activity") }>JSON</button>
+									} else if r.Training != nil {
+										<button class="btn-json" onclick={ showReportJSON(i, "training") }>JSON</button>
+									}
 									<button class="btn-delete" onclick={ deleteReport(r.ID.String()) }>Delete</button>
 								</td>
 							</tr>
@@ -145,6 +150,13 @@ templ Dashboard(data DashboardData) {
 				<div class="pagination" id="reports-pagination"></div>
 			}
 		</div>
+		for i, r := range data.Reports {
+			if r.Activity != nil {
+				@templ.JSONScript(fmt.Sprintf("report-%d-activity", i), r.Activity)
+			} else if r.Training != nil {
+				@templ.JSONScript(fmt.Sprintf("report-%d-training", i), r.Training)
+			}
+		}
 		<div class="table-container" id="users-container">
 			<div class="table-title">Users</div>
 			<div class="table-scroll">
@@ -333,6 +345,13 @@ func formatCompleted(t *time.Time) string {
 
 script showTrainingJSON(index int) {
 	var el = document.getElementById('training-' + index);
+	var data = JSON.parse(el.textContent);
+	document.getElementById('modal-json').textContent = JSON.stringify(data, null, 2);
+	document.getElementById('modal').classList.add('open');
+}
+
+script showReportJSON(index int, kind string) {
+	var el = document.getElementById('report-' + index + '-' + kind);
 	var data = JSON.parse(el.textContent);
 	document.getElementById('modal-json').textContent = JSON.stringify(data, null, 2);
 	document.getElementById('modal').classList.add('open');
