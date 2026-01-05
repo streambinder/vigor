@@ -163,34 +163,29 @@ func toActiveUsersSeries(stats []database.ActiveUsersPoint) []view.LatencySeries
 	return []view.LatencySeries{{Name: "Active Users", Points: points}}
 }
 
-// generateDayRange returns all days between min and max dates found in daySet
+// generateDayRange returns all days between min date found in daySet and today
 func generateDayRange(daySet map[string]bool) []string {
 	if len(daySet) == 0 {
 		return nil
 	}
 
-	var minDay, maxDay time.Time
+	now := time.Now()
+	today, _ := time.Parse("2006-01-02", now.Format("2006-01-02"))
+	var minDay time.Time
 	first := true
 	for day := range daySet {
 		t, err := time.Parse("2006-01-02", day)
 		if err != nil {
 			continue
 		}
-		if first {
-			minDay, maxDay = t, t
+		if first || t.Before(minDay) {
+			minDay = t
 			first = false
-		} else {
-			if t.Before(minDay) {
-				minDay = t
-			}
-			if t.After(maxDay) {
-				maxDay = t
-			}
 		}
 	}
 
 	var days []string
-	for d := minDay; !d.After(maxDay); d = d.AddDate(0, 0, 1) {
+	for d := minDay; !d.After(today); d = d.AddDate(0, 0, 1) {
 		days = append(days, d.Format("2006-01-02"))
 	}
 	return days
