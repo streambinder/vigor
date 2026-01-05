@@ -13,8 +13,14 @@ import (
 func Dashboard(c *fiber.Ctx) error {
 	userCount, _ := database.GetUserCount()
 	avgActiveUsersPerDay, _ := database.GetAvgActiveUsersPerDay()
-	trainingCount, _ := database.GetTrainingCount()
-	avgTrainingsPerDay, _ := database.GetAvgTrainingsPerDay()
+	trainingGenerationCount, _ := database.GetTrainingGenerationCount()
+	trainingDbCount, _ := database.GetTrainingCount()
+	if trainingDbCount > trainingGenerationCount {
+		trainingGenerationCount = trainingDbCount
+	}
+	avgTrainingGenerationsPerDay, _ := database.GetAvgTrainingGenerationsPerDay()
+	completedTrainingCount, _ := database.GetCompletedTrainingCount()
+	avgCompletedTrainingsPerDay, _ := database.GetAvgCompletedTrainingsPerDay()
 	activeUsersStats, _ := database.GetActiveUsersPerDay(14)
 	trainingStats, _ := database.GetTrainingGenerationStats(14)
 	handlerStats, _ := database.GetHandlerRequestStats(14)
@@ -24,17 +30,19 @@ func Dashboard(c *fiber.Ctx) error {
 	users, _ := database.GetUsers()
 
 	data := view.DashboardData{
-		UserCount:                   userCount,
-		AvgActiveUsersPerDay:        avgActiveUsersPerDay,
-		TrainingCount:               trainingCount,
-		AvgTrainingsPerDay:          avgTrainingsPerDay,
-		ActiveUsersPerDay:           toActiveUsersSeries(activeUsersStats),
-		TrainingGenerationLatencies: toLatencySeries(trainingStats),
-		HandlerRequestLatencies:     toLatencySeries(handlerStats),
-		HandlerRequestErrors:        toErrorSeries(errorStats),
-		Trainings:                   trainings,
-		Reports:                     reports,
-		Users:                       users,
+		UserCount:                    userCount,
+		AvgActiveUsersPerDay:         avgActiveUsersPerDay,
+		TrainingGenerationCount:      trainingGenerationCount,
+		AvgTrainingGenerationsPerDay: avgTrainingGenerationsPerDay,
+		CompletedTrainingCount:       completedTrainingCount,
+		AvgCompletedTrainingsPerDay:  avgCompletedTrainingsPerDay,
+		ActiveUsersPerDay:            toActiveUsersSeries(activeUsersStats),
+		TrainingGenerationLatencies:  toLatencySeries(trainingStats),
+		HandlerRequestLatencies:      toLatencySeries(handlerStats),
+		HandlerRequestErrors:         toErrorSeries(errorStats),
+		Trainings:                    trainings,
+		Reports:                      reports,
+		Users:                        users,
 	}
 
 	return render(c, view.Dashboard(data))

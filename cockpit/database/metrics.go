@@ -153,3 +153,39 @@ func GetAvgActiveUsersPerDay() (float64, error) {
 
 	return result.Avg, err
 }
+
+// GetTrainingGenerationCount returns total count of training generation events
+func GetTrainingGenerationCount() (int64, error) {
+	if Metrics == nil {
+		return 0, nil
+	}
+
+	stmt := &gorm.Statement{DB: Metrics}
+	_ = stmt.Parse(&event.TrainingGenerationEvent{})
+
+	var result countResult
+	err := Metrics.Raw(fmt.Sprintf(`SELECT count(*) as count FROM %s`, stmt.Table)).Scan(&result).Error
+	return result.Count, err
+}
+
+// GetAvgTrainingGenerationsPerDay returns average training generations per day over last 30 days
+func GetAvgTrainingGenerationsPerDay() (float64, error) {
+	if Metrics == nil {
+		return 0, nil
+	}
+
+	stmt := &gorm.Statement{DB: Metrics}
+	_ = stmt.Parse(&event.TrainingGenerationEvent{})
+
+	var result avgResult
+	err := Metrics.Raw(fmt.Sprintf(`
+		SELECT COALESCE(AVG(daily_count), 0) as avg FROM (
+			SELECT date(time) as day, COUNT(*) as daily_count
+			FROM %s
+			WHERE time > datetime('now', '-30 days')
+			GROUP BY day
+		) daily_counts
+	`, stmt.Table)).Scan(&result).Error
+
+	return result.Avg, err
+}

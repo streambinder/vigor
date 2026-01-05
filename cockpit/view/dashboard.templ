@@ -20,7 +20,11 @@ templ Dashboard(data DashboardData) {
 			</div>
 			<div class="card">
 				<div class="card-label">Trainings</div>
-				<div class="card-value">{ formatNumber(data.TrainingCount) } <span class="card-sub">{ formatFloat(data.AvgTrainingsPerDay) }<span class="muted">/day</span></span></div>
+				<div class="card-value">{ formatNumber(data.TrainingGenerationCount) } <span class="card-sub">{ formatFloat(data.AvgTrainingGenerationsPerDay) }<span class="muted">/day</span></span></div>
+			</div>
+			<div class="card">
+				<div class="card-label">Completed</div>
+				<div class="card-value">{ formatNumber(data.CompletedTrainingCount) } <span class="card-sub">{ formatFloat(data.AvgCompletedTrainingsPerDay) }<span class="muted">/day</span></span></div>
 			</div>
 		</div>
 		<div class="chart-container">

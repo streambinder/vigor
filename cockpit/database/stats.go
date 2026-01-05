@@ -28,6 +28,15 @@ func GetTrainingCount() (int64, error) {
 	return result.Count, err
 }
 
+func GetCompletedTrainingCount() (int64, error) {
+	if DB == nil {
+		return 0, nil
+	}
+	var result countResult
+	err := DB.Raw(`SELECT count(*) as count FROM trainings WHERE completed_at IS NOT NULL`).Scan(&result).Error
+	return result.Count, err
+}
+
 func GetAvgTrainingsPerDay() (float64, error) {
 	if DB == nil {
 		return 0, nil
@@ -38,6 +47,22 @@ func GetAvgTrainingsPerDay() (float64, error) {
 			SELECT DATE(created_at) as day, COUNT(*) as daily_count
 			FROM trainings
 			WHERE created_at > NOW() - INTERVAL '30 days'
+			GROUP BY day
+		) daily_counts
+	`).Scan(&result).Error
+	return result.Avg, err
+}
+
+func GetAvgCompletedTrainingsPerDay() (float64, error) {
+	if DB == nil {
+		return 0, nil
+	}
+	var result avgResult
+	err := DB.Raw(`
+		SELECT COALESCE(AVG(daily_count), 0) as avg FROM (
+			SELECT DATE(completed_at) as day, COUNT(*) as daily_count
+			FROM trainings
+			WHERE completed_at IS NOT NULL AND completed_at > NOW() - INTERVAL '30 days'
 			GROUP BY day
 		) daily_counts
 	`).Scan(&result).Error
