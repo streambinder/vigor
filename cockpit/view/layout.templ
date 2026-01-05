@@ -93,8 +93,28 @@ templ Layout(title string) {
 					margin-bottom: 1rem;
 					color: var(--text);
 				}
+				.table-scroll {
+					overflow-x: auto;
+					-webkit-overflow-scrolling: touch;
+					scrollbar-width: thin;
+					scrollbar-color: var(--border) transparent;
+				}
+				.table-scroll::-webkit-scrollbar {
+					height: 6px;
+				}
+				.table-scroll::-webkit-scrollbar-track {
+					background: transparent;
+				}
+				.table-scroll::-webkit-scrollbar-thumb {
+					background: var(--border);
+					border-radius: 3px;
+				}
+				.table-scroll::-webkit-scrollbar-thumb:hover {
+					background: var(--text-muted);
+				}
 				table {
 					width: 100%;
+					min-width: 600px;
 					border-collapse: collapse;
 					font-size: 0.875rem;
 				}
@@ -239,6 +259,16 @@ templ Layout(title string) {
 				.page-info {
 					color: var(--text-muted);
 					font-size: 0.875rem;
+				}
+				@media (max-width: 768px) {
+					body { padding: 1rem; }
+					h1 { font-size: 1.25rem; margin-bottom: 1.5rem; }
+					.card { padding: 1rem; }
+					.card-value { font-size: 1.75rem; }
+					.card-sub { font-size: 1.25rem; }
+					.table-container { padding: 1rem; }
+					.table-title { margin-bottom: 0.75rem; }
+					th, td { padding: 0.5rem 0.75rem; white-space: nowrap; }
 				}
 			</style>
 		</head>
