@@ -64,6 +64,7 @@ func GetHandlerRequestStats(days int) ([]LatencyPoint, error) {
 				COUNT(*) OVER (PARTITION BY date(time), method, path) as cnt
 			FROM %s
 			WHERE time > datetime('now', '-%d days')
+				AND NOT (method = 'POST' AND path = '/training')
 		)
 		SELECT day, grp as "group", ms as p95_ms, cnt as count
 		FROM ranked
