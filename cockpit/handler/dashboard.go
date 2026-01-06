@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"sort"
 	"time"
 
 	"github.com/a-h/templ"
@@ -53,12 +54,16 @@ func toLatencySeries(stats []database.LatencyPoint) []view.LatencySeries {
 		return nil
 	}
 
-	// collect all days and find date range
+	// collect unique days sorted
 	daySet := make(map[string]bool)
 	for _, s := range stats {
 		daySet[s.Day] = true
 	}
-	allDays := generateDayRange(daySet)
+	var allDays []string
+	for day := range daySet {
+		allDays = append(allDays, day)
+	}
+	sort.Strings(allDays)
 
 	// group points by Group field
 	seriesMap := make(map[string]map[string]float64)
@@ -71,20 +76,22 @@ func toLatencySeries(stats []database.LatencyPoint) []view.LatencySeries {
 		seriesMap[s.Group][s.Day] = s.P95Ms
 	}
 
-	// build series with zero-filled gaps
+	// build series with only actual data points (no zero-filling)
 	var series []view.LatencySeries
 	for _, name := range seriesOrder {
 		var points []view.LatencyDataPoint
 		dayValues := seriesMap[name]
 		for _, day := range allDays {
-			label := day
-			if t, err := time.Parse("2006-01-02", day); err == nil {
-				label = t.Format("Jan 2")
+			if val, exists := dayValues[day]; exists {
+				label := day
+				if t, err := time.Parse("2006-01-02", day); err == nil {
+					label = t.Format("Jan 2")
+				}
+				points = append(points, view.LatencyDataPoint{
+					Label: label,
+					Value: val,
+				})
 			}
-			points = append(points, view.LatencyDataPoint{
-				Label: label,
-				Value: dayValues[day], // zero if missing
-			})
 		}
 		series = append(series, view.LatencySeries{Name: name, Points: points})
 	}
