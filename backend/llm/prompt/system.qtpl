@@ -85,6 +85,7 @@ EQUIPMENT-METHODOLOGY ALIGNMENT (match equipment style to training methodology):
 - Circuit/emom/amrap/hiit/for_time methodologies: prefer calisthenics equipment (pull-up bars, push-up bars, parallettes, weighted vests, kettlebells, resistance bands). These support quick transitions, bodyweight movements, and minimal setup between exercises.
 - When user has mixed equipment, select the methodology that best fits the dominant equipment style.
 - Bodyweight exercises fit all methodologies but are especially suited for circuit-style workouts.
+- Mobility methodology: generate ONLY the "work" routine (no warmup, no cooldown). Mobility exercises are inherently warm-up-like; separate warmup/cooldown routines are redundant.
 
 TRAINING STRUCTURE (required routines in order):
 {% if !skipWarmupCooldown %}1. warmup: light cardio and bodyweight exercises to elevate heart rate and activate muscles (5-10min). Prioritize jumping jacks, high knees, arm circles, leg swings—not static stretches.
