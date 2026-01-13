@@ -314,7 +314,7 @@ func RetrieveFavoriteExercises(favorites []string) ([]model.Exercise, error) {
 // filterByProficiency filters exercises based on user proficiency per family and methodology min scores.
 // Applies graceful degradation: if methodology min yields too few results, falls back to proficiency-only.
 func filterByProficiency(exercises []model.Exercise, proficiencies map[string]float64, methodology *model.Methodology, margin float64) []model.Exercise {
-	log.Debug().Float64("proficiency_margin", margin).Msg("filtering exercises by proficiency")
+	log.Debug().Int("count", len(exercises)).Float64("proficiency_margin", margin).Msg("filtering exercises by proficiency")
 
 	var methodologyWork map[string]model.MethodologyWork
 	if methodology != nil {
