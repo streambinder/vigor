@@ -27,7 +27,10 @@ type UserSummary struct {
 // GetUsers returns all users except the requesting user.
 func GetUsers(excludeUserID uuid.UUID) ([]UserSummary, error) {
 	var profiles []model.Profile
-	if err := database.DB.Select("user_id", "first_name", "last_name").Where("user_id != ?", excludeUserID).Find(&profiles).Error; err != nil {
+	if err := database.DB.Select("user_id", "first_name", "last_name").
+		Where("user_id != ?", excludeUserID).
+		Where("first_name != '' AND last_name != ''").
+		Find(&profiles).Error; err != nil {
 		return nil, err
 	}
 
