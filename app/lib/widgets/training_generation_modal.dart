@@ -621,9 +621,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               return Chip(
                 label: Text(
                   partner.displayName,
-                  style: VigorTypography.caption,
+                  style: VigorTypography.caption.copyWith(
+                    color: VigorColors.textPrimary(context),
+                  ),
                 ),
-                deleteIcon: const Icon(Icons.close, size: 16),
+                deleteIcon: Icon(Icons.close, size: 16, color: VigorColors.textSecondary(context)),
                 onDeleted: () => _removePartner(partner),
                 backgroundColor: VigorColors.orange.withValues(alpha: 0.1),
               );
