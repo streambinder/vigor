@@ -312,7 +312,7 @@ func RetrieveFavoriteExercises(favorites []string) ([]model.Exercise, error) {
 }
 
 // filterByProficiency filters exercises based on user proficiency per family and methodology min scores.
-// Applies graceful degradation: if methodology min yields too few results, falls back to proficiency-only.
+// Applies graceful degradation: first drops methodology min, then progressively increases margin.
 func filterByProficiency(exercises []model.Exercise, proficiencies map[string]float64, methodology *model.Methodology, margin float64) []model.Exercise {
 	log.Debug().Int("count", len(exercises)).Float64("proficiency_margin", margin).Msg("filtering exercises by proficiency")
 
@@ -326,8 +326,15 @@ func filterByProficiency(exercises []model.Exercise, proficiencies map[string]fl
 
 	// graceful degradation: if too few results, ignore methodology min
 	if len(filtered) < MinWorkExercises && methodologyWork != nil {
-		log.Debug().Int("count", len(filtered)).Msg("too few exercises with methodology min, falling back")
+		log.Debug().Int("count", len(filtered)).Msg("too few exercises with methodology min, falling back to no-min")
 		filtered = filterWithConstraints(exercises, proficiencies, methodologyWork, margin, false)
+	}
+
+	// progressive margin increase: if still too few, widen margin in steps
+	for step := 1; len(filtered) < MinWorkExercises && step <= 3; step++ {
+		expandedMargin := margin + float64(step)*15
+		log.Debug().Int("count", len(filtered)).Float64("expanded_margin", expandedMargin).Msg("too few exercises, expanding margin")
+		filtered = filterWithConstraints(exercises, proficiencies, methodologyWork, expandedMargin, false)
 	}
 
 	if len(filtered) > MaxWorkExercises {
