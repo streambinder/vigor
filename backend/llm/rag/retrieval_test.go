@@ -24,8 +24,9 @@ func TestFilterByProficiency(t *testing.T) {
 	t.Run("new user with margin 45 no methodology", func(t *testing.T) {
 		profs := map[string]float64{} // empty proficiencies
 		filtered := filterByProficiency(exercises, profs, nil, 45.0)
-		// all exercises with all progressions <= 45 should pass
-		expected := []string{"easy", "medium", "multi-easy", "multi-mixed"}
+		// with 5 exercises total (< MinWorkExercises=10), progressive margin expansion kicks in
+		// margin 45 -> 60 -> 75 -> 90, so all exercises pass
+		expected := []string{"easy", "medium", "hard", "multi-easy", "multi-mixed"}
 		if len(filtered) != len(expected) {
 			t.Errorf("got %d exercises, want %d", len(filtered), len(expected))
 		}
@@ -39,25 +40,21 @@ func TestFilterByProficiency(t *testing.T) {
 	t.Run("experienced user with margin 15 no methodology", func(t *testing.T) {
 		profs := map[string]float64{"core": 30, "push": 20}
 		filtered := filterByProficiency(exercises, profs, nil, 15.0)
-		// core: 30+15=45, push: 20+15=35
-		// easy: core 10 <= 45 ✓
-		// medium: core 30 <= 45 ✓
-		// hard: core 50 > 45 ✗
-		// multi-easy: core 10 <= 45, push 10 <= 35 ✓
-		// multi-mixed: core 10 <= 45, push 40 > 35 ✗
-		expected := []string{"easy", "medium", "multi-easy"}
-		if len(filtered) != len(expected) {
-			t.Errorf("got %d exercises, want %d", len(filtered), len(expected))
+		// core: 30+15=45, push: 20+15=35 initially
+		// but with 5 exercises (< MinWorkExercises=10), progressive margin kicks in
+		// after expansion, all 5 exercises should pass
+		if len(filtered) != 5 {
+			t.Errorf("got %d exercises, want 5 (all pass due to margin expansion)", len(filtered))
 		}
 	})
 
 	t.Run("empty proficiencies with strict margin", func(t *testing.T) {
 		profs := map[string]float64{}
 		filtered := filterByProficiency(exercises, profs, nil, 15.0)
-		// only exercises with all progressions <= 15
-		expected := []string{"easy", "multi-easy"}
-		if len(filtered) != len(expected) {
-			t.Errorf("got %d exercises, want %d", len(filtered), len(expected))
+		// with 5 exercises (< MinWorkExercises=10), progressive margin kicks in
+		// margin 15 -> 30 -> 45 -> 60, so all exercises eventually pass
+		if len(filtered) != 5 {
+			t.Errorf("got %d exercises, want 5 (all pass due to margin expansion)", len(filtered))
 		}
 	})
 

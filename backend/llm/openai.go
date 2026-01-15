@@ -55,8 +55,8 @@ func (llm *OpenAI) query(prompt llmPrompt, temperature float64, maxTokens int) (
 			},
 		},
 	}
-	// Add provider-specific parameter (reduces exercise repetition, encourages variety)
-	params.SetExtraFields(map[string]any{"repeat_penalty": 1.15})
+	// slight penalty to encourage variety, but not too high to avoid breaking valid repetitions
+	params.SetExtraFields(map[string]any{"repeat_penalty": 1.05})
 
 	promptJSON, _ := json.Marshal(prompt)
 	log.Debug().Str("provider", llm.provider).Str("model", llm.model).RawJSON("request", promptJSON).Msg("Sending request to LLM")

@@ -53,7 +53,7 @@ func GenTraining(
 	skipWarmupCooldown bool,
 ) (*model.Training, llmPrompt, string, error) {
 	request := llmPrompt{
-		prompt.System(methodologies, skipWarmupCooldown),
+		prompt.System(methodology, methodologies, skipWarmupCooldown),
 		prompt.GenTraining(
 			profiles,
 			goals,
@@ -74,8 +74,8 @@ func GenTraining(
 	}
 	response, llmModel, err := getLLM(profiles).query(
 		request,
-		0.35,  // Balanced: structured output + training variety
-		16000, // High limit for complex workouts (EMOM, circuits with timing metadata)
+		0.35, // Balanced: structured output + training variety
+		16000,
 	)
 	if err != nil {
 		return nil, request, llmModel, fmt.Errorf("failed to generate training: %s", err)

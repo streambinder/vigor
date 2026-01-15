@@ -488,7 +488,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                       borderRadius: VigorRadius.radiusXs,
                     ),
                     child: Text(
-                      training.type.toUpperCase(),
+                      training.methodology.toUpperCase(),
                       style: VigorTypography.caption.copyWith(
                         color: VigorColors.electricBlue,
                         fontWeight: FontWeight.w600,

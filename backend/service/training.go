@@ -21,15 +21,15 @@ const (
 )
 
 var (
-	ErrTrainingNotFound    = errors.New("training not found")
-	ErrUserNotFound        = errors.New("user not found")
-	ErrAccessDenied        = errors.New("access denied")
-	ErrCannotAddSelf       = errors.New("cannot add yourself as partner")
-	ErrPartnerExists       = errors.New("partner already added")
-	ErrInvalidGym          = errors.New("gym not found")
-	ErrDurationRequired    = errors.New("duration is required")
-	ErrDurationOutOfRange  = errors.New("duration must be between 10 and 180 minutes")
-	ErrMalformedTraining   = errors.New("malformed generated training")
+	ErrTrainingNotFound   = errors.New("training not found")
+	ErrUserNotFound       = errors.New("user not found")
+	ErrAccessDenied       = errors.New("access denied")
+	ErrCannotAddSelf      = errors.New("cannot add yourself as partner")
+	ErrPartnerExists      = errors.New("partner already added")
+	ErrInvalidGym         = errors.New("gym not found")
+	ErrDurationRequired   = errors.New("duration is required")
+	ErrDurationOutOfRange = errors.New("duration must be between 10 and 180 minutes")
+	ErrMalformedTraining  = errors.New("malformed generated training")
 )
 
 // GenerateTraining creates a new training for a user.
@@ -226,6 +226,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			Model: llmModel,
 		}).Msg("training generated")
 
+	training.Description = training.BuildDescription()
 	training.UserID = requestorProfile.UserID
 	if promptJSON, err := json.Marshal(llmPrompt); err == nil {
 		training.Prompt = promptJSON

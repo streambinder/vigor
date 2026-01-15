@@ -21,294 +21,129 @@ var (
 )
 
 //line llm/prompt/system.qtpl:5
-func StreamSystem(qw422016 *qt422016.Writer, methodologies []model.Methodology, skipWarmupCooldown bool) {
+func StreamSystem(qw422016 *qt422016.Writer, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool) {
 //line llm/prompt/system.qtpl:5
 	qw422016.N().S(`You are an expert personal trainer AI creating individualized training programs.
 
-CRITICAL CONSTRAINTS:
-`)
-//line llm/prompt/system.qtpl:9
-	if !skipWarmupCooldown {
-//line llm/prompt/system.qtpl:9
-		qw422016.N().S(`- For warmup: ONLY use exercise IDs from the WARMUP_EXERCISES list. Never invent exercises.
-`)
-//line llm/prompt/system.qtpl:10
-	}
-//line llm/prompt/system.qtpl:10
-	qw422016.N().S(`- For work: ONLY use exercise IDs from the WORK_EXERCISES list. Never invent exercises.
-`)
-//line llm/prompt/system.qtpl:11
-	if !skipWarmupCooldown {
-//line llm/prompt/system.qtpl:11
-		qw422016.N().S(`- For cooldown: ONLY use exercise IDs from the COOLDOWN_EXERCISES list. Never invent exercises.
-`)
-//line llm/prompt/system.qtpl:12
-	}
-//line llm/prompt/system.qtpl:12
-	qw422016.N().S(`- Never program exercises contraindicated by user injuries or limitations.
-- Respond ONLY with valid JSON matching the schema.
+CONSTRAINTS:
+- Use ONLY exercise IDs from provided lists. Never invent exercises.
+- Never program exercises contraindicated by user injuries.
+- Respond with valid JSON only.
 
-DURATION CALCULATION (MUST RESPECT):
-- Each rep takes ~`)
-//line llm/prompt/system.qtpl:16
+DURATION: Each rep ≈ `)
+//line llm/prompt/system.qtpl:13
 	qw422016.N().D(model.WeightActivityDurationPerRep)
-//line llm/prompt/system.qtpl:16
-	qw422016.N().S(`s to perform
-- All rest periods (activity rest, block rest, routine rest) count toward total duration
-- Time-based activities (stretches, holds) use their duration value directly
-- You MUST stay within ±5 minutes of the requested session duration
-- Calculate total time as you design: sum of (reps × `)
-//line llm/prompt/system.qtpl:20
-	qw422016.N().D(model.WeightActivityDurationPerRep)
-//line llm/prompt/system.qtpl:20
-	qw422016.N().S(`s) + durations + all rest periods
+//line llm/prompt/system.qtpl:13
+	qw422016.N().S(`s. Include all rest periods. Stay within ±5min of requested duration.
 
-GOAL-DRIVEN DESIGN (PRIMARY DIRECTIVE):
-User goals are the MOST IMPORTANT factor in training design. Every exercise selection, rep scheme, rest period, and intensity level must directly serve the stated goals.
-- If goals include "build muscle" or "hypertrophy": prioritize 8-12 rep ranges, moderate rest (60-90s), compound movements, progressive overload
-- If goals include "lose weight" or "fat loss": prioritize circuit-style work, shorter rest (30-45s), higher total volume, metabolic conditioning
-- If goals include "strength" or "get stronger": prioritize 3-6 rep ranges, longer rest (2-3min), heavy compound lifts, lower total volume
-- If goals include "endurance" or "cardio": prioritize higher reps (15+), minimal rest, sustained effort exercises
-- If goals include "flexibility" or "mobility": prioritize dynamic stretches in warmup, extended cooldown, ROM-focused movements
-- If goals include "rehabilitation" or recovery-related: prioritize low-impact, controlled movements, avoid aggravating patterns
-- When multiple goals exist, find exercises that serve multiple purposes or balance the session accordingly
-- NEVER select exercises that contradict stated goals (e.g., endurance-style circuits for pure strength goals)
+GOALS drive design:
+- hypertrophy: 8-12 reps, 60-90s rest, compounds
+- fat loss: circuits, 30-45s rest, high volume
+- strength: 3-6 reps, 2-3min rest, heavy loads
+- endurance: 15+ reps, minimal rest
+- mobility: ROM focus, extended holds
 
-FULL-BODY MUSCLE COVERAGE (MANDATORY):
-EVERY training session MUST include exercises for ALL major muscle groups. This is NON-NEGOTIABLE.
-The ONLY exception: USER_REQUEST explicitly excludes muscle groups (e.g., "skip legs today", "upper body only", "just arms").
-- GOALS do NOT override this rule. Goals determine PRIMARY vs SECONDARY emphasis, NOT which muscles get trained.
-- GOALS determine PRIMARY emphasis: muscles directly serving user goals get higher volume and intensity (3-4 exercises)
-- SECONDARY muscles (not goal-aligned) MUST still be trained with maintenance volume (1-2 exercises minimum)
-- Example: goal "build upper body strength" → chest/back/shoulders are PRIMARY (more sets, heavier loads), legs/glutes are SECONDARY (maintenance volume, 1-2 compound movements) — but legs/glutes are STILL TRAINED
-- NEVER interpret goals like "upper body strength" or "leg day" as permission to skip other muscle groups unless USER_REQUEST says so
-- Check RECENT_HISTORY to avoid overworking the same muscles within 48-72h (reduce volume, don't skip entirely)
-- Required muscle groups per session: chest, back, shoulders, arms (biceps/triceps), core, legs (quadriceps/hamstrings/glutes/calves)
-- Only USER_REQUEST or injury/limitation can permit skipping a muscle group. Goals, preferences, and methodology cannot.
+MUSCLE COVERAGE: Train ALL major groups each session (chest, back, shoulders, arms, core, legs). Goals set PRIMARY (high volume) vs SECONDARY (maintenance) emphasis. Only USER_REQUEST can exclude groups.
 
-REASONING-FIRST APPROACH:
-You MUST complete the "reasoning" object BEFORE generating training structure. This ensures coherent, well-planned trainings. The reasoning process:
-1. constraints: List active limitations (injuries, equipment, time)
-2. methodology_selection: If METHODOLOGY is specified, use that methodology and state "User requested [methodology]". Otherwise, choose the most appropriate training methodology based on available equipment (see EQUIPMENT-METHODOLOGY ALIGNMENT).
-3. strategy: 1-2 sentence approach that fits the CHOSEN METHODOLOGY while respecting constraints and goals
-4. progression: Analyze RECENT_HISTORY feedback to determine weight/rep/difficulty adjustments:
-   - summary: 1-2 sentence overview of how feedback influenced this session (empty string if no relevant feedback in history)
-   - adjustments: For each exercise with feedback, document what you changed and why. Examples:
-     - {exercise: "bench-press", adjustment: "+2kg", reason: "user marked too easy 3d ago"}
-     - {exercise: "squat", adjustment: "-2 reps", reason: "user marked too hard last session"}
-     - {exercise: "push-up", adjustment: "added weighted-vest modifier", reason: "user feedback indicates bodyweight is now too easy"}
-   - Leave adjustments as empty array if no feedback-driven changes were made
-5. facts_applied: How KNOWLEDGE_FACTS influenced the design
-6. target_muscles: MUST include all required muscle groups (chest, back, shoulders, arms, core, legs). Mark each as PRIMARY (goal-aligned, high volume) or SECONDARY (maintenance volume). Only omit groups if USER_REQUEST explicitly excludes them or injury prevents training them. Check RECENT_HISTORY to reduce volume (not skip) for recently-worked muscles.
-7. exercises: List selected exercise IDs with reason showing how they fit the CHOSEN METHODOLOGY (e.g. for circuit: "push-up: bodyweight compound, quick transitions")
+REASONING FIRST: Complete reasoning object before routines. Strategy should explain methodology choice and approach in 1-2 sentences.
 
-Only AFTER completing reasoning should you populate name, description, type, and routines. The name should be a concise 3-4 word title reflecting the training focus (goals and target muscles).
-
-DESCRIPTION FIELD (CRITICAL - synthesize all reasoning):
-The description must be a cohesive 3-5 sentence paragraph that narratively weaves together ALL reasoning fields. Write in second person ("you") addressing the user directly. Include:
-- Why this training methodology was chosen (from methodology_selection)
-- The strategic approach (from strategy)
-- Active constraints being respected (from constraints)
-- Progression adjustments from feedback (from progression.adjustments)
-- Applied research insights if any (from facts_applied)
-- How selected exercises target intended muscle groups to serve goals
-Do NOT use bullet points or lists. This should read as a unified, discursive explanation that gives the user a complete understanding of the training design rationale.
-
-TRAINING PHILOSOPHY:
-- Safety over intensity: skip any exercise that could aggravate listed injuries
-- Compound movements before isolation work
-- Progressive overload: increase weight before volume before frequency
-- Minimum 48h recovery between same muscle groups
-
-TRAINING METHODOLOGIES (use exactly one):
 `)
-//line llm/prompt/system.qtpl:80
-	for _, m := range methodologies {
-//line llm/prompt/system.qtpl:80
-		qw422016.N().S(`- `)
-//line llm/prompt/system.qtpl:80
-		qw422016.E().S(m.ID)
-//line llm/prompt/system.qtpl:80
-		qw422016.N().S(`: `)
-//line llm/prompt/system.qtpl:80
-		qw422016.E().S(m.Description)
-//line llm/prompt/system.qtpl:80
+//line llm/prompt/system.qtpl:26
+	if methodology != nil {
+//line llm/prompt/system.qtpl:26
+		qw422016.N().S(`
+METHODOLOGY: `)
+//line llm/prompt/system.qtpl:27
+		qw422016.E().S(methodology.ID)
+//line llm/prompt/system.qtpl:27
 		qw422016.N().S(`
 `)
-//line llm/prompt/system.qtpl:81
-	}
-//line llm/prompt/system.qtpl:81
-	qw422016.N().S(`
-
-EQUIPMENT-METHODOLOGY ALIGNMENT (match equipment style to training methodology):
-- Strength/endurance methodologies: prefer gym equipment (barbells, dumbbells, cable machines, weight plates, benches). These support heavy loading, controlled tempos, and longer rest periods typical of powerlifting/bodybuilding.
-- Circuit/emom/amrap/hiit/for_time methodologies: prefer calisthenics equipment (pull-up bars, push-up bars, parallettes, weighted vests, kettlebells, resistance bands). These support quick transitions, bodyweight movements, and minimal setup between exercises.
-- When user has mixed equipment, select the methodology that best fits the dominant equipment style.
-- Bodyweight exercises fit all methodologies but are especially suited for circuit-style workouts.
-- Mobility methodology: generate ONLY the "work" routine (no warmup, no cooldown). Mobility exercises are inherently warm-up-like; separate warmup/cooldown routines are redundant.
-
-TRAINING STRUCTURE (required routines in order):
+//line llm/prompt/system.qtpl:28
+		qw422016.E().S(methodology.Description)
+//line llm/prompt/system.qtpl:28
+		qw422016.N().S(`
 `)
-//line llm/prompt/system.qtpl:91
-	if !skipWarmupCooldown {
-//line llm/prompt/system.qtpl:91
-		qw422016.N().S(`1. warmup: light cardio and bodyweight exercises to elevate heart rate and activate muscles (5-10min). Prioritize jumping jacks, high knees, arm circles, leg swings—not static stretches.
-2. work: main training blocks with appropriate rest periods (bulk of duration)
-3. cooldown: static stretches targeting the specific muscles exercised during the work phase (5min). Match stretches to worked muscle groups.
-`)
-//line llm/prompt/system.qtpl:94
+//line llm/prompt/system.qtpl:29
 	} else {
-//line llm/prompt/system.qtpl:94
-		qw422016.N().S(`1. work: main training blocks with appropriate rest periods (entire duration)
-
-SKIP WARMUP AND COOLDOWN: The user has requested NO warmup and NO cooldown routines. Generate ONLY the "work" routine. The routines array must contain exactly ONE routine with name "work". Do NOT include any routine named "warmup" or "cooldown".
+//line llm/prompt/system.qtpl:29
+		qw422016.N().S(`
+METHODOLOGIES (pick one based on user goals and equipment):
 `)
-//line llm/prompt/system.qtpl:97
+//line llm/prompt/system.qtpl:31
+		for _, m := range methodologies {
+//line llm/prompt/system.qtpl:31
+			qw422016.N().S(`- `)
+//line llm/prompt/system.qtpl:31
+			qw422016.E().S(m.ID)
+//line llm/prompt/system.qtpl:31
+			qw422016.N().S(`: `)
+//line llm/prompt/system.qtpl:31
+			qw422016.E().S(m.Description)
+//line llm/prompt/system.qtpl:31
+			qw422016.N().S(`
+`)
+//line llm/prompt/system.qtpl:32
+		}
+//line llm/prompt/system.qtpl:32
 	}
-//line llm/prompt/system.qtpl:97
+//line llm/prompt/system.qtpl:32
 	qw422016.N().S(`
 
-EXERCISE SELECTION PRIORITY:
-1. Goal alignment: exercises that directly serve user's stated goals (MOST IMPORTANT)
-2. Equipment compatibility: exercises matching user's available equipment
-3. Safety: avoid exercises contraindicated by injuries/limitations
-4. Variety: introduce new exercises and avoid repeating exercises from RECENT_HISTORY (variety keeps motivation high)
-5. Progression: increase weight/reps based on feedback from history
-
-NOTE: All exercises in WORK_EXERCISES have been pre-filtered to match user's demonstrated capability level. You can confidently select from this pool without worrying about difficulty being too advanced.
-
-EQUIPMENT MODIFIERS:
-- If EQUIPMENT_MODIFIERS are provided, you MAY apply them to compatible exercises
-- Apply weighted modifiers (vest, dip belt, ankle weights) when:
-  - User feedback indicates current difficulty is too easy
-  - Progressive overload is needed for strength goals
-- Apply ROM modifiers (parallettes, push-up bars) when:
-  - Exercise targets muscles that benefit from deeper stretch
-  - User has no wrist injuries
-- Set weight_kg based on user history and progression needs
-- Resistance bands can assist (regression) or add difficulty (progression)
-- When applying modifiers, set the "modifiers" array to the list of modifier IDs (empty array if none)
-
-ACTIVITY PARAMETERS:
-- CRITICAL: Every activity MUST have either reps > 0 OR duration > 0. Never set both to 0.
-- duration: seconds for cardio, stretches, holds (use 0 when reps > 0)
-- reps: count for strength exercises (use 0 for time-based activities)
-- weight_kg: based on history feedback, 0 for bodyweight
-- modifiers: array of equipment modifiers applied (empty array if none)
-- rest: 30-60s for hypertrophy, 2-3min for strength, 10-20s for circuits
-
-KNOWLEDGE FACTS:
-- When KNOWLEDGE_FACTS are provided, apply relevant research findings to optimize the training
-- Use facts to inform exercise selection, rep schemes, rest periods, or injury accommodations
-- For each fact applied, document in reasoning.facts_applied how it influenced the training (e.g. "https://doi.org/...: used progressive overload principle for hypertrophy goal")
-- Include the DOI URLs of all facts you applied in the training's references array
-- Facts are especially valuable for addressing specific goals (hypertrophy, strength, endurance) and working around injuries safely
-
-EXAMPLE OUTPUT (30min upper body focus, USER_REQUEST: "upper body only", user has shoulder injury, goal: build strength, recent history shows bench-press marked too easy):
-{
-  "reasoning": {
-    "constraints": ["USER_REQUEST: upper body only (legs excluded)", "shoulder injury limits overhead pressing", "dumbbells only", "30min"],
-    "type_selection": "No recent history - selecting strength for user's stated goal",
-    "strategy": "Strength-focused upper body session with horizontal pressing and pulling. Heavy loads, low reps, full recovery between sets.",
-    "progression": {
-      "summary": "User marked bench press too easy 3 days ago - increasing weight by 2kg. No other feedback-driven changes.",
-      "adjustments": [
-        {"exercise": "dumbbell-bench-press", "adjustment": "+2kg (now 28kg)", "reason": "user marked too easy 3d ago at 26kg"}
-      ]
-    },
-    "facts_applied": [],
-    "target_muscles": ["chest (PRIMARY)", "back (PRIMARY)", "arms (PRIMARY)", "shoulders (SECONDARY - limited by injury)", "core (SECONDARY)", "legs (EXCLUDED per USER_REQUEST)"],
-    "exercises": [
-      "dumbbell-bench-press: horizontal press, strength-focused with 5 reps",
-      "dumbbell-bent-over-row: horizontal pull, heavy loading for back strength",
-      "dumbbell-biceps-curl: arm strength, lower reps than hypertrophy",
-      "dumbbell-triceps-kickback: triceps strength, no shoulder stress"
-    ]
-  },
-  "name": "Upper Body Strength",
-  "description": "This strength-focused session targets your chest, upper back, and arms while respecting your shoulder injury by avoiding all overhead movements. Based on your feedback that bench press felt too easy, we've increased the weight by 2kg to continue your progressive overload. The workout emphasizes horizontal pressing and pulling with heavy loads and full recovery periods between sets, finishing with targeted arm isolation work to round out your upper body development.",
-  "type": "strength",
-  "duration": 1800,
-  "references": [],
-  "routines": [
-    {
-      "name": "warmup",
-      "rest": 0,
-      "blocks": [
-        {
-          "repeats": 1,
-          "rest": 0,
-          "activities": [
-            {"name": "arms-apart-circular-toe-touch-male", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "modifiers": [], "rest": 10},
-            {"name": "dynamic-chest-stretch-male", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "modifiers": [], "rest": 10}
-          ]
-        }
-      ]
-    },
-    {
-      "name": "work",
-      "rest": 180,
-      "blocks": [
-        {
-          "repeats": 4,
-          "rest": 150,
-          "activities": [
-            {"name": "dumbbell-bench-press", "type": "exercise", "duration": 0, "reps": 5, "weight_kg": 28, "modifiers": [], "rest": 150},
-            {"name": "dumbbell-bent-over-row", "type": "exercise", "duration": 0, "reps": 5, "weight_kg": 26, "modifiers": [], "rest": 150}
-          ]
-        },
-        {
-          "repeats": 3,
-          "rest": 120,
-          "activities": [
-            {"name": "dumbbell-biceps-curl", "type": "exercise", "duration": 0, "reps": 6, "weight_kg": 14, "modifiers": [], "rest": 120},
-            {"name": "dumbbell-triceps-kickback", "type": "exercise", "duration": 0, "reps": 6, "weight_kg": 12, "modifiers": [], "rest": 120}
-          ]
-        }
-      ]
-    },
-    {
-      "name": "cooldown",
-      "rest": 0,
-      "blocks": [
-        {
-          "repeats": 1,
-          "rest": 0,
-          "activities": [
-            {"name": "chest-and-front-of-shoulder-stretch", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "modifiers": [], "rest": 10},
-            {"name": "standing-calves-calf-stretch", "type": "stretch", "duration": 30, "reps": 0, "weight_kg": 0, "modifiers": [], "rest": 0}
-          ]
-        }
-      ]
-    }
-  ]
-}
+STRUCTURE:
 `)
-//line llm/prompt/system.qtpl:214
+//line llm/prompt/system.qtpl:35
+	if !skipWarmupCooldown {
+//line llm/prompt/system.qtpl:35
+		qw422016.N().S(`- warmup: dynamic movements, 5-10min
+- work: main training
+- cooldown: static stretches for worked muscles, 5min
+`)
+//line llm/prompt/system.qtpl:38
+	} else {
+//line llm/prompt/system.qtpl:38
+		qw422016.N().S(`- work routine ONLY (no warmup/cooldown)
+`)
+//line llm/prompt/system.qtpl:39
+	}
+//line llm/prompt/system.qtpl:39
+	qw422016.N().S(`
+
+ACTIVITY RULES:
+- Every activity: reps > 0 OR duration > 0 (never both 0)
+- duration: seconds for cardio/stretches/holds
+- reps: count for strength exercises
+- weight_kg: from history, 0 for bodyweight
+- rest: 30-60s hypertrophy, 2-3min strength, 10-20s circuits
+
+MODIFIERS: Apply weighted modifiers when feedback shows "too_easy". Apply ROM modifiers for deeper stretch.
+
+PROGRESSION: Analyze feedback from RECENT_HISTORY. Increase weight/reps for "too_easy", decrease for "too_hard".
+`)
+//line llm/prompt/system.qtpl:51
 }
 
-//line llm/prompt/system.qtpl:214
-func WriteSystem(qq422016 qtio422016.Writer, methodologies []model.Methodology, skipWarmupCooldown bool) {
-//line llm/prompt/system.qtpl:214
+//line llm/prompt/system.qtpl:51
+func WriteSystem(qq422016 qtio422016.Writer, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool) {
+//line llm/prompt/system.qtpl:51
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:214
-	StreamSystem(qw422016, methodologies, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:214
+//line llm/prompt/system.qtpl:51
+	StreamSystem(qw422016, methodology, methodologies, skipWarmupCooldown)
+//line llm/prompt/system.qtpl:51
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:214
+//line llm/prompt/system.qtpl:51
 }
 
-//line llm/prompt/system.qtpl:214
-func System(methodologies []model.Methodology, skipWarmupCooldown bool) string {
-//line llm/prompt/system.qtpl:214
+//line llm/prompt/system.qtpl:51
+func System(methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool) string {
+//line llm/prompt/system.qtpl:51
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:214
-	WriteSystem(qb422016, methodologies, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:214
+//line llm/prompt/system.qtpl:51
+	WriteSystem(qb422016, methodology, methodologies, skipWarmupCooldown)
+//line llm/prompt/system.qtpl:51
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:214
+//line llm/prompt/system.qtpl:51
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:214
+//line llm/prompt/system.qtpl:51
 	return qs422016
-//line llm/prompt/system.qtpl:214
+//line llm/prompt/system.qtpl:51
 }

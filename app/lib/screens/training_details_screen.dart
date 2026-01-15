@@ -8,6 +8,7 @@ import '../models/routine.dart';
 import '../models/block.dart';
 import '../models/activity.dart';
 import '../models/exercise.dart';
+import '../models/progression_adjustment.dart';
 import '../providers/auth_provider.dart';
 import '../services/service_locator.dart';
 import '../widgets/adaptive/adaptive.dart';
@@ -250,12 +251,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (r.constraints.isNotEmpty) _buildReasoningSection(title: l10n.constraints, items: r.constraints, color: VigorColors.warning),
-                if (r.typeSelection.isNotEmpty) _buildReasoningText(title: l10n.typeSelection, text: r.typeSelection, color: VigorColors.electricBlue),
-                _buildReasoningText(title: l10n.strategy, text: r.strategy, color: VigorColors.success),
-                if (r.progression.summary.isNotEmpty || r.progression.adjustments.isNotEmpty)
-                  _buildProgressionSection(l10n, r),
-                if (r.factsApplied.isNotEmpty) _buildReasoningSection(title: l10n.researchApplied, items: r.factsApplied, color: Colors.purple),
-                if (r.targetMuscles.isNotEmpty) _buildMuscleChips(l10n, r.targetMuscles),
+                if (r.strategy.isNotEmpty) _buildReasoningText(title: l10n.strategy, text: r.strategy, color: VigorColors.success),
+                if (r.adjustments.isNotEmpty) _buildAdjustmentsSection(l10n, r.adjustments),
                 if (r.exercises.isNotEmpty) _buildReasoningSection(title: l10n.exercises, items: r.exercises, color: VigorColors.orange),
               ],
             ),
@@ -325,7 +322,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     );
   }
 
-  Widget _buildProgressionSection(AppLocalizations l10n, reasoning) {
+  Widget _buildAdjustmentsSection(AppLocalizations l10n, List<ProgressionAdjustment> adjustments) {
     return Container(
       margin: const EdgeInsets.only(bottom: VigorSpacing.md),
       padding: VigorSpacing.paddingMd,
@@ -339,12 +336,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         children: [
           Text(l10n.progression, style: VigorTypography.label.copyWith(color: VigorColors.electricBlue, fontWeight: FontWeight.w600)),
           const SizedBox(height: VigorSpacing.sm),
-          if (reasoning.progression.summary.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(bottom: VigorSpacing.sm),
-              child: Text(reasoning.progression.summary, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
-            ),
-          ...reasoning.progression.adjustments.map((a) => Padding(
+          ...adjustments.map((a) => Padding(
             padding: const EdgeInsets.only(bottom: VigorSpacing.xs),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,34 +351,6 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
               ],
             ),
           )),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMuscleChips(AppLocalizations l10n, List<String> muscles) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: VigorSpacing.md),
-      padding: VigorSpacing.paddingMd,
-      decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.1),
-        borderRadius: VigorRadius.radiusMd,
-        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.targetMuscles, style: VigorTypography.label.copyWith(color: Colors.red.shade700, fontWeight: FontWeight.w600)),
-          const SizedBox(height: VigorSpacing.sm),
-          Wrap(
-            spacing: VigorSpacing.xs,
-            runSpacing: VigorSpacing.xs,
-            children: muscles.map((m) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
-              decoration: BoxDecoration(color: Colors.red.shade700, borderRadius: VigorRadius.radiusFull),
-              child: Text(m, style: VigorTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w500)),
-            )).toList(),
-          ),
         ],
       ),
     );
@@ -585,7 +549,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       children: [
         if (_partnerCount > 0) _buildMetaChip(Icons.people, '${1 + _partnerCount}', VigorColors.electricBlue),
         if (training.gym != null) _buildMetaChip(Icons.location_on, training.gym!.name, VigorColors.success),
-        _buildMetaChip(Icons.tune, training.type, VigorColors.orange),
+        _buildMetaChip(Icons.tune, training.methodology, VigorColors.orange),
         _buildMetaChip(Icons.schedule, _formatDuration(training.duration), VigorColors.warning),
         _buildMetaChip(Icons.calendar_today, _formatDate(training.completedAt ?? training.createdAt), VigorColors.textSecondary(context)),
         if (training.parentId != null) _buildMetaChip(Icons.copy, l10n.copied, Colors.purple),

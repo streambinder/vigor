@@ -18,8 +18,8 @@ class Training {
   final String name;
   @JsonKey(name: 'description', defaultValue: '')
   final String description;
-  @JsonKey(name: 'type', defaultValue: '')
-  final String type;
+  @JsonKey(name: 'methodology', defaultValue: '')
+  final String methodology;
   @JsonKey(name: 'duration')
   final int duration;
   @JsonKey(name: 'equipment', defaultValue: [])
@@ -52,7 +52,7 @@ class Training {
     required this.reasoning,
     required this.name,
     required this.description,
-    required this.type,
+    required this.methodology,
     required this.duration,
     required this.equipment,
     required this.goals,

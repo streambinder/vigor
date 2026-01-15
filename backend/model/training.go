@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -59,21 +60,13 @@ type ProgressionAdjustment struct {
 	Reason     string `json:"reason" prompt:"Why this adjustment was made (e.g. 'user marked too easy', 'user marked too hard', 'progressive overload')"`
 }
 
-// ProgressionReasoning captures progression/regression decisions based on user feedback.
-type ProgressionReasoning struct {
-	Summary     string                  `json:"summary" prompt:"1-2 sentence overview of how feedback from recent trainings influenced this session (empty string if no relevant feedback)"`
-	Adjustments []ProgressionAdjustment `json:"adjustments" prompt:"Individual exercise adjustments made based on user feedback. Empty array if no feedback-driven changes."`
-}
-
 // TrainingReasoning captures the model's thought process before generating training structure.
+// Simplified to reduce token usage while preserving essential planning information.
 type TrainingReasoning struct {
-	Constraints   []string             `json:"constraints" prompt:"Active constraints from user profile (injuries, limitations, equipment restrictions, time)"`
-	TypeSelection string               `json:"type_selection" prompt:"Which types were used in RECENT_HISTORY, and why a different type was chosen for variety"`
-	Strategy      string               `json:"strategy" prompt:"1-2 sentence training approach that fits the chosen type while respecting constraints and goals"`
-	Progression   ProgressionReasoning `json:"progression" prompt:"How user feedback from recent trainings influenced exercise parameters (weight, reps, difficulty)"`
-	FactsApplied  []string             `json:"facts_applied" prompt:"How each KNOWLEDGE_FACT was applied to address user goals or work around injuries (e.g. 'DOI URL: applied X principle for Y goal/injury'). Empty array if no facts provided."`
-	TargetMuscles []string             `json:"target_muscles" prompt:"Primary muscle groups this training will target"`
-	Exercises     []string             `json:"exercises" prompt:"Exercise IDs selected for this training with brief reason each (e.g. 'push-up: chest compound')"`
+	Constraints []string                `json:"constraints" prompt:"Active constraints (injuries, equipment, time)"`
+	Strategy    string                  `json:"strategy" prompt:"1-2 sentence approach: methodology choice + how it serves goals"`
+	Adjustments []ProgressionAdjustment `json:"adjustments" prompt:"Feedback-driven changes (empty array if none)"`
+	Exercises   []string                `json:"exercises" prompt:"Selected exercise IDs"`
 }
 
 // Training represents the entire training session with a UUID ID
@@ -82,16 +75,16 @@ type Training struct {
 
 	// Reasoning captures the model's thought process before generating training structure.
 	// This forces coherent planning: constraints → strategy → exercises → naming.
-	Reasoning datatypes.JSONType[TrainingReasoning] `gorm:"type:jsonb,not null" json:"reasoning" prompt:"Step-by-step reasoning that led to this training design. MUST be completed before other fields."`
+	Reasoning datatypes.JSONType[TrainingReasoning] `gorm:"type:jsonb,not null" json:"reasoning" prompt:"Planning before output"`
 
-	Name        string         `gorm:"not null" json:"name" prompt:"Concise 3-4 word title reflecting the training focus based on goals and target muscles (e.g. Upper Body Strength, Core HIIT Circuit, Leg Day Power)"`
-	Description string         `gorm:"not null" json:"description" prompt:"Cohesive paragraph (3-5 sentences) that narratively summarizes ALL reasoning fields into a flowing, discursive explanation. Must weave together: why this training methodology was chosen (from methodology_selection), the strategic approach (from strategy), any active constraints being respected (from constraints), progression adjustments from feedback (from progression), applied research insights (from facts_applied), and how the selected exercises target the intended muscle groups to serve user goals. Write in second person ('you') addressing the user directly. Avoid bullet points or lists — this should read as a unified narrative explanation of the training design."`
-	Type        string         `gorm:"not null" json:"type" prompt:"Training methodology;enum:strength,circuit,emom,amrap,hiit,for_time,endurance,mobility"`
-	Duration    int            `gorm:"not null" json:"duration" prompt:"Total duration in seconds"`
+	Name        string         `gorm:"not null" json:"name" prompt:"3-4 word title (e.g. Upper Body Strength)"`
+	Description string         `gorm:"not null" json:"description" prompt:"-"`
+	Methodology string         `gorm:"column:methodology;not null" json:"methodology" prompt:"Methodology;enum:strength,circuit,emom,amrap,hiit,for_time,endurance,mobility"`
+	Duration    int            `gorm:"not null" json:"duration" prompt:"Total seconds"`
 	Equipment   pq.StringArray `gorm:"type:text[]" json:"equipment" prompt:"-"`
 	Goals       pq.StringArray `gorm:"type:text[]" json:"goals" prompt:"-"`
-	References  pq.StringArray `gorm:"type:text[]" json:"references" prompt:"DOI URLs from KNOWLEDGE_FACTS that influenced this training design (empty array if no facts were used)"`
-	Routines    []Routine      `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"routines" prompt:"Set of routines to be performed, where each comprehends the same type of activity. Standard trainings have at least 3 routines, with warmup, work, cooldown."`
+	References  pq.StringArray `gorm:"type:text[]" json:"references" prompt:"DOI URLs from facts used (empty if none)"`
+	Routines    []Routine      `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"routines" prompt:"Training routines"`
 	Prompt      datatypes.JSON `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
 	Feedback    string         `json:"feedback" prompt:"-"`
 
@@ -113,9 +106,9 @@ type Routine struct {
 	TrainingID string `gorm:"index;type:uuid;not null" json:"training_id" prompt:"-"`
 
 	Position int     `gorm:"not null;default:0" json:"-" prompt:"-"`
-	Type     string  `gorm:"not null" json:"name" prompt:"Routine phase;enum:warmup,work,cooldown"`
-	Rest     int     `gorm:"not null" json:"rest" prompt:"Rest seconds after this routine"`
-	Blocks   []Block `json:"blocks" gorm:"foreignKey:RoutineID;constraint:OnDelete:CASCADE" prompt:"Set of blocks to be performed. A block is composed by at least 2 activities."`
+	Type     string  `gorm:"not null" json:"name" prompt:"Phase;enum:warmup,work,cooldown"`
+	Rest     int     `gorm:"not null" json:"rest" prompt:"Rest after routine (s)"`
+	Blocks   []Block `json:"blocks" gorm:"foreignKey:RoutineID;constraint:OnDelete:CASCADE" prompt:"Exercise blocks"`
 
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
@@ -127,8 +120,8 @@ type Block struct {
 	RoutineID string `gorm:"index;type:uuid;not null" json:"routine_id" prompt:"-"`
 
 	Position   int        `gorm:"not null;default:0" json:"-" prompt:"-"`
-	Repeats    int        `gorm:"not null" json:"repeats" prompt:"Number of block repetitions"`
-	Rest       int        `gorm:"not null" json:"rest" prompt:"Rest seconds between repeats"`
+	Repeats    int        `gorm:"not null" json:"repeats" prompt:"Sets/rounds"`
+	Rest       int        `gorm:"not null" json:"rest" prompt:"Rest between repeats (s)"`
 	Activities []Activity `json:"activities" gorm:"foreignKey:BlockID;constraint:OnDelete:CASCADE"`
 
 	CreatedAt time.Time `json:"-"`
@@ -141,13 +134,13 @@ type Activity struct {
 	BlockID string `gorm:"index;type:uuid;not null" json:"block_id" prompt:"-"`
 
 	Position   int            `gorm:"not null;default:0" json:"-" prompt:"-"`
-	ExerciseID string         `gorm:"not null" json:"exercise_id" prompt:"Exercise ID from AVAILABLE_EXERCISES"`
+	ExerciseID string         `gorm:"not null" json:"exercise_id" prompt:"Exercise ID from list"`
 	Name       string         `gorm:"not null" json:"name" prompt:"-"`
-	Duration   int            `gorm:"not null" json:"duration" prompt:"Seconds (use 0 when reps > 0)"`
-	Reps       int            `gorm:"not null" json:"reps" prompt:"Repetition count (use 0 for time-based)"`
-	WeightKg   int            `gorm:"not null" json:"weight_kg" prompt:"Weight in kg (0 for bodyweight)"`
-	Modifiers  pq.StringArray `gorm:"type:text[]" json:"modifiers" prompt:"Equipment modifiers applied (empty array if none)"`
-	Rest       int            `gorm:"not null" json:"rest" prompt:"Rest seconds after this activity"`
+	Duration   int            `gorm:"not null" json:"duration" prompt:"Seconds (0 if using reps)"`
+	Reps       int            `gorm:"not null" json:"reps" prompt:"Rep count (0 if using duration)"`
+	WeightKg   int            `gorm:"not null" json:"weight_kg" prompt:"kg (0=bodyweight)"`
+	Modifiers  pq.StringArray `gorm:"type:text[]" json:"modifiers" prompt:"Modifier IDs (empty if none)"`
+	Rest       int            `gorm:"not null" json:"rest" prompt:"Rest after (s)"`
 	Detail     datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"`
 	Feedback   string         `json:"feedback" prompt:"-"` // too_easy, easy, ok, hard, too_hard, skipped
 
@@ -195,6 +188,36 @@ func (t *Training) Validate() error {
 		}
 	}
 	return nil
+}
+
+// GenerateDescription creates a description from the reasoning fields.
+// This is called server-side since description is no longer generated by the LLM.
+func (t *Training) BuildDescription() string {
+	reasoning := t.Reasoning.Data()
+	var parts []string
+
+	// strategy contains methodology choice + approach
+	if reasoning.Strategy != "" {
+		parts = append(parts, reasoning.Strategy)
+	}
+
+	// mention constraints if any
+	if len(reasoning.Constraints) > 0 {
+		parts = append(parts, "Respecting: "+reasoning.Constraints[0])
+		if len(reasoning.Constraints) > 1 {
+			parts[len(parts)-1] += " and " + strconv.Itoa(len(reasoning.Constraints)-1) + " other constraint(s)."
+		} else {
+			parts[len(parts)-1] += "."
+		}
+	}
+
+	// mention adjustments if any
+	if len(reasoning.Adjustments) > 0 {
+		adj := reasoning.Adjustments[0]
+		parts = append(parts, "Adjusted "+adj.Exercise+" ("+adj.Adjustment+").")
+	}
+
+	return strings.Join(parts, " ")
 }
 
 // Activities returns unique work activities for capability tracking.
