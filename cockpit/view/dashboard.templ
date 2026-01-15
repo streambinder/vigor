@@ -285,7 +285,7 @@ templ latencyChartScript() {
 					},
 					tooltip: {
 						theme: 'dark',
-						y: { formatter: function(val) { return val ? (suffix ? val.toFixed(1) + suffix : Math.round(val)) : '-'; } }
+						y: { formatter: function(val) { return val != null ? (suffix ? val.toFixed(1) + suffix : Math.round(val)) : undefined; } }
 					},
 					legend: {
 						labels: { colors: '#8b949e' }
