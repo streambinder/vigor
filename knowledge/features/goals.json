@@ -1,7 +1,7 @@
 [
   {
     "id": "hypertrophy",
-    "description": "Building muscle mass and size through progressive resistance training, focusing on muscle fiber growth and increased muscle volume for a more muscular physique.",
+    "description": "Prioritize moderate rep ranges (6-12) with controlled tempo for time under tension. Rest 60-90s between sets. Emphasize compound movements as primary exercises with isolation finishers. High training volume (3-4 sets per exercise). Progressive overload is key—increase weight when feedback shows too_easy.",
     "aliases": [
       "hypertrophy",
       "muscle building",
@@ -39,7 +39,7 @@
   },
   {
     "id": "fat loss",
-    "description": "Reducing body fat percentage through a combination of caloric deficit, metabolic conditioning, and resistance training to achieve a leaner, more defined body composition.",
+    "description": "Favor high-energy-expenditure circuits and supersets. Shorter rest periods (30-45s) to maintain elevated heart rate. Include compound movements and metabolic finishers. Higher rep ranges (12-15+) with moderate weights. Balance resistance training with cardio elements for sustained caloric burn.",
     "aliases": [
       "fat loss",
       "lose weight",
@@ -81,7 +81,7 @@
   },
   {
     "id": "toning",
-    "description": "Achieving a firm, defined physique with visible muscle definition without significant bulk, combining moderate resistance training with body fat reduction for a lean, athletic appearance.",
+    "description": "Moderate resistance with higher reps (12-15) for muscular endurance and definition. Include both compound and isolation exercises for balanced muscle development. Moderate rest periods (45-60s). Emphasize controlled movement quality and mind-muscle connection over heavy loads.",
     "aliases": [
       "toning",
       "muscle tone",
@@ -117,7 +117,7 @@
   },
   {
     "id": "posture",
-    "description": "Correcting postural imbalances and alignment issues such as rounded shoulders, forward head position, hyperlordosis, or kyphosis through targeted strengthening and stretching exercises.",
+    "description": "Prioritize posterior chain strengthening and core stabilization. Address anterior-posterior imbalances: strengthen back, rear delts, external rotators while stretching tight anterior muscles. Include thoracic spine mobility work. Low-moderate intensity with controlled movements. Focus on proper alignment and body awareness throughout.",
     "aliases": [
       "posture",
       "posture correction",
@@ -174,7 +174,7 @@
   },
   {
     "id": "rehabilitation",
-    "description": "Recovering from injuries, surgeries, or managing chronic pain through therapeutic exercises designed to restore function, reduce pain, and rebuild strength safely and progressively.",
+    "description": "Conservative intensity with high movement quality. Favor controlled range-of-motion exercises. CRITICAL: avoid exercises that aggravate injured areas listed in user profile. Progressive loading only after pain-free movement is established. Include proprioceptive and stabilization work. Longer rest periods (90-120s) for adequate recovery between sets.",
     "aliases": [
       "rehabilitation",
       "injury recovery",
@@ -217,7 +217,7 @@
   },
   {
     "id": "wellness",
-    "description": "Improving overall health, energy levels, and quality of life through regular physical activity, stress reduction, and maintaining an active lifestyle for mental and physical well-being.",
+    "description": "Balanced full-body approach with moderate intensity suitable for sustainable long-term practice. Include stress-reducing elements: controlled breathing cues, mindful movement. Prioritize exercise variety to maintain engagement. Select accessible exercises with low injury risk. Rest periods 45-60s.",
     "aliases": [
       "wellness",
       "general fitness",
@@ -266,7 +266,7 @@
   },
   {
     "id": "flexibility",
-    "description": "Increasing range of motion, reducing stiffness, and improving joint health through stretching and mobility work to move more freely and prevent movement restrictions.",
+    "description": "Extended hold durations (30-60s per stretch). Progress from dynamic warm-up movements to static stretches. Focus on full range of motion work. Target common restriction areas: hip flexors, hamstrings, thoracic spine, shoulders. Minimal or no resistance—pure mobility and flexibility focus. Use duration field for all activities.",
     "aliases": [
       "mobility",
       "flexibility",
@@ -306,7 +306,7 @@
   },
   {
     "id": "sports",
-    "description": "Enhancing athletic performance for competitive sports or recreational activities through sport-specific training, conditioning, and skill development to excel in chosen athletic pursuits.",
+    "description": "Emphasize power and explosiveness: include plyometrics and speed work. Incorporate sport-specific movement patterns when identifiable from user prompt. Balance strength development with conditioning. Include agility, coordination, and reactive elements. Higher intensity with adequate rest (60-90s) to maintain movement quality.",
     "aliases": [
       "sports",
       "athletic performance",

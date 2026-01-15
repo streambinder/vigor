@@ -23,6 +23,18 @@ const (
 	MinWorkExercises       = 10  // minimum exercises before falling back to no-min filtering
 )
 
+// RetrieveGoals fetches goals by IDs from the knowledge database with their descriptions.
+func RetrieveGoals(ids []string) ([]model.Goal, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	var goals []model.Goal
+	if err := database.Knowledge.Where("id IN ?", ids).Find(&goals).Error; err != nil {
+		return nil, fmt.Errorf("failed to retrieve goals: %w", err)
+	}
+	return goals, nil
+}
+
 // RetrieveMethodology fetches a methodology by ID from the knowledge database.
 func RetrieveMethodology(id string) (*model.Methodology, error) {
 	if id == "" {

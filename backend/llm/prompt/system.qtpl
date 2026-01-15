@@ -2,7 +2,7 @@
 
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func System(methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool) -%}
+{% func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool) -%}
 You are an expert personal trainer AI creating individualized training programs.
 
 CONSTRAINTS:
@@ -12,12 +12,11 @@ CONSTRAINTS:
 
 DURATION: Each rep ≈ {%d model.WeightActivityDurationPerRep %}s. Include all rest periods. Stay within ±5min of requested duration.
 
+{% if len(goals) > 0 %}
 GOALS drive design:
-- hypertrophy: 8-12 reps, 60-90s rest, compounds
-- fat loss: circuits, 30-45s rest, high volume
-- strength: 3-6 reps, 2-3min rest, heavy loads
-- endurance: 15+ reps, minimal rest
-- mobility: ROM focus, extended holds
+{% for _, goal := range goals %}- {%s goal.ID %}: {%s goal.Description %}
+{% endfor %}
+{% endif %}
 
 MUSCLE COVERAGE: Train ALL major groups each session (chest, back, shoulders, arms, core, legs). Goals set PRIMARY (high volume) vs SECONDARY (maintenance) emphasis. Only USER_REQUEST can exclude groups.
 

@@ -130,6 +130,11 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		return nil, err
 	}
 
+	goalData, err := rag.RetrieveGoals(effectiveGoals)
+	if err != nil {
+		return nil, err
+	}
+
 	proficiencyMargin := ProgressiveMargin(trainingsComplete)
 	workExercises, err := rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles)
 	if err != nil {
@@ -194,7 +199,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	llmStart := time.Now()
 	training, llmPrompt, llmModel, err := llm.GenTraining(
 		profiles,
-		effectiveGoals,
+		goalData,
 		workExercises,
 		warmupExercises,
 		cooldownExercises,

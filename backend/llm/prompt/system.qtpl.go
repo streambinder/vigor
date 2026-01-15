@@ -21,7 +21,7 @@ var (
 )
 
 //line llm/prompt/system.qtpl:5
-func StreamSystem(qw422016 *qt422016.Writer, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool) {
+func StreamSystem(qw422016 *qt422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool) {
 //line llm/prompt/system.qtpl:5
 	qw422016.N().S(`You are an expert personal trainer AI creating individualized training programs.
 
@@ -36,76 +36,99 @@ DURATION: Each rep ≈ `)
 //line llm/prompt/system.qtpl:13
 	qw422016.N().S(`s. Include all rest periods. Stay within ±5min of requested duration.
 
+`)
+//line llm/prompt/system.qtpl:15
+	if len(goals) > 0 {
+//line llm/prompt/system.qtpl:15
+		qw422016.N().S(`
 GOALS drive design:
-- hypertrophy: 8-12 reps, 60-90s rest, compounds
-- fat loss: circuits, 30-45s rest, high volume
-- strength: 3-6 reps, 2-3min rest, heavy loads
-- endurance: 15+ reps, minimal rest
-- mobility: ROM focus, extended holds
+`)
+//line llm/prompt/system.qtpl:17
+		for _, goal := range goals {
+//line llm/prompt/system.qtpl:17
+			qw422016.N().S(`- `)
+//line llm/prompt/system.qtpl:17
+			qw422016.E().S(goal.ID)
+//line llm/prompt/system.qtpl:17
+			qw422016.N().S(`: `)
+//line llm/prompt/system.qtpl:17
+			qw422016.E().S(goal.Description)
+//line llm/prompt/system.qtpl:17
+			qw422016.N().S(`
+`)
+//line llm/prompt/system.qtpl:18
+		}
+//line llm/prompt/system.qtpl:18
+		qw422016.N().S(`
+`)
+//line llm/prompt/system.qtpl:19
+	}
+//line llm/prompt/system.qtpl:19
+	qw422016.N().S(`
 
 MUSCLE COVERAGE: Train ALL major groups each session (chest, back, shoulders, arms, core, legs). Goals set PRIMARY (high volume) vs SECONDARY (maintenance) emphasis. Only USER_REQUEST can exclude groups.
 
 REASONING FIRST: Complete reasoning object before routines. Strategy should explain methodology choice and approach in 1-2 sentences.
 
 `)
-//line llm/prompt/system.qtpl:26
+//line llm/prompt/system.qtpl:25
 	if methodology != nil {
-//line llm/prompt/system.qtpl:26
+//line llm/prompt/system.qtpl:25
 		qw422016.N().S(`
 METHODOLOGY: `)
-//line llm/prompt/system.qtpl:27
+//line llm/prompt/system.qtpl:26
 		qw422016.E().S(methodology.ID)
+//line llm/prompt/system.qtpl:26
+		qw422016.N().S(`
+`)
+//line llm/prompt/system.qtpl:27
+		qw422016.E().S(methodology.Description)
 //line llm/prompt/system.qtpl:27
 		qw422016.N().S(`
 `)
 //line llm/prompt/system.qtpl:28
-		qw422016.E().S(methodology.Description)
-//line llm/prompt/system.qtpl:28
-		qw422016.N().S(`
-`)
-//line llm/prompt/system.qtpl:29
 	} else {
-//line llm/prompt/system.qtpl:29
+//line llm/prompt/system.qtpl:28
 		qw422016.N().S(`
 METHODOLOGIES (pick one based on user goals and equipment):
 `)
-//line llm/prompt/system.qtpl:31
+//line llm/prompt/system.qtpl:30
 		for _, m := range methodologies {
-//line llm/prompt/system.qtpl:31
+//line llm/prompt/system.qtpl:30
 			qw422016.N().S(`- `)
-//line llm/prompt/system.qtpl:31
+//line llm/prompt/system.qtpl:30
 			qw422016.E().S(m.ID)
-//line llm/prompt/system.qtpl:31
+//line llm/prompt/system.qtpl:30
 			qw422016.N().S(`: `)
-//line llm/prompt/system.qtpl:31
+//line llm/prompt/system.qtpl:30
 			qw422016.E().S(m.Description)
-//line llm/prompt/system.qtpl:31
+//line llm/prompt/system.qtpl:30
 			qw422016.N().S(`
 `)
-//line llm/prompt/system.qtpl:32
+//line llm/prompt/system.qtpl:31
 		}
-//line llm/prompt/system.qtpl:32
+//line llm/prompt/system.qtpl:31
 	}
-//line llm/prompt/system.qtpl:32
+//line llm/prompt/system.qtpl:31
 	qw422016.N().S(`
 
 STRUCTURE:
 `)
-//line llm/prompt/system.qtpl:35
+//line llm/prompt/system.qtpl:34
 	if !skipWarmupCooldown {
-//line llm/prompt/system.qtpl:35
+//line llm/prompt/system.qtpl:34
 		qw422016.N().S(`- warmup: dynamic movements, 5-10min
 - work: main training
 - cooldown: static stretches for worked muscles, 5min
 `)
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:37
 	} else {
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:37
 		qw422016.N().S(`- work routine ONLY (no warmup/cooldown)
 `)
-//line llm/prompt/system.qtpl:39
+//line llm/prompt/system.qtpl:38
 	}
-//line llm/prompt/system.qtpl:39
+//line llm/prompt/system.qtpl:38
 	qw422016.N().S(`
 
 ACTIVITY RULES:
@@ -119,31 +142,31 @@ MODIFIERS: Apply weighted modifiers when feedback shows "too_easy". Apply ROM mo
 
 PROGRESSION: Analyze feedback from RECENT_HISTORY. Increase weight/reps for "too_easy", decrease for "too_hard".
 `)
-//line llm/prompt/system.qtpl:51
+//line llm/prompt/system.qtpl:50
 }
 
-//line llm/prompt/system.qtpl:51
-func WriteSystem(qq422016 qtio422016.Writer, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool) {
-//line llm/prompt/system.qtpl:51
+//line llm/prompt/system.qtpl:50
+func WriteSystem(qq422016 qtio422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool) {
+//line llm/prompt/system.qtpl:50
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:51
-	StreamSystem(qw422016, methodology, methodologies, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:51
+//line llm/prompt/system.qtpl:50
+	StreamSystem(qw422016, goals, methodology, methodologies, skipWarmupCooldown)
+//line llm/prompt/system.qtpl:50
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:51
+//line llm/prompt/system.qtpl:50
 }
 
-//line llm/prompt/system.qtpl:51
-func System(methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool) string {
-//line llm/prompt/system.qtpl:51
+//line llm/prompt/system.qtpl:50
+func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool) string {
+//line llm/prompt/system.qtpl:50
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:51
-	WriteSystem(qb422016, methodology, methodologies, skipWarmupCooldown)
-//line llm/prompt/system.qtpl:51
+//line llm/prompt/system.qtpl:50
+	WriteSystem(qb422016, goals, methodology, methodologies, skipWarmupCooldown)
+//line llm/prompt/system.qtpl:50
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:51
+//line llm/prompt/system.qtpl:50
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:51
+//line llm/prompt/system.qtpl:50
 	return qs422016
-//line llm/prompt/system.qtpl:51
+//line llm/prompt/system.qtpl:50
 }
