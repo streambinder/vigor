@@ -527,6 +527,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           placeholder: l10n.focusOnUpperBody,
           maxLines: 2,
           minLines: 1,
+          maxLength: 500,
         ),
         const SizedBox(height: VigorSpacing.md),
 

@@ -20,6 +20,8 @@ const (
 	recentTrainingMaxResults = 5
 )
 
+const maxPromptLength = 500
+
 var (
 	ErrTrainingNotFound   = errors.New("training not found")
 	ErrUserNotFound       = errors.New("user not found")
@@ -29,6 +31,7 @@ var (
 	ErrInvalidGym         = errors.New("gym not found")
 	ErrDurationRequired   = errors.New("duration is required")
 	ErrDurationOutOfRange = errors.New("duration must be between 10 and 180 minutes")
+	ErrPromptTooLong      = errors.New("prompt exceeds maximum length")
 	ErrMalformedTraining  = errors.New("malformed generated training")
 )
 
@@ -39,6 +42,9 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	}
 	if duration < 10 || duration > 180 {
 		return nil, ErrDurationOutOfRange
+	}
+	if len(prompt) > maxPromptLength {
+		return nil, ErrPromptTooLong
 	}
 
 	var requestorProfile model.Profile

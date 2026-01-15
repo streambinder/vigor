@@ -46,6 +46,8 @@ func postTraining(c *fiber.Ctx) error {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "duration is required"})
 		case errors.Is(err, service.ErrDurationOutOfRange):
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "duration must be between 10 and 180 minutes"})
+		case errors.Is(err, service.ErrPromptTooLong):
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "prompt exceeds maximum length"})
 		case errors.Is(err, service.ErrUserNotFound):
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
 		case errors.Is(err, service.ErrInvalidGym):

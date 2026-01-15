@@ -20,6 +20,7 @@ class AdaptiveTextField extends StatelessWidget {
   final Widget? suffix;
   final int? maxLines;
   final int? minLines;
+  final int? maxLength;
   final List<TextInputFormatter>? inputFormatters;
   final bool readOnly;
   final VoidCallback? onTap;
@@ -39,6 +40,7 @@ class AdaptiveTextField extends StatelessWidget {
     this.suffix,
     this.maxLines = 1,
     this.minLines,
+    this.maxLength,
     this.inputFormatters,
     this.readOnly = false,
     this.onTap,
@@ -93,6 +95,7 @@ class AdaptiveTextField extends StatelessWidget {
                 onSubmitted: onSubmitted,
                 maxLines: maxLines,
                 minLines: minLines,
+                maxLength: maxLength,
                 inputFormatters: inputFormatters,
                 readOnly: readOnly,
                 onTap: onTap,
@@ -138,6 +141,7 @@ class AdaptiveTextField extends StatelessWidget {
       onSubmitted: onSubmitted,
       maxLines: maxLines,
       minLines: minLines,
+      maxLength: maxLength,
       inputFormatters: inputFormatters,
       readOnly: readOnly,
       onTap: onTap,
