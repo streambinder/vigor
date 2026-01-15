@@ -179,24 +179,11 @@ func RetrieveUserModifiers(equipment []string) ([]model.Modifier, error) {
 	if len(equipment) == 0 {
 		return nil, nil
 	}
-
-	result := make([]model.Modifier, 0, len(equipment))
-	seen := make(map[string]bool)
-
-	for _, entry := range equipment {
-		var match model.Modifier
-		if err := database.Knowledge.
-			Where("id = ?", entry).
-			First(&match).
-			Error; err == nil {
-			if !seen[match.ID] {
-				seen[match.ID] = true
-				result = append(result, match)
-			}
-		}
+	var modifiers []model.Modifier
+	if err := database.Knowledge.Where("id IN ?", equipment).Find(&modifiers).Error; err != nil {
+		return nil, fmt.Errorf("failed to retrieve modifiers: %w", err)
 	}
-
-	return result, nil
+	return modifiers, nil
 }
 
 // RetrieveEquipment retrieves equipment by direct ID match.
@@ -204,24 +191,11 @@ func RetrieveEquipment(ids []string) ([]model.Equipment, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}
-
-	result := make([]model.Equipment, 0, len(ids))
-	seen := make(map[string]bool)
-
-	for _, id := range ids {
-		var match model.Equipment
-		if err := database.Knowledge.
-			Where("id = ?", id).
-			First(&match).
-			Error; err == nil {
-			if !seen[match.ID] {
-				seen[match.ID] = true
-				result = append(result, match)
-			}
-		}
+	var equipment []model.Equipment
+	if err := database.Knowledge.Where("id IN ?", ids).Find(&equipment).Error; err != nil {
+		return nil, fmt.Errorf("failed to retrieve equipment: %w", err)
 	}
-
-	return result, nil
+	return equipment, nil
 }
 
 // RetrieveWarmupExercises retrieves exercises for the warmup phase via random selection.
