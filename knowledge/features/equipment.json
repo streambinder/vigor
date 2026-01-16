@@ -66,6 +66,25 @@
     ]
   },
   {
+    "id": "box",
+    "aliases": [
+      "box",
+      "plyo box",
+      "jump box",
+      "step box",
+      "cassetta",
+      "cajón",
+      "caja",
+      "boîte",
+      "caisse",
+      "Box",
+      "Sprungbox",
+      "caixa",
+      "тумба",
+      "бокс"
+    ]
+  },
+  {
     "id": "bosu ball",
     "aliases": [
       "bosu ball",
@@ -319,6 +338,23 @@
     ]
   },
   {
+    "id": "rowing machine",
+    "aliases": [
+      "rowing machine",
+      "rower",
+      "erg",
+      "ergometer",
+      "concept2",
+      "vogatore",
+      "máquina de remo",
+      "rameur",
+      "Rudergerät",
+      "Rudermaschine",
+      "remo ergométrico",
+      "гребной тренажер"
+    ]
+  },
+  {
     "id": "skierg machine",
     "aliases": [
       "skierg machine",
@@ -455,6 +491,26 @@
     ]
   },
   {
+    "id": "trx",
+    "aliases": [
+      "trx",
+      "suspension trainer",
+      "suspension straps",
+      "suspension training",
+      "allenamento in sospensione",
+      "cinghie sospensione",
+      "entrenador en suspensión",
+      "correas de suspensión",
+      "sangles de suspension",
+      "TRX",
+      "Schlingentrainer",
+      "Suspensionstrainer",
+      "fita de suspensão",
+      "тренажер trx",
+      "петли trx"
+    ]
+  },
+  {
     "id": "upper body ergometer",
     "aliases": [
       "upper body ergometer",
@@ -467,6 +523,27 @@
       "Armergometer",
       "ergômetro de braço",
       "ручной эргометр"
+    ]
+  },
+  {
+    "id": "weighted",
+    "aliases": [
+      "weighted",
+      "weight vest",
+      "weighted vest",
+      "weight belt",
+      "dip belt",
+      "giubbotto zavorrato",
+      "cintura con pesi",
+      "chaleco lastrado",
+      "cinturón de lastre",
+      "gilet lesté",
+      "ceinture lestée",
+      "Gewichtsweste",
+      "Dip-Gürtel",
+      "colete de peso",
+      "жилет с отягощением",
+      "пояс для отягощений"
     ]
   },
   {
