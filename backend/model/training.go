@@ -162,7 +162,7 @@ func (t Training) DaysSince() int {
 }
 
 // Validate checks that the training has valid structure.
-func (t *Training) Validate(validExerciseIDs, validModifierIDs map[string]bool) error {
+func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineTypes map[string]bool) error {
 	if t.Name == "" {
 		return errors.New("training name is empty")
 	}
@@ -172,6 +172,9 @@ func (t *Training) Validate(validExerciseIDs, validModifierIDs map[string]bool) 
 	for i, routine := range t.Routines {
 		if routine.Type == "" {
 			return errors.New("routine " + strconv.Itoa(i) + " has no type")
+		}
+		if !validRoutineTypes[routine.Type] {
+			return errors.New("routine " + strconv.Itoa(i) + " has invalid type: " + routine.Type)
 		}
 		if len(routine.Blocks) == 0 {
 			return errors.New("routine " + strconv.Itoa(i) + " has no blocks")

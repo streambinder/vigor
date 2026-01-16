@@ -117,18 +117,19 @@ STRUCTURE:
 //line llm/prompt/system.qtpl:34
 	if !skipWarmupCooldown {
 //line llm/prompt/system.qtpl:34
-		qw422016.N().S(`- warmup: dynamic movements, 5-10min
+		qw422016.N().S(`- 3 routines named "warmup", "work", "cooldown"
+- warmup: dynamic movements, 5-10min
 - work: main training
-- cooldown: static stretches for worked muscles, 5min
+- cooldown: static stretches, 5min
 `)
-//line llm/prompt/system.qtpl:37
+//line llm/prompt/system.qtpl:38
 	} else {
-//line llm/prompt/system.qtpl:37
-		qw422016.N().S(`- work routine ONLY (no warmup/cooldown)
+//line llm/prompt/system.qtpl:38
+		qw422016.N().S(`- 1 routine named "work" only
 `)
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:39
 	}
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:39
 	qw422016.N().S(`
 
 ACTIVITY RULES:
@@ -136,64 +137,64 @@ ACTIVITY RULES:
 - duration: seconds for cardio/stretches/holds
 - reps: count for strength exercises
 - weight_kg: 0 for bodyweight exercises`)
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:45
 	if hasModifiers {
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:45
 		qw422016.N().S(`, >0 only with weighted modifiers`)
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:45
 	}
-//line llm/prompt/system.qtpl:44
+//line llm/prompt/system.qtpl:45
 	qw422016.N().S(`
 
 - rest: 30-60s hypertrophy, 2-3min strength, 10-20s circuits
 
 `)
-//line llm/prompt/system.qtpl:48
+//line llm/prompt/system.qtpl:49
 	if hasModifiers {
-//line llm/prompt/system.qtpl:48
+//line llm/prompt/system.qtpl:49
 		qw422016.N().S(`
 MODIFIERS: When feedback shows "too_easy", add modifier IDs from [MODIFIERS] section to activity.modifiers array. Never invent modifier IDs.
 `)
-//line llm/prompt/system.qtpl:50
+//line llm/prompt/system.qtpl:51
 	}
-//line llm/prompt/system.qtpl:50
+//line llm/prompt/system.qtpl:51
 	qw422016.N().S(`
 
 PROGRESSION: Analyze feedback from [HISTORY]. For "too_easy": increase reps`)
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 	if hasModifiers {
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 		qw422016.N().S(` or add weighted modifiers`)
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 	}
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 	qw422016.N().S(`. For "too_hard": decrease reps.
 `)
-//line llm/prompt/system.qtpl:53
+//line llm/prompt/system.qtpl:54
 }
 
-//line llm/prompt/system.qtpl:53
+//line llm/prompt/system.qtpl:54
 func WriteSystem(qq422016 qtio422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool) {
-//line llm/prompt/system.qtpl:53
+//line llm/prompt/system.qtpl:54
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:53
+//line llm/prompt/system.qtpl:54
 	StreamSystem(qw422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers)
-//line llm/prompt/system.qtpl:53
+//line llm/prompt/system.qtpl:54
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:53
+//line llm/prompt/system.qtpl:54
 }
 
-//line llm/prompt/system.qtpl:53
+//line llm/prompt/system.qtpl:54
 func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool) string {
-//line llm/prompt/system.qtpl:53
+//line llm/prompt/system.qtpl:54
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:53
+//line llm/prompt/system.qtpl:54
 	WriteSystem(qb422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers)
-//line llm/prompt/system.qtpl:53
+//line llm/prompt/system.qtpl:54
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:53
+//line llm/prompt/system.qtpl:54
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:53
+//line llm/prompt/system.qtpl:54
 	return qs422016
-//line llm/prompt/system.qtpl:53
+//line llm/prompt/system.qtpl:54
 }

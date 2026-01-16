@@ -31,10 +31,11 @@ METHODOLOGIES (pick one based on user goals and equipment):
 {% endfor %}{% endif %}
 
 STRUCTURE:
-{% if !skipWarmupCooldown %}- warmup: dynamic movements, 5-10min
+{% if !skipWarmupCooldown %}- 3 routines named "warmup", "work", "cooldown"
+- warmup: dynamic movements, 5-10min
 - work: main training
-- cooldown: static stretches for worked muscles, 5min
-{% else %}- work routine ONLY (no warmup/cooldown)
+- cooldown: static stretches, 5min
+{% else %}- 1 routine named "work" only
 {% endif %}
 
 ACTIVITY RULES:
