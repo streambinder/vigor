@@ -1687,9 +1687,7 @@
   {
     "id": "weighted-front-plank",
     "name": "Weighted Front Plank",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "core",
       "shoulders"
@@ -2051,9 +2049,7 @@
   {
     "id": "weighted-crunch",
     "name": "Weighted Crunch",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "core"
     ],
@@ -3895,9 +3891,7 @@
   {
     "id": "weighted-drop-push-up",
     "name": "Weighted Drop Push Up",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "shoulders",
       "chest"
@@ -4411,9 +4405,7 @@
   {
     "id": "weighted-muscle-up-on-bar",
     "name": "Weighted Muscle Up (On Bar)",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "arms",
       "shoulders"
@@ -4882,9 +4874,7 @@
   {
     "id": "weighted-donkey-calf-raise",
     "name": "Weighted Donkey Calf Raise",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "legs"
     ],
@@ -5808,7 +5798,6 @@
     "id": "weighted-triceps-dips",
     "name": "Weighted Triceps Dips",
     "equipment": [
-      "weighted",
       "dip station"
     ],
     "muscles": [
@@ -6326,9 +6315,7 @@
   {
     "id": "weighted-overhead-crunch-on-stability-ball",
     "name": "Weighted Overhead Crunch (On Stability Ball)",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "core",
       "back"
@@ -7119,9 +7106,7 @@
   {
     "id": "weighted-muscle-up",
     "name": "Weighted Muscle Up",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "arms",
       "chest"
@@ -7190,9 +7175,7 @@
   {
     "id": "weighted-svend-press",
     "name": "Weighted Svend Press",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "shoulders",
       "chest"
@@ -8591,9 +8574,7 @@
   {
     "id": "weighted-decline-sit-up",
     "name": "Weighted Decline Sit-Up",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "core",
       "back"
@@ -9488,9 +9469,7 @@
   {
     "id": "weighted-seated-twist-on-stability-ball",
     "name": "Weighted Seated Twist (On Stability Ball)",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "core",
       "back"
@@ -9626,9 +9605,7 @@
   {
     "id": "weighted-cossack-squats",
     "name": "Weighted Cossack Squats",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "legs",
       "glutes"
@@ -10451,9 +10428,7 @@
   {
     "id": "weighted-lunge-with-swing",
     "name": "Weighted Lunge With Swing",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "legs",
       "glutes"
@@ -10655,9 +10630,7 @@
   {
     "id": "weighted-three-bench-dips",
     "name": "Weighted Three Bench Dips",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "chest",
       "shoulders"
@@ -11170,9 +11143,7 @@
   {
     "id": "otis-up",
     "name": "Otis Up",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "core",
       "back"
@@ -11497,9 +11468,7 @@
   {
     "id": "weighted-triceps-dip-on-high-parallel-bars",
     "name": "Weighted Triceps Dip On High Parallel Bars",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "chest",
       "shoulders"
@@ -11854,9 +11823,7 @@
   {
     "id": "weighted-stretch-lunge",
     "name": "Weighted Stretch Lunge",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "legs",
       "glutes"
@@ -12908,9 +12875,7 @@
   {
     "id": "weighted-squat",
     "name": "Weighted Squat",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "legs",
       "glutes"
@@ -14308,9 +14273,7 @@
   {
     "id": "wrist-rollerer",
     "name": "Wrist Rollerer",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "arms"
     ],
@@ -14330,9 +14293,7 @@
   {
     "id": "weighted-sissy-squat",
     "name": "Weighted Sissy Squat",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "legs",
       "glutes"
@@ -14553,9 +14514,7 @@
   {
     "id": "weighted-round-arm",
     "name": "Weighted Round Arm",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "shoulders",
       "arms"
@@ -16484,9 +16443,7 @@
   {
     "id": "weighted-standing-curl",
     "name": "Weighted Standing Curl",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "arms"
     ],
@@ -17202,9 +17159,7 @@
   {
     "id": "weighted-close-grip-chin-up-on-dip-cage",
     "name": "Weighted Close Grip Chin-Up On Dip Cage",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "back",
       "arms"
@@ -17226,9 +17181,7 @@
   {
     "id": "weighted-straight-bar-dip",
     "name": "Weighted Straight Bar Dip",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "shoulders",
       "chest"
@@ -20361,9 +20314,7 @@
   {
     "id": "weighted-russian-twist-legs-up",
     "name": "Weighted Russian Twist (Legs Up)",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "core"
     ],
@@ -21205,9 +21156,7 @@
   {
     "id": "weighted-kneeling-step-with-swing",
     "name": "Weighted Kneeling Step With Swing",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "core",
       "shoulders"
@@ -21425,7 +21374,6 @@
     "id": "weighted-pull-up",
     "name": "Weighted Pull-Up",
     "equipment": [
-      "weighted",
       "pull-up bar"
     ],
     "muscles": [
@@ -21696,9 +21644,7 @@
   {
     "id": "weighted-bench-dip",
     "name": "Weighted Bench Dip",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "chest",
       "shoulders"
@@ -23349,9 +23295,7 @@
   {
     "id": "weighted-side-bend-on-stability-ball",
     "name": "Weighted Side Bend (On Stability Ball)",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "core",
       "back"
@@ -23620,9 +23564,7 @@
   {
     "id": "weighted-hanging-leg-hip-raise",
     "name": "Weighted Hanging Leg-Hip Raise",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "core",
       "back"
@@ -25473,9 +25415,7 @@
   {
     "id": "weighted-russian-twist",
     "name": "Weighted Russian Twist",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "core",
       "back"
@@ -25646,9 +25586,7 @@
   {
     "id": "weighted-one-hand-pull-up",
     "name": "Weighted One Hand Pull Up",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "back",
       "arms"
@@ -26095,9 +26033,7 @@
   {
     "id": "weighted-front-raise",
     "name": "Weighted Front Raise",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "arms",
       "shoulders"
@@ -26742,9 +26678,7 @@
   {
     "id": "weighted-hyperextension-on-stability-ball",
     "name": "Weighted Hyperextension (On Stability Ball)",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "glutes",
       "legs"
@@ -27074,9 +27008,7 @@
   {
     "id": "weighted-standing-hand-squeeze",
     "name": "Weighted Standing Hand Squeeze",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "arms"
     ],
@@ -27302,9 +27234,7 @@
   {
     "id": "weighted-russian-twist-v-2",
     "name": "Weighted Russian Twist V. 2",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "core",
       "back"
@@ -29591,9 +29521,7 @@
   {
     "id": "fierce-weighted-straight-bar-dip",
     "name": "Fierce Weighted Straight Bar Dip",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "shoulders",
       "chest"
@@ -29837,9 +29765,7 @@
   {
     "id": "weighted-lunge-with-swing-twisted",
     "name": "Weighted Lunge With Swing Twisted",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "legs",
       "glutes"
@@ -30686,9 +30612,7 @@
   {
     "id": "weighted-one-hand-pull-up-fast",
     "name": "Weighted One Hand Pull Up Fast",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "back",
       "arms"
@@ -31041,9 +30965,7 @@
   {
     "id": "controlled-wrist-rollerer",
     "name": "Controlled Wrist Rollerer",
-    "equipment": [
-      "weighted"
-    ],
+    "equipment": [],
     "muscles": [
       "arms"
     ],

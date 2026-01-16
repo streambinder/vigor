@@ -6,12 +6,12 @@
       "training partner",
       "workout partner",
       "compagno",
-      "compañero",
+      "compa\u00f1ero",
       "partenaire",
       "Partner",
       "Trainingspartner",
       "parceiro",
-      "партнер"
+      "\u043f\u0430\u0440\u0442\u043d\u0435\u0440"
     ]
   },
   {
@@ -20,12 +20,12 @@
       "balance board",
       "tavola di equilibrio",
       "tabla de equilibrio",
-      "planche d'équilibre",
+      "planche d'\u00e9quilibre",
       "Balance Board",
       "Gleichgewichtsbrett",
-      "prancha de equilíbrio",
-      "балансборд",
-      "доска для баланса"
+      "prancha de equil\u00edbrio",
+      "\u0431\u0430\u043b\u0430\u043d\u0441\u0431\u043e\u0440\u0434",
+      "\u0434\u043e\u0441\u043a\u0430 \u0434\u043b\u044f \u0431\u0430\u043b\u0430\u043d\u0441\u0430"
     ]
   },
   {
@@ -34,11 +34,11 @@
       "band",
       "elastic band",
       "elastico",
-      "banda elástica",
-      "bande élastique",
+      "banda el\u00e1stica",
+      "bande \u00e9lastique",
       "Gummiband",
       "banda",
-      "резинка"
+      "\u0440\u0435\u0437\u0438\u043d\u043a\u0430"
     ]
   },
   {
@@ -50,7 +50,7 @@
       "barre",
       "Langhantel",
       "barra de pesos",
-      "штанга"
+      "\u0448\u0442\u0430\u043d\u0433\u0430"
     ]
   },
   {
@@ -61,8 +61,8 @@
       "banco",
       "banc",
       "Hantelbank",
-      "banco de musculação",
-      "скамья"
+      "banco de muscula\u00e7\u00e3o",
+      "\u0441\u043a\u0430\u043c\u044c\u044f"
     ]
   },
   {
@@ -73,15 +73,15 @@
       "jump box",
       "step box",
       "cassetta",
-      "cajón",
+      "caj\u00f3n",
       "caja",
-      "boîte",
+      "bo\u00eete",
       "caisse",
       "Box",
       "Sprungbox",
       "caixa",
-      "тумба",
-      "бокс"
+      "\u0442\u0443\u043c\u0431\u0430",
+      "\u0431\u043e\u043a\u0441"
     ]
   },
   {
@@ -94,7 +94,7 @@
       "ballon bosu",
       "Bosu Ball",
       "bola bosu",
-      "босу"
+      "\u0431\u043e\u0441\u0443"
     ]
   },
   {
@@ -104,14 +104,14 @@
       "cable machine",
       "cavo",
       "polea",
-      "câble",
+      "c\u00e2ble",
       "poulie",
       "Kabelzug",
       "Seilzug",
       "polia",
       "cabo",
-      "блочный тренажер",
-      "кабель"
+      "\u0431\u043b\u043e\u0447\u043d\u044b\u0439 \u0442\u0440\u0435\u043d\u0430\u0436\u0435\u0440",
+      "\u043a\u0430\u0431\u0435\u043b\u044c"
     ]
   },
   {
@@ -121,14 +121,14 @@
       "dip bars",
       "parallele",
       "stazione per dip",
-      "estación de fondos",
+      "estaci\u00f3n de fondos",
       "barras paralelas",
-      "barres à dips",
+      "barres \u00e0 dips",
       "station de dips",
-      "Dipständer",
+      "Dipst\u00e4nder",
       "Dipstation",
-      "estação de mergulho",
-      "брусья"
+      "esta\u00e7\u00e3o de mergulho",
+      "\u0431\u0440\u0443\u0441\u044c\u044f"
     ]
   },
   {
@@ -140,14 +140,14 @@
       "manubri",
       "mancuerna",
       "mancuernas",
-      "haltère",
-      "haltères",
+      "halt\u00e8re",
+      "halt\u00e8res",
       "Kurzhantel",
       "Kurzhanteln",
       "halter",
       "halteres",
-      "гантель",
-      "гантели"
+      "\u0433\u0430\u043d\u0442\u0435\u043b\u044c",
+      "\u0433\u0430\u043d\u0442\u0435\u043b\u0438"
     ]
   },
   {
@@ -156,13 +156,13 @@
       "elliptical machine",
       "elliptical",
       "ellittica",
-      "elíptica",
-      "vélo elliptique",
+      "el\u00edptica",
+      "v\u00e9lo elliptique",
       "Crosstrainer",
       "Ellipsentrainer",
-      "elíptico",
-      "эллиптический тренажер",
-      "эллипсоид"
+      "el\u00edptico",
+      "\u044d\u043b\u043b\u0438\u043f\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u0442\u0440\u0435\u043d\u0430\u0436\u0435\u0440",
+      "\u044d\u043b\u043b\u0438\u043f\u0441\u043e\u0438\u0434"
     ]
   },
   {
@@ -177,7 +177,7 @@
       "barre ez",
       "EZ-Stange",
       "SZ-Stange",
-      "ez-гриф"
+      "ez-\u0433\u0440\u0438\u0444"
     ]
   },
   {
@@ -193,13 +193,19 @@
       "Hammer",
       "Vorschlaghammer",
       "martelo",
-      "кувалда",
-      "молот"
+      "\u043a\u0443\u0432\u0430\u043b\u0434\u0430",
+      "\u043c\u043e\u043b\u043e\u0442"
     ]
   },
   {
     "id": "kettlebell",
-    "aliases": ["kettlebell", "kettlebells", "pesa rusa", "Kugelhantel", "гиря"]
+    "aliases": [
+      "kettlebell",
+      "kettlebells",
+      "pesa rusa",
+      "Kugelhantel",
+      "\u0433\u0438\u0440\u044f"
+    ]
   },
   {
     "id": "leverage machine",
@@ -207,11 +213,11 @@
       "leverage machine",
       "plate loaded machine",
       "macchina a leva",
-      "máquina de palanca",
-      "machine à levier",
+      "m\u00e1quina de palanca",
+      "machine \u00e0 levier",
       "Hebelmaschine",
-      "máquina de alavanca",
-      "рычажный тренажер"
+      "m\u00e1quina de alavanca",
+      "\u0440\u044b\u0447\u0430\u0436\u043d\u044b\u0439 \u0442\u0440\u0435\u043d\u0430\u0436\u0435\u0440"
     ]
   },
   {
@@ -220,14 +226,14 @@
       "medicine ball",
       "med ball",
       "palla medica",
-      "balón medicinal",
+      "bal\u00f3n medicinal",
       "pelota medicinal",
-      "médecine ball",
-      "ballon lesté",
+      "m\u00e9decine ball",
+      "ballon lest\u00e9",
       "Medizinball",
       "bola medicinal",
-      "медицинбол",
-      "медицинский мяч"
+      "\u043c\u0435\u0434\u0438\u0446\u0438\u043d\u0431\u043e\u043b",
+      "\u043c\u0435\u0434\u0438\u0446\u0438\u043d\u0441\u043a\u0438\u0439 \u043c\u044f\u0447"
     ]
   },
   {
@@ -236,12 +242,12 @@
       "olympic barbell",
       "olympic bar",
       "bilanciere olimpico",
-      "barra olímpica",
+      "barra ol\u00edmpica",
       "barre olympique",
       "Olympiahantel",
       "olympische Langhantel",
-      "олимпийский гриф",
-      "олимпийская штанга"
+      "\u043e\u043b\u0438\u043c\u043f\u0438\u0439\u0441\u043a\u0438\u0439 \u0433\u0440\u0438\u0444",
+      "\u043e\u043b\u0438\u043c\u043f\u0438\u0439\u0441\u043a\u0430\u044f \u0448\u0442\u0430\u043d\u0433\u0430"
     ]
   },
   {
@@ -253,13 +259,13 @@
       "sbarra",
       "sbarra per trazioni",
       "barra de dominadas",
-      "barra de tracción",
+      "barra de tracci\u00f3n",
       "barre de traction",
       "Klimmzugstange",
       "barra fixa",
       "barra de pull-up",
-      "турник",
-      "перекладина"
+      "\u0442\u0443\u0440\u043d\u0438\u043a",
+      "\u043f\u0435\u0440\u0435\u043a\u043b\u0430\u0434\u0438\u043d\u0430"
     ]
   },
   {
@@ -269,14 +275,14 @@
       "resistance bands",
       "elastico di resistenza",
       "banda de resistencia",
-      "bande de résistance",
-      "élastique de musculation",
+      "bande de r\u00e9sistance",
+      "\u00e9lastique de musculation",
       "Widerstandsband",
       "Fitnessband",
-      "banda de resistência",
-      "elástico",
-      "резинка для фитнеса",
-      "эспандер"
+      "banda de resist\u00eancia",
+      "el\u00e1stico",
+      "\u0440\u0435\u0437\u0438\u043d\u043a\u0430 \u0434\u043b\u044f \u0444\u0438\u0442\u043d\u0435\u0441\u0430",
+      "\u044d\u0441\u043f\u0430\u043d\u0434\u0435\u0440"
     ]
   },
   {
@@ -294,9 +300,9 @@
       "Turnringe",
       "Gymnastikringe",
       "argolas",
-      "argolas de ginástica",
-      "гимнастические кольца",
-      "кольца"
+      "argolas de gin\u00e1stica",
+      "\u0433\u0438\u043c\u043d\u0430\u0441\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u043a\u043e\u043b\u044c\u0446\u0430",
+      "\u043a\u043e\u043b\u044c\u0446\u0430"
     ]
   },
   {
@@ -314,8 +320,8 @@
       "Schaumstoffrolle",
       "rolo",
       "rolo de espuma",
-      "ролик",
-      "массажный ролик"
+      "\u0440\u043e\u043b\u0438\u043a",
+      "\u043c\u0430\u0441\u0441\u0430\u0436\u043d\u044b\u0439 \u0440\u043e\u043b\u0438\u043a"
     ]
   },
   {
@@ -329,12 +335,12 @@
       "cuerda",
       "comba",
       "corde",
-      "corde à sauter",
+      "corde \u00e0 sauter",
       "Seil",
       "Springseil",
       "corda de pular",
-      "скакалка",
-      "канат"
+      "\u0441\u043a\u0430\u043a\u0430\u043b\u043a\u0430",
+      "\u043a\u0430\u043d\u0430\u0442"
     ]
   },
   {
@@ -346,12 +352,12 @@
       "ergometer",
       "concept2",
       "vogatore",
-      "máquina de remo",
+      "m\u00e1quina de remo",
       "rameur",
-      "Rudergerät",
+      "Ruderger\u00e4t",
       "Rudermaschine",
-      "remo ergométrico",
-      "гребной тренажер"
+      "remo ergom\u00e9trico",
+      "\u0433\u0440\u0435\u0431\u043d\u043e\u0439 \u0442\u0440\u0435\u043d\u0430\u0436\u0435\u0440"
     ]
   },
   {
@@ -361,10 +367,10 @@
       "skierg",
       "ski erg",
       "ski ergometer",
-      "máquina de esquí",
+      "m\u00e1quina de esqu\u00ed",
       "Skiergometer",
-      "скиэрг",
-      "лыжный тренажер"
+      "\u0441\u043a\u0438\u044d\u0440\u0433",
+      "\u043b\u044b\u0436\u043d\u044b\u0439 \u0442\u0440\u0435\u043d\u0430\u0436\u0435\u0440"
     ]
   },
   {
@@ -377,9 +383,9 @@
       "trineo",
       "traineau",
       "Schlitten",
-      "trenó",
-      "сани",
-      "санки"
+      "tren\u00f3",
+      "\u0441\u0430\u043d\u0438",
+      "\u0441\u0430\u043d\u043a\u0438"
     ]
   },
   {
@@ -388,12 +394,12 @@
       "smith machine",
       "multipower",
       "macchina smith",
-      "máquina smith",
+      "m\u00e1quina smith",
       "machine smith",
       "Smith-Maschine",
       "Multipresse",
-      "тренажер смита",
-      "машина смита"
+      "\u0442\u0440\u0435\u043d\u0430\u0436\u0435\u0440 \u0441\u043c\u0438\u0442\u0430",
+      "\u043c\u0430\u0448\u0438\u043d\u0430 \u0441\u043c\u0438\u0442\u0430"
     ]
   },
   {
@@ -406,13 +412,13 @@
       "palla svizzera",
       "palla fitness",
       "pelota suiza",
-      "balón de estabilidad",
+      "bal\u00f3n de estabilidad",
       "ballon suisse",
       "Gymnastikball",
       "Pezziball",
-      "bola suíça",
-      "фитбол",
-      "швейцарский мяч"
+      "bola su\u00ed\u00e7a",
+      "\u0444\u0438\u0442\u0431\u043e\u043b",
+      "\u0448\u0432\u0435\u0439\u0446\u0430\u0440\u0441\u043a\u0438\u0439 \u043c\u044f\u0447"
     ]
   },
   {
@@ -423,13 +429,12 @@
       "spin bike",
       "cyclette",
       "bici da camera",
-      "bicicleta estática",
-      "vélo d'appartement",
-      "vélo stationnaire",
+      "bicicleta est\u00e1tica",
+      "v\u00e9lo d'appartement",
+      "v\u00e9lo stationnaire",
       "Heimtrainer",
-      "Ergometer",
-      "bicicleta ergométrica",
-      "велотренажер"
+      "bicicleta ergom\u00e9trica",
+      "\u0432\u0435\u043b\u043e\u0442\u0440\u0435\u043d\u0430\u0436\u0435\u0440"
     ]
   },
   {
@@ -445,8 +450,8 @@
       "Treppensteiger",
       "Stepper",
       "escada infinita",
-      "степпер",
-      "лестничный тренажер"
+      "\u0441\u0442\u0435\u043f\u043f\u0435\u0440",
+      "\u043b\u0435\u0441\u0442\u043d\u0438\u0447\u043d\u044b\u0439 \u0442\u0440\u0435\u043d\u0430\u0436\u0435\u0440"
     ]
   },
   {
@@ -456,12 +461,12 @@
       "tyre",
       "copertone",
       "pneumatico",
-      "neumático",
+      "neum\u00e1tico",
       "llanta",
       "pneu",
       "Reifen",
-      "покрышка",
-      "шина"
+      "\u043f\u043e\u043a\u0440\u044b\u0448\u043a\u0430",
+      "\u0448\u0438\u043d\u0430"
     ]
   },
   {
@@ -473,7 +478,7 @@
       "cinta de correr",
       "Laufband",
       "esteira",
-      "беговая дорожка"
+      "\u0431\u0435\u0433\u043e\u0432\u0430\u044f \u0434\u043e\u0440\u043e\u0436\u043a\u0430"
     ]
   },
   {
@@ -486,8 +491,8 @@
       "barre hexagonale",
       "Trap Bar",
       "Hex-Stange",
-      "трэп-гриф",
-      "гексагональный гриф"
+      "\u0442\u0440\u044d\u043f-\u0433\u0440\u0438\u0444",
+      "\u0433\u0435\u043a\u0441\u0430\u0433\u043e\u043d\u0430\u043b\u044c\u043d\u044b\u0439 \u0433\u0440\u0438\u0444"
     ]
   },
   {
@@ -499,15 +504,15 @@
       "suspension training",
       "allenamento in sospensione",
       "cinghie sospensione",
-      "entrenador en suspensión",
-      "correas de suspensión",
+      "entrenador en suspensi\u00f3n",
+      "correas de suspensi\u00f3n",
       "sangles de suspension",
       "TRX",
       "Schlingentrainer",
       "Suspensionstrainer",
-      "fita de suspensão",
-      "тренажер trx",
-      "петли trx"
+      "fita de suspens\u00e3o",
+      "\u0442\u0440\u0435\u043d\u0430\u0436\u0435\u0440 trx",
+      "\u043f\u0435\u0442\u043b\u0438 trx"
     ]
   },
   {
@@ -518,32 +523,11 @@
       "arm bike",
       "UBE",
       "ergometro per braccia",
-      "ergómetro de brazos",
-      "ergomètre à bras",
+      "erg\u00f3metro de brazos",
+      "ergom\u00e8tre \u00e0 bras",
       "Armergometer",
-      "ergômetro de braço",
-      "ручной эргометр"
-    ]
-  },
-  {
-    "id": "weighted",
-    "aliases": [
-      "weighted",
-      "weight vest",
-      "weighted vest",
-      "weight belt",
-      "dip belt",
-      "giubbotto zavorrato",
-      "cintura con pesi",
-      "chaleco lastrado",
-      "cinturón de lastre",
-      "gilet lesté",
-      "ceinture lestée",
-      "Gewichtsweste",
-      "Dip-Gürtel",
-      "colete de peso",
-      "жилет с отягощением",
-      "пояс для отягощений"
+      "erg\u00f4metro de bra\u00e7o",
+      "\u0440\u0443\u0447\u043d\u043e\u0439 \u044d\u0440\u0433\u043e\u043c\u0435\u0442\u0440"
     ]
   },
   {
@@ -558,7 +542,7 @@
       "Bauchroller",
       "AB-Wheel",
       "roda abdominal",
-      "ролик для пресса"
+      "\u0440\u043e\u043b\u0438\u043a \u0434\u043b\u044f \u043f\u0440\u0435\u0441\u0441\u0430"
     ]
   }
 ]
