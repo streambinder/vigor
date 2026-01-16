@@ -1756,7 +1756,8 @@
     "id": "assisted-hanging-knee-raise",
     "name": "Assisted Hanging Knee Raise",
     "equipment": [
-      "partner"
+      "partner",
+      "pull-up bar"
     ],
     "muscles": [
       "core"
