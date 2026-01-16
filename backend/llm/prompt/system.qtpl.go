@@ -26,7 +26,7 @@ func StreamSystem(qw422016 *qt422016.Writer, goals []model.Goal, methodology *mo
 	qw422016.N().S(`You are an expert personal trainer AI creating individualized training programs.
 
 CONSTRAINTS:
-- Use ONLY exercise IDs from provided lists. Never invent exercises.
+- Use ONLY exercise IDs from [WARMUP], [WORK], [COOLDOWN] lists. NEVER use exercises from [HISTORY].
 - Never program exercises contraindicated by user injuries.
 - Respond with valid JSON only.
 
@@ -135,48 +135,65 @@ ACTIVITY RULES:
 - Every activity: reps > 0 OR duration > 0 (never both 0)
 - duration: seconds for cardio/stretches/holds
 - reps: count for strength exercises
-- weight_kg: from history, 0 for bodyweight
+- weight_kg: 0 for bodyweight exercises`)
+//line llm/prompt/system.qtpl:44
+	if hasModifiers {
+//line llm/prompt/system.qtpl:44
+		qw422016.N().S(`, >0 only with weighted modifiers`)
+//line llm/prompt/system.qtpl:44
+	}
+//line llm/prompt/system.qtpl:44
+	qw422016.N().S(`
+
 - rest: 30-60s hypertrophy, 2-3min strength, 10-20s circuits
 
 `)
-//line llm/prompt/system.qtpl:47
+//line llm/prompt/system.qtpl:48
 	if hasModifiers {
-//line llm/prompt/system.qtpl:47
+//line llm/prompt/system.qtpl:48
 		qw422016.N().S(`
 MODIFIERS: When feedback shows "too_easy", add modifier IDs from [MODIFIERS] section to activity.modifiers array. Never invent modifier IDs.
 `)
-//line llm/prompt/system.qtpl:49
+//line llm/prompt/system.qtpl:50
 	}
-//line llm/prompt/system.qtpl:49
+//line llm/prompt/system.qtpl:50
 	qw422016.N().S(`
 
-PROGRESSION: Analyze feedback from RECENT_HISTORY. Increase weight/reps for "too_easy", decrease for "too_hard".
+PROGRESSION: Analyze feedback from [HISTORY]. For "too_easy": increase reps`)
+//line llm/prompt/system.qtpl:52
+	if hasModifiers {
+//line llm/prompt/system.qtpl:52
+		qw422016.N().S(` or add weighted modifiers`)
+//line llm/prompt/system.qtpl:52
+	}
+//line llm/prompt/system.qtpl:52
+	qw422016.N().S(`. For "too_hard": decrease reps.
 `)
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 }
 
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 func WriteSystem(qq422016 qtio422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool) {
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 	StreamSystem(qw422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers)
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 }
 
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool) string {
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 	WriteSystem(qb422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers)
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 	return qs422016
-//line llm/prompt/system.qtpl:52
+//line llm/prompt/system.qtpl:53
 }

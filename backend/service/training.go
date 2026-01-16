@@ -228,11 +228,21 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	if err != nil {
 		return nil, err
 	}
+	validExerciseIDs := make(map[string]bool, len(workExercises)+len(warmupExercises)+len(cooldownExercises))
+	for _, e := range workExercises {
+		validExerciseIDs[e.ID] = true
+	}
+	for _, e := range warmupExercises {
+		validExerciseIDs[e.ID] = true
+	}
+	for _, e := range cooldownExercises {
+		validExerciseIDs[e.ID] = true
+	}
 	validModifierIDs := make(map[string]bool, len(modifiers))
 	for _, m := range modifiers {
 		validModifierIDs[m.ID] = true
 	}
-	if err := training.Validate(validModifierIDs); err != nil {
+	if err := training.Validate(validExerciseIDs, validModifierIDs); err != nil {
 		log.Error().Err(err).Msg("generated training validation failed")
 		return nil, ErrMalformedTraining
 	}
