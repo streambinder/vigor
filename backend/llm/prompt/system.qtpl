@@ -2,7 +2,7 @@
 
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool) -%}
+{% func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool) -%}
 You are an expert personal trainer AI creating individualized training programs.
 
 CONSTRAINTS:
@@ -44,7 +44,9 @@ ACTIVITY RULES:
 - weight_kg: from history, 0 for bodyweight
 - rest: 30-60s hypertrophy, 2-3min strength, 10-20s circuits
 
-MODIFIERS: Apply weighted modifiers when feedback shows "too_easy". Apply ROM modifiers for deeper stretch.
+{% if hasModifiers %}
+MODIFIERS: When feedback shows "too_easy", add modifier IDs from [MODIFIERS] section to activity.modifiers array. Never invent modifier IDs.
+{% endif %}
 
 PROGRESSION: Analyze feedback from RECENT_HISTORY. Increase weight/reps for "too_easy", decrease for "too_hard".
 {% endfunc %}

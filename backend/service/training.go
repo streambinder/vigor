@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"errors"
+	"regexp"
 	"time"
 
 	"github.com/google/uuid"
@@ -165,6 +166,9 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		return nil, err
 	}
 
+	// filter modifiers to only those applicable to retrieved exercises
+	modifiers = filterApplicableModifiers(modifiers, workExercises)
+
 	var allFavoriteExercises, allFavoriteEquipment []string
 	for _, profile := range profiles {
 		allFavoriteExercises = append(allFavoriteExercises, profile.FavoriteExercises()...)
@@ -224,7 +228,11 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	if err != nil {
 		return nil, err
 	}
-	if err := training.Validate(); err != nil {
+	validModifierIDs := make(map[string]bool, len(modifiers))
+	for _, m := range modifiers {
+		validModifierIDs[m.ID] = true
+	}
+	if err := training.Validate(validModifierIDs); err != nil {
 		log.Error().Err(err).Msg("generated training validation failed")
 		return nil, ErrMalformedTraining
 	}
@@ -524,4 +532,34 @@ func CreateReport(userID uuid.UUID, trainingID, content string) (*model.Report, 
 	}
 
 	return &report, nil
+}
+
+// filterApplicableModifiers returns only modifiers whose patterns match at least one exercise ID.
+func filterApplicableModifiers(modifiers []model.Modifier, exercises []model.Exercise) []model.Modifier {
+	if len(modifiers) == 0 || len(exercises) == 0 {
+		return nil
+	}
+
+	var applicable []model.Modifier
+	for _, mod := range modifiers {
+		if modifierMatchesAnyExercise(mod, exercises) {
+			applicable = append(applicable, mod)
+		}
+	}
+	return applicable
+}
+
+func modifierMatchesAnyExercise(mod model.Modifier, exercises []model.Exercise) bool {
+	for _, pattern := range mod.Patterns {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			continue
+		}
+		for _, ex := range exercises {
+			if re.MatchString(ex.ID) {
+				return true
+			}
+		}
+	}
+	return false
 }

@@ -57,7 +57,7 @@ func GenTraining(
 		goalIDs[i] = g.ID
 	}
 	request := llmPrompt{
-		prompt.System(goals, methodology, methodologies, skipWarmupCooldown),
+		prompt.System(goals, methodology, methodologies, skipWarmupCooldown, len(modifiers) > 0),
 		prompt.GenTraining(
 			profiles,
 			goalIDs,

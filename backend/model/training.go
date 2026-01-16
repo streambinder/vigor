@@ -162,7 +162,7 @@ func (t Training) DaysSince() int {
 }
 
 // Validate checks that the training has valid structure.
-func (t *Training) Validate() error {
+func (t *Training) Validate(validModifierIDs map[string]bool) error {
 	if t.Name == "" {
 		return errors.New("training name is empty")
 	}
@@ -183,6 +183,11 @@ func (t *Training) Validate() error {
 			for k, activity := range block.Activities {
 				if activity.ExerciseID == "" {
 					return errors.New("activity " + strconv.Itoa(k) + " in block " + strconv.Itoa(j) + " has no exercise ID")
+				}
+				for _, mod := range activity.Modifiers {
+					if !validModifierIDs[mod] {
+						return errors.New("activity " + strconv.Itoa(k) + " has invalid modifier: " + mod)
+					}
 				}
 			}
 		}
