@@ -29,6 +29,8 @@ class CachedExerciseImage extends StatelessWidget {
     return uri != null && uri.hasScheme && (uri.scheme == 'http' || uri.scheme == 'https');
   }
 
+  static bool _isGif(String url) => url.toLowerCase().endsWith('.gif');
+
   static String proxyUrl(String url) => '${ApiConfig.baseUrl}/proxy/image?url=${Uri.encodeComponent(url)}';
 
   @override
@@ -37,13 +39,16 @@ class CachedExerciseImage extends StatelessWidget {
       return _buildPlaceholder();
     }
 
+    // skip mem cache resizing for GIFs - resizing strips animation frames
+    final isAnimated = _isGif(imageUrl!);
+
     final image = CachedNetworkImage(
       imageUrl: proxyUrl(imageUrl!),
       width: width,
       height: height,
       fit: fit,
-      memCacheWidth: width != null ? (width! * 2).toInt() : null,
-      memCacheHeight: height != null ? (height! * 2).toInt() : null,
+      memCacheWidth: isAnimated ? null : (width != null ? (width! * 2).toInt() : null),
+      memCacheHeight: isAnimated ? null : (height != null ? (height! * 2).toInt() : null),
       fadeInDuration: VigorAnimation.fast,
       fadeOutDuration: VigorAnimation.fast,
       placeholder: (_, _) => _buildPlaceholder(),

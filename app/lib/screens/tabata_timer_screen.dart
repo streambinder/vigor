@@ -734,11 +734,19 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
                       ),
                     ],
                   ),
-                  child: CachedExerciseImage(
-                    imageUrl: exercise.reference,
-                    width: imageSize,
-                    height: imageSize,
-                    isCircular: true,
+                  child: ClipOval(
+                    child: Image.network(
+                      CachedExerciseImage.proxyUrl(exercise.reference),
+                      width: imageSize,
+                      height: imageSize,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Container(
+                        width: imageSize,
+                        height: imageSize,
+                        color: VigorColors.orange.withValues(alpha: 0.2),
+                        child: Icon(Icons.fitness_center, size: imageSize * 0.4),
+                      ),
+                    ),
                   ),
                 ),
               ),
