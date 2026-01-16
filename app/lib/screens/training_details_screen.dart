@@ -537,6 +537,29 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
               )).toList(),
             ),
           ],
+          if (training.muscles.isNotEmpty) ...[
+            const SizedBox(height: VigorSpacing.md),
+            Wrap(
+              spacing: VigorSpacing.xs,
+              runSpacing: VigorSpacing.xs,
+              children: training.muscles.map((muscle) => Container(
+                padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+                decoration: BoxDecoration(
+                  color: VigorColors.orange.withValues(alpha: 0.15),
+                  borderRadius: VigorRadius.radiusFull,
+                  border: Border.all(color: VigorColors.orange.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.accessibility_new, size: 12, color: VigorColors.orange),
+                    const SizedBox(width: VigorSpacing.xs),
+                    Text(muscle, style: VigorTypography.caption.copyWith(color: VigorColors.orange)),
+                  ],
+                ),
+              )).toList(),
+            ),
+          ],
         ],
       ),
     );

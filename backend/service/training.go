@@ -274,6 +274,22 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		training.Equipment = append(training.Equipment, m.ID)
 	}
 	training.Goals = effectiveGoals
+
+	// collect muscles from work routine exercises
+	exerciseMuscles := make(map[string][]string, len(workExercises))
+	for _, ex := range workExercises {
+		exerciseMuscles[ex.ID] = ex.Muscles
+	}
+	muscleSet := make(map[string]bool)
+	for _, activity := range training.Activities() {
+		for _, muscle := range exerciseMuscles[activity.ExerciseID] {
+			muscleSet[muscle] = true
+		}
+	}
+	for muscle := range muscleSet {
+		training.Muscles = append(training.Muscles, muscle)
+	}
+
 	for i := range training.Routines {
 		training.Routines[i].Position = i
 		for j := range training.Routines[i].Blocks {

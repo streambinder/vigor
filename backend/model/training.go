@@ -83,6 +83,7 @@ type Training struct {
 	Duration    int            `gorm:"not null" json:"duration" prompt:"Total seconds"`
 	Equipment   pq.StringArray `gorm:"type:text[]" json:"equipment" prompt:"-"`
 	Goals       pq.StringArray `gorm:"type:text[]" json:"goals" prompt:"-"`
+	Muscles     pq.StringArray `gorm:"type:text[]" json:"muscles" prompt:"-"`
 	References  pq.StringArray `gorm:"type:text[]" json:"references" prompt:"DOI URLs from facts used (empty if none)"`
 	Routines    []Routine      `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"routines" prompt:"Training routines"`
 	Prompt      datatypes.JSON `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
