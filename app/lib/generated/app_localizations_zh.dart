@@ -834,7 +834,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get calibrationNeeded => '完成您的第一次训练，让Vigor根据您的水平校准推荐';
 
   @override
-  String get calibrationDescription => '在校准期间，平台会收集您的反馈数据，以更好地将训练与您的能力相匹配';
+  String get calibrationDescription => '在校准期间，平台会收集您的反馈数据，对您的健身状态和水平进行初步评估';
 
   @override
   String get capabilities => '能力';

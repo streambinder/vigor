@@ -295,7 +295,7 @@
   "noProgressYet": "トレーニングを完了して進捗を確認",
   "calibration": "キャリブレーション",
   "calibrationNeeded": "最初のトレーニングを完了して、Vigorがあなたのレベルに合わせた推奨を調整できるようにしましょう",
-  "calibrationDescription": "キャリブレーション中、プラットフォームはフィードバックからデータを収集し、トレーニングをあなたの能力により適合させます",
+  "calibrationDescription": "キャリブレーション中、プラットフォームはフィードバックからデータを収集し、あなたのフィットネス状態とレベルの初期評価を行います",
   "capabilities": "能力",
   "noTrainingsCompletedYet": "トレーニングを始めて何か表示しよう"
 }

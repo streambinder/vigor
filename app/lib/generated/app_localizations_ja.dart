@@ -836,7 +836,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get calibrationDescription =>
-      'キャリブレーション中、プラットフォームはフィードバックからデータを収集し、トレーニングをあなたの能力により適合させます';
+      'キャリブレーション中、プラットフォームはフィードバックからデータを収集し、あなたのフィットネス状態とレベルの初期評価を行います';
 
   @override
   String get capabilities => '能力';

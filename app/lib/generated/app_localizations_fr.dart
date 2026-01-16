@@ -852,7 +852,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get calibrationDescription =>
-      'Pendant le calibrage, la plateforme collecte des données de vos retours pour mieux adapter les entraînements à vos capacités';
+      'Pendant le calibrage, la plateforme collecte des données de vos retours pour faire une première évaluation de votre condition physique et niveau';
 
   @override
   String get capabilities => 'Capacités';

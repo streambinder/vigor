@@ -295,7 +295,7 @@
   "noProgressYet": "Completa gli allenamenti per vedere i tuoi progressi",
   "calibration": "Calibrazione",
   "calibrationNeeded": "Completa il tuo primo allenamento perché Vigor possa calibrare le raccomandazioni al tuo livello",
-  "calibrationDescription": "Durante la calibrazione, la piattaforma raccoglie dati dai tuoi feedback per allineare meglio i tuoi allenamenti alle tue capacità",
+  "calibrationDescription": "Durante la calibrazione, la piattaforma raccoglie dati dai tuoi feedback per fare un primo assessment sul tuo stato di forma e il tuo livello",
   "capabilities": "Capacità",
   "noTrainingsCompletedYet": "Inizia ad allenarti per vedere qualcosa qui"
 }

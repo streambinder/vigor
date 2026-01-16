@@ -1659,7 +1659,7 @@ abstract class AppLocalizations {
   /// No description provided for @calibrationDescription.
   ///
   /// In en, this message translates to:
-  /// **'During calibration, the platform collects data from your feedback to better align trainings with your capabilities'**
+  /// **'During calibration, the platform collects data from your feedback to make an initial assessment of your fitness level'**
   String get calibrationDescription;
 
   /// No description provided for @capabilities.

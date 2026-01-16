@@ -836,7 +836,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get calibrationDescription =>
-      '보정 기간 동안 플랫폼은 피드백 데이터를 수집하여 훈련을 당신의 능력에 더 잘 맞춥니다';
+      '보정 기간 동안 플랫폼은 피드백 데이터를 수집하여 당신의 체력 상태와 수준에 대한 초기 평가를 합니다';
 
   @override
   String get capabilities => '능력';

@@ -437,7 +437,7 @@
   "noProgressYet": "Complete trainings to see your progress",
   "calibration": "Calibration",
   "calibrationNeeded": "Complete your first training for Vigor to calibrate recommendations to your level",
-  "calibrationDescription": "During calibration, the platform collects data from your feedback to better align trainings with your capabilities",
+  "calibrationDescription": "During calibration, the platform collects data from your feedback to make an initial assessment of your fitness level",
   "capabilities": "Capabilities",
   "noTrainingsCompletedYet": "Start training to see something here"
 }

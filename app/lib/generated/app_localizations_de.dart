@@ -851,7 +851,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get calibrationDescription =>
-      'Während der Kalibrierung sammelt die Plattform Daten aus deinem Feedback, um Trainings besser auf deine Fähigkeiten abzustimmen';
+      'Während der Kalibrierung sammelt die Plattform Daten aus deinem Feedback, um eine erste Einschätzung deines Fitnesszustands und Levels zu machen';
 
   @override
   String get capabilities => 'Fähigkeiten';
