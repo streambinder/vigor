@@ -220,26 +220,23 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 const SizedBox(height: VigorSpacing.lg),
               ],
               _buildSection(
-                title: 'Personal Details', // TODO: add l10n.personalDetails
+                title: l10n.personalDetails,
                 icon: Icons.person,
-                color: VigorColors.orange,
                 children: [_buildPersonalDetailsContent(l10n)],
               ),
               const SizedBox(height: VigorSpacing.xl),
               _buildSection(
-                title: 'Health & Goals', // TODO: add l10n.healthAndGoals
+                title: l10n.healthAndGoals,
                 icon: Icons.fitness_center,
-                color: VigorColors.success,
                 children: [_buildHealthGoalsContent(l10n)],
               ),
               const SizedBox(height: VigorSpacing.xl),
               _buildSection(
-                title: l10n.favorites, // using existing 'Preferences' equivalent
+                title: l10n.favorites,
                 icon: Icons.favorite,
-                color: VigorColors.electricBlue,
                 children: [_buildPreferencesContent(l10n)],
               ),
-              const SizedBox(height: VigorSpacing.xxl),
+              const SizedBox(height: VigorSpacing.lg),
             ],
           ),
         ),
@@ -250,7 +247,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   Widget _buildSection({
     required String title,
     required IconData icon,
-    required Color color,
     required List<Widget> children,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -261,7 +257,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           : BoxDecoration(
               color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
               borderRadius: VigorRadius.radiusLg,
-              border: Border.all(color: color.withValues(alpha: 0.2)),
             ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,14 +265,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             padding: const EdgeInsets.all(VigorSpacing.lg),
             child: Row(
               children: [
-                Container(
-                  padding: VigorSpacing.paddingSm,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.15),
-                    borderRadius: VigorRadius.radiusSm,
-                  ),
-                  child: Icon(icon, color: color, size: 20),
-                ),
+                Icon(icon, color: VigorColors.stone, size: 20),
                 const SizedBox(width: VigorSpacing.md),
                 Text(
                   title,
@@ -527,17 +515,15 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             decoration: InputDecoration(
               border: const OutlineInputBorder(),
               contentPadding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
-              suffixIcon: Icon(Icons.calendar_today, size: 18, color: VigorColors.textMuted(context)),
+              suffixIcon: Icon(Icons.calendar_today, size: 18, color: VigorColors.stone),
             ),
             child: Text(
               _birthdate != null
                   ? '${_birthdate!.day}/${_birthdate!.month}/${_birthdate!.year}'
                   : '',
-              style: VigorTypography.body.copyWith(
-                color: _birthdate != null
-                    ? VigorColors.textPrimary(context)
-                    : VigorColors.textMuted(context),
-              ),
+              style: _birthdate != null
+                  ? VigorTypography.data.copyWith(color: VigorColors.textPrimary(context))
+                  : VigorTypography.body.copyWith(color: VigorColors.textMuted(context)),
             ),
           ),
         ),
@@ -633,26 +619,19 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.xs),
-              decoration: BoxDecoration(
-                color: VigorColors.orange.withValues(alpha: 0.15),
-                borderRadius: VigorRadius.radiusFull,
-              ),
-              child: Text(
-                '${value.round()} $unit',
-                style: VigorTypography.label.copyWith(color: VigorColors.orange, fontWeight: FontWeight.w600),
-              ),
+            Text(
+              '${value.round()} $unit',
+              style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context)),
             ),
           ],
         ),
         const SizedBox(height: VigorSpacing.sm),
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
-            activeTrackColor: VigorColors.orange,
-            inactiveTrackColor: VigorColors.orange.withValues(alpha: 0.2),
-            thumbColor: VigorColors.orange,
-            overlayColor: VigorColors.orange.withValues(alpha: 0.2),
+            activeTrackColor: VigorColors.stone,
+            inactiveTrackColor: VigorColors.stone.withValues(alpha: 0.2),
+            thumbColor: VigorColors.stone,
+            overlayColor: VigorColors.stone.withValues(alpha: 0.2),
             trackHeight: 4,
           ),
           child: Slider(
@@ -703,10 +682,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   entry.value,
                   style: VigorTypography.caption.copyWith(color: VigorColors.textPrimary(context)),
                 ),
-                deleteIcon: Icon(Icons.close, size: 16, color: VigorColors.textSecondary(context)),
+                deleteIcon: Icon(Icons.close, size: 16, color: VigorColors.stone),
                 onDeleted: () => onRemove(entry.key),
                 backgroundColor: VigorColors.surfaceElevated(context),
-                side: BorderSide(color: VigorColors.border(context)),
+                side: BorderSide.none,
               );
             }).toList(),
           ),
@@ -746,7 +725,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               border: const OutlineInputBorder(),
               contentPadding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
             ),
-            style: VigorTypography.body,
+            style: VigorTypography.data,
             keyboardType: TextInputType.number,
           ),
         ),

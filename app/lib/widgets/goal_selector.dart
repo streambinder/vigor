@@ -152,7 +152,7 @@ class _GoalSelectorState extends State<GoalSelector> {
                 icon: Icon(
                   allVisibleSelected ? Icons.deselect : Icons.select_all,
                   size: 20,
-                  color: VigorColors.orange,
+                  color: VigorColors.indigo,
                 ),
                 tooltip: allVisibleSelected ? l10n.noEquipment : l10n.addAllEquipment,
               ),
@@ -190,7 +190,7 @@ class _GoalSelectorState extends State<GoalSelector> {
                     ),
                     selected: isSelected,
                     onSelected: (_) => _toggle(goal),
-                    selectedColor: VigorColors.orange,
+                    selectedColor: VigorColors.indigo,
                     checkmarkColor: Colors.white,
                   );
                 }).toList(),

@@ -98,7 +98,7 @@ class AdaptiveAlertDialog extends StatelessWidget {
                               color: action.isDestructive
                                   ? VigorColors.error.withValues(alpha: 0.1)
                                   : action.isDefault
-                                      ? VigorColors.orange.withValues(alpha: 0.9)
+                                      ? VigorColors.persimmon.withValues(alpha: 0.9)
                                       : Colors.transparent,
                               borderRadius: VigorRadius.radiusSm,
                               border: !action.isDefault
@@ -116,7 +116,7 @@ class AdaptiveAlertDialog extends StatelessWidget {
                                     ? Colors.white
                                     : action.isDestructive
                                         ? VigorColors.error
-                                        : VigorColors.orange,
+                                        : VigorColors.persimmon,
                                 fontWeight: action.isDefault
                                     ? FontWeight.w600
                                     : FontWeight.w400,
@@ -147,7 +147,7 @@ class AdaptiveAlertDialog extends StatelessWidget {
                 style: action.isDestructive
                     ? TextButton.styleFrom(foregroundColor: VigorColors.error)
                     : action.isDefault
-                        ? TextButton.styleFrom(foregroundColor: VigorColors.orange)
+                        ? TextButton.styleFrom(foregroundColor: VigorColors.persimmon)
                         : null,
                 child: Text(action.label),
               ))

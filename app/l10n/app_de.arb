@@ -30,6 +30,7 @@
   "userDataRefreshed": "Benutzerdaten aktualisiert",
   "editProfile": "Profil Bearbeiten",
   "settings": "Einstellungen",
+  "other": "Sonstiges",
 
   "deleteGym": "Fitnessstudio Löschen",
   "deleteGymConfirmation": "\"{name}\" löschen?",
@@ -63,6 +64,8 @@
   "injuries": "Verletzungen",
   "limitations": "Einschränkungen",
   "favorites": "Favoriten",
+  "personalDetails": "Persönliche Daten",
+  "healthAndGoals": "Gesundheit & Ziele",
   "exercises": "Übungen",
   "equipment": "Ausrüstung",
   "startedDate": "Beginn: {date}",
@@ -143,6 +146,7 @@
   "yesterday": "Gestern",
   "available": "Verfügbar",
   "completed": "Abgeschlossen",
+  "completedSingular": "Abgeschlossen",
   "noPastTrainings": "Noch keine abgeschlossenen Trainings",
   "copied": "Kopiert",
   "durationMin": "{minutes} Min",
@@ -191,7 +195,7 @@
   "targetMuscles": "Zielmuskeln",
   "naming": "Benennung",
 
-  "trainingRoutines": "Trainingsroutinen",
+  "trainingRoutines": "Training",
   "noEquipment": "Keine Ausrüstung",
   "blockNumber": "Block {number}",
   "repeatsCount": "{count}x",
@@ -200,7 +204,9 @@
   "repsCount": "{count} Wiederholungen",
   "weightKgValue": "{value} kg",
   "markAsComplete": "Als Abgeschlossen Markieren",
+  "updateFeedback": "Feedback Aktualisieren",
   "references": "Referenzen",
+  "literature": "Literatur",
   "describeIssue": "Beschreibe das Problem...",
   "submit": "Absenden",
   "close": "Schließen",
@@ -294,8 +300,16 @@
   "failedToLoadProgress": "Fortschritt konnte nicht geladen werden",
   "noProgressYet": "Schließe Trainings ab, um deinen Fortschritt zu sehen",
   "calibration": "Kalibrierung",
+  "calibrationGlobal": "Gesamt",
   "calibrationNeeded": "Absolviere dein erstes Training, damit Vigor die Empfehlungen auf dein Level abstimmen kann",
   "calibrationDescription": "Während der Kalibrierung sammelt die Plattform Daten aus deinem Feedback, um eine erste Einschätzung deines Fitnesszustands und Levels zu machen",
   "capabilities": "Fähigkeiten",
-  "noTrainingsCompletedYet": "Starte ein Training um hier etwas zu sehen"
+  "noTrainingsCompletedYet": "Starte ein Training um hier etwas zu sehen",
+
+  "theme": "Thema",
+  "themeAuto": "Auto",
+  "themeLight": "Hell",
+  "themeDark": "Dunkel",
+  "themeAutoDescription": "Systemeinstellungen folgen",
+  "appearance": "Erscheinungsbild"
 }

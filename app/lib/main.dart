@@ -6,6 +6,7 @@ import 'design/vigor_theme.dart';
 import 'generated/app_localizations.dart';
 import 'providers/auth_provider.dart';
 import 'providers/locale_provider.dart';
+import 'providers/theme_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/google_auth_screen.dart';
 import 'screens/home_screen.dart';
@@ -113,9 +114,12 @@ class VigorApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => LocaleProvider(prefs),
         ),
+        ChangeNotifierProvider(
+          create: (_) => ThemeProvider(prefs),
+        ),
       ],
-      child: Consumer<LocaleProvider>(
-        builder: (context, localeProvider, _) => MaterialApp(
+      child: Consumer2<LocaleProvider, ThemeProvider>(
+        builder: (context, localeProvider, themeProvider, _) => MaterialApp(
           title: 'Vigor',
           locale: localeProvider.locale,
           supportedLocales: supportedLocales,
@@ -127,7 +131,7 @@ class VigorApp extends StatelessWidget {
           ],
           theme: VigorTheme.light,
           darkTheme: VigorTheme.dark,
-          themeMode: ThemeMode.system,
+          themeMode: themeProvider.themeMode,
           home: const AuthenticationWrapper(),
           debugShowCheckedModeBanner: false,
         ),

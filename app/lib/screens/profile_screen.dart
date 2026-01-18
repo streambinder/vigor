@@ -11,6 +11,7 @@ import '../services/service_locator.dart';
 import '../services/preferences_service.dart';
 import '../widgets/gym_form_dialog.dart';
 import 'profile_edit_screen.dart';
+import 'settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -159,20 +160,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 await authProvider.refreshUserData();
                 await _loadGyms();
               },
-              color: VigorColors.orange,
+              color: VigorColors.persimmon,
               child: ListView(
                 padding: VigorSpacing.paddingLg,
                 children: [
                   _buildProfileHeader(user, l10n),
-                  const SizedBox(height: VigorSpacing.lg),
-                  _buildQuickStats(user, l10n),
                   const SizedBox(height: VigorSpacing.xl),
                   _buildDataSections(user, l10n),
                   const SizedBox(height: VigorSpacing.xl),
                   _buildGymsSection(l10n),
                   const SizedBox(height: VigorSpacing.xl),
-                  _buildDangerZone(l10n, authProvider),
-                  const SizedBox(height: VigorSpacing.xxl),
+                  _buildOtherSection(l10n),
+                  const SizedBox(height: VigorSpacing.lg),
                 ],
               ),
             ),
@@ -180,81 +179,91 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileHeader(User user, AppLocalizations l10n) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final now = DateTime.now();
+    final birth = user.profile.birthdate;
+    int age = now.year - birth.year;
+    if (now.month < birth.month || (now.month == birth.month && now.day < birth.day)) {
+      age--;
+    }
+
     return Container(
       padding: VigorSpacing.paddingLg,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            VigorColors.orange.withValues(alpha: 0.15),
-            VigorColors.electricBlue.withValues(alpha: 0.15),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: VigorColors.surface(context),
         borderRadius: VigorRadius.radiusLg,
-        border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
-        ),
       ),
-      child: Row(
+      child: Column(
         children: [
-          // avatar with gradient ring
-          Container(
-            padding: const EdgeInsets.all(3),
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]),
-            ),
-            child: CircleAvatar(
-              radius: 36,
-              backgroundColor: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
-              child: ShaderMask(
-                shaderCallback: (bounds) => const LinearGradient(
-                  colors: [VigorColors.orange, VigorColors.electricBlue],
-                ).createShader(bounds),
-                child: const Icon(Icons.person, size: 40, color: Colors.white),
+          Row(
+            children: [
+              // avatar with solid stone border (no gradient ring)
+              Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: VigorColors.stone, width: 2),
+                ),
+                child: CircleAvatar(
+                  radius: 36,
+                  backgroundColor: VigorColors.surface(context),
+                  child: Icon(Icons.person, size: 40, color: VigorColors.stone),
+                ),
               ),
-            ),
-          ),
-          const SizedBox(width: VigorSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${user.profile.firstName} ${user.profile.lastName}',
-                  style: VigorTypography.headline.copyWith(
-                    fontSize: 20,
-                    color: VigorColors.textPrimary(context),
+              const SizedBox(width: VigorSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${user.profile.firstName} ${user.profile.lastName}',
+                      style: VigorTypography.headline.copyWith(
+                        fontSize: 20,
+                        color: VigorColors.textPrimary(context),
+                      ),
+                    ),
+                    const SizedBox(height: VigorSpacing.xs),
+                    Text(
+                      user.email,
+                      style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context)),
+                    ),
+                  ],
+                ),
+              ),
+              // edit button: stone, not persimmon (not a primary CTA)
+              GestureDetector(
+                onTap: () async {
+                  final result = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(builder: (_) => ProfileEditScreen(profile: user.profile)),
+                  );
+                  if (result == true && mounted) {
+                    context.read<AuthProvider>().refreshUserData();
+                  }
+                },
+                child: Container(
+                  padding: VigorSpacing.paddingSm,
+                  decoration: BoxDecoration(
+                    color: VigorColors.stone.withValues(alpha: 0.15),
+                    borderRadius: VigorRadius.radiusFull,
                   ),
+                  child: const Icon(Icons.edit, color: VigorColors.stone, size: 20),
                 ),
-                const SizedBox(height: VigorSpacing.xs),
-                Text(
-                  user.email,
-                  style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context)),
-                ),
-              ],
-            ),
-          ),
-          // edit button
-          GestureDetector(
-            onTap: () async {
-              final result = await Navigator.of(context).push<bool>(
-                MaterialPageRoute(builder: (_) => ProfileEditScreen(profile: user.profile)),
-              );
-              if (result == true && mounted) {
-                context.read<AuthProvider>().refreshUserData();
-              }
-            },
-            child: Container(
-              padding: VigorSpacing.paddingSm,
-              decoration: BoxDecoration(
-                color: VigorColors.orange.withValues(alpha: 0.15),
-                borderRadius: VigorRadius.radiusFull,
               ),
-              child: const Icon(Icons.edit, color: VigorColors.orange, size: 20),
-            ),
+            ],
+          ),
+          const SizedBox(height: VigorSpacing.lg),
+          Wrap(
+            spacing: VigorSpacing.sm,
+            runSpacing: VigorSpacing.sm,
+            alignment: WrapAlignment.center,
+            children: [
+              _buildStatPill(Icons.cake, '$age'),
+              _buildStatPill(Icons.height, '${user.profile.height.toInt()} cm'),
+              _buildStatPill(Icons.monitor_weight, '${user.profile.weight.toInt()} kg'),
+              _buildStatPill(
+                user.profile.gender == 'male' ? Icons.male : Icons.female,
+                user.profile.gender == 'male' ? l10n.male : l10n.female,
+              ),
+            ],
           ),
         ],
       ),
@@ -262,38 +271,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildQuickStats(User user, AppLocalizations l10n) {
-    final age = DateTime.now().year - user.profile.birthdate.year;
+    final now = DateTime.now();
+    final birth = user.profile.birthdate;
+    int age = now.year - birth.year;
+    // adjust if birthday hasn't occurred yet this year
+    if (now.month < birth.month || (now.month == birth.month && now.day < birth.day)) {
+      age--;
+    }
+    // kanso: all stat pills use stone for visual calm
     return Wrap(
       spacing: VigorSpacing.sm,
       runSpacing: VigorSpacing.sm,
       alignment: WrapAlignment.center,
       children: [
-        _buildStatPill(Icons.cake, '$age', VigorColors.orange),
-        _buildStatPill(Icons.height, '${user.profile.height.toInt()} cm', VigorColors.electricBlue),
-        _buildStatPill(Icons.monitor_weight, '${user.profile.weight.toInt()} kg', VigorColors.success),
+        _buildStatPill(Icons.cake, '$age'),
+        _buildStatPill(Icons.height, '${user.profile.height.toInt()} cm'),
+        _buildStatPill(Icons.monitor_weight, '${user.profile.weight.toInt()} kg'),
         _buildStatPill(
           user.profile.gender == 'male' ? Icons.male : Icons.female,
-          _capitalizeFirst(user.profile.gender),
-          VigorColors.warning,
+          user.profile.gender == 'male' ? l10n.male : l10n.female,
         ),
       ],
     );
   }
 
-  Widget _buildStatPill(IconData icon, String value, Color color) {
+  Widget _buildStatPill(IconData icon, String value) {
+    // using VigorTypography.data for numeric stats per identity.md
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
+        color: VigorColors.stone.withValues(alpha: 0.1),
         borderRadius: VigorRadius.radiusFull,
-        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color, size: 16),
+          Icon(icon, color: VigorColors.stone, size: 16),
           const SizedBox(width: VigorSpacing.xs),
-          Text(value, style: VigorTypography.label.copyWith(color: color, fontWeight: FontWeight.w600)),
+          Text(value, style: VigorTypography.data.copyWith(color: VigorColors.stone)),
         ],
       ),
     );
@@ -305,7 +320,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final limitations = _getLimitations(user.profile.data);
     final favExercises = _getFavoriteExercises(user.profile.data);
     final favEquipment = _getFavoriteEquipment(user.profile.data);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       children: [
@@ -313,17 +327,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildCollapsibleSection(
             icon: Icons.flag,
             title: l10n.goals,
-            color: VigorColors.success,
-            isDark: isDark,
-            children: [_buildChipWrap(goals, VigorColors.success)],
+            children: [_buildChipWrap(goals)],
           ),
         if (injuries.isNotEmpty) ...[
           const SizedBox(height: VigorSpacing.md),
           _buildCollapsibleSection(
             icon: Icons.healing,
             title: l10n.injuries,
-            color: VigorColors.warning,
-            isDark: isDark,
             children: injuries.map((i) => _buildListItem(i.description, subtitle: l10n.yearLabel(i.year))).toList(),
           ),
         ],
@@ -332,9 +342,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildCollapsibleSection(
             icon: Icons.warning_amber,
             title: l10n.limitations,
-            color: VigorColors.error,
-            isDark: isDark,
-            children: [_buildChipWrap(limitations, VigorColors.error)],
+            children: [_buildChipWrap(limitations)],
           ),
         ],
         if (favExercises.isNotEmpty || favEquipment.isNotEmpty) ...[
@@ -342,8 +350,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildCollapsibleSection(
             icon: Icons.favorite,
             title: l10n.favorites,
-            color: VigorColors.electricBlue,
-            isDark: isDark,
             children: [
               if (favExercises.isNotEmpty) ...[
                 Align(
@@ -353,7 +359,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Text(l10n.exercises, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
                   ),
                 ),
-                _buildChipWrap(favExercises, VigorColors.electricBlue),
+                _buildChipWrap(favExercises),
               ],
               if (favEquipment.isNotEmpty) ...[
                 const SizedBox(height: VigorSpacing.md),
@@ -364,7 +370,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Text(l10n.equipment, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
                   ),
                 ),
-                _buildChipWrap(favEquipment, VigorColors.electricBlue),
+                _buildChipWrap(favEquipment),
               ],
             ],
           ),
@@ -376,23 +382,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildCollapsibleSection({
     required IconData icon,
     required String title,
-    required Color color,
-    required bool isDark,
     required List<Widget> children,
   }) {
+    // seijaku: calm interface, stone for all section icons
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+        color: VigorColors.surface(context),
         borderRadius: VigorRadius.radiusMd,
-        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           leading: Container(
             padding: VigorSpacing.paddingSm,
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: VigorRadius.radiusSm),
-            child: Icon(icon, color: color, size: 20),
+            decoration: BoxDecoration(color: VigorColors.stone.withValues(alpha: 0.1), borderRadius: VigorRadius.radiusSm),
+            child: Icon(icon, color: VigorColors.stone, size: 20),
           ),
           title: Text(title, style: VigorTypography.headline.copyWith(fontSize: 16, color: VigorColors.textPrimary(context))),
           childrenPadding: const EdgeInsets.only(left: VigorSpacing.md, right: VigorSpacing.md, bottom: VigorSpacing.md),
@@ -412,7 +416,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             margin: const EdgeInsets.only(top: 6, right: VigorSpacing.sm),
             width: 6,
             height: 6,
-            decoration: const BoxDecoration(color: VigorColors.orange, shape: BoxShape.circle),
+            decoration: const BoxDecoration(color: VigorColors.stone, shape: BoxShape.circle),
           ),
           Expanded(
             child: Column(
@@ -429,7 +433,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildChipWrap(List<String> items, Color color) {
+  Widget _buildChipWrap(List<String> items) {
+    // kanso: stone for all chips, no color explosion
     return Align(
       alignment: Alignment.centerLeft,
       child: Wrap(
@@ -438,38 +443,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: items.map((item) => Container(
           padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
+            color: VigorColors.stone.withValues(alpha: 0.1),
             borderRadius: VigorRadius.radiusFull,
           ),
-          child: Text(item, style: VigorTypography.caption.copyWith(color: color)),
+          child: Text(item, style: VigorTypography.caption.copyWith(color: VigorColors.stone)),
         )).toList(),
       ),
     );
   }
 
   Widget _buildGymsSection(AppLocalizations l10n) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // section header
         Row(
           children: [
-            ShaderMask(
-              shaderCallback: (bounds) => const LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]).createShader(bounds),
-              child: const Icon(Icons.fitness_center, color: Colors.white, size: 24),
-            ),
+            // stone icon, no gradient
+            Icon(Icons.fitness_center, color: VigorColors.stone, size: 24),
             const SizedBox(width: VigorSpacing.sm),
             Expanded(
               child: Text(l10n.myGyms, style: VigorTypography.headline.copyWith(fontSize: 18, color: VigorColors.textPrimary(context))),
             ),
-            // add gym button
+            // add gym button: persimmon is ok here, it's a primary CTA. solid color, no gradient (seijaku)
             GestureDetector(
               onTap: () => _showGymDialog(),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
                 decoration: const BoxDecoration(
-                  gradient: LinearGradient(colors: [VigorColors.orange, VigorColors.electricBlue]),
+                  color: VigorColors.persimmon,
                   borderRadius: VigorRadius.radiusFull,
                 ),
                 child: Row(
@@ -492,38 +494,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             padding: VigorSpacing.paddingLg,
             decoration: BoxDecoration(
-              color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+              color: VigorColors.surface(context),
               borderRadius: VigorRadius.radiusMd,
-              border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05)),
             ),
             child: Column(
               children: [
-                ShaderMask(
-                  shaderCallback: (bounds) => LinearGradient(colors: [VigorColors.orange.withValues(alpha: 0.5), VigorColors.electricBlue.withValues(alpha: 0.5)]).createShader(bounds),
-                  child: const Icon(Icons.fitness_center, size: 48, color: Colors.white),
-                ),
+                Icon(Icons.fitness_center, size: 48, color: VigorColors.stone.withValues(alpha: 0.5)),
                 const SizedBox(height: VigorSpacing.sm),
                 Text(l10n.noGymsAddedYet, style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context))),
               ],
             ),
           )
         else
-          ...(_gyms!.map((gym) => _buildGymCard(gym, l10n, isDark))),
+          ...(_gyms!.map((gym) => _buildGymCard(gym, l10n))),
       ],
     );
   }
 
-  Widget _buildGymCard(Gym gym, AppLocalizations l10n, bool isDark) {
+  Widget _buildGymCard(Gym gym, AppLocalizations l10n) {
     final isDefault = context.read<PreferencesService>().defaultGymId == gym.id;
     return Container(
       margin: const EdgeInsets.only(bottom: VigorSpacing.md),
       decoration: BoxDecoration(
-        color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+        color: VigorColors.surface(context),
         borderRadius: VigorRadius.radiusMd,
-        border: Border.all(
-          color: isDefault ? VigorColors.orange.withValues(alpha: 0.5) : (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05)),
-          width: isDefault ? 2 : 1,
-        ),
+        // kintsugi: gold border for default gym only
+        border: isDefault ? Border.all(color: VigorColors.gold, width: 1) : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -535,10 +531,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Container(
                   padding: VigorSpacing.paddingSm,
                   decoration: BoxDecoration(
-                    color: VigorColors.orange.withValues(alpha: 0.15),
+                    color: VigorColors.stone.withValues(alpha: 0.1),
                     borderRadius: VigorRadius.radiusSm,
                   ),
-                  child: const Icon(Icons.fitness_center, color: VigorColors.orange, size: 20),
+                  child: const Icon(Icons.fitness_center, color: VigorColors.stone, size: 20),
                 ),
                 const SizedBox(width: VigorSpacing.md),
                 Expanded(
@@ -546,19 +542,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(gym.name, style: VigorTypography.headline.copyWith(fontSize: 16, color: VigorColors.textPrimary(context))),
-                      if (isDefault)
-                        Container(
-                          margin: const EdgeInsets.only(top: VigorSpacing.xs),
-                          padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: 2),
-                          decoration: const BoxDecoration(color: VigorColors.orange, borderRadius: VigorRadius.radiusFull),
-                          child: Text('Default', style: VigorTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
-                        ),
                     ],
                   ),
                 ),
-                // action buttons
-                _buildGymAction(isDefault ? Icons.star : Icons.star_border, isDefault ? Colors.amber : VigorColors.textSecondary(context), () => _toggleDefaultGym(gym.id)),
-                _buildGymAction(Icons.edit, VigorColors.electricBlue, () => _showGymDialog(gym: gym)),
+                // action buttons: stone for inactive star, gold for active (kintsugi)
+                _buildGymAction(isDefault ? Icons.star : Icons.star_border, isDefault ? VigorColors.gold : VigorColors.stone, () => _toggleDefaultGym(gym.id)),
+                _buildGymAction(Icons.edit, VigorColors.stone, () => _showGymDialog(gym: gym)),
                 _buildGymAction(Icons.delete, VigorColors.error, () => _deleteGym(gym)),
               ],
             ),
@@ -572,10 +561,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: gym.equipment.map((eq) => Container(
                   padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
                   decoration: BoxDecoration(
-                    color: VigorColors.electricBlue.withValues(alpha: 0.15),
+                    color: VigorColors.stone.withValues(alpha: 0.1),
                     borderRadius: VigorRadius.radiusFull,
                   ),
-                  child: Text(eq, style: VigorTypography.caption.copyWith(color: VigorColors.electricBlue)),
+                  child: Text(eq, style: VigorTypography.caption.copyWith(color: VigorColors.stone)),
                 )).toList(),
               ),
             ),
@@ -594,31 +583,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildDangerZone(AppLocalizations l10n, AuthProvider authProvider) {
+  Widget _buildSettingsButton(AppLocalizations l10n) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen())),
+      child: Container(
+        padding: VigorSpacing.paddingMd,
+        decoration: BoxDecoration(
+          color: VigorColors.surface(context),
+          borderRadius: VigorRadius.radiusMd,
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: VigorSpacing.paddingSm,
+              decoration: BoxDecoration(color: VigorColors.stone.withValues(alpha: 0.1), borderRadius: VigorRadius.radiusSm),
+              child: const Icon(Icons.settings, color: VigorColors.stone, size: 20),
+            ),
+            const SizedBox(width: VigorSpacing.md),
+            Expanded(child: Text(l10n.settings, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context), fontWeight: FontWeight.w500))),
+            const Icon(Icons.chevron_right, color: VigorColors.stone, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOtherSection(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // section header
         Row(
           children: [
-            const Icon(Icons.warning, color: VigorColors.error, size: 20),
+            Icon(Icons.more_horiz, color: VigorColors.stone, size: 24),
             const SizedBox(width: VigorSpacing.sm),
-            Text(l10n.dangerZone, style: VigorTypography.headline.copyWith(fontSize: 16, color: VigorColors.error)),
+            Text(l10n.other, style: VigorTypography.headline.copyWith(fontSize: 18, color: VigorColors.textPrimary(context))),
           ],
         ),
-        const SizedBox(height: VigorSpacing.sm),
-        Container(
-          decoration: BoxDecoration(
-            color: VigorColors.error.withValues(alpha: 0.1),
-            borderRadius: VigorRadius.radiusMd,
-            border: Border.all(color: VigorColors.error.withValues(alpha: 0.3)),
-          ),
-          child: ListTile(
-            leading: const Icon(Icons.delete_forever, color: VigorColors.error),
-            title: Text(l10n.deleteAccount, style: VigorTypography.body.copyWith(color: VigorColors.error, fontWeight: FontWeight.w500)),
-            trailing: const Icon(Icons.chevron_right, color: VigorColors.error),
-            onTap: () => _showDeleteAccountDialog(l10n, authProvider),
-          ),
-        ),
+        const SizedBox(height: VigorSpacing.md),
+        _buildSettingsButton(l10n),
       ],
     );
   }
@@ -635,29 +638,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
     if (shouldLogout == true && context.mounted) {
       await context.read<AuthProvider>().logout();
-    }
-  }
-
-  Future<void> _showDeleteAccountDialog(AppLocalizations l10n, AuthProvider authProvider) async {
-    final shouldDelete = await AdaptiveAlertDialog.show<bool>(
-      context: context,
-      title: l10n.deleteAccount,
-      content: l10n.deleteAccountConfirmation,
-      actions: [
-        AdaptiveDialogAction(label: l10n.cancel, onPressed: () => Navigator.of(context).pop(false)),
-        AdaptiveDialogAction(label: l10n.delete, isDestructive: true, onPressed: () => Navigator.of(context).pop(true)),
-      ],
-    );
-
-    if (shouldDelete == true && mounted) {
-      final success = await authProvider.deleteAccount();
-      if (mounted) {
-        if (success) {
-          AdaptiveNotification.show(context: context, message: l10n.accountDeletedSuccessfully);
-        } else {
-          AdaptiveNotification.showError(context: context, message: l10n.failedToDeleteAccount, rawError: authProvider.errorMessage);
-        }
-      }
     }
   }
 

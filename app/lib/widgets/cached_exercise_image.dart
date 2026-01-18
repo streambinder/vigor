@@ -71,25 +71,15 @@ class CachedExerciseImage extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            VigorColors.orange.withValues(alpha: 0.2),
-            VigorColors.electricBlue.withValues(alpha: 0.2),
-          ],
-        ),
+        color: VigorColors.stone.withValues(alpha: 0.1),
         borderRadius: isCircular ? null : borderRadius,
         shape: isCircular ? BoxShape.circle : BoxShape.rectangle,
       ),
       child: Center(
-        child: ShaderMask(
-          shaderCallback: (bounds) => const LinearGradient(
-            colors: [VigorColors.orange, VigorColors.electricBlue],
-          ).createShader(bounds),
-          child: Icon(
-            Icons.fitness_center,
-            size: (width ?? 72) * 0.4,
-            color: Colors.white,
-          ),
+        child: Icon(
+          Icons.fitness_center,
+          size: (width ?? 72) * 0.4,
+          color: VigorColors.stone.withValues(alpha: 0.5),
         ),
       ),
     );

@@ -41,19 +41,38 @@ flutter:
     - assets/icons/
 
   fonts:
-    - family: Barlow
+    # Space Grotesk — Headlines, branding (IDENTITY.md section 3.3)
+    - family: SpaceGrotesk
       fonts:
-        - asset: assets/fonts/Barlow-Regular.ttf
+        - asset: assets/fonts/SpaceGrotesk-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Barlow-Medium.ttf
+        - asset: assets/fonts/SpaceGrotesk-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Barlow-SemiBold.ttf
+        - asset: assets/fonts/SpaceGrotesk-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Barlow-Bold.ttf
+        - asset: assets/fonts/SpaceGrotesk-Bold.ttf
           weight: 700
-    - family: Barlow Condensed
+
+    # Inter — Body text, instructions (IDENTITY.md section 3.3)
+    - family: Inter
       fonts:
-        - asset: assets/fonts/BarlowCondensed-SemiBold.ttf
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/BarlowCondensed-Bold.ttf
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+
+    # JetBrains Mono — Data, timers, scores (IDENTITY.md section 3.3)
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/JetBrainsMono-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/JetBrainsMono-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/JetBrainsMono-Bold.ttf
           weight: 700

@@ -90,6 +90,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get settings => 'Impostazioni';
 
   @override
+  String get other => 'Altro';
+
+  @override
   String get deleteGym => 'Elimina Palestra';
 
   @override
@@ -182,6 +185,12 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get favorites => 'Preferiti';
+
+  @override
+  String get personalDetails => 'Dati Personali';
+
+  @override
+  String get healthAndGoals => 'Salute e Obiettivi';
 
   @override
   String get exercises => 'Esercizi';
@@ -397,7 +406,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get available => 'Disponibili';
 
   @override
-  String get completed => 'Completati';
+  String get completed => 'Completato';
+
+  @override
+  String get completedSingular => 'Completato';
 
   @override
   String get noPastTrainings => 'Nessun allenamento completato';
@@ -547,7 +559,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get naming => 'Denominazione';
 
   @override
-  String get trainingRoutines => 'Routine di Allenamento';
+  String get trainingRoutines => 'Allenamento';
 
   @override
   String get noEquipment => 'Nessuna attrezzatura';
@@ -586,7 +598,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get markAsComplete => 'Segna come Completato';
 
   @override
+  String get updateFeedback => 'Aggiorna Feedback';
+
+  @override
   String get references => 'Riferimenti';
+
+  @override
+  String get literature => 'Letteratura';
 
   @override
   String get describeIssue => 'Descrivi il problema...';
@@ -846,6 +864,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get calibration => 'Calibrazione';
 
   @override
+  String get calibrationGlobal => 'Globale';
+
+  @override
   String get calibrationNeeded =>
       'Completa il tuo primo allenamento perché Vigor possa calibrare le raccomandazioni al tuo livello';
 
@@ -859,4 +880,22 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get noTrainingsCompletedYet =>
       'Inizia ad allenarti per vedere qualcosa qui';
+
+  @override
+  String get theme => 'Tema';
+
+  @override
+  String get themeAuto => 'Auto';
+
+  @override
+  String get themeLight => 'Chiaro';
+
+  @override
+  String get themeDark => 'Scuro';
+
+  @override
+  String get themeAutoDescription => 'Segui le impostazioni di sistema';
+
+  @override
+  String get appearance => 'Aspetto';
 }

@@ -85,6 +85,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings => '设置';
 
   @override
+  String get other => '其他';
+
+  @override
   String get deleteGym => '删除健身房';
 
   @override
@@ -176,6 +179,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get favorites => '收藏';
+
+  @override
+  String get personalDetails => '个人信息';
+
+  @override
+  String get healthAndGoals => '健康与目标';
 
   @override
   String get exercises => '练习';
@@ -392,6 +401,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get completed => '已完成';
 
   @override
+  String get completedSingular => '完成';
+
+  @override
   String get noPastTrainings => '暂无已完成的训练';
 
   @override
@@ -537,7 +549,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get naming => '命名';
 
   @override
-  String get trainingRoutines => '训练程序';
+  String get trainingRoutines => '训练';
 
   @override
   String get noEquipment => '无设备';
@@ -576,7 +588,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get markAsComplete => '标记为完成';
 
   @override
+  String get updateFeedback => '更新反馈';
+
+  @override
   String get references => '参考';
+
+  @override
+  String get literature => '文献';
 
   @override
   String get describeIssue => '描述问题...';
@@ -831,6 +849,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get calibration => '校准';
 
   @override
+  String get calibrationGlobal => '整体';
+
+  @override
   String get calibrationNeeded => '完成您的第一次训练，让Vigor根据您的水平校准推荐';
 
   @override
@@ -841,4 +862,22 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noTrainingsCompletedYet => '开始训练来看点什么吧';
+
+  @override
+  String get theme => '主题';
+
+  @override
+  String get themeAuto => '自动';
+
+  @override
+  String get themeLight => '浅色';
+
+  @override
+  String get themeDark => '深色';
+
+  @override
+  String get themeAutoDescription => '跟随系统设置';
+
+  @override
+  String get appearance => '外观';
 }

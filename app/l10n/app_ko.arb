@@ -30,6 +30,7 @@
   "userDataRefreshed": "사용자 데이터가 새로고침되었습니다",
   "editProfile": "프로필 수정",
   "settings": "설정",
+  "other": "기타",
 
   "deleteGym": "헬스장 삭제",
   "deleteGymConfirmation": "\"{name}\"을(를) 삭제하시겠습니까?",
@@ -63,6 +64,8 @@
   "injuries": "부상",
   "limitations": "제한사항",
   "favorites": "즐겨찾기",
+  "personalDetails": "개인 정보",
+  "healthAndGoals": "건강 및 목표",
   "exercises": "운동",
   "equipment": "장비",
   "startedDate": "시작: {date}",
@@ -143,6 +146,7 @@
   "yesterday": "어제",
   "available": "이용 가능",
   "completed": "완료됨",
+  "completedSingular": "완료",
   "noPastTrainings": "완료된 훈련이 아직 없습니다",
   "copied": "복사됨",
   "durationMin": "{minutes}분",
@@ -191,7 +195,7 @@
   "targetMuscles": "타겟 근육",
   "naming": "명명",
 
-  "trainingRoutines": "트레이닝 루틴",
+  "trainingRoutines": "트레이닝",
   "noEquipment": "장비 없음",
   "blockNumber": "블록 {number}",
   "repeatsCount": "{count}x",
@@ -200,7 +204,9 @@
   "repsCount": "{count}회",
   "weightKgValue": "{value} kg",
   "markAsComplete": "완료로 표시",
+  "updateFeedback": "피드백 수정",
   "references": "참조",
+  "literature": "문헌",
   "describeIssue": "문제를 설명해 주세요...",
   "submit": "제출",
   "close": "닫기",
@@ -294,8 +300,16 @@
   "failedToLoadProgress": "진행 상황을 불러오지 못했습니다",
   "noProgressYet": "훈련을 완료하여 진행 상황을 확인하세요",
   "calibration": "보정",
+  "calibrationGlobal": "전체",
   "calibrationNeeded": "첫 번째 훈련을 완료하여 Vigor가 당신의 수준에 맞게 추천을 보정할 수 있도록 하세요",
   "calibrationDescription": "보정 기간 동안 플랫폼은 피드백 데이터를 수집하여 당신의 체력 상태와 수준에 대한 초기 평가를 합니다",
   "capabilities": "능력",
-  "noTrainingsCompletedYet": "훈련을 시작해서 여기에 뭔가 보여주세요"
+  "noTrainingsCompletedYet": "훈련을 시작해서 여기에 뭔가 보여주세요",
+
+  "theme": "테마",
+  "themeAuto": "자동",
+  "themeLight": "라이트",
+  "themeDark": "다크",
+  "themeAutoDescription": "시스템 설정 따르기",
+  "appearance": "외관"
 }

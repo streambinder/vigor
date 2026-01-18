@@ -85,6 +85,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings => '設定';
 
   @override
+  String get other => 'その他';
+
+  @override
   String get deleteGym => 'ジムを削除';
 
   @override
@@ -176,6 +179,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get favorites => 'お気に入り';
+
+  @override
+  String get personalDetails => '個人情報';
+
+  @override
+  String get healthAndGoals => '健康と目標';
 
   @override
   String get exercises => 'エクササイズ';
@@ -392,6 +401,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get completed => '完了';
 
   @override
+  String get completedSingular => '完了';
+
+  @override
   String get noPastTrainings => '完了したトレーニングはまだありません';
 
   @override
@@ -537,7 +549,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get naming => '命名';
 
   @override
-  String get trainingRoutines => 'トレーニングルーティン';
+  String get trainingRoutines => 'トレーニング';
 
   @override
   String get noEquipment => '器具なし';
@@ -576,7 +588,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get markAsComplete => '完了としてマーク';
 
   @override
+  String get updateFeedback => 'フィードバックを更新';
+
+  @override
   String get references => '参考資料';
+
+  @override
+  String get literature => '文献';
 
   @override
   String get describeIssue => '問題を説明してください...';
@@ -831,6 +849,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get calibration => 'キャリブレーション';
 
   @override
+  String get calibrationGlobal => '全体';
+
+  @override
   String get calibrationNeeded =>
       '最初のトレーニングを完了して、Vigorがあなたのレベルに合わせた推奨を調整できるようにしましょう';
 
@@ -843,4 +864,22 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get noTrainingsCompletedYet => 'トレーニングを始めて何か表示しよう';
+
+  @override
+  String get theme => 'テーマ';
+
+  @override
+  String get themeAuto => '自動';
+
+  @override
+  String get themeLight => 'ライト';
+
+  @override
+  String get themeDark => 'ダーク';
+
+  @override
+  String get themeAutoDescription => 'システム設定に従う';
+
+  @override
+  String get appearance => '外観';
 }

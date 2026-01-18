@@ -99,13 +99,13 @@ class LiquidGlassNavBar extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? VigorColors.orange.withValues(alpha: 0.15)
+                      ? VigorColors.indigo.withValues(alpha: 0.15)
                       : Colors.transparent,
                   borderRadius: VigorRadius.radiusFull,
                 ),
                 child: Icon(
                   item.icon,
-                  color: isSelected ? VigorColors.orange : unselectedColor,
+                  color: isSelected ? VigorColors.indigo : unselectedColor,
                   size: 24,
                 ),
               ),
@@ -115,7 +115,7 @@ class LiquidGlassNavBar extends StatelessWidget {
                 curve: VigorAnimation.defaultCurve,
                 style: VigorTypography.caption.copyWith(
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: isSelected ? VigorColors.orange : unselectedColor,
+                  color: isSelected ? VigorColors.indigo : unselectedColor,
                 ),
                 child: Text(item.label),
               ),

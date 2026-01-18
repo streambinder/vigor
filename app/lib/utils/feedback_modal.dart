@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/activity_ext.dart';
 import '../models/training.dart';
@@ -269,7 +270,7 @@ class _ExerciseFeedbackRow extends StatelessWidget {
           IconButton(
             icon: Icon(
               Icons.thumb_up_outlined,
-              color: feedback == ExerciseFeedback.tooEasy ? primaryColor : Colors.grey,
+              color: feedback == ExerciseFeedback.tooEasy ? primaryColor : VigorColors.stone,
             ),
             onPressed: () => onFeedbackChanged(
               feedback == ExerciseFeedback.tooEasy ? ExerciseFeedback.none : ExerciseFeedback.tooEasy,
@@ -280,7 +281,7 @@ class _ExerciseFeedbackRow extends StatelessWidget {
           IconButton(
             icon: Icon(
               Icons.thumb_down_outlined,
-              color: feedback == ExerciseFeedback.tooHard ? primaryColor : Colors.grey,
+              color: feedback == ExerciseFeedback.tooHard ? primaryColor : VigorColors.stone,
             ),
             onPressed: () => onFeedbackChanged(
               feedback == ExerciseFeedback.tooHard ? ExerciseFeedback.none : ExerciseFeedback.tooHard,
@@ -291,7 +292,7 @@ class _ExerciseFeedbackRow extends StatelessWidget {
           IconButton(
             icon: Icon(
               isFlagged ? Icons.flag : Icons.flag_outlined,
-              color: isFlagged ? Colors.orange : Colors.grey,
+              color: isFlagged ? VigorColors.crimson : VigorColors.stone,
             ),
             onPressed: () => onFlagChanged(!isFlagged),
             tooltip: 'Flag issue',

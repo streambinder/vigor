@@ -30,6 +30,7 @@
   "userDataRefreshed": "Dati utente aggiornati",
   "editProfile": "Modifica Profilo",
   "settings": "Impostazioni",
+  "other": "Altro",
 
   "deleteGym": "Elimina Palestra",
   "deleteGymConfirmation": "Eliminare \"{name}\"?",
@@ -63,6 +64,8 @@
   "injuries": "Infortuni",
   "limitations": "Limitazioni",
   "favorites": "Preferiti",
+  "personalDetails": "Dati Personali",
+  "healthAndGoals": "Salute e Obiettivi",
   "exercises": "Esercizi",
   "equipment": "Attrezzatura",
   "startedDate": "Inizio: {date}",
@@ -142,7 +145,8 @@
   "today": "Oggi",
   "yesterday": "Ieri",
   "available": "Disponibili",
-  "completed": "Completati",
+  "completed": "Completato",
+  "completedSingular": "Completato",
   "noPastTrainings": "Nessun allenamento completato",
   "copied": "Copiato",
   "durationMin": "{minutes} min",
@@ -191,7 +195,7 @@
   "targetMuscles": "Muscoli Target",
   "naming": "Denominazione",
 
-  "trainingRoutines": "Routine di Allenamento",
+  "trainingRoutines": "Allenamento",
   "noEquipment": "Nessuna attrezzatura",
   "blockNumber": "Blocco {number}",
   "repeatsCount": "{count}x",
@@ -200,7 +204,9 @@
   "repsCount": "{count} ripetizioni",
   "weightKgValue": "{value} kg",
   "markAsComplete": "Segna come Completato",
+  "updateFeedback": "Aggiorna Feedback",
   "references": "Riferimenti",
+  "literature": "Letteratura",
   "describeIssue": "Descrivi il problema...",
   "submit": "Invia",
   "close": "Chiudi",
@@ -294,8 +300,16 @@
   "failedToLoadProgress": "Impossibile caricare i progressi",
   "noProgressYet": "Completa gli allenamenti per vedere i tuoi progressi",
   "calibration": "Calibrazione",
+  "calibrationGlobal": "Globale",
   "calibrationNeeded": "Completa il tuo primo allenamento perché Vigor possa calibrare le raccomandazioni al tuo livello",
   "calibrationDescription": "Durante la calibrazione, la piattaforma raccoglie dati dai tuoi feedback per fare un primo assessment sul tuo stato di forma e il tuo livello",
   "capabilities": "Capacità",
-  "noTrainingsCompletedYet": "Inizia ad allenarti per vedere qualcosa qui"
+  "noTrainingsCompletedYet": "Inizia ad allenarti per vedere qualcosa qui",
+
+  "theme": "Tema",
+  "themeAuto": "Auto",
+  "themeLight": "Chiaro",
+  "themeDark": "Scuro",
+  "themeAutoDescription": "Segui le impostazioni di sistema",
+  "appearance": "Aspetto"
 }

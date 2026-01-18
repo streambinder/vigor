@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../design/tokens.dart';
 import '../../generated/app_localizations.dart';
 import '../../models/family_progress.dart';
 import '../../theme/liquid_glass_theme.dart';
@@ -99,7 +100,7 @@ class _CalibrationWidgetState extends State<CalibrationWidget> {
                     Icon(
                       _expanded ? Icons.expand_less : Icons.expand_more,
                       size: 20,
-                      color: Colors.grey,
+                      color: VigorColors.stone,
                     ),
                   ],
                 ),
@@ -115,7 +116,7 @@ class _CalibrationWidgetState extends State<CalibrationWidget> {
                       color: LiquidGlassTheme.captionStyle.color?.withValues(alpha: 0.7),
                     )
                   : Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
+                        color: VigorColors.stone,
                       ),
             ),
             const SizedBox(height: 12),

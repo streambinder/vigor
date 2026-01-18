@@ -30,6 +30,7 @@
   "userDataRefreshed": "Данные пользователя обновлены",
   "editProfile": "Редактировать Профиль",
   "settings": "Настройки",
+  "other": "Прочее",
 
   "deleteGym": "Удалить Зал",
   "deleteGymConfirmation": "Удалить \"{name}\"?",
@@ -63,6 +64,8 @@
   "injuries": "Травмы",
   "limitations": "Ограничения",
   "favorites": "Избранное",
+  "personalDetails": "Личные данные",
+  "healthAndGoals": "Здоровье и цели",
   "exercises": "Упражнения",
   "equipment": "Оборудование",
   "startedDate": "Начало: {date}",
@@ -143,6 +146,7 @@
   "yesterday": "Вчера",
   "available": "Доступно",
   "completed": "Завершено",
+  "completedSingular": "Завершено",
   "noPastTrainings": "Пока нет завершённых тренировок",
   "copied": "Скопировано",
   "durationMin": "{minutes} мин",
@@ -191,7 +195,7 @@
   "targetMuscles": "Целевые Мышцы",
   "naming": "Наименование",
 
-  "trainingRoutines": "Тренировочные Программы",
+  "trainingRoutines": "Тренировка",
   "noEquipment": "Без оборудования",
   "blockNumber": "Блок {number}",
   "repeatsCount": "{count}x",
@@ -200,7 +204,9 @@
   "repsCount": "{count} повторений",
   "weightKgValue": "{value} кг",
   "markAsComplete": "Отметить как Завершённое",
+  "updateFeedback": "Обновить Отзыв",
   "references": "Ссылки",
+  "literature": "Литература",
   "describeIssue": "Опишите проблему...",
   "submit": "Отправить",
   "close": "Закрыть",
@@ -294,8 +300,16 @@
   "failedToLoadProgress": "Не удалось загрузить прогресс",
   "noProgressYet": "Завершите тренировки, чтобы увидеть прогресс",
   "calibration": "Калибровка",
+  "calibrationGlobal": "Общий",
   "calibrationNeeded": "Завершите первую тренировку, чтобы Vigor откалибровал рекомендации под ваш уровень",
   "calibrationDescription": "Во время калибровки платформа собирает данные из ваших отзывов, чтобы сделать первоначальную оценку вашего физического состояния и уровня",
   "capabilities": "Возможности",
-  "noTrainingsCompletedYet": "Начни тренироваться, чтобы увидеть что-то здесь"
+  "noTrainingsCompletedYet": "Начни тренироваться, чтобы увидеть что-то здесь",
+
+  "theme": "Тема",
+  "themeAuto": "Авто",
+  "themeLight": "Светлая",
+  "themeDark": "Тёмная",
+  "themeAutoDescription": "Следовать настройкам системы",
+  "appearance": "Внешний вид"
 }

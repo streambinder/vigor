@@ -34,8 +34,8 @@ class AdaptiveButton extends StatelessWidget {
     final color = isDestructive
         ? VigorColors.error
         : isSecondary
-            ? VigorColors.electricBlue
-            : VigorColors.orange;
+            ? VigorColors.indigo
+            : VigorColors.persimmon;
 
     return GestureDetector(
       onTap: onPressed,
@@ -60,8 +60,8 @@ class AdaptiveButton extends StatelessWidget {
                     ),
                     boxShadow: onPressed != null
                         ? (isSecondary
-                            ? VigorShadows.blueGlow
-                            : VigorShadows.orangeGlow)
+                            ? VigorShadows.indigoGlow
+                            : VigorShadows.persimmonGlow)
                         : null,
                   ),
             child: DefaultTextStyle(
@@ -82,7 +82,7 @@ class AdaptiveButton extends StatelessWidget {
       return FilledButton(
         onPressed: onPressed,
         style: FilledButton.styleFrom(
-          backgroundColor: VigorColors.electricBlue,
+          backgroundColor: VigorColors.indigo,
           foregroundColor: Colors.white,
         ),
         child: child,
@@ -122,8 +122,8 @@ class AdaptiveTextButton extends StatelessWidget {
       final color = isDestructive
           ? VigorColors.error
           : isSecondary
-              ? VigorColors.electricBlue
-              : VigorColors.orange;
+              ? VigorColors.indigo
+              : VigorColors.persimmon;
 
       return GestureDetector(
         onTap: onPressed,
@@ -143,12 +143,12 @@ class AdaptiveTextButton extends StatelessWidget {
     final color = isDestructive
         ? VigorColors.error
         : isSecondary
-            ? VigorColors.electricBlue
-            : null;
+            ? VigorColors.indigoAdaptive(context)
+            : VigorColors.indigoAdaptive(context);
 
     return TextButton(
       onPressed: onPressed,
-      style: color != null ? TextButton.styleFrom(foregroundColor: color) : null,
+      style: TextButton.styleFrom(foregroundColor: color),
       child: child,
     );
   }
@@ -178,7 +178,7 @@ class AdaptiveIconButton extends StatelessWidget {
           padding: VigorSpacing.paddingSm,
           child: IconTheme(
             data: IconThemeData(
-              color: color ?? VigorColors.orange,
+              color: color ?? VigorColors.stone,
               size: 24,
             ),
             child: icon,
@@ -191,7 +191,7 @@ class AdaptiveIconButton extends StatelessWidget {
       onPressed: onPressed,
       icon: icon,
       tooltip: tooltip,
-      color: color ?? VigorColors.orange,
+      color: color ?? VigorColors.stone,
     );
   }
 }

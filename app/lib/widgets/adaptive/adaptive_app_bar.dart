@@ -27,17 +27,72 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
       return _buildLiquidGlassAppBar(context);
     }
 
-    return AppBar(
-      title: title,
-      actions: actions,
-      leading: leading,
-      automaticallyImplyLeading: automaticallyImplyLeading,
+    return _buildMaterialAppBar(context);
+  }
+
+  Widget _buildMaterialAppBar(BuildContext context) {
+    final textColor = VigorColors.textPrimary(context);
+    final hasCustomLeading = leading != null;
+    final willHaveLeading = hasCustomLeading ||
+        (automaticallyImplyLeading && Navigator.of(context).canPop());
+
+    // wrap actions to compensate for IconButton's internal padding (8px)
+    // so icons visually align with body content at VigorSpacing.lg (24px)
+    final wrappedActions = actions != null
+        ? [
+            Padding(
+              padding: const EdgeInsets.only(right: VigorSpacing.lg - 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: actions!,
+              ),
+            ),
+          ]
+        : null;
+
+    // wrap custom leading to add left margin so icon aligns with body content
+    final wrappedLeading = hasCustomLeading
+        ? Padding(
+            padding: const EdgeInsets.only(left: VigorSpacing.lg - 8),
+            child: leading,
+          )
+        : null;
+
+    return Column(
+      children: [
+        const SizedBox(height: VigorSpacing.sm),
+        Expanded(
+          child: AppBar(
+            title: title != null
+                ? DefaultTextStyle(
+                    style: VigorTypography.headline.copyWith(color: textColor),
+                    child: title!,
+                  )
+                : null,
+            titleSpacing: willHaveLeading ? VigorSpacing.sm : VigorSpacing.lg,
+            actions: wrappedActions,
+            leading: wrappedLeading,
+            leadingWidth: hasCustomLeading ? kToolbarHeight + VigorSpacing.lg - 8 : null,
+            automaticallyImplyLeading: hasCustomLeading ? false : automaticallyImplyLeading,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            toolbarHeight: kToolbarHeight,
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildLiquidGlassAppBar(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = VigorColors.textPrimary(context);
+    final hasLeading = leading != null ||
+        (automaticallyImplyLeading && Navigator.of(context).canPop());
+    final hasActions = actions != null && actions!.isNotEmpty;
+
+    // compensate for IconButton's internal 8px padding so icons align with body content
+    final leftPadding = hasLeading ? VigorSpacing.lg - 8 : VigorSpacing.lg;
+    final rightPadding = hasActions ? VigorSpacing.lg - 8 : VigorSpacing.lg;
 
     return ClipRRect(
       child: BackdropFilter(
@@ -58,9 +113,10 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           child: SafeArea(
             bottom: false,
+            minimum: const EdgeInsets.only(top: VigorSpacing.sm),
             child: Container(
               height: kToolbarHeight,
-              padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm),
+              padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
               child: Row(
                 children: [
                   if (leading != null)
@@ -70,7 +126,7 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
                     IconButton(
                       icon: const Icon(Icons.arrow_back_ios),
                       onPressed: () => Navigator.of(context).pop(),
-                      color: VigorColors.orange,
+                      color: VigorColors.stone,
                     ),
                   if (title != null)
                     Expanded(
@@ -90,6 +146,5 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize =>
-      const Size.fromHeight(kToolbarHeight + 44);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + VigorSpacing.sm);
 }

@@ -90,6 +90,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settings => 'Configuración';
 
   @override
+  String get other => 'Otros';
+
+  @override
   String get deleteGym => 'Eliminar Gimnasio';
 
   @override
@@ -182,6 +185,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get favorites => 'Favoritos';
+
+  @override
+  String get personalDetails => 'Datos Personales';
+
+  @override
+  String get healthAndGoals => 'Salud y Objetivos';
 
   @override
   String get exercises => 'Ejercicios';
@@ -400,6 +409,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get completed => 'Completado';
 
   @override
+  String get completedSingular => 'Completado';
+
+  @override
   String get noPastTrainings => 'Aún no hay entrenamientos completados';
 
   @override
@@ -548,7 +560,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get naming => 'Denominación';
 
   @override
-  String get trainingRoutines => 'Rutinas de Entrenamiento';
+  String get trainingRoutines => 'Entrenamiento';
 
   @override
   String get noEquipment => 'Sin equipamiento';
@@ -587,7 +599,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get markAsComplete => 'Marcar como Completado';
 
   @override
+  String get updateFeedback => 'Actualizar Feedback';
+
+  @override
   String get references => 'Referencias';
+
+  @override
+  String get literature => 'Literatura';
 
   @override
   String get describeIssue => 'Describe el problema...';
@@ -845,6 +863,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get calibration => 'Calibración';
 
   @override
+  String get calibrationGlobal => 'Global';
+
+  @override
   String get calibrationNeeded =>
       'Completa tu primer entrenamiento para que Vigor calibre las recomendaciones a tu nivel';
 
@@ -857,4 +878,22 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noTrainingsCompletedYet => 'Empieza a entrenar para ver algo aquí';
+
+  @override
+  String get theme => 'Tema';
+
+  @override
+  String get themeAuto => 'Auto';
+
+  @override
+  String get themeLight => 'Claro';
+
+  @override
+  String get themeDark => 'Oscuro';
+
+  @override
+  String get themeAutoDescription => 'Seguir configuración del sistema';
+
+  @override
+  String get appearance => 'Apariencia';
 }

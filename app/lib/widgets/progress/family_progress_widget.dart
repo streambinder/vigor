@@ -56,10 +56,7 @@ class FamilyProgressWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: sortedFamilies.map((entry) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _buildFamilyRow(context, entry.key, entry.value),
-        );
+        return _buildFamilyRow(context, entry.key, entry.value);
       }).toList(),
     );
   }
@@ -80,42 +77,48 @@ class FamilyProgressWidget extends StatelessWidget {
         ? LiquidGlassTheme.bodyStyle.copyWith(fontSize: 13)
         : Theme.of(context).textTheme.bodySmall;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: textStyle),
-            Text(
-              '${proficiency.toInt()}%',
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(label, style: textStyle),
+          ),
+          Expanded(
+            child: Stack(
+              children: [
+                Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: trackColor,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                FractionallySizedBox(
+                  widthFactor: proficiency / 100,
+                  child: Container(
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: primaryColor,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 36,
+            child: Text(
+              proficiency > 0 ? '${proficiency.toInt()}%' : '–',
+              textAlign: TextAlign.right,
               style: textStyle?.copyWith(fontWeight: FontWeight.w600),
             ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Stack(
-          children: [
-            Container(
-              height: 6,
-              decoration: BoxDecoration(
-                color: trackColor,
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-            FractionallySizedBox(
-              widthFactor: proficiency / 100,
-              child: Container(
-                height: 6,
-                decoration: BoxDecoration(
-                  color: primaryColor,
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 

@@ -85,6 +85,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings => '설정';
 
   @override
+  String get other => '기타';
+
+  @override
   String get deleteGym => '헬스장 삭제';
 
   @override
@@ -176,6 +179,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get favorites => '즐겨찾기';
+
+  @override
+  String get personalDetails => '개인 정보';
+
+  @override
+  String get healthAndGoals => '건강 및 목표';
 
   @override
   String get exercises => '운동';
@@ -392,6 +401,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get completed => '완료됨';
 
   @override
+  String get completedSingular => '완료';
+
+  @override
   String get noPastTrainings => '완료된 훈련이 아직 없습니다';
 
   @override
@@ -537,7 +549,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naming => '명명';
 
   @override
-  String get trainingRoutines => '트레이닝 루틴';
+  String get trainingRoutines => '트레이닝';
 
   @override
   String get noEquipment => '장비 없음';
@@ -576,7 +588,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get markAsComplete => '완료로 표시';
 
   @override
+  String get updateFeedback => '피드백 수정';
+
+  @override
   String get references => '참조';
+
+  @override
+  String get literature => '문헌';
 
   @override
   String get describeIssue => '문제를 설명해 주세요...';
@@ -831,6 +849,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calibration => '보정';
 
   @override
+  String get calibrationGlobal => '전체';
+
+  @override
   String get calibrationNeeded =>
       '첫 번째 훈련을 완료하여 Vigor가 당신의 수준에 맞게 추천을 보정할 수 있도록 하세요';
 
@@ -843,4 +864,22 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get noTrainingsCompletedYet => '훈련을 시작해서 여기에 뭔가 보여주세요';
+
+  @override
+  String get theme => '테마';
+
+  @override
+  String get themeAuto => '자동';
+
+  @override
+  String get themeLight => '라이트';
+
+  @override
+  String get themeDark => '다크';
+
+  @override
+  String get themeAutoDescription => '시스템 설정 따르기';
+
+  @override
+  String get appearance => '외관';
 }

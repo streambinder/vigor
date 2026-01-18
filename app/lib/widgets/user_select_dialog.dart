@@ -192,10 +192,10 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
         final user = _filteredUsers[index];
         return ListTile(
           leading: CircleAvatar(
-            backgroundColor: VigorColors.orange.withValues(alpha: 0.2),
+            backgroundColor: VigorColors.indigo.withValues(alpha: 0.2),
             child: Text(
               user.firstName.isNotEmpty ? user.firstName[0].toUpperCase() : '?',
-              style: const TextStyle(color: VigorColors.orange),
+              style: const TextStyle(color: VigorColors.indigo),
             ),
           ),
           title: Text(

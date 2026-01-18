@@ -88,6 +88,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settings => 'Настройки';
 
   @override
+  String get other => 'Прочее';
+
+  @override
   String get deleteGym => 'Удалить Зал';
 
   @override
@@ -179,6 +182,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get favorites => 'Избранное';
+
+  @override
+  String get personalDetails => 'Личные данные';
+
+  @override
+  String get healthAndGoals => 'Здоровье и цели';
 
   @override
   String get exercises => 'Упражнения';
@@ -396,6 +405,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get completed => 'Завершено';
 
   @override
+  String get completedSingular => 'Завершено';
+
+  @override
   String get noPastTrainings => 'Пока нет завершённых тренировок';
 
   @override
@@ -541,7 +553,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get naming => 'Наименование';
 
   @override
-  String get trainingRoutines => 'Тренировочные Программы';
+  String get trainingRoutines => 'Тренировка';
 
   @override
   String get noEquipment => 'Без оборудования';
@@ -580,7 +592,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get markAsComplete => 'Отметить как Завершённое';
 
   @override
+  String get updateFeedback => 'Обновить Отзыв';
+
+  @override
   String get references => 'Ссылки';
+
+  @override
+  String get literature => 'Литература';
 
   @override
   String get describeIssue => 'Опишите проблему...';
@@ -836,6 +854,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get calibration => 'Калибровка';
 
   @override
+  String get calibrationGlobal => 'Общий';
+
+  @override
   String get calibrationNeeded =>
       'Завершите первую тренировку, чтобы Vigor откалибровал рекомендации под ваш уровень';
 
@@ -849,4 +870,22 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get noTrainingsCompletedYet =>
       'Начни тренироваться, чтобы увидеть что-то здесь';
+
+  @override
+  String get theme => 'Тема';
+
+  @override
+  String get themeAuto => 'Авто';
+
+  @override
+  String get themeLight => 'Светлая';
+
+  @override
+  String get themeDark => 'Тёмная';
+
+  @override
+  String get themeAutoDescription => 'Следовать настройкам системы';
+
+  @override
+  String get appearance => 'Внешний вид';
 }

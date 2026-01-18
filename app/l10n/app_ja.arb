@@ -30,6 +30,7 @@
   "userDataRefreshed": "ユーザーデータを更新しました",
   "editProfile": "プロフィールを編集",
   "settings": "設定",
+  "other": "その他",
 
   "deleteGym": "ジムを削除",
   "deleteGymConfirmation": "「{name}」を削除しますか？",
@@ -63,6 +64,8 @@
   "injuries": "怪我",
   "limitations": "制限",
   "favorites": "お気に入り",
+  "personalDetails": "個人情報",
+  "healthAndGoals": "健康と目標",
   "exercises": "エクササイズ",
   "equipment": "器具",
   "startedDate": "開始：{date}",
@@ -143,6 +146,7 @@
   "yesterday": "昨日",
   "available": "利用可能",
   "completed": "完了",
+  "completedSingular": "完了",
   "noPastTrainings": "完了したトレーニングはまだありません",
   "copied": "コピー済み",
   "durationMin": "{minutes}分",
@@ -191,7 +195,7 @@
   "targetMuscles": "ターゲット筋肉",
   "naming": "命名",
 
-  "trainingRoutines": "トレーニングルーティン",
+  "trainingRoutines": "トレーニング",
   "noEquipment": "器具なし",
   "blockNumber": "ブロック {number}",
   "repeatsCount": "{count}x",
@@ -200,7 +204,9 @@
   "repsCount": "{count}回",
   "weightKgValue": "{value} kg",
   "markAsComplete": "完了としてマーク",
+  "updateFeedback": "フィードバックを更新",
   "references": "参考資料",
+  "literature": "文献",
   "describeIssue": "問題を説明してください...",
   "submit": "送信",
   "close": "閉じる",
@@ -294,8 +300,16 @@
   "failedToLoadProgress": "進捗の読み込みに失敗しました",
   "noProgressYet": "トレーニングを完了して進捗を確認",
   "calibration": "キャリブレーション",
+  "calibrationGlobal": "全体",
   "calibrationNeeded": "最初のトレーニングを完了して、Vigorがあなたのレベルに合わせた推奨を調整できるようにしましょう",
   "calibrationDescription": "キャリブレーション中、プラットフォームはフィードバックからデータを収集し、あなたのフィットネス状態とレベルの初期評価を行います",
   "capabilities": "能力",
-  "noTrainingsCompletedYet": "トレーニングを始めて何か表示しよう"
+  "noTrainingsCompletedYet": "トレーニングを始めて何か表示しよう",
+
+  "theme": "テーマ",
+  "themeAuto": "自動",
+  "themeLight": "ライト",
+  "themeDark": "ダーク",
+  "themeAutoDescription": "システム設定に従う",
+  "appearance": "外観"
 }

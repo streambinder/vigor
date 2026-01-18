@@ -258,6 +258,12 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
+  /// No description provided for @other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get other;
+
   /// No description provided for @deleteGym.
   ///
   /// In en, this message translates to:
@@ -431,6 +437,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Favorites'**
   String get favorites;
+
+  /// No description provided for @personalDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Details'**
+  String get personalDetails;
+
+  /// No description provided for @healthAndGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Health & Goals'**
+  String get healthAndGoals;
 
   /// No description provided for @exercises.
   ///
@@ -852,6 +870,12 @@ abstract class AppLocalizations {
   /// **'Completed'**
   String get completed;
 
+  /// No description provided for @completedSingular.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get completedSingular;
+
   /// No description provided for @noPastTrainings.
   ///
   /// In en, this message translates to:
@@ -1113,7 +1137,7 @@ abstract class AppLocalizations {
   /// No description provided for @trainingRoutines.
   ///
   /// In en, this message translates to:
-  /// **'Training Routines'**
+  /// **'Training'**
   String get trainingRoutines;
 
   /// No description provided for @noEquipment.
@@ -1164,11 +1188,23 @@ abstract class AppLocalizations {
   /// **'Mark as Complete'**
   String get markAsComplete;
 
+  /// No description provided for @updateFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Feedback'**
+  String get updateFeedback;
+
   /// No description provided for @references.
   ///
   /// In en, this message translates to:
   /// **'References'**
   String get references;
+
+  /// No description provided for @literature.
+  ///
+  /// In en, this message translates to:
+  /// **'Literature'**
+  String get literature;
 
   /// No description provided for @describeIssue.
   ///
@@ -1650,6 +1686,12 @@ abstract class AppLocalizations {
   /// **'Calibration'**
   String get calibration;
 
+  /// No description provided for @calibrationGlobal.
+  ///
+  /// In en, this message translates to:
+  /// **'Global'**
+  String get calibrationGlobal;
+
   /// No description provided for @calibrationNeeded.
   ///
   /// In en, this message translates to:
@@ -1673,6 +1715,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start training to see something here'**
   String get noTrainingsCompletedYet;
+
+  /// No description provided for @theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// No description provided for @themeAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get themeAuto;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @themeAutoDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow system settings'**
+  String get themeAutoDescription;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
 }
 
 class _AppLocalizationsDelegate

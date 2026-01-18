@@ -30,6 +30,7 @@
   "userDataRefreshed": "用户数据已刷新",
   "editProfile": "编辑个人资料",
   "settings": "设置",
+  "other": "其他",
 
   "deleteGym": "删除健身房",
   "deleteGymConfirmation": "删除「{name}」？",
@@ -63,6 +64,8 @@
   "injuries": "伤病",
   "limitations": "限制",
   "favorites": "收藏",
+  "personalDetails": "个人信息",
+  "healthAndGoals": "健康与目标",
   "exercises": "练习",
   "equipment": "设备",
   "startedDate": "开始：{date}",
@@ -143,6 +146,7 @@
   "yesterday": "昨天",
   "available": "可用",
   "completed": "已完成",
+  "completedSingular": "完成",
   "noPastTrainings": "暂无已完成的训练",
   "copied": "已复制",
   "durationMin": "{minutes} 分钟",
@@ -191,7 +195,7 @@
   "targetMuscles": "目标肌肉",
   "naming": "命名",
 
-  "trainingRoutines": "训练程序",
+  "trainingRoutines": "训练",
   "noEquipment": "无设备",
   "blockNumber": "区块 {number}",
   "repeatsCount": "{count}x",
@@ -200,7 +204,9 @@
   "repsCount": "{count} 次",
   "weightKgValue": "{value} 公斤",
   "markAsComplete": "标记为完成",
+  "updateFeedback": "更新反馈",
   "references": "参考",
+  "literature": "文献",
   "describeIssue": "描述问题...",
   "submit": "提交",
   "close": "关闭",
@@ -294,8 +300,16 @@
   "failedToLoadProgress": "加载进度失败",
   "noProgressYet": "完成训练以查看您的进度",
   "calibration": "校准",
+  "calibrationGlobal": "整体",
   "calibrationNeeded": "完成您的第一次训练，让Vigor根据您的水平校准推荐",
   "calibrationDescription": "在校准期间，平台会收集您的反馈数据，对您的健身状态和水平进行初步评估",
   "capabilities": "能力",
-  "noTrainingsCompletedYet": "开始训练来看点什么吧"
+  "noTrainingsCompletedYet": "开始训练来看点什么吧",
+
+  "theme": "主题",
+  "themeAuto": "自动",
+  "themeLight": "浅色",
+  "themeDark": "深色",
+  "themeAutoDescription": "跟随系统设置",
+  "appearance": "外观"
 }

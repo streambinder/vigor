@@ -30,6 +30,7 @@
   "userDataRefreshed": "Dados do utilizador atualizados",
   "editProfile": "Editar Perfil",
   "settings": "Configurações",
+  "other": "Outros",
 
   "deleteGym": "Eliminar Ginásio",
   "deleteGymConfirmation": "Eliminar \"{name}\"?",
@@ -63,6 +64,8 @@
   "injuries": "Lesões",
   "limitations": "Limitações",
   "favorites": "Favoritos",
+  "personalDetails": "Dados Pessoais",
+  "healthAndGoals": "Saúde e Objetivos",
   "exercises": "Exercícios",
   "equipment": "Equipamento",
   "startedDate": "Início: {date}",
@@ -143,6 +146,7 @@
   "yesterday": "Ontem",
   "available": "Disponível",
   "completed": "Concluído",
+  "completedSingular": "Concluído",
   "noPastTrainings": "Nenhum treino concluído ainda",
   "copied": "Copiado",
   "durationMin": "{minutes} min",
@@ -191,7 +195,7 @@
   "targetMuscles": "Músculos Alvo",
   "naming": "Denominação",
 
-  "trainingRoutines": "Rotinas de Treino",
+  "trainingRoutines": "Treino",
   "noEquipment": "Sem equipamento",
   "blockNumber": "Bloco {number}",
   "repeatsCount": "{count}x",
@@ -200,7 +204,9 @@
   "repsCount": "{count} repetições",
   "weightKgValue": "{value} kg",
   "markAsComplete": "Marcar como Concluído",
+  "updateFeedback": "Atualizar Feedback",
   "references": "Referências",
+  "literature": "Literatura",
   "describeIssue": "Descreve o problema...",
   "submit": "Enviar",
   "close": "Fechar",
@@ -294,8 +300,16 @@
   "failedToLoadProgress": "Falha ao carregar progresso",
   "noProgressYet": "Complete treinos para ver seu progresso",
   "calibration": "Calibração",
+  "calibrationGlobal": "Global",
   "calibrationNeeded": "Complete seu primeiro treino para que o Vigor calibre as recomendações ao seu nível",
   "calibrationDescription": "Durante a calibração, a plataforma coleta dados dos seus feedbacks para fazer uma avaliação inicial do seu estado físico e nível",
   "capabilities": "Capacidades",
-  "noTrainingsCompletedYet": "Comece a treinar para ver algo aqui"
+  "noTrainingsCompletedYet": "Comece a treinar para ver algo aqui",
+
+  "theme": "Tema",
+  "themeAuto": "Auto",
+  "themeLight": "Claro",
+  "themeDark": "Escuro",
+  "themeAutoDescription": "Seguir configurações do sistema",
+  "appearance": "Aparência"
 }

@@ -101,7 +101,7 @@ class AdaptiveTextField extends StatelessWidget {
                 onTap: onTap,
                 focusNode: focusNode,
                 style: VigorTypography.body.copyWith(color: textColor),
-                cursorColor: VigorColors.orange,
+                cursorColor: VigorColors.indigo,
                 decoration: InputDecoration(
                   hintText: placeholder ?? labelText,
                   hintStyle: VigorTypography.body.copyWith(color: hintColor),

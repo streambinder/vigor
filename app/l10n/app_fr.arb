@@ -30,6 +30,7 @@
   "userDataRefreshed": "Données utilisateur actualisées",
   "editProfile": "Modifier le Profil",
   "settings": "Paramètres",
+  "other": "Autre",
 
   "deleteGym": "Supprimer la Salle",
   "deleteGymConfirmation": "Supprimer \"{name}\" ?",
@@ -63,6 +64,8 @@
   "injuries": "Blessures",
   "limitations": "Limitations",
   "favorites": "Favoris",
+  "personalDetails": "Informations Personnelles",
+  "healthAndGoals": "Santé et Objectifs",
   "exercises": "Exercices",
   "equipment": "Équipement",
   "startedDate": "Début : {date}",
@@ -143,6 +146,7 @@
   "yesterday": "Hier",
   "available": "Disponible",
   "completed": "Terminé",
+  "completedSingular": "Terminé",
   "noPastTrainings": "Aucun entraînement terminé pour l'instant",
   "copied": "Copié",
   "durationMin": "{minutes} min",
@@ -191,7 +195,7 @@
   "targetMuscles": "Muscles Ciblés",
   "naming": "Dénomination",
 
-  "trainingRoutines": "Routines d'Entraînement",
+  "trainingRoutines": "Entraînement",
   "noEquipment": "Sans équipement",
   "blockNumber": "Bloc {number}",
   "repeatsCount": "{count}x",
@@ -200,7 +204,9 @@
   "repsCount": "{count} répétitions",
   "weightKgValue": "{value} kg",
   "markAsComplete": "Marquer comme Terminé",
+  "updateFeedback": "Modifier le Feedback",
   "references": "Références",
+  "literature": "Littérature",
   "describeIssue": "Décris le problème...",
   "submit": "Envoyer",
   "close": "Fermer",
@@ -294,8 +300,16 @@
   "failedToLoadProgress": "Impossible de charger les progrès",
   "noProgressYet": "Terminez des entraînements pour voir vos progrès",
   "calibration": "Calibrage",
+  "calibrationGlobal": "Global",
   "calibrationNeeded": "Terminez votre premier entraînement pour que Vigor calibre les recommandations à votre niveau",
   "calibrationDescription": "Pendant le calibrage, la plateforme collecte des données de vos retours pour faire une première évaluation de votre condition physique et niveau",
   "capabilities": "Capacités",
-  "noTrainingsCompletedYet": "Commence à t'entraîner pour voir quelque chose"
+  "noTrainingsCompletedYet": "Commence à t'entraîner pour voir quelque chose",
+
+  "theme": "Thème",
+  "themeAuto": "Auto",
+  "themeLight": "Clair",
+  "themeDark": "Sombre",
+  "themeAutoDescription": "Suivre les paramètres système",
+  "appearance": "Apparence"
 }

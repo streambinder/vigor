@@ -229,7 +229,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             )
           : BoxDecoration(
               border: Border.all(
-                color: VigorColors.darkBorder,
+                color: VigorColors.border(context),
               ),
               borderRadius: VigorRadius.radiusMd,
             ),
@@ -258,6 +258,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             setState(() {
               _selectedGym = value;
             });
+            // persist the selected gym as default
+            if (value != null) {
+              context.read<PreferencesService>().setDefaultGymId(value.id);
+            }
           },
         ),
       ),
@@ -322,7 +326,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 ),
               ),
               selected: _methodology == null,
-              selectedColor: VigorColors.orange,
+              selectedColor: VigorColors.indigo,
               checkmarkColor: Colors.white,
               onSelected: (selected) {
                 if (selected) setState(() => _methodology = null);
@@ -338,7 +342,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                   ),
                 ),
                 selected: isSelected,
-                selectedColor: VigorColors.orange,
+                selectedColor: VigorColors.indigo,
                 checkmarkColor: Colors.white,
                 onSelected: (selected) {
                   setState(() => _methodology = selected ? m : null);
@@ -384,7 +388,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 ),
               ),
               selected: isSelected,
-              selectedColor: VigorColors.orange,
+              selectedColor: VigorColors.indigo,
               checkmarkColor: Colors.white,
               onSelected: (selected) {
                 setState(() {
@@ -435,7 +439,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 ),
               ),
               selected: _selectedMuscles.isEmpty,
-              selectedColor: VigorColors.orange,
+              selectedColor: VigorColors.indigo,
               checkmarkColor: Colors.white,
               onSelected: (selected) {
                 if (selected) setState(() => _selectedMuscles.clear());
@@ -451,7 +455,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                   ),
                 ),
                 selected: isSelected,
-                selectedColor: VigorColors.orange,
+                selectedColor: VigorColors.indigo,
                 checkmarkColor: Colors.white,
                 onSelected: (selected) {
                   setState(() {
@@ -566,7 +570,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 ),
               )
             : BoxDecoration(
-                border: Border.all(color: VigorColors.darkBorder),
+                border: Border.all(color: VigorColors.border(context)),
                 borderRadius: VigorRadius.radiusMd,
               ),
         child: Row(
@@ -628,7 +632,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 ),
                 deleteIcon: Icon(Icons.close, size: 16, color: VigorColors.textSecondary(context)),
                 onDeleted: () => _removePartner(partner),
-                backgroundColor: VigorColors.orange.withValues(alpha: 0.1),
+                backgroundColor: VigorColors.indigo.withValues(alpha: 0.1),
               );
             }).toList(),
           ),
@@ -745,7 +749,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const AdaptiveLoadingIndicator(),
+          AdaptiveLoadingIndicator(color: VigorColors.persimmon),
           const SizedBox(height: VigorSpacing.lg),
           Text(
             l10n.generatingTraining,
@@ -799,8 +803,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                     ),
                     Text(
                       '$_duration min',
-                      style: VigorTypography.body.copyWith(
-                        color: VigorColors.orange,
+                      style: VigorTypography.data.copyWith(
+                        color: VigorColors.indigo,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -811,7 +815,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                   min: 10,
                   max: 180,
                   divisions: 34, // (180-10)/5 = 34 steps of 5 minutes
-                  activeColor: VigorColors.orange,
+                  activeColor: VigorColors.indigo,
                   onChanged: (value) => setState(() => _duration = value.round()),
                 ),
               ],

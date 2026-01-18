@@ -6,9 +6,9 @@ import '../design/vigor_theme.dart';
 /// Used on Android, Web, and all non-iOS platforms
 /// Now using Vigor design tokens for consistency
 class MaterialYouTheme {
-  // Seed color from design tokens
-  static Color get seedColor => VigorColors.orange;
-  static Color get accentColor => VigorColors.electricBlue;
+  // Seed color from design tokens (persimmon = primary accent)
+  static Color get seedColor => VigorColors.persimmon;
+  static Color get accentColor => VigorColors.indigo;
 
   /// Material 3 light theme - delegates to VigorTheme
   static ThemeData get lightTheme => VigorTheme.light;

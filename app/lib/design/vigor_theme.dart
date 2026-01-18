@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'tokens.dart';
 
 /// Vigor unified theme builder
-/// Creates consistent Material themes for both light and dark modes
+/// Based on IDENTITY.md: Japanese Aesthetics × Data Science
 /// Uses design tokens for all values
 
 class VigorTheme {
@@ -12,7 +12,7 @@ class VigorTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: _lightColorScheme,
-      fontFamily: VigorTypography.fontFamily,
+      fontFamily: VigorTypography.fontFamilyBody,
       scaffoldBackgroundColor: VigorColors.lightBackground,
       cardColor: VigorColors.lightSurface,
       dividerColor: VigorColors.lightBorder,
@@ -40,7 +40,7 @@ class VigorTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: _darkColorScheme,
-      fontFamily: VigorTypography.fontFamily,
+      fontFamily: VigorTypography.fontFamilyBody,
       scaffoldBackgroundColor: VigorColors.darkBackground,
       cardColor: VigorColors.darkSurface,
       dividerColor: VigorColors.darkBorder,
@@ -62,17 +62,19 @@ class VigorTheme {
     );
   }
 
-  // Color schemes
+  // Color schemes — using IDENTITY.md palette
+  // Note: primary is indigo (for data viz, selections)
+  // Buttons explicitly use persimmon for CTAs
   static ColorScheme get _lightColorScheme => ColorScheme(
         brightness: Brightness.light,
-        primary: VigorColors.orange,
-        onPrimary: Colors.white,
-        secondary: VigorColors.electricBlue,
-        onSecondary: Colors.white,
-        tertiary: VigorColors.info,
-        onTertiary: Colors.white,
-        error: VigorColors.error,
-        onError: Colors.white,
+        primary: VigorColors.indigo,
+        onPrimary: VigorColors.washi,
+        secondary: VigorColors.persimmon,
+        onSecondary: VigorColors.washi,
+        tertiary: VigorColors.gold,
+        onTertiary: VigorColors.sumi,
+        error: VigorColors.crimson,
+        onError: VigorColors.washi,
         surface: VigorColors.lightSurface,
         onSurface: VigorColors.lightTextPrimary,
         surfaceContainerHighest: VigorColors.lightSurfaceElevated,
@@ -83,14 +85,14 @@ class VigorTheme {
 
   static ColorScheme get _darkColorScheme => ColorScheme(
         brightness: Brightness.dark,
-        primary: VigorColors.orange,
-        onPrimary: Colors.white,
-        secondary: VigorColors.electricBlue,
-        onSecondary: Colors.white,
-        tertiary: VigorColors.info,
-        onTertiary: Colors.white,
-        error: VigorColors.error,
-        onError: Colors.white,
+        primary: VigorColors.indigoLight,
+        onPrimary: VigorColors.sumi,
+        secondary: VigorColors.persimmon,
+        onSecondary: VigorColors.washi,
+        tertiary: VigorColors.gold,
+        onTertiary: VigorColors.sumi,
+        error: VigorColors.crimson,
+        onError: VigorColors.washi,
         surface: VigorColors.darkSurface,
         onSurface: VigorColors.darkTextPrimary,
         surfaceContainerHighest: VigorColors.darkSurfaceElevated,
@@ -99,7 +101,7 @@ class VigorTheme {
         outlineVariant: VigorColors.darkBorder.withValues(alpha: 0.5),
       );
 
-  // Text theme
+  // Text theme — maps Material text styles to Vigor typography
   static TextTheme _textTheme(Brightness brightness) {
     final textColor = brightness == Brightness.dark
         ? VigorColors.darkTextPrimary
@@ -127,7 +129,6 @@ class VigorTheme {
     );
   }
 
-  // Card theme
   static CardThemeData _cardTheme() {
     return const CardThemeData(
       elevation: 0,
@@ -137,7 +138,6 @@ class VigorTheme {
     );
   }
 
-  // Input decoration theme
   static InputDecorationTheme _inputDecorationTheme(Brightness brightness) {
     final borderColor = brightness == Brightness.dark
         ? VigorColors.darkBorder
@@ -159,15 +159,15 @@ class VigorTheme {
       ),
       focusedBorder: const OutlineInputBorder(
         borderRadius: VigorRadius.input,
-        borderSide: BorderSide(color: VigorColors.orange, width: 2),
+        borderSide: BorderSide(color: VigorColors.indigo, width: 2),
       ),
       errorBorder: const OutlineInputBorder(
         borderRadius: VigorRadius.input,
-        borderSide: BorderSide(color: VigorColors.error),
+        borderSide: BorderSide(color: VigorColors.crimson),
       ),
       focusedErrorBorder: const OutlineInputBorder(
         borderRadius: VigorRadius.input,
-        borderSide: BorderSide(color: VigorColors.error, width: 2),
+        borderSide: BorderSide(color: VigorColors.crimson, width: 2),
       ),
       contentPadding: VigorSpacing.inputPadding,
       labelStyle: VigorTypography.body,
@@ -179,12 +179,11 @@ class VigorTheme {
     );
   }
 
-  // Elevated button theme
   static ElevatedButtonThemeData _elevatedButtonTheme() {
     return ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: VigorColors.orange,
-        foregroundColor: Colors.white,
+        backgroundColor: VigorColors.persimmon,
+        foregroundColor: VigorColors.washi,
         shape: const RoundedRectangleBorder(borderRadius: VigorRadius.button),
         padding: VigorSpacing.buttonPadding,
         elevation: 0,
@@ -193,12 +192,11 @@ class VigorTheme {
     );
   }
 
-  // Filled button theme
   static FilledButtonThemeData _filledButtonTheme() {
     return FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: VigorColors.orange,
-        foregroundColor: Colors.white,
+        backgroundColor: VigorColors.persimmon,
+        foregroundColor: VigorColors.washi,
         shape: const RoundedRectangleBorder(borderRadius: VigorRadius.button),
         padding: VigorSpacing.buttonPadding,
         textStyle: VigorTypography.label,
@@ -206,11 +204,10 @@ class VigorTheme {
     );
   }
 
-  // Text button theme
   static TextButtonThemeData _textButtonTheme() {
     return TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: VigorColors.orange,
+        foregroundColor: VigorColors.indigo,
         shape: const RoundedRectangleBorder(borderRadius: VigorRadius.button),
         padding: const EdgeInsets.symmetric(
           horizontal: VigorSpacing.md,
@@ -221,7 +218,6 @@ class VigorTheme {
     );
   }
 
-  // Outlined button theme
   static OutlinedButtonThemeData _outlinedButtonTheme(Brightness brightness) {
     final borderColor = brightness == Brightness.dark
         ? VigorColors.darkBorder
@@ -229,7 +225,7 @@ class VigorTheme {
 
     return OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: VigorColors.orange,
+        foregroundColor: VigorColors.indigo,
         side: BorderSide(color: borderColor),
         shape: const RoundedRectangleBorder(borderRadius: VigorRadius.button),
         padding: VigorSpacing.buttonPadding,
@@ -238,7 +234,6 @@ class VigorTheme {
     );
   }
 
-  // Dialog theme
   static DialogThemeData _dialogTheme() {
     return const DialogThemeData(
       shape: RoundedRectangleBorder(borderRadius: VigorRadius.modal),
@@ -246,7 +241,6 @@ class VigorTheme {
     );
   }
 
-  // Bottom sheet theme
   static BottomSheetThemeData _bottomSheetTheme() {
     return const BottomSheetThemeData(
       shape: RoundedRectangleBorder(borderRadius: VigorRadius.bottomSheet),
@@ -254,7 +248,6 @@ class VigorTheme {
     );
   }
 
-  // App bar theme
   static AppBarTheme _appBarTheme(Brightness brightness) {
     return AppBarTheme(
       centerTitle: false,
@@ -274,7 +267,6 @@ class VigorTheme {
     );
   }
 
-  // List tile theme
   static ListTileThemeData _listTileTheme() {
     return const ListTileThemeData(
       contentPadding: VigorSpacing.listTilePadding,
@@ -282,12 +274,14 @@ class VigorTheme {
     );
   }
 
-  // Navigation bar theme
   static NavigationBarThemeData _navigationBarTheme(Brightness brightness) {
     final bgColor = brightness == Brightness.dark
         ? VigorColors.darkSurface
         : VigorColors.lightSurface;
-    final indicatorColor = VigorColors.orange.withValues(alpha: 0.15);
+    final accentColor = brightness == Brightness.dark
+        ? VigorColors.indigoLight
+        : VigorColors.indigo;
+    final indicatorColor = accentColor.withValues(alpha: 0.15);
 
     return NavigationBarThemeData(
       height: 70,
@@ -296,7 +290,7 @@ class VigorTheme {
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
           return VigorTypography.label.copyWith(
-            color: VigorColors.orange,
+            color: accentColor,
             fontWeight: FontWeight.w600,
           );
         }
@@ -308,7 +302,7 @@ class VigorTheme {
       }),
       iconTheme: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
-          return const IconThemeData(color: VigorColors.orange, size: 24);
+          return IconThemeData(color: accentColor, size: 24);
         }
         return IconThemeData(
           color: brightness == Brightness.dark
@@ -320,32 +314,26 @@ class VigorTheme {
     );
   }
 
-  // Switch theme
   static SwitchThemeData _switchTheme() {
     return SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) {
-          return Colors.white;
-        }
-        return VigorColors.darkTextSecondary;
+        if (states.contains(WidgetState.selected)) return VigorColors.washi;
+        return VigorColors.stone;
       }),
       trackColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) {
-          return VigorColors.orange;
-        }
+        if (states.contains(WidgetState.selected)) return VigorColors.persimmon;
         return VigorColors.darkBorder;
       }),
       trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
     );
   }
 
-  // Chip theme
   static ChipThemeData _chipTheme(Brightness brightness) {
     return ChipThemeData(
       backgroundColor: brightness == Brightness.dark
           ? VigorColors.darkSurface
           : VigorColors.lightSurface,
-      selectedColor: VigorColors.orange.withValues(alpha: 0.15),
+      selectedColor: VigorColors.indigo.withValues(alpha: 0.15),
       labelStyle: VigorTypography.label,
       shape: const RoundedRectangleBorder(borderRadius: VigorRadius.chip),
       side: BorderSide(
@@ -356,10 +344,9 @@ class VigorTheme {
     );
   }
 
-  // Progress indicator theme
   static ProgressIndicatorThemeData _progressIndicatorTheme() {
     return const ProgressIndicatorThemeData(
-      color: VigorColors.orange,
+      color: VigorColors.indigo,
       linearTrackColor: VigorColors.darkBorder,
       circularTrackColor: VigorColors.darkBorder,
     );
@@ -370,17 +357,24 @@ class VigorTheme {
 extension VigorThemeExtension on BuildContext {
   bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
 
-  Color get vigorOrange => VigorColors.orange;
-  Color get vigorBlue => VigorColors.electricBlue;
+  // Brand colors
+  Color get vigorPersimmon => VigorColors.persimmon;
+  Color get vigorGold => VigorColors.gold;
+  Color get vigorIndigo => VigorColors.indigo;
+  Color get vigorCrimson => VigorColors.crimson;
+
+  // Semantic colors
   Color get vigorSuccess => VigorColors.success;
   Color get vigorWarning => VigorColors.warning;
   Color get vigorError => VigorColors.error;
 
+  // Surface colors
   Color get background => VigorColors.background(this);
   Color get surface => VigorColors.surface(this);
   Color get surfaceElevated => VigorColors.surfaceElevated(this);
   Color get borderColor => VigorColors.border(this);
 
+  // Text colors
   Color get textPrimary => VigorColors.textPrimary(this);
   Color get textSecondary => VigorColors.textSecondary(this);
   Color get textMuted => VigorColors.textMuted(this);

@@ -84,7 +84,7 @@ class _HomePageState extends State<HomePage> {
 
     return AdaptiveScaffold(
       appBar: AdaptiveAppBar(
-        title: Text(l10n.appName),
+        title: Text(l10n.appName.toUpperCase()),
         actions: [
           AdaptiveIconButton(
             icon: const Icon(Icons.refresh),
@@ -95,7 +95,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: RefreshIndicator(
         onRefresh: _loadProgress,
-        color: VigorColors.orange,
+        color: VigorColors.stone,
         child: _isLoading
             ? const Center(child: AdaptiveLoadingIndicator())
             : _buildContent(l10n),
@@ -118,117 +118,133 @@ class _HomePageState extends State<HomePage> {
     return ListView(
       padding: VigorSpacing.paddingLg,
       children: [
-        // hero stats section
-        _buildHeroStats(l10n),
+        // hero stats section with calibration badge
+        _buildHeroStats(l10n, families),
         const SizedBox(height: VigorSpacing.xl),
-        // calibration section
-        CalibrationWidget(families: families),
-        const SizedBox(height: VigorSpacing.lg),
         // capabilities section
         _buildCapabilitiesSection(l10n, families),
+        const SizedBox(height: VigorSpacing.lg),
       ],
     );
   }
 
-  Widget _buildHeroStats(AppLocalizations l10n) {
+  Widget _buildHeroStats(AppLocalizations l10n, Map<String, FamilyProgress> families) {
     final trainings = _progress?.trainings ?? 0;
     final partnered = _progress?.trainingsPartnered ?? 0;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      padding: VigorSpacing.paddingLg,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            VigorColors.orange.withValues(alpha: 0.15),
-            VigorColors.electricBlue.withValues(alpha: 0.15),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: VigorRadius.radiusLg,
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.1)
-              : Colors.black.withValues(alpha: 0.05),
-        ),
-      ),
-      child: Column(
-        children: [
-          // main stat with gradient text
-          RepaintBoundary(
-            child: ShaderMask(
-              shaderCallback: (bounds) => const LinearGradient(
-                colors: [VigorColors.orange, VigorColors.electricBlue],
-              ).createShader(bounds),
-              child: Text(
-                '$trainings',
-                style: VigorTypography.display.copyWith(
-                  fontSize: 80,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                  height: 1,
+    // calculate overall calibration
+    double calibration = 0;
+    if (families.isNotEmpty) {
+      final sum = families.values.fold(0.0, (acc, fp) => acc + fp.calibration);
+      calibration = (sum / families.length).clamp(0.0, 100.0);
+    }
+
+    return Center(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // size circle based on content height, not viewport width
+          const minSize = 220.0;
+          final size = minSize;
+          return SizedBox(
+            width: size,
+            height: size,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  padding: VigorSpacing.paddingLg,
+                  decoration: BoxDecoration(
+                    color: VigorColors.surface(context),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // main stat — JetBrains Mono for data
+                      Text(
+                        '$trainings',
+                        style: VigorTypography.dataDisplay.copyWith(
+                          fontSize: 72,
+                          fontWeight: FontWeight.w700,
+                          color: VigorColors.textPrimary(context),
+                          height: 1,
+                        ),
+                      ),
+                      const SizedBox(height: VigorSpacing.xs),
+                      Text(
+                        l10n.completedTrainings,
+                        style: VigorTypography.body.copyWith(
+                          color: VigorColors.textSecondary(context),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: VigorSpacing.sm),
+                      // secondary stat - compact
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.people, color: VigorColors.stone, size: 18),
+                          const SizedBox(width: VigorSpacing.xs),
+                          Text(
+                            '$partnered',
+                            style: VigorTypography.dataLarge.copyWith(
+                              color: VigorColors.textSecondary(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                // calibration badge - top right
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () => _showCalibrationModal(context, l10n, families, calibration),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: VigorColors.surface(context),
+                        borderRadius: VigorRadius.radiusFull,
+                        border: Border.all(color: VigorColors.border(context)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.tune, size: 14, color: VigorColors.indigoAdaptive(context)),
+                          const SizedBox(width: 4),
+                          Text(
+                            calibration > 0 ? '${calibration.toInt()}%' : '–',
+                            style: VigorTypography.caption.copyWith(
+                              color: VigorColors.indigoAdaptive(context),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          Icon(Icons.help_outline, size: 12, color: VigorColors.stone),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: VigorSpacing.xs),
-          Text(
-            l10n.completedTrainings,
-            style: VigorTypography.body.copyWith(
-              color: VigorColors.textSecondary(context),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: VigorSpacing.lg),
-          // secondary stat
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildSecondaryStatBadge(
-                icon: Icons.people,
-                value: partnered,
-                label: l10n.partneredTrainings,
-                color: VigorColors.electricBlue,
-              ),
-            ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildSecondaryStatBadge({
-    required IconData icon,
-    required int value,
-    required String label,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: VigorRadius.radiusFull,
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: color, size: 18),
-          const SizedBox(width: VigorSpacing.sm),
-          Text(
-            '$value',
-            style: VigorTypography.headline.copyWith(
-              color: color,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(width: VigorSpacing.xs),
-          Text(
-            label,
-            style: VigorTypography.caption.copyWith(color: color),
-          ),
-        ],
+  void _showCalibrationModal(BuildContext context, AppLocalizations l10n, Map<String, FamilyProgress> families, double calibration) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _CalibrationModal(
+        l10n: l10n,
+        families: families,
+        calibration: calibration,
       ),
     );
   }
@@ -239,14 +255,7 @@ class _HomePageState extends State<HomePage> {
       children: [
         Row(
           children: [
-            RepaintBoundary(
-              child: ShaderMask(
-                shaderCallback: (bounds) => const LinearGradient(
-                  colors: [VigorColors.orange, VigorColors.electricBlue],
-                ).createShader(bounds),
-                child: const Icon(Icons.show_chart, color: Colors.white, size: 24),
-              ),
-            ),
+            Icon(Icons.show_chart, color: VigorColors.stone, size: 24),
             const SizedBox(width: VigorSpacing.sm),
             Text(
               l10n.capabilities,
@@ -271,28 +280,16 @@ class _HomePageState extends State<HomePage> {
       padding: VigorSpacing.paddingLg,
       children: [
         SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-        // gradient icon
+        // simple icon container
         Center(
           child: Container(
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  VigorColors.orange.withValues(alpha: 0.2),
-                  VigorColors.electricBlue.withValues(alpha: 0.2),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: VigorColors.surface(context),
               shape: BoxShape.circle,
             ),
-            child: ShaderMask(
-              shaderCallback: (bounds) => const LinearGradient(
-                colors: [VigorColors.orange, VigorColors.electricBlue],
-              ).createShader(bounds),
-              child: const Icon(Icons.trending_up, size: 56, color: Colors.white),
-            ),
+            child: Icon(Icons.trending_up, size: 56, color: VigorColors.stone),
           ),
         ),
         const SizedBox(height: VigorSpacing.lg),
@@ -320,19 +317,12 @@ class _HomePageState extends State<HomePage> {
         Center(
           child: Column(
             children: [
-              // vigor logo icon
+              // vigor logo — clean surface container
               Container(
                 width: 100,
                 height: 100,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      VigorColors.orange.withValues(alpha: 0.2),
-                      VigorColors.electricBlue.withValues(alpha: 0.2),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: VigorColors.surface(context),
                   shape: BoxShape.circle,
                 ),
                 child: const Center(child: VigorLogo(size: 48)),
@@ -360,26 +350,23 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         const SizedBox(height: VigorSpacing.xxl),
-        // info cards
+        // info cards — stone borders, stone icons
         _buildInfoCard(
           icon: Icons.auto_awesome,
           title: 'AI-Powered',
           description: 'Personalized workouts generated by AI based on your goals and equipment',
-          gradient: [VigorColors.orange, VigorColors.orange.withValues(alpha: 0.7)],
         ),
         const SizedBox(height: VigorSpacing.md),
         _buildInfoCard(
           icon: Icons.trending_up,
           title: 'Track Progress',
           description: 'Monitor your capabilities across movement families as you train',
-          gradient: [VigorColors.electricBlue, VigorColors.electricBlue.withValues(alpha: 0.7)],
         ),
         const SizedBox(height: VigorSpacing.md),
         _buildInfoCard(
           icon: Icons.people,
           title: 'Train Together',
           description: 'Add partners to adjust workouts for group training sessions',
-          gradient: [VigorColors.success, VigorColors.success.withValues(alpha: 0.7)],
         ),
       ],
     );
@@ -389,18 +376,12 @@ class _HomePageState extends State<HomePage> {
     required IconData icon,
     required String title,
     required String description,
-    required List<Color> gradient,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Container(
       padding: VigorSpacing.paddingMd,
       decoration: BoxDecoration(
-        color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+        color: VigorColors.surface(context),
         borderRadius: VigorRadius.radiusMd,
-        border: Border.all(
-          color: gradient[0].withValues(alpha: 0.3),
-        ),
       ),
       child: Row(
         children: [
@@ -408,10 +389,10 @@ class _HomePageState extends State<HomePage> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: gradient),
+              color: VigorColors.surfaceElevated(context),
               borderRadius: VigorRadius.radiusSm,
             ),
-            child: Icon(icon, color: Colors.white, size: 24),
+            child: Icon(icon, color: VigorColors.stone, size: 24),
           ),
           const SizedBox(width: VigorSpacing.md),
           Expanded(
@@ -438,5 +419,220 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+}
+
+/// Modal for calibration details
+class _CalibrationModal extends StatelessWidget {
+  final AppLocalizations l10n;
+  final Map<String, FamilyProgress> families;
+  final double calibration;
+
+  const _CalibrationModal({
+    required this.l10n,
+    required this.families,
+    required this.calibration,
+  });
+
+  static const _familyLabels = {
+    'horizontal_push': 'Push',
+    'horizontal_pull': 'Pull',
+    'vertical_push': 'Overhead',
+    'vertical_pull': 'Pull-up',
+    'squat': 'Squat',
+    'hinge': 'Hinge',
+    'core': 'Core',
+    'carry': 'Carry',
+    'balance': 'Balance',
+    'cardio': 'Cardio',
+    'mobility': 'Mobility',
+  };
+
+  static const _familyOrder = [
+    'horizontal_push',
+    'horizontal_pull',
+    'vertical_push',
+    'vertical_pull',
+    'squat',
+    'hinge',
+    'core',
+    'cardio',
+    'mobility',
+    'balance',
+    'carry',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.all(VigorSpacing.md),
+      decoration: BoxDecoration(
+        color: VigorColors.surface(context),
+        borderRadius: VigorRadius.radiusLg,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // header
+          Padding(
+            padding: VigorSpacing.paddingMd,
+            child: Row(
+              children: [
+                Icon(Icons.tune, color: VigorColors.indigoAdaptive(context), size: 24),
+                const SizedBox(width: VigorSpacing.sm),
+                Text(
+                  l10n.calibration,
+                  style: VigorTypography.headline.copyWith(
+                    color: VigorColors.textPrimary(context),
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Icon(Icons.close, color: VigorColors.stone, size: 24),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: VigorColors.border(context)),
+          // description
+          Padding(
+            padding: VigorSpacing.paddingMd,
+            child: Text(
+              l10n.calibrationDescription,
+              style: VigorTypography.body.copyWith(
+                color: VigorColors.textSecondary(context),
+              ),
+            ),
+          ),
+          // overall progress bar with Global label
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 80,
+                  child: Text(
+                    l10n.calibrationGlobal,
+                    style: VigorTypography.caption.copyWith(
+                      color: VigorColors.textSecondary(context),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: _buildProgressBar(context, calibration, isDark),
+                ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 36,
+                  child: Text(
+                    calibration > 0 ? '${calibration.toInt()}%' : '–',
+                    textAlign: TextAlign.right,
+                    style: VigorTypography.data.copyWith(
+                      color: VigorColors.textPrimary(context),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: VigorSpacing.md),
+          Divider(height: 1, color: VigorColors.border(context)),
+          const SizedBox(height: VigorSpacing.md),
+          // per-family bars
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md),
+            child: Column(
+              children: _buildFamilyBars(context, isDark),
+            ),
+          ),
+          const SizedBox(height: VigorSpacing.lg),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressBar(BuildContext context, double value, bool isDark) {
+    return Stack(
+      children: [
+        Container(
+          height: 8,
+          decoration: BoxDecoration(
+            color: isDark ? Colors.white.withValues(alpha: 0.1) : VigorColors.stone.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+        FractionallySizedBox(
+          widthFactor: value / 100,
+          child: Container(
+            height: 8,
+            decoration: BoxDecoration(
+              color: VigorColors.indigoAdaptive(context),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildFamilyBars(BuildContext context, bool isDark) {
+    final sortedFamilies = _familyOrder
+        .where((f) => families.containsKey(f))
+        .map((f) => MapEntry(f, families[f]!))
+        .toList();
+
+    // add any families not in the predefined order
+    for (final entry in families.entries) {
+      if (!_familyOrder.contains(entry.key)) {
+        sortedFamilies.add(entry);
+      }
+    }
+
+    return sortedFamilies.map((entry) {
+      final label = _familyLabels[entry.key] ?? _formatFamilyName(entry.key);
+      final cal = entry.value.calibration.clamp(0.0, 100.0);
+
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 80,
+              child: Text(
+                label,
+                style: VigorTypography.caption.copyWith(
+                  color: VigorColors.textSecondary(context),
+                ),
+              ),
+            ),
+            Expanded(
+              child: _buildProgressBar(context, cal, isDark),
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 36,
+              child: Text(
+                cal > 0 ? '${cal.toInt()}%' : '–',
+                textAlign: TextAlign.right,
+                style: VigorTypography.data.copyWith(
+                  color: VigorColors.textSecondary(context),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }).toList();
+  }
+
+  String _formatFamilyName(String family) {
+    return family
+        .split('_')
+        .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : w)
+        .join(' ');
   }
 }

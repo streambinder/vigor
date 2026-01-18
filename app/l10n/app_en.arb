@@ -40,6 +40,7 @@
   "userDataRefreshed": "User data refreshed",
   "editProfile": "Edit Profile",
   "settings": "Settings",
+  "other": "Other",
 
   "deleteGym": "Delete Gym",
   "deleteGymConfirmation": "Delete \"{name}\"?",
@@ -88,6 +89,8 @@
   "injuries": "Injuries",
   "limitations": "Limitations",
   "favorites": "Favorites",
+  "personalDetails": "Personal Details",
+  "healthAndGoals": "Health & Goals",
   "exercises": "Exercises",
   "equipment": "Equipment",
   "startedDate": "Started: {date}",
@@ -178,6 +181,7 @@
   "yesterday": "Yesterday",
   "available": "Available",
   "completed": "Completed",
+  "completedSingular": "Complete",
   "noPastTrainings": "No completed trainings yet",
   "copied": "Copied",
   "durationMin": "{minutes} min",
@@ -269,7 +273,7 @@
   "targetMuscles": "Target Muscles",
   "naming": "Naming",
 
-  "trainingRoutines": "Training Routines",
+  "trainingRoutines": "Training",
   "noEquipment": "No equipment",
   "blockNumber": "Block {number}",
   "@blockNumber": {
@@ -308,7 +312,9 @@
     }
   },
   "markAsComplete": "Mark as Complete",
+  "updateFeedback": "Update Feedback",
   "references": "References",
+  "literature": "Literature",
   "describeIssue": "Describe the issue...",
   "submit": "Submit",
   "close": "Close",
@@ -436,8 +442,16 @@
   "failedToLoadProgress": "Failed to load progress",
   "noProgressYet": "Complete trainings to see your progress",
   "calibration": "Calibration",
+  "calibrationGlobal": "Global",
   "calibrationNeeded": "Complete your first training for Vigor to calibrate recommendations to your level",
   "calibrationDescription": "During calibration, the platform collects data from your feedback to make an initial assessment of your fitness level",
   "capabilities": "Capabilities",
-  "noTrainingsCompletedYet": "Start training to see something here"
+  "noTrainingsCompletedYet": "Start training to see something here",
+
+  "theme": "Theme",
+  "themeAuto": "Auto",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeAutoDescription": "Follow system settings",
+  "appearance": "Appearance"
 }

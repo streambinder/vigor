@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../config/api_config.dart';
+import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/exercise.dart';
 import '../theme/liquid_glass_theme.dart';
@@ -51,20 +52,29 @@ class ExerciseModal {
                     Image.network(
                       _proxyImageUrl(exercise.reference),
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        final isDark = Theme.of(context).brightness == Brightness.dark;
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
                         return Container(
                           height: 200,
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.1)
-                              : Colors.grey[300],
+                          color: VigorColors.stone.withValues(alpha: 0.1),
                           child: Center(
                             child: Icon(
-                              Icons.broken_image,
-                              size: 64,
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.5)
-                                  : Colors.grey.shade600,
+                              Icons.fitness_center,
+                              size: 200 * 0.4,
+                              color: VigorColors.stone.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: 200,
+                          color: VigorColors.stone.withValues(alpha: 0.1),
+                          child: Center(
+                            child: Icon(
+                              Icons.fitness_center,
+                              size: 200 * 0.4,
+                              color: VigorColors.stone.withValues(alpha: 0.5),
                             ),
                           ),
                         );
@@ -101,25 +111,13 @@ class ExerciseModal {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Container(
+                                  SizedBox(
                                     width: 24,
-                                    height: 24,
-                                    decoration: BoxDecoration(
-                                      color: PlatformHelper.useLiquidGlass
-                                          ? LiquidGlassTheme.primaryColor.withValues(alpha: 0.2)
-                                          : Theme.of(context).colorScheme.primaryContainer,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        '${index + 1}',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: PlatformHelper.useLiquidGlass
-                                              ? LiquidGlassTheme.primaryColor
-                                              : Theme.of(context).colorScheme.primary,
-                                        ),
+                                    child: Text(
+                                      '${index + 1}.',
+                                      style: VigorTypography.label.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: VigorColors.indigoAdaptive(context),
                                       ),
                                     ),
                                   ),

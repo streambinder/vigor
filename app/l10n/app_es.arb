@@ -30,6 +30,7 @@
   "userDataRefreshed": "Datos de usuario actualizados",
   "editProfile": "Editar Perfil",
   "settings": "Configuración",
+  "other": "Otros",
 
   "deleteGym": "Eliminar Gimnasio",
   "deleteGymConfirmation": "¿Eliminar \"{name}\"?",
@@ -63,6 +64,8 @@
   "injuries": "Lesiones",
   "limitations": "Limitaciones",
   "favorites": "Favoritos",
+  "personalDetails": "Datos Personales",
+  "healthAndGoals": "Salud y Objetivos",
   "exercises": "Ejercicios",
   "equipment": "Equipamiento",
   "startedDate": "Inicio: {date}",
@@ -143,6 +146,7 @@
   "yesterday": "Ayer",
   "available": "Disponible",
   "completed": "Completado",
+  "completedSingular": "Completado",
   "noPastTrainings": "Aún no hay entrenamientos completados",
   "copied": "Copiado",
   "durationMin": "{minutes} min",
@@ -191,7 +195,7 @@
   "targetMuscles": "Músculos Objetivo",
   "naming": "Denominación",
 
-  "trainingRoutines": "Rutinas de Entrenamiento",
+  "trainingRoutines": "Entrenamiento",
   "noEquipment": "Sin equipamiento",
   "blockNumber": "Bloque {number}",
   "repeatsCount": "{count}x",
@@ -200,7 +204,9 @@
   "repsCount": "{count} repeticiones",
   "weightKgValue": "{value} kg",
   "markAsComplete": "Marcar como Completado",
+  "updateFeedback": "Actualizar Feedback",
   "references": "Referencias",
+  "literature": "Literatura",
   "describeIssue": "Describe el problema...",
   "submit": "Enviar",
   "close": "Cerrar",
@@ -294,8 +300,16 @@
   "failedToLoadProgress": "No se pudo cargar el progreso",
   "noProgressYet": "Completa entrenamientos para ver tu progreso",
   "calibration": "Calibración",
+  "calibrationGlobal": "Global",
   "calibrationNeeded": "Completa tu primer entrenamiento para que Vigor calibre las recomendaciones a tu nivel",
   "calibrationDescription": "Durante la calibración, la plataforma recopila datos de tus comentarios para hacer una evaluación inicial de tu estado físico y nivel",
   "capabilities": "Capacidades",
-  "noTrainingsCompletedYet": "Empieza a entrenar para ver algo aquí"
+  "noTrainingsCompletedYet": "Empieza a entrenar para ver algo aquí",
+
+  "theme": "Tema",
+  "themeAuto": "Auto",
+  "themeLight": "Claro",
+  "themeDark": "Oscuro",
+  "themeAutoDescription": "Seguir configuración del sistema",
+  "appearance": "Apariencia"
 }

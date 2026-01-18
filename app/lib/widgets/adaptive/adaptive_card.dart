@@ -53,8 +53,8 @@ class AdaptiveCard extends StatelessWidget {
                   ? LiquidGlassTheme.vibrantGradient(
                       colors: gradientColors ??
                           [
-                            VigorColors.orange.withValues(alpha: 0.8),
-                            VigorColors.electricBlue.withValues(alpha: 0.8),
+                            VigorColors.indigo.withValues(alpha: 0.8),
+                            VigorColors.stone.withValues(alpha: 0.8),
                           ],
                       borderRadius: VigorRadius.md,
                     )
@@ -88,8 +88,8 @@ class AdaptiveCard extends StatelessWidget {
           gradient: LinearGradient(
             colors: gradientColors ??
                 [
-                  VigorColors.orange.withValues(alpha: 0.8),
-                  VigorColors.electricBlue.withValues(alpha: 0.8),
+                  VigorColors.indigo.withValues(alpha: 0.8),
+                  VigorColors.stone.withValues(alpha: 0.8),
                 ],
           ),
           borderRadius: VigorRadius.card,
@@ -108,15 +108,21 @@ class AdaptiveCard extends StatelessWidget {
       );
     }
 
-    return Card(
+    return Container(
       margin: margin ?? VigorSpacing.paddingXs,
-      color: glassColor,
-      child: InkWell(
-        onTap: onTap,
+      decoration: BoxDecoration(
+        color: glassColor ?? VigorColors.surface(context),
         borderRadius: VigorRadius.card,
-        child: Padding(
-          padding: padding ?? VigorSpacing.paddingMd,
-          child: child,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: VigorRadius.card,
+          child: Padding(
+            padding: padding ?? VigorSpacing.paddingMd,
+            child: child,
+          ),
         ),
       ),
     );

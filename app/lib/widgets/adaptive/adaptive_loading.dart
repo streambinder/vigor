@@ -15,6 +15,8 @@ class AdaptiveLoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final indicatorColor = color ?? VigorColors.indigoAdaptive(context);
+
     if (PlatformHelper.useLiquidGlass) {
       return SizedBox(
         width: 24,
@@ -22,14 +24,14 @@ class AdaptiveLoadingIndicator extends StatelessWidget {
         child: CircularProgressIndicator(
           value: value,
           strokeWidth: 2.5,
-          color: color ?? VigorColors.orange,
+          color: indicatorColor,
         ),
       );
     }
 
     return CircularProgressIndicator(
       value: value,
-      color: color,
+      color: indicatorColor,
     );
   }
 }
