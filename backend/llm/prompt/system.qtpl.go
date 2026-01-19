@@ -121,7 +121,7 @@ STRUCTURE:
 //line llm/prompt/system.qtpl:38
 	if !skipWarmupCooldown {
 //line llm/prompt/system.qtpl:38
-		qw422016.N().S(`- 3 routines named "warmup", "work", "cooldown"
+		qw422016.N().S(`- 3 routines in order: "warmup", "work", "cooldown" (warmup MUST be first, cooldown MUST be last)
 - warmup (5-10min): dynamic movements preparing muscles used in work phase. AVOID exercises targeting injured areas.
 - work: main training per methodology
 - cooldown (5min): static stretches for muscles worked. AVOID stretches aggravating injuries.

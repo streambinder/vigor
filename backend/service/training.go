@@ -247,6 +247,8 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		validRoutineTypes["warmup"] = true
 		validRoutineTypes["cooldown"] = true
 	}
+	// reorder routines: warmup first, work in original order, cooldown last
+	training.Routines = reorderRoutines(training.Routines)
 	if err := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes); err != nil {
 		log.Error().Err(err).Msg("generated training validation failed")
 		return nil, ErrMalformedTraining
@@ -596,4 +598,25 @@ func modifierMatchesAnyExercise(mod model.Modifier, exercises []model.Exercise) 
 		}
 	}
 	return false
+}
+
+// reorderRoutines ensures warmup is first, cooldown is last, and work routines
+// maintain their original relative order in between.
+func reorderRoutines(routines []model.Routine) []model.Routine {
+	var warmup, work, cooldown []model.Routine
+	for _, r := range routines {
+		switch r.Type {
+		case "warmup":
+			warmup = append(warmup, r)
+		case "cooldown":
+			cooldown = append(cooldown, r)
+		default:
+			work = append(work, r)
+		}
+	}
+	result := make([]model.Routine, 0, len(routines))
+	result = append(result, warmup...)
+	result = append(result, work...)
+	result = append(result, cooldown...)
+	return result
 }
