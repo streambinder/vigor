@@ -13,6 +13,7 @@ import '../providers/auth_provider.dart';
 import '../services/service_locator.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/cached_exercise_image.dart';
+import '../widgets/marquee_text.dart';
 import '../widgets/user_select_dialog.dart';
 import '../utils/exercise_modal.dart';
 import '../utils/feedback_modal.dart';
@@ -430,7 +431,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       },
       child: AdaptiveScaffold(
         appBar: AdaptiveAppBar(
-          title: Text(training.name),
+          title: MarqueeText(text: training.name),
           automaticallyImplyLeading: false,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: VigorColors.stone),
@@ -985,7 +986,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(activity.name, style: VigorTypography.body.copyWith(fontWeight: FontWeight.w600, color: VigorColors.textPrimary(context))),
+              MarqueeText(text: activity.name, style: VigorTypography.body.copyWith(fontWeight: FontWeight.w600, color: VigorColors.textPrimary(context))),
               if (exercise != null && (exercise.equipment.isNotEmpty || exercise.muscles.isNotEmpty || activity.modifiers.isNotEmpty)) ...[
                 const SizedBox(height: VigorSpacing.xs),
                 _buildExerciseDetails(exercise, activity.modifiers),

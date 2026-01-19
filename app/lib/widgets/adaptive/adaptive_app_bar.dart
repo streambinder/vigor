@@ -86,8 +86,10 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget _buildLiquidGlassAppBar(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = VigorColors.textPrimary(context);
-    final hasLeading = leading != null ||
-        (automaticallyImplyLeading && Navigator.of(context).canPop());
+    // cache canPop result to avoid race conditions between padding calc and widget render
+    final canPop = Navigator.of(context).canPop();
+    final showBackButton = leading == null && automaticallyImplyLeading && canPop;
+    final hasLeading = leading != null || showBackButton;
     final hasActions = actions != null && actions!.isNotEmpty;
 
     // compensate for IconButton's internal 8px padding so icons align with body content
@@ -121,8 +123,7 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
                 children: [
                   if (leading != null)
                     leading!
-                  else if (automaticallyImplyLeading &&
-                      Navigator.of(context).canPop())
+                  else if (showBackButton)
                     IconButton(
                       icon: const Icon(Icons.arrow_back_ios),
                       onPressed: () => Navigator.of(context).pop(),
