@@ -244,7 +244,7 @@
   "equipmentPlaceholder": "ej. Barra, Mancuernas",
   "customPromptOptional": "Prompt Personalizado (opcional)",
   "focusOnUpperBody": "ej. Enfocarse en la parte superior del cuerpo",
-  "trainingPartnersOptional": "Compañeros de Entrenamiento (opcional)",
+  "trainingPartnersOptional": "Partner",
 
   "generatingTraining": "Generando tu entrenamiento...",
   "thisMayTakeAMoment": "Esto puede tomar un momento",

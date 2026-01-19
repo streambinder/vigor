@@ -714,7 +714,7 @@ class AppLocalizationsIt extends AppLocalizations {
       'es. Concentrati sulla parte superiore del corpo';
 
   @override
-  String get trainingPartnersOptional => 'Partner di Allenamento (opzionale)';
+  String get trainingPartnersOptional => 'Partner';
 
   @override
   String get generatingTraining => 'Generazione allenamento in corso...';

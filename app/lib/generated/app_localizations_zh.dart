@@ -702,7 +702,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get focusOnUpperBody => '例如：专注于上半身';
 
   @override
-  String get trainingPartnersOptional => '训练伙伴（可选）';
+  String get trainingPartnersOptional => '伙伴';
 
   @override
   String get generatingTraining => '正在生成您的训练...';

@@ -1407,7 +1407,7 @@ abstract class AppLocalizations {
   /// No description provided for @trainingPartnersOptional.
   ///
   /// In en, this message translates to:
-  /// **'Training Partners (optional)'**
+  /// **'Partner'**
   String get trainingPartnersOptional;
 
   /// No description provided for @generatingTraining.

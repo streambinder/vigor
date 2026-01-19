@@ -244,7 +244,7 @@
   "equipmentPlaceholder": "напр. Штанга, Гантели",
   "customPromptOptional": "Пользовательский Запрос (необязательно)",
   "focusOnUpperBody": "напр. Сосредоточиться на верхней части тела",
-  "trainingPartnersOptional": "Партнёры по Тренировке (необязательно)",
+  "trainingPartnersOptional": "Партнёр",
 
   "generatingTraining": "Создаём вашу тренировку...",
   "thisMayTakeAMoment": "Это может занять некоторое время",

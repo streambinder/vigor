@@ -702,7 +702,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get focusOnUpperBody => '例：上半身に集中';
 
   @override
-  String get trainingPartnersOptional => 'トレーニングパートナー（任意）';
+  String get trainingPartnersOptional => 'パートナー';
 
   @override
   String get generatingTraining => 'トレーニングを生成中...';

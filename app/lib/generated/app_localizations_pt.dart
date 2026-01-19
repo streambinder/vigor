@@ -711,7 +711,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get focusOnUpperBody => 'ex. Focar na parte superior do corpo';
 
   @override
-  String get trainingPartnersOptional => 'Parceiros de Treino (opcional)';
+  String get trainingPartnersOptional => 'Partner';
 
   @override
   String get generatingTraining => 'A gerar o teu treino...';

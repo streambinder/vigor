@@ -369,7 +369,7 @@
   "equipmentPlaceholder": "e.g., Barbell, Dumbbells",
   "customPromptOptional": "Custom Prompt (optional)",
   "focusOnUpperBody": "e.g., Focus on upper body",
-  "trainingPartnersOptional": "Training Partners (optional)",
+  "trainingPartnersOptional": "Partner",
 
   "generatingTraining": "Generating your training...",
   "thisMayTakeAMoment": "This may take a moment",

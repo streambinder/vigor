@@ -702,7 +702,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get focusOnUpperBody => '예: 상체에 집중';
 
   @override
-  String get trainingPartnersOptional => '트레이닝 파트너 (선택사항)';
+  String get trainingPartnersOptional => '파트너';
 
   @override
   String get generatingTraining => '트레이닝을 생성하는 중...';

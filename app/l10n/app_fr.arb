@@ -244,7 +244,7 @@
   "equipmentPlaceholder": "ex. Barre, Haltères",
   "customPromptOptional": "Prompt Personnalisé (optionnel)",
   "focusOnUpperBody": "ex. Se concentrer sur le haut du corps",
-  "trainingPartnersOptional": "Partenaires d'Entraînement (optionnel)",
+  "trainingPartnersOptional": "Partner",
 
   "generatingTraining": "Génération de ton entraînement...",
   "thisMayTakeAMoment": "Cela peut prendre un moment",

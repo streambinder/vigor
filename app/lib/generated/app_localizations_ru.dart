@@ -706,8 +706,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get focusOnUpperBody => 'напр. Сосредоточиться на верхней части тела';
 
   @override
-  String get trainingPartnersOptional =>
-      'Партнёры по Тренировке (необязательно)';
+  String get trainingPartnersOptional => 'Партнёр';
 
   @override
   String get generatingTraining => 'Создаём вашу тренировку...';

@@ -244,7 +244,7 @@
   "equipmentPlaceholder": "例：バーベル、ダンベル",
   "customPromptOptional": "カスタムプロンプト（任意）",
   "focusOnUpperBody": "例：上半身に集中",
-  "trainingPartnersOptional": "トレーニングパートナー（任意）",
+  "trainingPartnersOptional": "パートナー",
 
   "generatingTraining": "トレーニングを生成中...",
   "thisMayTakeAMoment": "少々お待ちください",

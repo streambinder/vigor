@@ -244,7 +244,7 @@
   "equipmentPlaceholder": "z.B. Langhantel, Kurzhanteln",
   "customPromptOptional": "Benutzerdefinierter Prompt (optional)",
   "focusOnUpperBody": "z.B. Fokus auf Oberkörper",
-  "trainingPartnersOptional": "Trainingspartner (optional)",
+  "trainingPartnersOptional": "Partner",
 
   "generatingTraining": "Dein Training wird erstellt...",
   "thisMayTakeAMoment": "Dies kann einen Moment dauern",
