@@ -491,18 +491,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (_isLoadingGyms)
           const Center(child: AdaptiveLoadingIndicator())
         else if (_gyms == null || _gyms!.isEmpty)
-          Container(
-            padding: VigorSpacing.paddingLg,
-            decoration: BoxDecoration(
-              color: VigorColors.surface(context),
-              borderRadius: VigorRadius.radiusMd,
-            ),
-            child: Column(
-              children: [
-                Icon(Icons.fitness_center, size: 48, color: VigorColors.stone.withValues(alpha: 0.5)),
-                const SizedBox(height: VigorSpacing.sm),
-                Text(l10n.noGymsAddedYet, style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context))),
-              ],
+          SizedBox(
+            width: double.infinity,
+            child: Container(
+              padding: VigorSpacing.paddingLg,
+              decoration: BoxDecoration(
+                color: VigorColors.surface(context),
+                borderRadius: VigorRadius.radiusMd,
+              ),
+              child: Column(
+                children: [
+                  Icon(Icons.fitness_center, size: 48, color: VigorColors.stone.withValues(alpha: 0.5)),
+                  const SizedBox(height: VigorSpacing.sm),
+                  Text(l10n.noGymsAddedYet, style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context))),
+                ],
+              ),
             ),
           )
         else
