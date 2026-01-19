@@ -80,12 +80,17 @@ Age:{%d profile.Age() %} Height:{%f.0 profile.Height %}cm Weight:{%f.0 profile.W
 {% endif %}
 {% if len(recentTrainings) > 0 %}
 [HISTORY]
-{% for _, training := range recentTrainings %}{%d training.DaysSince() %}d: {%s training.Methodology %}{% if len(training.Feedback) > 0 %} "{%s training.Feedback %}"{% endif %}{% code activitiesWithFeedback := []string{}; for _, a := range training.Activities() { if len(a.Feedback) > 0 { activitiesWithFeedback = append(activitiesWithFeedback, a.ExerciseID + ":" + a.Feedback) } } %}{% if len(activitiesWithFeedback) > 0 %} | {% for i, f := range activitiesWithFeedback %}{%s f %}{% if i < len(activitiesWithFeedback)-1 %}, {% endif %}{% endfor %}{% endif %}
+{% for _, training := range recentTrainings %}
+- {%d training.DaysSince() %}d ago | {%s training.Methodology %}{% if len(training.Feedback) > 0 %} | Feedback: "{%s training.Feedback %}"{% endif %}
+{% code activitiesWithFeedback := training.Activities() %}
+{% for _, a := range activitiesWithFeedback %}{% if len(a.Feedback) > 0 %}  {%s a.ExerciseID %}: {%s a.Feedback %}
+{% endif %}{% endfor %}
 {% endfor %}
 {% endif %}
 {% if len(facts) > 0 %}
 [FACTS]
-{% for _, fact := range facts %}[{%s fact.Reference %}] {%s fact.Content %}
+Apply when relevant to selected exercises:
+{% for _, fact := range facts %}- {%s fact.Content %} (ref: {%s fact.Reference %})
 {% endfor %}
 {% endif %}
 Output language: {% if len(profiles) > 0 && len(profiles[0].Language) > 0 %}{%s profiles[0].Language %}{% else %}English{% endif %}

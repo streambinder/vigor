@@ -14,16 +14,16 @@ import (
 )
 
 const (
-	MaxWorkExercises       = 30 // RAG-based retrieval for main training
-	MaxWarmupExercises     = 8  // random selection for warmup
-	MaxCooldownExercises   = 5  // random selection for cooldown
+	MaxWorkExercises       = 15 // RAG-based retrieval for main training (reduced from 30)
+	MaxWarmupExercises     = 6  // random selection for warmup
+	MaxCooldownExercises   = 4  // random selection for cooldown
 	MaxPromptFacts         = 5
 	MaxFactDistance        = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
 	MaxExerciseDistance    = 0.2 // Maximum cosine distance for exercise matching
 	WarmupCooldownMaxScore = 25  // max progression score for warmup/cooldown exercises
-	MinWorkExercises       = 10  // minimum exercises before falling back to no-min filtering
-	MinFamilyExercises     = 5   // minimum exercises for a family to be considered relevant
-	MinPerFamilyLimit      = 5   // minimum exercises to query per family
+	MinWorkExercises       = 8   // minimum exercises before falling back to no-min filtering
+	MinFamilyExercises     = 3   // minimum exercises for a family to be considered relevant
+	MinPerFamilyLimit      = 3   // minimum exercises to query per family
 )
 
 // RetrieveGoals fetches goals by IDs from the knowledge database with their descriptions.

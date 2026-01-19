@@ -20,7 +20,11 @@ GOALS drive design:
 
 MUSCLE COVERAGE: Train ALL major groups each session (chest, back, shoulders, arms, core, legs). Goals set PRIMARY (high volume) vs SECONDARY (maintenance) emphasis. Only USER_REQUEST can exclude groups.
 
-REASONING FIRST: Complete reasoning object before routines. Strategy should explain methodology choice and approach in 1-2 sentences.
+REASONING (complete before generating routines):
+1. Constraints: injuries, equipment limits, time bounds
+2. Strategy: methodology choice + how it serves goals (1-2 sentences)
+3. Adjustments: apply [HISTORY] feedback — increase/decrease intensity
+4. Exercises: select from [WORK] list only, matching strategy
 
 {% if methodology != nil %}
 METHODOLOGY: {%s methodology.ID %}
@@ -32,9 +36,9 @@ METHODOLOGIES (pick one based on user goals and equipment):
 
 STRUCTURE:
 {% if !skipWarmupCooldown %}- 3 routines named "warmup", "work", "cooldown"
-- warmup: dynamic movements, 5-10min
-- work: main training
-- cooldown: static stretches, 5min
+- warmup (5-10min): dynamic movements preparing muscles used in work phase. AVOID exercises targeting injured areas.
+- work: main training per methodology
+- cooldown (5min): static stretches for muscles worked. AVOID stretches aggravating injuries.
 {% else %}- 1 routine named "work" only
 {% endif %}
 

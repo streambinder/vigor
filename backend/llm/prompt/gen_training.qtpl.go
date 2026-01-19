@@ -398,106 +398,112 @@ Age:`)
 //line llm/prompt/gen_training.qtpl:83
 		for _, training := range recentTrainings {
 //line llm/prompt/gen_training.qtpl:83
+			qw422016.N().S(`
+- `)
+//line llm/prompt/gen_training.qtpl:84
 			qw422016.N().D(training.DaysSince())
-//line llm/prompt/gen_training.qtpl:83
-			qw422016.N().S(`d: `)
-//line llm/prompt/gen_training.qtpl:83
+//line llm/prompt/gen_training.qtpl:84
+			qw422016.N().S(`d ago | `)
+//line llm/prompt/gen_training.qtpl:84
 			qw422016.E().S(training.Methodology)
-//line llm/prompt/gen_training.qtpl:83
+//line llm/prompt/gen_training.qtpl:84
 			if len(training.Feedback) > 0 {
-//line llm/prompt/gen_training.qtpl:83
-				qw422016.N().S(` "`)
-//line llm/prompt/gen_training.qtpl:83
+//line llm/prompt/gen_training.qtpl:84
+				qw422016.N().S(` | Feedback: "`)
+//line llm/prompt/gen_training.qtpl:84
 				qw422016.E().S(training.Feedback)
-//line llm/prompt/gen_training.qtpl:83
+//line llm/prompt/gen_training.qtpl:84
 				qw422016.N().S(`"`)
-//line llm/prompt/gen_training.qtpl:83
+//line llm/prompt/gen_training.qtpl:84
 			}
-//line llm/prompt/gen_training.qtpl:83
-			activitiesWithFeedback := []string{}
-			for _, a := range training.Activities() {
-				if len(a.Feedback) > 0 {
-					activitiesWithFeedback = append(activitiesWithFeedback, a.ExerciseID+":"+a.Feedback)
-				}
-			}
-
-//line llm/prompt/gen_training.qtpl:83
-			if len(activitiesWithFeedback) > 0 {
-//line llm/prompt/gen_training.qtpl:83
-				qw422016.N().S(` | `)
-//line llm/prompt/gen_training.qtpl:83
-				for i, f := range activitiesWithFeedback {
-//line llm/prompt/gen_training.qtpl:83
-					qw422016.E().S(f)
-//line llm/prompt/gen_training.qtpl:83
-					if i < len(activitiesWithFeedback)-1 {
-//line llm/prompt/gen_training.qtpl:83
-						qw422016.N().S(`, `)
-//line llm/prompt/gen_training.qtpl:83
-					}
-//line llm/prompt/gen_training.qtpl:83
-				}
-//line llm/prompt/gen_training.qtpl:83
-			}
-//line llm/prompt/gen_training.qtpl:83
+//line llm/prompt/gen_training.qtpl:84
 			qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:84
+//line llm/prompt/gen_training.qtpl:85
+			activitiesWithFeedback := training.Activities()
+
+//line llm/prompt/gen_training.qtpl:85
+			qw422016.N().S(`
+`)
+//line llm/prompt/gen_training.qtpl:86
+			for _, a := range activitiesWithFeedback {
+//line llm/prompt/gen_training.qtpl:86
+				if len(a.Feedback) > 0 {
+//line llm/prompt/gen_training.qtpl:86
+					qw422016.N().S(`  `)
+//line llm/prompt/gen_training.qtpl:86
+					qw422016.E().S(a.ExerciseID)
+//line llm/prompt/gen_training.qtpl:86
+					qw422016.N().S(`: `)
+//line llm/prompt/gen_training.qtpl:86
+					qw422016.E().S(a.Feedback)
+//line llm/prompt/gen_training.qtpl:86
+					qw422016.N().S(`
+`)
+//line llm/prompt/gen_training.qtpl:87
+				}
+//line llm/prompt/gen_training.qtpl:87
+			}
+//line llm/prompt/gen_training.qtpl:87
+			qw422016.N().S(`
+`)
+//line llm/prompt/gen_training.qtpl:88
 		}
-//line llm/prompt/gen_training.qtpl:84
+//line llm/prompt/gen_training.qtpl:88
 		qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:85
+//line llm/prompt/gen_training.qtpl:89
 	}
-//line llm/prompt/gen_training.qtpl:85
+//line llm/prompt/gen_training.qtpl:89
 	qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:86
+//line llm/prompt/gen_training.qtpl:90
 	if len(facts) > 0 {
-//line llm/prompt/gen_training.qtpl:86
+//line llm/prompt/gen_training.qtpl:90
 		qw422016.N().S(`
 [FACTS]
+Apply when relevant to selected exercises:
 `)
-//line llm/prompt/gen_training.qtpl:88
+//line llm/prompt/gen_training.qtpl:93
 		for _, fact := range facts {
-//line llm/prompt/gen_training.qtpl:88
-			qw422016.N().S(`[`)
-//line llm/prompt/gen_training.qtpl:88
-			qw422016.E().S(fact.Reference)
-//line llm/prompt/gen_training.qtpl:88
-			qw422016.N().S(`] `)
-//line llm/prompt/gen_training.qtpl:88
+//line llm/prompt/gen_training.qtpl:93
+			qw422016.N().S(`- `)
+//line llm/prompt/gen_training.qtpl:93
 			qw422016.E().S(fact.Content)
-//line llm/prompt/gen_training.qtpl:88
-			qw422016.N().S(`
+//line llm/prompt/gen_training.qtpl:93
+			qw422016.N().S(` (ref: `)
+//line llm/prompt/gen_training.qtpl:93
+			qw422016.E().S(fact.Reference)
+//line llm/prompt/gen_training.qtpl:93
+			qw422016.N().S(`)
 `)
-//line llm/prompt/gen_training.qtpl:89
+//line llm/prompt/gen_training.qtpl:94
 		}
-//line llm/prompt/gen_training.qtpl:89
+//line llm/prompt/gen_training.qtpl:94
 		qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:90
+//line llm/prompt/gen_training.qtpl:95
 	}
-//line llm/prompt/gen_training.qtpl:90
+//line llm/prompt/gen_training.qtpl:95
 	qw422016.N().S(`
 Output language: `)
-//line llm/prompt/gen_training.qtpl:91
+//line llm/prompt/gen_training.qtpl:96
 	if len(profiles) > 0 && len(profiles[0].Language) > 0 {
-//line llm/prompt/gen_training.qtpl:91
+//line llm/prompt/gen_training.qtpl:96
 		qw422016.E().S(profiles[0].Language)
-//line llm/prompt/gen_training.qtpl:91
+//line llm/prompt/gen_training.qtpl:96
 	} else {
-//line llm/prompt/gen_training.qtpl:91
+//line llm/prompt/gen_training.qtpl:96
 		qw422016.N().S(`English`)
-//line llm/prompt/gen_training.qtpl:91
+//line llm/prompt/gen_training.qtpl:96
 	}
-//line llm/prompt/gen_training.qtpl:91
+//line llm/prompt/gen_training.qtpl:96
 	qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:92
+//line llm/prompt/gen_training.qtpl:97
 }
 
-//line llm/prompt/gen_training.qtpl:92
+//line llm/prompt/gen_training.qtpl:97
 func WriteGenTraining(qq422016 qtio422016.Writer,
 	profiles []model.Profile,
 	goals []string,
@@ -515,16 +521,16 @@ func WriteGenTraining(qq422016 qtio422016.Writer,
 	facts []model.Fact,
 	skipWarmupCooldown bool,
 ) {
-//line llm/prompt/gen_training.qtpl:92
+//line llm/prompt/gen_training.qtpl:97
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/gen_training.qtpl:92
+//line llm/prompt/gen_training.qtpl:97
 	StreamGenTraining(qw422016, profiles, goals, workExercises, warmupExercises, cooldownExercises, equipment, modifiers, favoriteExercises, favoriteEquipment, methodology, userPrompt, duration, recentTrainings, facts, skipWarmupCooldown)
-//line llm/prompt/gen_training.qtpl:92
+//line llm/prompt/gen_training.qtpl:97
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/gen_training.qtpl:92
+//line llm/prompt/gen_training.qtpl:97
 }
 
-//line llm/prompt/gen_training.qtpl:92
+//line llm/prompt/gen_training.qtpl:97
 func GenTraining(
 	profiles []model.Profile,
 	goals []string,
@@ -542,15 +548,15 @@ func GenTraining(
 	facts []model.Fact,
 	skipWarmupCooldown bool,
 ) string {
-//line llm/prompt/gen_training.qtpl:92
+//line llm/prompt/gen_training.qtpl:97
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/gen_training.qtpl:92
+//line llm/prompt/gen_training.qtpl:97
 	WriteGenTraining(qb422016, profiles, goals, workExercises, warmupExercises, cooldownExercises, equipment, modifiers, favoriteExercises, favoriteEquipment, methodology, userPrompt, duration, recentTrainings, facts, skipWarmupCooldown)
-//line llm/prompt/gen_training.qtpl:92
+//line llm/prompt/gen_training.qtpl:97
 	qs422016 := string(qb422016.B)
-//line llm/prompt/gen_training.qtpl:92
+//line llm/prompt/gen_training.qtpl:97
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/gen_training.qtpl:92
+//line llm/prompt/gen_training.qtpl:97
 	return qs422016
-//line llm/prompt/gen_training.qtpl:92
+//line llm/prompt/gen_training.qtpl:97
 }
