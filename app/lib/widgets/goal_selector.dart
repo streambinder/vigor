@@ -177,8 +177,8 @@ class _GoalSelectorState extends State<GoalSelector> {
             constraints: const BoxConstraints(maxHeight: 200),
             child: SingleChildScrollView(
               child: Wrap(
-                spacing: VigorSpacing.sm,
-                runSpacing: VigorSpacing.sm,
+                spacing: VigorSpacing.xs,
+                runSpacing: VigorSpacing.xs,
                 children: filtered.map((goal) {
                   final isSelected = selectedSet.contains(goal);
                   return FilterChip(
@@ -192,6 +192,9 @@ class _GoalSelectorState extends State<GoalSelector> {
                     onSelected: (_) => _toggle(goal),
                     selectedColor: VigorColors.indigo,
                     checkmarkColor: Colors.white,
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.xs),
                   );
                 }).toList(),
               ),

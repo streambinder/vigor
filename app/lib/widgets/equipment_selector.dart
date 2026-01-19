@@ -177,8 +177,8 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
             constraints: const BoxConstraints(maxHeight: 200),
             child: SingleChildScrollView(
               child: Wrap(
-                spacing: VigorSpacing.sm,
-                runSpacing: VigorSpacing.sm,
+                spacing: VigorSpacing.xs,
+                runSpacing: VigorSpacing.xs,
                 children: filtered.map((equipment) {
                   final isSelected = selectedSet.contains(equipment);
                   return FilterChip(
@@ -192,6 +192,9 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
                     onSelected: (_) => _toggle(equipment),
                     selectedColor: VigorColors.indigo,
                     checkmarkColor: Colors.white,
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.xs),
                   );
                 }).toList(),
               ),
