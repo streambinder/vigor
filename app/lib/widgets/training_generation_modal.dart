@@ -189,16 +189,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   }
 
   Widget _buildEquipmentModeContent() {
-    final l10n = AppLocalizations.of(context);
     switch (_equipmentMode) {
       case EquipmentMode.bodyweight:
-        return Text(
-          l10n.noEquipmentBodyweightOnly,
-          style: VigorTypography.caption.copyWith(
-            color: VigorColors.textSecondary(context),
-            fontStyle: FontStyle.italic,
-          ),
-        );
+        return const SizedBox.shrink();
       case EquipmentMode.gym:
         return _buildGymSelector();
       case EquipmentMode.custom:
