@@ -226,6 +226,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       user.email,
                       style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context)),
                     ),
+                    const SizedBox(height: VigorSpacing.sm),
+                    Wrap(
+                      spacing: VigorSpacing.xs,
+                      runSpacing: VigorSpacing.xs,
+                      children: [
+                        _buildStatPill(Icons.cake, '$age'),
+                        _buildStatPill(Icons.height, '${user.profile.height.toInt()} cm'),
+                        _buildStatPill(Icons.monitor_weight, '${user.profile.weight.toInt()} kg'),
+                        _buildStatPill(
+                          user.profile.gender == 'male' ? Icons.male : Icons.female,
+                          user.profile.gender == 'male' ? l10n.male : l10n.female,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -247,21 +261,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   child: const Icon(Icons.edit, color: VigorColors.stone, size: 20),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: VigorSpacing.lg),
-          Wrap(
-            spacing: VigorSpacing.sm,
-            runSpacing: VigorSpacing.sm,
-            alignment: WrapAlignment.center,
-            children: [
-              _buildStatPill(Icons.cake, '$age'),
-              _buildStatPill(Icons.height, '${user.profile.height.toInt()} cm'),
-              _buildStatPill(Icons.monitor_weight, '${user.profile.weight.toInt()} kg'),
-              _buildStatPill(
-                user.profile.gender == 'male' ? Icons.male : Icons.female,
-                user.profile.gender == 'male' ? l10n.male : l10n.female,
               ),
             ],
           ),
@@ -298,7 +297,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildStatPill(IconData icon, String value) {
     // using VigorTypography.data for numeric stats per identity.md
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
+      padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
       decoration: BoxDecoration(
         color: VigorColors.stone.withValues(alpha: 0.1),
         borderRadius: VigorRadius.radiusFull,
@@ -306,9 +305,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: VigorColors.stone, size: 16),
+          Icon(icon, color: VigorColors.stone, size: 14),
           const SizedBox(width: VigorSpacing.xs),
-          Text(value, style: VigorTypography.data.copyWith(color: VigorColors.stone)),
+          Text(value, style: VigorTypography.data.copyWith(color: VigorColors.stone, fontSize: 12)),
         ],
       ),
     );
