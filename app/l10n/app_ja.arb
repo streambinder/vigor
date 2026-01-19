@@ -234,7 +234,7 @@
   "durationMinutes": "時間（分）",
   "bodyweight": "自重",
   "gym": "ジム",
-  "custom": "カスタム",
+  "custom": "その他",
   "noEquipmentBodyweightOnly": "自重のみ",
   "noGymsDefinedCreateOne": "ジムがありません。プロフィールで作成してください。",
   "selectAGym": "ジムを選択",

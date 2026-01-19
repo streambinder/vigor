@@ -672,7 +672,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get gym => 'ジム';
 
   @override
-  String get custom => 'カスタム';
+  String get custom => 'その他';
 
   @override
   String get noEquipmentBodyweightOnly => '自重のみ';

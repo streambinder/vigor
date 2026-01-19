@@ -234,7 +234,7 @@
   "durationMinutes": "Dauer (Minuten)",
   "bodyweight": "Körpergewicht",
   "gym": "Fitnessstudio",
-  "custom": "Benutzerdefiniert",
+  "custom": "Sonstiges",
   "noEquipmentBodyweightOnly": "Nur Körpergewicht",
   "noGymsDefinedCreateOne": "Kein Fitnessstudio. Erstelle eines im Profil.",
   "selectAGym": "Fitnessstudio auswählen",

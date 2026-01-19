@@ -681,7 +681,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get gym => 'Ginásio';
 
   @override
-  String get custom => 'Personalizado';
+  String get custom => 'Outro';
 
   @override
   String get noEquipmentBodyweightOnly => 'Apenas peso corporal';

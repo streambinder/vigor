@@ -234,7 +234,7 @@
   "durationMinutes": "시간 (분)",
   "bodyweight": "맨몸",
   "gym": "헬스장",
-  "custom": "사용자 정의",
+  "custom": "기타",
   "noEquipmentBodyweightOnly": "맨몸만",
   "noGymsDefinedCreateOne": "헬스장 없음. 프로필에서 생성하세요.",
   "selectAGym": "헬스장 선택",

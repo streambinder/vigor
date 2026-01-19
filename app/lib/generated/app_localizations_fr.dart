@@ -683,7 +683,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get gym => 'Salle';
 
   @override
-  String get custom => 'Personnalisé';
+  String get custom => 'Autre';
 
   @override
   String get noEquipmentBodyweightOnly => 'Poids du corps seulement';

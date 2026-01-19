@@ -234,7 +234,7 @@
   "durationMinutes": "Durée (minutes)",
   "bodyweight": "Poids du corps",
   "gym": "Salle",
-  "custom": "Personnalisé",
+  "custom": "Autre",
   "noEquipmentBodyweightOnly": "Poids du corps seulement",
   "noGymsDefinedCreateOne": "Aucune salle. Crée-en une dans le profil.",
   "selectAGym": "Sélectionner une salle",

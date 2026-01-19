@@ -672,7 +672,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gym => '健身房';
 
   @override
-  String get custom => '自定义';
+  String get custom => '其他';
 
   @override
   String get noEquipmentBodyweightOnly => '仅自重';

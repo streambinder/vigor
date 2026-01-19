@@ -234,7 +234,7 @@
   "durationMinutes": "时长（分钟）",
   "bodyweight": "自重",
   "gym": "健身房",
-  "custom": "自定义",
+  "custom": "其他",
   "noEquipmentBodyweightOnly": "仅自重",
   "noGymsDefinedCreateOne": "无健身房。在资料中创建。",
   "selectAGym": "选择健身房",

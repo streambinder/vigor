@@ -359,7 +359,7 @@
   "durationMinutes": "Duration (minutes)",
   "bodyweight": "Bodyweight",
   "gym": "Gym",
-  "custom": "Custom",
+  "custom": "Other",
   "noEquipmentBodyweightOnly": "Bodyweight only",
   "noGymsDefinedCreateOne": "No gyms. Create one in profile.",
   "selectAGym": "Select a gym",

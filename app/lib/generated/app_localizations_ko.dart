@@ -672,7 +672,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gym => '헬스장';
 
   @override
-  String get custom => '사용자 정의';
+  String get custom => '기타';
 
   @override
   String get noEquipmentBodyweightOnly => '맨몸만';

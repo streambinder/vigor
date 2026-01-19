@@ -676,7 +676,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get gym => 'Зал';
 
   @override
-  String get custom => 'Настраиваемое';
+  String get custom => 'Другое';
 
   @override
   String get noEquipmentBodyweightOnly => 'Только с собственным весом';

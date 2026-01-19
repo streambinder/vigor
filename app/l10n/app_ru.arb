@@ -234,7 +234,7 @@
   "durationMinutes": "Продолжительность (минуты)",
   "bodyweight": "С собственным весом",
   "gym": "Зал",
-  "custom": "Настраиваемое",
+  "custom": "Другое",
   "noEquipmentBodyweightOnly": "Только с собственным весом",
   "noGymsDefinedCreateOne": "Нет залов. Создайте в профиле.",
   "selectAGym": "Выбрать зал",

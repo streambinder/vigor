@@ -1347,7 +1347,7 @@ abstract class AppLocalizations {
   /// No description provided for @custom.
   ///
   /// In en, this message translates to:
-  /// **'Custom'**
+  /// **'Other'**
   String get custom;
 
   /// No description provided for @noEquipmentBodyweightOnly.

@@ -684,7 +684,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get gym => 'Fitnessstudio';
 
   @override
-  String get custom => 'Benutzerdefiniert';
+  String get custom => 'Sonstiges';
 
   @override
   String get noEquipmentBodyweightOnly => 'Nur Körpergewicht';
