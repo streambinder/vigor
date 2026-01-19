@@ -84,7 +84,14 @@ class _HomePageState extends State<HomePage> {
 
     return AdaptiveScaffold(
       appBar: AdaptiveAppBar(
-        title: Text(l10n.appName.toUpperCase()),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const VigorLogo(size: 24),
+            const SizedBox(width: VigorSpacing.sm),
+            Text(l10n.appName.toUpperCase()),
+          ],
+        ),
         actions: [
           AdaptiveIconButton(
             icon: const Icon(Icons.refresh),
