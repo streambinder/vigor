@@ -888,4 +888,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get appearance => 'Внешний вид';
+
+  @override
+  String get trainingDefaults => 'По умолчанию';
+
+  @override
+  String get defaultDuration => 'Длительность тренировки';
 }

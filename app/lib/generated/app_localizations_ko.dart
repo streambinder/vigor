@@ -882,4 +882,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get appearance => '외관';
+
+  @override
+  String get trainingDefaults => '기본값';
+
+  @override
+  String get defaultDuration => '훈련 시간';
 }

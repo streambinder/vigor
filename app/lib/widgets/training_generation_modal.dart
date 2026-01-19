@@ -35,7 +35,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   final _formKey = GlobalKey<FormState>();
   final _promptController = TextEditingController();
 
-  int _duration = 60; // minutes, range: 10-180
+  late int _duration; // minutes, range: 10-180
 
   EquipmentMode _equipmentMode = EquipmentMode.bodyweight;
   Gym? _selectedGym;
@@ -56,6 +56,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   void initState() {
     super.initState();
     final prefs = context.read<PreferencesService>();
+    _duration = prefs.defaultDuration;
     final defaultId = prefs.defaultGymId;
     // default to gym mode if user has a default gym set, otherwise bodyweight
     if (defaultId != null && widget.gyms.any((g) => g.id == defaultId)) {

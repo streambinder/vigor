@@ -880,4 +880,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get appearance => '外观';
+
+  @override
+  String get trainingDefaults => '默认值';
+
+  @override
+  String get defaultDuration => '训练时长';
 }

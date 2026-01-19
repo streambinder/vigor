@@ -1751,6 +1751,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Appearance'**
   String get appearance;
+
+  /// No description provided for @trainingDefaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Defaults'**
+  String get trainingDefaults;
+
+  /// No description provided for @defaultDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Training Duration'**
+  String get defaultDuration;
 }
 
 class _AppLocalizationsDelegate

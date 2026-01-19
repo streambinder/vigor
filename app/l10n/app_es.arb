@@ -311,5 +311,8 @@
   "themeLight": "Claro",
   "themeDark": "Oscuro",
   "themeAutoDescription": "Seguir configuración del sistema",
-  "appearance": "Apariencia"
+  "appearance": "Apariencia",
+
+  "trainingDefaults": "Predeterminados",
+  "defaultDuration": "Duración del Entrenamiento"
 }

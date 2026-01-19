@@ -888,4 +888,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appearance => 'Appearance';
+
+  @override
+  String get trainingDefaults => 'Defaults';
+
+  @override
+  String get defaultDuration => 'Training Duration';
 }

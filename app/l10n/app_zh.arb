@@ -311,5 +311,8 @@
   "themeLight": "浅色",
   "themeDark": "深色",
   "themeAutoDescription": "跟随系统设置",
-  "appearance": "外观"
+  "appearance": "外观",
+
+  "trainingDefaults": "默认值",
+  "defaultDuration": "训练时长"
 }

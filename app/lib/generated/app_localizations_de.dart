@@ -898,4 +898,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get appearance => 'Erscheinungsbild';
+
+  @override
+  String get trainingDefaults => 'Standardwerte';
+
+  @override
+  String get defaultDuration => 'Trainingsdauer';
 }

@@ -899,4 +899,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get appearance => 'Apparence';
+
+  @override
+  String get trainingDefaults => 'Paramètres par défaut';
+
+  @override
+  String get defaultDuration => 'Durée de l\'Entraînement';
 }

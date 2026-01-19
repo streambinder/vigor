@@ -891,4 +891,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get appearance => 'Aparência';
+
+  @override
+  String get trainingDefaults => 'Padrões';
+
+  @override
+  String get defaultDuration => 'Duração do Treino';
 }

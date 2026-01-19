@@ -311,5 +311,8 @@
   "themeLight": "Hell",
   "themeDark": "Dunkel",
   "themeAutoDescription": "Systemeinstellungen folgen",
-  "appearance": "Erscheinungsbild"
+  "appearance": "Erscheinungsbild",
+
+  "trainingDefaults": "Standardwerte",
+  "defaultDuration": "Trainingsdauer"
 }

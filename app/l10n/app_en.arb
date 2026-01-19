@@ -453,5 +453,8 @@
   "themeLight": "Light",
   "themeDark": "Dark",
   "themeAutoDescription": "Follow system settings",
-  "appearance": "Appearance"
+  "appearance": "Appearance",
+
+  "trainingDefaults": "Defaults",
+  "defaultDuration": "Training Duration"
 }

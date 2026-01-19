@@ -311,5 +311,8 @@
   "themeLight": "라이트",
   "themeDark": "다크",
   "themeAutoDescription": "시스템 설정 따르기",
-  "appearance": "외관"
+  "appearance": "외관",
+
+  "trainingDefaults": "기본값",
+  "defaultDuration": "훈련 시간"
 }

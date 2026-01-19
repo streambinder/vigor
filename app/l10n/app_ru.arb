@@ -311,5 +311,8 @@
   "themeLight": "Светлая",
   "themeDark": "Тёмная",
   "themeAutoDescription": "Следовать настройкам системы",
-  "appearance": "Внешний вид"
+  "appearance": "Внешний вид",
+
+  "trainingDefaults": "По умолчанию",
+  "defaultDuration": "Длительность тренировки"
 }

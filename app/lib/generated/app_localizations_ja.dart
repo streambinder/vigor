@@ -882,4 +882,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get appearance => '外観';
+
+  @override
+  String get trainingDefaults => 'デフォルト';
+
+  @override
+  String get defaultDuration => 'トレーニング時間';
 }

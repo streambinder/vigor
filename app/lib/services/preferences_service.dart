@@ -5,6 +5,8 @@ class PreferencesService {
   static const String _defaultGymIdKey = 'default_gym_id';
   static const String _localeKey = 'app_locale';
   static const String _themeModeKey = 'theme_mode';
+  static const String _defaultDurationKey = 'default_duration';
+  static const int defaultDurationFallback = 60;
 
   SharedPreferences? _prefs;
 
@@ -50,5 +52,11 @@ class PreferencesService {
 
   Future<void> setThemeMode(String mode) async {
     await _prefs?.setString(_themeModeKey, mode);
+  }
+
+  int get defaultDuration => _prefs?.getInt(_defaultDurationKey) ?? defaultDurationFallback;
+
+  Future<void> setDefaultDuration(int minutes) async {
+    await _prefs?.setInt(_defaultDurationKey, minutes);
   }
 }

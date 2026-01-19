@@ -311,5 +311,8 @@
   "themeLight": "ライト",
   "themeDark": "ダーク",
   "themeAutoDescription": "システム設定に従う",
-  "appearance": "外観"
+  "appearance": "外観",
+
+  "trainingDefaults": "デフォルト",
+  "defaultDuration": "トレーニング時間"
 }
