@@ -79,7 +79,7 @@ REASONING (complete before generating routines):
 	if methodology != nil {
 //line llm/prompt/system.qtpl:29
 		qw422016.N().S(`
-METHODOLOGY: `)
+METHODOLOGY (applies to work routine ONLY, not warmup/cooldown): `)
 //line llm/prompt/system.qtpl:30
 		qw422016.E().S(methodology.ID)
 //line llm/prompt/system.qtpl:30
@@ -94,7 +94,7 @@ METHODOLOGY: `)
 	} else {
 //line llm/prompt/system.qtpl:32
 		qw422016.N().S(`
-METHODOLOGIES (pick one based on user goals and equipment):
+METHODOLOGIES (pick one for work routine based on user goals and equipment; not warmup/cooldown):
 `)
 //line llm/prompt/system.qtpl:34
 		for _, m := range methodologies {

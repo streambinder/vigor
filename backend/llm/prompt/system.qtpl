@@ -27,10 +27,10 @@ REASONING (complete before generating routines):
 4. Exercises: select from [WORK] list only, matching strategy
 
 {% if methodology != nil %}
-METHODOLOGY: {%s methodology.ID %}
+METHODOLOGY (applies to work routine ONLY, not warmup/cooldown): {%s methodology.ID %}
 {%s methodology.Description %}
 {% else %}
-METHODOLOGIES (pick one based on user goals and equipment):
+METHODOLOGIES (pick one for work routine based on user goals and equipment; not warmup/cooldown):
 {% for _, m := range methodologies %}- {%s m.ID %}: {%s m.Description %}
 {% endfor %}{% endif %}
 
