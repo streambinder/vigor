@@ -81,7 +81,7 @@ Age:{%d profile.Age() %} Height:{%f.0 profile.Height %}cm Weight:{%f.0 profile.W
 {% if len(recentTrainings) > 0 %}
 [HISTORY]
 {% for _, training := range recentTrainings %}
-- {%d training.DaysSince() %}d ago | {%s training.Methodology %}{% if len(training.Feedback) > 0 %} | Feedback: "{%s training.Feedback %}"{% endif %}
+- "{%s training.Name %}" | {%d training.DaysSince() %}d ago | {%s training.Methodology %}{% if len(training.Feedback) > 0 %} | Feedback: "{%s training.Feedback %}"{% endif %}
 {% code activitiesWithFeedback := training.Activities() %}
 {% for _, a := range activitiesWithFeedback %}{% if len(a.Feedback) > 0 %}  {%s a.ExerciseID %}: {%s a.Feedback %}
 {% endif %}{% endfor %}

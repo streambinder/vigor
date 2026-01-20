@@ -55,4 +55,12 @@ MODIFIERS: When feedback shows "too_easy", add modifier IDs from [MODIFIERS] sec
 {% endif %}
 
 PROGRESSION: Analyze feedback from [HISTORY]. For "too_easy": increase reps{% if hasModifiers %} or add weighted modifiers{% endif %}. For "too_hard": decrease reps.
+
+NAME: Generate a memorable 3-4 word title that:
+- Reflects workout character (intensity, focus, energy)
+- Uses action words, alliteration, or evocative phrases
+- Matches methodology tone: strength=powerful/heavy, circuit/hiit=fast/intense, mobility=flowing/calm
+- NEVER use: ALL CAPS, methodology names, goal lists, generic terms ("training", "workout", "session")
+- NEVER reuse names from [HISTORY]
+Examples: Power Surge, Iron Hour, Circuit Breaker, Flow State, Burn Notice, Strength Stack, Rapid Fire, Full Throttle
 {% endfunc %}

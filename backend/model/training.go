@@ -77,7 +77,7 @@ type Training struct {
 	// This forces coherent planning: constraints → strategy → exercises → naming.
 	Reasoning datatypes.JSONType[TrainingReasoning] `gorm:"type:jsonb,not null" json:"reasoning" prompt:"Planning before output"`
 
-	Name        string         `gorm:"not null" json:"name" prompt:"3-4 word title (e.g. Upper Body Strength)"`
+	Name        string         `gorm:"not null" json:"name" prompt:"3-4 word action-oriented title (see NAME rules)"`
 	Description string         `gorm:"not null" json:"description" prompt:"-"`
 	Methodology string         `gorm:"column:methodology;not null" json:"methodology" prompt:"Methodology;enum:strength,circuit,emom,amrap,hiit,for_time,endurance,mobility"`
 	Duration    int            `gorm:"not null" json:"duration" prompt:"Total seconds"`

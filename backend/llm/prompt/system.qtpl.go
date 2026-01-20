@@ -173,32 +173,40 @@ PROGRESSION: Analyze feedback from [HISTORY]. For "too_easy": increase reps`)
 	}
 //line llm/prompt/system.qtpl:57
 	qw422016.N().S(`. For "too_hard": decrease reps.
+
+NAME: Generate a memorable 3-4 word title that:
+- Reflects workout character (intensity, focus, energy)
+- Uses action words, alliteration, or evocative phrases
+- Matches methodology tone: strength=powerful/heavy, circuit/hiit=fast/intense, mobility=flowing/calm
+- NEVER use: ALL CAPS, methodology names, goal lists, generic terms ("training", "workout", "session")
+- NEVER reuse names from [HISTORY]
+Examples: Power Surge, Iron Hour, Circuit Breaker, Flow State, Burn Notice, Strength Stack, Rapid Fire, Full Throttle
 `)
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:66
 }
 
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:66
 func WriteSystem(qq422016 qtio422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool) {
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:66
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:66
 	StreamSystem(qw422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers)
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:66
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:66
 }
 
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:66
 func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool) string {
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:66
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:66
 	WriteSystem(qb422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers)
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:66
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:66
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:66
 	return qs422016
-//line llm/prompt/system.qtpl:58
+//line llm/prompt/system.qtpl:66
 }

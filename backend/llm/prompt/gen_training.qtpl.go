@@ -399,7 +399,11 @@ Age:`)
 		for _, training := range recentTrainings {
 //line llm/prompt/gen_training.qtpl:83
 			qw422016.N().S(`
-- `)
+- "`)
+//line llm/prompt/gen_training.qtpl:84
+			qw422016.E().S(training.Name)
+//line llm/prompt/gen_training.qtpl:84
+			qw422016.N().S(`" | `)
 //line llm/prompt/gen_training.qtpl:84
 			qw422016.N().D(training.DaysSince())
 //line llm/prompt/gen_training.qtpl:84
