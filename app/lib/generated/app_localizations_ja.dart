@@ -630,6 +630,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tapToStart => 'タップして開始';
 
   @override
+  String get tapWhenDone => '完了したらタップ';
+
+  @override
   String get trainingCompleted => 'トレーニング完了！';
 
   @override

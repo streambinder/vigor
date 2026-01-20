@@ -640,6 +640,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tapToStart => 'Appuie pour commencer';
 
   @override
+  String get tapWhenDone => 'Appuie quand c\'est fait';
+
+  @override
   String get trainingCompleted => 'Entraînement Terminé !';
 
   @override

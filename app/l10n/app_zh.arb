@@ -219,6 +219,7 @@
   "leave": "离开",
 
   "tapToStart": "点击开始",
+  "tapWhenDone": "完成后点击",
   "trainingCompleted": "训练完成！",
   "greatJobCompleting": "完成 {name} 做得好",
   "done": "完成",

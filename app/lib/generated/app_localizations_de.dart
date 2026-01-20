@@ -642,6 +642,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tapToStart => 'Tippe zum Starten';
 
   @override
+  String get tapWhenDone => 'Tippe wenn fertig';
+
+  @override
   String get trainingCompleted => 'Training Abgeschlossen!';
 
   @override

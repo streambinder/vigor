@@ -327,6 +327,7 @@
   "leave": "Leave",
 
   "tapToStart": "Tap to start",
+  "tapWhenDone": "Tap when done",
   "trainingCompleted": "Training Completed!",
   "greatJobCompleting": "Great job completing {name}",
   "@greatJobCompleting": {

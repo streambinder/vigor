@@ -630,6 +630,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tapToStart => '点击开始';
 
   @override
+  String get tapWhenDone => '完成后点击';
+
+  @override
   String get trainingCompleted => '训练完成！';
 
   @override

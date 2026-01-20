@@ -219,6 +219,7 @@
   "leave": "Quitter",
 
   "tapToStart": "Appuie pour commencer",
+  "tapWhenDone": "Appuie quand c'est fait",
   "trainingCompleted": "Entraînement Terminé !",
   "greatJobCompleting": "Excellent travail pour {name}",
   "done": "Terminé",

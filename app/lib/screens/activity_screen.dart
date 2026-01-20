@@ -10,7 +10,7 @@ import '../services/service_locator.dart';
 import '../models/training.dart';
 import '../models/gym.dart';
 import 'training_details_screen.dart';
-import 'tabata_timer_screen.dart';
+import 'workout_timer_screen.dart';
 
 class ActivityScreen extends StatefulWidget {
   const ActivityScreen({super.key});
@@ -493,7 +493,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                     child: InkWell(
                       onTap: () async {
                         final completed = await Navigator.of(context).push<bool>(
-                          MaterialPageRoute(builder: (context) => TabataTimerScreen(training: training)),
+                          MaterialPageRoute(builder: (context) => WorkoutTimerScreen(training: training)),
                         );
                         if (completed == true) _loadTrainings();
                       },

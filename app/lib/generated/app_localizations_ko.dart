@@ -630,6 +630,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tapToStart => '탭하여 시작';
 
   @override
+  String get tapWhenDone => '완료하면 탭';
+
+  @override
   String get trainingCompleted => '트레이닝 완료!';
 
   @override

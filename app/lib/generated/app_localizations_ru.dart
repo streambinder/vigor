@@ -634,6 +634,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get tapToStart => 'Нажмите, чтобы начать';
 
   @override
+  String get tapWhenDone => 'Нажмите, когда закончите';
+
+  @override
   String get trainingCompleted => 'Тренировка Завершена!';
 
   @override

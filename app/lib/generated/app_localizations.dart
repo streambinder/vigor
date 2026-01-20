@@ -1272,6 +1272,12 @@ abstract class AppLocalizations {
   /// **'Tap to start'**
   String get tapToStart;
 
+  /// No description provided for @tapWhenDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap when done'**
+  String get tapWhenDone;
+
   /// No description provided for @trainingCompleted.
   ///
   /// In en, this message translates to:

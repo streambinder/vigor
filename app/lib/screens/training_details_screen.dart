@@ -18,7 +18,7 @@ import '../widgets/user_select_dialog.dart';
 import '../utils/exercise_modal.dart';
 import '../utils/feedback_modal.dart';
 import 'main_navigation.dart';
-import 'tabata_timer_screen.dart';
+import 'workout_timer_screen.dart';
 
 class TrainingDetailsScreen extends StatefulWidget {
   final Training training;
@@ -706,7 +706,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           label: l10n.startTraining,
           color: indigoColor,
           onPressed: () async {
-            final completed = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (context) => TabataTimerScreen(training: training)));
+            final completed = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (context) => WorkoutTimerScreen(training: training)));
             if (completed == true && mounted) Navigator.of(context).pop(true);
           },
         )),
