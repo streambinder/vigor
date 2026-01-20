@@ -318,6 +318,7 @@
 
   "trainingDefaults": "Predeterminados",
   "defaultDuration": "Duración del Entrenamiento",
+  "warmupCooldown": "Calentamiento y enfriamiento",
 
   "timer": "Temporizador",
   "intervalJingle": "Sonido al completar intervalo"

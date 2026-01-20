@@ -1782,6 +1782,12 @@ abstract class AppLocalizations {
   /// **'Training Duration'**
   String get defaultDuration;
 
+  /// No description provided for @warmupCooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'Warmup and cooldown'**
+  String get warmupCooldown;
+
   /// No description provided for @timer.
   ///
   /// In en, this message translates to:

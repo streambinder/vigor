@@ -899,6 +899,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get defaultDuration => '훈련 시간';
 
   @override
+  String get warmupCooldown => '워밍업 및 쿨다운';
+
+  @override
   String get timer => '타이머';
 
   @override

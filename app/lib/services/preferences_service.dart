@@ -7,6 +7,7 @@ class PreferencesService {
   static const String _themeModeKey = 'theme_mode';
   static const String _defaultDurationKey = 'default_duration';
   static const String _intervalJingleKey = 'interval_jingle';
+  static const String _warmupCooldownKey = 'warmup_cooldown';
   static const int defaultDurationFallback = 60;
 
   SharedPreferences? _prefs;
@@ -65,5 +66,11 @@ class PreferencesService {
 
   Future<void> setIntervalJingle(bool enabled) async {
     await _prefs?.setBool(_intervalJingleKey, enabled);
+  }
+
+  bool get warmupCooldown => _prefs?.getBool(_warmupCooldownKey) ?? true;
+
+  Future<void> setWarmupCooldown(bool enabled) async {
+    await _prefs?.setBool(_warmupCooldownKey, enabled);
   }
 }

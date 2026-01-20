@@ -318,6 +318,7 @@
 
   "trainingDefaults": "デフォルト",
   "defaultDuration": "トレーニング時間",
+  "warmupCooldown": "ウォームアップとクールダウン",
 
   "timer": "タイマー",
   "intervalJingle": "インターバル完了時にサウンド"

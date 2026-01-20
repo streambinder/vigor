@@ -318,6 +318,7 @@
 
   "trainingDefaults": "Padrões",
   "defaultDuration": "Duração do Treino",
+  "warmupCooldown": "Aquecimento e arrefecimento",
 
   "timer": "Temporizador",
   "intervalJingle": "Som ao completar intervalo"

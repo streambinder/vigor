@@ -897,6 +897,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get defaultDuration => '训练时长';
 
   @override
+  String get warmupCooldown => '热身和放松';
+
+  @override
   String get timer => '计时器';
 
   @override

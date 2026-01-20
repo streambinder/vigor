@@ -904,6 +904,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get defaultDuration => 'Длительность тренировки';
 
   @override
+  String get warmupCooldown => 'Разминка и заминка';
+
+  @override
   String get timer => 'Таймер';
 
   @override

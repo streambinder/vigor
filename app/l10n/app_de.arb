@@ -318,6 +318,7 @@
 
   "trainingDefaults": "Standardwerte",
   "defaultDuration": "Trainingsdauer",
+  "warmupCooldown": "Aufwärmen und Abkühlen",
 
   "timer": "Timer",
   "intervalJingle": "Ton bei Intervallende"

@@ -318,6 +318,7 @@
 
   "trainingDefaults": "默认值",
   "defaultDuration": "训练时长",
+  "warmupCooldown": "热身和放松",
 
   "timer": "计时器",
   "intervalJingle": "间隔完成时播放提示音"

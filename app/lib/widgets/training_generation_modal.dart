@@ -41,7 +41,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   Gym? _selectedGym;
   bool _isGenerating = false;
   int? _retryAttempt;
-  bool _includeWarmupCooldown = true;
+  late bool _includeWarmupCooldown;
   final List<UserInfo> _partners = [];
   List<String> _equipment = [];
   String? _methodology;
@@ -57,6 +57,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     super.initState();
     final prefs = context.read<PreferencesService>();
     _duration = prefs.defaultDuration;
+    _includeWarmupCooldown = prefs.warmupCooldown;
     final defaultId = prefs.defaultGymId;
     // default to gym mode if user has a default gym set, otherwise bodyweight
     if (defaultId != null && widget.gyms.any((g) => g.id == defaultId)) {

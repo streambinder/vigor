@@ -318,6 +318,7 @@
 
   "trainingDefaults": "По умолчанию",
   "defaultDuration": "Длительность тренировки",
+  "warmupCooldown": "Разминка и заминка",
 
   "timer": "Таймер",
   "intervalJingle": "Звук при завершении интервала"

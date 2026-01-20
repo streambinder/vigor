@@ -318,6 +318,7 @@
 
   "trainingDefaults": "기본값",
   "defaultDuration": "훈련 시간",
+  "warmupCooldown": "워밍업 및 쿨다운",
 
   "timer": "타이머",
   "intervalJingle": "인터벌 완료 시 소리"

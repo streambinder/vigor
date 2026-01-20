@@ -460,6 +460,7 @@
 
   "trainingDefaults": "Defaults",
   "defaultDuration": "Training Duration",
+  "warmupCooldown": "Warmup and cooldown",
 
   "timer": "Timer",
   "intervalJingle": "Jingle at interval completion"

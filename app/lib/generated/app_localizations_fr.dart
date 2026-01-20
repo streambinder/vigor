@@ -915,6 +915,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get defaultDuration => 'Durée de l\'Entraînement';
 
   @override
+  String get warmupCooldown => 'Échauffement et récupération';
+
+  @override
   String get timer => 'Minuteur';
 
   @override

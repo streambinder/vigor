@@ -16,6 +16,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   late int _defaultDuration;
   late bool _intervalJingle;
+  late bool _warmupCooldown;
 
   @override
   void initState() {
@@ -23,6 +24,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final prefs = context.read<PreferencesService>();
     _defaultDuration = prefs.defaultDuration;
     _intervalJingle = prefs.intervalJingle;
+    _warmupCooldown = prefs.warmupCooldown;
   }
 
   @override
@@ -192,6 +194,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   setState(() => _defaultDuration = value.round());
                   context.read<PreferencesService>().setDefaultDuration(value.round());
                 },
+              ),
+              const SizedBox(height: VigorSpacing.sm),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(l10n.warmupCooldown, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+                  Switch(
+                    value: _warmupCooldown,
+                    activeColor: VigorColors.indigo,
+                    onChanged: (value) {
+                      setState(() => _warmupCooldown = value);
+                      context.read<PreferencesService>().setWarmupCooldown(value);
+                    },
+                  ),
+                ],
               ),
             ],
           ),

@@ -318,6 +318,7 @@
 
   "trainingDefaults": "Paramètres par défaut",
   "defaultDuration": "Durée de l'Entraînement",
+  "warmupCooldown": "Échauffement et récupération",
 
   "timer": "Minuteur",
   "intervalJingle": "Son à la fin d'intervalle"

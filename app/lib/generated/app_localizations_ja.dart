@@ -899,6 +899,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get defaultDuration => 'トレーニング時間';
 
   @override
+  String get warmupCooldown => 'ウォームアップとクールダウン';
+
+  @override
   String get timer => 'タイマー';
 
   @override
