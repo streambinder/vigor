@@ -346,7 +346,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.check_circle, size: 18, color: _tabController.index == 1 ? Colors.white : VigorColors.gold),
+                const Icon(Icons.check_circle, size: 18),
                 const SizedBox(width: 6),
                 Text('$past ${l10n.completed}'),
               ],
