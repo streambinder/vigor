@@ -902,4 +902,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get defaultDuration => 'Длительность тренировки';
+
+  @override
+  String get timer => 'Таймер';
+
+  @override
+  String get intervalJingle => 'Звук при завершении интервала';
 }

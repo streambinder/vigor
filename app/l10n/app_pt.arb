@@ -317,5 +317,8 @@
   "appearance": "Aparência",
 
   "trainingDefaults": "Padrões",
-  "defaultDuration": "Duração do Treino"
+  "defaultDuration": "Duração do Treino",
+
+  "timer": "Temporizador",
+  "intervalJingle": "Som ao completar intervalo"
 }

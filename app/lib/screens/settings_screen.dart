@@ -15,11 +15,14 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   late int _defaultDuration;
+  late bool _intervalJingle;
 
   @override
   void initState() {
     super.initState();
-    _defaultDuration = context.read<PreferencesService>().defaultDuration;
+    final prefs = context.read<PreferencesService>();
+    _defaultDuration = prefs.defaultDuration;
+    _intervalJingle = prefs.intervalJingle;
   }
 
   @override
@@ -33,6 +36,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: VigorSpacing.paddingLg,
         children: [
           _buildAppearanceSection(context, l10n, isDark),
+          const SizedBox(height: VigorSpacing.lg),
+          _buildTimerSection(context, l10n, isDark),
           const SizedBox(height: VigorSpacing.lg),
           _buildTrainingSection(context, l10n, isDark),
           const SizedBox(height: VigorSpacing.lg),
@@ -98,6 +103,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onTap: () => themeProvider.setThemeMode('dark'),
               ),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimerSection(BuildContext context, AppLocalizations l10n, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: VigorSpacing.paddingSm,
+              decoration: BoxDecoration(
+                color: VigorColors.indigoAdaptive(context).withValues(alpha: 0.15),
+                borderRadius: VigorRadius.radiusSm,
+              ),
+              child: Icon(Icons.timer, color: VigorColors.indigoAdaptive(context), size: 20),
+            ),
+            const SizedBox(width: VigorSpacing.sm),
+            Text(l10n.timer, style: VigorTypography.headline.copyWith(fontSize: 18, color: VigorColors.textPrimary(context))),
+          ],
+        ),
+        const SizedBox(height: VigorSpacing.md),
+        Container(
+          decoration: BoxDecoration(
+            color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+            borderRadius: VigorRadius.radiusMd,
+          ),
+          child: SwitchListTile(
+            title: Text(l10n.intervalJingle, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+            value: _intervalJingle,
+            activeColor: VigorColors.indigo,
+            onChanged: (value) {
+              setState(() => _intervalJingle = value);
+              context.read<PreferencesService>().setIntervalJingle(value);
+            },
           ),
         ),
       ],

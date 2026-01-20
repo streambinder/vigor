@@ -317,5 +317,8 @@
   "appearance": "Aspetto",
 
   "trainingDefaults": "Predefiniti",
-  "defaultDuration": "Durata Allenamento"
+  "defaultDuration": "Durata Allenamento",
+
+  "timer": "Timer",
+  "intervalJingle": "Suono a fine intervallo"
 }

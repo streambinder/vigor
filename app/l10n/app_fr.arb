@@ -317,5 +317,8 @@
   "appearance": "Apparence",
 
   "trainingDefaults": "Paramètres par défaut",
-  "defaultDuration": "Durée de l'Entraînement"
+  "defaultDuration": "Durée de l'Entraînement",
+
+  "timer": "Minuteur",
+  "intervalJingle": "Son à la fin d'intervalle"
 }

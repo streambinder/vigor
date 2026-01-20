@@ -897,4 +897,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get defaultDuration => '훈련 시간';
+
+  @override
+  String get timer => '타이머';
+
+  @override
+  String get intervalJingle => '인터벌 완료 시 소리';
 }

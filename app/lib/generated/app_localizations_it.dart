@@ -913,4 +913,10 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get defaultDuration => 'Durata Allenamento';
+
+  @override
+  String get timer => 'Timer';
+
+  @override
+  String get intervalJingle => 'Suono a fine intervallo';
 }

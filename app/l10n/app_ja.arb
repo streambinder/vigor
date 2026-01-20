@@ -317,5 +317,8 @@
   "appearance": "外観",
 
   "trainingDefaults": "デフォルト",
-  "defaultDuration": "トレーニング時間"
+  "defaultDuration": "トレーニング時間",
+
+  "timer": "タイマー",
+  "intervalJingle": "インターバル完了時にサウンド"
 }

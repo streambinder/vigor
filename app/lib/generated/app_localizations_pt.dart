@@ -906,4 +906,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get defaultDuration => 'Duração do Treino';
+
+  @override
+  String get timer => 'Temporizador';
+
+  @override
+  String get intervalJingle => 'Som ao completar intervalo';
 }

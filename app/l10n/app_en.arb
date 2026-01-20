@@ -459,5 +459,8 @@
   "appearance": "Appearance",
 
   "trainingDefaults": "Defaults",
-  "defaultDuration": "Training Duration"
+  "defaultDuration": "Training Duration",
+
+  "timer": "Timer",
+  "intervalJingle": "Jingle at interval completion"
 }

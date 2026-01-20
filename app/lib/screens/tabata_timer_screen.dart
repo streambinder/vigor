@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/training.dart';
+import '../services/audio_service.dart';
+import '../services/preferences_service.dart';
 import '../timer/interval_controller.dart';
 import '../timer/timer_controller.dart';
 import '../timer/training_interval.dart';
@@ -28,17 +30,44 @@ class TabataTimerScreen extends StatefulWidget {
 
 class _TabataTimerScreenState extends State<TabataTimerScreen> {
   late final TimerController _controller;
+  String? _previousIntervalKey;
+  final AudioService _audioService = AudioService();
 
   @override
   void initState() {
     super.initState();
     _controller = IntervalController(training: widget.training);
     _controller.addListener(_onControllerUpdate);
+    _audioService.initialize();
     _controller.startCountdown();
   }
 
   void _onControllerUpdate() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+
+    // detect interval transition by comparing stable keys
+    final currentInterval = _controller.currentInterval;
+    final currentKey = _intervalKey(currentInterval);
+    if (_controller.hasStarted &&
+        currentKey != null &&
+        _previousIntervalKey != null &&
+        currentKey != _previousIntervalKey) {
+      _playJingleIfEnabled();
+    }
+    _previousIntervalKey = currentKey;
+
+    setState(() {});
+  }
+
+  String? _intervalKey(TrainingInterval? interval) {
+    if (interval == null) return null;
+    return '${interval.type}:${interval.activityNumber}:${interval.blockNumber}:${interval.routineNumber}';
+  }
+
+  void _playJingleIfEnabled() {
+    if (context.read<PreferencesService>().intervalJingle) {
+      _audioService.playJingle();
+    }
   }
 
   @override

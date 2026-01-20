@@ -910,4 +910,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get defaultDuration => 'Duración del Entrenamiento';
+
+  @override
+  String get timer => 'Temporizador';
+
+  @override
+  String get intervalJingle => 'Sonido al completar intervalo';
 }

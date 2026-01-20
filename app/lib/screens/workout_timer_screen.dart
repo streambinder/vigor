@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/training.dart';
+import '../services/audio_service.dart';
+import '../services/preferences_service.dart';
 import '../timer/timer_controller.dart';
 import '../timer/timer_mode.dart';
 import '../timer/training_interval.dart';
@@ -41,6 +43,8 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
   int _currentSegmentIndex = 0;
   TimerController? _controller;
   bool _workoutCompleted = false;
+  String? _previousIntervalKey;
+  final AudioService _audioService = AudioService();
 
   @override
   void initState() {
@@ -49,6 +53,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
       widget.training.routines,
       widget.training.methodology,
     );
+    _audioService.initialize();
     _startCurrentSegment();
   }
 
@@ -120,11 +125,34 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
 
     // check if current segment is complete
     if (_controller?.isCompleted == true) {
+      _playJingleIfEnabled();
       _advanceToNextSegment();
       return;
     }
 
+    // detect interval transition by comparing stable keys
+    final currentInterval = _controller?.currentInterval;
+    final currentKey = _intervalKey(currentInterval);
+    if (_controller?.hasStarted == true &&
+        currentKey != null &&
+        _previousIntervalKey != null &&
+        currentKey != _previousIntervalKey) {
+      _playJingleIfEnabled();
+    }
+    _previousIntervalKey = currentKey;
+
     setState(() {});
+  }
+
+  String? _intervalKey(TrainingInterval? interval) {
+    if (interval == null) return null;
+    return '${interval.type}:${interval.activityNumber}:${interval.blockNumber}:${interval.routineNumber}';
+  }
+
+  void _playJingleIfEnabled() {
+    if (context.read<PreferencesService>().intervalJingle) {
+      _audioService.playJingle();
+    }
   }
 
   void _advanceToNextSegment() {

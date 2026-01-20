@@ -897,4 +897,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get defaultDuration => 'トレーニング時間';
+
+  @override
+  String get timer => 'タイマー';
+
+  @override
+  String get intervalJingle => 'インターバル完了時にサウンド';
 }

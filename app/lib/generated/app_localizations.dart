@@ -1781,6 +1781,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Training Duration'**
   String get defaultDuration;
+
+  /// No description provided for @timer.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer'**
+  String get timer;
+
+  /// No description provided for @intervalJingle.
+  ///
+  /// In en, this message translates to:
+  /// **'Jingle at interval completion'**
+  String get intervalJingle;
 }
 
 class _AppLocalizationsDelegate

@@ -317,5 +317,8 @@
   "appearance": "外观",
 
   "trainingDefaults": "默认值",
-  "defaultDuration": "训练时长"
+  "defaultDuration": "训练时长",
+
+  "timer": "计时器",
+  "intervalJingle": "间隔完成时播放提示音"
 }

@@ -317,5 +317,8 @@
   "appearance": "외관",
 
   "trainingDefaults": "기본값",
-  "defaultDuration": "훈련 시간"
+  "defaultDuration": "훈련 시간",
+
+  "timer": "타이머",
+  "intervalJingle": "인터벌 완료 시 소리"
 }

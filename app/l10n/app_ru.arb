@@ -317,5 +317,8 @@
   "appearance": "Внешний вид",
 
   "trainingDefaults": "По умолчанию",
-  "defaultDuration": "Длительность тренировки"
+  "defaultDuration": "Длительность тренировки",
+
+  "timer": "Таймер",
+  "intervalJingle": "Звук при завершении интервала"
 }

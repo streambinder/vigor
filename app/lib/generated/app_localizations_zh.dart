@@ -895,4 +895,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get defaultDuration => '训练时长';
+
+  @override
+  String get timer => '计时器';
+
+  @override
+  String get intervalJingle => '间隔完成时播放提示音';
 }

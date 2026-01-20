@@ -317,5 +317,8 @@
   "appearance": "Erscheinungsbild",
 
   "trainingDefaults": "Standardwerte",
-  "defaultDuration": "Trainingsdauer"
+  "defaultDuration": "Trainingsdauer",
+
+  "timer": "Timer",
+  "intervalJingle": "Ton bei Intervallende"
 }
