@@ -194,8 +194,9 @@ class _HomePageState extends State<HomePage> {
                           const SizedBox(width: VigorSpacing.xs),
                           Text(
                             '$partnered',
-                            style: VigorTypography.dataLarge.copyWith(
+                            style: VigorTypography.data.copyWith(
                               color: VigorColors.textSecondary(context),
+                              fontSize: 18,
                             ),
                           ),
                         ],
