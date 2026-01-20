@@ -64,10 +64,15 @@ class FeedbackModal {
   }
 
   /// shows the feedback modal and returns the result, or null if cancelled
-  static Future<FeedbackResult?> show(BuildContext context, Training training) async {
+  /// [feedbackPrefix] is prepended to user feedback (e.g. methodology stats)
+  static Future<FeedbackResult?> show(
+    BuildContext context,
+    Training training, {
+    String? feedbackPrefix,
+  }) async {
     final activities = _getWorkActivities(training);
     if (activities.isEmpty) {
-      return FeedbackResult(feedback: '', activityFeedback: {}, activityReports: []);
+      return FeedbackResult(feedback: feedbackPrefix ?? '', activityFeedback: {}, activityReports: []);
     }
 
     return showDialog<FeedbackResult>(
@@ -76,6 +81,7 @@ class FeedbackModal {
       builder: (context) => _FeedbackDialogContent(
         activities: activities,
         showReports: true,
+        feedbackPrefix: feedbackPrefix,
       ),
     );
   }
@@ -103,11 +109,13 @@ class _FeedbackDialogContent extends StatefulWidget {
   final List<({String id, String exerciseId, String name, String? feedback})> activities;
   final bool showReports;
   final String? initialFeedback;
+  final String? feedbackPrefix;
 
   const _FeedbackDialogContent({
     required this.activities,
     required this.showReports,
     this.initialFeedback,
+    this.feedbackPrefix,
   });
 
   @override
@@ -137,6 +145,10 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
   }
 
   bool get _isValid {
+    // if there's a prefix (methodology stats), form is valid even without user input
+    if (widget.feedbackPrefix != null && widget.feedbackPrefix!.isNotEmpty) {
+      return true;
+    }
     final hasExplicitFeedback = _exerciseFeedback.values.any(
       (f) => f != ExerciseFeedback.none,
     );
@@ -161,7 +173,12 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
       }
     }
 
-    final feedback = _feedbackController.text.trim().replaceAll(RegExp(r'[\r\n]+'), ' ');
+    final userFeedback = _feedbackController.text.trim().replaceAll(RegExp(r'[\r\n]+'), ' ');
+    final prefix = widget.feedbackPrefix;
+    // prepend methodology stats to user feedback
+    final feedback = prefix != null && prefix.isNotEmpty
+        ? '$prefix$userFeedback'
+        : userFeedback;
     Navigator.of(context).pop(FeedbackResult(
       feedback: feedback,
       activityFeedback: activityFeedback,
@@ -211,6 +228,27 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // methodology stats (read-only, auto-generated)
+                      if (widget.feedbackPrefix != null && widget.feedbackPrefix!.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: TextField(
+                            controller: TextEditingController(text: widget.feedbackPrefix!.trim()),
+                            readOnly: true,
+                            maxLines: 1,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                          ),
+                        ),
                       TextField(
                         controller: _feedbackController,
                         maxLines: 1,

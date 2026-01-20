@@ -47,6 +47,9 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
   String? _previousIntervalKey;
   final AudioService _audioService = AudioService();
 
+  // methodology-specific stats captured on work segment completion
+  String? _methodologyStats;
+
   @override
   void initState() {
     super.initState();
@@ -126,6 +129,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
 
     // check if current segment is complete
     if (_controller?.isCompleted == true) {
+      _captureMethodologyStats();
       _playJingleIfEnabled();
       _advanceToNextSegment();
       return;
@@ -143,6 +147,36 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
     _previousIntervalKey = currentKey;
 
     setState(() {});
+  }
+
+  void _captureMethodologyStats() {
+    if (_currentSegmentIndex >= _segments.length) return;
+    final segment = _segments[_currentSegmentIndex];
+    final controller = _controller;
+    if (controller == null) return;
+
+    // only capture stats for work routine with AMRAP/ForTime
+    if (segment.routine.type.toLowerCase() != 'work') return;
+
+    switch (segment.mode) {
+      case TimerMode.amrap:
+        final amrapController = controller as AmrapController;
+        final completedRounds = amrapController.currentRound - 1;
+        _methodologyStats = 'Rounds completed: $completedRounds. ';
+        break;
+      case TimerMode.forTime:
+        final forTimeController = controller as ForTimeController;
+        _methodologyStats = 'Time to complete: ${forTimeController.globalSeconds} seconds. ';
+        break;
+      default:
+        break;
+    }
+  }
+
+  String _formatDuration(int seconds) {
+    final minutes = seconds ~/ 60;
+    final secs = seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   }
 
   String? _intervalKey(TrainingInterval? interval) {
@@ -194,7 +228,11 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
   }
 
   Future<void> _showFeedbackAndComplete() async {
-    final result = await FeedbackModal.show(context, widget.training);
+    final result = await FeedbackModal.show(
+      context,
+      widget.training,
+      feedbackPrefix: _methodologyStats,
+    );
     if (result == null) return;
     await _markTrainingComplete(result);
     if (mounted) {
@@ -456,7 +494,13 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
           TextButton(
             onPressed: () async {
               Navigator.of(dialogContext).pop();
-              final result = await FeedbackModal.show(context, widget.training);
+              // capture stats if exiting early from work segment
+              _captureMethodologyStats();
+              final result = await FeedbackModal.show(
+                context,
+                widget.training,
+                feedbackPrefix: _methodologyStats,
+              );
               if (result == null) return;
               await _markTrainingComplete(result);
               if (mounted) {
