@@ -180,6 +180,8 @@
   "failedToCloneTraining": "Не удалось клонировать тренировку",
   "trainingMarkedAsComplete": "Тренировка завершена",
   "failedToCompleteTraining": "Не удалось завершить тренировку",
+  "feedbackUpdated": "Отзыв обновлён",
+  "failedToUpdateFeedback": "Не удалось обновить отзыв",
   "reportSubmitted": "Отчёт отправлен",
   "failedToSubmitReport": "Не удалось отправить отчёт",
   "shuffleExercise": "Сменить упражнение",

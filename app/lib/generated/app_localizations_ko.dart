@@ -510,6 +510,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get failedToCompleteTraining => '트레이닝 완료 실패';
 
   @override
+  String get feedbackUpdated => '피드백이 업데이트되었습니다';
+
+  @override
+  String get failedToUpdateFeedback => '피드백 업데이트 실패';
+
+  @override
   String get reportSubmitted => '보고서가 제출되었습니다';
 
   @override

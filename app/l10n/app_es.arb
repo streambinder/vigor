@@ -180,6 +180,8 @@
   "failedToCloneTraining": "Error al clonar el entrenamiento",
   "trainingMarkedAsComplete": "Entrenamiento completado",
   "failedToCompleteTraining": "Error al completar el entrenamiento",
+  "feedbackUpdated": "Feedback actualizado",
+  "failedToUpdateFeedback": "Error al actualizar el feedback",
   "reportSubmitted": "Reporte enviado",
   "failedToSubmitReport": "Error al enviar el reporte",
   "shuffleExercise": "Cambiar ejercicio",

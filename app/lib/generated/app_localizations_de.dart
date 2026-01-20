@@ -521,6 +521,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Training konnte nicht abgeschlossen werden';
 
   @override
+  String get feedbackUpdated => 'Feedback aktualisiert';
+
+  @override
+  String get failedToUpdateFeedback =>
+      'Feedback konnte nicht aktualisiert werden';
+
+  @override
   String get reportSubmitted => 'Meldung gesendet';
 
   @override

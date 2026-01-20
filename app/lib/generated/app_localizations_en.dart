@@ -515,6 +515,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failedToCompleteTraining => 'Failed to complete training';
 
   @override
+  String get feedbackUpdated => 'Feedback updated';
+
+  @override
+  String get failedToUpdateFeedback => 'Failed to update feedback';
+
+  @override
   String get reportSubmitted => 'Report submitted';
 
   @override

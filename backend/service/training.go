@@ -33,7 +33,8 @@ var (
 	ErrDurationRequired   = errors.New("duration is required")
 	ErrDurationOutOfRange = errors.New("duration must be between 10 and 180 minutes")
 	ErrPromptTooLong      = errors.New("prompt exceeds maximum length")
-	ErrMalformedTraining  = errors.New("malformed generated training")
+	ErrMalformedTraining       = errors.New("malformed generated training")
+	ErrTrainingNotCompleted    = errors.New("training not completed")
 )
 
 // GenerateTraining creates a new training for a user.
@@ -432,6 +433,45 @@ func CompleteTraining(userID uuid.UUID, trainingID, feedback string, activityFee
 	}
 
 	// record proficiencies for owner and partners
+	if err := recordTrainingProficiencies(&training); err != nil {
+		log.Error().Err(err).Msg("failed to record proficiencies")
+	}
+
+	return &training, nil
+}
+
+// UpdateTrainingFeedback updates feedback on an already-completed training.
+func UpdateTrainingFeedback(userID uuid.UUID, trainingID, feedback string, activityFeedback map[string]string) (*model.Training, error) {
+	var training model.Training
+	if err := database.DB.
+		Preload("Gym").
+		Preload("Routines", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Routines.Blocks", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Routines.Blocks.Activities", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		First(&training, "id = ? AND (user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?))", trainingID, userID, userID).Error; err != nil {
+		return nil, ErrTrainingNotFound
+	}
+
+	if training.CompletedAt == nil {
+		return nil, ErrTrainingNotCompleted
+	}
+
+	training.Feedback = feedback
+	if err := database.DB.Save(&training).Error; err != nil {
+		return nil, err
+	}
+
+	if len(activityFeedback) > 0 {
+		for _, activity := range training.Activities() {
+			if fb, ok := activityFeedback[activity.ExerciseID]; ok {
+				activity.Feedback = fb
+				database.DB.Model(activity).Update("feedback", fb)
+			}
+		}
+	}
+
+	// delete old proficiencies for this training, then re-record
+	database.DB.Where("training_id = ?", training.ID).Delete(&model.Proficiency{})
 	if err := recordTrainingProficiencies(&training); err != nil {
 		log.Error().Err(err).Msg("failed to record proficiencies")
 	}

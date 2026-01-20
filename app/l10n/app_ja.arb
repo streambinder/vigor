@@ -180,6 +180,8 @@
   "failedToCloneTraining": "トレーニングの複製に失敗しました",
   "trainingMarkedAsComplete": "トレーニングが完了しました",
   "failedToCompleteTraining": "トレーニングの完了に失敗しました",
+  "feedbackUpdated": "フィードバックを更新しました",
+  "failedToUpdateFeedback": "フィードバックの更新に失敗しました",
   "reportSubmitted": "レポートが送信されました",
   "failedToSubmitReport": "レポートの送信に失敗しました",
   "shuffleExercise": "エクササイズを変更",

@@ -20,6 +20,16 @@ extension ExerciseFeedbackX on ExerciseFeedback {
         ExerciseFeedback.skipped => 'skipped',
         ExerciseFeedback.none => '',
       };
+
+  static ExerciseFeedback fromApiValue(String? value) => switch (value) {
+        'too_easy' => ExerciseFeedback.tooEasy,
+        'easy' => ExerciseFeedback.easy,
+        'ok' => ExerciseFeedback.ok,
+        'hard' => ExerciseFeedback.hard,
+        'too_hard' => ExerciseFeedback.tooHard,
+        'skipped' => ExerciseFeedback.skipped,
+        _ => ExerciseFeedback.none,
+      };
 }
 
 class FeedbackResult {
@@ -36,16 +46,16 @@ class FeedbackResult {
 
 class FeedbackModal {
   /// extracts unique activities from work routines
-  static List<({String id, String exerciseId, String name})> _getWorkActivities(Training training) {
+  static List<({String id, String exerciseId, String name, String? feedback})> _getWorkActivities(Training training) {
     final seen = <String>{};
-    final activities = <({String id, String exerciseId, String name})>[];
+    final activities = <({String id, String exerciseId, String name, String? feedback})>[];
     for (final routine in training.routines) {
       if (routine.type != 'work') continue;
       for (final block in routine.blocks) {
         for (final activity in block.activities) {
           if (!seen.contains(activity.exerciseId)) {
             seen.add(activity.exerciseId);
-            activities.add((id: activity.id, exerciseId: activity.exerciseId, name: activity.displayName));
+            activities.add((id: activity.id, exerciseId: activity.exerciseId, name: activity.displayName, feedback: activity.feedback));
           }
         }
       }
@@ -63,15 +73,42 @@ class FeedbackModal {
     return showDialog<FeedbackResult>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => _FeedbackDialogContent(activities: activities),
+      builder: (context) => _FeedbackDialogContent(
+        activities: activities,
+        showReports: true,
+      ),
+    );
+  }
+
+  /// shows the feedback modal for updating existing feedback (no reports, pre-populated values)
+  static Future<FeedbackResult?> showForUpdate(BuildContext context, Training training) async {
+    final activities = _getWorkActivities(training);
+    if (activities.isEmpty) {
+      return FeedbackResult(feedback: '', activityFeedback: {}, activityReports: []);
+    }
+
+    return showDialog<FeedbackResult>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _FeedbackDialogContent(
+        activities: activities,
+        showReports: false,
+        initialFeedback: training.feedback,
+      ),
     );
   }
 }
 
 class _FeedbackDialogContent extends StatefulWidget {
-  final List<({String id, String exerciseId, String name})> activities;
+  final List<({String id, String exerciseId, String name, String? feedback})> activities;
+  final bool showReports;
+  final String? initialFeedback;
 
-  const _FeedbackDialogContent({required this.activities});
+  const _FeedbackDialogContent({
+    required this.activities,
+    required this.showReports,
+    this.initialFeedback,
+  });
 
   @override
   State<_FeedbackDialogContent> createState() => _FeedbackDialogContentState();
@@ -85,8 +122,10 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
   @override
   void initState() {
     super.initState();
+    _feedbackController.text = widget.initialFeedback ?? '';
     _exerciseFeedback = {
-      for (final a in widget.activities) a.id: ExerciseFeedback.none,
+      for (final a in widget.activities)
+        a.id: ExerciseFeedbackX.fromApiValue(a.feedback),
     };
     _flaggedActivities = {};
   }
@@ -102,7 +141,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
       (f) => f != ExerciseFeedback.none,
     );
     final hasGeneralFeedback = _feedbackController.text.trim().isNotEmpty;
-    final hasFlags = _flaggedActivities.isNotEmpty;
+    final hasFlags = widget.showReports && _flaggedActivities.isNotEmpty;
     return hasExplicitFeedback || hasGeneralFeedback || hasFlags;
   }
 
@@ -188,6 +227,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                             name: a.name,
                             feedback: _exerciseFeedback[a.id]!,
                             isFlagged: _flaggedActivities.contains(a.id),
+                            showFlag: widget.showReports,
                             onFeedbackChanged: (feedback) {
                               setState(() => _exerciseFeedback[a.id] = feedback);
                             },
@@ -234,6 +274,7 @@ class _ExerciseFeedbackRow extends StatelessWidget {
   final String name;
   final ExerciseFeedback feedback;
   final bool isFlagged;
+  final bool showFlag;
   final ValueChanged<ExerciseFeedback> onFeedbackChanged;
   final ValueChanged<bool> onFlagChanged;
 
@@ -241,6 +282,7 @@ class _ExerciseFeedbackRow extends StatelessWidget {
     required this.name,
     required this.feedback,
     required this.isFlagged,
+    required this.showFlag,
     required this.onFeedbackChanged,
     required this.onFlagChanged,
   });
@@ -288,15 +330,16 @@ class _ExerciseFeedbackRow extends StatelessWidget {
             ),
             tooltip: 'Too hard',
           ),
-          // flag (independent from feedback)
-          IconButton(
-            icon: Icon(
-              isFlagged ? Icons.flag : Icons.flag_outlined,
-              color: isFlagged ? VigorColors.crimson : VigorColors.stone,
+          // flag (independent from feedback, only shown in completion mode)
+          if (showFlag)
+            IconButton(
+              icon: Icon(
+                isFlagged ? Icons.flag : Icons.flag_outlined,
+                color: isFlagged ? VigorColors.crimson : VigorColors.stone,
+              ),
+              onPressed: () => onFlagChanged(!isFlagged),
+              tooltip: 'Flag issue',
             ),
-            onPressed: () => onFlagChanged(!isFlagged),
-            tooltip: 'Flag issue',
-          ),
         ],
       ),
     );

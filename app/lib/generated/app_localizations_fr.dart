@@ -520,6 +520,12 @@ class AppLocalizationsFr extends AppLocalizations {
       'Échec de la complétion de l\'entraînement';
 
   @override
+  String get feedbackUpdated => 'Feedback mis à jour';
+
+  @override
+  String get failedToUpdateFeedback => 'Échec de la mise à jour du feedback';
+
+  @override
   String get reportSubmitted => 'Signalement envoyé';
 
   @override

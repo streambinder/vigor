@@ -258,6 +258,8 @@
   "failedToCloneTraining": "Failed to clone training",
   "trainingMarkedAsComplete": "Training completed",
   "failedToCompleteTraining": "Failed to complete training",
+  "feedbackUpdated": "Feedback updated",
+  "failedToUpdateFeedback": "Failed to update feedback",
   "reportSubmitted": "Report submitted",
   "failedToSubmitReport": "Failed to submit report",
   "shuffleExercise": "Shuffle exercise",

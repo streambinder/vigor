@@ -14,6 +14,7 @@ import (
 func initTraining(app *fiber.App) {
 	app.Post("/training", middleware.Authorized(), postTraining)
 	app.Post("/training/complete/:id", middleware.Authorized(), postTrainingCompleteById)
+	app.Put("/training/feedback/:id", middleware.Authorized(), putTrainingFeedbackById)
 	app.Post("/training/partner/:id", middleware.Authorized(), postTrainingPartner)
 	app.Post("/training/copy/:id", middleware.Authorized(), postTrainingCopy)
 	app.Post("/report", middleware.Authorized(), postReport)
@@ -133,6 +134,37 @@ func postTrainingCompleteById(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(dto.PostTrainingCompleteResponse{Message: "training updated successfully", Training: *training})
+}
+
+func putTrainingFeedbackById(c *fiber.Ctx) error {
+	trainingID := c.Params("id")
+	if trainingID == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "training id is required"})
+	}
+
+	var req dto.PostTrainingCompleteRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
+	}
+
+	training, err := service.UpdateTrainingFeedback(
+		c.Locals("userID").(uuid.UUID),
+		trainingID,
+		req.Feedback,
+		req.ActivityFeedback,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, service.ErrTrainingNotFound):
+			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})
+		case errors.Is(err, service.ErrTrainingNotCompleted):
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "training not completed"})
+		default:
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to update feedback"})
+		}
+	}
+
+	return c.JSON(dto.PostTrainingCompleteResponse{Message: "feedback updated successfully", Training: *training})
 }
 
 func postTrainingPartner(c *fiber.Ctx) error {

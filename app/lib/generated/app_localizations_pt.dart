@@ -519,6 +519,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get failedToCompleteTraining => 'Falha ao concluir o treino';
 
   @override
+  String get feedbackUpdated => 'Feedback atualizado';
+
+  @override
+  String get failedToUpdateFeedback => 'Falha ao atualizar o feedback';
+
+  @override
   String get reportSubmitted => 'Relatório enviado';
 
   @override

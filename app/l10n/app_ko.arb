@@ -180,6 +180,8 @@
   "failedToCloneTraining": "트레이닝 복제 실패",
   "trainingMarkedAsComplete": "트레이닝이 완료되었습니다",
   "failedToCompleteTraining": "트레이닝 완료 실패",
+  "feedbackUpdated": "피드백이 업데이트되었습니다",
+  "failedToUpdateFeedback": "피드백 업데이트 실패",
   "reportSubmitted": "보고서가 제출되었습니다",
   "failedToSubmitReport": "보고서 제출 실패",
   "shuffleExercise": "운동 바꾸기",

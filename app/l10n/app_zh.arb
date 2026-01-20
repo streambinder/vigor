@@ -180,6 +180,8 @@
   "failedToCloneTraining": "克隆训练失败",
   "trainingMarkedAsComplete": "训练已完成",
   "failedToCompleteTraining": "完成训练失败",
+  "feedbackUpdated": "反馈已更新",
+  "failedToUpdateFeedback": "更新反馈失败",
   "reportSubmitted": "报告已提交",
   "failedToSubmitReport": "提交报告失败",
   "shuffleExercise": "更换动作",

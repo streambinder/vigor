@@ -510,6 +510,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get failedToCompleteTraining => 'トレーニングの完了に失敗しました';
 
   @override
+  String get feedbackUpdated => 'フィードバックを更新しました';
+
+  @override
+  String get failedToUpdateFeedback => 'フィードバックの更新に失敗しました';
+
+  @override
   String get reportSubmitted => 'レポートが送信されました';
 
   @override

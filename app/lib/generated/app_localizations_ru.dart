@@ -514,6 +514,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get failedToCompleteTraining => 'Не удалось завершить тренировку';
 
   @override
+  String get feedbackUpdated => 'Отзыв обновлён';
+
+  @override
+  String get failedToUpdateFeedback => 'Не удалось обновить отзыв';
+
+  @override
   String get reportSubmitted => 'Отчёт отправлен';
 
   @override

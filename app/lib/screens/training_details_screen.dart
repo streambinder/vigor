@@ -131,6 +131,28 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     }
   }
 
+  Future<void> _updateFeedback(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final trainingService = context.read<ServiceLocator>().trainingService;
+    final result = await FeedbackModal.showForUpdate(context, training);
+    if (result == null) return;
+
+    final response = await trainingService.updateFeedback(
+      training.id,
+      feedback: result.feedback,
+      activityFeedback: result.activityFeedback,
+    );
+
+    if (context.mounted) {
+      if (response.isSuccess) {
+        Navigator.of(context).pop(true);
+        AdaptiveNotification.show(context: context, message: l10n.feedbackUpdated);
+      } else {
+        AdaptiveNotification.showError(context: context, message: l10n.failedToUpdateFeedback, rawError: response.error);
+      }
+    }
+  }
+
   void _navigateToActivityScreen(BuildContext context) {
     Navigator.of(context).popUntil((route) => route.isFirst);
     MainNavigation.navigateToTab(1);
@@ -697,12 +719,11 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             onPressed: isOwner ? () => _completeTraining(context) : null,
           ))
         else
-          // update feedback = disabled for now (indigo like start training)
           Expanded(child: _buildActionButton(
             icon: Icons.rate_review,
             label: l10n.updateFeedback,
             color: indigoColor,
-            onPressed: null, // temporarily disabled
+            onPressed: () => _updateFeedback(context),
           )),
       ],
     );

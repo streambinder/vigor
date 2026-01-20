@@ -170,6 +170,41 @@ class TrainingService {
     }
   }
 
+  Future<ApiResponse<Training>> updateFeedback(
+    String trainingId, {
+    String? feedback,
+    Map<String, String>? activityFeedback,
+  }) async {
+    AppLogger.debug('[TrainingService] Updating feedback for training: $trainingId');
+
+    final body = <String, dynamic>{};
+    if (feedback != null) {
+      body['feedback'] = feedback;
+    }
+    if (activityFeedback != null) {
+      body['activityFeedback'] = activityFeedback;
+    }
+
+    final response = await _apiService.put('/training/feedback/$trainingId', body: body);
+
+    if (response.isSuccess && response.data != null) {
+      try {
+        final training = Training.fromJson(response.data!['training']);
+        AppLogger.info('[TrainingService] Updated feedback for training: $trainingId');
+        return ApiResponse.success(training, response.statusCode);
+      } catch (e) {
+        AppLogger.error('[TrainingService] failed to parse updated training', e);
+        return ApiResponse.error('Failed to parse updated training', response.statusCode);
+      }
+    } else {
+      AppLogger.error('[TrainingService] Failed to update feedback: ${response.error}');
+      return ApiResponse.error(
+        response.error ?? 'Failed to update feedback',
+        response.statusCode,
+      );
+    }
+  }
+
   Future<ApiResponse<String>> addPartner(String trainingId, String partner) async {
     AppLogger.debug('[TrainingService] Adding partner to training: $trainingId');
 
