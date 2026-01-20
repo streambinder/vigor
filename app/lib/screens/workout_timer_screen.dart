@@ -22,6 +22,7 @@ import '../widgets/timer/exercise_display.dart';
 import '../widgets/timer/rest_display.dart';
 import '../widgets/timer/timer_controls.dart';
 import '../widgets/timer/upcoming_list.dart';
+import '../widgets/timer/remaining_exercises_list.dart';
 import '../widgets/timer/emom_display.dart';
 import '../widgets/timer/amrap_display.dart';
 import '../widgets/timer/for_time_display.dart';
@@ -272,9 +273,26 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
           child: Column(
             children: [
               Expanded(
-                child: SingleChildScrollView(
-                  padding: VigorSpacing.paddingLg,
-                  child: _buildModeSpecificDisplay(controller, interval, mode),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final mainAreaHeight = constraints.maxHeight;
+                    return SingleChildScrollView(
+                      padding: VigorSpacing.paddingLg,
+                      child: Column(
+                        children: [
+                          // main content area - fills viewport and centers content
+                          SizedBox(
+                            height: mainAreaHeight - VigorSpacing.lg * 2,
+                            child: Center(
+                              child: _buildModeMainContent(controller, interval, mode),
+                            ),
+                          ),
+                          // exercises list below - visible on scroll
+                          _buildExercisesList(controller, mode),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ),
               Padding(
@@ -288,7 +306,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
     );
   }
 
-  Widget _buildModeSpecificDisplay(
+  Widget _buildModeMainContent(
     TimerController controller,
     TrainingInterval interval,
     TimerMode mode,
@@ -326,14 +344,14 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
         );
 
       case TimerMode.interval:
-        return _buildIntervalDisplay(controller, interval);
+        return _buildIntervalMainContent(controller, interval);
     }
   }
 
-  Widget _buildIntervalDisplay(TimerController controller, TrainingInterval interval) {
+  Widget _buildIntervalMainContent(TimerController controller, TrainingInterval interval) {
     final isRest = interval.type == IntervalType.rest;
-
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         if (!isRest) _buildActivityName(interval),
         if (!isRest) const SizedBox(height: VigorSpacing.md),
@@ -346,9 +364,50 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
                 remainingSeconds: controller.remainingSeconds,
                 phaseColor: _phaseColor,
               ),
-        const SizedBox(height: VigorSpacing.xl),
-        UpcomingList(intervals: controller.upcomingIntervals),
       ],
+    );
+  }
+
+  Widget _buildExercisesList(TimerController controller, TimerMode mode) {
+    final intervals = controller.upcomingIntervals;
+    if (intervals.isEmpty) return const SizedBox.shrink();
+
+    if (mode == TimerMode.interval) {
+      return Padding(
+        padding: const EdgeInsets.only(top: VigorSpacing.xl),
+        child: UpcomingList(intervals: intervals),
+      );
+    }
+
+    int? currentRound;
+    int? totalRounds;
+
+    switch (mode) {
+      case TimerMode.emom:
+        final emomController = controller as EmomController;
+        currentRound = emomController.currentRound;
+        totalRounds = emomController.totalRounds;
+        break;
+      case TimerMode.amrap:
+        currentRound = (controller as AmrapController).currentRound;
+        break;
+      case TimerMode.forTime:
+        final forTimeController = controller as ForTimeController;
+        currentRound = forTimeController.currentRound;
+        totalRounds = forTimeController.totalRounds;
+        break;
+      case TimerMode.interval:
+        break;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: VigorSpacing.xl),
+      child: RemainingExercisesList(
+        intervals: intervals,
+        mode: mode,
+        currentRound: currentRound ?? 1,
+        totalRounds: totalRounds,
+      ),
     );
   }
 

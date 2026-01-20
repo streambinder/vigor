@@ -39,92 +39,58 @@ class AmrapDisplay extends StatelessWidget {
     final imageSize = screenWidth * 0.4;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // global countdown - prominent
-          Text(
-            _formatTime(globalSecondsRemaining),
-            style: VigorTypography.dataDisplay.copyWith(
-              color: VigorColors.persimmon,
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(_formatTime(globalSecondsRemaining), style: VigorTypography.dataDisplay.copyWith(color: VigorColors.persimmon)),
+        const SizedBox(height: VigorSpacing.md),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.lg, vertical: VigorSpacing.sm),
+          decoration: BoxDecoration(
+            color: VigorColors.gold.withValues(alpha: 0.15),
+            borderRadius: VigorRadius.radiusMd,
           ),
-          const SizedBox(height: VigorSpacing.md),
-
-          // round counter
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: VigorSpacing.lg,
-              vertical: VigorSpacing.sm,
-            ),
-            decoration: BoxDecoration(
-              color: VigorColors.gold.withValues(alpha: 0.15),
-              borderRadius: VigorRadius.radiusMd,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'ROUND $currentRound',
-                  style: VigorTypography.title.copyWith(
-                    color: VigorColors.gold,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: VigorSpacing.sm),
-                Text(
-                  '($activitiesInRound/$activitiesPerRound)',
-                  style: VigorTypography.label.copyWith(
-                    color: VigorColors.gold.withValues(alpha: 0.7),
-                  ),
-                ),
-              ],
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('ROUND $currentRound', style: VigorTypography.title.copyWith(color: VigorColors.gold, fontWeight: FontWeight.bold)),
+              const SizedBox(width: VigorSpacing.sm),
+              Text('($activitiesInRound/$activitiesPerRound)', style: VigorTypography.label.copyWith(color: VigorColors.gold.withValues(alpha: 0.7))),
+            ],
           ),
-          const SizedBox(height: VigorSpacing.lg),
-
-          // exercise image
-          if (exercise != null && CachedExerciseImage.isValidUrl(exercise.reference)) ...[
-            GestureDetector(
-              onTap: () => ExerciseModal.show(context, exercise),
-              child: Container(
-                width: imageSize,
-                height: imageSize,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: VigorColors.persimmon, width: 3),
-                ),
-                child: ClipOval(
-                  child: Image.network(
-                    CachedExerciseImage.proxyUrl(exercise.reference),
-                    width: imageSize,
-                    height: imageSize,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _buildPlaceholder(imageSize),
-                  ),
+        ),
+        const SizedBox(height: VigorSpacing.lg),
+        if (exercise != null && CachedExerciseImage.isValidUrl(exercise.reference)) ...[
+          GestureDetector(
+            onTap: () => ExerciseModal.show(context, exercise),
+            child: Container(
+              width: imageSize,
+              height: imageSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: VigorColors.persimmon, width: 3),
+              ),
+              child: ClipOval(
+                child: Image.network(
+                  CachedExerciseImage.proxyUrl(exercise.reference),
+                  width: imageSize,
+                  height: imageSize,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => _buildPlaceholder(imageSize),
                 ),
               ),
             ),
-            const SizedBox(height: VigorSpacing.md),
-          ],
-
-          // activity name
-          Text(
-            interval.activityName?.toUpperCase() ?? '',
-            style: VigorTypography.title.copyWith(
-              color: VigorColors.textPrimary(context),
-            ),
-            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: VigorSpacing.sm),
-
-          // reps display
-          if (activity != null && activity.reps > 0) ...[
-            _buildRepsChip(context, activity, isDark),
-          ],
+          const SizedBox(height: VigorSpacing.md),
         ],
-      ),
+        Text(
+          interval.activityName?.toUpperCase() ?? '',
+          style: VigorTypography.title.copyWith(color: VigorColors.textPrimary(context)),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: VigorSpacing.sm),
+        if (activity != null && activity.reps > 0) _buildRepsChip(context, activity, isDark),
+      ],
     );
   }
 
@@ -133,20 +99,13 @@ class AmrapDisplay extends StatelessWidget {
       width: size,
       height: size,
       color: VigorColors.stone.withValues(alpha: 0.1),
-      child: Icon(
-        Icons.fitness_center,
-        size: size * 0.4,
-        color: VigorColors.stone.withValues(alpha: 0.5),
-      ),
+      child: Icon(Icons.fitness_center, size: size * 0.4, color: VigorColors.stone.withValues(alpha: 0.5)),
     );
   }
 
   Widget _buildRepsChip(BuildContext context, Activity activity, bool isDark) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: VigorSpacing.md,
-        vertical: VigorSpacing.sm,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
       decoration: PlatformHelper.useLiquidGlass
           ? LiquidGlassTheme.glassDecoration(isDark: isDark)
           : BoxDecoration(
@@ -158,18 +117,12 @@ class AmrapDisplay extends StatelessWidget {
         children: [
           const Icon(Icons.fitness_center, size: 20, color: VigorColors.stone),
           const SizedBox(width: 4),
-          Text(
-            '${activity.reps} reps',
-            style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context)),
-          ),
+          Text('${activity.reps} reps', style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context))),
           if (activity.weightKg > 0) ...[
             const SizedBox(width: VigorSpacing.md),
             const Icon(Icons.scale, size: 20, color: VigorColors.stone),
             const SizedBox(width: 4),
-            Text(
-              '${activity.weightKg} kg',
-              style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context)),
-            ),
+            Text('${activity.weightKg} kg', style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context))),
           ],
         ],
       ),

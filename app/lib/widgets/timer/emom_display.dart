@@ -15,8 +15,8 @@ class EmomDisplay extends StatelessWidget {
   final int secondsRemaining;
   final int currentMinute;
   final int totalMinutes;
-  final int activityIndex;    // 0-based index within block
-  final int totalActivities;  // total activities in block
+  final int activityIndex;
+  final int totalActivities;
   final bool isResting;
 
   const EmomDisplay({
@@ -45,125 +45,84 @@ class EmomDisplay extends StatelessWidget {
     final imageSize = screenWidth * 0.4;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // minute counter + activity progress
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.lg, vertical: VigorSpacing.sm),
+              decoration: BoxDecoration(
+                color: VigorColors.persimmon.withValues(alpha: 0.15),
+                borderRadius: VigorRadius.radiusMd,
+              ),
+              child: Text(
+                'MINUTE $currentMinute / $totalMinutes',
+                style: VigorTypography.label.copyWith(color: VigorColors.persimmon, fontWeight: FontWeight.bold),
+              ),
+            ),
+            if (!isResting && totalActivities > 1) ...[
+              const SizedBox(width: VigorSpacing.sm),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: VigorSpacing.lg,
-                  vertical: VigorSpacing.sm,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
                 decoration: BoxDecoration(
-                  color: VigorColors.persimmon.withValues(alpha: 0.15),
+                  color: VigorColors.gold.withValues(alpha: 0.15),
                   borderRadius: VigorRadius.radiusMd,
                 ),
                 child: Text(
-                  'MINUTE $currentMinute / $totalMinutes',
-                  style: VigorTypography.label.copyWith(
-                    color: VigorColors.persimmon,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  '${activityIndex + 1}/$totalActivities',
+                  style: VigorTypography.label.copyWith(color: VigorColors.gold, fontWeight: FontWeight.bold),
                 ),
               ),
-              if (!isResting && totalActivities > 1) ...[
-                const SizedBox(width: VigorSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: VigorSpacing.md,
-                    vertical: VigorSpacing.sm,
-                  ),
-                  decoration: BoxDecoration(
-                    color: VigorColors.gold.withValues(alpha: 0.15),
-                    borderRadius: VigorRadius.radiusMd,
-                  ),
-                  child: Text(
-                    '${activityIndex + 1}/$totalActivities',
-                    style: VigorTypography.label.copyWith(
-                      color: VigorColors.gold,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-          const SizedBox(height: VigorSpacing.lg),
-
-          if (isResting) ...[
-            // rest display
-            const Icon(
-              Icons.local_drink,
-              size: 80,
-              color: VigorColors.indigo,
-            ),
-            const SizedBox(height: VigorSpacing.md),
-            Text(
-              l10n.rest.toUpperCase(),
-              style: VigorTypography.title.copyWith(
-                color: VigorColors.indigo,
-              ),
-            ),
-          ] else ...[
-            // exercise image
-            if (exercise != null && CachedExerciseImage.isValidUrl(exercise.reference)) ...[
-              GestureDetector(
-                onTap: () => ExerciseModal.show(context, exercise),
-                child: Container(
-                  width: imageSize,
-                  height: imageSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: VigorColors.persimmon,
-                      width: 3,
-                    ),
-                  ),
-                  child: ClipOval(
-                    child: Image.network(
-                      CachedExerciseImage.proxyUrl(exercise.reference),
-                      width: imageSize,
-                      height: imageSize,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _buildPlaceholder(imageSize),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: VigorSpacing.md),
-            ],
-
-            // activity name
-            Text(
-              interval.activityName?.toUpperCase() ?? '',
-              style: VigorTypography.title.copyWith(
-                color: VigorColors.textPrimary(context),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: VigorSpacing.sm),
-
-            // reps display
-            if (activity != null && activity.reps > 0) ...[
-              _buildRepsChip(context, activity, isDark),
             ],
           ],
+        ),
+        const SizedBox(height: VigorSpacing.lg),
 
-          const SizedBox(height: VigorSpacing.lg),
-
-          // time remaining in minute
-          Text(
-            _formatTime(secondsRemaining),
-            style: VigorTypography.dataDisplay.copyWith(
-              color: isResting ? VigorColors.indigo : VigorColors.persimmon,
+        if (isResting) ...[
+          const Icon(Icons.local_drink, size: 80, color: VigorColors.indigo),
+          const SizedBox(height: VigorSpacing.md),
+          Text(l10n.rest.toUpperCase(), style: VigorTypography.title.copyWith(color: VigorColors.indigo)),
+        ] else ...[
+          if (exercise != null && CachedExerciseImage.isValidUrl(exercise.reference)) ...[
+            GestureDetector(
+              onTap: () => ExerciseModal.show(context, exercise),
+              child: Container(
+                width: imageSize,
+                height: imageSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: VigorColors.persimmon, width: 3),
+                ),
+                child: ClipOval(
+                  child: Image.network(
+                    CachedExerciseImage.proxyUrl(exercise.reference),
+                    width: imageSize,
+                    height: imageSize,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => _buildPlaceholder(imageSize),
+                  ),
+                ),
+              ),
             ),
+            const SizedBox(height: VigorSpacing.md),
+          ],
+          Text(
+            interval.activityName?.toUpperCase() ?? '',
+            style: VigorTypography.title.copyWith(color: VigorColors.textPrimary(context)),
+            textAlign: TextAlign.center,
           ),
+          const SizedBox(height: VigorSpacing.sm),
+          if (activity != null && activity.reps > 0) _buildRepsChip(context, activity, isDark),
         ],
-      ),
+
+        const SizedBox(height: VigorSpacing.lg),
+        Text(
+          _formatTime(secondsRemaining),
+          style: VigorTypography.dataDisplay.copyWith(color: isResting ? VigorColors.indigo : VigorColors.persimmon),
+        ),
+      ],
     );
   }
 
@@ -172,20 +131,13 @@ class EmomDisplay extends StatelessWidget {
       width: size,
       height: size,
       color: VigorColors.stone.withValues(alpha: 0.1),
-      child: Icon(
-        Icons.fitness_center,
-        size: size * 0.4,
-        color: VigorColors.stone.withValues(alpha: 0.5),
-      ),
+      child: Icon(Icons.fitness_center, size: size * 0.4, color: VigorColors.stone.withValues(alpha: 0.5)),
     );
   }
 
   Widget _buildRepsChip(BuildContext context, Activity activity, bool isDark) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: VigorSpacing.md,
-        vertical: VigorSpacing.sm,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
       decoration: PlatformHelper.useLiquidGlass
           ? LiquidGlassTheme.glassDecoration(isDark: isDark)
           : BoxDecoration(
@@ -197,18 +149,12 @@ class EmomDisplay extends StatelessWidget {
         children: [
           const Icon(Icons.fitness_center, size: 20, color: VigorColors.stone),
           const SizedBox(width: 4),
-          Text(
-            '${activity.reps} reps',
-            style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context)),
-          ),
+          Text('${activity.reps} reps', style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context))),
           if (activity.weightKg > 0) ...[
             const SizedBox(width: VigorSpacing.md),
             const Icon(Icons.scale, size: 20, color: VigorColors.stone),
             const SizedBox(width: 4),
-            Text(
-              '${activity.weightKg} kg',
-              style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context)),
-            ),
+            Text('${activity.weightKg} kg', style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context))),
           ],
         ],
       ),
