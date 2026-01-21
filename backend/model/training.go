@@ -60,13 +60,19 @@ type ProgressionAdjustment struct {
 	Reason     string `json:"reason" prompt:"Why this adjustment was made (e.g. 'user marked too easy', 'user marked too hard', 'progressive overload')"`
 }
 
+// ExerciseSelection captures an exercise choice with its rationale categories.
+type ExerciseSelection struct {
+	ID        string   `json:"id" prompt:"Exercise ID from list"`
+	Rationale []string `json:"rationale" prompt:"Why selected;enum:goal,muscle,methodology,favorite,equipment,progression,feedback,variety"`
+}
+
 // TrainingReasoning captures the model's thought process before generating training structure.
 // Simplified to reduce token usage while preserving essential planning information.
 type TrainingReasoning struct {
-	Constraints []string                `json:"constraints" prompt:"Active constraints (injuries, equipment, time)"`
-	Strategy    string                  `json:"strategy" prompt:"1-2 sentence approach: methodology choice + how it serves goals"`
+	Constraints []string              `json:"constraints" prompt:"Active constraints (injuries, equipment, time)"`
+	Strategy    string                `json:"strategy" prompt:"1-2 sentence approach: methodology choice + how it serves goals"`
 	Adjustments []ProgressionAdjustment `json:"adjustments" prompt:"Feedback-driven changes (empty array if none)"`
-	Exercises   []string                `json:"exercises" prompt:"Selected exercise IDs"`
+	Exercises   []ExerciseSelection   `json:"exercises" prompt:"Selected exercises with rationale"`
 }
 
 // Training represents the entire training session with a UUID ID

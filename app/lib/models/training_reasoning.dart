@@ -3,6 +3,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 import 'progression_adjustment.dart';
+import 'exercise_selection.dart';
 
 part 'training_reasoning.g.dart';
 
@@ -15,7 +16,7 @@ class TrainingReasoning {
   @JsonKey(name: 'adjustments', defaultValue: [])
   final List<ProgressionAdjustment> adjustments;
   @JsonKey(name: 'exercises', defaultValue: [])
-  final List<String> exercises;
+  final List<ExerciseSelection> exercises;
 
   TrainingReasoning({
     required this.constraints,

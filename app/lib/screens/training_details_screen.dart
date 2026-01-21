@@ -278,7 +278,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                 if (r.constraints.isNotEmpty) _buildReasoningSection(title: l10n.constraints, items: r.constraints),
                 if (r.strategy.isNotEmpty) _buildReasoningText(title: l10n.strategy, text: r.strategy),
                 if (r.adjustments.isNotEmpty) _buildAdjustmentsSection(l10n, r.adjustments),
-                if (r.exercises.isNotEmpty) _buildReasoningSection(title: l10n.exercises, items: r.exercises),
+                if (r.exercises.isNotEmpty) _buildReasoningSection(title: l10n.exercises, items: r.exercises.map((e) => e.id).toList()),
               ],
             ),
           ),

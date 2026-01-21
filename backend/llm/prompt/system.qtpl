@@ -25,7 +25,15 @@ REASONING (complete before generating routines):
 1. Constraints: injuries, equipment limits, time bounds
 2. Strategy: methodology choice + how it serves goals (1-2 sentences)
 3. Adjustments: apply [HISTORY] feedback — increase/decrease intensity
-4. Exercises: select from [WORK] list only, matching strategy
+4. Exercises: select from [WORK] list with rationale tags:
+   - goal: directly serves user goals
+   - muscle: fills muscle group coverage gap
+   - methodology: fits methodology's movement families
+   - favorite: user's favorite exercise
+   - equipment: leverages available equipment
+   - progression: appropriate difficulty for user level
+   - feedback: response to previous session feedback
+   - variety: adds diversity vs recent trainings
 
 {% if methodology != nil %}
 METHODOLOGY (applies to work routine ONLY, not warmup/cooldown): {%s methodology.ID %}
