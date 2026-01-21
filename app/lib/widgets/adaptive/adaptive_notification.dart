@@ -67,9 +67,12 @@ class _NotificationWidget extends StatelessWidget {
       top: MediaQuery.of(context).padding.top + VigorSpacing.md,
       left: VigorSpacing.md,
       right: VigorSpacing.md,
-      child: Material(
-        color: Colors.transparent,
-        child: useLiquidGlass ? _buildLiquidGlass(context) : _buildMaterial(context),
+      child: GestureDetector(
+        onTap: onDismiss,
+        child: Material(
+          color: Colors.transparent,
+          child: useLiquidGlass ? _buildLiquidGlass(context) : _buildMaterial(context),
+        ),
       ),
     );
   }
