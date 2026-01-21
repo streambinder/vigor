@@ -163,13 +163,29 @@ func (t Training) DaysSince() int {
 }
 
 // Validate checks that the training has valid structure.
-func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineTypes map[string]bool) error {
+func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineTypes map[string]bool, requireWarmupCooldown bool) error {
 	if t.Name == "" {
 		return errors.New("training name is empty")
 	}
 	if len(t.Routines) == 0 {
 		return errors.New("training has no routines")
 	}
+
+	// count routine types to enforce exactly one warmup and one cooldown when required
+	routineCounts := make(map[string]int)
+	for _, routine := range t.Routines {
+		routineCounts[routine.Type]++
+	}
+
+	if requireWarmupCooldown {
+		if routineCounts["warmup"] != 1 {
+			return errors.New("training must have exactly one warmup routine")
+		}
+		if routineCounts["cooldown"] != 1 {
+			return errors.New("training must have exactly one cooldown routine")
+		}
+	}
+
 	for i, routine := range t.Routines {
 		if routine.Type == "" {
 			return errors.New("routine " + strconv.Itoa(i) + " has no type")

@@ -250,7 +250,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	}
 	// reorder routines: warmup first, work in original order, cooldown last
 	training.Routines = reorderRoutines(training.Routines)
-	if err := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes); err != nil {
+	if err := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, !skipWarmupCooldown); err != nil {
 		log.Error().Err(err).Msg("generated training validation failed")
 		return nil, ErrMalformedTraining
 	}
