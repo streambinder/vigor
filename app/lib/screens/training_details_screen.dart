@@ -49,14 +49,21 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     }
   }
 
-  String _formatDate(DateTime date) => '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date).inDays;
+    if (diff == 0) return AppLocalizations.of(context).today;
+    if (diff == 1) return AppLocalizations.of(context).yesterday;
+    if (diff < 7) return '${diff}d ago';
+    return '${date.day}/${date.month}';
+  }
 
   String _formatDuration(int seconds) {
     final minutes = seconds ~/ 60;
-    if (minutes < 60) return '$minutes min';
+    if (minutes < 60) return '${minutes}m';
     final hours = minutes ~/ 60;
     final remainingMinutes = minutes % 60;
-    return remainingMinutes == 0 ? '$hours hr' : '$hours hr $remainingMinutes min';
+    return remainingMinutes == 0 ? '${hours}h' : '${hours}h ${remainingMinutes}m';
   }
 
   String _formatTime(int seconds) {
@@ -633,19 +640,37 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       spacing: VigorSpacing.sm,
       runSpacing: VigorSpacing.sm,
       children: [
-        if (_partnerCount > 0) _buildMetaChip(Icons.people, '${1 + _partnerCount}'),
-        if (training.gym != null) _buildMetaChip(Icons.location_on, training.gym!.name),
-        _buildMetaChip(Icons.tune, training.methodology),
+        _buildMethodologyBadge(training.methodology),
         _buildMetaChip(Icons.schedule, _formatDuration(training.duration)),
         _buildMetaChip(Icons.calendar_today, _formatDate(training.completedAt ?? training.createdAt)),
+        if (_partnerCount > 0) _buildMetaChip(Icons.people, '${1 + _partnerCount}'),
+        if (training.gym != null) _buildMetaChip(Icons.location_on, training.gym!.name),
         if (training.parentId != null) _buildMetaChip(Icons.copy, l10n.copied),
       ],
     );
   }
 
-  Widget _buildMetaChip(IconData icon, String text) {
+  Widget _buildMethodologyBadge(String methodology) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: VigorColors.stone.withValues(alpha: 0.1),
+        borderRadius: VigorRadius.radiusXs,
+      ),
+      child: Text(
+        methodology.toUpperCase(),
+        style: VigorTypography.caption.copyWith(
+          color: VigorColors.stone,
+          fontWeight: FontWeight.w600,
+          fontSize: 10,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMetaChip(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
         color: VigorColors.stone.withValues(alpha: 0.1),
         borderRadius: VigorRadius.radiusXs,
