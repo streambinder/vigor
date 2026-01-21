@@ -45,6 +45,12 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
   void _onControllerUpdate() {
     if (!mounted) return;
 
+    // play countdown jingle for last 3 seconds of interval
+    if (_controller.shouldPlayCountdownJingle) {
+      _playJingleIfEnabled();
+      _controller.shouldPlayCountdownJingle = false;
+    }
+
     // detect interval transition by comparing stable keys
     final currentInterval = _controller.currentInterval;
     final currentKey = _intervalKey(currentInterval);
@@ -52,7 +58,11 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
         currentKey != null &&
         _previousIntervalKey != null &&
         currentKey != _previousIntervalKey) {
-      _playJingleIfEnabled();
+      // only play jingle on natural timer transitions, not skips
+      if (!_controller.wasSkipped) {
+        _playJingleIfEnabled();
+      }
+      _controller.wasSkipped = false;
     }
     _previousIntervalKey = currentKey;
 

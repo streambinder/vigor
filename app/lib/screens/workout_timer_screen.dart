@@ -135,6 +135,12 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
       return;
     }
 
+    // play countdown jingle for last 3 seconds of interval
+    if (_controller?.shouldPlayCountdownJingle == true) {
+      _playJingleIfEnabled();
+      _controller?.shouldPlayCountdownJingle = false;
+    }
+
     // detect interval transition by comparing stable keys
     final currentInterval = _controller?.currentInterval;
     final currentKey = _intervalKey(currentInterval);
@@ -142,7 +148,11 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
         currentKey != null &&
         _previousIntervalKey != null &&
         currentKey != _previousIntervalKey) {
-      _playJingleIfEnabled();
+      // only play jingle on natural timer transitions, not skips
+      if (_controller?.wasSkipped != true) {
+        _playJingleIfEnabled();
+      }
+      _controller?.wasSkipped = false;
     }
     _previousIntervalKey = currentKey;
 

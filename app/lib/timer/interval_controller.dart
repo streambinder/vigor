@@ -78,6 +78,7 @@ class IntervalController extends TimerController {
   @override
   void skipForward() {
     if (_isCompleted) return;
+    wasSkipped = true;
     _timer?.cancel();
     _history.add(_currentIntervalIndex);
     _currentIntervalIndex++;
@@ -92,6 +93,7 @@ class IntervalController extends TimerController {
   @override
   void skipBackward() {
     if (_history.isEmpty) return;
+    wasSkipped = true;
     _timer?.cancel();
     _currentIntervalIndex = _history.removeLast();
     _isCompleted = false;
@@ -111,6 +113,8 @@ class IntervalController extends TimerController {
 
       if (_remainingSeconds > 0) {
         _remainingSeconds--;
+        // play countdown jingle at 3, 2, 1 seconds (only during training, not initial countdown)
+        shouldPlayCountdownJingle = _hasStarted && _remainingSeconds >= 1 && _remainingSeconds <= 3;
         notifyListeners();
       } else {
         timer.cancel();
@@ -134,7 +138,16 @@ class IntervalController extends TimerController {
   }
 
   void _onIntervalCompleted() {
-    skipForward();
+    // timer-driven transition, not user skip - preserve wasSkipped = false
+    _timer?.cancel();
+    _history.add(_currentIntervalIndex);
+    _currentIntervalIndex++;
+
+    if (_currentIntervalIndex >= _intervals.length) {
+      _completeTraining();
+    } else {
+      _startCurrentInterval();
+    }
   }
 
   void _completeTraining() {

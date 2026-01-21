@@ -4,6 +4,14 @@ import 'training_interval.dart';
 /// Abstract base controller for all timer modes
 /// Each mode implements its own timing and progression logic
 abstract class TimerController extends ChangeNotifier {
+  /// Set to true when interval changes due to user skip (not timer)
+  /// Screens should check this to avoid playing jingle on skip
+  bool wasSkipped = false;
+
+  /// Set to true when countdown reaches 3, 2, or 1 seconds
+  /// Screens should play countdown jingle when this is true
+  bool shouldPlayCountdownJingle = false;
+
   /// Current countdown/countup value in seconds
   int get remainingSeconds;
 

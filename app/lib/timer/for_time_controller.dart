@@ -149,12 +149,14 @@ class ForTimeController extends TimerController {
 
   @override
   void skipForward() {
+    wasSkipped = true;
     onUserAction();
   }
 
   @override
   void skipBackward() {
     if (_history.isEmpty) return;
+    wasSkipped = true;
     _restoreHistory();
     notifyListeners();
   }
@@ -163,6 +165,7 @@ class ForTimeController extends TimerController {
   void onUserAction() {
     if (!_hasStarted || _isCompleted) return;
 
+    wasSkipped = true;
     _saveHistory();
     _currentActivityIndex++;
 

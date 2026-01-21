@@ -192,12 +192,14 @@ class EmomController extends TimerController {
   @override
   void skipForward() {
     if (_isCompleted) return;
+    wasSkipped = true;
     _advanceActivity();
   }
 
   @override
   void skipBackward() {
     if (_history.isEmpty) return;
+    wasSkipped = true;
     _restoreHistory();
     notifyListeners();
   }
@@ -205,6 +207,7 @@ class EmomController extends TimerController {
   @override
   void onUserAction() {
     // same as skip forward - advance to next activity
+    wasSkipped = true;
     skipForward();
   }
 
@@ -234,6 +237,8 @@ class EmomController extends TimerController {
 
       if (_secondsInMinute > 0) {
         _secondsInMinute--;
+        // play countdown jingle at 3, 2, 1 seconds before minute boundary (only during training)
+        shouldPlayCountdownJingle = _hasStarted && _secondsInMinute >= 1 && _secondsInMinute <= 3;
         notifyListeners();
       } else {
         timer.cancel();

@@ -138,12 +138,14 @@ class AmrapController extends TimerController {
 
   @override
   void skipForward() {
+    wasSkipped = true;
     onUserAction();
   }
 
   @override
   void skipBackward() {
     if (_history.isEmpty) return;
+    wasSkipped = true;
     _restoreHistory();
     notifyListeners();
   }
@@ -152,6 +154,7 @@ class AmrapController extends TimerController {
   void onUserAction() {
     if (!_hasStarted || _isCompleted) return;
 
+    wasSkipped = true;
     _saveHistory();
     _currentActivityIndex++;
 
@@ -176,6 +179,8 @@ class AmrapController extends TimerController {
 
       if (_globalSecondsRemaining > 0) {
         _globalSecondsRemaining--;
+        // play countdown jingle at 3, 2, 1 seconds before workout ends (only during training)
+        shouldPlayCountdownJingle = !isCountdown && _globalSecondsRemaining >= 1 && _globalSecondsRemaining <= 3;
         notifyListeners();
       } else {
         timer.cancel();
