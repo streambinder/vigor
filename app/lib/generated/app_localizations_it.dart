@@ -367,7 +367,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get musclesOptional => 'Muscoli (opzionale)';
 
   @override
-  String get musclesAuto => 'Auto';
+  String get musclesAuto => 'Tutti';
 
   @override
   String get advancedSettings => 'Avanzate';

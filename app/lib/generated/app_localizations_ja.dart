@@ -359,7 +359,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get musclesOptional => '筋肉（任意）';
 
   @override
-  String get musclesAuto => '自動';
+  String get musclesAuto => 'すべて';
 
   @override
   String get advancedSettings => '詳細設定';

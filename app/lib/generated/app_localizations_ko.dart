@@ -359,7 +359,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get musclesOptional => '근육 (선택사항)';
 
   @override
-  String get musclesAuto => '자동';
+  String get musclesAuto => '전체';
 
   @override
   String get advancedSettings => '고급';

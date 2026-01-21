@@ -789,7 +789,7 @@ abstract class AppLocalizations {
   /// No description provided for @musclesAuto.
   ///
   /// In en, this message translates to:
-  /// **'Auto'**
+  /// **'All'**
   String get musclesAuto;
 
   /// No description provided for @advancedSettings.
