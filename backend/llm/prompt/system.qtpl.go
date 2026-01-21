@@ -27,43 +27,44 @@ func StreamSystem(qw422016 *qt422016.Writer, goals []model.Goal, methodology *mo
 
 CONSTRAINTS:
 - Use ONLY exercise IDs from [WARMUP], [WORK], [COOLDOWN] lists. NEVER use exercises from [HISTORY].
+- Exercise IDs in [WORK] include [primary_muscle] hint. Ensure selection covers all major muscle groups when no user filter.
 - Never program exercises contraindicated by user injuries.
 - Respond with valid JSON only.
 
 DURATION: Each rep ≈ `)
-//line llm/prompt/system.qtpl:13
+//line llm/prompt/system.qtpl:14
 	qw422016.N().D(model.WeightActivityDurationPerRep)
-//line llm/prompt/system.qtpl:13
+//line llm/prompt/system.qtpl:14
 	qw422016.N().S(`s. Include all rest periods. Stay within ±5min of requested duration.
 
 `)
-//line llm/prompt/system.qtpl:15
+//line llm/prompt/system.qtpl:16
 	if len(goals) > 0 {
-//line llm/prompt/system.qtpl:15
+//line llm/prompt/system.qtpl:16
 		qw422016.N().S(`
 GOALS drive design:
 `)
-//line llm/prompt/system.qtpl:17
+//line llm/prompt/system.qtpl:18
 		for _, goal := range goals {
-//line llm/prompt/system.qtpl:17
+//line llm/prompt/system.qtpl:18
 			qw422016.N().S(`- `)
-//line llm/prompt/system.qtpl:17
+//line llm/prompt/system.qtpl:18
 			qw422016.E().S(goal.ID)
-//line llm/prompt/system.qtpl:17
+//line llm/prompt/system.qtpl:18
 			qw422016.N().S(`: `)
-//line llm/prompt/system.qtpl:17
+//line llm/prompt/system.qtpl:18
 			qw422016.E().S(goal.Description)
-//line llm/prompt/system.qtpl:17
+//line llm/prompt/system.qtpl:18
 			qw422016.N().S(`
 `)
-//line llm/prompt/system.qtpl:18
+//line llm/prompt/system.qtpl:19
 		}
-//line llm/prompt/system.qtpl:18
+//line llm/prompt/system.qtpl:19
 		qw422016.N().S(`
 `)
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:20
 	}
-//line llm/prompt/system.qtpl:19
+//line llm/prompt/system.qtpl:20
 	qw422016.N().S(`
 
 MUSCLE COVERAGE: Train ALL major groups each session (chest, back, shoulders, arms, core, legs). Goals set PRIMARY (high volume) vs SECONDARY (maintenance) emphasis. Only USER_REQUEST can exclude groups.
@@ -75,65 +76,65 @@ REASONING (complete before generating routines):
 4. Exercises: select from [WORK] list only, matching strategy
 
 `)
-//line llm/prompt/system.qtpl:29
+//line llm/prompt/system.qtpl:30
 	if methodology != nil {
-//line llm/prompt/system.qtpl:29
+//line llm/prompt/system.qtpl:30
 		qw422016.N().S(`
 METHODOLOGY (applies to work routine ONLY, not warmup/cooldown): `)
-//line llm/prompt/system.qtpl:30
+//line llm/prompt/system.qtpl:31
 		qw422016.E().S(methodology.ID)
-//line llm/prompt/system.qtpl:30
+//line llm/prompt/system.qtpl:31
 		qw422016.N().S(`
 `)
-//line llm/prompt/system.qtpl:31
+//line llm/prompt/system.qtpl:32
 		qw422016.E().S(methodology.Description)
-//line llm/prompt/system.qtpl:31
+//line llm/prompt/system.qtpl:32
 		qw422016.N().S(`
 `)
-//line llm/prompt/system.qtpl:32
+//line llm/prompt/system.qtpl:33
 	} else {
-//line llm/prompt/system.qtpl:32
+//line llm/prompt/system.qtpl:33
 		qw422016.N().S(`
 METHODOLOGIES (pick one for work routine based on user goals and equipment; not warmup/cooldown):
 `)
-//line llm/prompt/system.qtpl:34
+//line llm/prompt/system.qtpl:35
 		for _, m := range methodologies {
-//line llm/prompt/system.qtpl:34
+//line llm/prompt/system.qtpl:35
 			qw422016.N().S(`- `)
-//line llm/prompt/system.qtpl:34
+//line llm/prompt/system.qtpl:35
 			qw422016.E().S(m.ID)
-//line llm/prompt/system.qtpl:34
+//line llm/prompt/system.qtpl:35
 			qw422016.N().S(`: `)
-//line llm/prompt/system.qtpl:34
+//line llm/prompt/system.qtpl:35
 			qw422016.E().S(m.Description)
-//line llm/prompt/system.qtpl:34
+//line llm/prompt/system.qtpl:35
 			qw422016.N().S(`
 `)
-//line llm/prompt/system.qtpl:35
+//line llm/prompt/system.qtpl:36
 		}
-//line llm/prompt/system.qtpl:35
+//line llm/prompt/system.qtpl:36
 	}
-//line llm/prompt/system.qtpl:35
+//line llm/prompt/system.qtpl:36
 	qw422016.N().S(`
 
 STRUCTURE:
 `)
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:39
 	if !skipWarmupCooldown {
-//line llm/prompt/system.qtpl:38
+//line llm/prompt/system.qtpl:39
 		qw422016.N().S(`- 3 routines in order: "warmup", "work", "cooldown" (warmup MUST be first, cooldown MUST be last)
 - warmup (5-10min): dynamic movements preparing muscles used in work phase. AVOID exercises targeting injured areas.
 - work: main training per methodology
 - cooldown (5min): static stretches for muscles worked. AVOID stretches aggravating injuries.
 `)
-//line llm/prompt/system.qtpl:42
+//line llm/prompt/system.qtpl:43
 	} else {
-//line llm/prompt/system.qtpl:42
+//line llm/prompt/system.qtpl:43
 		qw422016.N().S(`- 1 routine named "work" only
 `)
-//line llm/prompt/system.qtpl:43
+//line llm/prompt/system.qtpl:44
 	}
-//line llm/prompt/system.qtpl:43
+//line llm/prompt/system.qtpl:44
 	qw422016.N().S(`
 
 ACTIVITY RULES:
@@ -141,37 +142,37 @@ ACTIVITY RULES:
 - duration: seconds for cardio/stretches/holds
 - reps: count for strength exercises
 - weight_kg: 0 for bodyweight exercises`)
-//line llm/prompt/system.qtpl:49
+//line llm/prompt/system.qtpl:50
 	if hasModifiers {
-//line llm/prompt/system.qtpl:49
+//line llm/prompt/system.qtpl:50
 		qw422016.N().S(`, >0 only with weighted modifiers`)
-//line llm/prompt/system.qtpl:49
+//line llm/prompt/system.qtpl:50
 	}
-//line llm/prompt/system.qtpl:49
+//line llm/prompt/system.qtpl:50
 	qw422016.N().S(`
 
 - rest: 30-60s hypertrophy, 2-3min strength, 10-20s circuits
 
 `)
-//line llm/prompt/system.qtpl:53
+//line llm/prompt/system.qtpl:54
 	if hasModifiers {
-//line llm/prompt/system.qtpl:53
+//line llm/prompt/system.qtpl:54
 		qw422016.N().S(`
 MODIFIERS: When feedback shows "too_easy", add modifier IDs from [MODIFIERS] section to activity.modifiers array. Never invent modifier IDs.
 `)
-//line llm/prompt/system.qtpl:55
+//line llm/prompt/system.qtpl:56
 	}
-//line llm/prompt/system.qtpl:55
+//line llm/prompt/system.qtpl:56
 	qw422016.N().S(`
 
 PROGRESSION: Analyze feedback from [HISTORY]. For "too_easy": increase reps`)
-//line llm/prompt/system.qtpl:57
+//line llm/prompt/system.qtpl:58
 	if hasModifiers {
-//line llm/prompt/system.qtpl:57
+//line llm/prompt/system.qtpl:58
 		qw422016.N().S(` or add weighted modifiers`)
-//line llm/prompt/system.qtpl:57
+//line llm/prompt/system.qtpl:58
 	}
-//line llm/prompt/system.qtpl:57
+//line llm/prompt/system.qtpl:58
 	qw422016.N().S(`. For "too_hard": decrease reps.
 
 NAME: Generate a memorable 3-4 word title that:
@@ -182,31 +183,31 @@ NAME: Generate a memorable 3-4 word title that:
 - NEVER reuse names from [HISTORY]
 Examples: Power Surge, Iron Hour, Circuit Breaker, Flow State, Burn Notice, Strength Stack, Rapid Fire, Full Throttle
 `)
-//line llm/prompt/system.qtpl:66
+//line llm/prompt/system.qtpl:67
 }
 
-//line llm/prompt/system.qtpl:66
+//line llm/prompt/system.qtpl:67
 func WriteSystem(qq422016 qtio422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool) {
-//line llm/prompt/system.qtpl:66
+//line llm/prompt/system.qtpl:67
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:66
+//line llm/prompt/system.qtpl:67
 	StreamSystem(qw422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers)
-//line llm/prompt/system.qtpl:66
+//line llm/prompt/system.qtpl:67
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:66
+//line llm/prompt/system.qtpl:67
 }
 
-//line llm/prompt/system.qtpl:66
+//line llm/prompt/system.qtpl:67
 func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool) string {
-//line llm/prompt/system.qtpl:66
+//line llm/prompt/system.qtpl:67
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:66
+//line llm/prompt/system.qtpl:67
 	WriteSystem(qb422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers)
-//line llm/prompt/system.qtpl:66
+//line llm/prompt/system.qtpl:67
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:66
+//line llm/prompt/system.qtpl:67
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:66
+//line llm/prompt/system.qtpl:67
 	return qs422016
-//line llm/prompt/system.qtpl:66
+//line llm/prompt/system.qtpl:67
 }

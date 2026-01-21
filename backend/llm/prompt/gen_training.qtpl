@@ -71,7 +71,7 @@ Age:{%d profile.Age() %} Height:{%f.0 profile.Height %}cm Weight:{%f.0 profile.W
 
 {% endif %}
 [WORK] {%d len(workExercises) %} options
-{% for _, exercise := range workExercises %}{%s exercise.ID %}, {% endfor %}
+{% for _, exercise := range workExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}, {% endfor %}
 
 {% if !skipWarmupCooldown %}
 [COOLDOWN] {%d len(cooldownExercises) %} options

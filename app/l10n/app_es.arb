@@ -130,7 +130,7 @@
   "methodologyAuto": "Auto",
   "goalsOptional": "Objetivos (opcional)",
   "musclesOptional": "Músculos (opcional)",
-  "musclesAuto": "Auto",
+  "musclesAuto": "Todos",
   "advancedSettings": "Avanzado",
 
   "failedToUpdateProfile": "Error al actualizar el perfil",

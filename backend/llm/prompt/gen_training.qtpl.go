@@ -355,6 +355,16 @@ Age:`)
 //line llm/prompt/gen_training.qtpl:74
 		qw422016.E().S(exercise.ID)
 //line llm/prompt/gen_training.qtpl:74
+		if len(exercise.Muscles) > 0 {
+//line llm/prompt/gen_training.qtpl:74
+			qw422016.N().S(`[`)
+//line llm/prompt/gen_training.qtpl:74
+			qw422016.E().S(exercise.Muscles[0])
+//line llm/prompt/gen_training.qtpl:74
+			qw422016.N().S(`]`)
+//line llm/prompt/gen_training.qtpl:74
+		}
+//line llm/prompt/gen_training.qtpl:74
 		qw422016.N().S(`, `)
 //line llm/prompt/gen_training.qtpl:74
 	}

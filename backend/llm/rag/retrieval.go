@@ -80,6 +80,14 @@ func RetrieveWorkExercises(profiles []model.Profile, goals []string, equipment [
 		return nil, err
 	}
 
+	// in "All" mode (no muscles selected), ensure coverage of all primary muscle groups
+	if len(muscles) == 0 {
+		exercises, err = ensureMuscleCoverage(exercises, equipment)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return filterByProficiency(exercises, proficiencies, methodology, proficiencyMargin), nil
 }
 
@@ -195,9 +203,9 @@ func retrieveBySimilarity(exerciseEmbedding []float32, equipment []string, muscl
 		)`)
 	}
 
-	// filter by target muscles if specified
+	// filter by target muscles if specified (primary muscle only - first element)
 	if len(muscles) > 0 {
-		query = query.Where("exercises.muscles && ?", pq.Array(muscles))
+		query = query.Where("exercises.muscles[1] = ANY(?)", pq.Array(muscles))
 	}
 
 	if err := database.Knowledge.
@@ -213,6 +221,59 @@ func retrieveBySimilarity(exerciseEmbedding []float32, equipment []string, muscl
 	for _, result := range results {
 		exercises = append(exercises, result.Exercise)
 	}
+	return exercises, nil
+}
+
+// ensureMuscleCoverage ensures at least one exercise per muscle group where that
+// muscle is PRIMARY (first in array). Used in "All" mode when no specific muscles selected.
+func ensureMuscleCoverage(exercises []model.Exercise, equipment []string) ([]model.Exercise, error) {
+	// determine which primary muscles are already covered
+	covered := make(map[string]bool)
+	for _, ex := range exercises {
+		if len(ex.Muscles) > 0 {
+			covered[ex.Muscles[0]] = true
+		}
+	}
+
+	// get all muscle IDs
+	var allMuscles []model.Muscle
+	if err := database.Knowledge.Find(&allMuscles).Error; err != nil {
+		return nil, fmt.Errorf("failed to get muscles: %w", err)
+	}
+
+	// find missing primary muscles
+	var missing []string
+	for _, m := range allMuscles {
+		if !covered[m.ID] {
+			missing = append(missing, m.ID)
+		}
+	}
+
+	if len(missing) == 0 {
+		return exercises, nil
+	}
+
+	// fetch one exercise per missing primary muscle
+	for _, muscleID := range missing {
+		query := database.Knowledge.Model(&model.Exercise{}).
+			Where("exercises.muscles[1] = ?", muscleID)
+
+		// apply equipment filter
+		if len(equipment) > 0 {
+			query = query.Where(`(
+				NOT EXISTS (SELECT 1 FROM exercise_equipment WHERE exercise_equipment.exercise_id = exercises.id)
+				OR NOT EXISTS (SELECT 1 FROM exercise_equipment ee WHERE ee.exercise_id = exercises.id AND ee.equipment_id NOT IN ?)
+			)`, equipment)
+		} else {
+			query = query.Where(`NOT EXISTS (SELECT 1 FROM exercise_equipment WHERE exercise_equipment.exercise_id = exercises.id)`)
+		}
+
+		var ex model.Exercise
+		if err := query.Order("RANDOM()").Limit(1).First(&ex).Error; err == nil {
+			exercises = append(exercises, ex)
+		}
+	}
+
 	return exercises, nil
 }
 
@@ -245,8 +306,9 @@ func countExercisesPerFamily(families []string, muscles []string, equipment []st
 			)`)
 		}
 
+		// filter by target muscles if specified (primary muscle only - first element)
 		if len(muscles) > 0 {
-			query = query.Where("exercises.muscles && ?", pq.Array(muscles))
+			query = query.Where("exercises.muscles[1] = ANY(?)", pq.Array(muscles))
 		}
 
 		var count int64
