@@ -8,6 +8,7 @@ import '../models/routine.dart';
 import '../models/block.dart';
 import '../models/activity.dart';
 import '../models/exercise.dart';
+import '../models/exercise_selection.dart';
 import '../models/progression_adjustment.dart';
 import '../providers/auth_provider.dart';
 import '../services/service_locator.dart';
@@ -278,7 +279,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                 if (r.constraints.isNotEmpty) _buildReasoningSection(title: l10n.constraints, items: r.constraints),
                 if (r.strategy.isNotEmpty) _buildReasoningText(title: l10n.strategy, text: r.strategy),
                 if (r.adjustments.isNotEmpty) _buildAdjustmentsSection(l10n, r.adjustments),
-                if (r.exercises.isNotEmpty) _buildReasoningSection(title: l10n.exercises, items: r.exercises.map((e) => e.id).toList()),
+                if (r.exercises.isNotEmpty) _buildExercisesReasoningSection(l10n, r.exercises),
               ],
             ),
           ),
@@ -370,6 +371,61 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                   decoration: const BoxDecoration(color: VigorColors.stone, shape: BoxShape.circle),
                 ),
                 Expanded(child: Text('${a.exercise}: ${a.adjustment} (${a.reason})', style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)))),
+              ],
+            ),
+          )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExercisesReasoningSection(AppLocalizations l10n, List<ExerciseSelection> exercises) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: VigorSpacing.md),
+      padding: VigorSpacing.paddingMd,
+      decoration: BoxDecoration(
+        color: VigorColors.stone.withValues(alpha: 0.08),
+        borderRadius: VigorRadius.radiusMd,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.exercises, style: VigorTypography.label.copyWith(color: VigorColors.stone, fontWeight: FontWeight.w600)),
+          const SizedBox(height: VigorSpacing.sm),
+          ...exercises.map((e) => Padding(
+            padding: const EdgeInsets.only(bottom: VigorSpacing.sm),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 6, right: VigorSpacing.sm),
+                  width: 5,
+                  height: 5,
+                  decoration: const BoxDecoration(color: VigorColors.stone, shape: BoxShape.circle),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(e.id, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+                      if (e.rationale.isNotEmpty) ...[
+                        const SizedBox(height: VigorSpacing.xs),
+                        Wrap(
+                          spacing: VigorSpacing.xs,
+                          runSpacing: VigorSpacing.xs,
+                          children: e.rationale.map((r) => Container(
+                            padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: VigorColors.indigo.withValues(alpha: 0.15),
+                              borderRadius: VigorRadius.radiusXs,
+                            ),
+                            child: Text(r, style: VigorTypography.caption.copyWith(color: VigorColors.indigo, fontSize: 10)),
+                          )).toList(),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ],
             ),
           )),
