@@ -145,7 +145,7 @@ type Activity struct {
 	Name       string         `gorm:"not null" json:"name" prompt:"-"`
 	Duration   int            `gorm:"not null" json:"duration" prompt:"Seconds (0 if using reps)"`
 	Reps       int            `gorm:"not null" json:"reps" prompt:"Rep count (0 if using duration)"`
-	WeightKg   int            `gorm:"not null" json:"weight_kg" prompt:"kg (0=bodyweight)"`
+	WeightKg   int            `gorm:"not null" json:"weight_kg" prompt:"kg (0=bodyweight, >0 for weighted-* exercises)"`
 	Modifiers  pq.StringArray `gorm:"type:text[]" json:"modifiers" prompt:"Modifier IDs (empty if none)"`
 	Rest       int            `gorm:"not null" json:"rest" prompt:"Rest after (s)"`
 	Detail     datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"`
