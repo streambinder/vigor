@@ -526,19 +526,32 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             _buildMenuButton(l10n, isOwner),
           ],
         ),
-        body: ListView(
+        body: ListView.builder(
           padding: VigorSpacing.paddingLg,
-          children: [
-            _buildHeaderWithActions(l10n, isDark, isOwner),
-            const SizedBox(height: VigorSpacing.xl),
-            _buildRoutinesHeader(l10n),
-            const SizedBox(height: VigorSpacing.md),
-            ...training.routines.map((routine) => Padding(
+          // header + routines header + routines + footer spacing
+          itemCount: training.routines.length + 3,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
+                child: _buildHeaderWithActions(l10n, isDark, isOwner),
+              );
+            }
+            if (index == 1) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: VigorSpacing.md),
+                child: _buildRoutinesHeader(l10n),
+              );
+            }
+            if (index == training.routines.length + 2) {
+              return const SizedBox(height: VigorSpacing.lg);
+            }
+            final routineIndex = index - 2;
+            return Padding(
               padding: const EdgeInsets.only(bottom: VigorSpacing.md),
-              child: _buildRoutineCard(routine, isDark),
-            )),
-            const SizedBox(height: VigorSpacing.lg),
-          ],
+              child: _buildRoutineCard(training.routines[routineIndex], isDark),
+            );
+          },
         ),
       ),
     );

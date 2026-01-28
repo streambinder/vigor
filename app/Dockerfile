@@ -8,6 +8,7 @@ RUN flutter config --enable-web && flutter pub get
 
 # copy source code after dependencies are cached
 COPY . .
+# note: --web-renderer is deprecated in Flutter 3.22+, canvaskit is now the default
 RUN dart run build_runner build --delete-conflicting-outputs \
     && flutter build web --release
 

@@ -34,25 +34,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return AdaptiveScaffold(
       appBar: AdaptiveAppBar(title: Text(l10n.settings)),
-      body: ListView(
+      body: ListView.builder(
         padding: VigorSpacing.paddingLg,
-        children: [
-          _buildAppearanceSection(context, l10n, isDark),
-          const SizedBox(height: VigorSpacing.lg),
-          _buildTimerSection(context, l10n, isDark),
-          const SizedBox(height: VigorSpacing.lg),
-          _buildTrainingSection(context, l10n, isDark),
-          const SizedBox(height: VigorSpacing.lg),
-        ],
+        itemCount: 4,
+        itemBuilder: (context, index) {
+          switch (index) {
+            case 0:
+              return Padding(
+                padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+                child: _buildAppearanceSection(context, l10n, isDark),
+              );
+            case 1:
+              return Padding(
+                padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+                child: _buildTimerSection(context, l10n, isDark),
+              );
+            case 2:
+              return Padding(
+                padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+                child: _buildTrainingSection(context, l10n, isDark),
+              );
+            default:
+              return const SizedBox.shrink();
+          }
+        },
       ),
     );
   }
 
   Widget _buildAppearanceSection(BuildContext context, AppLocalizations l10n, bool isDark) {
-    final themeProvider = context.watch<ThemeProvider>();
-    final currentMode = themeProvider.themeModeString;
-
-    return Column(
+    // use Selector to only rebuild when themeModeString changes, not on every provider update
+    return Selector<ThemeProvider, String>(
+      selector: (_, provider) => provider.themeModeString,
+      builder: (context, currentMode, child) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
@@ -84,7 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: l10n.themeAuto,
                 subtitle: l10n.themeAutoDescription,
                 icon: Icons.brightness_auto,
-                onTap: () => themeProvider.setThemeMode('system'),
+                onTap: () => context.read<ThemeProvider>().setThemeMode('system'),
               ),
               Divider(height: 1, color: VigorColors.border(context)),
               _buildThemeOption(
@@ -93,7 +107,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 currentValue: currentMode,
                 title: l10n.themeLight,
                 icon: Icons.light_mode,
-                onTap: () => themeProvider.setThemeMode('light'),
+                onTap: () => context.read<ThemeProvider>().setThemeMode('light'),
               ),
               Divider(height: 1, color: VigorColors.border(context)),
               _buildThemeOption(
@@ -102,12 +116,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 currentValue: currentMode,
                 title: l10n.themeDark,
                 icon: Icons.dark_mode,
-                onTap: () => themeProvider.setThemeMode('dark'),
+                onTap: () => context.read<ThemeProvider>().setThemeMode('dark'),
               ),
             ],
           ),
         ),
-      ],
+        ],
+      ),
     );
   }
 

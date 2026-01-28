@@ -117,11 +117,16 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   Future<void> _loadPartnerCounts() async {
     if (_trainings == null) return;
     final trainingService = context.read<ServiceLocator>().trainingService;
+    // batch all partner counts and update state once to avoid multiple rebuilds
+    final Map<String, int> newCounts = {};
     for (final training in _trainings!) {
       final response = await trainingService.getPartners(training.id);
-      if (response.isSuccess && mounted) {
-        setState(() => _partnerCounts[training.id] = response.data?.length ?? 0);
+      if (response.isSuccess) {
+        newCounts[training.id] = response.data?.length ?? 0;
       }
+    }
+    if (mounted && newCounts.isNotEmpty) {
+      setState(() => _partnerCounts.addAll(newCounts));
     }
   }
 

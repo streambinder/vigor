@@ -209,35 +209,52 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         ),
         body: Form(
           key: _formKey,
-          child: ListView(
+          child: ListView.builder(
             padding: VigorSpacing.paddingLg,
-            children: [
-              if (isCompletion) ...[
-                Text(
-                  l10n.pleaseCompleteProfile,
-                  style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context)),
-                ),
-                const SizedBox(height: VigorSpacing.lg),
-              ],
-              _buildSection(
-                title: l10n.personalDetails,
-                icon: Icons.person,
-                children: [_buildPersonalDetailsContent(l10n)],
-              ),
-              const SizedBox(height: VigorSpacing.xl),
-              _buildSection(
-                title: l10n.healthAndGoals,
-                icon: Icons.fitness_center,
-                children: [_buildHealthGoalsContent(l10n)],
-              ),
-              const SizedBox(height: VigorSpacing.xl),
-              _buildSection(
-                title: l10n.favorites,
-                icon: Icons.favorite,
-                children: [_buildPreferencesContent(l10n)],
-              ),
-              const SizedBox(height: VigorSpacing.lg),
-            ],
+            itemCount: isCompletion ? 5 : 4,
+            itemBuilder: (context, index) {
+              final adjustedIndex = isCompletion ? index : index + 1;
+              switch (adjustedIndex) {
+                case 0:
+                  // completion message (only shown if isCompletion)
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+                    child: Text(
+                      l10n.pleaseCompleteProfile,
+                      style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context)),
+                    ),
+                  );
+                case 1:
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
+                    child: _buildSection(
+                      title: l10n.personalDetails,
+                      icon: Icons.person,
+                      children: [_buildPersonalDetailsContent(l10n)],
+                    ),
+                  );
+                case 2:
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
+                    child: _buildSection(
+                      title: l10n.healthAndGoals,
+                      icon: Icons.fitness_center,
+                      children: [_buildHealthGoalsContent(l10n)],
+                    ),
+                  );
+                case 3:
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+                    child: _buildSection(
+                      title: l10n.favorites,
+                      icon: Icons.favorite,
+                      children: [_buildPreferencesContent(l10n)],
+                    ),
+                  );
+                default:
+                  return const SizedBox.shrink();
+              }
+            },
           ),
         ),
       ),

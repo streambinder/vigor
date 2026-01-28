@@ -161,18 +161,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 await _loadGyms();
               },
               color: VigorColors.persimmon,
-              child: ListView(
+              child: ListView.builder(
                 padding: VigorSpacing.paddingLg,
-                children: [
-                  _buildProfileHeader(user, l10n),
-                  const SizedBox(height: VigorSpacing.xl),
-                  _buildDataSections(user, l10n),
-                  const SizedBox(height: VigorSpacing.xl),
-                  _buildGymsSection(l10n),
-                  const SizedBox(height: VigorSpacing.xl),
-                  _buildOtherSection(l10n),
-                  const SizedBox(height: VigorSpacing.lg),
-                ],
+                itemCount: 5,
+                itemBuilder: (context, index) {
+                  switch (index) {
+                    case 0:
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
+                        child: _buildProfileHeader(user, l10n),
+                      );
+                    case 1:
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
+                        child: _buildDataSections(user, l10n),
+                      );
+                    case 2:
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
+                        child: _buildGymsSection(l10n),
+                      );
+                    case 3:
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+                        child: _buildOtherSection(l10n),
+                      );
+                    default:
+                      return const SizedBox.shrink();
+                  }
+                },
               ),
             ),
     );

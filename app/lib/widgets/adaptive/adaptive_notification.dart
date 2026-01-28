@@ -80,32 +80,35 @@ class _NotificationWidget extends StatelessWidget {
   Widget _buildLiquidGlass(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return ClipRRect(
-      borderRadius: VigorRadius.radiusMd,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: VigorSpacing.paddingMd,
-          decoration: BoxDecoration(
-            color: isError
-                ? VigorColors.error.withValues(alpha: 0.9)
-                : isDark
-                    ? VigorColors.darkSurface.withValues(alpha: 0.9)
-                    : Colors.white.withValues(alpha: 0.9),
-            borderRadius: VigorRadius.radiusMd,
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.white.withValues(alpha: 0.3),
-              width: 1,
+    // RepaintBoundary isolates the expensive blur effect from the rest of the widget tree
+    return RepaintBoundary(
+      child: ClipRRect(
+        borderRadius: VigorRadius.radiusMd,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            padding: VigorSpacing.paddingMd,
+            decoration: BoxDecoration(
+              color: isError
+                  ? VigorColors.error.withValues(alpha: 0.9)
+                  : isDark
+                      ? VigorColors.darkSurface.withValues(alpha: 0.9)
+                      : Colors.white.withValues(alpha: 0.9),
+              borderRadius: VigorRadius.radiusMd,
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.white.withValues(alpha: 0.3),
+                width: 1,
+              ),
+              boxShadow: VigorShadows.elevation2(context),
             ),
-            boxShadow: VigorShadows.elevation2(context),
-          ),
-          child: _buildContent(
-            iconColor: isError ? Colors.white : VigorColors.success,
-            textColor: isError
-                ? Colors.white
-                : VigorColors.textPrimary(context),
+            child: _buildContent(
+              iconColor: isError ? Colors.white : VigorColors.success,
+              textColor: isError
+                  ? Colors.white
+                  : VigorColors.textPrimary(context),
+            ),
           ),
         ),
       ),

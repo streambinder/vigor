@@ -122,16 +122,27 @@ class _HomePageState extends State<HomePage> {
       return _buildWelcomeState(l10n);
     }
 
-    return ListView(
+    return ListView.builder(
       padding: VigorSpacing.paddingLg,
-      children: [
-        // hero stats section with calibration badge
-        _buildHeroStats(l10n, families),
-        const SizedBox(height: VigorSpacing.xl),
-        // capabilities section
-        _buildCapabilitiesSection(l10n, families),
-        const SizedBox(height: VigorSpacing.lg),
-      ],
+      itemCount: 3,
+      itemBuilder: (context, index) {
+        switch (index) {
+          case 0:
+            // hero stats section with calibration badge
+            return Padding(
+              padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
+              child: _buildHeroStats(l10n, families),
+            );
+          case 1:
+            // capabilities section
+            return Padding(
+              padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+              child: _buildCapabilitiesSection(l10n, families),
+            );
+          default:
+            return const SizedBox.shrink();
+        }
+      },
     );
   }
 

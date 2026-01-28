@@ -37,39 +37,42 @@ class AdaptiveButton extends StatelessWidget {
             ? VigorColors.indigo
             : VigorColors.persimmon;
 
-    return GestureDetector(
-      onTap: onPressed,
-      child: ClipRRect(
-        borderRadius: VigorRadius.button,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: AnimatedContainer(
-            duration: VigorAnimation.fast,
-            padding: VigorSpacing.buttonPadding,
-            decoration: useGradient
-                ? LiquidGlassTheme.vibrantGradient(
-                    colors: [color, color.withValues(alpha: 0.8)],
-                    borderRadius: VigorRadius.sm,
-                  )
-                : BoxDecoration(
-                    color: color.withValues(alpha: onPressed == null ? 0.5 : 0.9),
-                    borderRadius: VigorRadius.button,
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      width: 1,
+    // RepaintBoundary isolates the expensive blur effect from the rest of the widget tree
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTap: onPressed,
+        child: ClipRRect(
+          borderRadius: VigorRadius.button,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: AnimatedContainer(
+              duration: VigorAnimation.fast,
+              padding: VigorSpacing.buttonPadding,
+              decoration: useGradient
+                  ? LiquidGlassTheme.vibrantGradient(
+                      colors: [color, color.withValues(alpha: 0.8)],
+                      borderRadius: VigorRadius.sm,
+                    )
+                  : BoxDecoration(
+                      color: color.withValues(alpha: onPressed == null ? 0.5 : 0.9),
+                      borderRadius: VigorRadius.button,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                      boxShadow: onPressed != null
+                          ? (isSecondary
+                              ? VigorShadows.indigoGlow
+                              : VigorShadows.persimmonGlow)
+                          : null,
                     ),
-                    boxShadow: onPressed != null
-                        ? (isSecondary
-                            ? VigorShadows.indigoGlow
-                            : VigorShadows.persimmonGlow)
-                        : null,
-                  ),
-            child: DefaultTextStyle(
-              style: VigorTypography.label.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
+              child: DefaultTextStyle(
+                style: VigorTypography.label.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+                child: child,
               ),
-              child: child,
             ),
           ),
         ),

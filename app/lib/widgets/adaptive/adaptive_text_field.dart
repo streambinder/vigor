@@ -72,43 +72,46 @@ class AdaptiveTextField extends StatelessWidget {
           ),
           const SizedBox(height: VigorSpacing.sm),
         ],
-        ClipRRect(
-          borderRadius: VigorRadius.input,
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              decoration: LiquidGlassTheme.glassDecoration(
-                borderRadius: VigorRadius.sm,
-                isDark: isDark,
-                border: Border.all(
-                  color: errorText != null
-                      ? VigorColors.error.withValues(alpha: 0.5)
-                      : VigorColors.border(context),
-                  width: 1.5,
+        // RepaintBoundary isolates the expensive blur effect from the rest of the widget tree
+        RepaintBoundary(
+          child: ClipRRect(
+            borderRadius: VigorRadius.input,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                decoration: LiquidGlassTheme.glassDecoration(
+                  borderRadius: VigorRadius.sm,
+                  isDark: isDark,
+                  border: Border.all(
+                    color: errorText != null
+                        ? VigorColors.error.withValues(alpha: 0.5)
+                        : VigorColors.border(context),
+                    width: 1.5,
+                  ),
                 ),
-              ),
-              child: TextField(
-                controller: controller,
-                keyboardType: keyboardType,
-                obscureText: obscureText,
-                onChanged: onChanged,
-                onSubmitted: onSubmitted,
-                maxLines: maxLines,
-                minLines: minLines,
-                maxLength: maxLength,
-                inputFormatters: inputFormatters,
-                readOnly: readOnly,
-                onTap: onTap,
-                focusNode: focusNode,
-                style: VigorTypography.body.copyWith(color: textColor),
-                cursorColor: VigorColors.indigo,
-                decoration: InputDecoration(
-                  hintText: placeholder ?? labelText,
-                  hintStyle: VigorTypography.body.copyWith(color: hintColor),
-                  prefixIcon: prefix,
-                  suffixIcon: suffix,
-                  border: InputBorder.none,
-                  contentPadding: VigorSpacing.inputPadding,
+                child: TextField(
+                  controller: controller,
+                  keyboardType: keyboardType,
+                  obscureText: obscureText,
+                  onChanged: onChanged,
+                  onSubmitted: onSubmitted,
+                  maxLines: maxLines,
+                  minLines: minLines,
+                  maxLength: maxLength,
+                  inputFormatters: inputFormatters,
+                  readOnly: readOnly,
+                  onTap: onTap,
+                  focusNode: focusNode,
+                  style: VigorTypography.body.copyWith(color: textColor),
+                  cursorColor: VigorColors.indigo,
+                  decoration: InputDecoration(
+                    hintText: placeholder ?? labelText,
+                    hintStyle: VigorTypography.body.copyWith(color: hintColor),
+                    prefixIcon: prefix,
+                    suffixIcon: suffix,
+                    border: InputBorder.none,
+                    contentPadding: VigorSpacing.inputPadding,
+                  ),
                 ),
               ),
             ),

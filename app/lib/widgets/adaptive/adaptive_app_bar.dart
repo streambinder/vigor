@@ -96,48 +96,51 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
     final leftPadding = hasLeading ? VigorSpacing.lg - 8 : VigorSpacing.lg;
     final rightPadding = hasActions ? VigorSpacing.lg - 8 : VigorSpacing.lg;
 
-    return ClipRRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.black.withValues(alpha: 0.3)
-                : Colors.white.withValues(alpha: 0.3),
-            border: Border(
-              bottom: BorderSide(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.1)
-                    : Colors.white.withValues(alpha: 0.2),
-                width: 0.5,
+    // RepaintBoundary isolates the expensive blur effect from the rest of the widget tree
+    return RepaintBoundary(
+      child: ClipRRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.white.withValues(alpha: 0.3),
+              border: Border(
+                bottom: BorderSide(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.white.withValues(alpha: 0.2),
+                  width: 0.5,
+                ),
               ),
             ),
-          ),
-          child: SafeArea(
-            bottom: false,
-            minimum: const EdgeInsets.only(top: VigorSpacing.sm),
-            child: Container(
-              height: kToolbarHeight,
-              padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
-              child: Row(
-                children: [
-                  if (leading != null)
-                    leading!
-                  else if (showBackButton)
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios),
-                      onPressed: () => Navigator.of(context).pop(),
-                      color: VigorColors.stone,
-                    ),
-                  if (title != null)
-                    Expanded(
-                      child: DefaultTextStyle(
-                        style: VigorTypography.headline.copyWith(color: textColor),
-                        child: title!,
+            child: SafeArea(
+              bottom: false,
+              minimum: const EdgeInsets.only(top: VigorSpacing.sm),
+              child: Container(
+                height: kToolbarHeight,
+                padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
+                child: Row(
+                  children: [
+                    if (leading != null)
+                      leading!
+                    else if (showBackButton)
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios),
+                        onPressed: () => Navigator.of(context).pop(),
+                        color: VigorColors.stone,
                       ),
-                    ),
-                  if (actions != null) ...actions!,
-                ],
+                    if (title != null)
+                      Expanded(
+                        child: DefaultTextStyle(
+                          style: VigorTypography.headline.copyWith(color: textColor),
+                          child: title!,
+                        ),
+                      ),
+                    if (actions != null) ...actions!,
+                  ],
+                ),
               ),
             ),
           ),

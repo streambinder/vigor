@@ -48,88 +48,91 @@ class AdaptiveAlertDialog extends StatelessWidget {
     final textColor = VigorColors.textPrimary(context);
     final secondaryColor = VigorColors.textSecondary(context);
 
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      child: ClipRRect(
-        borderRadius: VigorRadius.modal,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: VigorColors.glassBlur,
-            sigmaY: VigorColors.glassBlur,
-          ),
-          child: Container(
-            decoration: LiquidGlassTheme.glassDecoration(
-              borderRadius: VigorRadius.lg,
-              opacity: 0.95,
-              isDark: isDark,
+    // RepaintBoundary isolates the expensive blur effect from the rest of the widget tree
+    return RepaintBoundary(
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: ClipRRect(
+          borderRadius: VigorRadius.modal,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(
+              sigmaX: VigorColors.glassBlur,
+              sigmaY: VigorColors.glassBlur,
             ),
-            padding: VigorSpacing.paddingLg,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (title != null) ...[
-                  Text(
-                    title!,
-                    style: VigorTypography.headline.copyWith(color: textColor),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: VigorSpacing.sm),
-                ],
-                if (content != null) ...[
-                  Text(
-                    content!,
-                    style: VigorTypography.body.copyWith(color: secondaryColor),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: VigorSpacing.lg),
-                ],
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: actions.map((action) {
-                    return Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.xs),
-                        child: GestureDetector(
-                          onTap: action.onPressed,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: VigorSpacing.sm),
-                            decoration: BoxDecoration(
-                              color: action.isDestructive
-                                  ? VigorColors.error.withValues(alpha: 0.1)
-                                  : action.isDefault
-                                      ? VigorColors.persimmon.withValues(alpha: 0.9)
-                                      : Colors.transparent,
-                              borderRadius: VigorRadius.radiusSm,
-                              border: !action.isDefault
-                                  ? Border.all(
-                                      color: action.isDestructive
-                                          ? VigorColors.error
-                                          : VigorColors.border(context),
-                                    )
-                                  : null,
-                            ),
-                            child: Text(
-                              action.label,
-                              style: VigorTypography.label.copyWith(
-                                color: action.isDefault
-                                    ? Colors.white
-                                    : action.isDestructive
-                                        ? VigorColors.error
-                                        : VigorColors.persimmon,
-                                fontWeight: action.isDefault
-                                    ? FontWeight.w600
-                                    : FontWeight.w400,
+            child: Container(
+              decoration: LiquidGlassTheme.glassDecoration(
+                borderRadius: VigorRadius.lg,
+                opacity: 0.95,
+                isDark: isDark,
+              ),
+              padding: VigorSpacing.paddingLg,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (title != null) ...[
+                    Text(
+                      title!,
+                      style: VigorTypography.headline.copyWith(color: textColor),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: VigorSpacing.sm),
+                  ],
+                  if (content != null) ...[
+                    Text(
+                      content!,
+                      style: VigorTypography.body.copyWith(color: secondaryColor),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: VigorSpacing.lg),
+                  ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: actions.map((action) {
+                      return Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.xs),
+                          child: GestureDetector(
+                            onTap: action.onPressed,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: VigorSpacing.sm),
+                              decoration: BoxDecoration(
+                                color: action.isDestructive
+                                    ? VigorColors.error.withValues(alpha: 0.1)
+                                    : action.isDefault
+                                        ? VigorColors.persimmon.withValues(alpha: 0.9)
+                                        : Colors.transparent,
+                                borderRadius: VigorRadius.radiusSm,
+                                border: !action.isDefault
+                                    ? Border.all(
+                                        color: action.isDestructive
+                                            ? VigorColors.error
+                                            : VigorColors.border(context),
+                                      )
+                                    : null,
                               ),
-                              textAlign: TextAlign.center,
+                              child: Text(
+                                action.label,
+                                style: VigorTypography.label.copyWith(
+                                  color: action.isDefault
+                                      ? Colors.white
+                                      : action.isDestructive
+                                          ? VigorColors.error
+                                          : VigorColors.persimmon,
+                                  fontWeight: action.isDefault
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
