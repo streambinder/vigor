@@ -62,8 +62,8 @@ type ProgressionAdjustment struct {
 
 // ExerciseSelection captures an exercise choice with its rationale categories.
 type ExerciseSelection struct {
-	ID        string   `json:"id" prompt:"Exercise ID from list"`
-	Rationale []string `json:"rationale" prompt:"Why selected;enum:goal,muscle,methodology,favorite,equipment,progression,feedback,variety"`
+	ID        string            `json:"id" prompt:"Exercise ID from list"`
+	Rationale map[string]string `json:"rationale" prompt:"Brief reason per category (3-8 words each);keys:goal,muscle,methodology,favorite,equipment,progression,feedback,variety,injury"`
 }
 
 // TrainingReasoning captures the model's thought process before generating training structure.

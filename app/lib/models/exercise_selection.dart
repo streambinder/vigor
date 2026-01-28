@@ -9,8 +9,8 @@ part 'exercise_selection.g.dart';
 class ExerciseSelection {
   @JsonKey(name: 'id', defaultValue: '')
   final String id;
-  @JsonKey(name: 'rationale', defaultValue: [])
-  final List<String> rationale;
+  @JsonKey(name: 'rationale', defaultValue: {})
+  final Map<String, String> rationale;
 
   ExerciseSelection({
     required this.id,
