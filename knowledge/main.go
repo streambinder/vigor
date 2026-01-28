@@ -53,6 +53,10 @@ func main() {
 		log.Fatalf("Failed to migrate database: %s", err)
 	}
 
+	if err := createVectorIndexes(gormDB); err != nil {
+		log.Fatalf("Failed to create vector indexes: %s", err)
+	}
+
 	if err := bootstrapMethodologies(gormDB); err != nil {
 		log.Fatalf("Failed to inject methodologies: %s", err)
 	}
@@ -306,9 +310,9 @@ func boostrapFacts(gormDB *gorm.DB) error {
 
 // methodologyJSON mirrors the JSON structure for unmarshaling work map directly.
 type methodologyJSON struct {
-	ID          string                        `json:"id"`
-	Name        string                        `json:"name"`
-	Description string                        `json:"description"`
+	ID          string                           `json:"id"`
+	Name        string                           `json:"name"`
+	Description string                           `json:"description"`
 	Work        map[string]model.MethodologyWork `json:"work"`
 }
 
@@ -353,6 +357,26 @@ func bootstrapMuscles(gormDB *gorm.DB) error {
 
 	for _, row := range rows {
 		if err := gormDB.Save(&row).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// createVectorIndexes creates HNSW indexes on embedding columns for efficient similarity search.
+// Uses vector_cosine_ops since retrieval.go uses cosine distance (<=>).
+func createVectorIndexes(gormDB *gorm.DB) error {
+	indexes := []string{
+		"CREATE INDEX IF NOT EXISTS idx_exercise_embedding_hnsw ON exercise_embeddings USING hnsw (embedding vector_cosine_ops)",
+		"CREATE INDEX IF NOT EXISTS idx_fact_embedding_hnsw ON fact_embeddings USING hnsw (embedding vector_cosine_ops)",
+		"CREATE INDEX IF NOT EXISTS idx_goal_embedding_hnsw ON goal_embeddings USING hnsw (embedding vector_cosine_ops)",
+		"CREATE INDEX IF NOT EXISTS idx_equipment_embedding_hnsw ON equipment_embeddings USING hnsw (embedding vector_cosine_ops)",
+		"CREATE INDEX IF NOT EXISTS idx_modifier_embedding_hnsw ON modifier_embeddings USING hnsw (embedding vector_cosine_ops)",
+	}
+
+	for _, idx := range indexes {
+		if err := gormDB.Exec(idx).Error; err != nil {
 			return err
 		}
 	}
