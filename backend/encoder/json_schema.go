@@ -151,6 +151,13 @@ func buildPropertySchema(t reflect.Type, description string, enumValues []string
 		} else if elemType.Kind() == reflect.Struct || (elemType.Kind() == reflect.Pointer && elemType.Elem().Kind() == reflect.Struct) {
 			prop["items"] = jsonSchemaForType(elemType)
 		}
+	case reflect.Map:
+		// Handle map[string]string as object with additionalProperties
+		prop["type"] = "object"
+		valueType := t.Elem()
+		if valueType.Kind() == reflect.String {
+			prop["additionalProperties"] = map[string]interface{}{"type": "string"}
+		}
 	case reflect.Struct:
 		// Check if it's a special type (time.Time, etc.)
 		if t.String() == "time.Time" || t.String() == "gorm.DeletedAt" {

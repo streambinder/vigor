@@ -413,13 +413,13 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                         Wrap(
                           spacing: VigorSpacing.xs,
                           runSpacing: VigorSpacing.xs,
-                          children: e.rationale.map((r) => Container(
+                          children: e.rationale.entries.map((entry) => Container(
                             padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: 2),
                             decoration: BoxDecoration(
                               color: VigorColors.indigo.withValues(alpha: 0.15),
                               borderRadius: VigorRadius.radiusXs,
                             ),
-                            child: Text(r, style: VigorTypography.caption.copyWith(color: VigorColors.indigo, fontSize: 10)),
+                            child: Text('${entry.key}: ${entry.value}', style: VigorTypography.caption.copyWith(color: VigorColors.indigo, fontSize: 10)),
                           )).toList(),
                         ),
                       ],

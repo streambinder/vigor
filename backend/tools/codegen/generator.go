@@ -36,6 +36,7 @@ func NewGenerator(outputDir, modelImportPath string, localTypes map[string]bool)
 		"getRequiredFields":   getRequiredFields,
 		"needsListDefault":    needsListDefault,
 		"needsStringDefault":  needsStringDefault,
+		"needsMapDefault":     needsMapDefault,
 		"isDateTime":          isDateTime,
 		"hasDateTime":         hasDateTime,
 		"hasNullableDateTime": hasNullableDateTime,
@@ -134,6 +135,8 @@ func mapGoTypeToDart(goType string) string {
 		return "dynamic"
 	case "Map":
 		return "Map<String, dynamic>"
+	case "MapStringString":
+		return "Map<String, String>"
 	default:
 		// Assume it's a custom struct type
 		return toClassName(goType)
@@ -237,6 +240,15 @@ func needsStringDefault(field Field) bool {
 	return dartType == "String"
 }
 
+// needsMapDefault checks if a field needs an empty map default value
+func needsMapDefault(field Field) bool {
+	if field.IsOptional {
+		return false
+	}
+	dartType := toDartType(field.Type, false, field.IsCollection, field.CollectionOf)
+	return strings.HasPrefix(dartType, "Map<")
+}
+
 // isDateTime checks if a field type maps to DateTime
 func isDateTime(goType string) bool {
 	return goType == "time.Time" || goType == "gorm.DeletedAt"
@@ -287,7 +299,7 @@ class {{ toClassName .Name }} {
 {{- end }}
 
 {{- range .Fields }}
-  @JsonKey(name: '{{ .JsonTag }}'{{- if needsListDefault . }}, defaultValue: []{{- else if needsStringDefault . }}, defaultValue: ''{{- end }}{{- if isDateTime .Type }}{{- if .IsOptional }}, toJson: _nullableDateTimeToJson{{- else }}, toJson: _dateTimeToJson{{- end }}{{- end }})
+  @JsonKey(name: '{{ .JsonTag }}'{{- if needsListDefault . }}, defaultValue: []{{- else if needsMapDefault . }}, defaultValue: {}{{- else if needsStringDefault . }}, defaultValue: ''{{- end }}{{- if isDateTime .Type }}{{- if .IsOptional }}, toJson: _nullableDateTimeToJson{{- else }}, toJson: _dateTimeToJson{{- end }}{{- end }})
   final {{ toDartType .Type .IsOptional .IsCollection .CollectionOf }} {{ toCamelCase .Name }};
 {{- end }}
 

@@ -208,6 +208,12 @@ func (p *Parser) parseType(expr ast.Expr) (typeName string, isOptional bool, isC
 
 	case *ast.MapType:
 		// Map type: map[K]V
+		// Check if it's map[string]string specifically
+		if keyIdent, ok := t.Key.(*ast.Ident); ok && keyIdent.Name == "string" {
+			if valIdent, ok := t.Value.(*ast.Ident); ok && valIdent.Name == "string" {
+				return "MapStringString", false, false, ""
+			}
+		}
 		return "Map", false, false, ""
 
 	case *ast.IndexExpr:
