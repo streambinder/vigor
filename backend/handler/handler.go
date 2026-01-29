@@ -42,6 +42,7 @@ func Init() *fiber.App {
 	initTraining(app)
 	initActivity(app)
 	initProgress(app)
+	initReport(app)
 
 	return app
 }
