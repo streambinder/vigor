@@ -62,8 +62,8 @@ func RetrieveAllMethodologies() ([]model.Methodology, error) {
 // RetrieveWorkExercises retrieves exercises for the main training phase via RAG.
 // Uses per-family balanced retrieval when methodology is specified to ensure coverage of all movement families.
 // Falls back to simple similarity search when no methodology or families are defined.
-func RetrieveWorkExercises(profiles []model.Profile, goals []string, equipment []string, proficiencies map[string]float64, proficiencyMargin float64, methodology *model.Methodology, muscles []string) ([]model.Exercise, error) {
-	embeddingText := GenUserExercises(profiles, goals, equipment)
+func RetrieveWorkExercises(profiles []model.Profile, goals []string, equipment []string, proficiencies map[string]float64, proficiencyMargin float64, methodology *model.Methodology, muscles []string, prompt string) ([]model.Exercise, error) {
+	embeddingText := GenUserExercises(profiles, goals, equipment, prompt)
 	exerciseEmbedding, err := embedding.GenVector(embeddingText)
 	if err != nil {
 		return nil, err

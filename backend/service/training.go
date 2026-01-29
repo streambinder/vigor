@@ -144,7 +144,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	}
 
 	proficiencyMargin := ProgressiveMargin(trainingsComplete)
-	workExercises, err := rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles)
+	workExercises, err := rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles, prompt)
 	if err != nil {
 		return nil, err
 	}
