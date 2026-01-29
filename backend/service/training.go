@@ -292,6 +292,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	for muscle := range muscleSet {
 		training.Muscles = append(training.Muscles, muscle)
 	}
+	training.Request = prompt
 
 	for i := range training.Routines {
 		training.Routines[i].Position = i
