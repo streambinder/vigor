@@ -28,6 +28,8 @@ class Training {
   final List<String> goals;
   @JsonKey(name: 'muscles', defaultValue: [])
   final List<String> muscles;
+  @JsonKey(name: 'request', defaultValue: '')
+  final String request;
   @JsonKey(name: 'references', defaultValue: [])
   final List<String> references;
   @JsonKey(name: 'routines', defaultValue: [])
@@ -59,6 +61,7 @@ class Training {
     required this.equipment,
     required this.goals,
     required this.muscles,
+    required this.request,
     required this.references,
     required this.routines,
     required this.prompt,

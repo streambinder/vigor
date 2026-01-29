@@ -575,6 +575,10 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                 _buildMetadataChips(l10n),
                 const SizedBox(height: VigorSpacing.md),
                 Text(training.description, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context), height: 1.5)),
+                if (training.request.isNotEmpty) ...[
+                  const SizedBox(height: VigorSpacing.md),
+                  _buildInlineRequest(l10n),
+                ],
                 if (training.references.isNotEmpty) ...[
                   const SizedBox(height: VigorSpacing.md),
                   _buildInlineReferences(l10n),
@@ -625,6 +629,10 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           _buildMetadataChips(l10n),
           const SizedBox(height: VigorSpacing.md),
           Text(training.description, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context), height: 1.5)),
+          if (training.request.isNotEmpty) ...[
+            const SizedBox(height: VigorSpacing.md),
+            _buildInlineRequest(l10n),
+          ],
           if (training.references.isNotEmpty) ...[
             const SizedBox(height: VigorSpacing.md),
             _buildInlineReferences(l10n),
@@ -653,6 +661,27 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
               children: training.muscles.map((muscle) => _buildChip(Icons.accessibility_new, muscle)).toList(),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInlineRequest(AppLocalizations l10n) {
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.symmetric(vertical: VigorSpacing.xs),
+        leading: const Icon(Icons.chat_bubble_outline, size: 18, color: VigorColors.stone),
+        title: Text(l10n.request, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: VigorSpacing.xs),
+            child: Text(
+              training.request,
+              style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context), fontStyle: FontStyle.italic),
+            ),
+          ),
         ],
       ),
     );
