@@ -413,14 +413,17 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                         Wrap(
                           spacing: VigorSpacing.xs,
                           runSpacing: VigorSpacing.xs,
-                          children: e.rationale.entries.map((entry) => Container(
-                            padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: VigorColors.indigo.withValues(alpha: 0.15),
-                              borderRadius: VigorRadius.radiusXs,
-                            ),
-                            child: Text('${entry.key}: ${entry.value}', style: VigorTypography.caption.copyWith(color: VigorColors.indigo, fontSize: 10)),
-                          )).toList(),
+                          children: e.rationale.entries.map((entry) {
+                            final accentColor = VigorColors.indigoAdaptive(context);
+                            return Container(
+                              padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: accentColor.withValues(alpha: 0.15),
+                                borderRadius: VigorRadius.radiusXs,
+                              ),
+                              child: Text('${entry.key}: ${entry.value}', style: VigorTypography.caption.copyWith(color: accentColor, fontSize: 10)),
+                            );
+                          }).toList(),
                         ),
                       ],
                     ],
