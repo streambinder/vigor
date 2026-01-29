@@ -63,6 +63,7 @@
   "goals": "Цели",
   "injuries": "Травмы",
   "limitations": "Ограничения",
+  "conditions": "Состояния",
   "favorites": "Избранное",
   "personalDetails": "Личные данные",
   "healthAndGoals": "Здоровье и цели",
@@ -104,6 +105,7 @@
   "injuryDescription": "Описание травмы",
   "year": "Год",
   "addALimitation": "Добавить ограничение",
+  "addACondition": "Добавить состояние",
   "favoriteExercisesHint": "напр. приседания, подтягивания, бег",
   "favoriteEquipmentHint": "напр. гантели, штанга, гиря",
 

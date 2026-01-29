@@ -63,6 +63,7 @@
   "goals": "목표",
   "injuries": "부상",
   "limitations": "제한사항",
+  "conditions": "상태",
   "favorites": "즐겨찾기",
   "personalDetails": "개인 정보",
   "healthAndGoals": "건강 및 목표",
@@ -104,6 +105,7 @@
   "injuryDescription": "부상 설명",
   "year": "연도",
   "addALimitation": "제한사항 추가",
+  "addACondition": "상태 추가",
   "favoriteExercisesHint": "예: 스쿼트, 턱걸이, 달리기",
   "favoriteEquipmentHint": "예: 덤벨, 바벨, 케틀벨",
 

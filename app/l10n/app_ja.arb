@@ -63,6 +63,7 @@
   "goals": "目標",
   "injuries": "怪我",
   "limitations": "制限",
+  "conditions": "体調",
   "favorites": "お気に入り",
   "personalDetails": "個人情報",
   "healthAndGoals": "健康と目標",
@@ -104,6 +105,7 @@
   "injuryDescription": "怪我の説明",
   "year": "年",
   "addALimitation": "制限を追加",
+  "addACondition": "体調を追加",
   "favoriteExercisesHint": "例：スクワット、懸垂、ランニング",
   "favoriteEquipmentHint": "例：ダンベル、バーベル、ケトルベル",
 

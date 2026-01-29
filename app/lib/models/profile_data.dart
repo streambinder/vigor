@@ -19,6 +19,8 @@ class ProfileData {
   final List<Injury> injuries;
   @JsonKey(name: 'limitations', defaultValue: [])
   final List<String> limitations;
+  @JsonKey(name: 'conditions', defaultValue: [])
+  final List<String> conditions;
   @JsonKey(name: 'preferences')
   final Preferences? preferences;
 
@@ -26,6 +28,7 @@ class ProfileData {
     required this.goals,
     required this.injuries,
     required this.limitations,
+    required this.conditions,
     this.preferences,
   });
 

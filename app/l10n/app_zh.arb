@@ -63,6 +63,7 @@
   "goals": "目标",
   "injuries": "伤病",
   "limitations": "限制",
+  "conditions": "身体状况",
   "favorites": "收藏",
   "personalDetails": "个人信息",
   "healthAndGoals": "健康与目标",
@@ -104,6 +105,7 @@
   "injuryDescription": "伤病描述",
   "year": "年份",
   "addALimitation": "添加限制",
+  "addACondition": "添加身体状况",
   "favoriteExercisesHint": "例如：深蹲、引体向上、跑步",
   "favoriteEquipmentHint": "例如：哑铃、杠铃、壶铃",
 

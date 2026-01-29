@@ -63,6 +63,7 @@
   "goals": "Objectifs",
   "injuries": "Blessures",
   "limitations": "Limitations",
+  "conditions": "Conditions",
   "favorites": "Favoris",
   "personalDetails": "Informations Personnelles",
   "healthAndGoals": "Santé et Objectifs",
@@ -104,6 +105,7 @@
   "injuryDescription": "Description de la blessure",
   "year": "Année",
   "addALimitation": "Ajouter une limitation",
+  "addACondition": "Ajouter une condition",
   "favoriteExercisesHint": "ex. squats, tractions, course",
   "favoriteEquipmentHint": "ex. haltères, barre, kettlebell",
 
