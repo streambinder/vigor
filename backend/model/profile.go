@@ -30,6 +30,7 @@ type profileData struct {
 	Goals       []string     `json:"goals" flutter:"required"`
 	Injuries    []Injury     `json:"injuries"`
 	Limitations []string     `json:"limitations"`
+	Conditions  []string     `json:"conditions"`
 	Preferences *Preferences `json:"preferences,omitempty"`
 }
 
@@ -86,6 +87,15 @@ func (p *Profile) Limitations() []string {
 		return nil
 	}
 	return data.Limitations
+}
+
+// Conditions extracts the user's body conditions from profile data.
+func (p *Profile) Conditions() []string {
+	data, err := p.data()
+	if err != nil {
+		return nil
+	}
+	return data.Conditions
 }
 
 // FavoriteExercises extracts the user's favorite exercises from profile data.
