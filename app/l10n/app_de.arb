@@ -63,6 +63,7 @@
   "goals": "Ziele",
   "injuries": "Verletzungen",
   "limitations": "Einschränkungen",
+  "conditions": "Beschwerden",
   "favorites": "Favoriten",
   "personalDetails": "Persönliche Daten",
   "healthAndGoals": "Gesundheit & Ziele",
@@ -104,6 +105,7 @@
   "injuryDescription": "Verletzungsbeschreibung",
   "year": "Jahr",
   "addALimitation": "Einschränkung hinzufügen",
+  "addACondition": "Beschwerde hinzufügen",
   "favoriteExercisesHint": "z.B. Kniebeugen, Klimmzüge, Laufen",
   "favoriteEquipmentHint": "z.B. Kurzhanteln, Langhantel, Kettlebell",
 

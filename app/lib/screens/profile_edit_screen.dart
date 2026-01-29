@@ -48,6 +48,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   List<String> _goals = [];
   final List<Injury> _injuries = [];
   final List<String> _limitations = [];
+  final List<String> _conditions = [];
   final List<String> _favoriteExercises = [];
   List<String> _favoriteEquipment = [];
 
@@ -55,6 +56,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   final _injuryDescriptionController = TextEditingController();
   final _injuryYearController = TextEditingController();
   final _limitationController = TextEditingController();
+  final _conditionController = TextEditingController();
   final _favoriteExerciseController = TextEditingController();
 
   @override
@@ -90,6 +92,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         if (data['limitations'] != null) {
           _limitations.addAll((data['limitations'] as List).cast<String>());
         }
+        if (data['conditions'] != null) {
+          _conditions.addAll((data['conditions'] as List).cast<String>());
+        }
         if (data['preferences'] != null) {
           final prefs = data['preferences'] as Map<String, dynamic>;
           if (prefs['exercises'] != null) {
@@ -108,6 +113,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     _injuryDescriptionController.dispose();
     _injuryYearController.dispose();
     _limitationController.dispose();
+    _conditionController.dispose();
     _favoriteExerciseController.dispose();
     super.dispose();
   }
@@ -150,6 +156,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         'goals': _goals,
         'injuries': _injuries.map((i) => i.toJson()).toList(),
         'limitations': _limitations,
+        'conditions': _conditions,
       };
 
       if (_favoriteExercises.isNotEmpty || _favoriteEquipment.isNotEmpty) {
@@ -413,6 +420,27 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 setState(() {
                   _limitations.add(_limitationController.text);
                   _limitationController.clear();
+                });
+              }
+            },
+          ),
+        ),
+        const SizedBox(height: VigorSpacing.xl),
+
+        // conditions
+        _buildListInputSection(
+          label: l10n.conditions,
+          hint: l10n.optionalLeaveEmpty,
+          items: _conditions,
+          onRemove: (idx) => setState(() => _conditions.removeAt(idx)),
+          inputBuilder: () => _buildSimpleListInput(
+            controller: _conditionController,
+            placeholder: l10n.addACondition,
+            onAdd: () {
+              if (_conditionController.text.isNotEmpty) {
+                setState(() {
+                  _conditions.add(_conditionController.text);
+                  _conditionController.clear();
                 });
               }
             },
