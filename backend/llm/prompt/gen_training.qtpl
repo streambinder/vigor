@@ -40,6 +40,7 @@ Work routine ONLY. No warmup/cooldown.
 Age:{%d profile.Age() %} Height:{%f.0 profile.Height %}cm Weight:{%f.0 profile.Weight %}kg Gender:{%s profile.Gender %}
 {% if len(profile.Injuries()) > 0 %}Injuries: {% for j, injury := range profile.Injuries() %}{%s injury.Description %}({%d injury.Year %}){% if j < len(profile.Injuries())-1 %}, {% endif %}{% endfor %}
 {% endif %}{% if len(profile.Limitations()) > 0 %}Limitations: {% for j, limitation := range profile.Limitations() %}{%s limitation %}{% if j < len(profile.Limitations())-1 %}, {% endif %}{% endfor %}
+{% endif %}{% if len(profile.Conditions()) > 0 %}Conditions: {% for j, condition := range profile.Conditions() %}{%s condition %}{% if j < len(profile.Conditions())-1 %}, {% endif %}{% endfor %}
 {% endif %}
 {% endfor %}
 
