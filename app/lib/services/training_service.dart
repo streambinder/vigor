@@ -56,12 +56,13 @@ class TrainingService {
     }
 
     const maxRetries = 2;
+    const retryableStatusCodes = [500, 502, 503, 504];
     for (var attempt = 0; attempt <= maxRetries; attempt++) {
       final response = await _apiService.post('/training', body: body);
 
-      // retry on 503 (malformed training) up to maxRetries times
-      if (response.statusCode == 503 && attempt < maxRetries) {
-        AppLogger.warning('[TrainingService] Got 503, retrying (attempt ${attempt + 1})');
+      // retry on 5xx errors (transient server issues) up to maxRetries times
+      if (retryableStatusCodes.contains(response.statusCode) && attempt < maxRetries) {
+        AppLogger.warning('[TrainingService] Got ${response.statusCode}, retrying (attempt ${attempt + 1})');
         onRetry?.call(attempt + 1);
         await Future.delayed(const Duration(seconds: 3));
         continue;
@@ -86,7 +87,7 @@ class TrainingService {
     }
 
     // should not reach here, but just in case
-    return ApiResponse.error('Failed to generate training after retries', 503);
+    return ApiResponse.error('Failed to generate training after retries', 500);
   }
 
   Future<ApiResponse<List<Training>>> getTrainings() async {
