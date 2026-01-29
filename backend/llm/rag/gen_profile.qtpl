@@ -1,66 +1,47 @@
 {% package rag %}
 
 {% import "github.com/streambinder/vigor/model" %}
+{% import "github.com/streambinder/vigor/util" %}
 
-{% code
-type ProfilePurpose int
-
-const (
-	ProfilePurposeFacts ProfilePurpose = iota
-	ProfilePurposeExercises
-)
-%}
-
-{% func GenProfile(profiles []model.Profile, goals []string, equipment []string, prompt string, purpose ProfilePurpose) -%}
+{% func GenProfile(profiles []model.Profile, goals, equipment, muscles []string, prompt string) -%}
 {% collapsespace %}
 
-{% if purpose == ProfilePurposeFacts %}Knowledge for:{% else %}Exercises for:{% endif %}
 {% code
-	var allGoals, allInjuries, allLimitations, allConditions []string
-	goalSet := make(map[string]bool)
-	injurySet := make(map[string]bool)
-	limitationSet := make(map[string]bool)
-	conditionSet := make(map[string]bool)
-	for _, goal := range goals {
-		if !goalSet[goal] {
-			goalSet[goal] = true
-			allGoals = append(allGoals, goal)
-		}
+
+var (
+	injuries    []string
+	limitations []string
+	conditions  []string
+)
+for _, profile := range profiles {
+	limitations = append(limitations, profile.Limitations()...)
+	conditions = append(conditions, profile.Conditions()...)
+	for _, injury := range profile.Injuries() {
+		injuries = append(injuries, injury.Description)
 	}
+}
+if len(goals) == 0 {
 	for _, profile := range profiles {
-		for _, injury := range profile.Injuries() {
-			if !injurySet[injury.Description] {
-				injurySet[injury.Description] = true
-				allInjuries = append(allInjuries, injury.Description)
-			}
-		}
-		for _, limitation := range profile.Limitations() {
-			if !limitationSet[limitation] {
-				limitationSet[limitation] = true
-				allLimitations = append(allLimitations, limitation)
-			}
-		}
-		for _, condition := range profile.Conditions() {
-			if !conditionSet[condition] {
-				conditionSet[condition] = true
-				allConditions = append(allConditions, condition)
-			}
+		for _, goal := range profile.Goals() {
+			goals = append(goals, goal)
 		}
 	}
+}
+
+injuries = util.Dedupe(injuries)
+limitations = util.Dedupe(limitations)
+conditions = util.Dedupe(conditions)
+goals = util.Dedupe(goals)
+
 %}
+
 {% if len(prompt) > 0 %}Request: {%s prompt %}.{% endif %}
-{% if len(allGoals) > 0 %}Goals: {% for i, goal := range allGoals %}{%s goal %}{% if i < len(allGoals)-1 %}, {% endif %}{% endfor %}.{% endif %}
-{% if len(allInjuries) > 0 %}{% if purpose == ProfilePurposeFacts %}Injuries{% else %}Avoid{% endif %}: {% for i, injury := range allInjuries %}{%s injury %}{% if i < len(allInjuries)-1 %}, {% endif %}{% endfor %}.{% endif %}
-{% if len(allLimitations) > 0 %}Limitations: {% for i, limitation := range allLimitations %}{%s limitation %}{% if i < len(allLimitations)-1 %}, {% endif %}{% endfor %}.{% endif %}
-{% if len(allConditions) > 0 %}Conditions: {% for i, condition := range allConditions %}{%s condition %}{% if i < len(allConditions)-1 %}, {% endif %}{% endfor %}.{% endif %}
-{% if purpose == ProfilePurposeExercises && len(equipment) > 0 %}Equipment: {% for i, eq := range equipment %}{%s eq %}{% if i < len(equipment)-1 %}, {% endif %}{% endfor %}.{% endif %}
-{% code
-	hasContent := len(prompt) > 0 || len(allGoals) > 0 || len(allInjuries) > 0 || len(allLimitations) > 0 || len(allConditions) > 0
-	if purpose == ProfilePurposeExercises {
-		hasContent = hasContent || len(equipment) > 0
-	}
-%}
-{% if !hasContent %}{% if purpose == ProfilePurposeFacts %}General fitness knowledge.{% else %}General fitness exercises.{% endif %}{% endif %}
+{% if len(goals) > 0 %}Goals: {% for i, goal := range goals %}{%s goal %}{% if i < len(goals)-1 %}, {% endif %}{% endfor %}.{% endif %}
+{% if len(injuries) > 0 %}Injuries: {% for i, injury := range injuries %}{%s injury %}{% if i < len(injuries)-1 %}, {% endif %}{% endfor %}.{% endif %}
+{% if len(limitations) > 0 %}Limitations: {% for i, limitation := range limitations %}{%s limitation %}{% if i < len(limitations)-1 %}, {% endif %}{% endfor %}.{% endif %}
+{% if len(conditions) > 0 %}Conditions: {% for i, condition := range conditions %}{%s condition %}{% if i < len(conditions)-1 %}, {% endif %}{% endfor %}.{% endif %}
+{% if len(equipment) > 0 %}Equipment: {% for i, eq := range equipment %}{%s eq %}{% if i < len(equipment)-1 %}, {% endif %}{% endfor %}.{% endif %}
+{% if len(muscles) > 0 %}Muscles: {% for i, eq := range muscles %}{%s eq %}{% if i < len(muscles)-1 %}, {% endif %}{% endfor %}.{% endif %}
 
 {% endcollapsespace -%}
 {% endfunc %}

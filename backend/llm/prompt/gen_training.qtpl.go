@@ -182,342 +182,363 @@ Age:`)
 //line llm/prompt/gen_training.qtpl:43
 		}
 //line llm/prompt/gen_training.qtpl:43
-		qw422016.N().S(`
+		if len(profile.Conditions()) > 0 {
+//line llm/prompt/gen_training.qtpl:43
+			qw422016.N().S(`Conditions: `)
+//line llm/prompt/gen_training.qtpl:43
+			for j, condition := range profile.Conditions() {
+//line llm/prompt/gen_training.qtpl:43
+				qw422016.E().S(condition)
+//line llm/prompt/gen_training.qtpl:43
+				if j < len(profile.Conditions())-1 {
+//line llm/prompt/gen_training.qtpl:43
+					qw422016.N().S(`, `)
+//line llm/prompt/gen_training.qtpl:43
+				}
+//line llm/prompt/gen_training.qtpl:43
+			}
+//line llm/prompt/gen_training.qtpl:43
+			qw422016.N().S(`
 `)
 //line llm/prompt/gen_training.qtpl:44
-	}
+		}
 //line llm/prompt/gen_training.qtpl:44
+		qw422016.N().S(`
+`)
+//line llm/prompt/gen_training.qtpl:45
+	}
+//line llm/prompt/gen_training.qtpl:45
 	qw422016.N().S(`
 
 `)
-//line llm/prompt/gen_training.qtpl:46
+//line llm/prompt/gen_training.qtpl:47
 	if len(userPrompt) > 0 {
-//line llm/prompt/gen_training.qtpl:46
+//line llm/prompt/gen_training.qtpl:47
 		qw422016.N().S(`
 [USER REQUEST]
 `)
-//line llm/prompt/gen_training.qtpl:48
+//line llm/prompt/gen_training.qtpl:49
 		qw422016.E().S(userPrompt)
-//line llm/prompt/gen_training.qtpl:48
+//line llm/prompt/gen_training.qtpl:49
 		qw422016.N().S(`
 
 `)
-//line llm/prompt/gen_training.qtpl:50
+//line llm/prompt/gen_training.qtpl:51
 	}
-//line llm/prompt/gen_training.qtpl:50
+//line llm/prompt/gen_training.qtpl:51
 	qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:51
+//line llm/prompt/gen_training.qtpl:52
 	if len(equipment) > 0 {
-//line llm/prompt/gen_training.qtpl:51
+//line llm/prompt/gen_training.qtpl:52
 		qw422016.N().S(`
 [EQUIPMENT]
 `)
-//line llm/prompt/gen_training.qtpl:53
+//line llm/prompt/gen_training.qtpl:54
 		for i, eq := range equipment {
-//line llm/prompt/gen_training.qtpl:53
+//line llm/prompt/gen_training.qtpl:54
 			qw422016.E().S(eq)
-//line llm/prompt/gen_training.qtpl:53
+//line llm/prompt/gen_training.qtpl:54
 			if i < len(equipment)-1 {
-//line llm/prompt/gen_training.qtpl:53
+//line llm/prompt/gen_training.qtpl:54
 				qw422016.N().S(`, `)
-//line llm/prompt/gen_training.qtpl:53
+//line llm/prompt/gen_training.qtpl:54
 			}
-//line llm/prompt/gen_training.qtpl:53
+//line llm/prompt/gen_training.qtpl:54
 		}
-//line llm/prompt/gen_training.qtpl:53
+//line llm/prompt/gen_training.qtpl:54
 		qw422016.N().S(`
 
 `)
-//line llm/prompt/gen_training.qtpl:55
+//line llm/prompt/gen_training.qtpl:56
 	}
-//line llm/prompt/gen_training.qtpl:55
+//line llm/prompt/gen_training.qtpl:56
 	qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:56
+//line llm/prompt/gen_training.qtpl:57
 	if len(modifiers) > 0 {
-//line llm/prompt/gen_training.qtpl:56
+//line llm/prompt/gen_training.qtpl:57
 		qw422016.N().S(`
 [MODIFIERS]
 `)
-//line llm/prompt/gen_training.qtpl:58
+//line llm/prompt/gen_training.qtpl:59
 		for _, mod := range modifiers {
-//line llm/prompt/gen_training.qtpl:58
+//line llm/prompt/gen_training.qtpl:59
 			qw422016.E().S(mod.ID)
-//line llm/prompt/gen_training.qtpl:58
+//line llm/prompt/gen_training.qtpl:59
 			qw422016.N().S(`: [`)
-//line llm/prompt/gen_training.qtpl:58
+//line llm/prompt/gen_training.qtpl:59
 			qw422016.E().S(strings.Join(mod.Patterns, ","))
-//line llm/prompt/gen_training.qtpl:58
+//line llm/prompt/gen_training.qtpl:59
 			qw422016.N().S(`]
 `)
-//line llm/prompt/gen_training.qtpl:59
+//line llm/prompt/gen_training.qtpl:60
 		}
-//line llm/prompt/gen_training.qtpl:59
+//line llm/prompt/gen_training.qtpl:60
 		qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:60
+//line llm/prompt/gen_training.qtpl:61
 	}
-//line llm/prompt/gen_training.qtpl:60
+//line llm/prompt/gen_training.qtpl:61
 	qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:61
+//line llm/prompt/gen_training.qtpl:62
 	if len(favoriteExercises) > 0 || len(favoriteEquipment) > 0 {
-//line llm/prompt/gen_training.qtpl:61
+//line llm/prompt/gen_training.qtpl:62
 		qw422016.N().S(`
 [FAVORITES]
 `)
-//line llm/prompt/gen_training.qtpl:63
+//line llm/prompt/gen_training.qtpl:64
 		if len(favoriteExercises) > 0 {
-//line llm/prompt/gen_training.qtpl:63
+//line llm/prompt/gen_training.qtpl:64
 			qw422016.N().S(`Exercises: `)
-//line llm/prompt/gen_training.qtpl:63
+//line llm/prompt/gen_training.qtpl:64
 			for i, ex := range favoriteExercises {
-//line llm/prompt/gen_training.qtpl:63
+//line llm/prompt/gen_training.qtpl:64
 				qw422016.E().S(ex.ID)
-//line llm/prompt/gen_training.qtpl:63
+//line llm/prompt/gen_training.qtpl:64
 				if i < len(favoriteExercises)-1 {
-//line llm/prompt/gen_training.qtpl:63
+//line llm/prompt/gen_training.qtpl:64
 					qw422016.N().S(`, `)
-//line llm/prompt/gen_training.qtpl:63
+//line llm/prompt/gen_training.qtpl:64
 				}
-//line llm/prompt/gen_training.qtpl:63
+//line llm/prompt/gen_training.qtpl:64
 			}
-//line llm/prompt/gen_training.qtpl:63
+//line llm/prompt/gen_training.qtpl:64
 			qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:64
+//line llm/prompt/gen_training.qtpl:65
 		}
-//line llm/prompt/gen_training.qtpl:64
+//line llm/prompt/gen_training.qtpl:65
 		if len(favoriteEquipment) > 0 {
-//line llm/prompt/gen_training.qtpl:64
+//line llm/prompt/gen_training.qtpl:65
 			qw422016.N().S(`Equipment: `)
-//line llm/prompt/gen_training.qtpl:64
+//line llm/prompt/gen_training.qtpl:65
 			for i, eq := range favoriteEquipment {
-//line llm/prompt/gen_training.qtpl:64
+//line llm/prompt/gen_training.qtpl:65
 				qw422016.E().S(eq)
-//line llm/prompt/gen_training.qtpl:64
+//line llm/prompt/gen_training.qtpl:65
 				if i < len(favoriteEquipment)-1 {
-//line llm/prompt/gen_training.qtpl:64
+//line llm/prompt/gen_training.qtpl:65
 					qw422016.N().S(`, `)
-//line llm/prompt/gen_training.qtpl:64
+//line llm/prompt/gen_training.qtpl:65
 				}
-//line llm/prompt/gen_training.qtpl:64
+//line llm/prompt/gen_training.qtpl:65
 			}
-//line llm/prompt/gen_training.qtpl:64
+//line llm/prompt/gen_training.qtpl:65
 			qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:65
+//line llm/prompt/gen_training.qtpl:66
 		}
-//line llm/prompt/gen_training.qtpl:65
+//line llm/prompt/gen_training.qtpl:66
 		qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:66
+//line llm/prompt/gen_training.qtpl:67
 	}
-//line llm/prompt/gen_training.qtpl:66
+//line llm/prompt/gen_training.qtpl:67
 	qw422016.N().S(`
 
 `)
-//line llm/prompt/gen_training.qtpl:68
+//line llm/prompt/gen_training.qtpl:69
 	if !skipWarmupCooldown {
-//line llm/prompt/gen_training.qtpl:68
+//line llm/prompt/gen_training.qtpl:69
 		qw422016.N().S(`
 [WARMUP] `)
-//line llm/prompt/gen_training.qtpl:69
+//line llm/prompt/gen_training.qtpl:70
 		qw422016.N().D(len(warmupExercises))
-//line llm/prompt/gen_training.qtpl:69
+//line llm/prompt/gen_training.qtpl:70
 		qw422016.N().S(` options
 `)
-//line llm/prompt/gen_training.qtpl:70
+//line llm/prompt/gen_training.qtpl:71
 		for _, exercise := range warmupExercises {
-//line llm/prompt/gen_training.qtpl:70
+//line llm/prompt/gen_training.qtpl:71
 			qw422016.E().S(exercise.ID)
-//line llm/prompt/gen_training.qtpl:70
+//line llm/prompt/gen_training.qtpl:71
 			qw422016.N().S(`, `)
-//line llm/prompt/gen_training.qtpl:70
+//line llm/prompt/gen_training.qtpl:71
 		}
-//line llm/prompt/gen_training.qtpl:70
+//line llm/prompt/gen_training.qtpl:71
 		qw422016.N().S(`
 
 `)
-//line llm/prompt/gen_training.qtpl:72
+//line llm/prompt/gen_training.qtpl:73
 	}
-//line llm/prompt/gen_training.qtpl:72
+//line llm/prompt/gen_training.qtpl:73
 	qw422016.N().S(`
 [WORK] `)
-//line llm/prompt/gen_training.qtpl:73
+//line llm/prompt/gen_training.qtpl:74
 	qw422016.N().D(len(workExercises))
-//line llm/prompt/gen_training.qtpl:73
+//line llm/prompt/gen_training.qtpl:74
 	qw422016.N().S(` options
 `)
-//line llm/prompt/gen_training.qtpl:74
+//line llm/prompt/gen_training.qtpl:75
 	for _, exercise := range workExercises {
-//line llm/prompt/gen_training.qtpl:74
+//line llm/prompt/gen_training.qtpl:75
 		qw422016.E().S(exercise.ID)
-//line llm/prompt/gen_training.qtpl:74
+//line llm/prompt/gen_training.qtpl:75
 		if len(exercise.Muscles) > 0 {
-//line llm/prompt/gen_training.qtpl:74
+//line llm/prompt/gen_training.qtpl:75
 			qw422016.N().S(`[`)
-//line llm/prompt/gen_training.qtpl:74
+//line llm/prompt/gen_training.qtpl:75
 			qw422016.E().S(exercise.Muscles[0])
-//line llm/prompt/gen_training.qtpl:74
+//line llm/prompt/gen_training.qtpl:75
 			qw422016.N().S(`]`)
-//line llm/prompt/gen_training.qtpl:74
+//line llm/prompt/gen_training.qtpl:75
 		}
-//line llm/prompt/gen_training.qtpl:74
+//line llm/prompt/gen_training.qtpl:75
 		qw422016.N().S(`, `)
-//line llm/prompt/gen_training.qtpl:74
+//line llm/prompt/gen_training.qtpl:75
 	}
-//line llm/prompt/gen_training.qtpl:74
+//line llm/prompt/gen_training.qtpl:75
 	qw422016.N().S(`
 
 `)
-//line llm/prompt/gen_training.qtpl:76
+//line llm/prompt/gen_training.qtpl:77
 	if !skipWarmupCooldown {
-//line llm/prompt/gen_training.qtpl:76
+//line llm/prompt/gen_training.qtpl:77
 		qw422016.N().S(`
 [COOLDOWN] `)
-//line llm/prompt/gen_training.qtpl:77
+//line llm/prompt/gen_training.qtpl:78
 		qw422016.N().D(len(cooldownExercises))
-//line llm/prompt/gen_training.qtpl:77
+//line llm/prompt/gen_training.qtpl:78
 		qw422016.N().S(` options
 `)
-//line llm/prompt/gen_training.qtpl:78
+//line llm/prompt/gen_training.qtpl:79
 		for _, exercise := range cooldownExercises {
-//line llm/prompt/gen_training.qtpl:78
+//line llm/prompt/gen_training.qtpl:79
 			qw422016.E().S(exercise.ID)
-//line llm/prompt/gen_training.qtpl:78
+//line llm/prompt/gen_training.qtpl:79
 			qw422016.N().S(`, `)
-//line llm/prompt/gen_training.qtpl:78
+//line llm/prompt/gen_training.qtpl:79
 		}
-//line llm/prompt/gen_training.qtpl:78
+//line llm/prompt/gen_training.qtpl:79
 		qw422016.N().S(`
 
 `)
-//line llm/prompt/gen_training.qtpl:80
+//line llm/prompt/gen_training.qtpl:81
 	}
-//line llm/prompt/gen_training.qtpl:80
+//line llm/prompt/gen_training.qtpl:81
 	qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:81
+//line llm/prompt/gen_training.qtpl:82
 	if len(recentTrainings) > 0 {
-//line llm/prompt/gen_training.qtpl:81
+//line llm/prompt/gen_training.qtpl:82
 		qw422016.N().S(`
 [HISTORY]
 `)
-//line llm/prompt/gen_training.qtpl:83
+//line llm/prompt/gen_training.qtpl:84
 		for _, training := range recentTrainings {
-//line llm/prompt/gen_training.qtpl:83
+//line llm/prompt/gen_training.qtpl:84
 			qw422016.N().S(`
 - "`)
-//line llm/prompt/gen_training.qtpl:84
+//line llm/prompt/gen_training.qtpl:85
 			qw422016.E().S(training.Name)
-//line llm/prompt/gen_training.qtpl:84
+//line llm/prompt/gen_training.qtpl:85
 			qw422016.N().S(`" | `)
-//line llm/prompt/gen_training.qtpl:84
+//line llm/prompt/gen_training.qtpl:85
 			qw422016.N().D(training.DaysSince())
-//line llm/prompt/gen_training.qtpl:84
+//line llm/prompt/gen_training.qtpl:85
 			qw422016.N().S(`d ago | `)
-//line llm/prompt/gen_training.qtpl:84
+//line llm/prompt/gen_training.qtpl:85
 			qw422016.E().S(training.Methodology)
-//line llm/prompt/gen_training.qtpl:84
+//line llm/prompt/gen_training.qtpl:85
 			if len(training.Feedback) > 0 {
-//line llm/prompt/gen_training.qtpl:84
+//line llm/prompt/gen_training.qtpl:85
 				qw422016.N().S(` | Feedback: "`)
-//line llm/prompt/gen_training.qtpl:84
+//line llm/prompt/gen_training.qtpl:85
 				qw422016.E().S(training.Feedback)
-//line llm/prompt/gen_training.qtpl:84
+//line llm/prompt/gen_training.qtpl:85
 				qw422016.N().S(`"`)
-//line llm/prompt/gen_training.qtpl:84
+//line llm/prompt/gen_training.qtpl:85
 			}
-//line llm/prompt/gen_training.qtpl:84
+//line llm/prompt/gen_training.qtpl:85
 			qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:85
+//line llm/prompt/gen_training.qtpl:86
 			activitiesWithFeedback := training.Activities()
 
-//line llm/prompt/gen_training.qtpl:85
+//line llm/prompt/gen_training.qtpl:86
 			qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:86
+//line llm/prompt/gen_training.qtpl:87
 			for _, a := range activitiesWithFeedback {
-//line llm/prompt/gen_training.qtpl:86
+//line llm/prompt/gen_training.qtpl:87
 				if len(a.Feedback) > 0 {
-//line llm/prompt/gen_training.qtpl:86
+//line llm/prompt/gen_training.qtpl:87
 					qw422016.N().S(`  `)
-//line llm/prompt/gen_training.qtpl:86
+//line llm/prompt/gen_training.qtpl:87
 					qw422016.E().S(a.ExerciseID)
-//line llm/prompt/gen_training.qtpl:86
+//line llm/prompt/gen_training.qtpl:87
 					qw422016.N().S(`: `)
-//line llm/prompt/gen_training.qtpl:86
+//line llm/prompt/gen_training.qtpl:87
 					qw422016.E().S(a.Feedback)
-//line llm/prompt/gen_training.qtpl:86
+//line llm/prompt/gen_training.qtpl:87
 					qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:87
+//line llm/prompt/gen_training.qtpl:88
 				}
-//line llm/prompt/gen_training.qtpl:87
+//line llm/prompt/gen_training.qtpl:88
 			}
-//line llm/prompt/gen_training.qtpl:87
+//line llm/prompt/gen_training.qtpl:88
 			qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:88
+//line llm/prompt/gen_training.qtpl:89
 		}
-//line llm/prompt/gen_training.qtpl:88
+//line llm/prompt/gen_training.qtpl:89
 		qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:89
+//line llm/prompt/gen_training.qtpl:90
 	}
-//line llm/prompt/gen_training.qtpl:89
+//line llm/prompt/gen_training.qtpl:90
 	qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:90
+//line llm/prompt/gen_training.qtpl:91
 	if len(facts) > 0 {
-//line llm/prompt/gen_training.qtpl:90
+//line llm/prompt/gen_training.qtpl:91
 		qw422016.N().S(`
 [FACTS]
 Apply when relevant to selected exercises:
 `)
-//line llm/prompt/gen_training.qtpl:93
+//line llm/prompt/gen_training.qtpl:94
 		for _, fact := range facts {
-//line llm/prompt/gen_training.qtpl:93
+//line llm/prompt/gen_training.qtpl:94
 			qw422016.N().S(`- `)
-//line llm/prompt/gen_training.qtpl:93
+//line llm/prompt/gen_training.qtpl:94
 			qw422016.E().S(fact.Content)
-//line llm/prompt/gen_training.qtpl:93
+//line llm/prompt/gen_training.qtpl:94
 			qw422016.N().S(` (ref: `)
-//line llm/prompt/gen_training.qtpl:93
+//line llm/prompt/gen_training.qtpl:94
 			qw422016.E().S(fact.Reference)
-//line llm/prompt/gen_training.qtpl:93
+//line llm/prompt/gen_training.qtpl:94
 			qw422016.N().S(`)
 `)
-//line llm/prompt/gen_training.qtpl:94
+//line llm/prompt/gen_training.qtpl:95
 		}
-//line llm/prompt/gen_training.qtpl:94
+//line llm/prompt/gen_training.qtpl:95
 		qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:95
+//line llm/prompt/gen_training.qtpl:96
 	}
-//line llm/prompt/gen_training.qtpl:95
+//line llm/prompt/gen_training.qtpl:96
 	qw422016.N().S(`
 Output language: `)
-//line llm/prompt/gen_training.qtpl:96
+//line llm/prompt/gen_training.qtpl:97
 	if len(profiles) > 0 && len(profiles[0].Language) > 0 {
-//line llm/prompt/gen_training.qtpl:96
+//line llm/prompt/gen_training.qtpl:97
 		qw422016.E().S(profiles[0].Language)
-//line llm/prompt/gen_training.qtpl:96
+//line llm/prompt/gen_training.qtpl:97
 	} else {
-//line llm/prompt/gen_training.qtpl:96
+//line llm/prompt/gen_training.qtpl:97
 		qw422016.N().S(`English`)
-//line llm/prompt/gen_training.qtpl:96
+//line llm/prompt/gen_training.qtpl:97
 	}
-//line llm/prompt/gen_training.qtpl:96
+//line llm/prompt/gen_training.qtpl:97
 	qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:97
+//line llm/prompt/gen_training.qtpl:98
 }
 
-//line llm/prompt/gen_training.qtpl:97
+//line llm/prompt/gen_training.qtpl:98
 func WriteGenTraining(qq422016 qtio422016.Writer,
 	profiles []model.Profile,
 	goals []string,
@@ -535,16 +556,16 @@ func WriteGenTraining(qq422016 qtio422016.Writer,
 	facts []model.Fact,
 	skipWarmupCooldown bool,
 ) {
-//line llm/prompt/gen_training.qtpl:97
+//line llm/prompt/gen_training.qtpl:98
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/gen_training.qtpl:97
+//line llm/prompt/gen_training.qtpl:98
 	StreamGenTraining(qw422016, profiles, goals, workExercises, warmupExercises, cooldownExercises, equipment, modifiers, favoriteExercises, favoriteEquipment, methodology, userPrompt, duration, recentTrainings, facts, skipWarmupCooldown)
-//line llm/prompt/gen_training.qtpl:97
+//line llm/prompt/gen_training.qtpl:98
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/gen_training.qtpl:97
+//line llm/prompt/gen_training.qtpl:98
 }
 
-//line llm/prompt/gen_training.qtpl:97
+//line llm/prompt/gen_training.qtpl:98
 func GenTraining(
 	profiles []model.Profile,
 	goals []string,
@@ -562,15 +583,15 @@ func GenTraining(
 	facts []model.Fact,
 	skipWarmupCooldown bool,
 ) string {
-//line llm/prompt/gen_training.qtpl:97
+//line llm/prompt/gen_training.qtpl:98
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/gen_training.qtpl:97
+//line llm/prompt/gen_training.qtpl:98
 	WriteGenTraining(qb422016, profiles, goals, workExercises, warmupExercises, cooldownExercises, equipment, modifiers, favoriteExercises, favoriteEquipment, methodology, userPrompt, duration, recentTrainings, facts, skipWarmupCooldown)
-//line llm/prompt/gen_training.qtpl:97
+//line llm/prompt/gen_training.qtpl:98
 	qs422016 := string(qb422016.B)
-//line llm/prompt/gen_training.qtpl:97
+//line llm/prompt/gen_training.qtpl:98
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/gen_training.qtpl:97
+//line llm/prompt/gen_training.qtpl:98
 	return qs422016
-//line llm/prompt/gen_training.qtpl:97
+//line llm/prompt/gen_training.qtpl:98
 }
