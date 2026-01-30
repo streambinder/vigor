@@ -185,6 +185,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get limitations => 'Einschränkungen';
 
   @override
+  String get conditions => 'Beschwerden';
+
+  @override
   String get favorites => 'Favoriten';
 
   @override
@@ -296,6 +299,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get addALimitation => 'Einschränkung hinzufügen';
+
+  @override
+  String get addACondition => 'Beschwerde hinzufügen';
 
   @override
   String get favoriteExercisesHint => 'z.B. Kniebeugen, Klimmzüge, Laufen';
@@ -615,6 +621,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get literature => 'Literatur';
 
   @override
+  String get request => 'Anfrage';
+
+  @override
   String get describeIssue => 'Beschreibe das Problem...';
 
   @override
@@ -886,6 +895,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get capabilities => 'Fähigkeiten';
+
+  @override
+  String get muscleHeatMap => 'Muscle Heat Map';
 
   @override
   String get noTrainingsCompletedYet =>

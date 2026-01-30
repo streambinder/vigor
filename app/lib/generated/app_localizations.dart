@@ -432,6 +432,12 @@ abstract class AppLocalizations {
   /// **'Limitations'**
   String get limitations;
 
+  /// No description provided for @conditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Conditions'**
+  String get conditions;
+
   /// No description provided for @favorites.
   ///
   /// In en, this message translates to:
@@ -647,6 +653,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add a limitation'**
   String get addALimitation;
+
+  /// No description provided for @addACondition.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a condition'**
+  String get addACondition;
 
   /// No description provided for @favoriteExercisesHint.
   ///
@@ -1218,6 +1230,12 @@ abstract class AppLocalizations {
   /// **'Literature'**
   String get literature;
 
+  /// No description provided for @request.
+  ///
+  /// In en, this message translates to:
+  /// **'Request'**
+  String get request;
+
   /// No description provided for @describeIssue.
   ///
   /// In en, this message translates to:
@@ -1727,6 +1745,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Capabilities'**
   String get capabilities;
+
+  /// No description provided for @muscleHeatMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Muscle Heat Map'**
+  String get muscleHeatMap;
 
   /// No description provided for @noTrainingsCompletedYet.
   ///

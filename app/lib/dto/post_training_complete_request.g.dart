@@ -10,7 +10,11 @@ PostTrainingCompleteRequest _$PostTrainingCompleteRequestFromJson(
   Map<String, dynamic> json,
 ) => PostTrainingCompleteRequest(
   feedback: json['feedback'] as String? ?? '',
-  activityFeedback: json['activityFeedback'] as Map<String, dynamic>,
+  activityFeedback:
+      (json['activityFeedback'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, e as String),
+      ) ??
+      {},
   activityReports:
       (json['activityReports'] as List<dynamic>?)
           ?.map((e) => e as String)

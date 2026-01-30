@@ -310,6 +310,7 @@
   "calibrationNeeded": "最初のトレーニングを完了して、Vigorがあなたのレベルに合わせた推奨を調整できるようにしましょう",
   "calibrationDescription": "キャリブレーション中、プラットフォームはフィードバックからデータを収集し、あなたのフィットネス状態とレベルの初期評価を行います",
   "capabilities": "能力",
+  "muscleHeatMap": "Muscle Heat Map",
   "noTrainingsCompletedYet": "トレーニングを始めて何か表示しよう",
 
   "theme": "テーマ",

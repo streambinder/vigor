@@ -41,6 +41,10 @@ flutter:
     - assets/fonts/
     - assets/icons/
     - assets/audio/
+    - assets/body_front.svg
+    - assets/body_back.svg
+    - assets/body_front_female.svg
+    - assets/body_back_female.svg
 
   fonts:
     # Space Grotesk — Headlines, branding (IDENTITY.md section 3.3)

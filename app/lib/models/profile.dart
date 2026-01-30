@@ -31,7 +31,7 @@ class Profile {
   final double height;
   @JsonKey(name: 'weight')
   final double weight;
-  @JsonKey(name: 'data')
+  @JsonKey(name: 'data', defaultValue: {})
   final Map<String, dynamic> data;
   @JsonKey(name: 'user_id', defaultValue: '')
   final String userId;

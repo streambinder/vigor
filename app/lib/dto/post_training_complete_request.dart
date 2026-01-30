@@ -9,8 +9,8 @@ part 'post_training_complete_request.g.dart';
 class PostTrainingCompleteRequest {
   @JsonKey(name: 'feedback', defaultValue: '')
   final String feedback;
-  @JsonKey(name: 'activityFeedback')
-  final Map<String, dynamic> activityFeedback;
+  @JsonKey(name: 'activityFeedback', defaultValue: {})
+  final Map<String, String> activityFeedback;
   @JsonKey(name: 'activityReports', defaultValue: [])
   final List<String> activityReports;
 

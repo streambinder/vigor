@@ -21,7 +21,7 @@ class PostUserUpdateRequest {
   final double height;
   @JsonKey(name: 'weight')
   final double weight;
-  @JsonKey(name: 'data')
+  @JsonKey(name: 'data', defaultValue: {})
   final Map<String, dynamic> data;
 
   PostUserUpdateRequest({

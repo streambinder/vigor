@@ -184,6 +184,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get limitations => 'Limitaciones';
 
   @override
+  String get conditions => 'Condiciones';
+
+  @override
   String get favorites => 'Favoritos';
 
   @override
@@ -295,6 +298,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get addALimitation => 'Agregar una limitación';
+
+  @override
+  String get addACondition => 'Agregar una condición';
 
   @override
   String get favoriteExercisesHint => 'ej. sentadillas, dominadas, correr';
@@ -614,6 +620,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get literature => 'Literatura';
 
   @override
+  String get request => 'Request';
+
+  @override
   String get describeIssue => 'Describe el problema...';
 
   @override
@@ -883,6 +892,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get capabilities => 'Capacidades';
+
+  @override
+  String get muscleHeatMap => 'Muscle Heat Map';
 
   @override
   String get noTrainingsCompletedYet => 'Empieza a entrenar para ver algo aquí';

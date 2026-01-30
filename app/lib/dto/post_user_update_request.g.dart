@@ -16,7 +16,7 @@ PostUserUpdateRequest _$PostUserUpdateRequestFromJson(
   language: json['language'] as String? ?? '',
   height: (json['height'] as num).toDouble(),
   weight: (json['weight'] as num).toDouble(),
-  data: json['data'] as Map<String, dynamic>,
+  data: json['data'] as Map<String, dynamic>? ?? {},
 );
 
 Map<String, dynamic> _$PostUserUpdateRequestToJson(
