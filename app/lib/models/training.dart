@@ -34,7 +34,7 @@ class Training {
   final List<String> references;
   @JsonKey(name: 'routines', defaultValue: [])
   final List<Routine> routines;
-  @JsonKey(name: 'prompt')
+  @JsonKey(name: 'prompt', defaultValue: {})
   final Map<String, dynamic> prompt;
   @JsonKey(name: 'feedback', defaultValue: '')
   final String feedback;

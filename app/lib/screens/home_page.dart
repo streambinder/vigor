@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/family_progress.dart';
+import '../models/muscle_impact.dart';
 import '../providers/auth_provider.dart';
 import '../services/secure_storage_service.dart';
 import '../widgets/adaptive/adaptive.dart';
@@ -116,7 +117,12 @@ class _HomePageState extends State<HomePage> {
     }
 
     final families = ProgressService.parseFamilies(_progress!.families);
+    final muscles = ProgressService.parseMuscles(_progress!.muscles);
     final trainings = _progress!.trainings;
+
+    // get gender from user profile for body figure
+    final authProvider = context.read<AuthProvider>();
+    final gender = authProvider.currentUser?.profile.gender ?? '';
 
     if (trainings == 0) {
       return _buildWelcomeState(l10n);
@@ -124,7 +130,7 @@ class _HomePageState extends State<HomePage> {
 
     return ListView.builder(
       padding: VigorSpacing.paddingLg,
-      itemCount: 3,
+      itemCount: 4,
       itemBuilder: (context, index) {
         switch (index) {
           case 0:
@@ -134,6 +140,12 @@ class _HomePageState extends State<HomePage> {
               child: _buildHeroStats(l10n, families),
             );
           case 1:
+            // muscle map section
+            return Padding(
+              padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+              child: _buildMuscleMapSection(context, l10n, muscles),
+            );
+          case 2:
             // capabilities section
             return Padding(
               padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
@@ -265,6 +277,81 @@ class _HomePageState extends State<HomePage> {
         families: families,
         calibration: calibration,
       ),
+    );
+  }
+
+  Widget _buildMuscleMapSection(BuildContext context, AppLocalizations l10n, Map<String, MuscleImpact> muscles) {
+    final gender = context.read<AuthProvider>().currentUser?.profile.gender;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.accessibility_new, color: VigorColors.stone, size: 24),
+            const SizedBox(width: VigorSpacing.sm),
+            Text(
+              l10n.muscleHeatMap,
+              style: VigorTypography.headline.copyWith(
+                fontSize: 18,
+                color: VigorColors.textPrimary(context),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: VigorSpacing.sm),
+        AdaptiveCard(
+          padding: VigorSpacing.paddingMd,
+          child: Column(
+            children: [
+              MuscleMapWidget(
+                muscles: muscles,
+                showToggle: false,
+                height: 280,
+                gender: gender,
+              ),
+              const SizedBox(height: VigorSpacing.md),
+              _buildHeatLegend(context),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeatLegend(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildLegendItem(context, Colors.transparent, 'Cool', showBorder: true),
+        const SizedBox(width: VigorSpacing.md),
+        _buildLegendItem(context, VigorColors.persimmon.withValues(alpha: 0.25), 'Warm'),
+        const SizedBox(width: VigorSpacing.md),
+        _buildLegendItem(context, VigorColors.persimmon.withValues(alpha: 0.60), 'Hot'),
+      ],
+    );
+  }
+
+  Widget _buildLegendItem(BuildContext context, Color color, String label, {bool showBorder = false}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: VigorRadius.radiusXs,
+            border: showBorder ? Border.all(color: VigorColors.border(context)) : null,
+          ),
+        ),
+        const SizedBox(width: VigorSpacing.xs),
+        Text(
+          label,
+          style: VigorTypography.caption.copyWith(
+            color: VigorColors.textSecondary(context),
+          ),
+        ),
+      ],
     );
   }
 

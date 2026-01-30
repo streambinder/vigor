@@ -11,7 +11,7 @@ class JSONSchema {
   final String name;
   @JsonKey(name: 'strict')
   final bool strict;
-  @JsonKey(name: 'schema')
+  @JsonKey(name: 'schema', defaultValue: {})
   final Map<String, dynamic> schema;
   @JsonKey(name: 'description')
   final String? description;

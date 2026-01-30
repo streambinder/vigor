@@ -19,7 +19,7 @@ class Exercise {
   final String reference;
   @JsonKey(name: 'instructions', defaultValue: [])
   final List<String> instructions;
-  @JsonKey(name: 'progressions')
+  @JsonKey(name: 'progressions', defaultValue: {})
   final Map<String, dynamic> progressions;
 
   Exercise({

@@ -25,7 +25,7 @@ class Activity {
   final List<String> modifiers;
   @JsonKey(name: 'rest')
   final int rest;
-  @JsonKey(name: 'detail')
+  @JsonKey(name: 'detail', defaultValue: {})
   final Map<String, dynamic> detail;
   @JsonKey(name: 'feedback', defaultValue: '')
   final String feedback;

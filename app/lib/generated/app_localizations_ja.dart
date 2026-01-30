@@ -178,6 +178,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get limitations => '制限';
 
   @override
+  String get conditions => '体調';
+
+  @override
   String get favorites => 'お気に入り';
 
   @override
@@ -288,6 +291,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get addALimitation => '制限を追加';
+
+  @override
+  String get addACondition => '体調を追加';
 
   @override
   String get favoriteExercisesHint => '例：スクワット、懸垂、ランニング';
@@ -603,6 +609,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get literature => '文献';
 
   @override
+  String get request => 'Request';
+
+  @override
   String get describeIssue => '問題を説明してください...';
 
   @override
@@ -870,6 +879,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get capabilities => '能力';
+
+  @override
+  String get muscleHeatMap => 'Muscle Heat Map';
 
   @override
   String get noTrainingsCompletedYet => 'トレーニングを始めて何か表示しよう';

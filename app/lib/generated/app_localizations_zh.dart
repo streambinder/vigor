@@ -178,6 +178,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get limitations => '限制';
 
   @override
+  String get conditions => '身体状况';
+
+  @override
   String get favorites => '收藏';
 
   @override
@@ -288,6 +291,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get addALimitation => '添加限制';
+
+  @override
+  String get addACondition => '添加身体状况';
 
   @override
   String get favoriteExercisesHint => '例如：深蹲、引体向上、跑步';
@@ -603,6 +609,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get literature => '文献';
 
   @override
+  String get request => 'Request';
+
+  @override
   String get describeIssue => '描述问题...';
 
   @override
@@ -868,6 +877,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get capabilities => '能力';
+
+  @override
+  String get muscleHeatMap => 'Muscle Heat Map';
 
   @override
   String get noTrainingsCompletedYet => '开始训练来看点什么吧';

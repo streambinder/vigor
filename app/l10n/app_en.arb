@@ -452,6 +452,7 @@
   "calibrationNeeded": "Complete your first training for Vigor to calibrate recommendations to your level",
   "calibrationDescription": "During calibration, the platform collects data from your feedback to make an initial assessment of your fitness level",
   "capabilities": "Capabilities",
+  "muscleHeatMap": "Muscle Heat Map",
   "noTrainingsCompletedYet": "Start training to see something here",
 
   "theme": "Theme",

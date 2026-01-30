@@ -310,6 +310,7 @@
   "calibrationNeeded": "Completa tu primer entrenamiento para que Vigor calibre las recomendaciones a tu nivel",
   "calibrationDescription": "Durante la calibración, la plataforma recopila datos de tus comentarios para hacer una evaluación inicial de tu estado físico y nivel",
   "capabilities": "Capacidades",
+  "muscleHeatMap": "Muscle Heat Map",
   "noTrainingsCompletedYet": "Empieza a entrenar para ver algo aquí",
 
   "theme": "Tema",

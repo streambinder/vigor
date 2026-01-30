@@ -178,6 +178,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get limitations => '제한사항';
 
   @override
+  String get conditions => '상태';
+
+  @override
   String get favorites => '즐겨찾기';
 
   @override
@@ -288,6 +291,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get addALimitation => '제한사항 추가';
+
+  @override
+  String get addACondition => '상태 추가';
 
   @override
   String get favoriteExercisesHint => '예: 스쿼트, 턱걸이, 달리기';
@@ -603,6 +609,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get literature => '문헌';
 
   @override
+  String get request => 'Request';
+
+  @override
   String get describeIssue => '문제를 설명해 주세요...';
 
   @override
@@ -870,6 +879,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get capabilities => '능력';
+
+  @override
+  String get muscleHeatMap => 'Muscle Heat Map';
 
   @override
   String get noTrainingsCompletedYet => '훈련을 시작해서 여기에 뭔가 보여주세요';
