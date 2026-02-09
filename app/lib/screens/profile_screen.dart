@@ -21,32 +21,15 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  List<Gym>? _gyms;
-  bool _isLoadingGyms = false;
-
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadGyms());
-  }
-
-  Future<void> _loadGyms() async {
-    setState(() => _isLoadingGyms = true);
-
-    final response = await context.read<ServiceLocator>().gymService.getGyms();
-    if (response.isSuccess && mounted) {
-      setState(() {
-        _gyms = response.data;
-        _isLoadingGyms = false;
-      });
-    } else if (mounted) {
-      setState(() => _isLoadingGyms = false);
-      AdaptiveNotification.showError(
-        context: context,
-        message: AppLocalizations.of(context).failedToLoadGyms,
-        rawError: response.error,
-      );
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final locator = context.read<ServiceLocator>();
+      if (locator.gymsNotifier.value == null) {
+        locator.refreshGyms();
+      }
+    });
   }
 
   Future<void> _showGymDialog({Gym? gym}) async {
@@ -67,25 +50,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _addGym(String name, List<String> equipment) async {
     final l10n = AppLocalizations.of(context);
-
     final response = await context.read<ServiceLocator>().gymService.createGym(name: name, equipment: equipment);
-    if (response.isSuccess && mounted) {
-      AdaptiveNotification.show(context: context, message: l10n.gymAddedSuccessfully);
-      await _loadGyms();
-    } else if (mounted) {
-      AdaptiveNotification.showError(context: context, message: l10n.failedToAddGym, rawError: response.error);
+    if (mounted) {
+      if (response.isSuccess) {
+        AdaptiveNotification.show(context: context, message: l10n.gymAddedSuccessfully);
+      } else {
+        AdaptiveNotification.showError(context: context, message: l10n.failedToAddGym, rawError: response.error);
+      }
     }
   }
 
   Future<void> _updateGym(String id, String name, List<String> equipment) async {
     final l10n = AppLocalizations.of(context);
-
     final response = await context.read<ServiceLocator>().gymService.updateGym(id: id, name: name, equipment: equipment);
-    if (response.isSuccess && mounted) {
-      AdaptiveNotification.show(context: context, message: l10n.gymUpdatedSuccessfully);
-      await _loadGyms();
-    } else if (mounted) {
-      AdaptiveNotification.showError(context: context, message: l10n.failedToUpdateGym, rawError: response.error);
+    if (mounted) {
+      if (response.isSuccess) {
+        AdaptiveNotification.show(context: context, message: l10n.gymUpdatedSuccessfully);
+      } else {
+        AdaptiveNotification.showError(context: context, message: l10n.failedToUpdateGym, rawError: response.error);
+      }
     }
   }
 
@@ -111,7 +94,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         await prefsService.clearDefaultGymIfMatches(gym.id);
         if (!mounted) return;
         AdaptiveNotification.show(context: context, message: l10n.gymDeletedSuccessfully);
-        await _loadGyms();
       } else {
         AdaptiveNotification.showError(context: context, message: l10n.failedToDeleteGym, rawError: response.error);
       }
@@ -131,6 +113,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = authProvider.currentUser;
     final l10n = AppLocalizations.of(context);
 
+    final locator = context.read<ServiceLocator>();
+
     return AdaptiveScaffold(
       appBar: AdaptiveAppBar(
         title: Text(l10n.profile),
@@ -140,7 +124,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             tooltip: l10n.refresh,
             onPressed: () async {
               await authProvider.refreshUserData();
-              await _loadGyms();
+              await locator.refreshGyms();
               if (context.mounted) {
                 AdaptiveNotification.show(context: context, message: l10n.userDataRefreshed, duration: const Duration(seconds: 2));
               }
@@ -158,7 +142,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           : RefreshIndicator(
               onRefresh: () async {
                 await authProvider.refreshUserData();
-                await _loadGyms();
+                await locator.refreshGyms();
               },
               color: VigorColors.persimmon,
               child: ListView.builder(
@@ -469,6 +453,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildGymsSection(AppLocalizations l10n) {
+    final locator = context.read<ServiceLocator>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -504,28 +490,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: VigorSpacing.md),
         // gyms list
-        if (_isLoadingGyms)
-          const Center(child: AdaptiveLoadingIndicator())
-        else if (_gyms == null || _gyms!.isEmpty)
-          SizedBox(
-            width: double.infinity,
-            child: Container(
-              padding: VigorSpacing.paddingLg,
-              decoration: BoxDecoration(
-                color: VigorColors.surface(context),
-                borderRadius: VigorRadius.radiusMd,
-              ),
-              child: Column(
-                children: [
-                  Icon(Icons.fitness_center, size: 48, color: VigorColors.stone.withValues(alpha: 0.5)),
-                  const SizedBox(height: VigorSpacing.sm),
-                  Text(l10n.noGymsAddedYet, style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context))),
-                ],
-              ),
-            ),
-          )
-        else
-          ...(_gyms!.map((gym) => _buildGymCard(gym, l10n))),
+        ValueListenableBuilder<List<Gym>?>(
+          valueListenable: locator.gymsNotifier,
+          builder: (context, gyms, _) {
+            if (gyms == null) {
+              return const Center(child: AdaptiveLoadingIndicator());
+            }
+            if (gyms.isEmpty) {
+              return SizedBox(
+                width: double.infinity,
+                child: Container(
+                  padding: VigorSpacing.paddingLg,
+                  decoration: BoxDecoration(
+                    color: VigorColors.surface(context),
+                    borderRadius: VigorRadius.radiusMd,
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(Icons.fitness_center, size: 48, color: VigorColors.stone.withValues(alpha: 0.5)),
+                      const SizedBox(height: VigorSpacing.sm),
+                      Text(l10n.noGymsAddedYet, style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context))),
+                    ],
+                  ),
+                ),
+              );
+            }
+            return Column(children: gyms.map((gym) => _buildGymCard(gym, l10n)).toList());
+          },
+        ),
       ],
     );
   }
@@ -656,6 +648,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ],
     );
     if (shouldLogout == true && context.mounted) {
+      context.read<ServiceLocator>().clearServices();
       await context.read<AuthProvider>().logout();
     }
   }

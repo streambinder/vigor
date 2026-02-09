@@ -1,3 +1,4 @@
+import 'dart:ui';
 import '../models/activity.dart';
 import '../models/api_response.dart';
 import '../models/partner.dart';
@@ -8,10 +9,12 @@ import 'secure_storage_service.dart';
 
 class TrainingService {
   final AuthenticatedApiService _apiService;
+  final VoidCallback? onDataChanged;
 
   TrainingService({
     AuthenticatedApiService? apiService,
     SecureStorageService? storageService,
+    this.onDataChanged,
   }) : _apiService = apiService ??
             AuthenticatedApiService(storageService: storageService);
 
@@ -72,6 +75,7 @@ class TrainingService {
         try {
           final training = Training.fromJson(response.data!);
           AppLogger.info('[TrainingService] Generated training: ${training.id}');
+          onDataChanged?.call();
           return ApiResponse.success(training, response.statusCode);
         } catch (e) {
           AppLogger.error('[TrainingService] failed to parse training', e);
@@ -122,6 +126,7 @@ class TrainingService {
     if (response.isSuccess) {
       final message = response.data?['message'] as String? ?? 'Training deleted';
       AppLogger.info('[TrainingService] Deleted training: $trainingId');
+      onDataChanged?.call();
       return ApiResponse.success(message, response.statusCode);
     } else {
       AppLogger.error('[TrainingService] Failed to delete training: ${response.error}');
@@ -157,6 +162,7 @@ class TrainingService {
       try {
         final training = Training.fromJson(response.data!['training']);
         AppLogger.info('[TrainingService] Completed training: $trainingId');
+        onDataChanged?.call();
         return ApiResponse.success(training, response.statusCode);
       } catch (e) {
         AppLogger.error('[TrainingService] failed to parse completed training', e);
@@ -239,6 +245,7 @@ class TrainingService {
       try {
         final training = Training.fromJson(response.data!);
         AppLogger.info('[TrainingService] Copied training: $trainingId');
+        onDataChanged?.call();
         return ApiResponse.success(training, response.statusCode);
       } catch (e) {
         AppLogger.error('[TrainingService] failed to parse copied training', e);

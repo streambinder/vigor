@@ -20,10 +20,7 @@ class ActivityScreen extends StatefulWidget {
 }
 
 class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProviderStateMixin {
-  List<Training>? _trainings;
-  List<Gym>? _gyms;
   bool _isLoading = false;
-  bool _isLoadingGyms = false;
   bool _hasLoadedOnce = false;
   final Map<String, int> _partnerCounts = {};
 
@@ -45,81 +42,59 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     super.dispose();
   }
 
-  Future<void> _loadGyms() async {
-    setState(() => _isLoadingGyms = true);
-    final response = await context.read<ServiceLocator>().gymService.getGyms();
-    if (response.isSuccess && mounted) {
-      setState(() {
-        _gyms = response.data;
-        _isLoadingGyms = false;
-      });
-    } else if (mounted) {
-      setState(() => _isLoadingGyms = false);
-    }
-  }
-
-  void _showTrainingGenerationModal() {
+  void _showTrainingGenerationModal(List<Gym> gyms) {
+    final locator = context.read<ServiceLocator>();
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context) => TrainingGenerationModal(
-        gyms: _gyms ?? [],
-        onSuccess: (training) {
-          _loadTrainings();
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => TrainingDetailsScreen(training: training),
-            ),
-          );
-        },
+      builder: (dialogContext) => ValueListenableBuilder<List<Gym>?>(
+        valueListenable: locator.gymsNotifier,
+        builder: (context, currentGyms, _) => TrainingGenerationModal(
+          gyms: currentGyms ?? gyms,
+          onSuccess: (training) {
+            Navigator.of(dialogContext).push(
+              MaterialPageRoute(
+                builder: (context) => TrainingDetailsScreen(training: training),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 
-  Future<void> _loadTrainings({int retryCount = 0}) async {
+  Future<void> _loadData({int retryCount = 0}) async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
     _hasLoadedOnce = true;
 
     final storage = context.read<SecureStorageService>();
-    final trainingService = context.read<ServiceLocator>().trainingService;
+    final locator = context.read<ServiceLocator>();
     if (!await storage.hasTokens()) {
       if (retryCount < 3) {
         await Future.delayed(const Duration(milliseconds: 100));
         if (mounted) {
           setState(() => _isLoading = false);
           _hasLoadedOnce = false;
-          _loadTrainings(retryCount: retryCount + 1);
+          _loadData(retryCount: retryCount + 1);
         }
         return;
       }
     }
 
-    final response = await trainingService.getTrainings();
-    if (response.isSuccess && mounted) {
-      setState(() {
-        _trainings = response.data;
-        _isLoading = false;
-      });
-      _loadPartnerCounts();
-    } else if (mounted) {
+    await Future.wait([locator.refreshTrainings(), locator.refreshGyms()]);
+    if (mounted) {
       setState(() => _isLoading = false);
-      if (response.error != null) {
-        AdaptiveNotification.showError(
-          context: context,
-          message: AppLocalizations.of(context).failedToLoadTrainings,
-          rawError: response.error,
-        );
-      }
+      _loadPartnerCounts(locator.trainingsNotifier.value);
     }
   }
 
-  Future<void> _loadPartnerCounts() async {
-    if (_trainings == null) return;
+  Future<void> _loadPartnerCounts(List<Training>? trainings) async {
+    if (trainings == null) return;
     final trainingService = context.read<ServiceLocator>().trainingService;
     // batch all partner counts and update state once to avoid multiple rebuilds
     final Map<String, int> newCounts = {};
-    for (final training in _trainings!) {
+    for (final training in trainings) {
       final response = await trainingService.getPartners(training.id);
       if (response.isSuccess) {
         newCounts[training.id] = response.data?.length ?? 0;
@@ -161,12 +136,12 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     return DateTime.now().difference(training.createdAt).inDays >= 7;
   }
 
-  List<Training> get _availableTrainings => (_trainings ?? [])
+  List<Training> _availableTrainings(List<Training>? trainings) => (trainings ?? [])
       .where((t) => !_isCompletedTraining(t))
       .toList()
     ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-  List<Training> get _pastTrainings => (_trainings ?? [])
+  List<Training> _pastTrainings(List<Training>? trainings) => (trainings ?? [])
       .where((t) => _isCompletedTraining(t))
       .toList()
     ..sort((a, b) => (b.completedAt ?? b.createdAt).compareTo(a.completedAt ?? a.createdAt));
@@ -175,47 +150,51 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final locator = context.read<ServiceLocator>();
 
     final authState = context.watch<AuthProvider>().state;
     if (authState == AuthState.authenticated && !_hasLoadedOnce && !_isLoading) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _loadTrainings();
-        _loadGyms();
-      });
+      WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
     }
 
-    return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(
-        title: Text(l10n.activity),
-        actions: [
-          AdaptiveIconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: l10n.refresh,
-            onPressed: _loadTrainings,
+    return ValueListenableBuilder<List<Training>?>(
+      valueListenable: locator.trainingsNotifier,
+      builder: (context, trainings, _) => ValueListenableBuilder<List<Gym>?>(
+        valueListenable: locator.gymsNotifier,
+        builder: (context, gyms, _) => AdaptiveScaffold(
+          appBar: AdaptiveAppBar(
+            title: Text(l10n.activity),
+            actions: [
+              AdaptiveIconButton(
+                icon: const Icon(Icons.refresh),
+                tooltip: l10n.refresh,
+                onPressed: _loadData,
+              ),
+            ],
           ),
-        ],
-      ),
-      floatingActionButton: _buildFAB(l10n),
-      body: RefreshIndicator(
-        onRefresh: _loadTrainings,
-        color: VigorColors.persimmon,
-        child: _isLoading
-            ? const Center(child: AdaptiveLoadingIndicator())
-            : _trainings == null || _trainings!.isEmpty
-                ? _buildEmptyState(l10n)
-                : _buildContent(l10n, isDark),
+          floatingActionButton: _buildFAB(l10n, gyms ?? []),
+          body: RefreshIndicator(
+            onRefresh: _loadData,
+            color: VigorColors.persimmon,
+            child: _isLoading
+                ? const Center(child: AdaptiveLoadingIndicator())
+                : trainings == null || trainings.isEmpty
+                    ? _buildEmptyState(l10n, gyms ?? [])
+                    : _buildContent(l10n, isDark, trainings),
+          ),
+        ),
       ),
     );
   }
 
   // solid persimmon FAB - primary CTA per IDENTITY.md
-  Widget _buildFAB(AppLocalizations l10n) {
+  Widget _buildFAB(AppLocalizations l10n, List<Gym> gyms) {
     return Material(
       color: VigorColors.persimmon,
       borderRadius: BorderRadius.circular(16),
       elevation: 4,
       child: InkWell(
-        onTap: _isLoadingGyms ? null : _showTrainingGenerationModal,
+        onTap: () => _showTrainingGenerationModal(gyms),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -239,7 +218,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   }
 
   // kanso: minimal empty state, no decorative gradients
-  Widget _buildEmptyState(AppLocalizations l10n) {
+  Widget _buildEmptyState(AppLocalizations l10n, List<Gym> gyms) {
     return ListView(
       padding: VigorSpacing.paddingLg,
       children: [
@@ -270,7 +249,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
             color: VigorColors.persimmon,
             borderRadius: VigorRadius.radiusSm,
             child: InkWell(
-              onTap: _isLoadingGyms ? null : _showTrainingGenerationModal,
+              onTap: () => _showTrainingGenerationModal(gyms),
               borderRadius: VigorRadius.radiusSm,
               child: Padding(
                 padding: VigorSpacing.buttonPadding,
@@ -296,19 +275,19 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     );
   }
 
-  Widget _buildContent(AppLocalizations l10n, bool isDark) {
-    final availableCount = _availableTrainings.length;
-    final pastCount = _pastTrainings.length;
+  Widget _buildContent(AppLocalizations l10n, bool isDark, List<Training> trainings) {
+    final available = _availableTrainings(trainings);
+    final past = _pastTrainings(trainings);
 
     return Column(
       children: [
-        _buildSegmentedControl(l10n, availableCount, pastCount, isDark),
+        _buildSegmentedControl(l10n, available.length, past.length, isDark),
         Expanded(
           child: TabBarView(
             controller: _tabController,
             children: [
-              _buildTrainingList(_availableTrainings, l10n, isAvailable: true),
-              _buildTrainingList(_pastTrainings, l10n, isAvailable: false),
+              _buildTrainingList(available, l10n, isAvailable: true),
+              _buildTrainingList(past, l10n, isAvailable: false),
             ],
           ),
         ),
@@ -406,12 +385,9 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
         borderRadius: VigorRadius.radiusMd,
       ),
       child: InkWell(
-        onTap: () async {
-          final changed = await Navigator.of(context).push<bool>(
-            MaterialPageRoute(builder: (context) => TrainingDetailsScreen(training: training)),
-          );
-          if (changed == true) _loadTrainings();
-        },
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => TrainingDetailsScreen(training: training)),
+        ),
         borderRadius: VigorRadius.radiusMd,
         child: Padding(
           padding: VigorSpacing.paddingMd,
@@ -496,12 +472,9 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                     color: VigorColors.indigo,
                     borderRadius: VigorRadius.radiusSm,
                     child: InkWell(
-                      onTap: () async {
-                        final completed = await Navigator.of(context).push<bool>(
-                          MaterialPageRoute(builder: (context) => WorkoutTimerScreen(training: training)),
-                        );
-                        if (completed == true) _loadTrainings();
-                      },
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => WorkoutTimerScreen(training: training)),
+                      ),
                       borderRadius: VigorRadius.radiusSm,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: VigorSpacing.sm),

@@ -107,7 +107,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
       if (context.mounted) {
         if (response.isSuccess) {
-          Navigator.of(context).pop(true);
+          _navigateToActivityScreen(context);
           AdaptiveNotification.show(context: context, message: successMessage);
         } else {
           AdaptiveNotification.showError(context: context, message: l10n.failedToDeleteTraining, rawError: response.error);
@@ -131,7 +131,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
     if (context.mounted) {
       if (response.isSuccess) {
-        Navigator.of(context).pop(true);
+        _navigateToActivityScreen(context);
         AdaptiveNotification.show(context: context, message: l10n.trainingMarkedAsComplete);
       } else {
         AdaptiveNotification.showError(context: context, message: l10n.failedToCompleteTraining, rawError: response.error);
@@ -153,7 +153,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
     if (context.mounted) {
       if (response.isSuccess) {
-        Navigator.of(context).pop(true);
+        _navigateToActivityScreen(context);
         AdaptiveNotification.show(context: context, message: l10n.feedbackUpdated);
       } else {
         AdaptiveNotification.showError(context: context, message: l10n.failedToUpdateFeedback, rawError: response.error);
@@ -217,7 +217,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     if (context.mounted) {
       if (response.isSuccess) {
         AdaptiveNotification.show(context: context, message: l10n.trainingCloned);
-        Navigator.of(context).pop(true);
+        _navigateToActivityScreen(context);
       } else {
         AdaptiveNotification.showError(context: context, message: l10n.failedToCloneTraining, rawError: response.error);
       }
@@ -831,10 +831,9 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           icon: Icons.timer,
           label: l10n.startTraining,
           color: indigoColor,
-          onPressed: () async {
-            final completed = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (context) => WorkoutTimerScreen(training: training)));
-            if (completed == true && mounted) Navigator.of(context).pop(true);
-          },
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => WorkoutTimerScreen(training: training)),
+          ),
         )),
         if (!isCompleted)
           // mark as complete = primary CTA (persimmon)

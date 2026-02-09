@@ -1,3 +1,4 @@
+import 'dart:ui';
 import '../models/api_response.dart';
 import '../models/gym.dart';
 import 'app_logger.dart';
@@ -8,11 +9,13 @@ import 'api_service.dart';
 class GymService {
   final AuthenticatedApiService _apiService;
   final ApiService _publicApiService;
+  final VoidCallback? onDataChanged;
 
   GymService({
     AuthenticatedApiService? apiService,
     SecureStorageService? storageService,
     ApiService? publicApiService,
+    this.onDataChanged,
   })  : _apiService = apiService ??
             AuthenticatedApiService(storageService: storageService),
         _publicApiService = publicApiService ?? ApiService();
@@ -162,6 +165,7 @@ class GymService {
       try {
         final gym = Gym.fromJson(response.data!['gym']);
         AppLogger.info('[GymService] Created gym: ${gym.name}');
+        onDataChanged?.call();
         return ApiResponse.success(gym, response.statusCode);
       } catch (e) {
         AppLogger.error('[GymService] failed to parse created gym', e);
@@ -193,6 +197,7 @@ class GymService {
       try {
         final gym = Gym.fromJson(response.data!['gym']);
         AppLogger.info('[GymService] Updated gym: ${gym.name}');
+        onDataChanged?.call();
         return ApiResponse.success(gym, response.statusCode);
       } catch (e) {
         AppLogger.error('[GymService] failed to parse updated gym', e);
@@ -215,6 +220,7 @@ class GymService {
     if (response.isSuccess) {
       final message = response.data?['message'] as String? ?? 'Gym deleted';
       AppLogger.info('[GymService] Deleted gym: $id');
+      onDataChanged?.call();
       return ApiResponse.success(message, response.statusCode);
     } else {
       AppLogger.error('[GymService] Failed to delete gym: ${response.error}');
