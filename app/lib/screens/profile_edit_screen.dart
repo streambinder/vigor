@@ -36,6 +36,7 @@ class ProfileEditScreen extends StatefulWidget {
 class _ProfileEditScreenState extends State<ProfileEditScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isSubmitting = false;
+  bool _didSave = false;
 
   // form state
   String? _firstName;
@@ -43,6 +44,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   DateTime? _birthdate;
   String? _gender;
   String? _language;
+  String? _originalLanguage; // for revert on cancel
   double _height = 170;
   double _weight = 70;
   List<String> _goals = [];
@@ -77,6 +79,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
     _gender = p.gender.isNotEmpty ? p.gender : null;
     _language = p.language.isNotEmpty ? p.language : _getSystemLanguage();
+    _originalLanguage = _language;
     _height = p.height > 0 ? p.height : 170;
     _weight = p.weight > 0 ? p.weight : 70;
 
@@ -179,7 +182,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       );
 
       if (success && mounted) {
-        context.read<LocaleProvider>().setFromProfileLanguage(_language);
+        _didSave = true;
+        _originalLanguage = _language; // update original so no revert needed
         Navigator.of(context).pop(true);
       } else if (mounted) {
         AdaptiveNotification.showError(
@@ -200,6 +204,12 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
     return PopScope(
       canPop: !isCompletion,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop && !_didSave && _language != _originalLanguage) {
+          // revert locale if user cancelled without saving
+          context.read<LocaleProvider>().setFromProfileLanguage(_originalLanguage);
+        }
+      },
       child: AdaptiveScaffold(
         appBar: AdaptiveAppBar(
           title: Text(isCompletion ? l10n.completeYourProfile : l10n.editProfile),
@@ -584,7 +594,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         _buildFieldLabel(l10n.gender, required: true),
         const SizedBox(height: VigorSpacing.sm),
         DropdownButtonFormField<String>(
-          initialValue: _gender,
+          value: _gender,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
@@ -624,7 +634,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         _buildFieldLabel(l10n.language, required: true),
         const SizedBox(height: VigorSpacing.sm),
         DropdownButtonFormField<String>(
-          initialValue: _language,
+          value: _language,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
@@ -637,7 +647,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             if (v == null || v.isEmpty) return l10n.pleaseSelectLanguage;
             return null;
           },
-          onChanged: (v) => setState(() => _language = v),
+          onChanged: (v) {
+            setState(() => _language = v);
+            context.read<LocaleProvider>().setFromProfileLanguage(v);
+          },
         ),
       ],
     );

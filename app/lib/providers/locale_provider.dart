@@ -15,8 +15,19 @@ const _languageToLocale = {
   '한국어': Locale('ko'),
 };
 
-/// supported locales for the app (only en and it for now)
-const supportedLocales = [Locale('en'), Locale('it')];
+/// supported locales for the app
+const supportedLocales = [
+  Locale('en'),
+  Locale('it'),
+  Locale('es'),
+  Locale('fr'),
+  Locale('de'),
+  Locale('pt'),
+  Locale('ru'),
+  Locale('zh'),
+  Locale('ja'),
+  Locale('ko'),
+];
 
 class LocaleProvider extends ChangeNotifier {
   final PreferencesService _prefs;
