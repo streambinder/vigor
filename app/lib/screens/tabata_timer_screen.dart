@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/training.dart';
@@ -36,6 +37,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
   @override
   void initState() {
     super.initState();
+    WakelockPlus.enable();
     _controller = IntervalController(training: widget.training);
     _controller.addListener(_onControllerUpdate);
     _audioService.initialize();
@@ -82,6 +84,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
 
   @override
   void dispose() {
+    WakelockPlus.disable();
     _controller.removeListener(_onControllerUpdate);
     _controller.dispose();
     super.dispose();
