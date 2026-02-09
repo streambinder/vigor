@@ -363,11 +363,22 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.goalsOptional,
-          style: VigorTypography.caption.copyWith(
-            color: VigorColors.textSecondary(context),
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              l10n.goalsOptional,
+              style: VigorTypography.caption.copyWith(
+                color: VigorColors.textSecondary(context),
+              ),
+            ),
+            Text(
+              '${_selectedGoals.length}/2',
+              style: VigorTypography.caption.copyWith(
+                color: VigorColors.textSecondary(context),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: VigorSpacing.sm),
         Wrap(
@@ -388,7 +399,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               onSelected: (selected) {
                 setState(() {
                   if (selected) {
-                    _selectedGoals.add(goal);
+                    if (_selectedGoals.length < 2) {
+                      _selectedGoals.add(goal);
+                    }
                   } else {
                     _selectedGoals.remove(goal);
                   }

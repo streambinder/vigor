@@ -393,6 +393,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         GoalSelector(
           selected: _goals,
           onChanged: (updated) => setState(() => _goals = updated),
+          maxSelection: 2,
         ),
         const SizedBox(height: VigorSpacing.xl),
 

@@ -8,11 +8,13 @@ import 'adaptive/adaptive.dart';
 class GoalSelector extends StatefulWidget {
   final List<String> selected;
   final ValueChanged<List<String>> onChanged;
+  final int? maxSelection;
 
   const GoalSelector({
     super.key,
     required this.selected,
     required this.onChanged,
+    this.maxSelection,
   });
 
   @override
@@ -66,12 +68,16 @@ class _GoalSelectorState extends State<GoalSelector> {
     if (updated.contains(goal)) {
       updated.remove(goal);
     } else {
+      if (widget.maxSelection != null && updated.length >= widget.maxSelection!) {
+        return;
+      }
       updated.add(goal);
     }
     widget.onChanged(updated);
   }
 
   void _selectAll() {
+    if (widget.maxSelection != null) return;
     final visible = _filteredGoals;
     final updated = List<String>.from(widget.selected);
     for (final g in visible) {
@@ -146,6 +152,7 @@ class _GoalSelectorState extends State<GoalSelector> {
                   prefix: const Icon(Icons.search, size: 20),
                 ),
               ),
+              if (widget.maxSelection == null) ...[
               const SizedBox(width: VigorSpacing.sm),
               IconButton(
                 onPressed: allVisibleSelected ? _deselectAll : _selectAll,
@@ -156,6 +163,7 @@ class _GoalSelectorState extends State<GoalSelector> {
                 ),
                 tooltip: allVisibleSelected ? l10n.noEquipment : l10n.addAllEquipment,
               ),
+            ],
             ],
           ),
         ),
@@ -201,16 +209,17 @@ class _GoalSelectorState extends State<GoalSelector> {
             ),
           ),
         // selected count
-        if (widget.selected.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: VigorSpacing.sm),
-            child: Text(
-              '${widget.selected.length} selected',
-              style: VigorTypography.caption.copyWith(
-                color: VigorColors.textSecondary(context),
-              ),
+        Padding(
+          padding: const EdgeInsets.only(top: VigorSpacing.sm),
+          child: Text(
+            widget.maxSelection != null
+                ? '${widget.selected.length}/${widget.maxSelection} selected'
+                : '${widget.selected.length} selected',
+            style: VigorTypography.caption.copyWith(
+              color: VigorColors.textSecondary(context),
             ),
           ),
+        ),
       ],
     );
   }

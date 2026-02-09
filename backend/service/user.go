@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -57,11 +58,19 @@ type UpdateProfileParams struct {
 	Data      map[string]any
 }
 
+const MaxGoals = 2
+
 // UpdateProfile updates a user's profile.
 func UpdateProfile(userID uuid.UUID, params UpdateProfileParams) (model.Profile, error) {
 	var profile model.Profile
 	if err := database.DB.First(&profile, "user_id = ?", userID).Error; err != nil {
 		return profile, err
+	}
+
+	if params.Data != nil {
+		if goals, ok := params.Data["goals"].([]any); ok && len(goals) > MaxGoals {
+			return profile, fmt.Errorf("maximum of %d goals allowed", MaxGoals)
+		}
 	}
 
 	if params.FirstName != "" {
