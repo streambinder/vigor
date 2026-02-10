@@ -4,6 +4,9 @@ import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/family_progress.dart';
 import '../models/muscle_impact.dart';
+import '../models/weekly_target.dart';
+import '../models/week_progress.dart';
+import '../models/week_summary.dart';
 import '../providers/auth_provider.dart';
 import '../services/secure_storage_service.dart';
 import '../widgets/adaptive/adaptive.dart';
@@ -22,6 +25,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Progress? _progress;
+  WeeklyTarget? _weeklyTarget;
   bool _isLoading = false;
   bool _hasLoadedOnce = false;
 
@@ -46,19 +50,30 @@ class _HomePageState extends State<HomePage> {
     }
 
     try {
-      final response = await progressService.getProgress();
-      if (response.isSuccess && mounted) {
+      final results = await Future.wait([
+        progressService.getProgress(),
+        progressService.getWeeklyTarget(),
+      ]);
+
+      if (mounted) {
+        final progressResponse = results[0];
+        final weeklyTargetResponse = results[1];
+
         setState(() {
-          _progress = response.data;
+          if (progressResponse.isSuccess) {
+            _progress = progressResponse.data as Progress?;
+          }
+          if (weeklyTargetResponse.isSuccess) {
+            _weeklyTarget = weeklyTargetResponse.data as WeeklyTarget?;
+          }
           _isLoading = false;
         });
-      } else if (mounted) {
-        setState(() => _isLoading = false);
-        if (response.error != null) {
+
+        if (!progressResponse.isSuccess && progressResponse.error != null) {
           AdaptiveNotification.showError(
             context: context,
             message: AppLocalizations.of(context).failedToLoadProgress,
-            rawError: response.error,
+            rawError: progressResponse.error,
           );
         }
       }
@@ -130,7 +145,7 @@ class _HomePageState extends State<HomePage> {
 
     return ListView.builder(
       padding: VigorSpacing.paddingLg,
-      itemCount: 4,
+      itemCount: 5,
       itemBuilder: (context, index) {
         switch (index) {
           case 0:
@@ -140,12 +155,21 @@ class _HomePageState extends State<HomePage> {
               child: _buildHeroStats(l10n, families),
             );
           case 1:
+            // weekly target card
+            if (_weeklyTarget != null && _weeklyTarget!.goals.isNotEmpty) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+                child: _buildWeeklyTargetCard(context, l10n, _weeklyTarget!),
+              );
+            }
+            return const SizedBox.shrink();
+          case 2:
             // muscle map section
             return Padding(
               padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
               child: _buildMuscleMapSection(context, l10n, muscles),
             );
-          case 2:
+          case 3:
             // capabilities section
             return Padding(
               padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
@@ -378,6 +402,201 @@ class _HomePageState extends State<HomePage> {
           child: FamilyProgressWidget(families: families),
         ),
       ],
+    );
+  }
+
+  Widget _buildWeeklyTargetCard(BuildContext context, AppLocalizations l10n, WeeklyTarget weeklyTarget) {
+    final current = weeklyTarget.currentWeek;
+    final rec = weeklyTarget.recommendation;
+    final minTarget = rec.sessionsPerWeek.isNotEmpty ? rec.sessionsPerWeek[0] : 0;
+    final maxTarget = rec.sessionsPerWeek.length > 1 ? rec.sessionsPerWeek[1] : minTarget;
+    final progress = maxTarget > 0
+        ? (current.sessionsCompleted / maxTarget).clamp(0.0, 1.0)
+        : 0.0;
+    final targetAvg = ((minTarget + maxTarget) / 2).round();
+
+    return GestureDetector(
+      onTap: () => _showWeeklyTargetModal(context, l10n, weeklyTarget),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.event_note, color: VigorColors.stone, size: 24),
+              const SizedBox(width: VigorSpacing.sm),
+              Text(
+                l10n.weeklyTarget,
+                style: VigorTypography.headline.copyWith(
+                  fontSize: 18,
+                  color: VigorColors.textPrimary(context),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: VigorSpacing.sm),
+          AdaptiveCard(
+            padding: VigorSpacing.paddingMd,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // circular progress on left with sessions count inside
+                Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: SizedBox(
+                    width: 72,
+                    height: 72,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: 72,
+                          height: 72,
+                          child: CircularProgressIndicator(
+                            value: progress,
+                            strokeWidth: 6,
+                            backgroundColor: VigorColors.stone.withValues(alpha: 0.2),
+                            valueColor: AlwaysStoppedAnimation(
+                              current.sessionsCompleted >= minTarget
+                                  ? VigorColors.persimmon
+                                  : VigorColors.stone,
+                            ),
+                          ),
+                        ),
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '${current.sessionsCompleted}',
+                                style: VigorTypography.data.copyWith(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: VigorColors.textPrimary(context),
+                                ),
+                              ),
+                              TextSpan(
+                                text: '/$targetAvg',
+                                style: VigorTypography.data.copyWith(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: VigorColors.textSecondary(context),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: VigorSpacing.lg),
+                // right column: chips row, week days below
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // goals chips left, days left chip right
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Wrap(
+                              alignment: WrapAlignment.start,
+                              spacing: 6,
+                              runSpacing: 4,
+                              children: weeklyTarget.goals.map((g) => Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: VigorColors.surfaceElevated(context),
+                                  borderRadius: VigorRadius.radiusFull,
+                                ),
+                                child: Text(
+                                  _formatGoalName(g),
+                                  style: VigorTypography.caption.copyWith(
+                                    color: VigorColors.textSecondary(context),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              )).toList(),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.open_in_new,
+                            size: 14,
+                            color: VigorColors.textSecondary(context),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: VigorSpacing.md),
+                      // week days indicator
+                      _buildWeekDays(context, current.completedDays),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeekDays(BuildContext context, List<int> completedDays) {
+    const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    final today = (DateTime.now().weekday - 1) % 7;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: List.generate(7, (i) {
+        final isCompleted = completedDays.contains(i);
+        final isToday = i == today;
+        final isPast = i < today;
+
+        return Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: isCompleted
+                ? VigorColors.persimmon
+                : isToday
+                    ? VigorColors.surface(context)
+                    : Colors.transparent,
+            borderRadius: VigorRadius.radiusSm,
+            border: isToday && !isCompleted
+                ? Border.all(color: VigorColors.stone)
+                : null,
+          ),
+          child: Center(
+            child: isCompleted
+                ? const Icon(Icons.check, size: 16, color: Colors.white)
+                : Text(
+                    days[i],
+                    style: VigorTypography.caption.copyWith(
+                      color: isPast && !isCompleted
+                          ? VigorColors.stone.withValues(alpha: 0.5)
+                          : VigorColors.textSecondary(context),
+                      fontWeight: isToday ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+          ),
+        );
+      }),
+    );
+  }
+
+  String _formatGoalName(String id) {
+    return id
+        .split(' ')
+        .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : w)
+        .join(' ');
+  }
+
+  void _showWeeklyTargetModal(BuildContext context, AppLocalizations l10n, WeeklyTarget weeklyTarget) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _WeeklyTargetModal(l10n: l10n, weeklyTarget: weeklyTarget),
     );
   }
 
@@ -740,5 +959,444 @@ class _CalibrationModal extends StatelessWidget {
         .split('_')
         .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : w)
         .join(' ');
+  }
+}
+
+/// Modal for weekly target details
+class _WeeklyTargetModal extends StatelessWidget {
+  final AppLocalizations l10n;
+  final WeeklyTarget weeklyTarget;
+
+  const _WeeklyTargetModal({required this.l10n, required this.weeklyTarget});
+
+  @override
+  Widget build(BuildContext context) {
+    final rec = weeklyTarget.recommendation;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.all(VigorSpacing.md),
+      decoration: BoxDecoration(
+        color: VigorColors.surface(context),
+        borderRadius: VigorRadius.radiusLg,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // header
+          Padding(
+            padding: VigorSpacing.paddingMd,
+            child: Row(
+              children: [
+                Icon(Icons.event_note, color: VigorColors.stone, size: 24),
+                const SizedBox(width: VigorSpacing.sm),
+                Text(
+                  l10n.weeklyTarget,
+                  style: VigorTypography.headline.copyWith(
+                    color: VigorColors.textPrimary(context),
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Icon(Icons.close, color: VigorColors.stone, size: 24),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: VigorColors.border(context)),
+
+          const SizedBox(height: VigorSpacing.md),
+
+          // goals as chips
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md),
+            child: Row(
+              children: [
+                Icon(Icons.flag, color: VigorColors.stone, size: 18),
+                const SizedBox(width: VigorSpacing.sm),
+                Text(
+                  l10n.goals,
+                  style: VigorTypography.body.copyWith(
+                    color: VigorColors.textSecondary(context),
+                  ),
+                ),
+                const Spacer(),
+                ...weeklyTarget.goals.map((g) => Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: VigorColors.surfaceElevated(context),
+                      borderRadius: VigorRadius.radiusFull,
+                    ),
+                    child: Text(
+                      _formatGoalName(g),
+                      style: VigorTypography.caption.copyWith(
+                        color: VigorColors.textSecondary(context),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                )),
+              ],
+            ),
+          ),
+          const SizedBox(height: VigorSpacing.sm),
+
+          // recommendations
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md),
+            child: Column(
+              children: [
+                _buildRecommendationRow(
+                  context,
+                  Icons.repeat,
+                  l10n.sessionsPerWeek,
+                  _formatRange(rec.sessionsPerWeek),
+                ),
+                const SizedBox(height: VigorSpacing.sm),
+                _buildRecommendationRow(
+                  context,
+                  Icons.timer,
+                  l10n.sessionDuration,
+                  '${_formatDurationRange(rec.sessionDurationMins)} min',
+                ),
+                if (rec.preferredHours.isNotEmpty) ...[
+                  const SizedBox(height: VigorSpacing.sm),
+                  _buildRecommendationRow(
+                    context,
+                    Icons.schedule,
+                    l10n.recommendedTime,
+                    _formatTimeRange(rec.preferredHours),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: VigorSpacing.sm),
+
+          // methodology mix
+          if (rec.methodologyMix.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.methodologyMix,
+                    style: VigorTypography.caption.copyWith(
+                      color: VigorColors.textSecondary(context),
+                    ),
+                  ),
+                  const SizedBox(height: VigorSpacing.sm),
+                  _buildMethodologyBars(context, _toDoubleMap(rec.methodologyMix), isDark),
+                ],
+              ),
+            ),
+
+          const SizedBox(height: VigorSpacing.md),
+          Divider(height: 1, color: VigorColors.border(context)),
+          const SizedBox(height: VigorSpacing.md),
+
+          // current week
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.thisWeek,
+                  style: VigorTypography.caption.copyWith(
+                    color: VigorColors.textSecondary(context),
+                  ),
+                ),
+                const SizedBox(height: VigorSpacing.sm),
+                _buildWeekCalendar(context, weeklyTarget.currentWeek),
+              ],
+            ),
+          ),
+
+          // history
+          if (weeklyTarget.history.isNotEmpty) ...[
+            const SizedBox(height: VigorSpacing.md),
+            Divider(height: 1, color: VigorColors.border(context)),
+            const SizedBox(height: VigorSpacing.md),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.pastWeeks,
+                    style: VigorTypography.caption.copyWith(
+                      color: VigorColors.textSecondary(context),
+                    ),
+                  ),
+                  const SizedBox(height: VigorSpacing.sm),
+                  ...weeklyTarget.history.map((week) => _buildHistoryRow(
+                        context,
+                        week,
+                        rec.sessionsPerWeek.length > 1 ? rec.sessionsPerWeek[1] : (rec.sessionsPerWeek.isNotEmpty ? rec.sessionsPerWeek[0] : 1),
+                        isDark,
+                      )),
+                ],
+              ),
+            ),
+          ],
+
+          const SizedBox(height: VigorSpacing.lg),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecommendationRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
+    return Row(
+      children: [
+        Icon(icon, color: VigorColors.stone, size: 18),
+        const SizedBox(width: VigorSpacing.sm),
+        Text(
+          label,
+          style: VigorTypography.body.copyWith(
+            color: VigorColors.textSecondary(context),
+          ),
+        ),
+        const Spacer(),
+        Text(
+          value,
+          style: VigorTypography.data.copyWith(
+            color: VigorColors.textPrimary(context),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMethodologyBars(
+    BuildContext context,
+    Map<String, double> mix,
+    bool isDark,
+  ) {
+    final sorted = mix.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return Column(
+      children: sorted.take(4).map((entry) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 80,
+                child: Text(
+                  _formatMethodology(entry.key),
+                  style: VigorTypography.caption.copyWith(
+                    color: VigorColors.textSecondary(context),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Stack(
+                  children: [
+                    Container(
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : VigorColors.stone.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                    FractionallySizedBox(
+                      widthFactor: entry.value,
+                      child: Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: VigorColors.stone,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 36,
+                child: Text(
+                  '${(entry.value * 100).round()}%',
+                  textAlign: TextAlign.right,
+                  style: VigorTypography.caption.copyWith(
+                    color: VigorColors.textSecondary(context),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildWeekCalendar(BuildContext context, WeekProgress week) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final today = (DateTime.now().weekday - 1) % 7;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: List.generate(7, (i) {
+        final isCompleted = week.completedDays.contains(i);
+        final isToday = i == today;
+
+        return Column(
+          children: [
+            Text(
+              days[i],
+              style: VigorTypography.caption.copyWith(
+                color: VigorColors.textSecondary(context),
+                fontSize: 10,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: isCompleted
+                    ? VigorColors.persimmon
+                    : VigorColors.surfaceElevated(context),
+                borderRadius: VigorRadius.radiusSm,
+                border: isToday && !isCompleted
+                    ? Border.all(color: VigorColors.persimmon, width: 2)
+                    : null,
+              ),
+              child: isCompleted
+                  ? const Icon(Icons.check, size: 18, color: Colors.white)
+                  : null,
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildHistoryRow(
+    BuildContext context,
+    WeekSummary week,
+    int maxTarget,
+    bool isDark,
+  ) {
+    final progress =
+        maxTarget > 0 ? (week.sessionsCompleted / maxTarget).clamp(0.0, 1.0) : 0.0;
+    final dateStr = _formatWeekDate(week.weekStart);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 110,
+            child: Text(
+              dateStr,
+              style: VigorTypography.caption.copyWith(
+                color: VigorColors.textSecondary(context),
+                fontFamily: 'monospace',
+                fontFamilyFallback: const ['Courier', 'Courier New'],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Stack(
+              children: [
+                Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : VigorColors.stone.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                FractionallySizedBox(
+                  widthFactor: progress,
+                  child: Container(
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color:
+                          week.onTarget ? VigorColors.persimmon : VigorColors.stone,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 24,
+            child: Text(
+              '${week.sessionsCompleted}',
+              textAlign: TextAlign.right,
+              style: VigorTypography.data.copyWith(
+                color: VigorColors.textPrimary(context),
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          if (week.onTarget)
+            Icon(Icons.check_circle, size: 16, color: VigorColors.persimmon)
+          else
+            const SizedBox(width: 16),
+        ],
+      ),
+    );
+  }
+
+  String _formatGoalName(String id) {
+    return id
+        .split(' ')
+        .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : w)
+        .join(' ');
+  }
+
+  String _formatMethodology(String id) {
+    return id
+        .split('_')
+        .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : w)
+        .join(' ');
+  }
+
+  String _formatTimeRange(List<int> hours) {
+    if (hours.length < 2) return '';
+    return '${hours[0].toString().padLeft(2, '0')}:00 - ${hours[1].toString().padLeft(2, '0')}:00';
+  }
+
+  String _formatWeekDate(DateTime weekStart) {
+    final weekEnd = weekStart.add(const Duration(days: 6));
+    return '${weekStart.day.toString().padLeft(2, '0')}/${weekStart.month.toString().padLeft(2, '0')} – ${weekEnd.day.toString().padLeft(2, '0')}/${weekEnd.month.toString().padLeft(2, '0')}';
+  }
+
+  String _formatRange(List<int> values) {
+    if (values.isEmpty) return '0';
+    if (values.length == 1) return '${values[0]}';
+    return '${values[0]}-${values[1]}';
+  }
+
+  String _formatDurationRange(List<int> values) {
+    if (values.isEmpty) return '0';
+    if (values.length == 1) return '${values[0]}';
+    if (values[0] == values[1]) return '${values[0]}';
+    return '${values[0]}-${values[1]}';
+  }
+
+  Map<String, double> _toDoubleMap(Map<String, dynamic> map) {
+    return map.map((k, v) => MapEntry(k, (v as num).toDouble()));
   }
 }

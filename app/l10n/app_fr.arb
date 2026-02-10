@@ -342,5 +342,16 @@
   "goalFlexibility": "Souplesse",
   "goalFlexibilityDescription": "Améliore l'amplitude de mouvement avec étirements et mobilité",
   "goalSports": "Performance Sportive",
-  "goalSportsDescription": "Améliore les capacités athlétiques avec puissance et agilité"
+  "goalSportsDescription": "Améliore les capacités athlétiques avec puissance et agilité",
+
+  "thisWeek": "Cette Semaine",
+  "trainingPlan": "Plan d'Entraînement",
+  "sessionsPerWeek": "Séances par semaine",
+  "sessionDuration": "Durée de séance",
+  "preferredTime": "Horaire préféré",
+  "recommendedTime": "Horaire recommandé",
+  "methodologyMix": "Mix de méthodologies",
+  "pastWeeks": "Semaines passées",
+  "weeklyTarget": "Objectif Hebdomadaire",
+  "daysLeft": "{count} jours restants"
 }

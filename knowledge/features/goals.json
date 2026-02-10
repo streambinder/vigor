@@ -35,7 +35,15 @@
       "筋肥大",
       "근비대",
       "근육 성장"
-    ]
+    ],
+    "sessions_per_week": [3, 5],
+    "session_duration_mins": [45, 75],
+    "methodology_weights": {
+      "strength": 0.50,
+      "supersets": 0.30,
+      "circuit": 0.20
+    },
+    "preferred_hours": [17, 21]
   },
   {
     "id": "fat loss",
@@ -77,7 +85,16 @@
       "ダイエット",
       "체지방 감소",
       "다이어트"
-    ]
+    ],
+    "sessions_per_week": [4, 6],
+    "session_duration_mins": [30, 60],
+    "methodology_weights": {
+      "circuit": 0.40,
+      "hiit": 0.30,
+      "emom": 0.20,
+      "strength": 0.10
+    },
+    "preferred_hours": [6, 10]
   },
   {
     "id": "toning",
@@ -113,7 +130,15 @@
       "トーニング",
       "몸매 관리",
       "탄력"
-    ]
+    ],
+    "sessions_per_week": [3, 4],
+    "session_duration_mins": [30, 45],
+    "methodology_weights": {
+      "circuit": 0.40,
+      "supersets": 0.30,
+      "strength": 0.30
+    },
+    "preferred_hours": [0, 24]
   },
   {
     "id": "posture",
@@ -170,7 +195,15 @@
       "자세",
       "자세 교정",
       "척추 건강"
-    ]
+    ],
+    "sessions_per_week": [3, 5],
+    "session_duration_mins": [30, 45],
+    "methodology_weights": {
+      "strength": 0.40,
+      "mobility": 0.40,
+      "supersets": 0.20
+    },
+    "preferred_hours": [0, 24]
   },
   {
     "id": "rehabilitation",
@@ -213,7 +246,14 @@
       "재활",
       "부상 회복",
       "물리치료"
-    ]
+    ],
+    "sessions_per_week": [2, 4],
+    "session_duration_mins": [20, 40],
+    "methodology_weights": {
+      "mobility": 0.60,
+      "strength": 0.40
+    },
+    "preferred_hours": [0, 24]
   },
   {
     "id": "wellness",
@@ -262,7 +302,16 @@
       "웰빙",
       "건강 유지",
       "스트레스 해소"
-    ]
+    ],
+    "sessions_per_week": [2, 4],
+    "session_duration_mins": [30, 45],
+    "methodology_weights": {
+      "circuit": 0.30,
+      "strength": 0.30,
+      "mobility": 0.20,
+      "hiit": 0.20
+    },
+    "preferred_hours": [6, 10]
   },
   {
     "id": "flexibility",
@@ -302,7 +351,13 @@
       "가동성",
       "유연성",
       "관절 건강"
-    ]
+    ],
+    "sessions_per_week": [3, 5],
+    "session_duration_mins": [20, 30],
+    "methodology_weights": {
+      "mobility": 1.00
+    },
+    "preferred_hours": [18, 22]
   },
   {
     "id": "sports",
@@ -336,6 +391,15 @@
       "競技力向上",
       "스포츠",
       "경기력 향상"
-    ]
+    ],
+    "sessions_per_week": [4, 6],
+    "session_duration_mins": [45, 90],
+    "methodology_weights": {
+      "strength": 0.40,
+      "hiit": 0.30,
+      "circuit": 0.20,
+      "emom": 0.10
+    },
+    "preferred_hours": [0, 24]
   }
 ]

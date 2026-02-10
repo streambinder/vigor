@@ -342,5 +342,16 @@
   "goalFlexibility": "柔軟性",
   "goalFlexibilityDescription": "ストレッチとモビリティで可動域を改善",
   "goalSports": "スポーツパフォーマンス",
-  "goalSportsDescription": "パワーと俊敏性のトレーニングで運動能力を向上"
+  "goalSportsDescription": "パワーと俊敏性のトレーニングで運動能力を向上",
+
+  "thisWeek": "今週",
+  "trainingPlan": "トレーニングプラン",
+  "sessionsPerWeek": "週あたりのセッション数",
+  "sessionDuration": "セッション時間",
+  "preferredTime": "推奨時間帯",
+  "recommendedTime": "おすすめ時間帯",
+  "methodologyMix": "メソッドミックス",
+  "pastWeeks": "過去の週",
+  "weeklyTarget": "週間目標",
+  "daysLeft": "残り{count}日"
 }

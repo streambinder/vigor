@@ -12,6 +12,7 @@ import (
 
 func initProgress(app *fiber.App) {
 	app.Get("/progress", middleware.Authorized(), getProgress)
+	app.Get("/progress/weekly-target", middleware.Authorized(), getWeeklyTarget)
 }
 
 func getProgress(c *fiber.Ctx) error {
@@ -21,4 +22,13 @@ func getProgress(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.JSON(dto.GetProgressResponse(progress))
+}
+
+func getWeeklyTarget(c *fiber.Ctx) error {
+	weeklyTarget, err := service.GetWeeklyTarget(c.Locals("userID").(uuid.UUID))
+	if err != nil {
+		middleware.Log(c).Error().Err(err).Msg("failed to compute weekly target")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.JSON(dto.GetWeeklyTargetResponse(weeklyTarget))
 }

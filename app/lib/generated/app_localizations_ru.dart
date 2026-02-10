@@ -978,4 +978,36 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get goalSportsDescription =>
       'Улучшите атлетические способности с силой и ловкостью';
+
+  @override
+  String get thisWeek => 'Эта неделя';
+
+  @override
+  String get trainingPlan => 'План тренировок';
+
+  @override
+  String get sessionsPerWeek => 'Тренировок в неделю';
+
+  @override
+  String get sessionDuration => 'Длительность тренировки';
+
+  @override
+  String get preferredTime => 'Предпочтительное время';
+
+  @override
+  String get recommendedTime => 'Рекомендуемое время';
+
+  @override
+  String get methodologyMix => 'Микс методологий';
+
+  @override
+  String get pastWeeks => 'Прошлые недели';
+
+  @override
+  String get weeklyTarget => 'Цель на неделю';
+
+  @override
+  String daysLeft(int count) {
+    return '$count дней осталось';
+  }
 }

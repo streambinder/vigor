@@ -966,4 +966,36 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get goalSportsDescription => '파워와 민첩성 훈련으로 운동 능력 향상';
+
+  @override
+  String get thisWeek => '이번 주';
+
+  @override
+  String get trainingPlan => '트레이닝 플랜';
+
+  @override
+  String get sessionsPerWeek => '주당 세션';
+
+  @override
+  String get sessionDuration => '세션 시간';
+
+  @override
+  String get preferredTime => '권장 시간';
+
+  @override
+  String get recommendedTime => '추천 시간';
+
+  @override
+  String get methodologyMix => '방법론 믹스';
+
+  @override
+  String get pastWeeks => '지난 주';
+
+  @override
+  String get weeklyTarget => '주간 목표';
+
+  @override
+  String daysLeft(int count) {
+    return '$count일 남음';
+  }
 }

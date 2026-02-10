@@ -342,5 +342,16 @@
   "goalFlexibility": "Flexibilität",
   "goalFlexibilityDescription": "Verbessere die Beweglichkeit mit Dehnung und Mobilität",
   "goalSports": "Sportliche Leistung",
-  "goalSportsDescription": "Steigere die athletische Fähigkeit mit Kraft- und Agilitätstraining"
+  "goalSportsDescription": "Steigere die athletische Fähigkeit mit Kraft- und Agilitätstraining",
+
+  "thisWeek": "Diese Woche",
+  "trainingPlan": "Trainingsplan",
+  "sessionsPerWeek": "Einheiten pro Woche",
+  "sessionDuration": "Einheitsdauer",
+  "preferredTime": "Bevorzugte Zeit",
+  "recommendedTime": "Empfohlene Zeit",
+  "methodologyMix": "Methodenmix",
+  "pastWeeks": "Vergangene Wochen",
+  "weeklyTarget": "Wochenziel",
+  "daysLeft": "{count} Tage übrig"
 }

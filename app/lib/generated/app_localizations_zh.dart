@@ -964,4 +964,36 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get goalSportsDescription => '通过力量和敏捷训练提升运动能力';
+
+  @override
+  String get thisWeek => '本周';
+
+  @override
+  String get trainingPlan => '训练计划';
+
+  @override
+  String get sessionsPerWeek => '每周训练次数';
+
+  @override
+  String get sessionDuration => '训练时长';
+
+  @override
+  String get preferredTime => '建议时间';
+
+  @override
+  String get recommendedTime => '推荐时间';
+
+  @override
+  String get methodologyMix => '方法组合';
+
+  @override
+  String get pastWeeks => '过去几周';
+
+  @override
+  String get weeklyTarget => '每周目标';
+
+  @override
+  String daysLeft(int count) {
+    return '还剩 $count 天';
+  }
 }

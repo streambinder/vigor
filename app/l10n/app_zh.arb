@@ -342,5 +342,16 @@
   "goalFlexibility": "柔韧性",
   "goalFlexibilityDescription": "通过拉伸和灵活性训练提高活动范围",
   "goalSports": "运动表现",
-  "goalSportsDescription": "通过力量和敏捷训练提升运动能力"
+  "goalSportsDescription": "通过力量和敏捷训练提升运动能力",
+
+  "thisWeek": "本周",
+  "trainingPlan": "训练计划",
+  "sessionsPerWeek": "每周训练次数",
+  "sessionDuration": "训练时长",
+  "preferredTime": "建议时间",
+  "recommendedTime": "推荐时间",
+  "methodologyMix": "方法组合",
+  "pastWeeks": "过去几周",
+  "weeklyTarget": "每周目标",
+  "daysLeft": "还剩 {count} 天"
 }

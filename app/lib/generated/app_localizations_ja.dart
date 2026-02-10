@@ -966,4 +966,36 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get goalSportsDescription => 'パワーと俊敏性のトレーニングで運動能力を向上';
+
+  @override
+  String get thisWeek => '今週';
+
+  @override
+  String get trainingPlan => 'トレーニングプラン';
+
+  @override
+  String get sessionsPerWeek => '週あたりのセッション数';
+
+  @override
+  String get sessionDuration => 'セッション時間';
+
+  @override
+  String get preferredTime => '推奨時間帯';
+
+  @override
+  String get recommendedTime => 'おすすめ時間帯';
+
+  @override
+  String get methodologyMix => 'メソッドミックス';
+
+  @override
+  String get pastWeeks => '過去の週';
+
+  @override
+  String get weeklyTarget => '週間目標';
+
+  @override
+  String daysLeft(int count) {
+    return '残り$count日';
+  }
 }

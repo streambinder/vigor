@@ -13,11 +13,23 @@ class Goal {
   final String? description;
   @JsonKey(name: 'aliases')
   final List<String>? aliases;
+  @JsonKey(name: 'sessions_per_week')
+  final List<int>? sessionsPerWeek;
+  @JsonKey(name: 'session_duration_mins')
+  final List<int>? sessionDurationMins;
+  @JsonKey(name: 'methodology_weights')
+  final Map<String, dynamic>? methodologyWeights;
+  @JsonKey(name: 'preferred_hours')
+  final List<int>? preferredHours;
 
   Goal({
     required this.id,
     this.description,
     this.aliases,
+    this.sessionsPerWeek,
+    this.sessionDurationMins,
+    this.methodologyWeights,
+    this.preferredHours,
   });
 
   factory Goal.fromJson(Map<String, dynamic> json) => _$GoalFromJson(json);

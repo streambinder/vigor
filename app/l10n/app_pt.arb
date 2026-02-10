@@ -342,5 +342,16 @@
   "goalFlexibility": "Flexibilidade",
   "goalFlexibilityDescription": "Melhore a amplitude de movimento com alongamentos e mobilidade",
   "goalSports": "Desempenho Desportivo",
-  "goalSportsDescription": "Melhore a capacidade atlética com treino de potência e agilidade"
+  "goalSportsDescription": "Melhore a capacidade atlética com treino de potência e agilidade",
+
+  "thisWeek": "Esta Semana",
+  "trainingPlan": "Plano de Treino",
+  "sessionsPerWeek": "Sessões por semana",
+  "sessionDuration": "Duração da sessão",
+  "preferredTime": "Horário preferido",
+  "recommendedTime": "Horário recomendado",
+  "methodologyMix": "Mix de metodologias",
+  "pastWeeks": "Semanas anteriores",
+  "weeklyTarget": "Meta Semanal",
+  "daysLeft": "{count} dias restantes"
 }

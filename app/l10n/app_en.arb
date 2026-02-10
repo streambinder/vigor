@@ -484,5 +484,21 @@
   "goalFlexibility": "Flexibility",
   "goalFlexibilityDescription": "Improve range of motion with stretching and mobility",
   "goalSports": "Sports Performance",
-  "goalSportsDescription": "Boost athletic ability with power and agility training"
+  "goalSportsDescription": "Boost athletic ability with power and agility training",
+
+  "thisWeek": "This Week",
+  "trainingPlan": "Training Plan",
+  "sessionsPerWeek": "Sessions per week",
+  "sessionDuration": "Session duration",
+  "preferredTime": "Preferred time",
+  "recommendedTime": "Recommended time",
+  "methodologyMix": "Methodology mix",
+  "pastWeeks": "Past weeks",
+  "weeklyTarget": "Weekly Target",
+  "daysLeft": "{count} days left",
+  "@daysLeft": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  }
 }

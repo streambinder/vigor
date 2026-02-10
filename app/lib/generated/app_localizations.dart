@@ -1919,6 +1919,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Boost athletic ability with power and agility training'**
   String get goalSportsDescription;
+
+  /// No description provided for @thisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get thisWeek;
+
+  /// No description provided for @trainingPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Training Plan'**
+  String get trainingPlan;
+
+  /// No description provided for @sessionsPerWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions per week'**
+  String get sessionsPerWeek;
+
+  /// No description provided for @sessionDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Session duration'**
+  String get sessionDuration;
+
+  /// No description provided for @preferredTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred time'**
+  String get preferredTime;
+
+  /// No description provided for @recommendedTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended time'**
+  String get recommendedTime;
+
+  /// No description provided for @methodologyMix.
+  ///
+  /// In en, this message translates to:
+  /// **'Methodology mix'**
+  String get methodologyMix;
+
+  /// No description provided for @pastWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'Past weeks'**
+  String get pastWeeks;
+
+  /// No description provided for @weeklyTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Target'**
+  String get weeklyTarget;
+
+  /// No description provided for @daysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days left'**
+  String daysLeft(int count);
 }
 
 class _AppLocalizationsDelegate

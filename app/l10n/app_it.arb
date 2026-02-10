@@ -342,5 +342,16 @@
   "goalFlexibility": "Flessibilità",
   "goalFlexibilityDescription": "Migliora la mobilità con stretching e lavoro articolare",
   "goalSports": "Prestazione Sportiva",
-  "goalSportsDescription": "Potenzia le capacità atletiche con allenamenti di forza e agilità"
+  "goalSportsDescription": "Potenzia le capacità atletiche con allenamenti di forza e agilità",
+
+  "thisWeek": "Questa Settimana",
+  "trainingPlan": "Piano di Allenamento",
+  "sessionsPerWeek": "Sessioni a settimana",
+  "sessionDuration": "Durata sessione",
+  "preferredTime": "Orario preferito",
+  "recommendedTime": "Orario suggerito",
+  "methodologyMix": "Mix metodologie",
+  "pastWeeks": "Settimane passate",
+  "weeklyTarget": "Obiettivo Settimanale",
+  "daysLeft": "{count} giorni rimasti"
 }

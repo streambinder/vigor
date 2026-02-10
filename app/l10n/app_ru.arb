@@ -342,5 +342,16 @@
   "goalFlexibility": "Гибкость",
   "goalFlexibilityDescription": "Улучшите подвижность с растяжкой и мобильностью",
   "goalSports": "Спортивные результаты",
-  "goalSportsDescription": "Улучшите атлетические способности с силой и ловкостью"
+  "goalSportsDescription": "Улучшите атлетические способности с силой и ловкостью",
+
+  "thisWeek": "Эта неделя",
+  "trainingPlan": "План тренировок",
+  "sessionsPerWeek": "Тренировок в неделю",
+  "sessionDuration": "Длительность тренировки",
+  "preferredTime": "Предпочтительное время",
+  "recommendedTime": "Рекомендуемое время",
+  "methodologyMix": "Микс методологий",
+  "pastWeeks": "Прошлые недели",
+  "weeklyTarget": "Цель на неделю",
+  "daysLeft": "{count} дней осталось"
 }

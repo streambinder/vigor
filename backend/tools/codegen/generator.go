@@ -103,11 +103,18 @@ func mapGoTypeToDart(goType string) string {
 		case "time":
 			return "DateTime" // time.Time -> DateTime
 		case "pq":
-			if typeName == "StringArray" {
+			switch typeName {
+			case "StringArray":
 				return "List<String>"
+			case "Int32Array", "Int64Array":
+				return "List<int>"
+			case "Float32Array", "Float64Array":
+				return "List<double>"
+			case "BoolArray":
+				return "List<bool>"
 			}
 		case "datatypes":
-			if typeName == "JSON" {
+			if typeName == "JSON" || typeName == "JSONMap" {
 				return "Map<String, dynamic>"
 			}
 		case "gorm":

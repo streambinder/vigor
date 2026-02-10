@@ -983,4 +983,36 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get goalSportsDescription =>
       'Melhore a capacidade atlética com treino de potência e agilidade';
+
+  @override
+  String get thisWeek => 'Esta Semana';
+
+  @override
+  String get trainingPlan => 'Plano de Treino';
+
+  @override
+  String get sessionsPerWeek => 'Sessões por semana';
+
+  @override
+  String get sessionDuration => 'Duração da sessão';
+
+  @override
+  String get preferredTime => 'Horário preferido';
+
+  @override
+  String get recommendedTime => 'Horário recomendado';
+
+  @override
+  String get methodologyMix => 'Mix de metodologias';
+
+  @override
+  String get pastWeeks => 'Semanas anteriores';
+
+  @override
+  String get weeklyTarget => 'Meta Semanal';
+
+  @override
+  String daysLeft(int count) {
+    return '$count dias restantes';
+  }
 }

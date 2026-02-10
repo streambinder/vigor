@@ -1,5 +1,6 @@
 import '../models/api_response.dart';
 import '../models/progress.dart';
+import '../models/weekly_target.dart';
 import '../models/family_progress.dart';
 import '../models/muscle_impact.dart';
 import 'app_logger.dart';
@@ -52,5 +53,28 @@ class ProgressService {
       key,
       MuscleImpact.fromJson(value as Map<String, dynamic>),
     ));
+  }
+
+  Future<ApiResponse<WeeklyTarget>> getWeeklyTarget() async {
+    AppLogger.debug('[ProgressService] Fetching weekly target');
+
+    final response = await _apiService.get('/progress/weekly-target');
+
+    if (response.isSuccess && response.data != null) {
+      try {
+        final weeklyTarget = WeeklyTarget.fromJson(response.data!);
+        AppLogger.info('[ProgressService] Fetched weekly target: ${weeklyTarget.goals.length} goals');
+        return ApiResponse.success(weeklyTarget, response.statusCode);
+      } catch (e) {
+        AppLogger.error('[ProgressService] failed to parse weekly target', e);
+        return ApiResponse.error('Failed to parse weekly target', response.statusCode);
+      }
+    } else {
+      AppLogger.error('[ProgressService] Failed to fetch weekly target: ${response.error}');
+      return ApiResponse.error(
+        response.error ?? 'Failed to fetch weekly target',
+        response.statusCode,
+      );
+    }
   }
 }

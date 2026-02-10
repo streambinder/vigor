@@ -342,5 +342,16 @@
   "goalFlexibility": "유연성",
   "goalFlexibilityDescription": "스트레칭과 이동성으로 가동 범위 개선",
   "goalSports": "스포츠 퍼포먼스",
-  "goalSportsDescription": "파워와 민첩성 훈련으로 운동 능력 향상"
+  "goalSportsDescription": "파워와 민첩성 훈련으로 운동 능력 향상",
+
+  "thisWeek": "이번 주",
+  "trainingPlan": "트레이닝 플랜",
+  "sessionsPerWeek": "주당 세션",
+  "sessionDuration": "세션 시간",
+  "preferredTime": "권장 시간",
+  "recommendedTime": "추천 시간",
+  "methodologyMix": "방법론 믹스",
+  "pastWeeks": "지난 주",
+  "weeklyTarget": "주간 목표",
+  "daysLeft": "{count}일 남음"
 }
