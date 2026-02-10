@@ -881,7 +881,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get capabilities => '能力';
 
   @override
-  String get muscleHeatMap => 'Muscle Heat Map';
+  String get muscleHeatMap => '筋肉ヒートマップ';
+
+  @override
+  String get heatResting => '休息中';
+
+  @override
+  String get heatRecovered => '回復済み';
+
+  @override
+  String get heatActive => '活動中';
+
+  @override
+  String get heatWarm => 'ウォーム';
+
+  @override
+  String get heatHot => '高強度';
 
   @override
   String get noTrainingsCompletedYet => 'トレーニングを始めて何か表示しよう';

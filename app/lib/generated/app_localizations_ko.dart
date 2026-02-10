@@ -881,7 +881,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get capabilities => '능력';
 
   @override
-  String get muscleHeatMap => 'Muscle Heat Map';
+  String get muscleHeatMap => '근육 히트맵';
+
+  @override
+  String get heatResting => '휴식 중';
+
+  @override
+  String get heatRecovered => '회복됨';
+
+  @override
+  String get heatActive => '활동 중';
+
+  @override
+  String get heatWarm => '따뜻함';
+
+  @override
+  String get heatHot => '고강도';
 
   @override
   String get noTrainingsCompletedYet => '훈련을 시작해서 여기에 뭔가 보여주세요';

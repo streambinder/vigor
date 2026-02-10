@@ -1752,6 +1752,36 @@ abstract class AppLocalizations {
   /// **'Muscle Heat Map'**
   String get muscleHeatMap;
 
+  /// No description provided for @heatResting.
+  ///
+  /// In en, this message translates to:
+  /// **'Resting'**
+  String get heatResting;
+
+  /// No description provided for @heatRecovered.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovered'**
+  String get heatRecovered;
+
+  /// No description provided for @heatActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get heatActive;
+
+  /// No description provided for @heatWarm.
+  ///
+  /// In en, this message translates to:
+  /// **'Warm'**
+  String get heatWarm;
+
+  /// No description provided for @heatHot.
+  ///
+  /// In en, this message translates to:
+  /// **'Hot'**
+  String get heatHot;
+
   /// No description provided for @noTrainingsCompletedYet.
   ///
   /// In en, this message translates to:

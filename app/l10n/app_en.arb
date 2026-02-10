@@ -453,6 +453,11 @@
   "calibrationDescription": "During calibration, the platform collects data from your feedback to make an initial assessment of your fitness level",
   "capabilities": "Capabilities",
   "muscleHeatMap": "Muscle Heat Map",
+  "heatResting": "Resting",
+  "heatRecovered": "Recovered",
+  "heatActive": "Active",
+  "heatWarm": "Warm",
+  "heatHot": "Hot",
   "noTrainingsCompletedYet": "Start training to see something here",
 
   "theme": "Theme",

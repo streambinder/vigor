@@ -86,17 +86,12 @@ class VigorColors {
 // =============================================================================
 
 class VigorHeat {
-  static const Color cool = VigorColors.indigo; // recovered, low intensity
-  static const Color warm = VigorColors.persimmon; // active, building heat
-  static const Color hot = VigorColors.crimson; // overload, needs recovery
+  static const Color base = VigorColors.persimmon;
   static const Color mastery = VigorColors.gold; // high proficiency, achievements
 
   /// returns heat color based on 0.0-1.0 intensity value
-  static Color fromIntensity(double intensity) {
-    if (intensity <= 0.30) return cool;
-    if (intensity <= 0.80) return warm;
-    return hot;
-  }
+  static Color fromIntensity(double intensity) =>
+      base.withValues(alpha: intensity.clamp(0.0, 1.0));
 }
 
 // =============================================================================

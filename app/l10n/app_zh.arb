@@ -310,7 +310,12 @@
   "calibrationNeeded": "完成您的第一次训练，让Vigor根据您的水平校准推荐",
   "calibrationDescription": "在校准期间，平台会收集您的反馈数据，对您的健身状态和水平进行初步评估",
   "capabilities": "能力",
-  "muscleHeatMap": "Muscle Heat Map",
+  "muscleHeatMap": "肌肉热力图",
+  "heatResting": "休息中",
+  "heatRecovered": "已恢复",
+  "heatActive": "活跃",
+  "heatWarm": "温热",
+  "heatHot": "高强度",
   "noTrainingsCompletedYet": "开始训练来看点什么吧",
 
   "theme": "主题",

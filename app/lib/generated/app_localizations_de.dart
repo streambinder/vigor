@@ -897,7 +897,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String get capabilities => 'Fähigkeiten';
 
   @override
-  String get muscleHeatMap => 'Muscle Heat Map';
+  String get muscleHeatMap => 'Muskel-Heatmap';
+
+  @override
+  String get heatResting => 'Ruhend';
+
+  @override
+  String get heatRecovered => 'Erholt';
+
+  @override
+  String get heatActive => 'Aktiv';
+
+  @override
+  String get heatWarm => 'Warm';
+
+  @override
+  String get heatHot => 'Intensiv';
 
   @override
   String get noTrainingsCompletedYet =>

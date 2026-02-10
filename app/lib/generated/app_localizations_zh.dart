@@ -879,7 +879,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get capabilities => '能力';
 
   @override
-  String get muscleHeatMap => 'Muscle Heat Map';
+  String get muscleHeatMap => '肌肉热力图';
+
+  @override
+  String get heatResting => '休息中';
+
+  @override
+  String get heatRecovered => '已恢复';
+
+  @override
+  String get heatActive => '活跃';
+
+  @override
+  String get heatWarm => '温热';
+
+  @override
+  String get heatHot => '高强度';
 
   @override
   String get noTrainingsCompletedYet => '开始训练来看点什么吧';

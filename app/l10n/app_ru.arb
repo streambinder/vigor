@@ -310,7 +310,12 @@
   "calibrationNeeded": "Завершите первую тренировку, чтобы Vigor откалибровал рекомендации под ваш уровень",
   "calibrationDescription": "Во время калибровки платформа собирает данные из ваших отзывов, чтобы сделать первоначальную оценку вашего физического состояния и уровня",
   "capabilities": "Возможности",
-  "muscleHeatMap": "Muscle Heat Map",
+  "muscleHeatMap": "Тепловая карта мышц",
+  "heatResting": "В покое",
+  "heatRecovered": "Восстановлен",
+  "heatActive": "Активен",
+  "heatWarm": "Тёплый",
+  "heatHot": "Горячий",
   "noTrainingsCompletedYet": "Начни тренироваться, чтобы увидеть что-то здесь",
 
   "theme": "Тема",

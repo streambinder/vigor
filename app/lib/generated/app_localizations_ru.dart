@@ -885,7 +885,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String get capabilities => 'Возможности';
 
   @override
-  String get muscleHeatMap => 'Muscle Heat Map';
+  String get muscleHeatMap => 'Тепловая карта мышц';
+
+  @override
+  String get heatResting => 'В покое';
+
+  @override
+  String get heatRecovered => 'Восстановлен';
+
+  @override
+  String get heatActive => 'Активен';
+
+  @override
+  String get heatWarm => 'Тёплый';
+
+  @override
+  String get heatHot => 'Горячий';
 
   @override
   String get noTrainingsCompletedYet =>

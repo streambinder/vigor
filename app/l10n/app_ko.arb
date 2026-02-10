@@ -310,7 +310,12 @@
   "calibrationNeeded": "첫 번째 훈련을 완료하여 Vigor가 당신의 수준에 맞게 추천을 보정할 수 있도록 하세요",
   "calibrationDescription": "보정 기간 동안 플랫폼은 피드백 데이터를 수집하여 당신의 체력 상태와 수준에 대한 초기 평가를 합니다",
   "capabilities": "능력",
-  "muscleHeatMap": "Muscle Heat Map",
+  "muscleHeatMap": "근육 히트맵",
+  "heatResting": "휴식 중",
+  "heatRecovered": "회복됨",
+  "heatActive": "활동 중",
+  "heatWarm": "따뜻함",
+  "heatHot": "고강도",
   "noTrainingsCompletedYet": "훈련을 시작해서 여기에 뭔가 보여주세요",
 
   "theme": "테마",

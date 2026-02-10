@@ -248,7 +248,7 @@ class _MuscleMapWidgetState extends State<MuscleMapWidget> {
     for (final svgId in allMuscles) {
       final heat = svgHeatMap[svgId];
       final colorData = heat != null
-          ? _heatToColorAndOpacity(heat, isDark)
+          ? _heatToColorAndOpacity(heat)
           : const {'color': 'transparent', 'opacity': '0'};
 
       result = result.replaceAll('{{FILL_$svgId}}', colorData['color']!);
@@ -258,17 +258,14 @@ class _MuscleMapWidgetState extends State<MuscleMapWidget> {
     return result;
   }
 
-  /// 5-step gradient: indigo (cool) -> persimmon (active) -> crimson (hot)
+  /// single-color gradient using persimmon, fading from transparent to opaque
   /// heat is 0-100 from backend
-  Map<String, String> _heatToColorAndOpacity(double heat, bool isDark) {
-    final coolColor = isDark ? '#5A9ABF' : '#2B4C5D';
+  Map<String, String> _heatToColorAndOpacity(double heat) {
     const persimmon = '#E65D38';
-    const crimson = '#8F1D21';
-
-    if (heat <= 10) return {'color': coolColor, 'opacity': '0.15'};
-    if (heat <= 30) return {'color': coolColor, 'opacity': '0.35'};
-    if (heat <= 55) return {'color': persimmon, 'opacity': '0.30'};
-    if (heat <= 80) return {'color': persimmon, 'opacity': '0.55'};
-    return {'color': crimson, 'opacity': '0.70'};
+    if (heat <= 10) return {'color': persimmon, 'opacity': '0.10'};
+    if (heat <= 30) return {'color': persimmon, 'opacity': '0.30'};
+    if (heat <= 55) return {'color': persimmon, 'opacity': '0.50'};
+    if (heat <= 80) return {'color': persimmon, 'opacity': '0.70'};
+    return {'color': persimmon, 'opacity': '0.90'};
   }
 }

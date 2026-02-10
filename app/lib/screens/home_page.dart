@@ -343,22 +343,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHeatLegend(BuildContext context) {
-    final coolColor = VigorColors.indigoAdaptive(context);
+    final l10n = AppLocalizations.of(context);
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: VigorSpacing.md,
       runSpacing: VigorSpacing.xs,
       children: [
-        _buildLegendItem(context, coolColor.withValues(alpha: 0.15), 'Resting'),
-        _buildLegendItem(context, coolColor.withValues(alpha: 0.35), 'Recovered'),
-        _buildLegendItem(context, VigorColors.persimmon.withValues(alpha: 0.30), 'Active'),
-        _buildLegendItem(context, VigorColors.persimmon.withValues(alpha: 0.55), 'Warm'),
-        _buildLegendItem(context, VigorColors.crimson.withValues(alpha: 0.70), 'Hot'),
+        _buildLegendItem(context, Colors.transparent, l10n.heatResting, showBorder: true),
+        _buildLegendItem(context, VigorColors.persimmon.withValues(alpha: 0.90), l10n.heatHot),
       ],
     );
   }
 
-  Widget _buildLegendItem(BuildContext context, Color color, String label) {
+  Widget _buildLegendItem(BuildContext context, Color color, String label, {bool showBorder = false}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -368,6 +365,7 @@ class _HomePageState extends State<HomePage> {
           decoration: BoxDecoration(
             color: color,
             borderRadius: VigorRadius.radiusXs,
+            border: showBorder ? Border.all(color: VigorColors.border(context)) : null,
           ),
         ),
         const SizedBox(width: VigorSpacing.xs),
