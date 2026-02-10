@@ -325,5 +325,22 @@
   "warmupCooldown": "ウォームアップとクールダウン",
 
   "timer": "タイマー",
-  "intervalJingle": "インターバル完了時にサウンド"
+  "intervalJingle": "インターバル完了時にサウンド",
+
+  "goalHypertrophy": "筋肥大",
+  "goalHypertrophyDescription": "ターゲットを絞った筋トレで筋肉量を増やす",
+  "goalFatLoss": "脂肪燃焼",
+  "goalFatLossDescription": "高強度ワークアウトでカロリーを消費し体脂肪を減らす",
+  "goalToning": "引き締め",
+  "goalToningDescription": "引き締まった筋肉とアスリート体型を作る",
+  "goalPosture": "姿勢",
+  "goalPostureDescription": "背中とコアを強化して姿勢を改善",
+  "goalRehabilitation": "リハビリ",
+  "goalRehabilitationDescription": "怪我からの回復のための安全で管理されたエクササイズ",
+  "goalWellness": "ウェルネス",
+  "goalWellnessDescription": "健康とストレス解消のためのバランスの取れたワークアウト",
+  "goalFlexibility": "柔軟性",
+  "goalFlexibilityDescription": "ストレッチとモビリティで可動域を改善",
+  "goalSports": "スポーツパフォーマンス",
+  "goalSportsDescription": "パワーと俊敏性のトレーニングで運動能力を向上"
 }

@@ -918,4 +918,52 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get intervalJingle => '인터벌 완료 시 소리';
+
+  @override
+  String get goalHypertrophy => '근육 증가';
+
+  @override
+  String get goalHypertrophyDescription => '타겟 저항 훈련으로 근육량 증가';
+
+  @override
+  String get goalFatLoss => '체지방 감소';
+
+  @override
+  String get goalFatLossDescription => '고강도 운동으로 칼로리 소모 및 체지방 감소';
+
+  @override
+  String get goalToning => '탄탄한 몸매';
+
+  @override
+  String get goalToningDescription => '선명한 근육과 탄탄한 외모 만들기';
+
+  @override
+  String get goalPosture => '자세 교정';
+
+  @override
+  String get goalPostureDescription => '등과 코어 강화로 바른 자세 유지';
+
+  @override
+  String get goalRehabilitation => '재활';
+
+  @override
+  String get goalRehabilitationDescription => '부상 회복을 위한 안전하고 통제된 운동';
+
+  @override
+  String get goalWellness => '웰니스';
+
+  @override
+  String get goalWellnessDescription => '건강과 스트레스 해소를 위한 균형 잡힌 운동';
+
+  @override
+  String get goalFlexibility => '유연성';
+
+  @override
+  String get goalFlexibilityDescription => '스트레칭과 이동성으로 가동 범위 개선';
+
+  @override
+  String get goalSports => '스포츠 퍼포먼스';
+
+  @override
+  String get goalSportsDescription => '파워와 민첩성 훈련으로 운동 능력 향상';
 }

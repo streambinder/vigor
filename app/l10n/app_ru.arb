@@ -325,5 +325,22 @@
   "warmupCooldown": "Разминка и заминка",
 
   "timer": "Таймер",
-  "intervalJingle": "Звук при завершении интервала"
+  "intervalJingle": "Звук при завершении интервала",
+
+  "goalHypertrophy": "Набор массы",
+  "goalHypertrophyDescription": "Наращивайте мышечную массу с силовыми тренировками",
+  "goalFatLoss": "Сжигание жира",
+  "goalFatLossDescription": "Сжигайте калории и уменьшайте жир с интенсивными тренировками",
+  "goalToning": "Рельеф",
+  "goalToningDescription": "Развивайте рельефные мышцы и атлетичную фигуру",
+  "goalPosture": "Осанка",
+  "goalPostureDescription": "Укрепите спину и кор для лучшей осанки",
+  "goalRehabilitation": "Реабилитация",
+  "goalRehabilitationDescription": "Безопасные упражнения для восстановления после травм",
+  "goalWellness": "Здоровье",
+  "goalWellnessDescription": "Сбалансированные тренировки для здоровья и снятия стресса",
+  "goalFlexibility": "Гибкость",
+  "goalFlexibilityDescription": "Улучшите подвижность с растяжкой и мобильностью",
+  "goalSports": "Спортивные результаты",
+  "goalSportsDescription": "Улучшите атлетические способности с силой и ловкостью"
 }

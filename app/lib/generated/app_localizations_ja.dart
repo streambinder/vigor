@@ -918,4 +918,52 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get intervalJingle => 'インターバル完了時にサウンド';
+
+  @override
+  String get goalHypertrophy => '筋肥大';
+
+  @override
+  String get goalHypertrophyDescription => 'ターゲットを絞った筋トレで筋肉量を増やす';
+
+  @override
+  String get goalFatLoss => '脂肪燃焼';
+
+  @override
+  String get goalFatLossDescription => '高強度ワークアウトでカロリーを消費し体脂肪を減らす';
+
+  @override
+  String get goalToning => '引き締め';
+
+  @override
+  String get goalToningDescription => '引き締まった筋肉とアスリート体型を作る';
+
+  @override
+  String get goalPosture => '姿勢';
+
+  @override
+  String get goalPostureDescription => '背中とコアを強化して姿勢を改善';
+
+  @override
+  String get goalRehabilitation => 'リハビリ';
+
+  @override
+  String get goalRehabilitationDescription => '怪我からの回復のための安全で管理されたエクササイズ';
+
+  @override
+  String get goalWellness => 'ウェルネス';
+
+  @override
+  String get goalWellnessDescription => '健康とストレス解消のためのバランスの取れたワークアウト';
+
+  @override
+  String get goalFlexibility => '柔軟性';
+
+  @override
+  String get goalFlexibilityDescription => 'ストレッチとモビリティで可動域を改善';
+
+  @override
+  String get goalSports => 'スポーツパフォーマンス';
+
+  @override
+  String get goalSportsDescription => 'パワーと俊敏性のトレーニングで運動能力を向上';
 }

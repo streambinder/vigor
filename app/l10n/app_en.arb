@@ -467,5 +467,22 @@
   "warmupCooldown": "Warmup and cooldown",
 
   "timer": "Timer",
-  "intervalJingle": "Jingle at interval completion"
+  "intervalJingle": "Jingle at interval completion",
+
+  "goalHypertrophy": "Muscle Building",
+  "goalHypertrophyDescription": "Build muscle size with targeted resistance training",
+  "goalFatLoss": "Fat Loss",
+  "goalFatLossDescription": "Burn calories and reduce body fat with high-energy workouts",
+  "goalToning": "Toning",
+  "goalToningDescription": "Develop lean muscle definition and a fit appearance",
+  "goalPosture": "Posture",
+  "goalPostureDescription": "Strengthen your back and core for better alignment",
+  "goalRehabilitation": "Rehabilitation",
+  "goalRehabilitationDescription": "Safe, controlled exercises for injury recovery",
+  "goalWellness": "Wellness",
+  "goalWellnessDescription": "Balanced workouts for overall health and stress relief",
+  "goalFlexibility": "Flexibility",
+  "goalFlexibilityDescription": "Improve range of motion with stretching and mobility",
+  "goalSports": "Sports Performance",
+  "goalSportsDescription": "Boost athletic ability with power and agility training"
 }

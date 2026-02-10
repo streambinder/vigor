@@ -325,5 +325,22 @@
   "warmupCooldown": "Aufwärmen und Abkühlen",
 
   "timer": "Timer",
-  "intervalJingle": "Ton bei Intervallende"
+  "intervalJingle": "Ton bei Intervallende",
+
+  "goalHypertrophy": "Muskelaufbau",
+  "goalHypertrophyDescription": "Baue Muskelmasse mit gezieltem Krafttraining auf",
+  "goalFatLoss": "Fettabbau",
+  "goalFatLossDescription": "Verbrenne Kalorien und reduziere Körperfett mit intensiven Workouts",
+  "goalToning": "Straffung",
+  "goalToningDescription": "Entwickle definierte Muskeln und ein athletisches Erscheinungsbild",
+  "goalPosture": "Haltung",
+  "goalPostureDescription": "Stärke Rücken und Core für bessere Ausrichtung",
+  "goalRehabilitation": "Rehabilitation",
+  "goalRehabilitationDescription": "Sichere, kontrollierte Übungen zur Verletzungserholung",
+  "goalWellness": "Wohlbefinden",
+  "goalWellnessDescription": "Ausgewogene Workouts für Gesundheit und Stressabbau",
+  "goalFlexibility": "Flexibilität",
+  "goalFlexibilityDescription": "Verbessere die Beweglichkeit mit Dehnung und Mobilität",
+  "goalSports": "Sportliche Leistung",
+  "goalSportsDescription": "Steigere die athletische Fähigkeit mit Kraft- und Agilitätstraining"
 }

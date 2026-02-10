@@ -916,4 +916,52 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get intervalJingle => '间隔完成时播放提示音';
+
+  @override
+  String get goalHypertrophy => '增肌';
+
+  @override
+  String get goalHypertrophyDescription => '通过针对性力量训练增加肌肉量';
+
+  @override
+  String get goalFatLoss => '减脂';
+
+  @override
+  String get goalFatLossDescription => '通过高强度训练燃烧卡路里、减少体脂';
+
+  @override
+  String get goalToning => '塑形';
+
+  @override
+  String get goalToningDescription => '塑造线条分明的肌肉和健美体态';
+
+  @override
+  String get goalPosture => '体态';
+
+  @override
+  String get goalPostureDescription => '强化背部和核心以改善体态';
+
+  @override
+  String get goalRehabilitation => '康复';
+
+  @override
+  String get goalRehabilitationDescription => '安全可控的伤后恢复训练';
+
+  @override
+  String get goalWellness => '健康';
+
+  @override
+  String get goalWellnessDescription => '均衡训练促进整体健康和缓解压力';
+
+  @override
+  String get goalFlexibility => '柔韧性';
+
+  @override
+  String get goalFlexibilityDescription => '通过拉伸和灵活性训练提高活动范围';
+
+  @override
+  String get goalSports => '运动表现';
+
+  @override
+  String get goalSportsDescription => '通过力量和敏捷训练提升运动能力';
 }

@@ -60,7 +60,12 @@ class _GoalSelectorState extends State<GoalSelector> {
     if (_allGoals == null) return [];
     if (_searchQuery.isEmpty) return _allGoals!;
     final query = _searchQuery.toLowerCase();
-    return _allGoals!.where((g) => g.toLowerCase().contains(query)).toList();
+    final l10n = AppLocalizations.of(context);
+    return _allGoals!.where((g) {
+      // match against goal id or localized label
+      return g.toLowerCase().contains(query) ||
+          _goalLabel(g, l10n).toLowerCase().contains(query);
+    }).toList();
   }
 
   void _toggle(String goal) {
@@ -88,6 +93,85 @@ class _GoalSelectorState extends State<GoalSelector> {
 
   void _deselectAll() {
     widget.onChanged([]);
+  }
+
+  String _goalLabel(String goalId, AppLocalizations l10n) {
+    return switch (goalId) {
+      'hypertrophy' => l10n.goalHypertrophy,
+      'fat loss' => l10n.goalFatLoss,
+      'toning' => l10n.goalToning,
+      'posture' => l10n.goalPosture,
+      'rehabilitation' => l10n.goalRehabilitation,
+      'wellness' => l10n.goalWellness,
+      'flexibility' => l10n.goalFlexibility,
+      'sports' => l10n.goalSports,
+      _ => goalId.split(' ').map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}').join(' '),
+    };
+  }
+
+  String _goalDescription(String goalId, AppLocalizations l10n) {
+    return switch (goalId) {
+      'hypertrophy' => l10n.goalHypertrophyDescription,
+      'fat loss' => l10n.goalFatLossDescription,
+      'toning' => l10n.goalToningDescription,
+      'posture' => l10n.goalPostureDescription,
+      'rehabilitation' => l10n.goalRehabilitationDescription,
+      'wellness' => l10n.goalWellnessDescription,
+      'flexibility' => l10n.goalFlexibilityDescription,
+      'sports' => l10n.goalSportsDescription,
+      _ => '',
+    };
+  }
+
+  Widget _buildGoalTile(String goal, bool isSelected, AppLocalizations l10n) {
+    return GestureDetector(
+      onTap: () => _toggle(goal),
+      child: Container(
+        padding: const EdgeInsets.all(VigorSpacing.sm),
+        decoration: BoxDecoration(
+          color: isSelected ? VigorColors.indigo.withValues(alpha: 0.1) : null,
+          border: Border.all(
+            color: isSelected ? VigorColors.indigo : VigorColors.border(context),
+          ),
+          borderRadius: VigorRadius.radiusMd,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.check_circle : Icons.circle_outlined,
+              color: isSelected ? VigorColors.indigo : VigorColors.textMuted(context),
+              size: 20,
+            ),
+            const SizedBox(width: VigorSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _goalLabel(goal, l10n),
+                    style: VigorTypography.body.copyWith(
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: VigorColors.textPrimary(context),
+                    ),
+                  ),
+                  if (_goalDescription(goal, l10n).isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      _goalDescription(goal, l10n),
+                      style: VigorTypography.caption.copyWith(
+                        color: VigorColors.textSecondary(context),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -168,7 +252,7 @@ class _GoalSelectorState extends State<GoalSelector> {
           ),
         ),
         const SizedBox(height: VigorSpacing.sm),
-        // goal chips
+        // goal tiles
         if (filtered.isEmpty)
           Padding(
             padding: VigorSpacing.paddingMd,
@@ -182,30 +266,16 @@ class _GoalSelectorState extends State<GoalSelector> {
           )
         else
           ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 200),
-            child: SingleChildScrollView(
-              child: Wrap(
-                spacing: VigorSpacing.xs,
-                runSpacing: VigorSpacing.xs,
-                children: filtered.map((goal) {
-                  final isSelected = selectedSet.contains(goal);
-                  return FilterChip(
-                    label: Text(
-                      goal,
-                      style: VigorTypography.caption.copyWith(
-                        color: isSelected ? Colors.white : VigorColors.textPrimary(context),
-                      ),
-                    ),
-                    selected: isSelected,
-                    onSelected: (_) => _toggle(goal),
-                    selectedColor: VigorColors.indigo,
-                    checkmarkColor: Colors.white,
-                    visualDensity: VisualDensity.compact,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.xs),
-                  );
-                }).toList(),
-              ),
+            constraints: const BoxConstraints(maxHeight: 300),
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: filtered.length,
+              separatorBuilder: (_, __) => const SizedBox(height: VigorSpacing.xs),
+              itemBuilder: (context, index) {
+                final goal = filtered[index];
+                final isSelected = selectedSet.contains(goal);
+                return _buildGoalTile(goal, isSelected, l10n);
+              },
             ),
           ),
         // selected count

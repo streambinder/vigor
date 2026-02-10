@@ -923,4 +923,59 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get intervalJingle => 'Звук при завершении интервала';
+
+  @override
+  String get goalHypertrophy => 'Набор массы';
+
+  @override
+  String get goalHypertrophyDescription =>
+      'Наращивайте мышечную массу с силовыми тренировками';
+
+  @override
+  String get goalFatLoss => 'Сжигание жира';
+
+  @override
+  String get goalFatLossDescription =>
+      'Сжигайте калории и уменьшайте жир с интенсивными тренировками';
+
+  @override
+  String get goalToning => 'Рельеф';
+
+  @override
+  String get goalToningDescription =>
+      'Развивайте рельефные мышцы и атлетичную фигуру';
+
+  @override
+  String get goalPosture => 'Осанка';
+
+  @override
+  String get goalPostureDescription => 'Укрепите спину и кор для лучшей осанки';
+
+  @override
+  String get goalRehabilitation => 'Реабилитация';
+
+  @override
+  String get goalRehabilitationDescription =>
+      'Безопасные упражнения для восстановления после травм';
+
+  @override
+  String get goalWellness => 'Здоровье';
+
+  @override
+  String get goalWellnessDescription =>
+      'Сбалансированные тренировки для здоровья и снятия стресса';
+
+  @override
+  String get goalFlexibility => 'Гибкость';
+
+  @override
+  String get goalFlexibilityDescription =>
+      'Улучшите подвижность с растяжкой и мобильностью';
+
+  @override
+  String get goalSports => 'Спортивные результаты';
+
+  @override
+  String get goalSportsDescription =>
+      'Улучшите атлетические способности с силой и ловкостью';
 }

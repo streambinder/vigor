@@ -325,5 +325,22 @@
   "warmupCooldown": "热身和放松",
 
   "timer": "计时器",
-  "intervalJingle": "间隔完成时播放提示音"
+  "intervalJingle": "间隔完成时播放提示音",
+
+  "goalHypertrophy": "增肌",
+  "goalHypertrophyDescription": "通过针对性力量训练增加肌肉量",
+  "goalFatLoss": "减脂",
+  "goalFatLossDescription": "通过高强度训练燃烧卡路里、减少体脂",
+  "goalToning": "塑形",
+  "goalToningDescription": "塑造线条分明的肌肉和健美体态",
+  "goalPosture": "体态",
+  "goalPostureDescription": "强化背部和核心以改善体态",
+  "goalRehabilitation": "康复",
+  "goalRehabilitationDescription": "安全可控的伤后恢复训练",
+  "goalWellness": "健康",
+  "goalWellnessDescription": "均衡训练促进整体健康和缓解压力",
+  "goalFlexibility": "柔韧性",
+  "goalFlexibilityDescription": "通过拉伸和灵活性训练提高活动范围",
+  "goalSports": "运动表现",
+  "goalSportsDescription": "通过力量和敏捷训练提升运动能力"
 }

@@ -1823,6 +1823,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Jingle at interval completion'**
   String get intervalJingle;
+
+  /// No description provided for @goalHypertrophy.
+  ///
+  /// In en, this message translates to:
+  /// **'Muscle Building'**
+  String get goalHypertrophy;
+
+  /// No description provided for @goalHypertrophyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Build muscle size with targeted resistance training'**
+  String get goalHypertrophyDescription;
+
+  /// No description provided for @goalFatLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'Fat Loss'**
+  String get goalFatLoss;
+
+  /// No description provided for @goalFatLossDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Burn calories and reduce body fat with high-energy workouts'**
+  String get goalFatLossDescription;
+
+  /// No description provided for @goalToning.
+  ///
+  /// In en, this message translates to:
+  /// **'Toning'**
+  String get goalToning;
+
+  /// No description provided for @goalToningDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Develop lean muscle definition and a fit appearance'**
+  String get goalToningDescription;
+
+  /// No description provided for @goalPosture.
+  ///
+  /// In en, this message translates to:
+  /// **'Posture'**
+  String get goalPosture;
+
+  /// No description provided for @goalPostureDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Strengthen your back and core for better alignment'**
+  String get goalPostureDescription;
+
+  /// No description provided for @goalRehabilitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Rehabilitation'**
+  String get goalRehabilitation;
+
+  /// No description provided for @goalRehabilitationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe, controlled exercises for injury recovery'**
+  String get goalRehabilitationDescription;
+
+  /// No description provided for @goalWellness.
+  ///
+  /// In en, this message translates to:
+  /// **'Wellness'**
+  String get goalWellness;
+
+  /// No description provided for @goalWellnessDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced workouts for overall health and stress relief'**
+  String get goalWellnessDescription;
+
+  /// No description provided for @goalFlexibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexibility'**
+  String get goalFlexibility;
+
+  /// No description provided for @goalFlexibilityDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Improve range of motion with stretching and mobility'**
+  String get goalFlexibilityDescription;
+
+  /// No description provided for @goalSports.
+  ///
+  /// In en, this message translates to:
+  /// **'Sports Performance'**
+  String get goalSports;
+
+  /// No description provided for @goalSportsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Boost athletic ability with power and agility training'**
+  String get goalSportsDescription;
 }
 
 class _AppLocalizationsDelegate

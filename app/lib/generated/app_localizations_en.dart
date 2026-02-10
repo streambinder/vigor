@@ -924,4 +924,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get intervalJingle => 'Jingle at interval completion';
+
+  @override
+  String get goalHypertrophy => 'Muscle Building';
+
+  @override
+  String get goalHypertrophyDescription =>
+      'Build muscle size with targeted resistance training';
+
+  @override
+  String get goalFatLoss => 'Fat Loss';
+
+  @override
+  String get goalFatLossDescription =>
+      'Burn calories and reduce body fat with high-energy workouts';
+
+  @override
+  String get goalToning => 'Toning';
+
+  @override
+  String get goalToningDescription =>
+      'Develop lean muscle definition and a fit appearance';
+
+  @override
+  String get goalPosture => 'Posture';
+
+  @override
+  String get goalPostureDescription =>
+      'Strengthen your back and core for better alignment';
+
+  @override
+  String get goalRehabilitation => 'Rehabilitation';
+
+  @override
+  String get goalRehabilitationDescription =>
+      'Safe, controlled exercises for injury recovery';
+
+  @override
+  String get goalWellness => 'Wellness';
+
+  @override
+  String get goalWellnessDescription =>
+      'Balanced workouts for overall health and stress relief';
+
+  @override
+  String get goalFlexibility => 'Flexibility';
+
+  @override
+  String get goalFlexibilityDescription =>
+      'Improve range of motion with stretching and mobility';
+
+  @override
+  String get goalSports => 'Sports Performance';
+
+  @override
+  String get goalSportsDescription =>
+      'Boost athletic ability with power and agility training';
 }

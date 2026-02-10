@@ -325,5 +325,22 @@
   "warmupCooldown": "Calentamiento y enfriamiento",
 
   "timer": "Temporizador",
-  "intervalJingle": "Sonido al completar intervalo"
+  "intervalJingle": "Sonido al completar intervalo",
+
+  "goalHypertrophy": "Desarrollo Muscular",
+  "goalHypertrophyDescription": "Aumenta el tamaño muscular con entrenamiento de resistencia",
+  "goalFatLoss": "Pérdida de Grasa",
+  "goalFatLossDescription": "Quema calorías y reduce grasa corporal con entrenamientos intensos",
+  "goalToning": "Tonificación",
+  "goalToningDescription": "Desarrolla músculos definidos y una apariencia atlética",
+  "goalPosture": "Postura",
+  "goalPostureDescription": "Fortalece espalda y core para mejor alineación",
+  "goalRehabilitation": "Rehabilitación",
+  "goalRehabilitationDescription": "Ejercicios seguros y controlados para recuperación de lesiones",
+  "goalWellness": "Bienestar",
+  "goalWellnessDescription": "Entrenamientos equilibrados para salud y alivio del estrés",
+  "goalFlexibility": "Flexibilidad",
+  "goalFlexibilityDescription": "Mejora el rango de movimiento con estiramientos y movilidad",
+  "goalSports": "Rendimiento Deportivo",
+  "goalSportsDescription": "Mejora la capacidad atlética con entrenamiento de potencia y agilidad"
 }

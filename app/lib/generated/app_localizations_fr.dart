@@ -934,4 +934,60 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get intervalJingle => 'Son à la fin d\'intervalle';
+
+  @override
+  String get goalHypertrophy => 'Prise de Masse';
+
+  @override
+  String get goalHypertrophyDescription =>
+      'Développe la masse musculaire avec un entraînement ciblé';
+
+  @override
+  String get goalFatLoss => 'Perte de Graisse';
+
+  @override
+  String get goalFatLossDescription =>
+      'Brûle des calories et réduis la graisse avec des séances intensives';
+
+  @override
+  String get goalToning => 'Tonification';
+
+  @override
+  String get goalToningDescription =>
+      'Développe des muscles définis et une apparence athlétique';
+
+  @override
+  String get goalPosture => 'Posture';
+
+  @override
+  String get goalPostureDescription =>
+      'Renforce le dos et le core pour un meilleur alignement';
+
+  @override
+  String get goalRehabilitation => 'Rééducation';
+
+  @override
+  String get goalRehabilitationDescription =>
+      'Exercices sûrs et contrôlés pour la récupération';
+
+  @override
+  String get goalWellness => 'Bien-être';
+
+  @override
+  String get goalWellnessDescription =>
+      'Entraînements équilibrés pour la santé et la détente';
+
+  @override
+  String get goalFlexibility => 'Souplesse';
+
+  @override
+  String get goalFlexibilityDescription =>
+      'Améliore l\'amplitude de mouvement avec étirements et mobilité';
+
+  @override
+  String get goalSports => 'Performance Sportive';
+
+  @override
+  String get goalSportsDescription =>
+      'Améliore les capacités athlétiques avec puissance et agilité';
 }

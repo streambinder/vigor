@@ -350,9 +350,91 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     );
   }
 
-  String _goalLabel(String goal) {
-    // format goal id to human-readable: muscle_building -> Muscle Building
-    return goal.split('_').map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}').join(' ');
+  String _goalLabel(String goalId, AppLocalizations l10n) {
+    return switch (goalId) {
+      'hypertrophy' => l10n.goalHypertrophy,
+      'fat loss' => l10n.goalFatLoss,
+      'toning' => l10n.goalToning,
+      'posture' => l10n.goalPosture,
+      'rehabilitation' => l10n.goalRehabilitation,
+      'wellness' => l10n.goalWellness,
+      'flexibility' => l10n.goalFlexibility,
+      'sports' => l10n.goalSports,
+      _ => goalId.split(' ').map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}').join(' '),
+    };
+  }
+
+  String _goalDescription(String goalId, AppLocalizations l10n) {
+    return switch (goalId) {
+      'hypertrophy' => l10n.goalHypertrophyDescription,
+      'fat loss' => l10n.goalFatLossDescription,
+      'toning' => l10n.goalToningDescription,
+      'posture' => l10n.goalPostureDescription,
+      'rehabilitation' => l10n.goalRehabilitationDescription,
+      'wellness' => l10n.goalWellnessDescription,
+      'flexibility' => l10n.goalFlexibilityDescription,
+      'sports' => l10n.goalSportsDescription,
+      _ => '',
+    };
+  }
+
+  Widget _buildGoalTile(String goal, bool isSelected, AppLocalizations l10n) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (isSelected) {
+            _selectedGoals.remove(goal);
+          } else if (_selectedGoals.length < 2) {
+            _selectedGoals.add(goal);
+          }
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.all(VigorSpacing.sm),
+        decoration: BoxDecoration(
+          color: isSelected ? VigorColors.indigo.withValues(alpha: 0.1) : null,
+          border: Border.all(
+            color: isSelected ? VigorColors.indigo : VigorColors.border(context),
+          ),
+          borderRadius: VigorRadius.radiusMd,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.check_circle : Icons.circle_outlined,
+              color: isSelected ? VigorColors.indigo : VigorColors.textMuted(context),
+              size: 20,
+            ),
+            const SizedBox(width: VigorSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _goalLabel(goal, l10n),
+                    style: VigorTypography.body.copyWith(
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: VigorColors.textPrimary(context),
+                    ),
+                  ),
+                  if (_goalDescription(goal, l10n).isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      _goalDescription(goal, l10n),
+                      style: VigorTypography.caption.copyWith(
+                        color: VigorColors.textSecondary(context),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildGoalsSection() {
@@ -381,34 +463,18 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           ],
         ),
         const SizedBox(height: VigorSpacing.sm),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _availableGoals.map((goal) {
-            final isSelected = _selectedGoals.contains(goal);
-            return FilterChip(
-              label: Text(
-                _goalLabel(goal),
-                style: VigorTypography.caption.copyWith(
-                  color: isSelected ? Colors.white : VigorColors.textPrimary(context),
-                ),
-              ),
-              selected: isSelected,
-              selectedColor: VigorColors.indigo,
-              checkmarkColor: Colors.white,
-              onSelected: (selected) {
-                setState(() {
-                  if (selected) {
-                    if (_selectedGoals.length < 2) {
-                      _selectedGoals.add(goal);
-                    }
-                  } else {
-                    _selectedGoals.remove(goal);
-                  }
-                });
-              },
-            );
-          }).toList(),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 250),
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: _availableGoals.length,
+            separatorBuilder: (_, __) => const SizedBox(height: VigorSpacing.xs),
+            itemBuilder: (context, index) {
+              final goal = _availableGoals[index];
+              final isSelected = _selectedGoals.contains(goal);
+              return _buildGoalTile(goal, isSelected, l10n);
+            },
+          ),
         ),
       ],
     );
