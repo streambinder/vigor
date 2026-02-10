@@ -116,6 +116,34 @@ class ApiService {
     }
   }
 
+  /// Make a multipart POST request (platform-agnostic, no dart:io file access)
+  Future<ApiResponse<Map<String, dynamic>>> postMultipart(
+    String endpoint, {
+    required List<int> bytes,
+    required String fieldName,
+    required String filename,
+    Map<String, String>? headers,
+  }) async {
+    try {
+      final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+      final request = http.MultipartRequest('POST', url);
+      if (headers != null) request.headers.addAll(headers);
+      request.files.add(http.MultipartFile.fromBytes(fieldName, bytes, filename: filename));
+      final streamed = await request.send();
+      final response = await http.Response.fromStream(streamed);
+      return _handleResponse(response);
+    } on SocketException {
+      return ApiResponse.networkError('No internet connection');
+    } on HttpException {
+      return ApiResponse.networkError('HTTP error occurred');
+    } on FormatException {
+      return ApiResponse.networkError('Bad response format');
+    } catch (e) {
+      AppLogger.error('[ApiService] POST multipart request failed', e);
+      return ApiResponse.networkError('Something went wrong');
+    }
+  }
+
   /// Build headers with default values
   Map<String, String> _buildHeaders(Map<String, String>? customHeaders) {
     final headers = {

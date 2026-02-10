@@ -40,6 +40,15 @@ class AuthenticatedApiService {
     return _authenticatedRequest(() => _doDelete(endpoint));
   }
 
+  Future<ApiResponse<Map<String, dynamic>>> postMultipart(
+    String endpoint, {
+    required List<int> bytes,
+    required String fieldName,
+    required String filename,
+  }) async {
+    return _authenticatedRequest(() => _doPostMultipart(endpoint, bytes: bytes, fieldName: fieldName, filename: filename));
+  }
+
   /// Wraps a request with 401 interception and token refresh logic
   Future<ApiResponse<Map<String, dynamic>>> _authenticatedRequest(
     Future<ApiResponse<Map<String, dynamic>>> Function() request,
@@ -146,5 +155,18 @@ class AuthenticatedApiService {
       return ApiResponse.error('Not authenticated', 401);
     }
     return _apiService.delete(endpoint, headers: headers);
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> _doPostMultipart(
+    String endpoint, {
+    required List<int> bytes,
+    required String fieldName,
+    required String filename,
+  }) async {
+    final headers = await _getAuthHeaders();
+    if (headers == null) {
+      return ApiResponse.error('Not authenticated', 401);
+    }
+    return _apiService.postMultipart(endpoint, bytes: bytes, fieldName: fieldName, filename: filename, headers: headers);
   }
 }

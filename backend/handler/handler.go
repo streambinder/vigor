@@ -31,6 +31,7 @@ func Init() *fiber.App {
 	app.Use(middleware.Logging())
 
 	// Register route handlers with logging and CORS
+	initAvatar(app)
 	initSession(app)
 	initOauth(app)
 	initUser(app)

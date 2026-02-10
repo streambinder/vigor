@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../config/api_config.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../services/user_service.dart';
@@ -191,11 +193,21 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
       itemBuilder: (ctx, index) {
         final user = _filteredUsers[index];
         return ListTile(
-          leading: CircleAvatar(
-            backgroundColor: VigorColors.indigo.withValues(alpha: 0.2),
-            child: Text(
-              user.firstName.isNotEmpty ? user.firstName[0].toUpperCase() : '?',
-              style: const TextStyle(color: VigorColors.indigo),
+          leading: CachedNetworkImage(
+            imageUrl: ApiConfig.avatarUrl(user.id),
+            imageBuilder: (context, imageProvider) => CircleAvatar(
+              backgroundImage: imageProvider,
+            ),
+            placeholder: (context, url) => CircleAvatar(
+              backgroundColor: VigorColors.indigo.withValues(alpha: 0.2),
+              child: const AdaptiveLoadingIndicator(),
+            ),
+            errorWidget: (context, url, error) => CircleAvatar(
+              backgroundColor: VigorColors.indigo.withValues(alpha: 0.2),
+              child: Text(
+                user.firstName.isNotEmpty ? user.firstName[0].toUpperCase() : '?',
+                style: const TextStyle(color: VigorColors.indigo),
+              ),
             ),
           ),
           title: Text(

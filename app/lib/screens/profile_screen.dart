@@ -1,5 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import '../config/api_config.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
@@ -21,6 +24,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  int _avatarVersion = 0;
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +35,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
         locator.refreshGyms();
       }
     });
+  }
+
+  Future<void> _pickAndUploadAvatar() async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 256, maxHeight: 256);
+    if (picked == null) return;
+
+    final bytes = await picked.readAsBytes();
+    final response = await context.read<ServiceLocator>().userService.uploadAvatar(bytes, picked.name);
+    if (!mounted) return;
+    if (response.isSuccess) {
+      setState(() => _avatarVersion++);
+      AdaptiveNotification.show(context: context, message: 'Avatar updated');
+    } else {
+      AdaptiveNotification.showError(context: context, message: response.error ?? 'Upload failed');
+    }
   }
 
   Future<void> _showGymDialog({Gym? gym}) async {
@@ -198,16 +218,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Row(
             children: [
               // avatar with solid stone border (no gradient ring)
-              Container(
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: VigorColors.stone, width: 2),
-                ),
-                child: CircleAvatar(
-                  radius: 36,
-                  backgroundColor: VigorColors.surface(context),
-                  child: Icon(Icons.person, size: 40, color: VigorColors.stone),
+              GestureDetector(
+                onTap: _pickAndUploadAvatar,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: VigorColors.stone, width: 2),
+                  ),
+                  child: CachedNetworkImage(
+                    imageUrl: '${ApiConfig.avatarUrl(user.id)}?v=$_avatarVersion',
+                    imageBuilder: (context, imageProvider) => CircleAvatar(
+                      radius: 36,
+                      backgroundImage: imageProvider,
+                    ),
+                    placeholder: (context, url) => CircleAvatar(
+                      radius: 36,
+                      backgroundColor: VigorColors.surface(context),
+                      child: const AdaptiveLoadingIndicator(),
+                    ),
+                    errorWidget: (context, url, error) => CircleAvatar(
+                      radius: 36,
+                      backgroundColor: VigorColors.surface(context),
+                      child: Icon(Icons.person, size: 40, color: VigorColors.stone),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: VigorSpacing.md),

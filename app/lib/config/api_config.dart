@@ -30,6 +30,10 @@ class ApiConfig {
   static const String updateUserEndpoint = '/user/update';
   static const String unregisterEndpoint = '/unregister';
 
+  // Avatar endpoints
+  static const String avatarEndpoint = '/user/avatar';
+  static String avatarUrl(String userId) => '$baseUrl/user/avatar/$userId';
+
   // Token configuration
   static const Duration accessTokenExpiry = Duration(hours: 2);
   static const Duration refreshTokenExpiry = Duration(days: 7);

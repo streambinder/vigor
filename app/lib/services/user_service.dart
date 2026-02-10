@@ -1,3 +1,4 @@
+import '../config/api_config.dart';
 import '../models/api_response.dart';
 import 'app_logger.dart';
 import 'authenticated_api_service.dart';
@@ -55,5 +56,15 @@ class UserService {
         response.statusCode,
       );
     }
+  }
+
+  Future<ApiResponse<Map<String, dynamic>>> uploadAvatar(List<int> bytes, String filename) async {
+    AppLogger.debug('[UserService] Uploading avatar');
+    return _apiService.postMultipart(
+      ApiConfig.avatarEndpoint,
+      bytes: bytes,
+      fieldName: 'avatar',
+      filename: filename,
+    );
   }
 }
