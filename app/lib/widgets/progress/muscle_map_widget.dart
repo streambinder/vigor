@@ -7,7 +7,7 @@ import '../../models/muscle_impact.dart';
 /// A widget that displays a human body figure with muscles colored based on training heat.
 /// Inspired by MuscleWiki's interactive body map.
 class MuscleMapWidget extends StatefulWidget {
-  /// Map of muscle ID to MuscleImpact (contains heat value 0.0-1.0)
+  /// Map of muscle ID to MuscleImpact (contains heat value 0-100)
   final Map<String, MuscleImpact> muscles;
 
   /// Whether to show toggle for front/back views (default: true)
@@ -232,9 +232,6 @@ class _MuscleMapWidgetState extends State<MuscleMapWidget> {
       result = result.replaceAll('stroke="#484a68"', 'stroke="#B8BCC4"');
     }
 
-    const indigo = '#2B4C5D';
-    const persimmon = '#E65D38';
-
     // build a map of svgId -> heat value
     final svgHeatMap = <String, double>{};
     for (final entry in muscleMapping.entries) {
@@ -249,33 +246,29 @@ class _MuscleMapWidgetState extends State<MuscleMapWidget> {
 
     // replace placeholders for each muscle group
     for (final svgId in allMuscles) {
-      final heat = svgHeatMap[svgId] ?? 0.0;
-      final colorData = _heatToColorAndOpacity(heat, indigo, persimmon);
-      final fillColor = colorData['color']!;
-      final fillOpacity = colorData['opacity']!;
+      final heat = svgHeatMap[svgId];
+      final colorData = heat != null
+          ? _heatToColorAndOpacity(heat, isDark)
+          : const {'color': 'transparent', 'opacity': '0'};
 
-      // simple string replacement of placeholders
-      result = result.replaceAll('{{FILL_$svgId}}', fillColor);
-      result = result.replaceAll('{{OPACITY_$svgId}}', fillOpacity);
+      result = result.replaceAll('{{FILL_$svgId}}', colorData['color']!);
+      result = result.replaceAll('{{OPACITY_$svgId}}', colorData['opacity']!);
     }
 
     return result;
   }
 
-  /// Converts a heat value (0.0-1.0) to color with varying opacity
-  /// - Base/Cool (0-0.33): fully transparent
-  /// - Warm (0.33-0.66): persimmon with 0.25 opacity
-  /// - Hot (0.66-1.0): persimmon with 0.60 opacity
-  Map<String, String> _heatToColorAndOpacity(double heat, String indigo, String persimmon) {
-    if (heat <= 0.33) {
-      // base/cool - fully transparent
-      return {'color': 'transparent', 'opacity': '0'};
-    }
-    if (heat <= 0.66) {
-      // warm - persimmon 0.25 opacity
-      return {'color': persimmon, 'opacity': '0.25'};
-    }
-    // hot - persimmon 0.60 opacity
-    return {'color': persimmon, 'opacity': '0.60'};
+  /// 5-step gradient: indigo (cool) -> persimmon (active) -> crimson (hot)
+  /// heat is 0-100 from backend
+  Map<String, String> _heatToColorAndOpacity(double heat, bool isDark) {
+    final coolColor = isDark ? '#5A9ABF' : '#2B4C5D';
+    const persimmon = '#E65D38';
+    const crimson = '#8F1D21';
+
+    if (heat <= 10) return {'color': coolColor, 'opacity': '0.15'};
+    if (heat <= 30) return {'color': coolColor, 'opacity': '0.35'};
+    if (heat <= 55) return {'color': persimmon, 'opacity': '0.30'};
+    if (heat <= 80) return {'color': persimmon, 'opacity': '0.55'};
+    return {'color': crimson, 'opacity': '0.70'};
   }
 }

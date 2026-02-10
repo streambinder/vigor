@@ -343,19 +343,22 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHeatLegend(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    final coolColor = VigorColors.indigoAdaptive(context);
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: VigorSpacing.md,
+      runSpacing: VigorSpacing.xs,
       children: [
-        _buildLegendItem(context, Colors.transparent, 'Cool', showBorder: true),
-        const SizedBox(width: VigorSpacing.md),
-        _buildLegendItem(context, VigorColors.persimmon.withValues(alpha: 0.25), 'Warm'),
-        const SizedBox(width: VigorSpacing.md),
-        _buildLegendItem(context, VigorColors.persimmon.withValues(alpha: 0.60), 'Hot'),
+        _buildLegendItem(context, coolColor.withValues(alpha: 0.15), 'Resting'),
+        _buildLegendItem(context, coolColor.withValues(alpha: 0.35), 'Recovered'),
+        _buildLegendItem(context, VigorColors.persimmon.withValues(alpha: 0.30), 'Active'),
+        _buildLegendItem(context, VigorColors.persimmon.withValues(alpha: 0.55), 'Warm'),
+        _buildLegendItem(context, VigorColors.crimson.withValues(alpha: 0.70), 'Hot'),
       ],
     );
   }
 
-  Widget _buildLegendItem(BuildContext context, Color color, String label, {bool showBorder = false}) {
+  Widget _buildLegendItem(BuildContext context, Color color, String label) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -365,7 +368,6 @@ class _HomePageState extends State<HomePage> {
           decoration: BoxDecoration(
             color: color,
             borderRadius: VigorRadius.radiusXs,
-            border: showBorder ? Border.all(color: VigorColors.border(context)) : null,
           ),
         ),
         const SizedBox(width: VigorSpacing.xs),

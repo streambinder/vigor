@@ -93,8 +93,8 @@ class VigorHeat {
 
   /// returns heat color based on 0.0-1.0 intensity value
   static Color fromIntensity(double intensity) {
-    if (intensity <= 0.33) return cool;
-    if (intensity <= 0.66) return warm;
+    if (intensity <= 0.30) return cool;
+    if (intensity <= 0.80) return warm;
     return hot;
   }
 }
