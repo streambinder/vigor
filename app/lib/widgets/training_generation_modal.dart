@@ -676,16 +676,16 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         _buildWarmupToggle(),
         const SizedBox(height: VigorSpacing.md),
 
+        // Muscles selection
+        _buildMusclesSection(),
+        if (_availableMuscles.isNotEmpty) const SizedBox(height: VigorSpacing.md),
+
         // Methodology selection
         _buildMethodologySection(),
         if (_availableMethodologies.isNotEmpty) const SizedBox(height: VigorSpacing.md),
 
         // Goals selection
         _buildGoalsSection(),
-        if (_availableGoals.isNotEmpty) const SizedBox(height: VigorSpacing.md),
-
-        // Muscles selection
-        _buildMusclesSection(),
       ],
     );
   }
