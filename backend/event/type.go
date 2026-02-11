@@ -23,8 +23,9 @@ type TrainingGenerationEvent struct {
 // TrainingGenerationFailureEvent tracks LLM training generation failures
 type TrainingGenerationFailureEvent struct {
 	Event
-	Model  string `gorm:"column:model" json:"model"`
-	Reason string `gorm:"column:reason" json:"reason"`
+	Model   string `gorm:"column:model" json:"model"`
+	Reason  string `gorm:"column:reason" json:"reason"`
+	Message string `gorm:"column:message" json:"message"`
 }
 
 // HandlerRequestEvent tracks HTTP request handling
