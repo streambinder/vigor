@@ -2,11 +2,17 @@ package llm
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/llm/prompt"
 	"github.com/streambinder/vigor/model"
+)
+
+var (
+	ErrLLMQuery     = errors.New("llm query failed")
+	ErrLLMUnmarshal = errors.New("llm unmarshal failed")
 )
 
 var providers = []LLM{}
@@ -82,12 +88,12 @@ func GenTraining(
 		16000,
 	)
 	if err != nil {
-		return nil, request, llmModel, fmt.Errorf("failed to generate training: %s", err)
+		return nil, request, llmModel, fmt.Errorf("%w: %s", ErrLLMQuery, err)
 	}
 
 	training := &model.Training{}
 	if err := json.Unmarshal(response, &training); err != nil {
-		return nil, request, llmModel, fmt.Errorf("unable to generate training for %s: %s", string(response), err)
+		return nil, request, llmModel, fmt.Errorf("%w: %s", ErrLLMUnmarshal, err)
 	}
 
 	return training, request, llmModel, nil

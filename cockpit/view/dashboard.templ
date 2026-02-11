@@ -38,6 +38,11 @@ templ Dashboard(data DashboardData) {
 		</div>
 		@templ.JSONScript("training-chart-data", multiSeriesChartData(data.TrainingGenerationLatencies))
 		<div class="chart-container">
+			<div class="chart-title">Training Generation Failures <span class="muted">(count)</span></div>
+			<div id="training-failures-chart"></div>
+		</div>
+		@templ.JSONScript("training-failures-chart-data", multiSeriesChartData(data.TrainingGenerationFailures))
+		<div class="chart-container">
 			<div class="chart-title">Handler Request Latency <span class="muted">(p95 ms)</span></div>
 			<div id="handler-latency-chart"></div>
 		</div>
@@ -296,6 +301,7 @@ templ latencyChartScript() {
 			renderChart('active-users-chart-data', '#active-users-chart', '');
 			renderChart('training-chart-data', '#training-latency-chart', ' ms');
 			renderChart('handler-chart-data', '#handler-latency-chart', ' ms');
+			renderChart('training-failures-chart-data', '#training-failures-chart', '');
 			renderChart('errors-chart-data', '#handler-errors-chart', '');
 		})();
 	</script>

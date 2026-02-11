@@ -34,6 +34,7 @@ func InitDB() (*Sink, error) {
 	// automigrate all event types
 	if err := DB.AutoMigrate(
 		&TrainingGenerationEvent{},
+		&TrainingGenerationFailureEvent{},
 		&HandlerRequestEvent{},
 	); err != nil {
 		return nil, err
@@ -69,10 +70,16 @@ func (s *Sink) Write(p []byte) (int, error) {
 	if json.Unmarshal(entry.Event, &handlerEvent) == nil && handlerEvent.Method != "" {
 		err = DB.Create(&handlerEvent).Error
 	} else {
-		// try TrainingGenerationEvent
-		var trainingEvent TrainingGenerationEvent
-		if json.Unmarshal(entry.Event, &trainingEvent) == nil && !trainingEvent.Time.IsZero() {
-			err = DB.Create(&trainingEvent).Error
+		// try TrainingGenerationFailureEvent (has Reason field)
+		var failureEvent TrainingGenerationFailureEvent
+		if json.Unmarshal(entry.Event, &failureEvent) == nil && failureEvent.Reason != "" {
+			err = DB.Create(&failureEvent).Error
+		} else {
+			// try TrainingGenerationEvent
+			var trainingEvent TrainingGenerationEvent
+			if json.Unmarshal(entry.Event, &trainingEvent) == nil && !trainingEvent.Time.IsZero() {
+				err = DB.Create(&trainingEvent).Error
+			}
 		}
 	}
 

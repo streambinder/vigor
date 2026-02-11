@@ -20,6 +20,13 @@ type TrainingGenerationEvent struct {
 	Model string `gorm:"column:model" json:"model"`
 }
 
+// TrainingGenerationFailureEvent tracks LLM training generation failures
+type TrainingGenerationFailureEvent struct {
+	Event
+	Model  string `gorm:"column:model" json:"model"`
+	Reason string `gorm:"column:reason" json:"reason"`
+}
+
 // HandlerRequestEvent tracks HTTP request handling
 type HandlerRequestEvent struct {
 	LatencyEvent

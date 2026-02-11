@@ -26,6 +26,7 @@ func Dashboard(c *fiber.Ctx) error {
 	trainingStats, _ := database.GetTrainingGenerationStats(14)
 	handlerStats, _ := database.GetHandlerRequestStats(14)
 	errorStats, _ := database.GetHandlerErrorStats(14)
+	trainingFailureStats, _ := database.GetTrainingGenerationFailures(14)
 	trainings, _ := database.GetTrainings()
 	reports, _ := database.GetReports()
 	users, _ := database.GetUsers()
@@ -41,6 +42,7 @@ func Dashboard(c *fiber.Ctx) error {
 		TrainingGenerationLatencies:  toLatencySeries(trainingStats),
 		HandlerRequestLatencies:      toLatencySeries(handlerStats),
 		HandlerRequestErrors:         toErrorSeries(errorStats),
+		TrainingGenerationFailures:   toErrorSeries(trainingFailureStats),
 		Trainings:                    trainings,
 		Reports:                      reports,
 		Users:                        users,

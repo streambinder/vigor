@@ -227,6 +227,16 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		skipWarmupCooldown,
 	)
 	if err != nil {
+		reason := "llm_error"
+		if errors.Is(err, llm.ErrLLMUnmarshal) {
+			reason = "unmarshal_error"
+		}
+		log.Error().
+			Interface("event", event.TrainingGenerationFailureEvent{
+				Event:  event.Event{Time: time.Now()},
+				Model:  llmModel,
+				Reason: reason,
+			}).Err(err).Msg("training generation failed")
 		return nil, err
 	}
 	validExerciseIDs := make(map[string]bool, len(workExercises)+len(warmupExercises)+len(cooldownExercises))
@@ -251,7 +261,12 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	// reorder routines: warmup first, work in original order, cooldown last
 	training.Routines = reorderRoutines(training.Routines)
 	if err := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, !skipWarmupCooldown); err != nil {
-		log.Error().Err(err).Msg("generated training validation failed")
+		log.Error().
+			Interface("event", event.TrainingGenerationFailureEvent{
+				Event:  event.Event{Time: time.Now()},
+				Model:  llmModel,
+				Reason: "validation_error",
+			}).Err(err).Msg("generated training validation failed")
 		return nil, ErrMalformedTraining
 	}
 	training.SetDuration(duration)
