@@ -194,7 +194,9 @@ class IntervalController extends TimerController {
             activityCounter++;
             final exercise = _parseExercise(activity.detail);
 
-            final workDuration = activity.duration > 0 ? activity.duration : 60;
+            final workDuration = activity.duration > 0
+                ? activity.duration
+                : (activity.reps > 0 ? activity.reps * 4 : 30);
             intervals.add(TrainingInterval(
               type: IntervalType.work,
               duration: workDuration,

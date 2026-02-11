@@ -254,6 +254,8 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		log.Error().Err(err).Msg("generated training validation failed")
 		return nil, ErrMalformedTraining
 	}
+	training.SetDuration(duration)
+
 	log.Info().
 		Interface("event", event.TrainingGenerationEvent{
 			LatencyEvent: event.LatencyEvent{

@@ -13,7 +13,7 @@ import (
 	"gorm.io/datatypes"
 )
 
-const WeightActivityDurationPerRep = 3 // 3 seconds per rep
+const WeightActivityDurationPerRep = 4 // NSCA/ACSM controlled tempo (2-0-2-0)
 
 // Valid activity feedback values
 const (
@@ -299,4 +299,129 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 	}
 
 	return clone
+}
+
+// activityWorkDuration returns the effective work duration for an activity,
+// mirroring the app's IntervalController heuristic.
+func activityWorkDuration(a Activity) int {
+	if a.Duration > 0 {
+		return a.Duration
+	}
+	if a.Reps > 0 {
+		return a.Reps * WeightActivityDurationPerRep
+	}
+	return 30
+}
+
+// calcIntervalDuration computes total seconds for routines matching any of the given types,
+// using the same interval-building logic as the app's IntervalController.
+func (t *Training) calcIntervalDuration(routineTypes ...string) int {
+	allowed := make(map[string]bool, len(routineTypes))
+	for _, rt := range routineTypes {
+		allowed[rt] = true
+	}
+
+	// collect matching routines preserving order
+	var routines []Routine
+	for _, r := range t.Routines {
+		if allowed[r.Type] {
+			routines = append(routines, r)
+		}
+	}
+
+	type interval struct {
+		isRest   bool
+		duration int
+	}
+	var intervals []interval
+
+	addRest := func(dur int) {
+		if len(intervals) > 0 && intervals[len(intervals)-1].isRest {
+			// rest merging: consecutive rests → keep longer
+			if dur > intervals[len(intervals)-1].duration {
+				intervals[len(intervals)-1].duration = dur
+			}
+		} else {
+			intervals = append(intervals, interval{isRest: true, duration: dur})
+		}
+	}
+
+	for ri, routine := range routines {
+		for bi, block := range routine.Blocks {
+			for repeat := 0; repeat < block.Repeats; repeat++ {
+				for ai, activity := range block.Activities {
+					isLastInRepeat := ai == len(block.Activities)-1
+
+					intervals = append(intervals, interval{isRest: false, duration: activityWorkDuration(activity)})
+
+					isLastRoutine := ri == len(routines)-1
+					isLastBlock := bi == len(routine.Blocks)-1
+					isLastRepeat := repeat == block.Repeats-1
+					isLastOfTraining := isLastRoutine && isLastBlock && isLastRepeat && isLastInRepeat
+
+					if isLastInRepeat && block.Rest > 0 && !isLastOfTraining {
+						addRest(block.Rest)
+					} else if !isLastInRepeat && activity.Rest > 0 {
+						addRest(activity.Rest)
+					}
+				}
+			}
+		}
+
+		if routine.Rest > 0 && ri < len(routines)-1 {
+			addRest(routine.Rest)
+		}
+	}
+
+	total := 0
+	for _, iv := range intervals {
+		total += iv.duration
+	}
+	return total
+}
+
+// CalculateDuration returns total training duration in seconds, handling
+// methodology-specific routing (interval, emom, amrap, for_time).
+func (t *Training) CalculateDuration() int {
+	switch t.Methodology {
+	case "emom":
+		warmup := t.calcIntervalDuration("warmup")
+		cooldown := t.calcIntervalDuration("cooldown")
+		work := 0
+		for _, r := range t.Routines {
+			if r.Type == "work" {
+				for _, b := range r.Blocks {
+					work += b.Repeats * 60
+				}
+			}
+		}
+		return warmup + work + cooldown
+
+	case "amrap":
+		// amrap work duration is stored in t.Duration (set by SetDuration)
+		warmup := t.calcIntervalDuration("warmup")
+		cooldown := t.calcIntervalDuration("cooldown")
+		return warmup + t.Duration + cooldown
+
+	default:
+		// interval-based: strength, circuit, hiit, for_time, mobility, endurance
+		return t.calcIntervalDuration("warmup", "work", "cooldown")
+	}
+}
+
+// SetDuration computes and sets t.Duration based on methodology.
+// userRequestedMinutes is the user's requested total duration in minutes.
+func (t *Training) SetDuration(userRequestedMinutes int) {
+	switch t.Methodology {
+	case "amrap":
+		warmup := t.calcIntervalDuration("warmup")
+		cooldown := t.calcIntervalDuration("cooldown")
+		work := userRequestedMinutes*60 - warmup - cooldown
+		if work < 60 {
+			work = 60
+		}
+		t.Duration = work
+	default:
+		t.Duration = t.CalculateDuration()
+	}
 }

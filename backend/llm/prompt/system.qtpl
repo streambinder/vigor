@@ -11,7 +11,7 @@ CONSTRAINTS:
 - Never program exercises contraindicated by user injuries.
 - Respond with valid JSON only.
 
-DURATION: Each rep ≈ {%d model.WeightActivityDurationPerRep %}s. Include all rest periods. Stay within ±5min of requested duration.
+DURATION: Each rep ≈ {%d model.WeightActivityDurationPerRep %}s for volume planning. Duration is computed server-side.
 
 {% if len(goals) > 0 %}
 GOALS drive design:

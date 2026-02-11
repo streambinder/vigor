@@ -35,7 +35,7 @@ DURATION: Each rep ≈ `)
 //line llm/prompt/system.qtpl:14
 	qw422016.N().D(model.WeightActivityDurationPerRep)
 //line llm/prompt/system.qtpl:14
-	qw422016.N().S(`s. Include all rest periods. Stay within ±5min of requested duration.
+	qw422016.N().S(`s for volume planning. Duration is computed server-side.
 
 `)
 //line llm/prompt/system.qtpl:16
