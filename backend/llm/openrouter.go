@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-const defaultOpenRouterModel = "mistralai/mistral-small-3.1-24b-instruct"
+const defaultOpenRouterModel = "google/gemini-2.5-flash-lite"
 
 func init() {
 	apiKey := os.Getenv("OPENROUTER_API_KEY")
