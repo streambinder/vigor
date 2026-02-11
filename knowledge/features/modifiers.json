@@ -126,23 +126,5 @@
     ],
     "progression_impact": 2.5,
     "is_weighted": true
-  },
-  {
-    "id": "gymnastic rings",
-    "patterns": ["dip", "row", "push-up", "muscle-up", "pull-up"],
-    "aliases": [
-      "gymnastic rings",
-      "gym rings",
-      "rings",
-      "anelli da ginnastica",
-      "anillas de gimnasia",
-      "anneaux de gymnastique",
-      "Turnringe",
-      "Gymnastikringe",
-      "argolas de gin\u00e1stica",
-      "\u0433\u0438\u043c\u043d\u0430\u0441\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u043a\u043e\u043b\u044c\u0446\u0430"
-    ],
-    "progression_impact": 15,
-    "is_weighted": false
   }
 ]
