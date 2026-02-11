@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/family_progress.dart';
+import '../models/gym.dart';
 import '../models/muscle_impact.dart';
 import '../models/weekly_target.dart';
 import '../models/week_progress.dart';
@@ -14,7 +15,9 @@ import '../widgets/progress/progress.dart';
 import '../models/progress.dart';
 import '../services/progress_service.dart';
 import '../services/service_locator.dart';
+import '../widgets/training_generation_modal.dart';
 import '../widgets/vigor_logo.dart';
+import 'training_details_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,6 +31,56 @@ class _HomePageState extends State<HomePage> {
   WeeklyTarget? _weeklyTarget;
   bool _isLoading = false;
   bool _hasLoadedOnce = false;
+
+  void _showTrainingGenerationModal(List<Gym> gyms) {
+    final locator = context.read<ServiceLocator>();
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => ValueListenableBuilder<List<Gym>?>(
+        valueListenable: locator.gymsNotifier,
+        builder: (context, currentGyms, _) => TrainingGenerationModal(
+          gyms: currentGyms ?? gyms,
+          onSuccess: (training) {
+            Navigator.of(dialogContext).push(
+              MaterialPageRoute(
+                builder: (context) => TrainingDetailsScreen(training: training),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFAB(AppLocalizations l10n, List<Gym> gyms) {
+    return Material(
+      color: VigorColors.persimmon,
+      borderRadius: BorderRadius.circular(16),
+      elevation: 4,
+      child: InkWell(
+        onTap: () => _showTrainingGenerationModal(gyms),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.bolt, color: Colors.white, size: 22),
+              const SizedBox(width: 8),
+              Text(
+                l10n.generateTraining,
+                style: VigorTypography.label.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Future<void> _loadProgress({int retryCount = 0}) async {
     if (_isLoading) return;
@@ -92,36 +145,41 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final locator = context.read<ServiceLocator>();
     // watch auth state to trigger load when authenticated
     final authState = context.watch<AuthProvider>().state;
     if (authState == AuthState.authenticated && !_hasLoadedOnce && !_isLoading) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _loadProgress());
     }
 
-    return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const VigorLogo(size: 24),
-            const SizedBox(width: VigorSpacing.sm),
-            Text(l10n.appName.toUpperCase()),
+    return ValueListenableBuilder<List<Gym>?>(
+      valueListenable: locator.gymsNotifier,
+      builder: (context, gyms, _) => AdaptiveScaffold(
+        appBar: AdaptiveAppBar(
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const VigorLogo(size: 24),
+              const SizedBox(width: VigorSpacing.sm),
+              Text(l10n.appName.toUpperCase()),
+            ],
+          ),
+          actions: [
+            AdaptiveIconButton(
+              icon: const Icon(Icons.refresh),
+              tooltip: l10n.refresh,
+              onPressed: _loadProgress,
+            ),
           ],
         ),
-        actions: [
-          AdaptiveIconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: l10n.refresh,
-            onPressed: _loadProgress,
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: _loadProgress,
-        color: VigorColors.stone,
-        child: _isLoading
-            ? const Center(child: AdaptiveLoadingIndicator())
-            : _buildContent(l10n),
+        floatingActionButton: _buildFAB(l10n, gyms ?? []),
+        body: RefreshIndicator(
+          onRefresh: _loadProgress,
+          color: VigorColors.stone,
+          child: _isLoading
+              ? const Center(child: AdaptiveLoadingIndicator())
+              : _buildContent(l10n),
+        ),
       ),
     );
   }
