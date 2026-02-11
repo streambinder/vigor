@@ -12,7 +12,7 @@ func mustJSON(v any) []byte {
 	return b
 }
 
-func TestFilterByProficiency(t *testing.T) {
+func TestFilterByProficiencyPerMuscle(t *testing.T) {
 	exercises := []model.Exercise{
 		{ID: "easy", Progressions: mustJSON(map[string]float64{"core": 10})},
 		{ID: "medium", Progressions: mustJSON(map[string]float64{"core": 30})},
@@ -22,98 +22,86 @@ func TestFilterByProficiency(t *testing.T) {
 	}
 
 	t.Run("new user with margin 45 no methodology", func(t *testing.T) {
-		profs := map[string]float64{} // empty proficiencies
-		filtered := filterByProficiency(exercises, profs, nil, 45.0)
-		// with 5 exercises total (< MinWorkExercises=10), progressive margin expansion kicks in
-		// margin 45 -> 60 -> 75 -> 90, so all exercises pass
-		expected := []string{"easy", "medium", "hard", "multi-easy", "multi-mixed"}
+		profs := map[string]float64{}
+		filtered := filterByProficiencyPerMuscle(exercises, profs, nil, 45.0)
+		// max core=45, max push=45 → easy(10), medium(30), multi-easy(10,10) pass
+		// hard(50) > 45 → rejected. multi-mixed push=40 < 45 → passes
+		// that's 4 exercises, which is >= MinPerMuscleExercises(2), no degradation
+		expected := []string{"easy", "medium", "multi-easy", "multi-mixed"}
 		if len(filtered) != len(expected) {
 			t.Errorf("got %d exercises, want %d", len(filtered), len(expected))
-		}
-		for i, e := range filtered {
-			if e.ID != expected[i] {
-				t.Errorf("filtered[%d] = %s, want %s", i, e.ID, expected[i])
-			}
 		}
 	})
 
 	t.Run("experienced user with margin 15 no methodology", func(t *testing.T) {
 		profs := map[string]float64{"core": 30, "push": 20}
-		filtered := filterByProficiency(exercises, profs, nil, 15.0)
-		// core: 30+15=45, push: 20+15=35 initially
-		// but with 5 exercises (< MinWorkExercises=10), progressive margin kicks in
-		// after expansion, all 5 exercises should pass
-		if len(filtered) != 5 {
-			t.Errorf("got %d exercises, want 5 (all pass due to margin expansion)", len(filtered))
+		filtered := filterByProficiencyPerMuscle(exercises, profs, nil, 15.0)
+		// core max: 45, push max: 35
+		// easy(10)✓, medium(30)✓, hard(50>45)✗, multi-easy(10,10)✓, multi-mixed(10,40>35)✗
+		// 3 results >= MinPerMuscleExercises(2), no degradation
+		if len(filtered) != 3 {
+			t.Errorf("got %d exercises, want 3", len(filtered))
 		}
 	})
 
-	t.Run("empty proficiencies with strict margin", func(t *testing.T) {
-		profs := map[string]float64{}
-		filtered := filterByProficiency(exercises, profs, nil, 15.0)
-		// with 5 exercises (< MinWorkExercises=10), progressive margin kicks in
-		// margin 15 -> 30 -> 45 -> 60, so all exercises eventually pass
-		if len(filtered) != 5 {
-			t.Errorf("got %d exercises, want 5 (all pass due to margin expansion)", len(filtered))
+	t.Run("strict margin triggers degradation", func(t *testing.T) {
+		// only 1 exercise passes with margin 5, degradation expands margin
+		profs := map[string]float64{"core": 5, "push": 5}
+		filtered := filterByProficiencyPerMuscle(exercises, profs, nil, 5.0)
+		// margin 5: max=10 → only easy(10) passes → 1 < MinPerMuscleExercises(2)
+		// margin 20: max=25 → easy(10), multi-easy(10,10) pass → 2 >= 2, done
+		if len(filtered) < MinPerMuscleExercises {
+			t.Errorf("degradation should ensure >= %d exercises, got %d", MinPerMuscleExercises, len(filtered))
 		}
 	})
 
 	t.Run("exercise without progressions passes", func(t *testing.T) {
 		noProgs := []model.Exercise{{ID: "no-progs", Progressions: nil}}
-		filtered := filterByProficiency(noProgs, map[string]float64{}, nil, 15.0)
+		filtered := filterByProficiencyPerMuscle(noProgs, map[string]float64{}, nil, 15.0)
 		if len(filtered) != 1 {
 			t.Errorf("exercise without progressions should pass, got %d", len(filtered))
 		}
 	})
 
 	t.Run("methodology min filters low-score exercises", func(t *testing.T) {
-		// create enough exercises above the min threshold to avoid graceful degradation
-		testExercises := make([]model.Exercise, 15)
-		for i := range testExercises {
-			score := 20 + float64(i*3) // scores from 20 to 62
-			testExercises[i] = model.Exercise{
-				ID:           "ex" + string(rune('a'+i)),
-				Progressions: mustJSON(map[string]float64{"core": score}),
-			}
+		testExercises := []model.Exercise{
+			{ID: "low", Progressions: mustJSON(map[string]float64{"core": 20})},
+			{ID: "mid", Progressions: mustJSON(map[string]float64{"core": 35})},
+			{ID: "high", Progressions: mustJSON(map[string]float64{"core": 50})},
 		}
 		methodology := &model.Methodology{}
 		methodology.SetWork(map[string]model.MethodologyWork{
-			"core": {Min: 35}, // filters out exercises with score < 35
+			"core": {Min: 35},
 		})
 		profs := map[string]float64{"core": 60}
-		filtered := filterByProficiency(testExercises, profs, methodology, 15.0)
-		// with min 35 and max 75 (60+15):
-		// exercises with scores 35+ should pass (scores: 35, 38, 41, 44, 47, 50, 53, 56, 59, 62)
-		// that's 10 exercises, which is >= MinWorkExercises, so no graceful degradation
+		filtered := filterByProficiencyPerMuscle(testExercises, profs, methodology.GetWork(), 15.0)
+		// min 35, max 75 → mid(35)✓, high(50)✓, low(20)✗
 		for _, ex := range filtered {
 			progs := ex.GetProgressions()
 			if progs["core"] < 35 {
 				t.Errorf("exercise %s with score %f should have been filtered by min 35", ex.ID, progs["core"])
 			}
 		}
-		if len(filtered) == 0 {
-			t.Error("expected some exercises to pass the filter")
+		if len(filtered) != 2 {
+			t.Errorf("got %d exercises, want 2", len(filtered))
 		}
 	})
 
-	t.Run("graceful degradation when min too restrictive", func(t *testing.T) {
-		// create many exercises so graceful degradation kicks in
-		manyExercises := make([]model.Exercise, 20)
-		for i := range manyExercises {
-			manyExercises[i] = model.Exercise{
-				ID:           "ex" + string(rune('a'+i)),
-				Progressions: mustJSON(map[string]float64{"core": float64(5 + i)}),
-			}
+	t.Run("graceful degradation drops methodology min", func(t *testing.T) {
+		// all exercises below min → first pass yields 0, degradation drops min
+		testExercises := []model.Exercise{
+			{ID: "a", Progressions: mustJSON(map[string]float64{"core": 10})},
+			{ID: "b", Progressions: mustJSON(map[string]float64{"core": 20})},
+			{ID: "c", Progressions: mustJSON(map[string]float64{"core": 30})},
 		}
 		methodology := &model.Methodology{}
 		methodology.SetWork(map[string]model.MethodologyWork{
-			"core": {Min: 50}, // very high min, most exercises below
+			"core": {Min: 50},
 		})
 		profs := map[string]float64{"core": 30}
-		filtered := filterByProficiency(manyExercises, profs, methodology, 15.0)
-		// with prof 30 + margin 15 = max 45, and min 50, intersection is empty
-		// graceful degradation should return exercises without min constraint
-		if len(filtered) < MinWorkExercises {
+		filtered := filterByProficiencyPerMuscle(testExercises, profs, methodology.GetWork(), 15.0)
+		// with min 50 and max 45: empty → drop min → max 45: a(10)✓, b(20)✓, c(30)✓
+		if len(filtered) < MinPerMuscleExercises {
 			t.Errorf("graceful degradation should have kicked in, got %d exercises", len(filtered))
 		}
 	})

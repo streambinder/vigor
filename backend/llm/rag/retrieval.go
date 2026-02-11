@@ -3,6 +3,7 @@ package rag
 import (
 	"fmt"
 	"math/rand"
+	"regexp"
 	"strings"
 
 	"github.com/lib/pq"
@@ -18,13 +19,14 @@ const (
 	MaxWarmupExercises     = 6  // random selection for warmup
 	MaxCooldownExercises   = 4  // random selection for cooldown
 	MaxPromptFacts         = 5
-	MaxFactDistance        = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
-	MaxExerciseDistance    = 0.2 // Maximum cosine distance for exercise matching
+	MaxFactDistance         = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
+	MaxExerciseDistance     = 0.2 // Maximum cosine distance for exercise matching
 	WarmupCooldownMaxScore = 25  // max progression score for warmup/cooldown exercises
-	MinWorkExercises       = 8   // minimum exercises before falling back to no-min filtering
-	MinFamilyExercises     = 3   // minimum exercises for a family to be considered relevant
-	MinPerFamilyLimit      = 3   // minimum exercises to query per family
+	MinPerMuscleExercises  = 2   // minimum exercises per muscle group after proficiency filtering
 )
+
+// validFamilyName ensures family names are safe for SQL interpolation (JSONB ? operator can't use placeholders).
+var validFamilyName = regexp.MustCompile(`^[a-z_]+$`)
 
 // RetrieveGoals fetches goals by IDs from the knowledge database with their descriptions.
 func RetrieveGoals(ids []string) ([]model.Goal, error) {
@@ -60,8 +62,8 @@ func RetrieveAllMethodologies() ([]model.Methodology, error) {
 }
 
 // RetrieveWorkExercises retrieves exercises for the main training phase via RAG.
-// Uses per-family balanced retrieval when methodology is specified to ensure coverage of all movement families.
-// Falls back to simple similarity search when no methodology or families are defined.
+// Uses per-muscle-group balanced retrieval to guarantee coverage across all muscle groups.
+// Each group gets its own retrieval + proficiency filtering pipeline so no group can be starved.
 func RetrieveWorkExercises(
 	profiles []model.Profile,
 	goals []string,
@@ -78,98 +80,119 @@ func RetrieveWorkExercises(
 		return nil, err
 	}
 
-	var exercises []model.Exercise
-
-	if methodology != nil && len(methodology.GetWork()) > 0 {
-		exercises, err = retrieveBalancedByFamily(exerciseEmbedding, methodology, equipment, muscles)
-	} else {
-		exercises, err = retrieveBySimilarity(exerciseEmbedding, equipment, muscles, nil)
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	// in "All" mode (no muscles selected), ensure coverage of all primary muscle groups
-	if len(muscles) == 0 {
-		exercises, err = ensureMuscleCoverage(exercises, equipment)
-		if err != nil {
-			return nil, err
+	// collect methodology family names to filter out non-methodology exercises (e.g. mobility in strength)
+	var methodologyFamilies []string
+	if methodology != nil {
+		for f := range methodology.GetWork() {
+			methodologyFamilies = append(methodologyFamilies, f)
 		}
 	}
 
-	return filterByProficiency(exercises, proficiencies, methodology, proficiencyMargin), nil
+	// resolve target muscles: user-selected or all from DB
+	targetMuscles := muscles
+	if len(targetMuscles) == 0 {
+		var allMuscles []model.Muscle
+		if err := database.Knowledge.Find(&allMuscles).Error; err != nil {
+			return nil, fmt.Errorf("failed to get muscles: %w", err)
+		}
+		for _, m := range allMuscles {
+			targetMuscles = append(targetMuscles, m.ID)
+		}
+	}
+
+	return retrieveBalancedByMuscle(exerciseEmbedding, methodology, equipment, targetMuscles, methodologyFamilies, proficiencies, proficiencyMargin), nil
 }
 
-// retrieveBalancedByFamily queries exercises per methodology family with balanced quotas.
-// When muscles are specified, only families with sufficient matching exercises are queried.
-func retrieveBalancedByFamily(exerciseEmbedding []float32, methodology *model.Methodology, equipment []string, muscles []string) ([]model.Exercise, error) {
-	workFamilies := methodology.GetWork()
-	familyNames := make([]string, 0, len(workFamilies))
-	for f := range workFamilies {
-		familyNames = append(familyNames, f)
+// retrieveBalancedByMuscle queries and filters exercises per muscle group independently,
+// then assembles a balanced final list. Each muscle group gets its own proficiency filtering
+// with graceful degradation, so equipment/proficiency constraints on one group can't starve it.
+func retrieveBalancedByMuscle(
+	exerciseEmbedding []float32,
+	methodology *model.Methodology,
+	equipment []string,
+	muscles []string,
+	methodologyFamilies []string,
+	proficiencies map[string]float64,
+	proficiencyMargin float64,
+) []model.Exercise {
+	if len(muscles) == 0 {
+		return nil
 	}
 
-	// determine relevant families when muscles filter is specified
-	relevantFamilies := familyNames
-	effectiveMuscles := muscles
-	if len(muscles) > 0 {
-		counts, err := countExercisesPerFamily(familyNames, muscles, equipment)
-		if err != nil {
-			return nil, err
-		}
-		relevantFamilies = nil
-		for _, family := range familyNames {
-			if counts[family] >= MinFamilyExercises {
-				relevantFamilies = append(relevantFamilies, family)
-			}
-		}
-		// fallback: if no families have enough exercises, use all families without muscle filter
-		if len(relevantFamilies) == 0 {
-			log.Debug().Strs("muscles", muscles).Msg("no families with enough exercises for muscle filter, disabling filter")
-			relevantFamilies = familyNames
-			effectiveMuscles = nil
-		}
+	var methodologyWork map[string]model.MethodologyWork
+	if methodology != nil {
+		methodologyWork = methodology.GetWork()
 	}
 
-	// query each relevant family with quota
-	perFamilyLimit := (MaxWorkExercises * 2) / len(relevantFamilies)
-	if perFamilyLimit < MinPerFamilyLimit {
-		perFamilyLimit = MinPerFamilyLimit
+	perMuscleQuota := (MaxWorkExercises * 2) / len(muscles)
+	if perMuscleQuota < MinPerMuscleExercises {
+		perMuscleQuota = MinPerMuscleExercises
 	}
 
 	var combined []model.Exercise
 	seen := make(map[string]bool)
 
-	for _, family := range relevantFamilies {
-		familyExercises, err := retrieveBySimilarity(exerciseEmbedding, equipment, effectiveMuscles, &family)
+	for _, muscle := range muscles {
+		// retrieve candidates for this muscle group
+		candidates, err := retrieveBySimilarity(exerciseEmbedding, equipment, []string{muscle}, methodologyFamilies)
 		if err != nil {
-			return nil, err
+			log.Warn().Err(err).Str("muscle", muscle).Msg("failed to retrieve exercises for muscle group")
+			continue
 		}
 
+		// apply proficiency filtering per muscle with graceful degradation
+		filtered := filterByProficiencyPerMuscle(candidates, proficiencies, methodologyWork, proficiencyMargin)
+
 		added := 0
-		for _, ex := range familyExercises {
+		for _, ex := range filtered {
 			if !seen[ex.ID] {
 				seen[ex.ID] = true
 				combined = append(combined, ex)
 				added++
-				if added >= perFamilyLimit {
+				if added >= perMuscleQuota {
 					break
 				}
 			}
 		}
-		log.Debug().Str("family", family).Int("added", added).Int("limit", perFamilyLimit).Msg("retrieved exercises for family")
+		log.Debug().Str("muscle", muscle).Int("candidates", len(candidates)).Int("filtered", len(filtered)).Int("added", added).Int("quota", perMuscleQuota).Msg("retrieved exercises for muscle group")
 	}
 
-	// shuffle to avoid family ordering bias in final result
+	// shuffle to avoid muscle ordering bias
 	rand.Shuffle(len(combined), func(i, j int) {
 		combined[i], combined[j] = combined[j], combined[i]
 	})
 
-	return combined, nil
+	if len(combined) > MaxWorkExercises {
+		return combined[:MaxWorkExercises]
+	}
+	return combined
 }
 
-// retrieveBySimilarity performs embedding similarity search with optional family filter.
-func retrieveBySimilarity(exerciseEmbedding []float32, equipment []string, muscles []string, family *string) ([]model.Exercise, error) {
+// filterByProficiencyPerMuscle applies proficiency filtering for a single muscle group's candidates.
+// Uses the same graceful degradation as the old global filter but with a per-muscle minimum threshold.
+func filterByProficiencyPerMuscle(exercises []model.Exercise, proficiencies map[string]float64, methodologyWork map[string]model.MethodologyWork, margin float64) []model.Exercise {
+	// first pass: full constraints (methodology min + proficiency max)
+	filtered := filterWithConstraints(exercises, proficiencies, methodologyWork, margin, true)
+
+	// drop methodology min if too few
+	if len(filtered) < MinPerMuscleExercises && methodologyWork != nil {
+		log.Debug().Int("count", len(filtered)).Msg("per-muscle: too few with methodology min, dropping")
+		filtered = filterWithConstraints(exercises, proficiencies, methodologyWork, margin, false)
+	}
+
+	// progressive margin expansion if still too few
+	for step := 1; len(filtered) < MinPerMuscleExercises && step <= 3; step++ {
+		expandedMargin := margin + float64(step)*15
+		log.Debug().Int("count", len(filtered)).Float64("expanded_margin", expandedMargin).Msg("per-muscle: expanding margin")
+		filtered = filterWithConstraints(exercises, proficiencies, methodologyWork, expandedMargin, false)
+	}
+
+	return filtered
+}
+
+// retrieveBySimilarity performs embedding similarity search with optional methodology families filter.
+// When families are provided, only exercises belonging to at least one of those families are returned.
+func retrieveBySimilarity(exerciseEmbedding []float32, equipment []string, muscles []string, families []string) ([]model.Exercise, error) {
 	var results []struct {
 		ExerciseID string
 		Text       string
@@ -186,9 +209,19 @@ func retrieveBySimilarity(exerciseEmbedding []float32, equipment []string, muscl
 		        exercises.*`, pgvector.NewVector(exerciseEmbedding)).
 		Joins("JOIN exercises ON exercises.id = exercise_embeddings.exercise_id")
 
-	// filter by specific family if provided
-	if family != nil {
-		query = query.Where(fmt.Sprintf("exercises.progressions ? '%s'", *family))
+	// filter by methodology families: exercise must belong to at least one
+	// uses fmt.Sprintf because JSONB ? operator conflicts with GORM's ? placeholder
+	if len(families) > 0 {
+		var familyClauses []string
+		for _, f := range families {
+			if !validFamilyName.MatchString(f) {
+				continue
+			}
+			familyClauses = append(familyClauses, fmt.Sprintf("exercises.progressions ? '%s'", f))
+		}
+		if len(familyClauses) > 0 {
+			query = query.Where("(" + strings.Join(familyClauses, " OR ") + ")")
+		}
 	}
 
 	// filter by user equipment
@@ -231,103 +264,6 @@ func retrieveBySimilarity(exerciseEmbedding []float32, equipment []string, muscl
 		exercises = append(exercises, result.Exercise)
 	}
 	return exercises, nil
-}
-
-// ensureMuscleCoverage ensures at least one exercise per muscle group where that
-// muscle is PRIMARY (first in array). Used in "All" mode when no specific muscles selected.
-func ensureMuscleCoverage(exercises []model.Exercise, equipment []string) ([]model.Exercise, error) {
-	// determine which primary muscles are already covered
-	covered := make(map[string]bool)
-	for _, ex := range exercises {
-		if len(ex.Muscles) > 0 {
-			covered[ex.Muscles[0]] = true
-		}
-	}
-
-	// get all muscle IDs
-	var allMuscles []model.Muscle
-	if err := database.Knowledge.Find(&allMuscles).Error; err != nil {
-		return nil, fmt.Errorf("failed to get muscles: %w", err)
-	}
-
-	// find missing primary muscles
-	var missing []string
-	for _, m := range allMuscles {
-		if !covered[m.ID] {
-			missing = append(missing, m.ID)
-		}
-	}
-
-	if len(missing) == 0 {
-		return exercises, nil
-	}
-
-	// fetch one exercise per missing primary muscle
-	for _, muscleID := range missing {
-		query := database.Knowledge.Model(&model.Exercise{}).
-			Where("exercises.muscles[1] = ?", muscleID)
-
-		// apply equipment filter
-		if len(equipment) > 0 {
-			query = query.Where(`(
-				NOT EXISTS (SELECT 1 FROM exercise_equipment WHERE exercise_equipment.exercise_id = exercises.id)
-				OR NOT EXISTS (SELECT 1 FROM exercise_equipment ee WHERE ee.exercise_id = exercises.id AND ee.equipment_id NOT IN ?)
-			)`, equipment)
-		} else {
-			query = query.Where(`NOT EXISTS (SELECT 1 FROM exercise_equipment WHERE exercise_equipment.exercise_id = exercises.id)`)
-		}
-
-		var ex model.Exercise
-		if err := query.Order("RANDOM()").Limit(1).First(&ex).Error; err == nil {
-			exercises = append(exercises, ex)
-		}
-	}
-
-	return exercises, nil
-}
-
-// countExercisesPerFamily counts exercises matching muscles and equipment filters for each family.
-func countExercisesPerFamily(families []string, muscles []string, equipment []string) (map[string]int, error) {
-	counts := make(map[string]int, len(families))
-
-	for _, family := range families {
-		query := database.Knowledge.
-			Model(&model.Exercise{}).
-			Where(fmt.Sprintf("exercises.progressions ? '%s'", family))
-
-		if len(equipment) > 0 {
-			query = query.Where(`(
-				NOT EXISTS (
-					SELECT 1 FROM exercise_equipment
-					WHERE exercise_equipment.exercise_id = exercises.id
-				)
-				OR
-				NOT EXISTS (
-					SELECT 1 FROM exercise_equipment ee
-					WHERE ee.exercise_id = exercises.id
-					AND ee.equipment_id NOT IN ?
-				)
-			)`, equipment)
-		} else {
-			query = query.Where(`NOT EXISTS (
-				SELECT 1 FROM exercise_equipment
-				WHERE exercise_equipment.exercise_id = exercises.id
-			)`)
-		}
-
-		// filter by target muscles if specified (primary muscle only - first element)
-		if len(muscles) > 0 {
-			query = query.Where("exercises.muscles[1] = ANY(?)", pq.Array(muscles))
-		}
-
-		var count int64
-		if err := query.Count(&count).Error; err != nil {
-			return nil, fmt.Errorf("failed to count exercises for family %s: %w", family, err)
-		}
-		counts[family] = int(count)
-	}
-
-	return counts, nil
 }
 
 // QueryUserFacts retrieves facts relevant to the users' profiles and prompt.
@@ -487,38 +423,6 @@ func RetrieveFavoriteExercises(favorites []string) ([]model.Exercise, error) {
 		exercises = append(exercises, result.Exercise)
 	}
 	return exercises, nil
-}
-
-// filterByProficiency filters exercises based on user proficiency per family and methodology min scores.
-// Applies graceful degradation: first drops methodology min, then progressively increases margin.
-func filterByProficiency(exercises []model.Exercise, proficiencies map[string]float64, methodology *model.Methodology, margin float64) []model.Exercise {
-	log.Debug().Int("count", len(exercises)).Float64("proficiency_margin", margin).Msg("filtering exercises by proficiency")
-
-	var methodologyWork map[string]model.MethodologyWork
-	if methodology != nil {
-		methodologyWork = methodology.GetWork()
-	}
-
-	// first pass: apply both proficiency max and methodology min
-	filtered := filterWithConstraints(exercises, proficiencies, methodologyWork, margin, true)
-
-	// graceful degradation: if too few results, ignore methodology min
-	if len(filtered) < MinWorkExercises && methodologyWork != nil {
-		log.Debug().Int("count", len(filtered)).Msg("too few exercises with methodology min, falling back to no-min")
-		filtered = filterWithConstraints(exercises, proficiencies, methodologyWork, margin, false)
-	}
-
-	// progressive margin increase: if still too few, widen margin in steps
-	for step := 1; len(filtered) < MinWorkExercises && step <= 3; step++ {
-		expandedMargin := margin + float64(step)*15
-		log.Debug().Int("count", len(filtered)).Float64("expanded_margin", expandedMargin).Msg("too few exercises, expanding margin")
-		filtered = filterWithConstraints(exercises, proficiencies, methodologyWork, expandedMargin, false)
-	}
-
-	if len(filtered) > MaxWorkExercises {
-		return filtered[:MaxWorkExercises]
-	}
-	return filtered
 }
 
 // filterWithConstraints applies proficiency and optionally methodology min constraints.
