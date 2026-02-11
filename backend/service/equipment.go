@@ -19,6 +19,9 @@ func GetEquipment() ([]string, error) {
 
 	ids := make([]string, 0, len(equipment)+len(modifiers))
 	for _, e := range equipment {
+		if e.ID == PartnerEquipment {
+			continue
+		}
 		ids = append(ids, e.ID)
 	}
 	for _, m := range modifiers {
