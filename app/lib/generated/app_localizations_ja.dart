@@ -1037,4 +1037,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String daysLeft(int count) {
     return '残り$count日';
   }
+
+  @override
+  String get recommended => 'おすすめ';
+
+  @override
+  String get duration => '時間';
 }

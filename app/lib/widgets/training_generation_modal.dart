@@ -20,11 +20,14 @@ enum EquipmentMode { bodyweight, gym, custom }
 class TrainingGenerationModal extends StatefulWidget {
   final List<Gym> gyms;
   final Function(Training)? onSuccess;
+  /// Recommended duration range [min, max] from weekly target, if available
+  final List<int>? recommendedDurationRange;
 
   const TrainingGenerationModal({
     super.key,
     required this.gyms,
     this.onSuccess,
+    this.recommendedDurationRange,
   });
 
   @override
@@ -876,6 +879,137 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     );
   }
 
+  Widget _buildDurationSlider(AppLocalizations l10n) {
+    final rec = widget.recommendedDurationRange;
+    final hasRecommendation = rec != null && rec.length >= 2;
+    final isSingleValue = hasRecommendation && rec[0] == rec[1];
+    // format recommendation label: "X min" if single value, "X-Y min" if range
+    final recLabel = hasRecommendation
+        ? (isSingleValue ? '${rec[0]} min' : '${rec[0]}-${rec[1]} min')
+        : '';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              l10n.duration,
+              style: VigorTypography.caption.copyWith(
+                color: VigorColors.textSecondary(context),
+              ),
+            ),
+            if (hasRecommendation) ...[
+              const SizedBox(width: VigorSpacing.md),
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: VigorColors.gold.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                  border: Border.all(color: VigorColors.gold, width: 1),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '${l10n.recommended}: $recLabel',
+                style: VigorTypography.caption.copyWith(
+                  color: VigorColors.gold,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+            const Spacer(),
+            Text(
+              '$_duration min',
+              style: VigorTypography.data.copyWith(
+                color: VigorColors.indigo,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            const sliderPadding = 12.0;
+            final trackWidth = constraints.maxWidth - (sliderPadding * 2);
+            const minVal = 10.0;
+            const maxVal = 180.0;
+            const range = maxVal - minVal;
+
+            Widget? rangeIndicator;
+            if (hasRecommendation) {
+              // ensure at least 20 min visual width: if range < 20, pad by 10 on each side
+              final rawMin = rec[0];
+              final rawMax = rec[1];
+              final rangeWidth = rawMax - rawMin;
+              final recMin = (rangeWidth < 20 ? rawMin - 10 : rawMin).clamp(10, 180).toDouble();
+              final recMax = (rangeWidth < 20 ? rawMax + 10 : rawMax).clamp(10, 180).toDouble();
+              final leftPos = sliderPadding + ((recMin - minVal) / range) * trackWidth;
+              final rightPos = sliderPadding + ((recMax - minVal) / range) * trackWidth;
+              final width = (rightPos - leftPos).clamp(4.0, trackWidth);
+
+              rangeIndicator = Positioned(
+                left: leftPos - 2,
+                top: 12,
+                child: IgnorePointer(
+                  child: Container(
+                    width: width + 4,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: VigorColors.gold.withValues(alpha: 0.25),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: VigorColors.gold, width: 1.5),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // base slider (track only, thumb hidden)
+                IgnorePointer(
+                  child: SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      thumbShape: SliderComponentShape.noThumb,
+                    ),
+                    child: Slider(
+                      value: _duration.toDouble(),
+                      min: minVal,
+                      max: maxVal,
+                      divisions: 34,
+                      activeColor: VigorColors.indigo,
+                      onChanged: (_) {},
+                    ),
+                  ),
+                ),
+                // recommendation indicator (middle layer)
+                if (rangeIndicator != null) rangeIndicator,
+                // interactive slider with thumb on top
+                SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    trackShape: const _TransparentTrackShape(),
+                    thumbColor: VigorColors.indigo,
+                    overlayColor: VigorColors.indigo.withValues(alpha: 0.2),
+                  ),
+                  child: Slider(
+                    value: _duration.toDouble(),
+                    min: minVal,
+                    max: maxVal,
+                    divisions: 34,
+                    onChanged: (value) => setState(() => _duration = value.round()),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _buildLoadingView() {
     final l10n = AppLocalizations.of(context);
     final statusText = _retryAttempt != null
@@ -925,38 +1059,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             ),
             const SizedBox(height: VigorSpacing.lg),
 
-            // Duration slider
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      l10n.durationMinutes,
-                      style: VigorTypography.caption.copyWith(
-                        color: VigorColors.textSecondary(context),
-                      ),
-                    ),
-                    Text(
-                      '$_duration min',
-                      style: VigorTypography.data.copyWith(
-                        color: VigorColors.indigo,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                Slider(
-                  value: _duration.toDouble(),
-                  min: 10,
-                  max: 180,
-                  divisions: 34, // (180-10)/5 = 34 steps of 5 minutes
-                  activeColor: VigorColors.indigo,
-                  onChanged: (value) => setState(() => _duration = value.round()),
-                ),
-              ],
-            ),
+            // Duration slider with recommended range
+            _buildDurationSlider(l10n),
             const SizedBox(height: VigorSpacing.md),
 
             // Equipment mode selection
@@ -1001,5 +1105,27 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         ),
       ),
     );
+  }
+}
+
+/// Transparent track shape so only the thumb is rendered
+class _TransparentTrackShape extends RoundedRectSliderTrackShape {
+  const _TransparentTrackShape();
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required TextDirection textDirection,
+    required Offset thumbCenter,
+    Offset? secondaryOffset,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+    double additionalActiveTrackHeight = 0,
+  }) {
+    // don't paint anything - track is invisible
   }
 }

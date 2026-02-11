@@ -1037,4 +1037,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String daysLeft(int count) {
     return '$count일 남음';
   }
+
+  @override
+  String get recommended => '추천';
+
+  @override
+  String get duration => '시간';
 }

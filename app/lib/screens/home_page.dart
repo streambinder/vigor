@@ -34,6 +34,7 @@ class _HomePageState extends State<HomePage> {
 
   void _showTrainingGenerationModal(List<Gym> gyms) {
     final locator = context.read<ServiceLocator>();
+    final recDuration = _weeklyTarget?.recommendation.sessionDurationMins;
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -41,6 +42,7 @@ class _HomePageState extends State<HomePage> {
         valueListenable: locator.gymsNotifier,
         builder: (context, currentGyms, _) => TrainingGenerationModal(
           gyms: currentGyms ?? gyms,
+          recommendedDurationRange: recDuration,
           onSuccess: (training) {
             Navigator.of(dialogContext).push(
               MaterialPageRoute(

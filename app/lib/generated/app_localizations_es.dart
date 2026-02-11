@@ -339,49 +339,57 @@ class AppLocalizationsEs extends AppLocalizations {
   String get workoutTypeStrength => 'Fuerza';
 
   @override
-  String get workoutTypeStrengthDescription => 'Desarrolla fuerza máxima con cargas pesadas y descanso completo';
+  String get workoutTypeStrengthDescription =>
+      'Desarrolla fuerza máxima con cargas pesadas y descanso completo';
 
   @override
   String get workoutTypeCircuit => 'Circuito';
 
   @override
-  String get workoutTypeCircuitDescription => 'Pasa por estaciones con mínimo descanso para acondicionamiento';
+  String get workoutTypeCircuitDescription =>
+      'Pasa por estaciones con mínimo descanso para acondicionamiento';
 
   @override
   String get workoutTypeEmom => 'EMOM';
 
   @override
-  String get workoutTypeEmomDescription => 'Cada minuto: completa las repeticiones y descansa hasta el siguiente minuto';
+  String get workoutTypeEmomDescription =>
+      'Cada minuto: completa las repeticiones y descansa hasta el siguiente minuto';
 
   @override
   String get workoutTypeAmrap => 'AMRAP';
 
   @override
-  String get workoutTypeAmrapDescription => 'Tantas rondas como sea posible dentro del tiempo límite';
+  String get workoutTypeAmrapDescription =>
+      'Tantas rondas como sea posible dentro del tiempo límite';
 
   @override
   String get workoutTypeHiit => 'HIIT';
 
   @override
-  String get workoutTypeHiitDescription => 'Alterna ráfagas de alta intensidad con recuperación corta';
+  String get workoutTypeHiitDescription =>
+      'Alterna ráfagas de alta intensidad con recuperación corta';
 
   @override
   String get workoutTypeForTime => 'For Time';
 
   @override
-  String get workoutTypeForTimeDescription => 'Completa el entrenamiento lo más rápido posible';
+  String get workoutTypeForTimeDescription =>
+      'Completa el entrenamiento lo más rápido posible';
 
   @override
   String get workoutTypeEndurance => 'Resistencia';
 
   @override
-  String get workoutTypeEnduranceDescription => 'Esfuerzo sostenido a intensidad moderada para capacidad aeróbica';
+  String get workoutTypeEnduranceDescription =>
+      'Esfuerzo sostenido a intensidad moderada para capacidad aeróbica';
 
   @override
   String get workoutTypeMobility => 'Movilidad';
 
   @override
-  String get workoutTypeMobilityDescription => 'Mejora el rango de movimiento y la salud articular';
+  String get workoutTypeMobilityDescription =>
+      'Mejora el rango de movimiento y la salud articular';
 
   @override
   String get methodologyOptional => 'Metodología (opcional)';
@@ -1058,4 +1066,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String daysLeft(int count) {
     return '$count días restantes';
   }
+
+  @override
+  String get recommended => 'Recomendado';
+
+  @override
+  String get duration => 'Duración';
 }

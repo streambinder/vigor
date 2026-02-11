@@ -513,5 +513,7 @@
     "placeholders": {
       "count": {"type": "int"}
     }
-  }
+  },
+  "recommended": "Recommended",
+  "duration": "Duration"
 }

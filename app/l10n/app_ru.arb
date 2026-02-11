@@ -366,5 +366,7 @@
   "methodologyMix": "Микс методологий",
   "pastWeeks": "Прошлые недели",
   "weeklyTarget": "Цель на неделю",
-  "daysLeft": "{count} дней осталось"
+  "daysLeft": "{count} дней осталось",
+  "recommended": "Рекомендуется",
+  "duration": "Продолжительность"
 }

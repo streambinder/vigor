@@ -366,5 +366,7 @@
   "methodologyMix": "メソッドミックス",
   "pastWeeks": "過去の週",
   "weeklyTarget": "週間目標",
-  "daysLeft": "残り{count}日"
+  "daysLeft": "残り{count}日",
+  "recommended": "おすすめ",
+  "duration": "時間"
 }

@@ -366,5 +366,7 @@
   "methodologyMix": "Mix de méthodologies",
   "pastWeeks": "Semaines passées",
   "weeklyTarget": "Objectif Hebdomadaire",
-  "daysLeft": "{count} jours restants"
+  "daysLeft": "{count} jours restants",
+  "recommended": "Recommandé",
+  "duration": "Durée"
 }

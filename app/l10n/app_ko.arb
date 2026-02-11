@@ -366,5 +366,7 @@
   "methodologyMix": "방법론 믹스",
   "pastWeeks": "지난 주",
   "weeklyTarget": "주간 목표",
-  "daysLeft": "{count}일 남음"
+  "daysLeft": "{count}일 남음",
+  "recommended": "추천",
+  "duration": "시간"
 }

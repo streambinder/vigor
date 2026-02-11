@@ -1035,4 +1035,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String daysLeft(int count) {
     return '还剩 $count 天';
   }
+
+  @override
+  String get recommended => '推荐';
+
+  @override
+  String get duration => '时长';
 }

@@ -2057,6 +2057,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} days left'**
   String daysLeft(int count);
+
+  /// No description provided for @recommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get recommended;
+
+  /// No description provided for @duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get duration;
 }
 
 class _AppLocalizationsDelegate

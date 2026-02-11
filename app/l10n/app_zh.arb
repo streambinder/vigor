@@ -366,5 +366,7 @@
   "methodologyMix": "方法组合",
   "pastWeeks": "过去几周",
   "weeklyTarget": "每周目标",
-  "daysLeft": "还剩 {count} 天"
+  "daysLeft": "还剩 {count} 天",
+  "recommended": "推荐",
+  "duration": "时长"
 }
