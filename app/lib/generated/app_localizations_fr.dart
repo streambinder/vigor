@@ -1075,4 +1075,37 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get duration => 'Durée';
+
+  @override
+  String get familyHorizontalPush => 'Poussée';
+
+  @override
+  String get familyHorizontalPull => 'Tirage';
+
+  @override
+  String get familyVerticalPush => 'Développé';
+
+  @override
+  String get familyVerticalPull => 'Traction';
+
+  @override
+  String get familySquat => 'Squat';
+
+  @override
+  String get familyHinge => 'Charnière';
+
+  @override
+  String get familyCore => 'Core';
+
+  @override
+  String get familyCarry => 'Portage';
+
+  @override
+  String get familyCardio => 'Cardio';
+
+  @override
+  String get familyMobility => 'Mobilité';
+
+  @override
+  String get familyBalance => 'Équilibre';
 }

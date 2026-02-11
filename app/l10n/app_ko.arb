@@ -368,5 +368,17 @@
   "weeklyTarget": "주간 목표",
   "daysLeft": "{count}일 남음",
   "recommended": "추천",
-  "duration": "시간"
+  "duration": "시간",
+
+  "familyHorizontalPush": "푸시",
+  "familyHorizontalPull": "풀",
+  "familyVerticalPush": "오버헤드",
+  "familyVerticalPull": "턱걸이",
+  "familySquat": "스쿼트",
+  "familyHinge": "힌지",
+  "familyCore": "코어",
+  "familyCarry": "캐리",
+  "familyCardio": "유산소",
+  "familyMobility": "이동성",
+  "familyBalance": "균형"
 }

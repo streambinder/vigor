@@ -368,5 +368,17 @@
   "weeklyTarget": "Wochenziel",
   "daysLeft": "{count} Tage übrig",
   "recommended": "Empfohlen",
-  "duration": "Dauer"
+  "duration": "Dauer",
+
+  "familyHorizontalPush": "Drücken",
+  "familyHorizontalPull": "Ziehen",
+  "familyVerticalPush": "Überkopf",
+  "familyVerticalPull": "Klimmzug",
+  "familySquat": "Kniebeuge",
+  "familyHinge": "Hüftbeugung",
+  "familyCore": "Core",
+  "familyCarry": "Tragen",
+  "familyCardio": "Cardio",
+  "familyMobility": "Mobilität",
+  "familyBalance": "Gleichgewicht"
 }

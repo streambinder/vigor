@@ -515,5 +515,17 @@
     }
   },
   "recommended": "Recommended",
-  "duration": "Duration"
+  "duration": "Duration",
+
+  "familyHorizontalPush": "Push",
+  "familyHorizontalPull": "Pull",
+  "familyVerticalPush": "Overhead",
+  "familyVerticalPull": "Pull-up",
+  "familySquat": "Squat",
+  "familyHinge": "Hinge",
+  "familyCore": "Core",
+  "familyCarry": "Carry",
+  "familyCardio": "Cardio",
+  "familyMobility": "Mobility",
+  "familyBalance": "Balance"
 }

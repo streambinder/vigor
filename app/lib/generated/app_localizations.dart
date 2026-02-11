@@ -2069,6 +2069,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Duration'**
   String get duration;
+
+  /// No description provided for @familyHorizontalPush.
+  ///
+  /// In en, this message translates to:
+  /// **'Push'**
+  String get familyHorizontalPush;
+
+  /// No description provided for @familyHorizontalPull.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull'**
+  String get familyHorizontalPull;
+
+  /// No description provided for @familyVerticalPush.
+  ///
+  /// In en, this message translates to:
+  /// **'Overhead'**
+  String get familyVerticalPush;
+
+  /// No description provided for @familyVerticalPull.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull-up'**
+  String get familyVerticalPull;
+
+  /// No description provided for @familySquat.
+  ///
+  /// In en, this message translates to:
+  /// **'Squat'**
+  String get familySquat;
+
+  /// No description provided for @familyHinge.
+  ///
+  /// In en, this message translates to:
+  /// **'Hinge'**
+  String get familyHinge;
+
+  /// No description provided for @familyCore.
+  ///
+  /// In en, this message translates to:
+  /// **'Core'**
+  String get familyCore;
+
+  /// No description provided for @familyCarry.
+  ///
+  /// In en, this message translates to:
+  /// **'Carry'**
+  String get familyCarry;
+
+  /// No description provided for @familyCardio.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardio'**
+  String get familyCardio;
+
+  /// No description provided for @familyMobility.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobility'**
+  String get familyMobility;
+
+  /// No description provided for @familyBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get familyBalance;
 }
 
 class _AppLocalizationsDelegate

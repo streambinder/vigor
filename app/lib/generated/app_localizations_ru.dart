@@ -1063,4 +1063,37 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get duration => 'Продолжительность';
+
+  @override
+  String get familyHorizontalPush => 'Жим';
+
+  @override
+  String get familyHorizontalPull => 'Тяга';
+
+  @override
+  String get familyVerticalPush => 'Жим вверх';
+
+  @override
+  String get familyVerticalPull => 'Подтягивание';
+
+  @override
+  String get familySquat => 'Присед';
+
+  @override
+  String get familyHinge => 'Наклон';
+
+  @override
+  String get familyCore => 'Кор';
+
+  @override
+  String get familyCarry => 'Перенос';
+
+  @override
+  String get familyCardio => 'Кардио';
+
+  @override
+  String get familyMobility => 'Мобильность';
+
+  @override
+  String get familyBalance => 'Баланс';
 }

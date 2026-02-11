@@ -1041,4 +1041,37 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get duration => '时长';
+
+  @override
+  String get familyHorizontalPush => '推';
+
+  @override
+  String get familyHorizontalPull => '拉';
+
+  @override
+  String get familyVerticalPush => '过顶推';
+
+  @override
+  String get familyVerticalPull => '引体向上';
+
+  @override
+  String get familySquat => '深蹲';
+
+  @override
+  String get familyHinge => '铰链';
+
+  @override
+  String get familyCore => '核心';
+
+  @override
+  String get familyCarry => '负重行走';
+
+  @override
+  String get familyCardio => '有氧';
+
+  @override
+  String get familyMobility => '灵活性';
+
+  @override
+  String get familyBalance => '平衡';
 }

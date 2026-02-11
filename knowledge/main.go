@@ -49,6 +49,7 @@ func main() {
 		&model.FactEmbedding{},
 		&model.Methodology{},
 		&model.Muscle{},
+		&model.MovementFamily{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %s", err)
 	}
@@ -67,6 +68,10 @@ func main() {
 
 	if err := bootstrapMuscles(gormDB); err != nil {
 		log.Fatalf("Failed to inject muscles: %s", err)
+	}
+
+	if err := bootstrapMovementFamilies(gormDB); err != nil {
+		log.Fatalf("Failed to inject movement families: %s", err)
 	}
 
 	if err := bootstrapEquipment(gormDB); err != nil {
@@ -337,6 +342,26 @@ func bootstrapMethodologies(gormDB *gorm.DB) error {
 			return err
 		}
 		if err := gormDB.Save(&methodology).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func bootstrapMovementFamilies(gormDB *gorm.DB) error {
+	bytes, err := os.ReadFile(filepath.Join("features", "movement_families.json"))
+	if err != nil {
+		return err
+	}
+
+	var rows []model.MovementFamily
+	if err := json.Unmarshal(bytes, &rows); err != nil {
+		return err
+	}
+
+	for _, row := range rows {
+		if err := gormDB.Save(&row).Error; err != nil {
 			return err
 		}
 	}

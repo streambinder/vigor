@@ -368,5 +368,17 @@
   "weeklyTarget": "每周目标",
   "daysLeft": "还剩 {count} 天",
   "recommended": "推荐",
-  "duration": "时长"
+  "duration": "时长",
+
+  "familyHorizontalPush": "推",
+  "familyHorizontalPull": "拉",
+  "familyVerticalPush": "过顶推",
+  "familyVerticalPull": "引体向上",
+  "familySquat": "深蹲",
+  "familyHinge": "铰链",
+  "familyCore": "核心",
+  "familyCarry": "负重行走",
+  "familyCardio": "有氧",
+  "familyMobility": "灵活性",
+  "familyBalance": "平衡"
 }

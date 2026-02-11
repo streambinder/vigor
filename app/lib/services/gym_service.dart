@@ -80,6 +80,26 @@ class GymService {
     );
   }
 
+  Future<ApiResponse<List<String>>> getAvailableMovementFamilies() async {
+    AppLogger.debug('[GymService] Fetching available movement families');
+    final response = await _publicApiService.get('/movement-families');
+    if (response.isSuccess && response.data != null) {
+      try {
+        final families = (response.data!['movement_families'] as List).cast<String>();
+        AppLogger.info('[GymService] Fetched ${families.length} movement families');
+        return ApiResponse.success(families, response.statusCode);
+      } catch (e) {
+        AppLogger.error('[GymService] failed to parse movement families', e);
+        return ApiResponse.error('Failed to parse movement families', response.statusCode);
+      }
+    }
+    AppLogger.error('[GymService] Failed to fetch movement families: ${response.error}');
+    return ApiResponse.error(
+      response.error ?? 'Failed to fetch movement families',
+      response.statusCode,
+    );
+  }
+
   Future<ApiResponse<List<String>>> getAvailableMethodologies() async {
     AppLogger.debug('[GymService] Fetching available methodologies');
     final response = await _publicApiService.get('/methodologies');

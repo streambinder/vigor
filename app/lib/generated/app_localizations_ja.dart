@@ -1043,4 +1043,37 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get duration => '時間';
+
+  @override
+  String get familyHorizontalPush => 'プッシュ';
+
+  @override
+  String get familyHorizontalPull => 'プル';
+
+  @override
+  String get familyVerticalPush => 'オーバーヘッド';
+
+  @override
+  String get familyVerticalPull => '懸垂';
+
+  @override
+  String get familySquat => 'スクワット';
+
+  @override
+  String get familyHinge => 'ヒンジ';
+
+  @override
+  String get familyCore => 'コア';
+
+  @override
+  String get familyCarry => 'キャリー';
+
+  @override
+  String get familyCardio => 'カーディオ';
+
+  @override
+  String get familyMobility => 'モビリティ';
+
+  @override
+  String get familyBalance => 'バランス';
 }

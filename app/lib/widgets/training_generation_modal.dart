@@ -13,6 +13,7 @@ import '../widgets/adaptive/adaptive.dart';
 import '../widgets/equipment_selector.dart';
 import '../widgets/user_select_dialog.dart';
 import '../theme/liquid_glass_theme.dart';
+import '../utils/knowledge_labels.dart';
 import '../utils/platform_helper.dart';
 
 enum EquipmentMode { bodyweight, gym, custom }
@@ -273,54 +274,6 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     );
   }
 
-  String _methodologyLabel(String methodology, AppLocalizations l10n) {
-    switch (methodology) {
-      case 'auto':
-        return l10n.methodologyAuto;
-      case 'strength':
-        return l10n.workoutTypeStrength;
-      case 'circuit':
-        return l10n.workoutTypeCircuit;
-      case 'emom':
-        return l10n.workoutTypeEmom;
-      case 'amrap':
-        return l10n.workoutTypeAmrap;
-      case 'hiit':
-        return l10n.workoutTypeHiit;
-      case 'for_time':
-        return l10n.workoutTypeForTime;
-      case 'endurance':
-        return l10n.workoutTypeEndurance;
-      case 'mobility':
-        return l10n.workoutTypeMobility;
-      default:
-        return methodology;
-    }
-  }
-
-  String _methodologyDescription(String methodology, AppLocalizations l10n) {
-    switch (methodology) {
-      case 'strength':
-        return l10n.workoutTypeStrengthDescription;
-      case 'circuit':
-        return l10n.workoutTypeCircuitDescription;
-      case 'emom':
-        return l10n.workoutTypeEmomDescription;
-      case 'amrap':
-        return l10n.workoutTypeAmrapDescription;
-      case 'hiit':
-        return l10n.workoutTypeHiitDescription;
-      case 'for_time':
-        return l10n.workoutTypeForTimeDescription;
-      case 'endurance':
-        return l10n.workoutTypeEnduranceDescription;
-      case 'mobility':
-        return l10n.workoutTypeMobilityDescription;
-      default:
-        return '';
-    }
-  }
-
   Widget _buildMethodologyTile(String methodology, bool isSelected, AppLocalizations l10n) {
     final isAuto = methodology == 'auto';
     return GestureDetector(
@@ -355,16 +308,16 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _methodologyLabel(methodology, l10n),
+                    KnowledgeLabels.methodologyLabel(methodology, l10n),
                     style: VigorTypography.body.copyWith(
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                       color: VigorColors.textPrimary(context),
                     ),
                   ),
-                  if (_methodologyDescription(methodology, l10n).isNotEmpty) ...[
+                  if (KnowledgeLabels.methodologyDescription(methodology, l10n).isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(
-                      _methodologyDescription(methodology, l10n),
+                      KnowledgeLabels.methodologyDescription(methodology, l10n),
                       style: VigorTypography.caption.copyWith(
                         color: VigorColors.textSecondary(context),
                       ),
@@ -416,34 +369,6 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     );
   }
 
-  String _goalLabel(String goalId, AppLocalizations l10n) {
-    return switch (goalId) {
-      'hypertrophy' => l10n.goalHypertrophy,
-      'fat loss' => l10n.goalFatLoss,
-      'toning' => l10n.goalToning,
-      'posture' => l10n.goalPosture,
-      'rehabilitation' => l10n.goalRehabilitation,
-      'wellness' => l10n.goalWellness,
-      'flexibility' => l10n.goalFlexibility,
-      'sports' => l10n.goalSports,
-      _ => goalId.split(' ').map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}').join(' '),
-    };
-  }
-
-  String _goalDescription(String goalId, AppLocalizations l10n) {
-    return switch (goalId) {
-      'hypertrophy' => l10n.goalHypertrophyDescription,
-      'fat loss' => l10n.goalFatLossDescription,
-      'toning' => l10n.goalToningDescription,
-      'posture' => l10n.goalPostureDescription,
-      'rehabilitation' => l10n.goalRehabilitationDescription,
-      'wellness' => l10n.goalWellnessDescription,
-      'flexibility' => l10n.goalFlexibilityDescription,
-      'sports' => l10n.goalSportsDescription,
-      _ => '',
-    };
-  }
-
   Widget _buildGoalTile(String goal, bool isSelected, AppLocalizations l10n) {
     return GestureDetector(
       onTap: () {
@@ -477,16 +402,16 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _goalLabel(goal, l10n),
+                    KnowledgeLabels.goalLabel(goal, l10n),
                     style: VigorTypography.body.copyWith(
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                       color: VigorColors.textPrimary(context),
                     ),
                   ),
-                  if (_goalDescription(goal, l10n).isNotEmpty) ...[
+                  if (KnowledgeLabels.goalDescription(goal, l10n).isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(
-                      _goalDescription(goal, l10n),
+                      KnowledgeLabels.goalDescription(goal, l10n),
                       style: VigorTypography.caption.copyWith(
                         color: VigorColors.textSecondary(context),
                       ),

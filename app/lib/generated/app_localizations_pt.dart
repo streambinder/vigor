@@ -1068,4 +1068,37 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get duration => 'Duração';
+
+  @override
+  String get familyHorizontalPush => 'Empurrar';
+
+  @override
+  String get familyHorizontalPull => 'Puxar';
+
+  @override
+  String get familyVerticalPush => 'Press vertical';
+
+  @override
+  String get familyVerticalPull => 'Barra fixa';
+
+  @override
+  String get familySquat => 'Agachamento';
+
+  @override
+  String get familyHinge => 'Dobradiça';
+
+  @override
+  String get familyCore => 'Core';
+
+  @override
+  String get familyCarry => 'Transporte';
+
+  @override
+  String get familyCardio => 'Cardio';
+
+  @override
+  String get familyMobility => 'Mobilidade';
+
+  @override
+  String get familyBalance => 'Equilíbrio';
 }

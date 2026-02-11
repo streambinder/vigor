@@ -368,5 +368,17 @@
   "weeklyTarget": "Meta Semanal",
   "daysLeft": "{count} dias restantes",
   "recommended": "Recomendado",
-  "duration": "Duração"
+  "duration": "Duração",
+
+  "familyHorizontalPush": "Empurrar",
+  "familyHorizontalPull": "Puxar",
+  "familyVerticalPush": "Press vertical",
+  "familyVerticalPull": "Barra fixa",
+  "familySquat": "Agachamento",
+  "familyHinge": "Dobradiça",
+  "familyCore": "Core",
+  "familyCarry": "Transporte",
+  "familyCardio": "Cardio",
+  "familyMobility": "Mobilidade",
+  "familyBalance": "Equilíbrio"
 }

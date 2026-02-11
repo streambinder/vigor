@@ -1076,4 +1076,37 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get duration => 'Dauer';
+
+  @override
+  String get familyHorizontalPush => 'Drücken';
+
+  @override
+  String get familyHorizontalPull => 'Ziehen';
+
+  @override
+  String get familyVerticalPush => 'Überkopf';
+
+  @override
+  String get familyVerticalPull => 'Klimmzug';
+
+  @override
+  String get familySquat => 'Kniebeuge';
+
+  @override
+  String get familyHinge => 'Hüftbeugung';
+
+  @override
+  String get familyCore => 'Core';
+
+  @override
+  String get familyCarry => 'Tragen';
+
+  @override
+  String get familyCardio => 'Cardio';
+
+  @override
+  String get familyMobility => 'Mobilität';
+
+  @override
+  String get familyBalance => 'Gleichgewicht';
 }

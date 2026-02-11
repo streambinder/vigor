@@ -3,6 +3,7 @@ import '../../design/tokens.dart';
 import '../../generated/app_localizations.dart';
 import '../../models/family_progress.dart';
 import '../../theme/liquid_glass_theme.dart';
+import '../../utils/knowledge_labels.dart';
 import '../../utils/platform_helper.dart';
 
 /// Shows overall calibration as an expandable bar.
@@ -19,21 +20,6 @@ class CalibrationWidget extends StatefulWidget {
 
 class _CalibrationWidgetState extends State<CalibrationWidget> {
   bool _expanded = false;
-
-  // human-readable family names
-  static const _familyLabels = {
-    'horizontal_push': 'Push',
-    'horizontal_pull': 'Pull',
-    'vertical_push': 'Overhead',
-    'vertical_pull': 'Pull-up',
-    'squat': 'Squat',
-    'hinge': 'Hinge',
-    'core': 'Core',
-    'carry': 'Carry',
-    'balance': 'Balance',
-    'cardio': 'Cardio',
-    'mobility': 'Mobility',
-  };
 
   double get _overallCalibration {
     if (widget.families.isEmpty) return 0;
@@ -170,8 +156,9 @@ class _CalibrationWidgetState extends State<CalibrationWidget> {
     final sorted = widget.families.entries.toList()
       ..sort((a, b) => b.value.calibration.compareTo(a.value.calibration));
 
+    final l10n = AppLocalizations.of(context);
     return sorted.map((entry) {
-      final label = _familyLabels[entry.key] ?? _formatFamilyName(entry.key);
+      final label = KnowledgeLabels.familyLabel(entry.key, l10n);
       final cal = entry.value.calibration.clamp(0.0, 100.0);
 
       return Padding(
@@ -205,13 +192,6 @@ class _CalibrationWidgetState extends State<CalibrationWidget> {
         ),
       );
     }).toList();
-  }
-
-  String _formatFamilyName(String family) {
-    return family
-        .split('_')
-        .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : w)
-        .join(' ');
   }
 
   Color _calibrationColor(double calibration) {

@@ -368,5 +368,17 @@
   "weeklyTarget": "週間目標",
   "daysLeft": "残り{count}日",
   "recommended": "おすすめ",
-  "duration": "時間"
+  "duration": "時間",
+
+  "familyHorizontalPush": "プッシュ",
+  "familyHorizontalPull": "プル",
+  "familyVerticalPush": "オーバーヘッド",
+  "familyVerticalPull": "懸垂",
+  "familySquat": "スクワット",
+  "familyHinge": "ヒンジ",
+  "familyCore": "コア",
+  "familyCarry": "キャリー",
+  "familyCardio": "カーディオ",
+  "familyMobility": "モビリティ",
+  "familyBalance": "バランス"
 }

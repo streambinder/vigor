@@ -10,6 +10,7 @@ import '../models/week_progress.dart';
 import '../models/week_summary.dart';
 import '../providers/auth_provider.dart';
 import '../services/secure_storage_service.dart';
+import '../utils/knowledge_labels.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/progress/progress.dart';
 import '../models/progress.dart';
@@ -819,34 +820,6 @@ class _CalibrationModal extends StatelessWidget {
     required this.calibration,
   });
 
-  static const _familyLabels = {
-    'horizontal_push': 'Push',
-    'horizontal_pull': 'Pull',
-    'vertical_push': 'Overhead',
-    'vertical_pull': 'Pull-up',
-    'squat': 'Squat',
-    'hinge': 'Hinge',
-    'core': 'Core',
-    'carry': 'Carry',
-    'balance': 'Balance',
-    'cardio': 'Cardio',
-    'mobility': 'Mobility',
-  };
-
-  static const _familyOrder = [
-    'horizontal_push',
-    'horizontal_pull',
-    'vertical_push',
-    'vertical_pull',
-    'squat',
-    'hinge',
-    'core',
-    'cardio',
-    'mobility',
-    'balance',
-    'carry',
-  ];
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -965,20 +938,20 @@ class _CalibrationModal extends StatelessWidget {
   }
 
   List<Widget> _buildFamilyBars(BuildContext context, bool isDark) {
-    final sortedFamilies = _familyOrder
+    final sortedFamilies = KnowledgeLabels.familyDisplayOrder
         .where((f) => families.containsKey(f))
         .map((f) => MapEntry(f, families[f]!))
         .toList();
 
     // add any families not in the predefined order
     for (final entry in families.entries) {
-      if (!_familyOrder.contains(entry.key)) {
+      if (!KnowledgeLabels.familyDisplayOrder.contains(entry.key)) {
         sortedFamilies.add(entry);
       }
     }
 
     return sortedFamilies.map((entry) {
-      final label = _familyLabels[entry.key] ?? _formatFamilyName(entry.key);
+      final label = KnowledgeLabels.familyLabel(entry.key, l10n);
       final cal = entry.value.calibration.clamp(0.0, 100.0);
 
       return Padding(
@@ -1014,12 +987,6 @@ class _CalibrationModal extends StatelessWidget {
     }).toList();
   }
 
-  String _formatFamilyName(String family) {
-    return family
-        .split('_')
-        .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : w)
-        .join(' ');
-  }
 }
 
 /// Modal for weekly target details

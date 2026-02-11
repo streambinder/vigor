@@ -368,5 +368,17 @@
   "weeklyTarget": "Цель на неделю",
   "daysLeft": "{count} дней осталось",
   "recommended": "Рекомендуется",
-  "duration": "Продолжительность"
+  "duration": "Продолжительность",
+
+  "familyHorizontalPush": "Жим",
+  "familyHorizontalPull": "Тяга",
+  "familyVerticalPush": "Жим вверх",
+  "familyVerticalPull": "Подтягивание",
+  "familySquat": "Присед",
+  "familyHinge": "Наклон",
+  "familyCore": "Кор",
+  "familyCarry": "Перенос",
+  "familyCardio": "Кардио",
+  "familyMobility": "Мобильность",
+  "familyBalance": "Баланс"
 }

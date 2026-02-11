@@ -1043,4 +1043,37 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get duration => '시간';
+
+  @override
+  String get familyHorizontalPush => '푸시';
+
+  @override
+  String get familyHorizontalPull => '풀';
+
+  @override
+  String get familyVerticalPush => '오버헤드';
+
+  @override
+  String get familyVerticalPull => '턱걸이';
+
+  @override
+  String get familySquat => '스쿼트';
+
+  @override
+  String get familyHinge => '힌지';
+
+  @override
+  String get familyCore => '코어';
+
+  @override
+  String get familyCarry => '캐리';
+
+  @override
+  String get familyCardio => '유산소';
+
+  @override
+  String get familyMobility => '이동성';
+
+  @override
+  String get familyBalance => '균형';
 }

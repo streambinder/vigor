@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../generated/app_localizations.dart';
 import '../../models/family_progress.dart';
 import '../../theme/liquid_glass_theme.dart';
+import '../../utils/knowledge_labels.dart';
 import '../../utils/platform_helper.dart';
 
 /// Displays proficiency progress bars for each movement family.
@@ -9,46 +11,16 @@ class FamilyProgressWidget extends StatelessWidget {
 
   const FamilyProgressWidget({super.key, required this.families});
 
-  // human-readable family names
-  static const _familyLabels = {
-    'horizontal_push': 'Push',
-    'horizontal_pull': 'Pull',
-    'vertical_push': 'Overhead',
-    'vertical_pull': 'Pull-up',
-    'squat': 'Squat',
-    'hinge': 'Hinge',
-    'core': 'Core',
-    'carry': 'Carry',
-    'balance': 'Balance',
-    'cardio': 'Cardio',
-    'mobility': 'Mobility',
-  };
-
-  // display order
-  static const _familyOrder = [
-    'horizontal_push',
-    'horizontal_pull',
-    'vertical_push',
-    'vertical_pull',
-    'squat',
-    'hinge',
-    'core',
-    'cardio',
-    'mobility',
-    'balance',
-    'carry',
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final sortedFamilies = _familyOrder
+    final sortedFamilies = KnowledgeLabels.familyDisplayOrder
         .where((f) => families.containsKey(f))
         .map((f) => MapEntry(f, families[f]!))
         .toList();
 
     // add any families not in the predefined order
     for (final entry in families.entries) {
-      if (!_familyOrder.contains(entry.key)) {
+      if (!KnowledgeLabels.familyDisplayOrder.contains(entry.key)) {
         sortedFamilies.add(entry);
       }
     }
@@ -62,7 +34,7 @@ class FamilyProgressWidget extends StatelessWidget {
   }
 
   Widget _buildFamilyRow(BuildContext context, String family, FamilyProgress progress) {
-    final label = _familyLabels[family] ?? _formatFamilyName(family);
+    final label = KnowledgeLabels.familyLabel(family, AppLocalizations.of(context));
     final proficiency = progress.proficiency.clamp(0.0, 100.0);
 
     final primaryColor = PlatformHelper.useLiquidGlass
@@ -122,10 +94,4 @@ class FamilyProgressWidget extends StatelessWidget {
     );
   }
 
-  String _formatFamilyName(String family) {
-    return family
-        .split('_')
-        .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : w)
-        .join(' ');
-  }
 }

@@ -368,5 +368,17 @@
   "weeklyTarget": "Obiettivo Settimanale",
   "daysLeft": "{count} giorni rimasti",
   "recommended": "Consigliato",
-  "duration": "Durata"
+  "duration": "Durata",
+
+  "familyHorizontalPush": "Spinta",
+  "familyHorizontalPull": "Tirata",
+  "familyVerticalPush": "Spinta verticale",
+  "familyVerticalPull": "Trazione",
+  "familySquat": "Squat",
+  "familyHinge": "Cerniera",
+  "familyCore": "Core",
+  "familyCarry": "Trasporto",
+  "familyCardio": "Cardio",
+  "familyMobility": "Mobilità",
+  "familyBalance": "Equilibrio"
 }
