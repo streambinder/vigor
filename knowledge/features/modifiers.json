@@ -110,6 +110,13 @@
     "is_weighted": false
   },
   {
+    "id": "weight",
+    "patterns": [".*"],
+    "aliases": ["weight"],
+    "progression_impact": 0.5,
+    "is_weighted": true
+  },
+  {
     "id": "wrist weights",
     "patterns": ["punch", "raise", "arm-circle", "shadow"],
     "aliases": [

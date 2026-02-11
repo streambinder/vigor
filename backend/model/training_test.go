@@ -19,6 +19,10 @@ func act(duration, reps, rest int) Activity {
 	return Activity{Duration: duration, Reps: reps, Rest: rest}
 }
 
+func actWeighted(exerciseID string, weightKg int, modifiers []string) Activity {
+	return Activity{ExerciseID: exerciseID, Reps: 10, WeightKg: weightKg, Modifiers: modifiers}
+}
+
 func TestActivityWorkDuration(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -322,5 +326,63 @@ func TestSetDuration_AMRAP_SkipWarmupCooldown(t *testing.T) {
 	}
 	if total := tr.CalculateDuration(); total != 1200 {
 		t.Errorf("amrap skip warmup/cooldown: CalculateDuration() = %d, want 1200", total)
+	}
+}
+
+func TestValidate_WeightModifierConsistency(t *testing.T) {
+	validExercises := map[string]bool{"bench-press": true, "push-up": true}
+	validModifiers := map[string]bool{"weight": true, "weighted vest": true}
+	validRoutines := map[string]bool{"work": true}
+	weightedModifiers := map[string]bool{"weight": true, "weighted vest": true}
+
+	tests := []struct {
+		name    string
+		activity Activity
+		wantErr bool
+	}{
+		{
+			"weight_kg with weighted modifier passes",
+			actWeighted("bench-press", 60, []string{"weight"}),
+			false,
+		},
+		{
+			"weight_kg with vest modifier passes",
+			actWeighted("push-up", 10, []string{"weighted vest"}),
+			false,
+		},
+		{
+			"weight_kg without weighted modifier fails",
+			actWeighted("bench-press", 60, nil),
+			true,
+		},
+		{
+			"vest modifier without weight_kg passes",
+			actWeighted("push-up", 0, []string{"weighted vest"}),
+			false,
+		},
+		{
+			"bodyweight without modifier passes",
+			actWeighted("push-up", 0, nil),
+			false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tr := Training{
+				Name: "Test",
+				Routines: []Routine{{
+					Type: "work",
+					Blocks: []Block{{
+						Repeats:    1,
+						Activities: []Activity{tt.activity},
+					}},
+				}},
+			}
+			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
 	}
 }

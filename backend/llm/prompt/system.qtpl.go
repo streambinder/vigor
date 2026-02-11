@@ -151,11 +151,11 @@ ACTIVITY RULES:
 - Every activity: reps > 0 OR duration > 0 (never both 0)
 - duration: seconds for cardio/stretches/holds
 - reps: count for strength exercises
-- weight_kg: 0 for bodyweight exercises`)
+- weight_kg: 0 for bodyweight exercises, >0 for exercises using weighted equipment (barbell, dumbbell, kettlebell, etc.)`)
 //line llm/prompt/system.qtpl:60
 	if hasModifiers {
 //line llm/prompt/system.qtpl:60
-		qw422016.N().S(`, >0 only with weighted modifiers`)
+		qw422016.N().S(` or when using weighted modifiers`)
 //line llm/prompt/system.qtpl:60
 	}
 //line llm/prompt/system.qtpl:60

@@ -57,7 +57,7 @@ ACTIVITY RULES:
 - Every activity: reps > 0 OR duration > 0 (never both 0)
 - duration: seconds for cardio/stretches/holds
 - reps: count for strength exercises
-- weight_kg: 0 for bodyweight exercises{% if hasModifiers %}, >0 only with weighted modifiers{% endif %}
+- weight_kg: 0 for bodyweight exercises, >0 for exercises using weighted equipment (barbell, dumbbell, kettlebell, etc.){% if hasModifiers %} or when using weighted modifiers{% endif %}
 
 - rest: 30-60s hypertrophy, 2-3min strength, 10-20s circuits
 

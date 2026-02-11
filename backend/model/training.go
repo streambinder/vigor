@@ -146,7 +146,7 @@ type Activity struct {
 	Name       string         `gorm:"not null" json:"name" prompt:"-"`
 	Duration   int            `gorm:"not null" json:"duration" prompt:"Seconds (0 if using reps)"`
 	Reps       int            `gorm:"not null" json:"reps" prompt:"Rep count (0 if using duration)"`
-	WeightKg   int            `gorm:"not null" json:"weight_kg" prompt:"kg (0=bodyweight, >0 for weighted-* exercises)"`
+	WeightKg   int            `gorm:"not null" json:"weight_kg" prompt:"kg (0=bodyweight, >0 for weighted equipment/modifiers)"`
 	Modifiers  pq.StringArray `gorm:"type:text[]" json:"modifiers" prompt:"Modifier IDs (empty if none)"`
 	Rest       int            `gorm:"not null" json:"rest" prompt:"Rest after (s)"`
 	Detail     datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"`
@@ -170,7 +170,7 @@ func (t Training) DaysSince() int {
 }
 
 // Validate checks that the training has valid structure.
-func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineTypes map[string]bool, requireWarmupCooldown bool) error {
+func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, requireWarmupCooldown bool) error {
 	if t.Name == "" {
 		return errors.New("training name is empty")
 	}
@@ -217,6 +217,19 @@ func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineType
 				for _, mod := range activity.Modifiers {
 					if !validModifierIDs[mod] {
 						return errors.New("activity " + strconv.Itoa(k) + " has invalid modifier: " + mod)
+					}
+				}
+				// weight_kg > 0 must have a weighted modifier (auto-attach adds "weight" before this runs)
+				if activity.WeightKg > 0 {
+					hasWeightedMod := false
+					for _, mod := range activity.Modifiers {
+						if weightedModifierIDs[mod] {
+							hasWeightedMod = true
+							break
+						}
+					}
+					if !hasWeightedMod {
+						return errors.New("activity " + strconv.Itoa(k) + " has weight_kg > 0 but no weighted modifier")
 					}
 				}
 			}

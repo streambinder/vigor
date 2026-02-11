@@ -170,6 +170,9 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	// filter modifiers to only those applicable to retrieved exercises
 	modifiers = filterApplicableModifiers(modifiers, workExercises)
 
+	// strip weight modifier from LLM input — it's auto-attached post-generation
+	llmModifiers := stripWeightModifier(modifiers)
+
 	var allFavoriteExercises, allFavoriteEquipment []string
 	for _, profile := range profiles {
 		allFavoriteExercises = append(allFavoriteExercises, profile.FavoriteExercises()...)
@@ -215,7 +218,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		warmupExercises,
 		cooldownExercises,
 		equipmentIDs,
-		modifiers,
+		llmModifiers,
 		favoriteExercises,
 		favoriteEquipmentIDs,
 		methodologyData,
@@ -249,10 +252,40 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	for _, e := range cooldownExercises {
 		validExerciseIDs[e.ID] = true
 	}
-	validModifierIDs := make(map[string]bool, len(modifiers))
+	validModifierIDs := make(map[string]bool, len(modifiers)+1)
+	weightedModifierIDs := make(map[string]bool)
 	for _, m := range modifiers {
 		validModifierIDs[m.ID] = true
+		if m.IsWeighted {
+			weightedModifierIDs[m.ID] = true
+		}
 	}
+	// always allow the auto-attached weight modifier
+	validModifierIDs[WeightModifier] = true
+	weightedModifierIDs[WeightModifier] = true
+
+	// auto-attach weight modifier to activities with weight_kg > 0 and no existing weighted modifier
+	for i := range training.Routines {
+		for j := range training.Routines[i].Blocks {
+			for k := range training.Routines[i].Blocks[j].Activities {
+				a := &training.Routines[i].Blocks[j].Activities[k]
+				if a.WeightKg <= 0 {
+					continue
+				}
+				hasWeighted := false
+				for _, mod := range a.Modifiers {
+					if weightedModifierIDs[mod] {
+						hasWeighted = true
+						break
+					}
+				}
+				if !hasWeighted {
+					a.Modifiers = append(a.Modifiers, WeightModifier)
+				}
+			}
+		}
+	}
+
 	validRoutineTypes := map[string]bool{"work": true}
 	if !skipWarmupCooldown {
 		validRoutineTypes["warmup"] = true
@@ -260,7 +293,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	}
 	// reorder routines: warmup first, work in original order, cooldown last
 	training.Routines = reorderRoutines(training.Routines)
-	if err := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, !skipWarmupCooldown); err != nil {
+	if err := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, weightedModifierIDs, !skipWarmupCooldown); err != nil {
 		log.Error().
 			Interface("event", event.TrainingGenerationFailureEvent{
 				Event:  event.Event{Time: time.Now()},
@@ -632,6 +665,17 @@ func modifierMatchesAnyExercise(mod model.Modifier, exercises []model.Exercise) 
 		}
 	}
 	return false
+}
+
+// stripWeightModifier removes the "weight" modifier from a slice since it's auto-attached post-generation.
+func stripWeightModifier(modifiers []model.Modifier) []model.Modifier {
+	result := make([]model.Modifier, 0, len(modifiers))
+	for _, m := range modifiers {
+		if m.ID != WeightModifier {
+			result = append(result, m)
+		}
+	}
+	return result
 }
 
 // reorderRoutines ensures warmup is first, cooldown is last, and work routines
