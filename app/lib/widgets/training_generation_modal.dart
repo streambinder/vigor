@@ -272,6 +272,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
   String _methodologyLabel(String methodology, AppLocalizations l10n) {
     switch (methodology) {
+      case 'auto':
+        return l10n.methodologyAuto;
       case 'strength':
         return l10n.workoutTypeStrength;
       case 'circuit':
@@ -293,6 +295,89 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     }
   }
 
+  String _methodologyDescription(String methodology, AppLocalizations l10n) {
+    switch (methodology) {
+      case 'strength':
+        return l10n.workoutTypeStrengthDescription;
+      case 'circuit':
+        return l10n.workoutTypeCircuitDescription;
+      case 'emom':
+        return l10n.workoutTypeEmomDescription;
+      case 'amrap':
+        return l10n.workoutTypeAmrapDescription;
+      case 'hiit':
+        return l10n.workoutTypeHiitDescription;
+      case 'for_time':
+        return l10n.workoutTypeForTimeDescription;
+      case 'endurance':
+        return l10n.workoutTypeEnduranceDescription;
+      case 'mobility':
+        return l10n.workoutTypeMobilityDescription;
+      default:
+        return '';
+    }
+  }
+
+  Widget _buildMethodologyTile(String methodology, bool isSelected, AppLocalizations l10n) {
+    final isAuto = methodology == 'auto';
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (isAuto) {
+            _methodology = null;
+          } else {
+            _methodology = isSelected ? null : methodology;
+          }
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.all(VigorSpacing.sm),
+        decoration: BoxDecoration(
+          color: isSelected ? VigorColors.indigo.withValues(alpha: 0.1) : null,
+          border: Border.all(
+            color: isSelected ? VigorColors.indigo : VigorColors.border(context),
+          ),
+          borderRadius: VigorRadius.radiusMd,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.check_circle : Icons.circle_outlined,
+              color: isSelected ? VigorColors.indigo : VigorColors.textMuted(context),
+              size: 20,
+            ),
+            const SizedBox(width: VigorSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _methodologyLabel(methodology, l10n),
+                    style: VigorTypography.body.copyWith(
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: VigorColors.textPrimary(context),
+                    ),
+                  ),
+                  if (_methodologyDescription(methodology, l10n).isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      _methodologyDescription(methodology, l10n),
+                      style: VigorTypography.caption.copyWith(
+                        color: VigorColors.textSecondary(context),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildMethodologySection() {
     final l10n = AppLocalizations.of(context);
     if (_availableMethodologies.isEmpty) {
@@ -308,43 +393,21 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           ),
         ),
         const SizedBox(height: VigorSpacing.sm),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            // "auto" chip for unset
-            FilterChip(
-              label: Text(
-                l10n.methodologyAuto,
-                style: VigorTypography.caption.copyWith(
-                  color: _methodology == null ? Colors.white : VigorColors.textPrimary(context),
-                ),
-              ),
-              selected: _methodology == null,
-              selectedColor: VigorColors.indigo,
-              checkmarkColor: Colors.white,
-              onSelected: (selected) {
-                if (selected) setState(() => _methodology = null);
-              },
-            ),
-            ..._availableMethodologies.map((m) {
-              final isSelected = _methodology == m;
-              return FilterChip(
-                label: Text(
-                  _methodologyLabel(m, l10n),
-                  style: VigorTypography.caption.copyWith(
-                    color: isSelected ? Colors.white : VigorColors.textPrimary(context),
-                  ),
-                ),
-                selected: isSelected,
-                selectedColor: VigorColors.indigo,
-                checkmarkColor: Colors.white,
-                onSelected: (selected) {
-                  setState(() => _methodology = selected ? m : null);
-                },
-              );
-            }),
-          ],
+        // auto tile
+        _buildMethodologyTile('auto', _methodology == null, l10n),
+        const SizedBox(height: VigorSpacing.xs),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 250),
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: _availableMethodologies.length,
+            separatorBuilder: (_, __) => const SizedBox(height: VigorSpacing.xs),
+            itemBuilder: (context, index) {
+              final methodology = _availableMethodologies[index];
+              final isSelected = _methodology == methodology;
+              return _buildMethodologyTile(methodology, isSelected, l10n);
+            },
+          ),
         ),
       ],
     );

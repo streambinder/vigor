@@ -732,11 +732,23 @@ abstract class AppLocalizations {
   /// **'Strength'**
   String get workoutTypeStrength;
 
+  /// No description provided for @workoutTypeStrengthDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Build maximal force with heavy loads and full rest'**
+  String get workoutTypeStrengthDescription;
+
   /// No description provided for @workoutTypeCircuit.
   ///
   /// In en, this message translates to:
   /// **'Circuit'**
   String get workoutTypeCircuit;
+
+  /// No description provided for @workoutTypeCircuitDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Move through stations with minimal rest for conditioning'**
+  String get workoutTypeCircuitDescription;
 
   /// No description provided for @workoutTypeEmom.
   ///
@@ -744,11 +756,23 @@ abstract class AppLocalizations {
   /// **'EMOM'**
   String get workoutTypeEmom;
 
+  /// No description provided for @workoutTypeEmomDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Minute On the Minute: complete reps then rest until next minute'**
+  String get workoutTypeEmomDescription;
+
   /// No description provided for @workoutTypeAmrap.
   ///
   /// In en, this message translates to:
   /// **'AMRAP'**
   String get workoutTypeAmrap;
+
+  /// No description provided for @workoutTypeAmrapDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'As Many Rounds As Possible within a time cap'**
+  String get workoutTypeAmrapDescription;
 
   /// No description provided for @workoutTypeHiit.
   ///
@@ -756,11 +780,23 @@ abstract class AppLocalizations {
   /// **'HIIT'**
   String get workoutTypeHiit;
 
+  /// No description provided for @workoutTypeHiitDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Alternate high-intensity bursts with short recovery'**
+  String get workoutTypeHiitDescription;
+
   /// No description provided for @workoutTypeForTime.
   ///
   /// In en, this message translates to:
   /// **'For Time'**
   String get workoutTypeForTime;
+
+  /// No description provided for @workoutTypeForTimeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the workout as fast as possible'**
+  String get workoutTypeForTimeDescription;
 
   /// No description provided for @workoutTypeEndurance.
   ///
@@ -768,11 +804,23 @@ abstract class AppLocalizations {
   /// **'Endurance'**
   String get workoutTypeEndurance;
 
+  /// No description provided for @workoutTypeEnduranceDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sustained effort at moderate intensity for aerobic capacity'**
+  String get workoutTypeEnduranceDescription;
+
   /// No description provided for @workoutTypeMobility.
   ///
   /// In en, this message translates to:
   /// **'Mobility'**
   String get workoutTypeMobility;
+
+  /// No description provided for @workoutTypeMobilityDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Improve range of motion and joint health'**
+  String get workoutTypeMobilityDescription;
 
   /// No description provided for @methodologyOptional.
   ///

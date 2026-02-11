@@ -332,25 +332,49 @@ class AppLocalizationsJa extends AppLocalizations {
   String get workoutTypeStrength => '筋力';
 
   @override
+  String get workoutTypeStrengthDescription => '重い負荷と十分な休息で最大筋力を構築';
+
+  @override
   String get workoutTypeCircuit => 'サーキット';
+
+  @override
+  String get workoutTypeCircuitDescription => '最小限の休息でステーション間を移動してコンディショニング';
 
   @override
   String get workoutTypeEmom => 'EMOM';
 
   @override
+  String get workoutTypeEmomDescription => '毎分：回数を完了し次の分まで休息';
+
+  @override
   String get workoutTypeAmrap => 'AMRAP';
+
+  @override
+  String get workoutTypeAmrapDescription => '制限時間内にできるだけ多くのラウンドを完了';
 
   @override
   String get workoutTypeHiit => 'HIIT';
 
   @override
+  String get workoutTypeHiitDescription => '高強度バーストと短い回復を交互に実施';
+
+  @override
   String get workoutTypeForTime => 'タイムトライアル';
+
+  @override
+  String get workoutTypeForTimeDescription => 'できるだけ速くワークアウトを完了';
 
   @override
   String get workoutTypeEndurance => '持久力';
 
   @override
+  String get workoutTypeEnduranceDescription => '中程度の強度で持続的な運動により有酸素能力を向上';
+
+  @override
   String get workoutTypeMobility => 'モビリティ';
+
+  @override
+  String get workoutTypeMobilityDescription => '可動域と関節の健康を改善';
 
   @override
   String get methodologyOptional => 'メソッド（任意）';

@@ -339,25 +339,49 @@ class AppLocalizationsFr extends AppLocalizations {
   String get workoutTypeStrength => 'Force';
 
   @override
+  String get workoutTypeStrengthDescription => 'Développez la force maximale avec des charges lourdes et repos complet';
+
+  @override
   String get workoutTypeCircuit => 'Circuit';
+
+  @override
+  String get workoutTypeCircuitDescription => 'Passez d\'une station à l\'autre avec un repos minimal pour le conditionnement';
 
   @override
   String get workoutTypeEmom => 'EMOM';
 
   @override
+  String get workoutTypeEmomDescription => 'Chaque minute: complétez les répétitions puis reposez jusqu\'à la minute suivante';
+
+  @override
   String get workoutTypeAmrap => 'AMRAP';
+
+  @override
+  String get workoutTypeAmrapDescription => 'Autant de tours que possible dans le temps imparti';
 
   @override
   String get workoutTypeHiit => 'HIIT';
 
   @override
+  String get workoutTypeHiitDescription => 'Alternez des rafales de haute intensité avec une récupération courte';
+
+  @override
   String get workoutTypeForTime => 'For Time';
+
+  @override
+  String get workoutTypeForTimeDescription => 'Terminez l\'entraînement le plus rapidement possible';
 
   @override
   String get workoutTypeEndurance => 'Endurance';
 
   @override
+  String get workoutTypeEnduranceDescription => 'Effort soutenu à intensité modérée pour la capacité aérobie';
+
+  @override
   String get workoutTypeMobility => 'Mobilité';
+
+  @override
+  String get workoutTypeMobilityDescription => 'Améliorez l\'amplitude de mouvement et la santé articulaire';
 
   @override
   String get methodologyOptional => 'Méthodologie (optionnel)';

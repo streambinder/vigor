@@ -332,25 +332,49 @@ class AppLocalizationsZh extends AppLocalizations {
   String get workoutTypeStrength => '力量';
 
   @override
+  String get workoutTypeStrengthDescription => '使用重负荷和充分休息来增强最大力量';
+
+  @override
   String get workoutTypeCircuit => '循环';
+
+  @override
+  String get workoutTypeCircuitDescription => '在各站之间以最少休息进行体能训练';
 
   @override
   String get workoutTypeEmom => 'EMOM';
 
   @override
+  String get workoutTypeEmomDescription => '每分钟：完成规定次数后休息至下一分钟';
+
+  @override
   String get workoutTypeAmrap => 'AMRAP';
+
+  @override
+  String get workoutTypeAmrapDescription => '在规定时间内完成尽可能多的轮次';
 
   @override
   String get workoutTypeHiit => 'HIIT';
 
   @override
+  String get workoutTypeHiitDescription => '高强度爆发与短暂恢复交替进行';
+
+  @override
   String get workoutTypeForTime => '计时';
+
+  @override
+  String get workoutTypeForTimeDescription => '尽快完成训练';
 
   @override
   String get workoutTypeEndurance => '耐力';
 
   @override
+  String get workoutTypeEnduranceDescription => '中等强度的持续运动以提高有氧能力';
+
+  @override
   String get workoutTypeMobility => '灵活性';
+
+  @override
+  String get workoutTypeMobilityDescription => '改善活动范围和关节健康';
 
   @override
   String get methodologyOptional => '方法（可选）';

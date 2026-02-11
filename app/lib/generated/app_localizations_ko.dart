@@ -332,25 +332,49 @@ class AppLocalizationsKo extends AppLocalizations {
   String get workoutTypeStrength => '근력';
 
   @override
+  String get workoutTypeStrengthDescription => '무거운 중량과 충분한 휴식으로 최대 근력 구축';
+
+  @override
   String get workoutTypeCircuit => '서킷';
+
+  @override
+  String get workoutTypeCircuitDescription => '최소한의 휴식으로 스테이션 간 이동하며 컨디셔닝';
 
   @override
   String get workoutTypeEmom => 'EMOM';
 
   @override
+  String get workoutTypeEmomDescription => '매 분: 정해진 횟수를 완료하고 다음 분까지 휴식';
+
+  @override
   String get workoutTypeAmrap => 'AMRAP';
+
+  @override
+  String get workoutTypeAmrapDescription => '제한 시간 내 가능한 많은 라운드 완료';
 
   @override
   String get workoutTypeHiit => 'HIIT';
 
   @override
+  String get workoutTypeHiitDescription => '고강도 폭발과 짧은 회복을 번갈아 수행';
+
+  @override
   String get workoutTypeForTime => '타임 트라이얼';
+
+  @override
+  String get workoutTypeForTimeDescription => '가능한 빨리 운동 완료';
 
   @override
   String get workoutTypeEndurance => '지구력';
 
   @override
+  String get workoutTypeEnduranceDescription => '중간 강도의 지속적인 운동으로 유산소 능력 향상';
+
+  @override
   String get workoutTypeMobility => '유연성';
+
+  @override
+  String get workoutTypeMobilityDescription => '가동 범위와 관절 건강 개선';
 
   @override
   String get methodologyOptional => '방법론 (선택사항)';

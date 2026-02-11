@@ -336,25 +336,49 @@ class AppLocalizationsRu extends AppLocalizations {
   String get workoutTypeStrength => 'Сила';
 
   @override
+  String get workoutTypeStrengthDescription => 'Развивайте максимальную силу с тяжёлыми весами и полным отдыхом';
+
+  @override
   String get workoutTypeCircuit => 'Круговая';
+
+  @override
+  String get workoutTypeCircuitDescription => 'Переходите между станциями с минимальным отдыхом для кондиционирования';
 
   @override
   String get workoutTypeEmom => 'EMOM';
 
   @override
+  String get workoutTypeEmomDescription => 'Каждую минуту: выполните повторения и отдыхайте до следующей минуты';
+
+  @override
   String get workoutTypeAmrap => 'AMRAP';
+
+  @override
+  String get workoutTypeAmrapDescription => 'Как можно больше раундов за отведённое время';
 
   @override
   String get workoutTypeHiit => 'HIIT';
 
   @override
+  String get workoutTypeHiitDescription => 'Чередуйте высокоинтенсивные интервалы с коротким восстановлением';
+
+  @override
   String get workoutTypeForTime => 'На время';
+
+  @override
+  String get workoutTypeForTimeDescription => 'Завершите тренировку как можно быстрее';
 
   @override
   String get workoutTypeEndurance => 'Выносливость';
 
   @override
+  String get workoutTypeEnduranceDescription => 'Продолжительная нагрузка умеренной интенсивности для аэробной способности';
+
+  @override
   String get workoutTypeMobility => 'Мобильность';
+
+  @override
+  String get workoutTypeMobilityDescription => 'Улучшите диапазон движений и здоровье суставов';
 
   @override
   String get methodologyOptional => 'Методология (необязательно)';
