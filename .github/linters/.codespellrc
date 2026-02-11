@@ -1,0 +1,3 @@
+[codespell]
+check-filenames =
+skip = ./knowledge/features/exercises.json
