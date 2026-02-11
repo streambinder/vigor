@@ -1614,6 +1614,12 @@ abstract class AppLocalizations {
   /// **'Any additional comments?'**
   String get anyAdditionalComments;
 
+  /// No description provided for @actualDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual duration (min)'**
+  String get actualDuration;
+
   /// No description provided for @tooEasy.
   ///
   /// In en, this message translates to:

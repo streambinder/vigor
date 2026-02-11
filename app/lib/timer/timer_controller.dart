@@ -8,6 +8,12 @@ abstract class TimerController extends ChangeNotifier {
   /// Screens should check this to avoid playing jingle on skip
   bool wasSkipped = false;
 
+  /// Tracks total elapsed seconds (excluding pauses, including rest)
+  int _totalElapsedSeconds = 0;
+  int get elapsedSeconds => _totalElapsedSeconds;
+  @protected
+  void tickElapsed() => _totalElapsedSeconds++;
+
   /// Set to true when countdown reaches 3, 2, or 1 seconds
   /// Screens should play countdown jingle when this is true
   bool shouldPlayCountdownJingle = false;

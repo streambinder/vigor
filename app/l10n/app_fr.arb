@@ -284,6 +284,7 @@
 
   "howWasYourTraining": "Comment s'est passé ton entraînement ?",
   "anyAdditionalComments": "Des commentaires supplémentaires ?",
+  "actualDuration": "Durée réelle (min)",
   "tooEasy": "Trop facile",
   "tooHard": "Trop difficile",
   "flag": "Signaler",

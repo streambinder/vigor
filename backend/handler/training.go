@@ -124,6 +124,7 @@ func postTrainingCompleteById(c *fiber.Ctx) error {
 		req.Feedback,
 		req.ActivityFeedback,
 		req.ActivityReports,
+		req.CompletedIn,
 	)
 	if err != nil {
 		if errors.Is(err, service.ErrTrainingNotFound) {
@@ -151,6 +152,7 @@ func putTrainingFeedbackById(c *fiber.Ctx) error {
 		trainingID,
 		req.Feedback,
 		req.ActivityFeedback,
+		req.CompletedIn,
 	)
 	if err != nil {
 		switch {

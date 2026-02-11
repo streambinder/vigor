@@ -416,6 +416,7 @@
 
   "howWasYourTraining": "How was your training?",
   "anyAdditionalComments": "Any additional comments?",
+  "actualDuration": "Actual duration (min)",
   "tooEasy": "Too easy",
   "tooHard": "Too hard",
   "flag": "Flag",

@@ -20,6 +20,7 @@ PostTrainingCompleteRequest _$PostTrainingCompleteRequestFromJson(
           ?.map((e) => e as String)
           .toList() ??
       [],
+  completedIn: (json['completedIn'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$PostTrainingCompleteRequestToJson(
@@ -28,4 +29,5 @@ Map<String, dynamic> _$PostTrainingCompleteRequestToJson(
   'feedback': instance.feedback,
   'activityFeedback': instance.activityFeedback,
   'activityReports': instance.activityReports,
+  'completedIn': instance.completedIn,
 };

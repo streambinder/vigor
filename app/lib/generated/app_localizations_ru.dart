@@ -821,6 +821,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get anyAdditionalComments => 'Дополнительные комментарии?';
 
   @override
+  String get actualDuration => 'Фактическая длительность (мин)';
+
+  @override
   String get tooEasy => 'Слишком легко';
 
   @override

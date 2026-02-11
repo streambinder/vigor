@@ -826,6 +826,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get anyAdditionalComments => 'Algum comentário adicional?';
 
   @override
+  String get actualDuration => 'Duração real (min)';
+
+  @override
   String get tooEasy => 'Muito fácil';
 
   @override

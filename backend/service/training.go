@@ -443,7 +443,7 @@ func DeleteTraining(userID uuid.UUID, trainingID string) (isOwner bool, err erro
 }
 
 // CompleteTraining marks a training as completed.
-func CompleteTraining(userID uuid.UUID, trainingID, feedback string, activityFeedback map[string]string, activityReports []string) (*model.Training, error) {
+func CompleteTraining(userID uuid.UUID, trainingID, feedback string, activityFeedback map[string]string, activityReports []string, completedIn *int) (*model.Training, error) {
 	var training model.Training
 	if err := database.DB.
 		Preload("Gym").
@@ -456,6 +456,7 @@ func CompleteTraining(userID uuid.UUID, trainingID, feedback string, activityFee
 
 	now := time.Now()
 	training.CompletedAt = &now
+	training.CompletedIn = completedIn
 	training.Feedback = feedback
 
 	if err := database.DB.Save(&training).Error; err != nil {
@@ -492,7 +493,7 @@ func CompleteTraining(userID uuid.UUID, trainingID, feedback string, activityFee
 }
 
 // UpdateTrainingFeedback updates feedback on an already-completed training.
-func UpdateTrainingFeedback(userID uuid.UUID, trainingID, feedback string, activityFeedback map[string]string) (*model.Training, error) {
+func UpdateTrainingFeedback(userID uuid.UUID, trainingID, feedback string, activityFeedback map[string]string, completedIn *int) (*model.Training, error) {
 	var training model.Training
 	if err := database.DB.
 		Preload("Gym").
@@ -508,6 +509,9 @@ func UpdateTrainingFeedback(userID uuid.UUID, trainingID, feedback string, activ
 	}
 
 	training.Feedback = feedback
+	if completedIn != nil {
+		training.CompletedIn = completedIn
+	}
 	if err := database.DB.Save(&training).Error; err != nil {
 		return nil, err
 	}

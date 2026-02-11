@@ -234,6 +234,7 @@ class EmomController extends TimerController {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_isPaused) return;
+      if (_hasStarted) tickElapsed();
 
       if (_secondsInMinute > 0) {
         _secondsInMinute--;

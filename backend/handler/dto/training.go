@@ -38,6 +38,7 @@ type PostTrainingCompleteRequest struct {
 	Feedback         string            `json:"feedback"`
 	ActivityFeedback map[string]string `json:"activityFeedback"`
 	ActivityReports  []string          `json:"activityReports"`
+	CompletedIn      *int              `json:"completedIn"`
 }
 
 // PostTrainingCompleteResponse represents the response for POST /training/complete/:id

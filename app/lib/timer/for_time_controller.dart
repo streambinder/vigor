@@ -206,6 +206,7 @@ class ForTimeController extends TimerController {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_isPaused) return;
+      tickElapsed();
       _elapsedSeconds++;
       notifyListeners();
     });

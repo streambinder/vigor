@@ -40,6 +40,8 @@ class Training {
   final String feedback;
   @JsonKey(name: 'completed_at', toJson: _nullableDateTimeToJson)
   final DateTime? completedAt;
+  @JsonKey(name: 'completed_in')
+  final int? completedIn;
   @JsonKey(name: 'created_at', toJson: _dateTimeToJson)
   final DateTime createdAt;
   @JsonKey(name: 'user_id', defaultValue: '')
@@ -67,6 +69,7 @@ class Training {
     required this.prompt,
     required this.feedback,
     this.completedAt,
+    this.completedIn,
     required this.createdAt,
     required this.userId,
     this.parentId,

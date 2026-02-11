@@ -50,6 +50,9 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
   // methodology-specific stats captured on work segment completion
   String? _methodologyStats;
 
+  // accumulated elapsed seconds across all segments
+  int _accumulatedElapsedSeconds = 0;
+
   @override
   void initState() {
     super.initState();
@@ -129,6 +132,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
 
     // check if current segment is complete
     if (_controller?.isCompleted == true) {
+      _accumulatedElapsedSeconds += _controller?.elapsedSeconds ?? 0;
       _captureMethodologyStats();
       _playJingleIfEnabled();
       _advanceToNextSegment();
@@ -242,6 +246,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
       context,
       widget.training,
       feedbackPrefix: _methodologyStats,
+      elapsedSeconds: _accumulatedElapsedSeconds,
     );
     if (result == null) return;
     await _markTrainingComplete(result);
@@ -255,6 +260,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
       widget.training.id,
       feedback: result.feedback,
       activityFeedback: result.activityFeedback,
+      completedIn: result.completedIn,
     );
     if (!response.isSuccess && mounted) {
       AdaptiveNotification.showError(
@@ -506,10 +512,12 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
               Navigator.of(dialogContext).pop();
               // capture stats if exiting early from work segment
               _captureMethodologyStats();
+              _accumulatedElapsedSeconds += _controller?.elapsedSeconds ?? 0;
               final result = await FeedbackModal.show(
                 context,
                 widget.training,
                 feedbackPrefix: _methodologyStats,
+                elapsedSeconds: _accumulatedElapsedSeconds,
               );
               if (result == null) return;
               await _markTrainingComplete(result);

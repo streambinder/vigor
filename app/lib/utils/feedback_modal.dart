@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
@@ -36,11 +37,13 @@ class FeedbackResult {
   final String feedback;
   final Map<String, String> activityFeedback;
   final List<String> activityReports; // activity IDs flagged by user
+  final int? completedIn; // actual duration in seconds
 
   FeedbackResult({
     required this.feedback,
     required this.activityFeedback,
     required this.activityReports,
+    this.completedIn,
   });
 }
 
@@ -65,10 +68,12 @@ class FeedbackModal {
 
   /// shows the feedback modal and returns the result, or null if cancelled
   /// [feedbackPrefix] is prepended to user feedback (e.g. methodology stats)
+  /// [elapsedSeconds] pre-fills the duration field from timer tracking
   static Future<FeedbackResult?> show(
     BuildContext context,
     Training training, {
     String? feedbackPrefix,
+    int? elapsedSeconds,
   }) async {
     final activities = _getWorkActivities(training);
     if (activities.isEmpty) {
@@ -82,6 +87,7 @@ class FeedbackModal {
         activities: activities,
         showReports: true,
         feedbackPrefix: feedbackPrefix,
+        elapsedSeconds: elapsedSeconds,
       ),
     );
   }
@@ -100,6 +106,7 @@ class FeedbackModal {
         activities: activities,
         showReports: false,
         initialFeedback: training.feedback,
+        elapsedSeconds: training.completedIn,
       ),
     );
   }
@@ -110,12 +117,14 @@ class _FeedbackDialogContent extends StatefulWidget {
   final bool showReports;
   final String? initialFeedback;
   final String? feedbackPrefix;
+  final int? elapsedSeconds;
 
   const _FeedbackDialogContent({
     required this.activities,
     required this.showReports,
     this.initialFeedback,
     this.feedbackPrefix,
+    this.elapsedSeconds,
   });
 
   @override
@@ -124,13 +133,20 @@ class _FeedbackDialogContent extends StatefulWidget {
 
 class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
   final _feedbackController = TextEditingController();
+  late double _durationMinutes;
   late final Map<String, ExerciseFeedback> _exerciseFeedback; // keyed by activity id
   late final Set<String> _flaggedActivities; // activity IDs that are flagged
+
+  static const _minDuration = 1.0;
+  static const _maxDuration = 180.0;
 
   @override
   void initState() {
     super.initState();
     _feedbackController.text = widget.initialFeedback ?? '';
+    _durationMinutes = widget.elapsedSeconds != null && widget.elapsedSeconds! > 0
+        ? min(_maxDuration, max(_minDuration, (widget.elapsedSeconds! / 60).roundToDouble()))
+        : _minDuration;
     _exerciseFeedback = {
       for (final a in widget.activities)
         a.id: ExerciseFeedbackX.fromApiValue(a.feedback),
@@ -183,6 +199,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
       feedback: feedback,
       activityFeedback: activityFeedback,
       activityReports: activityReports,
+      completedIn: _durationMinutes > 0 ? (_durationMinutes * 60).round() : null,
     ));
   }
 
@@ -249,6 +266,40 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                             ),
                           ),
                         ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          children: [
+                            Text(
+                              l10n.actualDuration,
+                              style: useLiquidGlass
+                                  ? LiquidGlassTheme.bodyStyle
+                                  : Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            Expanded(
+                              child: Slider(
+                                value: _durationMinutes.clamp(_minDuration, _maxDuration),
+                                min: _minDuration,
+                                max: _maxDuration,
+                                divisions: (_maxDuration - _minDuration).round(),
+                                label: '${_durationMinutes.round()} min',
+                                onChanged: (v) => setState(() => _durationMinutes = v),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 56,
+                              child: Text(
+                                '${_durationMinutes.round()}′',
+                                textAlign: TextAlign.end,
+                                style: (useLiquidGlass
+                                        ? LiquidGlassTheme.bodyStyle
+                                        : Theme.of(context).textTheme.bodyMedium)
+                                    ?.copyWith(fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       TextField(
                         controller: _feedbackController,
                         maxLines: 1,

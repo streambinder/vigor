@@ -809,6 +809,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get anyAdditionalComments => '有其他评论吗？';
 
   @override
+  String get actualDuration => '实际时长（分钟）';
+
+  @override
   String get tooEasy => '太简单';
 
   @override

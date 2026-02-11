@@ -13,11 +13,14 @@ class PostTrainingCompleteRequest {
   final Map<String, String> activityFeedback;
   @JsonKey(name: 'activityReports', defaultValue: [])
   final List<String> activityReports;
+  @JsonKey(name: 'completedIn')
+  final int? completedIn;
 
   PostTrainingCompleteRequest({
     required this.feedback,
     required this.activityFeedback,
     required this.activityReports,
+    this.completedIn,
   });
 
   factory PostTrainingCompleteRequest.fromJson(Map<String, dynamic> json) => _$PostTrainingCompleteRequestFromJson(json);

@@ -100,7 +100,11 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
   }
 
   Future<void> _showFeedbackAndComplete() async {
-    final result = await FeedbackModal.show(context, widget.training);
+    final result = await FeedbackModal.show(
+      context,
+      widget.training,
+      elapsedSeconds: _controller.elapsedSeconds,
+    );
     if (result == null) return;
     await _markTrainingComplete(result);
     if (mounted) {
@@ -113,6 +117,7 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
       widget.training.id,
       feedback: result.feedback,
       activityFeedback: result.activityFeedback,
+      completedIn: result.completedIn,
     );
     if (!response.isSuccess && mounted) {
       AdaptiveNotification.showError(
@@ -241,7 +246,11 @@ class _TabataTimerScreenState extends State<TabataTimerScreen> {
           TextButton(
             onPressed: () async {
               Navigator.of(dialogContext).pop();
-              final result = await FeedbackModal.show(context, widget.training);
+              final result = await FeedbackModal.show(
+                context,
+                widget.training,
+                elapsedSeconds: _controller.elapsedSeconds,
+              );
               if (result == null) return;
               await _markTrainingComplete(result);
               if (mounted) {

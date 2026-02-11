@@ -119,7 +119,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   Future<void> _completeTraining(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
     final trainingService = context.read<ServiceLocator>().trainingService;
-    final result = await FeedbackModal.show(context, training);
+    final result = await FeedbackModal.show(context, training, elapsedSeconds: training.duration);
     if (result == null) return;
 
     final response = await trainingService.completeTraining(
@@ -127,6 +127,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       feedback: result.feedback,
       activityFeedback: result.activityFeedback,
       activityReports: result.activityReports,
+      completedIn: result.completedIn,
     );
 
     if (context.mounted) {
@@ -149,6 +150,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       training.id,
       feedback: result.feedback,
       activityFeedback: result.activityFeedback,
+      completedIn: result.completedIn,
     );
 
     if (context.mounted) {

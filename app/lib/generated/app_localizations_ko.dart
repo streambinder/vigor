@@ -809,6 +809,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get anyAdditionalComments => '추가 의견이 있으신가요?';
 
   @override
+  String get actualDuration => '실제 소요 시간 (분)';
+
+  @override
   String get tooEasy => '너무 쉬움';
 
   @override

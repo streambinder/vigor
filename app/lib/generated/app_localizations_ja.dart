@@ -809,6 +809,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get anyAdditionalComments => '追加のコメントはありますか？';
 
   @override
+  String get actualDuration => '実際の所要時間（分）';
+
+  @override
   String get tooEasy => '簡単すぎる';
 
   @override

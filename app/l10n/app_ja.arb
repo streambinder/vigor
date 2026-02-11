@@ -284,6 +284,7 @@
 
   "howWasYourTraining": "トレーニングはいかがでしたか？",
   "anyAdditionalComments": "追加のコメントはありますか？",
+  "actualDuration": "実際の所要時間（分）",
   "tooEasy": "簡単すぎる",
   "tooHard": "難しすぎる",
   "flag": "フラグ",

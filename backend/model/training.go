@@ -97,6 +97,7 @@ type Training struct {
 	Feedback    string         `json:"feedback" prompt:"-"`
 
 	CompletedAt *time.Time `json:"completed_at" prompt:"-"`
+	CompletedIn *int       `json:"completed_in" prompt:"-"`
 	CreatedAt   time.Time  `json:"created_at" prompt:"-"`
 	UpdatedAt   time.Time  `json:"-"`
 
@@ -287,6 +288,7 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 	clone.Prompt = []byte("{}")
 	clone.Feedback = ""
 	clone.CompletedAt = nil
+	clone.CompletedIn = nil
 	clone.CreatedAt = time.Time{}
 	clone.UpdatedAt = time.Time{}
 	clone.GymID = nil // gym belongs to original user

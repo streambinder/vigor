@@ -442,6 +442,16 @@ Age:`)
 //line llm/prompt/gen_training.qtpl:85
 			qw422016.E().S(training.Methodology)
 //line llm/prompt/gen_training.qtpl:85
+			if training.CompletedIn != nil {
+//line llm/prompt/gen_training.qtpl:85
+				qw422016.N().S(` | `)
+//line llm/prompt/gen_training.qtpl:85
+				qw422016.N().D(*training.CompletedIn / 60)
+//line llm/prompt/gen_training.qtpl:85
+				qw422016.N().S(`min actual`)
+//line llm/prompt/gen_training.qtpl:85
+			}
+//line llm/prompt/gen_training.qtpl:85
 			if len(training.Feedback) > 0 {
 //line llm/prompt/gen_training.qtpl:85
 				qw422016.N().S(` | Feedback: "`)

@@ -176,6 +176,7 @@ class AmrapController extends TimerController {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_isPaused) return;
+      if (!isCountdown) tickElapsed();
 
       if (_globalSecondsRemaining > 0) {
         _globalSecondsRemaining--;

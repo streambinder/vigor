@@ -142,6 +142,7 @@ class TrainingService {
     String? feedback,
     Map<String, String>? activityFeedback,
     List<String>? activityReports,
+    int? completedIn,
   }) async {
     AppLogger.debug('[TrainingService] Completing training: $trainingId');
 
@@ -154,6 +155,9 @@ class TrainingService {
     }
     if (activityReports != null && activityReports.isNotEmpty) {
       body['activityReports'] = activityReports;
+    }
+    if (completedIn != null) {
+      body['completedIn'] = completedIn;
     }
 
     final response = await _apiService.post('/training/complete/$trainingId', body: body.isNotEmpty ? body : null);
@@ -181,6 +185,7 @@ class TrainingService {
     String trainingId, {
     String? feedback,
     Map<String, String>? activityFeedback,
+    int? completedIn,
   }) async {
     AppLogger.debug('[TrainingService] Updating feedback for training: $trainingId');
 
@@ -190,6 +195,9 @@ class TrainingService {
     }
     if (activityFeedback != null) {
       body['activityFeedback'] = activityFeedback;
+    }
+    if (completedIn != null) {
+      body['completedIn'] = completedIn;
     }
 
     final response = await _apiService.put('/training/feedback/$trainingId', body: body);
