@@ -88,7 +88,7 @@ services:
       LLAMACPP_TIERS: http://llm:8080
       INFINITY_TIERS: http://embedding:7997
       OPENROUTER_API_KEY: sk-or-v1-blablabla
-      OPENROUTER_MODEL: openai/gpt-oss-20b:free
+      OPENROUTER_MODELS: openai/gpt-oss-20b:free
       GOOGLE_CLIENT_ID: 123123123-abcedfghilmnopqrstuvz.apps.googleusercontent.com
       METRICS_URL: /data/metrics.db
     volumes:

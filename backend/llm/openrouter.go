@@ -2,6 +2,7 @@ package llm
 
 import (
 	"os"
+	"strings"
 )
 
 const defaultOpenRouterModel = "google/gemini-2.5-flash-lite"
@@ -12,14 +13,17 @@ func init() {
 		return
 	}
 
-	model := os.Getenv("OPENROUTER_MODEL")
-	if model == "" {
-		model = defaultOpenRouterModel
+	models := os.Getenv("OPENROUTER_MODELS")
+	if models == "" {
+		models = defaultOpenRouterModel
 	}
 
-	providers = append(providers, &OpenAI{
-		provider: "openrouter",
-		model:    model,
-		client:   openAIClient("https://openrouter.ai", apiKey),
-	})
+	client := openAIClient("https://openrouter.ai", apiKey)
+	for m := range strings.SplitSeq(models, ",") {
+		providers = append(providers, &OpenAI{
+			provider: "openrouter",
+			model:    m,
+			client:   client,
+		})
+	}
 }

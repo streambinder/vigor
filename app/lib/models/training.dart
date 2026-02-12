@@ -4,6 +4,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'training_reasoning.dart';
 import 'routine.dart';
+import 'training_prompt.dart';
 import 'training_feedback.dart';
 import 'gym.dart';
 
@@ -35,8 +36,8 @@ class Training {
   final List<String> references;
   @JsonKey(name: 'routines', defaultValue: [])
   final List<Routine> routines;
-  @JsonKey(name: 'prompt', defaultValue: {})
-  final Map<String, dynamic> prompt;
+  @JsonKey(name: 'prompt')
+  final TrainingPrompt prompt;
   @JsonKey(name: 'feedback')
   final TrainingFeedback feedback;
   @JsonKey(name: 'completed_at', toJson: _nullableDateTimeToJson)

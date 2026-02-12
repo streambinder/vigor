@@ -25,6 +25,18 @@ const (
 	FeedbackSkipped = "skipped"
 )
 
+// LLMPrompt holds the system/user prompt pair sent to the LLM.
+type LLMPrompt struct {
+	System string `json:"system"`
+	User   string `json:"user"`
+}
+
+// TrainingPrompt wraps the LLM prompt with the model that served it.
+type TrainingPrompt struct {
+	Query LLMPrompt `json:"query"`
+	Model string    `json:"model"`
+}
+
 // JSONSchemaFormat defines the structure for OpenRouter's structured outputs
 type JSONSchemaFormat struct {
 	Type       string     `json:"type"`
@@ -100,7 +112,7 @@ type Training struct {
 	Request     string         `json:"request" prompt:"-"`
 	References  pq.StringArray `gorm:"type:text[]" json:"references" prompt:"DOI URLs from facts used (empty if none)"`
 	Routines    []Routine      `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"routines" prompt:"Training routines"`
-	Prompt   datatypes.JSON                       `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
+	Prompt   datatypes.JSONType[TrainingPrompt]    `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
 	Feedback datatypes.JSONType[TrainingFeedback] `gorm:"type:jsonb" json:"feedback" prompt:"-"`
 
 	CompletedAt *time.Time `json:"completed_at" prompt:"-"`
@@ -292,7 +304,7 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 	clone.ID = uuid.UUID{}
 	clone.UserID = newUserID
 	clone.ParentID = &t.ID
-	clone.Prompt = []byte("{}")
+	clone.Prompt = datatypes.NewJSONType(TrainingPrompt{})
 	clone.Feedback = datatypes.NewJSONType(TrainingFeedback{})
 	clone.CompletedAt = nil
 	clone.CompletedIn = nil

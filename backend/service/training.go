@@ -211,6 +211,13 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		return nil, err
 	}
 
+	// round-robin: find the model used in the user's most recent training
+	var lastModel string
+	database.DB.Raw(
+		`SELECT prompt->>'model' FROM trainings WHERE user_id = ? AND prompt->>'model' IS NOT NULL ORDER BY created_at DESC LIMIT 1`,
+		userID,
+	).Scan(&lastModel)
+
 	llmStart := time.Now()
 	training, llmPrompt, llmModel, err := llm.GenTraining(
 		profiles,
@@ -229,6 +236,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		recentTrainings,
 		facts,
 		skipWarmupCooldown,
+		lastModel,
 	)
 	if err != nil {
 		reason := "llm_error"
@@ -318,9 +326,10 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 
 	training.Description = training.BuildDescription()
 	training.UserID = requestorProfile.UserID
-	if promptJSON, err := json.Marshal(llmPrompt); err == nil {
-		training.Prompt = promptJSON
-	}
+	training.Prompt = datatypes.NewJSONType(model.TrainingPrompt{
+		Query: llmPrompt,
+		Model: llmModel,
+	})
 	if gym != nil {
 		training.GymID = &gym.ID
 		training.Gym = gym

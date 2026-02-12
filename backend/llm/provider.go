@@ -19,21 +19,22 @@ var providers = []LLM{}
 
 // LLM defines the interface for language model providers.
 type LLM interface {
-	query(prompt llmPrompt, temperature float64, maxTokens int) ([]byte, string, error)
+	query(prompt model.LLMPrompt, temperature float64, maxTokens int) ([]byte, string, error)
 }
 
-type llmPrompt struct {
-	System string `json:"system"`
-	User   string `json:"user"`
-}
-
-func getLLM(_ []model.Profile) LLM {
-	// this is a placeholder for now
-	// eventually we'll be able to discern what LLM
-	// to use for a given profile, if they have specific
-	// settings, e.g. a personal token
+// getLLM picks the next provider via round-robin based on lastModel.
+// Empty or unrecognized lastModel falls back to providers[0].
+func getLLM(lastModel string) LLM {
 	if len(providers) == 0 {
 		log.Fatal().Msg("No LLMs available")
+	}
+
+	if lastModel != "" {
+		for i, p := range providers {
+			if oai, ok := p.(*OpenAI); ok && oai.model == lastModel {
+				return providers[(i+1)%len(providers)]
+			}
+		}
 	}
 
 	return providers[0]
@@ -57,14 +58,15 @@ func GenTraining(
 	recentTrainings []model.Training,
 	facts []model.Fact,
 	skipWarmupCooldown bool,
-) (*model.Training, llmPrompt, string, error) {
+	lastModel string,
+) (*model.Training, model.LLMPrompt, string, error) {
 	goalIDs := make([]string, len(goals))
 	for i, g := range goals {
 		goalIDs[i] = g.ID
 	}
-	request := llmPrompt{
-		prompt.System(goals, methodology, methodologies, skipWarmupCooldown, len(modifiers) > 0),
-		prompt.GenTraining(
+	request := model.LLMPrompt{
+		System: prompt.System(goals, methodology, methodologies, skipWarmupCooldown, len(modifiers) > 0),
+		User: prompt.GenTraining(
 			profiles,
 			goalIDs,
 			workExercises,
@@ -82,7 +84,7 @@ func GenTraining(
 			skipWarmupCooldown,
 		),
 	}
-	response, llmModel, err := getLLM(profiles).query(
+	response, llmModel, err := getLLM(lastModel).query(
 		request,
 		0.35, // Balanced: structured output + training variety
 		16000,

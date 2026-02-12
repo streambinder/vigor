@@ -30,7 +30,7 @@ func openAIClient(host, apiKey string) openai.Client {
 	)
 }
 
-func (llm *OpenAI) query(prompt llmPrompt, temperature float64, maxTokens int) ([]byte, string, error) {
+func (llm *OpenAI) query(prompt model.LLMPrompt, temperature float64, maxTokens int) ([]byte, string, error) {
 	start := time.Now()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
