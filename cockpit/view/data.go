@@ -24,6 +24,7 @@ type DashboardData struct {
 	HandlerRequestLatencies       []LatencySeries
 	HandlerRequestErrors          []LatencySeries
 	TrainingGenerationFailures    []LatencySeries
+	BadQualityPerModel            []LatencySeries
 	Trainings                     []model.Training
 	Reports                       []model.Report
 	Users                         []model.User

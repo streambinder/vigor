@@ -27,6 +27,7 @@ func Dashboard(c *fiber.Ctx) error {
 	handlerStats, _ := database.GetHandlerRequestStats(14)
 	errorStats, _ := database.GetHandlerErrorStats(14)
 	trainingFailureStats, _ := database.GetTrainingGenerationFailures(14)
+	badQualityStats, _ := database.GetBadQualityPerModel()
 	trainings, _ := database.GetTrainings()
 	reports, _ := database.GetReports()
 	users, _ := database.GetUsers()
@@ -43,6 +44,7 @@ func Dashboard(c *fiber.Ctx) error {
 		HandlerRequestLatencies:      toLatencySeries(handlerStats),
 		HandlerRequestErrors:         toErrorSeries(errorStats),
 		TrainingGenerationFailures:   toErrorSeries(trainingFailureStats),
+		BadQualityPerModel:           toBadQualitySeries(badQualityStats),
 		Trainings:                    trainings,
 		Reports:                      reports,
 		Users:                        users,
@@ -198,6 +200,17 @@ func generateDayRange(daySet map[string]bool) []string {
 		days = append(days, d.Format("2006-01-02"))
 	}
 	return days
+}
+
+func toBadQualitySeries(stats []database.ModelQualityPoint) []view.LatencySeries {
+	if len(stats) == 0 {
+		return nil
+	}
+	points := make([]view.LatencyDataPoint, len(stats))
+	for i, s := range stats {
+		points[i] = view.LatencyDataPoint{Label: s.Model, Value: float64(s.Count)}
+	}
+	return []view.LatencySeries{{Name: "Bad Quality", Points: points}}
 }
 
 func DeleteReport(c *fiber.Ctx) error {

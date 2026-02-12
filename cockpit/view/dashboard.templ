@@ -38,10 +38,15 @@ templ Dashboard(data DashboardData) {
 		</div>
 		@templ.JSONScript("training-chart-data", multiSeriesChartData(data.TrainingGenerationLatencies))
 		<div class="chart-container">
-			<div class="chart-title">Training Generation Failures <span class="muted">(count)</span></div>
+			<div class="chart-title">Training Generation Failures</div>
 			<div id="training-failures-chart"></div>
 		</div>
 		@templ.JSONScript("training-failures-chart-data", multiSeriesChartData(data.TrainingGenerationFailures))
+		<div class="chart-container">
+			<div class="chart-title">Bad Quality Ratings</div>
+			<div id="bad-quality-chart"></div>
+		</div>
+		@templ.JSONScript("bad-quality-chart-data", multiSeriesChartData(data.BadQualityPerModel))
 		<div class="chart-container">
 			<div class="chart-title">Handler Request Latency <span class="muted">(p95 ms)</span></div>
 			<div id="handler-latency-chart"></div>
@@ -277,13 +282,23 @@ templ latencyChartScript() {
 						axisBorder: { color: '#30363d' },
 						axisTicks: { color: '#30363d' }
 					},
-					yaxis: {
-						min: 0,
-						labels: {
-							style: { colors: '#8b949e' },
-							formatter: function(val) { return suffix ? val.toFixed(1) : Math.round(val); }
+					yaxis: function() {
+						var cfg = {
+							min: 0,
+							labels: {
+								style: { colors: '#8b949e' },
+								formatter: function(val) { return suffix ? val.toFixed(1) : Math.round(val); }
+							}
+						};
+						if (!suffix) {
+							var max = 0;
+							series.forEach(function(s) { s.data.forEach(function(v) { if (v > max) max = v; }); });
+							max = Math.max(max, 10);
+							cfg.tickAmount = max;
+							cfg.max = max;
 						}
-					},
+						return cfg;
+					}(),
 					grid: {
 						borderColor: '#30363d',
 						strokeDashArray: 4
@@ -298,11 +313,52 @@ templ latencyChartScript() {
 				};
 				new ApexCharts(document.querySelector(chartId), options).render();
 			}
+			function renderBarChart(dataId, chartId) {
+				var chartData = JSON.parse(document.getElementById(dataId).textContent);
+				if (!chartData.series || chartData.series.length === 0) return;
+				var options = {
+					series: [{ name: chartData.series[0].name, data: chartData.series[0].data }],
+					chart: {
+						type: 'bar',
+						height: 300,
+						background: 'transparent',
+						toolbar: { show: false },
+						animations: { enabled: false }
+					},
+					plotOptions: { bar: { borderRadius: 4, horizontal: true } },
+					dataLabels: { enabled: true, style: { colors: ['#c9d1d9'] } },
+					xaxis: function() {
+						var max = 0;
+						chartData.series[0].data.forEach(function(v) { if (v > max) max = v; });
+						max = Math.max(max, 10);
+						return {
+							categories: chartData.labels,
+							labels: {
+								style: { colors: '#8b949e' },
+								formatter: function(val) { return Math.round(val); }
+							},
+							axisBorder: { color: '#30363d' },
+							axisTicks: { color: '#30363d' },
+							tickAmount: max,
+							max: max,
+							min: 0
+						};
+					}(),
+					yaxis: { labels: { style: { colors: '#8b949e' } } },
+					grid: { borderColor: '#30363d', strokeDashArray: 4 },
+					tooltip: {
+						theme: 'dark',
+						y: { formatter: function(val) { return Math.round(val); } }
+					}
+				};
+				new ApexCharts(document.querySelector(chartId), options).render();
+			}
 			renderChart('active-users-chart-data', '#active-users-chart', '');
 			renderChart('training-chart-data', '#training-latency-chart', ' ms');
 			renderChart('handler-chart-data', '#handler-latency-chart', ' ms');
 			renderChart('training-failures-chart-data', '#training-failures-chart', '');
 			renderChart('errors-chart-data', '#handler-errors-chart', '');
+			renderBarChart('bad-quality-chart-data', '#bad-quality-chart');
 		})();
 	</script>
 }

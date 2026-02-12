@@ -105,6 +105,28 @@ func GetUsers() ([]model.User, error) {
 	return users, err
 }
 
+type ModelQualityPoint struct {
+	Model string
+	Count int64
+}
+
+func GetBadQualityPerModel() ([]ModelQualityPoint, error) {
+	if DB == nil {
+		return nil, nil
+	}
+	var results []ModelQualityPoint
+	err := DB.Raw(`
+		SELECT prompt->>'model' AS model, COUNT(*) AS count
+		FROM trainings
+		WHERE feedback->>'quality' = 'false'
+		  AND prompt->>'model' IS NOT NULL
+		  AND prompt->>'model' != ''
+		GROUP BY prompt->>'model'
+		ORDER BY count DESC
+	`).Scan(&results).Error
+	return results, err
+}
+
 func DeleteReport(id string) error {
 	if DB == nil {
 		return nil
