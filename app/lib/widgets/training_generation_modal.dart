@@ -21,14 +21,11 @@ enum EquipmentMode { bodyweight, gym, custom }
 class TrainingGenerationModal extends StatefulWidget {
   final List<Gym> gyms;
   final Function(Training)? onSuccess;
-  /// Recommended duration range [min, max] from weekly target, if available
-  final List<int>? recommendedDurationRange;
 
   const TrainingGenerationModal({
     super.key,
     required this.gyms,
     this.onSuccess,
-    this.recommendedDurationRange,
   });
 
   @override
@@ -55,6 +52,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   final Set<String> _selectedMuscles = {};
   List<String> _availableMethodologies = [];
   bool _advancedExpanded = false;
+  List<int>? _recommendedDurationRange;
 
   @override
   void initState() {
@@ -73,6 +71,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     _loadGoals();
     _loadMuscles();
     _loadMethodologies();
+    _loadRecommendedDuration();
   }
 
   Future<void> _loadGoals() async {
@@ -116,6 +115,18 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       setState(() {
         _availableMethodologies = response.data!;
       });
+    }
+  }
+
+  Future<void> _loadRecommendedDuration() async {
+    final progressService = context.read<ServiceLocator>().progressService;
+    final response = await progressService.getWeeklyTarget();
+    if (!mounted) return;
+    if (response.isSuccess && response.data != null) {
+      final mins = response.data!.recommendation.sessionDurationMins;
+      if (mins.isNotEmpty) {
+        setState(() => _recommendedDurationRange = mins);
+      }
     }
   }
 
@@ -805,7 +816,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   }
 
   Widget _buildDurationSlider(AppLocalizations l10n) {
-    final rec = widget.recommendedDurationRange;
+    final rec = _recommendedDurationRange;
     final hasRecommendation = rec != null && rec.length >= 2;
     final isSingleValue = hasRecommendation && rec[0] == rec[1];
     // format recommendation label: "X min" if single value, "X-Y min" if range
