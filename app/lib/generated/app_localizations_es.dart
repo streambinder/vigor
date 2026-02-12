@@ -1124,4 +1124,112 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get bad => 'Malo';
+
+  @override
+  String get loadingMsg1 => 'Analizando tu perfil...';
+
+  @override
+  String get loadingMsg2 => 'Seleccionando ejercicios...';
+
+  @override
+  String get loadingMsg3 => 'Construyendo tu rutina...';
+
+  @override
+  String get loadingMsg4 => 'Calculando volumen de entrenamiento...';
+
+  @override
+  String get loadingMsg5 => 'Optimizando intervalos de descanso...';
+
+  @override
+  String get loadingMsg6 => 'Consultando investigaciones...';
+
+  @override
+  String get loadingMsg7 => 'Equilibrando grupos musculares...';
+
+  @override
+  String get loadingMsg8 => 'Diseñando ruta de progresión...';
+
+  @override
+  String get loadingMsg9 => 'Ajustando la intensidad...';
+
+  @override
+  String get loadingMsg10 => 'Revisando patrones de movimiento...';
+
+  @override
+  String get loadingMsg11 => 'Evaluando necesidades de recuperación...';
+
+  @override
+  String get loadingMsg12 => 'Eligiendo variantes de ejercicio...';
+
+  @override
+  String get loadingMsg13 => 'Estructurando bloques de trabajo...';
+
+  @override
+  String get loadingMsg14 => 'Definiendo intervalos de trabajo...';
+
+  @override
+  String get loadingMsg15 => 'Aplicando ciencia del ejercicio...';
+
+  @override
+  String get loadingMsg16 => 'Diseñando calentamiento...';
+
+  @override
+  String get loadingMsg17 => 'Mapeando familias de movimiento...';
+
+  @override
+  String get loadingMsg18 => 'Evaluando distribución de carga...';
+
+  @override
+  String get loadingMsg19 => 'Personalizando tu sesión...';
+
+  @override
+  String get loadingMsg20 => 'Casi listo...';
+
+  @override
+  String loadingMsgGoal(String goal) {
+    return 'Optimizando para $goal...';
+  }
+
+  @override
+  String get loadingMsgInjuries => 'Adaptando según tus lesiones...';
+
+  @override
+  String get loadingMsgFavorites => 'Priorizando tus ejercicios favoritos...';
+
+  @override
+  String get loadingMsgConditions => 'Adaptando a tus condiciones...';
+
+  @override
+  String loadingMsgMethodology(String methodology) {
+    return 'Diseñando sesión de $methodology...';
+  }
+
+  @override
+  String get loadingMsgPartners => 'Coordinando entrenamiento en pareja...';
+
+  @override
+  String loadingMsgGym(String gym) {
+    return 'Cargando equipamiento de $gym...';
+  }
+
+  @override
+  String get loadingMsgHistory => 'Analizando tus sesiones recientes...';
+
+  @override
+  String get loadingRetryMsg1 => 'hmm, no salió bien — reintentando';
+
+  @override
+  String get loadingRetryMsg2 => 'déjame intentar de nuevo...';
+
+  @override
+  String get loadingRetryMsg3 => 'no del todo — otro intento';
+
+  @override
+  String get loadingRetryMsg4 => 'un intento más, un momento';
+
+  @override
+  String get loadingRetryMsg5 => 'oops, recalibrando...';
+
+  @override
+  String get loadingRetryMsg6 => 'casi lo tenía — otra vez';
 }

@@ -534,5 +534,57 @@
   "trainingQualityHint": "Helps us evaluate AI training quality",
   "qualityReasonHint": "What could be improved?",
   "good": "Good",
-  "bad": "Bad"
+  "bad": "Bad",
+
+  "loadingMsg1": "Analyzing your profile...",
+  "loadingMsg2": "Selecting exercises...",
+  "loadingMsg3": "Building your routine...",
+  "loadingMsg4": "Calculating training volume...",
+  "loadingMsg5": "Optimizing rest intervals...",
+  "loadingMsg6": "Cross-referencing exercise research...",
+  "loadingMsg7": "Balancing muscle groups...",
+  "loadingMsg8": "Crafting progression path...",
+  "loadingMsg9": "Fine-tuning intensity...",
+  "loadingMsg10": "Reviewing movement patterns...",
+  "loadingMsg11": "Assessing recovery needs...",
+  "loadingMsg12": "Picking exercise variations...",
+  "loadingMsg13": "Structuring training blocks...",
+  "loadingMsg14": "Timing work intervals...",
+  "loadingMsg15": "Applying exercise science...",
+  "loadingMsg16": "Designing warm-up sequence...",
+  "loadingMsg17": "Mapping movement families...",
+  "loadingMsg18": "Evaluating load distribution...",
+  "loadingMsg19": "Personalizing your session...",
+  "loadingMsg20": "Almost ready...",
+
+  "loadingMsgGoal": "Optimizing for {goal}...",
+  "@loadingMsgGoal": {
+    "placeholders": {
+      "goal": {"type": "String"}
+    }
+  },
+  "loadingMsgInjuries": "Adapting around your injuries...",
+  "loadingMsgFavorites": "Prioritizing your favorite exercises...",
+  "loadingMsgConditions": "Adapting for your conditions...",
+  "loadingMsgMethodology": "Designing a {methodology} session...",
+  "@loadingMsgMethodology": {
+    "placeholders": {
+      "methodology": {"type": "String"}
+    }
+  },
+  "loadingMsgPartners": "Coordinating partner workout...",
+  "loadingMsgGym": "Loading {gym} equipment...",
+  "@loadingMsgGym": {
+    "placeholders": {
+      "gym": {"type": "String"}
+    }
+  },
+  "loadingMsgHistory": "Analyzing your recent sessions...",
+
+  "loadingRetryMsg1": "hmm, that didn't come out right — retrying",
+  "loadingRetryMsg2": "let me try that again...",
+  "loadingRetryMsg3": "not quite — giving it another shot",
+  "loadingRetryMsg4": "one more try, hang tight",
+  "loadingRetryMsg5": "oops, recalibrating...",
+  "loadingRetryMsg6": "almost had it — trying again"
 }

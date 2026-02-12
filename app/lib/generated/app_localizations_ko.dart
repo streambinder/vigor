@@ -1094,4 +1094,112 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get bad => '나쁨';
+
+  @override
+  String get loadingMsg1 => '프로필 분석 중...';
+
+  @override
+  String get loadingMsg2 => '운동 선택 중...';
+
+  @override
+  String get loadingMsg3 => '루틴 구성 중...';
+
+  @override
+  String get loadingMsg4 => '트레이닝 볼륨 계산 중...';
+
+  @override
+  String get loadingMsg5 => '휴식 간격 최적화 중...';
+
+  @override
+  String get loadingMsg6 => '운동 연구 참조 중...';
+
+  @override
+  String get loadingMsg7 => '근육군 균형 조정 중...';
+
+  @override
+  String get loadingMsg8 => '진행 경로 설계 중...';
+
+  @override
+  String get loadingMsg9 => '강도 미세 조정 중...';
+
+  @override
+  String get loadingMsg10 => '동작 패턴 검토 중...';
+
+  @override
+  String get loadingMsg11 => '회복 필요량 평가 중...';
+
+  @override
+  String get loadingMsg12 => '운동 변형 선택 중...';
+
+  @override
+  String get loadingMsg13 => '트레이닝 블록 구조화 중...';
+
+  @override
+  String get loadingMsg14 => '작업 간격 설정 중...';
+
+  @override
+  String get loadingMsg15 => '운동 과학 적용 중...';
+
+  @override
+  String get loadingMsg16 => '워밍업 설계 중...';
+
+  @override
+  String get loadingMsg17 => '동작 패밀리 매핑 중...';
+
+  @override
+  String get loadingMsg18 => '부하 분배 평가 중...';
+
+  @override
+  String get loadingMsg19 => '세션 개인화 중...';
+
+  @override
+  String get loadingMsg20 => '거의 완료...';
+
+  @override
+  String loadingMsgGoal(String goal) {
+    return '$goal 최적화 중...';
+  }
+
+  @override
+  String get loadingMsgInjuries => '부상에 맞춰 조정 중...';
+
+  @override
+  String get loadingMsgFavorites => '선호 운동 우선 배치 중...';
+
+  @override
+  String get loadingMsgConditions => '컨디션에 맞춰 조정 중...';
+
+  @override
+  String loadingMsgMethodology(String methodology) {
+    return '$methodology 세션 설계 중...';
+  }
+
+  @override
+  String get loadingMsgPartners => '파트너 운동 조정 중...';
+
+  @override
+  String loadingMsgGym(String gym) {
+    return '$gym 장비 로딩 중...';
+  }
+
+  @override
+  String get loadingMsgHistory => '최근 세션 분석 중...';
+
+  @override
+  String get loadingRetryMsg1 => '음, 잘 안 됐어요 — 다시 시도 중';
+
+  @override
+  String get loadingRetryMsg2 => '다시 해볼게요...';
+
+  @override
+  String get loadingRetryMsg3 => '아쉽네요 — 한 번 더';
+
+  @override
+  String get loadingRetryMsg4 => '한 번 더, 잠시만요';
+
+  @override
+  String get loadingRetryMsg5 => '이런, 재조정 중...';
+
+  @override
+  String get loadingRetryMsg6 => '거의 됐어요 — 다시 시도';
 }

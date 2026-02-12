@@ -1128,4 +1128,112 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get bad => 'Schlecht';
+
+  @override
+  String get loadingMsg1 => 'Analyse deines Profils...';
+
+  @override
+  String get loadingMsg2 => 'Übungen auswählen...';
+
+  @override
+  String get loadingMsg3 => 'Routine wird erstellt...';
+
+  @override
+  String get loadingMsg4 => 'Trainingsvolumen berechnen...';
+
+  @override
+  String get loadingMsg5 => 'Pausenzeiten optimieren...';
+
+  @override
+  String get loadingMsg6 => 'Studien abgleichen...';
+
+  @override
+  String get loadingMsg7 => 'Muskelgruppen ausbalancieren...';
+
+  @override
+  String get loadingMsg8 => 'Progressionspfad erstellen...';
+
+  @override
+  String get loadingMsg9 => 'Intensität feinabstimmen...';
+
+  @override
+  String get loadingMsg10 => 'Bewegungsmuster prüfen...';
+
+  @override
+  String get loadingMsg11 => 'Erholungsbedarf einschätzen...';
+
+  @override
+  String get loadingMsg12 => 'Übungsvarianten auswählen...';
+
+  @override
+  String get loadingMsg13 => 'Trainingsblöcke strukturieren...';
+
+  @override
+  String get loadingMsg14 => 'Arbeitsintervalle festlegen...';
+
+  @override
+  String get loadingMsg15 => 'Sportwissenschaft anwenden...';
+
+  @override
+  String get loadingMsg16 => 'Aufwärmphase gestalten...';
+
+  @override
+  String get loadingMsg17 => 'Bewegungsfamilien zuordnen...';
+
+  @override
+  String get loadingMsg18 => 'Lastverteilung bewerten...';
+
+  @override
+  String get loadingMsg19 => 'Deine Session personalisieren...';
+
+  @override
+  String get loadingMsg20 => 'Fast fertig...';
+
+  @override
+  String loadingMsgGoal(String goal) {
+    return 'Optimierung für $goal...';
+  }
+
+  @override
+  String get loadingMsgInjuries => 'Anpassung an deine Verletzungen...';
+
+  @override
+  String get loadingMsgFavorites => 'Deine Lieblingsübungen priorisieren...';
+
+  @override
+  String get loadingMsgConditions => 'Anpassung an deine Bedingungen...';
+
+  @override
+  String loadingMsgMethodology(String methodology) {
+    return '$methodology-Session gestalten...';
+  }
+
+  @override
+  String get loadingMsgPartners => 'Partnertraining koordinieren...';
+
+  @override
+  String loadingMsgGym(String gym) {
+    return '$gym-Geräte laden...';
+  }
+
+  @override
+  String get loadingMsgHistory => 'Letzte Trainings analysieren...';
+
+  @override
+  String get loadingRetryMsg1 => 'hmm, das war nicht ganz richtig — nochmal';
+
+  @override
+  String get loadingRetryMsg2 => 'ich versuch\'s nochmal...';
+
+  @override
+  String get loadingRetryMsg3 => 'nicht ganz — noch ein Versuch';
+
+  @override
+  String get loadingRetryMsg4 => 'noch ein Versuch, Moment';
+
+  @override
+  String get loadingRetryMsg5 => 'oops, wird neu kalibriert...';
+
+  @override
+  String get loadingRetryMsg6 => 'fast gehabt — nochmal';
 }

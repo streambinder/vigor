@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../design/tokens.dart';
@@ -35,6 +38,7 @@ class TrainingGenerationModal extends StatefulWidget {
 class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   final _formKey = GlobalKey<FormState>();
   final _promptController = TextEditingController();
+  final _random = Random();
 
   late int _duration; // minutes, range: 10-180
 
@@ -53,6 +57,13 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   List<String> _availableMethodologies = [];
   bool _advancedExpanded = false;
   List<int>? _recommendedDurationRange;
+
+  // rotating status message state
+  Timer? _messageTimer;
+  int _currentMessageIndex = 0;
+  List<String> _messagePool = [];
+  bool _showingRetryMessage = false;
+  int _retryCallbackId = 0;
 
   @override
   void initState() {
@@ -132,9 +143,109 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
   @override
   void dispose() {
+    _messageTimer?.cancel();
     _promptController.dispose();
     super.dispose();
   }
+
+  // -- rotating status messages --
+
+  List<String> _buildMessagePool() {
+    final l10n = AppLocalizations.of(context);
+    final messages = <String>[
+      l10n.loadingMsg1,
+      l10n.loadingMsg2,
+      l10n.loadingMsg3,
+      l10n.loadingMsg4,
+      l10n.loadingMsg5,
+      l10n.loadingMsg6,
+      l10n.loadingMsg7,
+      l10n.loadingMsg8,
+      l10n.loadingMsg9,
+      l10n.loadingMsg10,
+      l10n.loadingMsg11,
+      l10n.loadingMsg12,
+      l10n.loadingMsg13,
+      l10n.loadingMsg14,
+      l10n.loadingMsg15,
+      l10n.loadingMsg16,
+      l10n.loadingMsg17,
+      l10n.loadingMsg18,
+      l10n.loadingMsg19,
+      l10n.loadingMsg20,
+    ];
+
+    // contextual messages based on profile/modal state
+    try {
+      final profile = context.read<AuthProvider>().currentUser?.profile;
+      if (profile != null && profile.data.isNotEmpty) {
+        final profileData = profile_models.ProfileData.fromJson(profile.data);
+        for (final goal in profileData.goals) {
+          messages.add(l10n.loadingMsgGoal(KnowledgeLabels.goalLabel(goal, l10n)));
+        }
+        if (profileData.injuries.isNotEmpty) messages.add(l10n.loadingMsgInjuries);
+        if (profileData.conditions.isNotEmpty) messages.add(l10n.loadingMsgConditions);
+        if (profileData.preferences?.exercises?.isNotEmpty == true) {
+          messages.add(l10n.loadingMsgFavorites);
+        }
+      }
+    } catch (_) {}
+
+    if (_methodology != null) {
+      messages.add(l10n.loadingMsgMethodology(
+        KnowledgeLabels.methodologyLabel(_methodology!, l10n),
+      ));
+    }
+    if (_partners.isNotEmpty) messages.add(l10n.loadingMsgPartners);
+    if (_equipmentMode == EquipmentMode.gym && _selectedGym != null) {
+      messages.add(l10n.loadingMsgGym(_selectedGym!.name));
+    }
+
+    final trainings = context.read<ServiceLocator>().trainingsNotifier.value;
+    if (trainings != null && trainings.isNotEmpty) {
+      messages.add(l10n.loadingMsgHistory);
+    }
+
+    messages.shuffle(_random);
+    return messages;
+  }
+
+  void _scheduleNextMessage() {
+    _messageTimer?.cancel();
+    final delay = 2000 + _random.nextInt(2001); // 2000-4000ms
+    _messageTimer = Timer(Duration(milliseconds: delay), () {
+      if (!mounted || !_isGenerating) return;
+      setState(() {
+        _currentMessageIndex = (_currentMessageIndex + 1) % _messagePool.length;
+      });
+      _scheduleNextMessage();
+    });
+  }
+
+  void _startMessageRotation() {
+    _currentMessageIndex = 0;
+    _messagePool = _buildMessagePool();
+    _scheduleNextMessage();
+  }
+
+  void _stopMessageRotation() {
+    _messageTimer?.cancel();
+    _messageTimer = null;
+  }
+
+  String _getRetryMessage(AppLocalizations l10n) {
+    final retryMessages = [
+      l10n.loadingRetryMsg1,
+      l10n.loadingRetryMsg2,
+      l10n.loadingRetryMsg3,
+      l10n.loadingRetryMsg4,
+      l10n.loadingRetryMsg5,
+      l10n.loadingRetryMsg6,
+    ];
+    return retryMessages[(_retryAttempt ?? 0) % retryMessages.length];
+  }
+
+  // -- end rotating status messages --
 
   Future<void> _addPartner() async {
     final l10n = AppLocalizations.of(context);
@@ -725,7 +836,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     setState(() {
       _isGenerating = true;
       _retryAttempt = null;
+      _showingRetryMessage = false;
     });
+    _startMessageRotation();
 
     final trainingService = context.read<ServiceLocator>().trainingService;
 
@@ -757,11 +870,23 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       goals: _selectedGoals.isEmpty ? null : _selectedGoals.toList(),
       muscles: _selectedMuscles.isEmpty ? null : _selectedMuscles.toList(),
       onRetry: (attempt) {
-        if (mounted) {
-          setState(() => _retryAttempt = attempt);
-        }
+        if (!mounted) return;
+        setState(() {
+          _retryAttempt = attempt;
+          _showingRetryMessage = true;
+        });
+        _stopMessageRotation();
+        // resume rotation after 4s, guard against stale callbacks
+        final callbackId = ++_retryCallbackId;
+        Timer(const Duration(seconds: 4), () {
+          if (!mounted || !_isGenerating || callbackId != _retryCallbackId) return;
+          setState(() => _showingRetryMessage = false);
+          _startMessageRotation();
+        });
       },
     );
+
+    _stopMessageRotation();
 
     if (mounted) {
       setState(() {
@@ -788,28 +913,35 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 500),
-        decoration: PlatformHelper.useLiquidGlass
-            ? LiquidGlassTheme.glassDecoration(
-                borderRadius: 20,
-                isDark: isDark,
-                border: Border.all(
-                  color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.1),
-                  width: 1.5,
+    return PopScope(
+      canPop: !_isGenerating,
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(
+          horizontal: VigorSpacing.xl,
+          vertical: VigorSpacing.xl,
+        ),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          decoration: PlatformHelper.useLiquidGlass
+              ? LiquidGlassTheme.glassDecoration(
+                  borderRadius: 20,
+                  isDark: isDark,
+                  border: Border.all(
+                    color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.1),
+                    width: 1.5,
+                  ),
+                )
+              : BoxDecoration(
+                  color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+                  borderRadius: BorderRadius.circular(20),
                 ),
-              )
-            : BoxDecoration(
-                color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
-                borderRadius: BorderRadius.circular(20),
-              ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: _isGenerating
-              ? _buildLoadingView()
-              : _buildFormView(),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: _isGenerating
+                ? _buildLoadingView()
+                : _buildFormView(),
+          ),
         ),
       ),
     );
@@ -948,30 +1080,65 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
   Widget _buildLoadingView() {
     final l10n = AppLocalizations.of(context);
-    final statusText = _retryAttempt != null
-        ? l10n.generationFailedRetrying(_retryAttempt!)
-        : l10n.thisMayTakeAMoment;
-    return Padding(
-      padding: VigorSpacing.paddingXl,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AdaptiveLoadingIndicator(color: VigorColors.persimmon),
-          const SizedBox(height: VigorSpacing.lg),
-          Text(
-            l10n.generatingTraining,
-            style: VigorTypography.headline.copyWith(
-              color: VigorColors.textPrimary(context),
+    final statusText = _showingRetryMessage
+        ? _getRetryMessage(l10n)
+        : (_messagePool.isNotEmpty
+            ? _messagePool[_currentMessageIndex % _messagePool.length]
+            : l10n.thisMayTakeAMoment);
+
+    return SizedBox(
+      width: double.infinity,
+      child: Padding(
+        padding: VigorSpacing.paddingLg,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AdaptiveLoadingIndicator(color: VigorColors.persimmon),
+            const SizedBox(height: VigorSpacing.md),
+            SizedBox(
+              height: 24,
+              child: ClipRect(
+                child: AnimatedSwitcher(
+                  duration: VigorAnimation.medium,
+                  switchInCurve: VigorAnimation.entranceCurve,
+                  switchOutCurve: VigorAnimation.exitCurve,
+                  transitionBuilder: (child, animation) {
+                    final isIncoming = child.key == ValueKey(statusText);
+                    final slideOffset = Tween<Offset>(
+                      begin: Offset(isIncoming ? 0.3 : 0.0, 0.0),
+                      end: Offset(isIncoming ? 0.0 : -0.3, 0.0),
+                    ).animate(animation);
+                    return SlideTransition(
+                      position: slideOffset,
+                      child: FadeTransition(opacity: animation, child: child),
+                    );
+                  },
+                  layoutBuilder: (currentChild, previousChildren) {
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        ...previousChildren,
+                        if (currentChild != null) currentChild,
+                      ],
+                    );
+                  },
+                  child: Text(
+                    statusText,
+                    key: ValueKey(statusText),
+                    style: VigorTypography.body.copyWith(
+                      color: _showingRetryMessage
+                          ? VigorColors.persimmon
+                          : VigorColors.textSecondary(context),
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: VigorSpacing.sm),
-          Text(
-            statusText,
-            style: VigorTypography.caption.copyWith(
-              color: VigorColors.textSecondary(context),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

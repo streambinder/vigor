@@ -1094,4 +1094,112 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get bad => '悪い';
+
+  @override
+  String get loadingMsg1 => 'プロフィールを分析中...';
+
+  @override
+  String get loadingMsg2 => 'エクササイズを選択中...';
+
+  @override
+  String get loadingMsg3 => 'ルーティンを構築中...';
+
+  @override
+  String get loadingMsg4 => 'トレーニング量を計算中...';
+
+  @override
+  String get loadingMsg5 => '休憩時間を最適化中...';
+
+  @override
+  String get loadingMsg6 => '運動研究を参照中...';
+
+  @override
+  String get loadingMsg7 => '筋肉群をバランス調整中...';
+
+  @override
+  String get loadingMsg8 => '進行パスを作成中...';
+
+  @override
+  String get loadingMsg9 => '強度を微調整中...';
+
+  @override
+  String get loadingMsg10 => '動作パターンを確認中...';
+
+  @override
+  String get loadingMsg11 => '回復ニーズを評価中...';
+
+  @override
+  String get loadingMsg12 => 'エクササイズの変化形を選択中...';
+
+  @override
+  String get loadingMsg13 => 'トレーニングブロックを構成中...';
+
+  @override
+  String get loadingMsg14 => 'ワーク間隔を設定中...';
+
+  @override
+  String get loadingMsg15 => '運動科学を適用中...';
+
+  @override
+  String get loadingMsg16 => 'ウォームアップを設計中...';
+
+  @override
+  String get loadingMsg17 => '動作ファミリーをマッピング中...';
+
+  @override
+  String get loadingMsg18 => '負荷分配を評価中...';
+
+  @override
+  String get loadingMsg19 => 'セッションをパーソナライズ中...';
+
+  @override
+  String get loadingMsg20 => 'もうすぐ完了...';
+
+  @override
+  String loadingMsgGoal(String goal) {
+    return '$goalを最適化中...';
+  }
+
+  @override
+  String get loadingMsgInjuries => '怪我に合わせて調整中...';
+
+  @override
+  String get loadingMsgFavorites => 'お気に入りの種目を優先中...';
+
+  @override
+  String get loadingMsgConditions => '体調に合わせて調整中...';
+
+  @override
+  String loadingMsgMethodology(String methodology) {
+    return '$methodologyセッションを設計中...';
+  }
+
+  @override
+  String get loadingMsgPartners => 'パートナートレーニングを調整中...';
+
+  @override
+  String loadingMsgGym(String gym) {
+    return '$gymの器具を読み込み中...';
+  }
+
+  @override
+  String get loadingMsgHistory => '最近のセッションを分析中...';
+
+  @override
+  String get loadingRetryMsg1 => 'うーん、うまくいかなかった — リトライ中';
+
+  @override
+  String get loadingRetryMsg2 => 'もう一度やってみます...';
+
+  @override
+  String get loadingRetryMsg3 => 'もう少し — もう一度';
+
+  @override
+  String get loadingRetryMsg4 => 'もう一回、お待ちください';
+
+  @override
+  String get loadingRetryMsg5 => 'おっと、再調整中...';
+
+  @override
+  String get loadingRetryMsg6 => 'あと少しだった — もう一度';
 }

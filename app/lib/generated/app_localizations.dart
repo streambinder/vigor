@@ -2171,6 +2171,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bad'**
   String get bad;
+
+  /// No description provided for @loadingMsg1.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing your profile...'**
+  String get loadingMsg1;
+
+  /// No description provided for @loadingMsg2.
+  ///
+  /// In en, this message translates to:
+  /// **'Selecting exercises...'**
+  String get loadingMsg2;
+
+  /// No description provided for @loadingMsg3.
+  ///
+  /// In en, this message translates to:
+  /// **'Building your routine...'**
+  String get loadingMsg3;
+
+  /// No description provided for @loadingMsg4.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculating training volume...'**
+  String get loadingMsg4;
+
+  /// No description provided for @loadingMsg5.
+  ///
+  /// In en, this message translates to:
+  /// **'Optimizing rest intervals...'**
+  String get loadingMsg5;
+
+  /// No description provided for @loadingMsg6.
+  ///
+  /// In en, this message translates to:
+  /// **'Cross-referencing exercise research...'**
+  String get loadingMsg6;
+
+  /// No description provided for @loadingMsg7.
+  ///
+  /// In en, this message translates to:
+  /// **'Balancing muscle groups...'**
+  String get loadingMsg7;
+
+  /// No description provided for @loadingMsg8.
+  ///
+  /// In en, this message translates to:
+  /// **'Crafting progression path...'**
+  String get loadingMsg8;
+
+  /// No description provided for @loadingMsg9.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine-tuning intensity...'**
+  String get loadingMsg9;
+
+  /// No description provided for @loadingMsg10.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewing movement patterns...'**
+  String get loadingMsg10;
+
+  /// No description provided for @loadingMsg11.
+  ///
+  /// In en, this message translates to:
+  /// **'Assessing recovery needs...'**
+  String get loadingMsg11;
+
+  /// No description provided for @loadingMsg12.
+  ///
+  /// In en, this message translates to:
+  /// **'Picking exercise variations...'**
+  String get loadingMsg12;
+
+  /// No description provided for @loadingMsg13.
+  ///
+  /// In en, this message translates to:
+  /// **'Structuring training blocks...'**
+  String get loadingMsg13;
+
+  /// No description provided for @loadingMsg14.
+  ///
+  /// In en, this message translates to:
+  /// **'Timing work intervals...'**
+  String get loadingMsg14;
+
+  /// No description provided for @loadingMsg15.
+  ///
+  /// In en, this message translates to:
+  /// **'Applying exercise science...'**
+  String get loadingMsg15;
+
+  /// No description provided for @loadingMsg16.
+  ///
+  /// In en, this message translates to:
+  /// **'Designing warm-up sequence...'**
+  String get loadingMsg16;
+
+  /// No description provided for @loadingMsg17.
+  ///
+  /// In en, this message translates to:
+  /// **'Mapping movement families...'**
+  String get loadingMsg17;
+
+  /// No description provided for @loadingMsg18.
+  ///
+  /// In en, this message translates to:
+  /// **'Evaluating load distribution...'**
+  String get loadingMsg18;
+
+  /// No description provided for @loadingMsg19.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalizing your session...'**
+  String get loadingMsg19;
+
+  /// No description provided for @loadingMsg20.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost ready...'**
+  String get loadingMsg20;
+
+  /// No description provided for @loadingMsgGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Optimizing for {goal}...'**
+  String loadingMsgGoal(String goal);
+
+  /// No description provided for @loadingMsgInjuries.
+  ///
+  /// In en, this message translates to:
+  /// **'Adapting around your injuries...'**
+  String get loadingMsgInjuries;
+
+  /// No description provided for @loadingMsgFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Prioritizing your favorite exercises...'**
+  String get loadingMsgFavorites;
+
+  /// No description provided for @loadingMsgConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Adapting for your conditions...'**
+  String get loadingMsgConditions;
+
+  /// No description provided for @loadingMsgMethodology.
+  ///
+  /// In en, this message translates to:
+  /// **'Designing a {methodology} session...'**
+  String loadingMsgMethodology(String methodology);
+
+  /// No description provided for @loadingMsgPartners.
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinating partner workout...'**
+  String get loadingMsgPartners;
+
+  /// No description provided for @loadingMsgGym.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading {gym} equipment...'**
+  String loadingMsgGym(String gym);
+
+  /// No description provided for @loadingMsgHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing your recent sessions...'**
+  String get loadingMsgHistory;
+
+  /// No description provided for @loadingRetryMsg1.
+  ///
+  /// In en, this message translates to:
+  /// **'hmm, that didn\'t come out right — retrying'**
+  String get loadingRetryMsg1;
+
+  /// No description provided for @loadingRetryMsg2.
+  ///
+  /// In en, this message translates to:
+  /// **'let me try that again...'**
+  String get loadingRetryMsg2;
+
+  /// No description provided for @loadingRetryMsg3.
+  ///
+  /// In en, this message translates to:
+  /// **'not quite — giving it another shot'**
+  String get loadingRetryMsg3;
+
+  /// No description provided for @loadingRetryMsg4.
+  ///
+  /// In en, this message translates to:
+  /// **'one more try, hang tight'**
+  String get loadingRetryMsg4;
+
+  /// No description provided for @loadingRetryMsg5.
+  ///
+  /// In en, this message translates to:
+  /// **'oops, recalibrating...'**
+  String get loadingRetryMsg5;
+
+  /// No description provided for @loadingRetryMsg6.
+  ///
+  /// In en, this message translates to:
+  /// **'almost had it — trying again'**
+  String get loadingRetryMsg6;
 }
 
 class _AppLocalizationsDelegate

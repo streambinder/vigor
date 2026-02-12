@@ -1115,4 +1115,112 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get bad => 'Плохо';
+
+  @override
+  String get loadingMsg1 => 'Анализ вашего профиля...';
+
+  @override
+  String get loadingMsg2 => 'Подбор упражнений...';
+
+  @override
+  String get loadingMsg3 => 'Построение программы...';
+
+  @override
+  String get loadingMsg4 => 'Расчёт тренировочного объёма...';
+
+  @override
+  String get loadingMsg5 => 'Оптимизация интервалов отдыха...';
+
+  @override
+  String get loadingMsg6 => 'Сверка с научными данными...';
+
+  @override
+  String get loadingMsg7 => 'Балансировка мышечных групп...';
+
+  @override
+  String get loadingMsg8 => 'Составление плана прогрессии...';
+
+  @override
+  String get loadingMsg9 => 'Настройка интенсивности...';
+
+  @override
+  String get loadingMsg10 => 'Проверка двигательных паттернов...';
+
+  @override
+  String get loadingMsg11 => 'Оценка потребности в восстановлении...';
+
+  @override
+  String get loadingMsg12 => 'Выбор вариантов упражнений...';
+
+  @override
+  String get loadingMsg13 => 'Структурирование блоков...';
+
+  @override
+  String get loadingMsg14 => 'Определение рабочих интервалов...';
+
+  @override
+  String get loadingMsg15 => 'Применение спортивной науки...';
+
+  @override
+  String get loadingMsg16 => 'Планирование разминки...';
+
+  @override
+  String get loadingMsg17 => 'Маппинг двигательных семейств...';
+
+  @override
+  String get loadingMsg18 => 'Оценка распределения нагрузки...';
+
+  @override
+  String get loadingMsg19 => 'Персонализация тренировки...';
+
+  @override
+  String get loadingMsg20 => 'Почти готово...';
+
+  @override
+  String loadingMsgGoal(String goal) {
+    return 'Оптимизация для $goal...';
+  }
+
+  @override
+  String get loadingMsgInjuries => 'Адаптация с учётом травм...';
+
+  @override
+  String get loadingMsgFavorites => 'Приоритет любимым упражнениям...';
+
+  @override
+  String get loadingMsgConditions => 'Адаптация к вашим условиям...';
+
+  @override
+  String loadingMsgMethodology(String methodology) {
+    return 'Разработка сессии $methodology...';
+  }
+
+  @override
+  String get loadingMsgPartners => 'Координация парной тренировки...';
+
+  @override
+  String loadingMsgGym(String gym) {
+    return 'Загрузка оборудования $gym...';
+  }
+
+  @override
+  String get loadingMsgHistory => 'Анализ последних тренировок...';
+
+  @override
+  String get loadingRetryMsg1 => 'хмм, не получилось — пробую снова';
+
+  @override
+  String get loadingRetryMsg2 => 'попробую ещё раз...';
+
+  @override
+  String get loadingRetryMsg3 => 'не совсем — ещё одна попытка';
+
+  @override
+  String get loadingRetryMsg4 => 'ещё одна попытка, подождите';
+
+  @override
+  String get loadingRetryMsg5 => 'ой, перекалибровка...';
+
+  @override
+  String get loadingRetryMsg6 => 'почти получилось — пробую снова';
 }

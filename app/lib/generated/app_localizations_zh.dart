@@ -1092,4 +1092,112 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get bad => '差';
+
+  @override
+  String get loadingMsg1 => '分析你的个人资料...';
+
+  @override
+  String get loadingMsg2 => '选择练习动作...';
+
+  @override
+  String get loadingMsg3 => '构建你的训练计划...';
+
+  @override
+  String get loadingMsg4 => '计算训练量...';
+
+  @override
+  String get loadingMsg5 => '优化休息间隔...';
+
+  @override
+  String get loadingMsg6 => '对照运动研究...';
+
+  @override
+  String get loadingMsg7 => '平衡肌肉群...';
+
+  @override
+  String get loadingMsg8 => '制定进阶路径...';
+
+  @override
+  String get loadingMsg9 => '微调训练强度...';
+
+  @override
+  String get loadingMsg10 => '审查动作模式...';
+
+  @override
+  String get loadingMsg11 => '评估恢复需求...';
+
+  @override
+  String get loadingMsg12 => '挑选动作变式...';
+
+  @override
+  String get loadingMsg13 => '组织训练模块...';
+
+  @override
+  String get loadingMsg14 => '安排工作间隔...';
+
+  @override
+  String get loadingMsg15 => '应用运动科学...';
+
+  @override
+  String get loadingMsg16 => '设计热身方案...';
+
+  @override
+  String get loadingMsg17 => '映射动作家族...';
+
+  @override
+  String get loadingMsg18 => '评估负荷分布...';
+
+  @override
+  String get loadingMsg19 => '个性化你的训练...';
+
+  @override
+  String get loadingMsg20 => '即将完成...';
+
+  @override
+  String loadingMsgGoal(String goal) {
+    return '为$goal优化...';
+  }
+
+  @override
+  String get loadingMsgInjuries => '根据伤病情况调整...';
+
+  @override
+  String get loadingMsgFavorites => '优先安排你喜欢的动作...';
+
+  @override
+  String get loadingMsgConditions => '适应你的身体状况...';
+
+  @override
+  String loadingMsgMethodology(String methodology) {
+    return '设计$methodology训练...';
+  }
+
+  @override
+  String get loadingMsgPartners => '协调搭档训练...';
+
+  @override
+  String loadingMsgGym(String gym) {
+    return '加载$gym的设备...';
+  }
+
+  @override
+  String get loadingMsgHistory => '分析你最近的训练...';
+
+  @override
+  String get loadingRetryMsg1 => '嗯，没出来对——重试中';
+
+  @override
+  String get loadingRetryMsg2 => '让我再试一次...';
+
+  @override
+  String get loadingRetryMsg3 => '差一点——再来一次';
+
+  @override
+  String get loadingRetryMsg4 => '再试一次，稍等';
+
+  @override
+  String get loadingRetryMsg5 => '哎呀，重新校准...';
+
+  @override
+  String get loadingRetryMsg6 => '差点就好了——再试';
 }

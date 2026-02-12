@@ -1127,4 +1127,113 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get bad => 'Mauvais';
+
+  @override
+  String get loadingMsg1 => 'Analyse de votre profil...';
+
+  @override
+  String get loadingMsg2 => 'Sélection des exercices...';
+
+  @override
+  String get loadingMsg3 => 'Construction de votre routine...';
+
+  @override
+  String get loadingMsg4 => 'Calcul du volume d\'entraînement...';
+
+  @override
+  String get loadingMsg5 => 'Optimisation des temps de repos...';
+
+  @override
+  String get loadingMsg6 => 'Consultation des études...';
+
+  @override
+  String get loadingMsg7 => 'Équilibrage des groupes musculaires...';
+
+  @override
+  String get loadingMsg8 => 'Création du parcours de progression...';
+
+  @override
+  String get loadingMsg9 => 'Réglage de l\'intensité...';
+
+  @override
+  String get loadingMsg10 => 'Révision des schémas de mouvement...';
+
+  @override
+  String get loadingMsg11 => 'Évaluation des besoins de récupération...';
+
+  @override
+  String get loadingMsg12 => 'Choix des variantes d\'exercice...';
+
+  @override
+  String get loadingMsg13 => 'Structuration des blocs...';
+
+  @override
+  String get loadingMsg14 => 'Définition des intervalles...';
+
+  @override
+  String get loadingMsg15 => 'Application des sciences du sport...';
+
+  @override
+  String get loadingMsg16 => 'Conception de l\'échauffement...';
+
+  @override
+  String get loadingMsg17 => 'Mapping des familles de mouvement...';
+
+  @override
+  String get loadingMsg18 => 'Évaluation de la répartition des charges...';
+
+  @override
+  String get loadingMsg19 => 'Personnalisation de votre séance...';
+
+  @override
+  String get loadingMsg20 => 'Presque prêt...';
+
+  @override
+  String loadingMsgGoal(String goal) {
+    return 'Optimisation pour $goal...';
+  }
+
+  @override
+  String get loadingMsgInjuries => 'Adaptation à vos blessures...';
+
+  @override
+  String get loadingMsgFavorites => 'Priorisation de vos exercices préférés...';
+
+  @override
+  String get loadingMsgConditions => 'Adaptation à vos conditions...';
+
+  @override
+  String loadingMsgMethodology(String methodology) {
+    return 'Conception d\'une séance $methodology...';
+  }
+
+  @override
+  String get loadingMsgPartners => 'Coordination de l\'entraînement à deux...';
+
+  @override
+  String loadingMsgGym(String gym) {
+    return 'Chargement de l\'équipement de $gym...';
+  }
+
+  @override
+  String get loadingMsgHistory => 'Analyse de vos séances récentes...';
+
+  @override
+  String get loadingRetryMsg1 =>
+      'hmm, ce n\'est pas sorti comme prévu — on réessaie';
+
+  @override
+  String get loadingRetryMsg2 => 'laissez-moi réessayer...';
+
+  @override
+  String get loadingRetryMsg3 => 'pas tout à fait — encore un essai';
+
+  @override
+  String get loadingRetryMsg4 => 'encore un essai, un instant';
+
+  @override
+  String get loadingRetryMsg5 => 'oops, recalibrage...';
+
+  @override
+  String get loadingRetryMsg6 => 'j\'y étais presque — on réessaie';
 }
