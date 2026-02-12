@@ -1099,4 +1099,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get familyBalance => 'Баланс';
+
+  @override
+  String get trainingQuality => 'Как вам эта тренировка?';
+
+  @override
+  String get trainingQualityHint =>
+      'Помогает нам оценить качество сгенерированной тренировки';
+
+  @override
+  String get good => 'Хорошо';
+
+  @override
+  String get bad => 'Плохо';
 }

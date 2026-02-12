@@ -1079,4 +1079,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get familyBalance => 'バランス';
+
+  @override
+  String get trainingQuality => 'このトレーニングはいかがでしたか？';
+
+  @override
+  String get trainingQualityHint => 'AIトレーニングの品質評価に役立ちます';
+
+  @override
+  String get good => '良い';
+
+  @override
+  String get bad => '悪い';
 }

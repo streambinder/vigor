@@ -1111,4 +1111,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get familyBalance => 'Équilibre';
+
+  @override
+  String get trainingQuality => 'Comment avez-vous trouvé cet entraînement ?';
+
+  @override
+  String get trainingQualityHint =>
+      'Nous aide à évaluer la qualité de l\'entraînement généré';
+
+  @override
+  String get good => 'Bon';
+
+  @override
+  String get bad => 'Mauvais';
 }

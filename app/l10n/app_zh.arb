@@ -381,5 +381,10 @@
   "familyCarry": "负重行走",
   "familyCardio": "有氧",
   "familyMobility": "灵活性",
-  "familyBalance": "平衡"
+  "familyBalance": "平衡",
+
+  "trainingQuality": "你觉得这次训练怎么样？",
+  "trainingQualityHint": "帮助我们评估AI生成训练的质量",
+  "good": "好",
+  "bad": "差"
 }

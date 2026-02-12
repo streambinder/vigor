@@ -1108,4 +1108,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get familyBalance => 'Equilibrio';
+
+  @override
+  String get trainingQuality => '¿Qué te pareció este entrenamiento?';
+
+  @override
+  String get trainingQualityHint =>
+      'Nos ayuda a evaluar la calidad del entrenamiento generado';
+
+  @override
+  String get good => 'Bueno';
+
+  @override
+  String get bad => 'Malo';
 }

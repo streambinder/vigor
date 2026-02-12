@@ -2141,6 +2141,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Balance'**
   String get familyBalance;
+
+  /// No description provided for @trainingQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'How did you like this training?'**
+  String get trainingQuality;
+
+  /// No description provided for @trainingQualityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Helps us evaluate AI training quality'**
+  String get trainingQualityHint;
+
+  /// No description provided for @good.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get good;
+
+  /// No description provided for @bad.
+  ///
+  /// In en, this message translates to:
+  /// **'Bad'**
+  String get bad;
 }
 
 class _AppLocalizationsDelegate

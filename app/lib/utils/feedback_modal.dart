@@ -137,13 +137,26 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
   late final Map<String, ExerciseFeedback> _exerciseFeedback; // keyed by activity id
   late final Set<String> _flaggedActivities; // activity IDs that are flagged
 
+  bool? _trainingQuality; // null = unselected, true = good, false = bad
+
+  static const _qualityGoodPrefix = 'quality: good; ';
+  static const _qualityBadPrefix = 'quality: bad; ';
   static const _minDuration = 1.0;
   static const _maxDuration = 180.0;
 
   @override
   void initState() {
     super.initState();
-    _feedbackController.text = widget.initialFeedback ?? '';
+    // parse quality prefix from existing feedback when updating
+    var initialText = widget.initialFeedback ?? '';
+    if (initialText.startsWith(_qualityGoodPrefix)) {
+      _trainingQuality = true;
+      initialText = initialText.substring(_qualityGoodPrefix.length);
+    } else if (initialText.startsWith(_qualityBadPrefix)) {
+      _trainingQuality = false;
+      initialText = initialText.substring(_qualityBadPrefix.length);
+    }
+    _feedbackController.text = initialText;
     _durationMinutes = widget.elapsedSeconds != null && widget.elapsedSeconds! > 0
         ? min(_maxDuration, max(_minDuration, (widget.elapsedSeconds! / 60).roundToDouble()))
         : _minDuration;
@@ -161,6 +174,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
   }
 
   bool get _isValid {
+    if (_trainingQuality == null) return false;
     // if there's a prefix (methodology stats), form is valid even without user input
     if (widget.feedbackPrefix != null && widget.feedbackPrefix!.isNotEmpty) {
       return true;
@@ -191,10 +205,11 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
 
     final userFeedback = _feedbackController.text.trim().replaceAll(RegExp(r'[\r\n]+'), ' ');
     final prefix = widget.feedbackPrefix;
-    // prepend methodology stats to user feedback
+    // prepend quality rating + methodology stats to user feedback
+    final qualityPrefix = _trainingQuality == true ? _qualityGoodPrefix : _qualityBadPrefix;
     final feedback = prefix != null && prefix.isNotEmpty
-        ? '$prefix$userFeedback'
-        : userFeedback;
+        ? '$qualityPrefix$prefix$userFeedback'
+        : '$qualityPrefix$userFeedback';
     Navigator.of(context).pop(FeedbackResult(
       feedback: feedback,
       activityFeedback: activityFeedback,
@@ -245,6 +260,53 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // training quality rating
+                      Builder(builder: (context) {
+                        final primaryColor = useLiquidGlass
+                            ? LiquidGlassTheme.primaryColor
+                            : Theme.of(context).colorScheme.primary;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  l10n.trainingQuality,
+                                  style: useLiquidGlass
+                                      ? LiquidGlassTheme.bodyStyle
+                                      : Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.thumb_up_outlined,
+                                  color: _trainingQuality == true ? primaryColor : VigorColors.stone,
+                                ),
+                                onPressed: () => setState(() => _trainingQuality = _trainingQuality == true ? null : true),
+                                tooltip: l10n.good,
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.thumb_down_outlined,
+                                  color: _trainingQuality == false ? primaryColor : VigorColors.stone,
+                                ),
+                                onPressed: () => setState(() => _trainingQuality = _trainingQuality == false ? null : false),
+                                tooltip: l10n.bad,
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          l10n.trainingQualityHint,
+                          style: (useLiquidGlass
+                                  ? LiquidGlassTheme.bodyStyle
+                                  : Theme.of(context).textTheme.bodySmall)
+                              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        ),
+                      ),
                       // methodology stats (read-only, auto-generated)
                       if (widget.feedbackPrefix != null && widget.feedbackPrefix!.isNotEmpty)
                         Padding(

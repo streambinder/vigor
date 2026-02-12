@@ -1112,4 +1112,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get familyBalance => 'Gleichgewicht';
+
+  @override
+  String get trainingQuality => 'Wie hat dir das Training gefallen?';
+
+  @override
+  String get trainingQualityHint =>
+      'Hilft uns, die Qualität des generierten Trainings zu bewerten';
+
+  @override
+  String get good => 'Gut';
+
+  @override
+  String get bad => 'Schlecht';
 }

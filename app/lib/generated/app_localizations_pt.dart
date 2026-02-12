@@ -1104,4 +1104,17 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get familyBalance => 'Equilíbrio';
+
+  @override
+  String get trainingQuality => 'O que achou deste treino?';
+
+  @override
+  String get trainingQualityHint =>
+      'Nos ajuda a avaliar a qualidade do treino gerado';
+
+  @override
+  String get good => 'Bom';
+
+  @override
+  String get bad => 'Ruim';
 }

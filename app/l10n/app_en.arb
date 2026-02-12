@@ -528,5 +528,10 @@
   "familyCarry": "Carry",
   "familyCardio": "Cardio",
   "familyMobility": "Mobility",
-  "familyBalance": "Balance"
+  "familyBalance": "Balance",
+
+  "trainingQuality": "How did you like this training?",
+  "trainingQualityHint": "Helps us evaluate AI training quality",
+  "good": "Good",
+  "bad": "Bad"
 }

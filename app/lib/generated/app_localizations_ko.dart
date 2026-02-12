@@ -1079,4 +1079,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get familyBalance => '균형';
+
+  @override
+  String get trainingQuality => '이 트레이닝은 어떠셨나요?';
+
+  @override
+  String get trainingQualityHint => 'AI 트레이닝 품질 평가에 도움이 됩니다';
+
+  @override
+  String get good => '좋음';
+
+  @override
+  String get bad => '나쁨';
 }

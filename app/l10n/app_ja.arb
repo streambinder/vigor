@@ -381,5 +381,10 @@
   "familyCarry": "キャリー",
   "familyCardio": "カーディオ",
   "familyMobility": "モビリティ",
-  "familyBalance": "バランス"
+  "familyBalance": "バランス",
+
+  "trainingQuality": "このトレーニングはいかがでしたか？",
+  "trainingQualityHint": "AIトレーニングの品質評価に役立ちます",
+  "good": "良い",
+  "bad": "悪い"
 }

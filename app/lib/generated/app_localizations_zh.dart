@@ -1077,4 +1077,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get familyBalance => '平衡';
+
+  @override
+  String get trainingQuality => '你觉得这次训练怎么样？';
+
+  @override
+  String get trainingQualityHint => '帮助我们评估AI生成训练的质量';
+
+  @override
+  String get good => '好';
+
+  @override
+  String get bad => '差';
 }

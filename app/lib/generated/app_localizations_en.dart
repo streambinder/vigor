@@ -1101,4 +1101,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyBalance => 'Balance';
+
+  @override
+  String get trainingQuality => 'How did you like this training?';
+
+  @override
+  String get trainingQualityHint => 'Helps us evaluate AI training quality';
+
+  @override
+  String get good => 'Good';
+
+  @override
+  String get bad => 'Bad';
 }

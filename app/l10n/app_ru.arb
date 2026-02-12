@@ -381,5 +381,10 @@
   "familyCarry": "Перенос",
   "familyCardio": "Кардио",
   "familyMobility": "Мобильность",
-  "familyBalance": "Баланс"
+  "familyBalance": "Баланс",
+
+  "trainingQuality": "Как вам эта тренировка?",
+  "trainingQualityHint": "Помогает нам оценить качество сгенерированной тренировки",
+  "good": "Хорошо",
+  "bad": "Плохо"
 }

@@ -381,5 +381,10 @@
   "familyCarry": "Transporte",
   "familyCardio": "Cardio",
   "familyMobility": "Mobilidade",
-  "familyBalance": "Equilíbrio"
+  "familyBalance": "Equilíbrio",
+
+  "trainingQuality": "O que achou deste treino?",
+  "trainingQualityHint": "Nos ajuda a avaliar a qualidade do treino gerado",
+  "good": "Bom",
+  "bad": "Ruim"
 }
