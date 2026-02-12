@@ -1168,7 +1168,7 @@
   {
     "id": "suspended-push-up",
     "name": "Suspended Push-Up",
-    "equipment": [],
+    "equipment": ["rings"],
     "muscles": [
       "chest",
       "arms"
@@ -21925,7 +21925,7 @@
   {
     "id": "suspended-row",
     "name": "Suspended Row",
-    "equipment": [],
+    "equipment": ["rings"],
     "muscles": [
       "back",
       "arms"
