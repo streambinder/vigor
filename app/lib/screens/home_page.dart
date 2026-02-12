@@ -463,28 +463,31 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                         ),
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: '${current.sessionsCompleted}',
-                                style: VigorTypography.data.copyWith(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: VigorColors.textPrimary(context),
+                        if (current.sessionsCompleted > targetAvg)
+                          Icon(Icons.check, size: 28, color: VigorColors.persimmon)
+                        else
+                          Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: '${current.sessionsCompleted}',
+                                  style: VigorTypography.data.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: VigorColors.textPrimary(context),
+                                  ),
                                 ),
-                              ),
-                              TextSpan(
-                                text: '/$targetAvg',
-                                style: VigorTypography.data.copyWith(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: VigorColors.textSecondary(context),
+                                TextSpan(
+                                  text: '/$targetAvg',
+                                  style: VigorTypography.data.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: VigorColors.textSecondary(context),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
