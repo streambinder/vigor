@@ -1087,6 +1087,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get trainingQualityHint => 'AIトレーニングの品質評価に役立ちます';
 
   @override
+  String get qualityReasonHint => '改善できる点は？';
+
+  @override
   String get good => '良い';
 
   @override

@@ -4,6 +4,7 @@ import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/activity_ext.dart';
 import '../models/training.dart';
+import '../models/training_feedback.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 import '../widgets/adaptive/adaptive.dart';
@@ -34,7 +35,7 @@ extension ExerciseFeedbackX on ExerciseFeedback {
 }
 
 class FeedbackResult {
-  final String feedback;
+  final TrainingFeedback feedback;
   final Map<String, String> activityFeedback;
   final List<String> activityReports; // activity IDs flagged by user
   final int? completedIn; // actual duration in seconds
@@ -67,17 +68,21 @@ class FeedbackModal {
   }
 
   /// shows the feedback modal and returns the result, or null if cancelled
-  /// [feedbackPrefix] is prepended to user feedback (e.g. methodology stats)
+  /// [messagePrefix] is prepended to user message (e.g. methodology stats)
   /// [elapsedSeconds] pre-fills the duration field from timer tracking
   static Future<FeedbackResult?> show(
     BuildContext context,
     Training training, {
-    String? feedbackPrefix,
+    String? messagePrefix,
     int? elapsedSeconds,
   }) async {
     final activities = _getWorkActivities(training);
     if (activities.isEmpty) {
-      return FeedbackResult(feedback: feedbackPrefix ?? '', activityFeedback: {}, activityReports: []);
+      return FeedbackResult(
+        feedback: TrainingFeedback(qualityReason: '', message: messagePrefix ?? ''),
+        activityFeedback: {},
+        activityReports: [],
+      );
     }
 
     return showDialog<FeedbackResult>(
@@ -86,7 +91,7 @@ class FeedbackModal {
       builder: (context) => _FeedbackDialogContent(
         activities: activities,
         showReports: true,
-        feedbackPrefix: feedbackPrefix,
+        messagePrefix: messagePrefix,
         elapsedSeconds: elapsedSeconds,
       ),
     );
@@ -96,7 +101,11 @@ class FeedbackModal {
   static Future<FeedbackResult?> showForUpdate(BuildContext context, Training training) async {
     final activities = _getWorkActivities(training);
     if (activities.isEmpty) {
-      return FeedbackResult(feedback: '', activityFeedback: {}, activityReports: []);
+      return FeedbackResult(
+        feedback: TrainingFeedback(qualityReason: '', message: ''),
+        activityFeedback: {},
+        activityReports: [],
+      );
     }
 
     return showDialog<FeedbackResult>(
@@ -115,15 +124,15 @@ class FeedbackModal {
 class _FeedbackDialogContent extends StatefulWidget {
   final List<({String id, String exerciseId, String name, String? feedback})> activities;
   final bool showReports;
-  final String? initialFeedback;
-  final String? feedbackPrefix;
+  final TrainingFeedback? initialFeedback;
+  final String? messagePrefix;
   final int? elapsedSeconds;
 
   const _FeedbackDialogContent({
     required this.activities,
     required this.showReports,
     this.initialFeedback,
-    this.feedbackPrefix,
+    this.messagePrefix,
     this.elapsedSeconds,
   });
 
@@ -132,31 +141,27 @@ class _FeedbackDialogContent extends StatefulWidget {
 }
 
 class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
-  final _feedbackController = TextEditingController();
+  final _messageController = TextEditingController();
+  final _qualityReasonController = TextEditingController();
   late double _durationMinutes;
   late final Map<String, ExerciseFeedback> _exerciseFeedback; // keyed by activity id
   late final Set<String> _flaggedActivities; // activity IDs that are flagged
 
   bool? _trainingQuality; // null = unselected, true = good, false = bad
 
-  static const _qualityGoodPrefix = 'quality: good; ';
-  static const _qualityBadPrefix = 'quality: bad; ';
   static const _minDuration = 1.0;
   static const _maxDuration = 180.0;
 
   @override
   void initState() {
     super.initState();
-    // parse quality prefix from existing feedback when updating
-    var initialText = widget.initialFeedback ?? '';
-    if (initialText.startsWith(_qualityGoodPrefix)) {
-      _trainingQuality = true;
-      initialText = initialText.substring(_qualityGoodPrefix.length);
-    } else if (initialText.startsWith(_qualityBadPrefix)) {
-      _trainingQuality = false;
-      initialText = initialText.substring(_qualityBadPrefix.length);
+    // populate from existing structured feedback when updating
+    final initial = widget.initialFeedback;
+    if (initial != null) {
+      _trainingQuality = initial.quality;
+      _qualityReasonController.text = initial.qualityReason;
+      _messageController.text = initial.message;
     }
-    _feedbackController.text = initialText;
     _durationMinutes = widget.elapsedSeconds != null && widget.elapsedSeconds! > 0
         ? min(_maxDuration, max(_minDuration, (widget.elapsedSeconds! / 60).roundToDouble()))
         : _minDuration;
@@ -169,20 +174,23 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
 
   @override
   void dispose() {
-    _feedbackController.dispose();
+    _messageController.dispose();
+    _qualityReasonController.dispose();
     super.dispose();
   }
 
   bool get _isValid {
     if (_trainingQuality == null) return false;
+    // bad quality requires a reason
+    if (_trainingQuality == false && _qualityReasonController.text.trim().isEmpty) return false;
     // if there's a prefix (methodology stats), form is valid even without user input
-    if (widget.feedbackPrefix != null && widget.feedbackPrefix!.isNotEmpty) {
+    if (widget.messagePrefix != null && widget.messagePrefix!.isNotEmpty) {
       return true;
     }
     final hasExplicitFeedback = _exerciseFeedback.values.any(
       (f) => f != ExerciseFeedback.none,
     );
-    final hasGeneralFeedback = _feedbackController.text.trim().isNotEmpty;
+    final hasGeneralFeedback = _messageController.text.trim().isNotEmpty;
     final hasFlags = widget.showReports && _flaggedActivities.isNotEmpty;
     return hasExplicitFeedback || hasGeneralFeedback || hasFlags;
   }
@@ -203,15 +211,17 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
       }
     }
 
-    final userFeedback = _feedbackController.text.trim().replaceAll(RegExp(r'[\r\n]+'), ' ');
-    final prefix = widget.feedbackPrefix;
-    // prepend quality rating + methodology stats to user feedback
-    final qualityPrefix = _trainingQuality == true ? _qualityGoodPrefix : _qualityBadPrefix;
-    final feedback = prefix != null && prefix.isNotEmpty
-        ? '$qualityPrefix$prefix$userFeedback'
-        : '$qualityPrefix$userFeedback';
+    // build message: prefix + user text
+    final userMessage = _messageController.text.trim().replaceAll(RegExp(r'[\r\n]+'), ' ');
+    final prefix = widget.messagePrefix;
+    final message = prefix != null && prefix.isNotEmpty ? '$prefix$userMessage' : userMessage;
+
     Navigator.of(context).pop(FeedbackResult(
-      feedback: feedback,
+      feedback: TrainingFeedback(
+        quality: _trainingQuality,
+        qualityReason: _trainingQuality == false ? _qualityReasonController.text.trim() : '',
+        message: message,
+      ),
       activityFeedback: activityFeedback,
       activityReports: activityReports,
       completedIn: _durationMinutes > 0 ? (_durationMinutes * 60).round() : null,
@@ -307,12 +317,28 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                               ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ),
                       ),
-                      // methodology stats (read-only, auto-generated)
-                      if (widget.feedbackPrefix != null && widget.feedbackPrefix!.isNotEmpty)
+                      // reason field when quality is bad
+                      if (_trainingQuality == false)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: TextField(
-                            controller: TextEditingController(text: widget.feedbackPrefix!.trim()),
+                            controller: _qualityReasonController,
+                            maxLines: 1,
+                            decoration: InputDecoration(
+                              hintText: l10n.qualityReasonHint,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                        ),
+                      // methodology stats (read-only, auto-generated)
+                      if (widget.messagePrefix != null && widget.messagePrefix!.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: TextField(
+                            controller: TextEditingController(text: widget.messagePrefix!.trim()),
                             readOnly: true,
                             maxLines: 1,
                             style: TextStyle(
@@ -363,7 +389,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                         ),
                       ),
                       TextField(
-                        controller: _feedbackController,
+                        controller: _messageController,
                         maxLines: 1,
                         decoration: InputDecoration(
                           hintText: l10n.anyAdditionalComments,

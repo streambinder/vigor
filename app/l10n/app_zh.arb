@@ -385,6 +385,7 @@
 
   "trainingQuality": "你觉得这次训练怎么样？",
   "trainingQualityHint": "帮助我们评估AI生成训练的质量",
+  "qualityReasonHint": "有什么可以改进的？",
   "good": "好",
   "bad": "差"
 }

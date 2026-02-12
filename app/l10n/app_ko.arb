@@ -385,6 +385,7 @@
 
   "trainingQuality": "이 트레이닝은 어떠셨나요?",
   "trainingQualityHint": "AI 트레이닝 품질 평가에 도움이 됩니다",
+  "qualityReasonHint": "개선할 점이 있나요?",
   "good": "좋음",
   "bad": "나쁨"
 }

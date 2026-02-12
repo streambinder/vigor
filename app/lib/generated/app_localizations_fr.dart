@@ -1120,6 +1120,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Nous aide à évaluer la qualité de l\'entraînement généré';
 
   @override
+  String get qualityReasonHint => 'Qu\'est-ce qui pourrait être amélioré ?';
+
+  @override
   String get good => 'Bon';
 
   @override

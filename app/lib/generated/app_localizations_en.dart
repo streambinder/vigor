@@ -1109,6 +1109,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trainingQualityHint => 'Helps us evaluate AI training quality';
 
   @override
+  String get qualityReasonHint => 'What could be improved?';
+
+  @override
   String get good => 'Good';
 
   @override

@@ -1085,6 +1085,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get trainingQualityHint => '帮助我们评估AI生成训练的质量';
 
   @override
+  String get qualityReasonHint => '有什么可以改进的？';
+
+  @override
   String get good => '好';
 
   @override

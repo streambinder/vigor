@@ -75,6 +75,13 @@ type TrainingReasoning struct {
 	Exercises   []ExerciseSelection   `json:"exercises" prompt:"Selected exercises with rationale"`
 }
 
+// TrainingFeedback captures structured feedback for a completed training.
+type TrainingFeedback struct {
+	Quality       *bool  `json:"quality"`       // nil = not rated, true = good, false = bad
+	QualityReason string `json:"qualityReason"` // reason when quality is bad
+	Message       string `json:"message"`       // user free-text comments
+}
+
 // Training represents the entire training session with a UUID ID
 type Training struct {
 	ID uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
@@ -93,8 +100,8 @@ type Training struct {
 	Request     string         `json:"request" prompt:"-"`
 	References  pq.StringArray `gorm:"type:text[]" json:"references" prompt:"DOI URLs from facts used (empty if none)"`
 	Routines    []Routine      `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"routines" prompt:"Training routines"`
-	Prompt      datatypes.JSON `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
-	Feedback    string         `json:"feedback" prompt:"-"`
+	Prompt   datatypes.JSON                       `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
+	Feedback datatypes.JSONType[TrainingFeedback] `gorm:"type:jsonb" json:"feedback" prompt:"-"`
 
 	CompletedAt *time.Time `json:"completed_at" prompt:"-"`
 	CompletedIn *int       `json:"completed_in" prompt:"-"`
@@ -286,7 +293,7 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 	clone.UserID = newUserID
 	clone.ParentID = &t.ID
 	clone.Prompt = []byte("{}")
-	clone.Feedback = ""
+	clone.Feedback = datatypes.NewJSONType(TrainingFeedback{})
 	clone.CompletedAt = nil
 	clone.CompletedIn = nil
 	clone.CreatedAt = time.Time{}

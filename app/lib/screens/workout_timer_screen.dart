@@ -245,7 +245,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
     final result = await FeedbackModal.show(
       context,
       widget.training,
-      feedbackPrefix: _methodologyStats,
+      messagePrefix: _methodologyStats,
       elapsedSeconds: _accumulatedElapsedSeconds,
     );
     if (result == null) return;
@@ -516,7 +516,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
               final result = await FeedbackModal.show(
                 context,
                 widget.training,
-                feedbackPrefix: _methodologyStats,
+                messagePrefix: _methodologyStats,
                 elapsedSeconds: _accumulatedElapsedSeconds,
               );
               if (result == null) return;

@@ -532,6 +532,7 @@
 
   "trainingQuality": "How did you like this training?",
   "trainingQualityHint": "Helps us evaluate AI training quality",
+  "qualityReasonHint": "What could be improved?",
   "good": "Good",
   "bad": "Bad"
 }

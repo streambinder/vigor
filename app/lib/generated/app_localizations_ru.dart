@@ -1108,6 +1108,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'Помогает нам оценить качество сгенерированной тренировки';
 
   @override
+  String get qualityReasonHint => 'Что можно улучшить?';
+
+  @override
   String get good => 'Хорошо';
 
   @override

@@ -385,6 +385,7 @@
 
   "trainingQuality": "O que achou deste treino?",
   "trainingQualityHint": "Nos ajuda a avaliar a qualidade do treino gerado",
+  "qualityReasonHint": "O que poderia ser melhorado?",
   "good": "Bom",
   "bad": "Ruim"
 }

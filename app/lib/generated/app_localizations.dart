@@ -2154,6 +2154,12 @@ abstract class AppLocalizations {
   /// **'Helps us evaluate AI training quality'**
   String get trainingQualityHint;
 
+  /// No description provided for @qualityReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What could be improved?'**
+  String get qualityReasonHint;
+
   /// No description provided for @good.
   ///
   /// In en, this message translates to:

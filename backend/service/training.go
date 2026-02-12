@@ -13,6 +13,7 @@ import (
 	"github.com/streambinder/vigor/llm"
 	"github.com/streambinder/vigor/llm/rag"
 	"github.com/streambinder/vigor/model"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -445,7 +446,7 @@ func DeleteTraining(userID uuid.UUID, trainingID string) (isOwner bool, err erro
 }
 
 // CompleteTraining marks a training as completed.
-func CompleteTraining(userID uuid.UUID, trainingID, feedback string, activityFeedback map[string]string, activityReports []string, completedIn *int) (*model.Training, error) {
+func CompleteTraining(userID uuid.UUID, trainingID string, feedback model.TrainingFeedback, activityFeedback map[string]string, activityReports []string, completedIn *int) (*model.Training, error) {
 	var training model.Training
 	if err := database.DB.
 		Preload("Gym").
@@ -459,7 +460,7 @@ func CompleteTraining(userID uuid.UUID, trainingID, feedback string, activityFee
 	now := time.Now()
 	training.CompletedAt = &now
 	training.CompletedIn = completedIn
-	training.Feedback = feedback
+	training.Feedback = datatypes.NewJSONType(feedback)
 
 	if err := database.DB.Save(&training).Error; err != nil {
 		return nil, err
@@ -495,7 +496,7 @@ func CompleteTraining(userID uuid.UUID, trainingID, feedback string, activityFee
 }
 
 // UpdateTrainingFeedback updates feedback on an already-completed training.
-func UpdateTrainingFeedback(userID uuid.UUID, trainingID, feedback string, activityFeedback map[string]string, completedIn *int) (*model.Training, error) {
+func UpdateTrainingFeedback(userID uuid.UUID, trainingID string, feedback model.TrainingFeedback, activityFeedback map[string]string, completedIn *int) (*model.Training, error) {
 	var training model.Training
 	if err := database.DB.
 		Preload("Gym").
@@ -510,7 +511,7 @@ func UpdateTrainingFeedback(userID uuid.UUID, trainingID, feedback string, activ
 		return nil, ErrTrainingNotCompleted
 	}
 
-	training.Feedback = feedback
+	training.Feedback = datatypes.NewJSONType(feedback)
 	if completedIn != nil {
 		training.CompletedIn = completedIn
 	}

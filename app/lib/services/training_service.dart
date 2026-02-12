@@ -3,6 +3,7 @@ import '../models/activity.dart';
 import '../models/api_response.dart';
 import '../models/partner.dart';
 import '../models/training.dart';
+import '../models/training_feedback.dart';
 import 'app_logger.dart';
 import 'authenticated_api_service.dart';
 import 'secure_storage_service.dart';
@@ -139,7 +140,7 @@ class TrainingService {
 
   Future<ApiResponse<Training>> completeTraining(
     String trainingId, {
-    String? feedback,
+    TrainingFeedback? feedback,
     Map<String, String>? activityFeedback,
     List<String>? activityReports,
     int? completedIn,
@@ -147,8 +148,8 @@ class TrainingService {
     AppLogger.debug('[TrainingService] Completing training: $trainingId');
 
     final body = <String, dynamic>{};
-    if (feedback != null && feedback.isNotEmpty) {
-      body['feedback'] = feedback;
+    if (feedback != null) {
+      body['feedback'] = feedback.toJson();
     }
     if (activityFeedback != null && activityFeedback.isNotEmpty) {
       body['activityFeedback'] = activityFeedback;
@@ -183,7 +184,7 @@ class TrainingService {
 
   Future<ApiResponse<Training>> updateFeedback(
     String trainingId, {
-    String? feedback,
+    TrainingFeedback? feedback,
     Map<String, String>? activityFeedback,
     int? completedIn,
   }) async {
@@ -191,7 +192,7 @@ class TrainingService {
 
     final body = <String, dynamic>{};
     if (feedback != null) {
-      body['feedback'] = feedback;
+      body['feedback'] = feedback.toJson();
     }
     if (activityFeedback != null) {
       body['activityFeedback'] = activityFeedback;

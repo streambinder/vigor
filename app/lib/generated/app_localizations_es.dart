@@ -1117,6 +1117,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Nos ayuda a evaluar la calidad del entrenamiento generado';
 
   @override
+  String get qualityReasonHint => '¿Qué podría mejorar?';
+
+  @override
   String get good => 'Bueno';
 
   @override

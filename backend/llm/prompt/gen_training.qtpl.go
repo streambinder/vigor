@@ -452,11 +452,38 @@ Age:`)
 //line llm/prompt/gen_training.qtpl:85
 			}
 //line llm/prompt/gen_training.qtpl:85
-			if len(training.Feedback) > 0 {
+			fb := training.Feedback.Data()
+
+//line llm/prompt/gen_training.qtpl:85
+			if fb.Quality != nil {
+//line llm/prompt/gen_training.qtpl:85
+				if *fb.Quality {
+//line llm/prompt/gen_training.qtpl:85
+					qw422016.N().S(` | Quality: good`)
+//line llm/prompt/gen_training.qtpl:85
+				} else {
+//line llm/prompt/gen_training.qtpl:85
+					qw422016.N().S(` | Quality: bad`)
+//line llm/prompt/gen_training.qtpl:85
+					if fb.QualityReason != "" {
+//line llm/prompt/gen_training.qtpl:85
+						qw422016.N().S(` (`)
+//line llm/prompt/gen_training.qtpl:85
+						qw422016.E().S(fb.QualityReason)
+//line llm/prompt/gen_training.qtpl:85
+						qw422016.N().S(`)`)
+//line llm/prompt/gen_training.qtpl:85
+					}
+//line llm/prompt/gen_training.qtpl:85
+				}
+//line llm/prompt/gen_training.qtpl:85
+			}
+//line llm/prompt/gen_training.qtpl:85
+			if fb.Message != "" {
 //line llm/prompt/gen_training.qtpl:85
 				qw422016.N().S(` | Feedback: "`)
 //line llm/prompt/gen_training.qtpl:85
-				qw422016.E().S(training.Feedback)
+				qw422016.E().S(fb.Message)
 //line llm/prompt/gen_training.qtpl:85
 				qw422016.N().S(`"`)
 //line llm/prompt/gen_training.qtpl:85
