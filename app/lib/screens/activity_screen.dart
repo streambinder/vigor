@@ -172,7 +172,6 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
               ),
             ],
           ),
-          floatingActionButton: _buildFAB(l10n, gyms ?? []),
           body: RefreshIndicator(
             onRefresh: _loadData,
             color: VigorColors.persimmon,
@@ -181,36 +180,6 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                 : trainings == null || trainings.isEmpty
                     ? _buildEmptyState(l10n, gyms ?? [])
                     : _buildContent(l10n, isDark, trainings),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // solid persimmon FAB - primary CTA per IDENTITY.md
-  Widget _buildFAB(AppLocalizations l10n, List<Gym> gyms) {
-    return Material(
-      color: VigorColors.persimmon,
-      borderRadius: BorderRadius.circular(16),
-      elevation: 4,
-      child: InkWell(
-        onTap: () => _showTrainingGenerationModal(gyms),
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.bolt, color: Colors.white, size: 22),
-              const SizedBox(width: 8),
-              Text(
-                l10n.generateTraining,
-                style: VigorTypography.label.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
           ),
         ),
       ),

@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
+import '../models/gym.dart';
+import '../services/service_locator.dart';
 import '../utils/platform_helper.dart';
 import '../widgets/navigation/liquid_glass_nav_bar.dart';
+import '../widgets/training_generation_modal.dart';
 import 'home_page.dart';
 import 'activity_screen.dart';
 import 'profile_screen.dart';
+import 'training_details_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -36,9 +42,88 @@ class MainNavigationState extends State<MainNavigation> {
     });
   }
 
+  void _showTrainingGenerationModal() {
+    final locator = context.read<ServiceLocator>();
+    final gyms = locator.gymsNotifier.value ?? [];
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => ValueListenableBuilder<List<Gym>?>(
+        valueListenable: locator.gymsNotifier,
+        builder: (context, currentGyms, _) => TrainingGenerationModal(
+          gyms: currentGyms ?? gyms,
+          onSuccess: (training) {
+            Navigator.of(dialogContext).push(
+              MaterialPageRoute(
+                builder: (context) => TrainingDetailsScreen(training: training),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // animated FAB: collapsed on home, expanded on activity, hidden on profile
+  Widget _buildFAB(AppLocalizations l10n) {
+    final isVisible = _currentIndex != 2;
+    final isExpanded = _currentIndex == 1;
+
+    final label = Text(
+      l10n.generateTraining,
+      style: VigorTypography.label.copyWith(
+        color: Colors.white,
+        fontWeight: FontWeight.w600,
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.clip,
+    );
+
+    return AnimatedScale(
+      scale: isVisible ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeInOut,
+      child: Material(
+        color: VigorColors.persimmon,
+        borderRadius: BorderRadius.circular(16),
+        elevation: 4,
+        child: InkWell(
+          onTap: isVisible ? _showTrainingGenerationModal : null,
+          borderRadius: BorderRadius.circular(16),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeInOut,
+            padding: isExpanded
+                ? const EdgeInsets.symmetric(horizontal: 20, vertical: 14)
+                : const EdgeInsets.all(14),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.bolt, color: Colors.white, size: 22),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 150),
+                  curve: Curves.easeInOut,
+                  alignment: Alignment.centerLeft,
+                  child: isExpanded
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [const SizedBox(width: 8), label],
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final fab = _buildFAB(l10n);
+
     if (PlatformHelper.useLiquidGlass) {
       // iOS-style with Liquid Glass navigation
       return Scaffold(
@@ -52,6 +137,12 @@ class MainNavigationState extends State<MainNavigation> {
                 index: _currentIndex,
                 children: _screens,
               ),
+            ),
+            // FAB above the nav bar
+            Positioned(
+              right: 16,
+              bottom: MediaQuery.of(context).padding.bottom + 90,
+              child: fab,
             ),
             // Liquid Glass navigation bar
             Positioned(
@@ -87,6 +178,7 @@ class MainNavigationState extends State<MainNavigation> {
           index: _currentIndex,
           children: _screens,
         ),
+        floatingActionButton: fab,
         bottomNavigationBar: NavigationBar(
           selectedIndex: _currentIndex,
           onDestinationSelected: _onTabTapped,
