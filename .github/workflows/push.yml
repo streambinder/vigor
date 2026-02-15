@@ -121,22 +121,33 @@ jobs:
           flutter pub get
           flutter gen-l10n
           git diff --exit-code
-  # flutter-build:
-  #   runs-on: ubuntu-latest
-  #   # needs: [super-linter, dart-build-runner]
-  #   needs: [dart-build-runner]
-  #   if: success()
-  #   steps:
-  #     - uses: actions/checkout@v6
-  #       with:
-  #         persist-credentials: false
-  #     - uses: subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e
-  #       with:
-  #         channel: stable
-  #     - run: |
-  #         cd app
-  #         flutter pub get
-  #         flutter build apk --debug
+  flutter-build-apk:
+    runs-on: ubuntu-latest
+    needs: [dart-build-runner]
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e
+        with:
+          channel: stable
+      - run: |
+          echo "${{ secrets.APK_KEYSTORE }}" | base64 -d > app/android/app/vigor-release.jks
+          cat <<EOF > app/android/key.properties
+          storePassword=${{ secrets.APK_KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.APK_KEYSTORE_PASSWORD }}
+          keyAlias=vigor-release
+          storeFile=../app/vigor-release.jks
+          EOF
+      - run: |
+          cd app
+          flutter pub get
+          flutter build apk --release --dart-define=API_URL=${{ secrets.API_URL }}
+      - uses: actions/upload-artifact@v5
+        with:
+          name: release-apk
+          path: app/build/app/outputs/flutter-apk/app-release.apk
   app-docker:
     runs-on: ubuntu-latest
     # needs: [flutter-build]
