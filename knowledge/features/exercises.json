@@ -207,6 +207,7 @@
       "band"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -405,7 +406,6 @@
       "band"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/obe5LMq.gif",
@@ -1061,7 +1061,6 @@
       "ez barbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/iaapw0g.gif",
@@ -1106,6 +1105,7 @@
       "dumbbell"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -1168,7 +1168,9 @@
   {
     "id": "suspended-push-up",
     "name": "Suspended Push-Up",
-    "equipment": ["rings"],
+    "equipment": [
+      "rings"
+    ],
     "muscles": [
       "chest",
       "arms"
@@ -1193,6 +1195,7 @@
       "dumbbell"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -1308,7 +1311,6 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/uxJcFUU.gif",
@@ -1354,7 +1356,6 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/U3ffHlY.gif",
@@ -1420,7 +1421,6 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/Gchi5Tr.gif",
@@ -1465,7 +1465,6 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/NN8nSNT.gif",
@@ -1557,6 +1556,7 @@
       "dumbbell"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -1669,8 +1669,8 @@
       "stability ball"
     ],
     "muscles": [
-      "glutes",
-      "legs"
+      "back",
+      "glutes"
     ],
     "reference": "https://static.exercisedb.dev/media/vM5YS2g.gif",
     "instructions": [
@@ -1850,8 +1850,7 @@
     "name": "Bodyweight Kneeling Triceps Extension",
     "equipment": [],
     "muscles": [
-      "chest",
-      "shoulders"
+      "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/s0HKO2I.gif",
     "instructions": [
@@ -1987,8 +1986,8 @@
       "bench"
     ],
     "muscles": [
-      "glutes",
-      "legs"
+      "back",
+      "glutes"
     ],
     "reference": "https://static.exercisedb.dev/media/zkgRrbK.gif",
     "instructions": [
@@ -2009,6 +2008,7 @@
       "barbell"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -2217,7 +2217,6 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/HEJ6DIX.gif",
@@ -2460,8 +2459,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/AQ0mC4Y.gif",
     "instructions": [
@@ -2717,8 +2715,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "back",
-      "shoulders"
+      "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/cAvTaSg.gif",
     "instructions": [
@@ -2891,8 +2888,8 @@
       "stability ball"
     ],
     "muscles": [
-      "glutes",
-      "legs"
+      "back",
+      "glutes"
     ],
     "reference": "https://static.exercisedb.dev/media/qLpO4vV.gif",
     "instructions": [
@@ -3390,8 +3387,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/hxyTtWj.gif",
     "instructions": [
@@ -3811,8 +3807,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/JzQbv7J.gif",
     "instructions": [
@@ -3925,8 +3920,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/aTNKZiC.gif",
     "instructions": [
@@ -4061,7 +4055,6 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/2IxROQ1.gif",
@@ -4129,8 +4122,8 @@
       "stability ball"
     ],
     "muscles": [
-      "glutes",
-      "legs"
+      "back",
+      "glutes"
     ],
     "reference": "https://static.exercisedb.dev/media/WME869U.gif",
     "instructions": [
@@ -4196,7 +4189,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/wOLmCXc.gif",
@@ -6197,7 +6189,6 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/i11JWU7.gif",
@@ -7297,6 +7288,7 @@
       "dumbbell"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -7433,7 +7425,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/mpKZGWz.gif",
@@ -7478,8 +7469,7 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/x825CZm.gif",
     "instructions": [
@@ -7545,8 +7535,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "back",
-      "shoulders"
+      "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/CJwa0vD.gif",
     "instructions": [
@@ -7655,7 +7644,6 @@
       "barbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/iZop9xO.gif",
@@ -8731,7 +8719,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/W6PxUkg.gif",
@@ -8754,6 +8741,7 @@
       "band"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -9088,8 +9076,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/n5cWCsI.gif",
     "instructions": [
@@ -9315,7 +9302,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/OTgkHwR.gif",
@@ -9361,6 +9347,7 @@
       "barbell"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -9569,7 +9556,6 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/1xHyxys.gif",
@@ -9592,7 +9578,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/OVIKwsd.gif",
@@ -9842,7 +9827,6 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/Hx1WC8I.gif",
@@ -9941,8 +9925,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "back",
-      "shoulders"
+      "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/4ievMJ9.gif",
     "instructions": [
@@ -10033,6 +10016,7 @@
       "barbell"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -10124,8 +10108,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/53Ttlck.gif",
     "instructions": [
@@ -10231,7 +10214,6 @@
       "barbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/yg8Totb.gif",
@@ -10640,7 +10622,6 @@
       "barbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/HJ63mSO.gif",
@@ -10688,8 +10669,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/vYk8lqw.gif",
     "instructions": [
@@ -10733,7 +10713,6 @@
       "ez barbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/CQHoDm0.gif",
@@ -10883,7 +10862,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/VQ3sNCn.gif",
@@ -10971,7 +10949,6 @@
       "ez barbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/6CKUx7o.gif",
@@ -11035,8 +11012,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/v1qBec9.gif",
     "instructions": [
@@ -11227,8 +11203,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/DsgkuIt.gif",
     "instructions": [
@@ -11523,8 +11498,7 @@
       "barbell"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/eXMFHww.gif",
     "instructions": [
@@ -11827,8 +11801,7 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/wEulIzp.gif",
     "instructions": [
@@ -12596,8 +12569,8 @@
       "stability ball"
     ],
     "muscles": [
-      "glutes",
-      "legs"
+      "back",
+      "glutes"
     ],
     "reference": "https://static.exercisedb.dev/media/o1HGDSq.gif",
     "instructions": [
@@ -12796,8 +12769,8 @@
       "stability ball"
     ],
     "muscles": [
-      "glutes",
-      "legs"
+      "back",
+      "glutes"
     ],
     "reference": "https://static.exercisedb.dev/media/PERjVm8.gif",
     "instructions": [
@@ -13227,7 +13200,6 @@
       "barbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/dZl9Q27.gif",
@@ -13431,7 +13403,6 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/ZujAdR9.gif",
@@ -13711,7 +13682,6 @@
       "smith machine"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/o8aOcrz.gif",
@@ -14582,7 +14552,6 @@
       "olympic barbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/wu5LXwz.gif",
@@ -14628,8 +14597,8 @@
       "leverage machine"
     ],
     "muscles": [
-      "glutes",
-      "legs"
+      "back",
+      "glutes"
     ],
     "reference": "https://static.exercisedb.dev/media/rUXfn3R.gif",
     "instructions": [
@@ -15019,7 +14988,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/kont8Ut.gif",
@@ -15090,7 +15058,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/PdmaD0N.gif",
@@ -15180,8 +15147,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/UzkLrem.gif",
     "instructions": [
@@ -15705,8 +15671,7 @@
       "band"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/sTg7iys.gif",
     "instructions": [
@@ -16216,8 +16181,7 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/goJ6ezq.gif",
     "instructions": [
@@ -16845,8 +16809,8 @@
       "leverage machine"
     ],
     "muscles": [
-      "glutes",
-      "legs"
+      "back",
+      "glutes"
     ],
     "reference": "https://static.exercisedb.dev/media/Krmb3cB.gif",
     "instructions": [
@@ -17096,7 +17060,6 @@
       "partner"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/7HcfMBP.gif",
@@ -17118,8 +17081,8 @@
       "stability ball"
     ],
     "muscles": [
-      "glutes",
-      "legs"
+      "back",
+      "glutes"
     ],
     "reference": "https://static.exercisedb.dev/media/WVD66ff.gif",
     "instructions": [
@@ -17640,7 +17603,6 @@
       "barbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/4CBIBOM.gif",
@@ -18207,7 +18169,6 @@
       "ez barbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/KyLtiLT.gif",
@@ -18586,7 +18547,6 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/sYCcnon.gif",
@@ -18609,6 +18569,7 @@
       "barbell"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -18926,7 +18887,6 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/vvNjDJS.gif",
@@ -19491,6 +19451,7 @@
       "leverage machine"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -19720,8 +19681,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "core",
-      "shoulders"
+      "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/XalXcvM.gif",
     "instructions": [
@@ -19828,8 +19788,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "back",
-      "shoulders"
+      "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/3T12T87.gif",
     "instructions": [
@@ -19876,6 +19835,7 @@
       "smith machine"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -19899,7 +19859,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/wyaqzOS.gif",
@@ -20782,7 +20741,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/UmpPAAe.gif",
@@ -20964,7 +20922,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/Gi2BXfK.gif",
@@ -21075,7 +21032,6 @@
       "leverage machine"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/Ser9eQp.gif",
@@ -21554,7 +21510,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/nAuHPcD.gif",
@@ -21925,7 +21880,9 @@
   {
     "id": "suspended-row",
     "name": "Suspended Row",
-    "equipment": ["rings"],
+    "equipment": [
+      "rings"
+    ],
     "muscles": [
       "back",
       "arms"
@@ -22161,7 +22118,6 @@
       "barbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/h8LFzo9.gif",
@@ -22203,8 +22159,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/hrrS0Ed.gif",
     "instructions": [
@@ -22422,8 +22377,8 @@
       "bench"
     ],
     "muscles": [
-      "glutes",
-      "legs"
+      "back",
+      "glutes"
     ],
     "reference": "https://static.exercisedb.dev/media/zhMwOwE.gif",
     "instructions": [
@@ -22868,7 +22823,6 @@
       "barbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/5uFK1xr.gif",
@@ -23735,8 +23689,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/Yg7MJAT.gif",
     "instructions": [
@@ -24498,6 +24451,7 @@
       "band"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -24522,8 +24476,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "back",
-      "shoulders"
+      "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/x0lwvfq.gif",
     "instructions": [
@@ -24962,8 +24915,8 @@
     "name": "Elbow Lift - Reverse Push-Up",
     "equipment": [],
     "muscles": [
-      "shoulders",
-      "arms"
+      "back",
+      "chest"
     ],
     "reference": "https://static.exercisedb.dev/media/wbUYILZ.gif",
     "instructions": [
@@ -25433,7 +25386,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/5fKX7wi.gif",
@@ -26078,7 +26030,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/bQy2Eni.gif",
@@ -26301,7 +26252,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/FQXdXzY.gif",
@@ -26440,7 +26390,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/en550rk.gif",
@@ -26642,7 +26591,6 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/Gm2Uv1z.gif",
@@ -27565,8 +27513,7 @@
       "leverage machine"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/dRTfGZT.gif",
     "instructions": [
@@ -27984,7 +27931,6 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": "https://static.exercisedb.dev/media/KWdF2JI.gif",
@@ -28555,8 +28501,7 @@
       "dumbbell"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": "https://static.exercisedb.dev/media/KwFGiEP.gif",
     "instructions": [
@@ -28799,7 +28744,6 @@
       "barbell"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": null,
@@ -29067,6 +29011,7 @@
       "band"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -29261,6 +29206,7 @@
       "barbell"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -29717,6 +29663,7 @@
       "dumbbell"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -30458,7 +30405,6 @@
       "smith machine"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": null,
@@ -30916,6 +30862,7 @@
       "band"
     ],
     "muscles": [
+      "back",
       "glutes",
       "legs"
     ],
@@ -31099,8 +31046,7 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
-      "back"
+      "shoulders"
     ],
     "reference": null,
     "instructions": [
@@ -31145,7 +31091,6 @@
       "partner"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": null,
@@ -31215,7 +31160,6 @@
       "cable"
     ],
     "muscles": [
-      "shoulders",
       "arms"
     ],
     "reference": null,
