@@ -149,7 +149,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
 
   bool? _trainingQuality; // null = unselected, true = good, false = bad
 
-  static const _minDuration = 1.0;
+  static const _minDuration = 10.0;
   static const _maxDuration = 180.0;
 
   @override
@@ -356,34 +356,33 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                         ),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: Row(
+                        child: Column(
                           children: [
-                            Text(
-                              l10n.actualDuration,
-                              style: useLiquidGlass
-                                  ? LiquidGlassTheme.bodyStyle
-                                  : Theme.of(context).textTheme.bodyMedium,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  l10n.actualDuration,
+                                  style: useLiquidGlass
+                                      ? LiquidGlassTheme.bodyStyle
+                                      : Theme.of(context).textTheme.bodyMedium,
+                                ),
+                                Text(
+                                  '${_durationMinutes.round()}′',
+                                  style: (useLiquidGlass
+                                          ? LiquidGlassTheme.bodyStyle
+                                          : Theme.of(context).textTheme.bodyMedium)
+                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                ),
+                              ],
                             ),
-                            Expanded(
-                              child: Slider(
-                                value: _durationMinutes.clamp(_minDuration, _maxDuration),
-                                min: _minDuration,
-                                max: _maxDuration,
-                                divisions: (_maxDuration - _minDuration).round(),
-                                label: '${_durationMinutes.round()} min',
-                                onChanged: (v) => setState(() => _durationMinutes = v),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 56,
-                              child: Text(
-                                '${_durationMinutes.round()}′',
-                                textAlign: TextAlign.end,
-                                style: (useLiquidGlass
-                                        ? LiquidGlassTheme.bodyStyle
-                                        : Theme.of(context).textTheme.bodyMedium)
-                                    ?.copyWith(fontWeight: FontWeight.w600),
-                              ),
+                            Slider(
+                              value: _durationMinutes.clamp(_minDuration, _maxDuration),
+                              min: _minDuration,
+                              max: _maxDuration,
+                              divisions: 34,
+                              label: '${_durationMinutes.round()} min',
+                              onChanged: (v) => setState(() => _durationMinutes = v),
                             ),
                           ],
                         ),
