@@ -1,6 +1,7 @@
 import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
@@ -337,6 +338,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 value: _firstName,
                 onChanged: (v) => _firstName = v.isNotEmpty ? v : null,
                 required: true,
+                inputFormatters: [_CapitalizeWordsFormatter()],
               ),
             ),
             const SizedBox(width: VigorSpacing.md),
@@ -346,6 +348,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 value: _lastName,
                 onChanged: (v) => _lastName = v.isNotEmpty ? v : null,
                 required: true,
+                inputFormatters: [_CapitalizeWordsFormatter()],
               ),
             ),
           ],
@@ -503,6 +506,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     required ValueChanged<String> onChanged,
     bool required = false,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -517,6 +521,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           ),
           style: VigorTypography.body,
           keyboardType: keyboardType,
+          textCapitalization: TextCapitalization.words,
+          inputFormatters: inputFormatters,
           validator: required
               ? (v) {
                   if (v == null || v.isEmpty) return AppLocalizations.of(context).required;
@@ -842,5 +848,18 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         ),
       ],
     );
+  }
+}
+
+/// capitalizes the first letter of each word as the user types
+class _CapitalizeWordsFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) return newValue;
+    final capitalized = newValue.text.replaceAllMapped(
+      RegExp(r'(?:^|\s)\S'),
+      (match) => match.group(0)!.toUpperCase(),
+    );
+    return newValue.copyWith(text: capitalized);
   }
 }
