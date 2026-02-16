@@ -193,7 +193,7 @@ func (t Training) DaysSince() int {
 }
 
 // Validate checks that the training has valid structure.
-func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, requireWarmupCooldown bool, userRequestedMinutes int) error {
+func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, requireWarmupCooldown bool, userRequestedMinutes int, targetMuscles []string, actualMuscles []string) error {
 	if t.Name == "" {
 		return errors.New("training name is empty")
 	}
@@ -265,6 +265,19 @@ func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineType
 		actualSecs := float64(t.CalculateDuration())
 		if actualSecs < requestedSecs*(1-durationTolerancePct) || actualSecs > requestedSecs*(1+durationTolerancePct) {
 			return errors.New("generated duration " + strconv.Itoa(int(actualSecs)/60) + "m deviates too much from requested " + strconv.Itoa(userRequestedMinutes) + "m")
+		}
+	}
+
+	// validate target muscles coverage
+	if len(targetMuscles) > 0 && len(actualMuscles) > 0 {
+		actualSet := make(map[string]bool, len(actualMuscles))
+		for _, m := range actualMuscles {
+			actualSet[m] = true
+		}
+		for _, m := range targetMuscles {
+			if !actualSet[m] {
+				return errors.New("training missing target muscle: " + m)
+			}
 		}
 	}
 

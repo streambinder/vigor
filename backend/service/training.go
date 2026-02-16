@@ -304,7 +304,37 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	// reorder routines: warmup first, work in original order, cooldown last
 	training.Routines = reorderRoutines(training.Routines)
 	training.SetDuration(duration)
-	if err := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, weightedModifierIDs, !skipWarmupCooldown, duration); err != nil {
+
+	// collect muscles from work routine exercises (before validation so we can check coverage)
+	exerciseMuscles := make(map[string][]string, len(workExercises))
+	for _, ex := range workExercises {
+		exerciseMuscles[ex.ID] = ex.Muscles
+	}
+	muscleSet := make(map[string]bool)
+	for _, activity := range training.Activities() {
+		for _, muscle := range exerciseMuscles[activity.ExerciseID] {
+			muscleSet[muscle] = true
+		}
+	}
+	var actualMuscles []string
+	for muscle := range muscleSet {
+		actualMuscles = append(actualMuscles, muscle)
+	}
+
+	// resolve target muscles for validation: user-specified or all from DB
+	targetMuscles := muscles
+	if len(targetMuscles) == 0 {
+		var allMuscles []model.Muscle
+		if err := database.Knowledge.Find(&allMuscles).Error; err != nil {
+			return nil, err
+		}
+		targetMuscles = make([]string, len(allMuscles))
+		for i, m := range allMuscles {
+			targetMuscles[i] = m.ID
+		}
+	}
+
+	if err := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, weightedModifierIDs, !skipWarmupCooldown, duration, targetMuscles, actualMuscles); err != nil {
 		log.Error().
 			Interface("event", event.TrainingGenerationFailureEvent{
 				Event:   event.Event{Time: time.Now()},
@@ -339,21 +369,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		training.Equipment = append(training.Equipment, m.ID)
 	}
 	training.Goals = effectiveGoals
-
-	// collect muscles from work routine exercises
-	exerciseMuscles := make(map[string][]string, len(workExercises))
-	for _, ex := range workExercises {
-		exerciseMuscles[ex.ID] = ex.Muscles
-	}
-	muscleSet := make(map[string]bool)
-	for _, activity := range training.Activities() {
-		for _, muscle := range exerciseMuscles[activity.ExerciseID] {
-			muscleSet[muscle] = true
-		}
-	}
-	for muscle := range muscleSet {
-		training.Muscles = append(training.Muscles, muscle)
-	}
+	training.Muscles = actualMuscles
 	training.Request = prompt
 
 	for i := range training.Routines {

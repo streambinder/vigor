@@ -379,7 +379,7 @@ func TestValidate_WeightModifierConsistency(t *testing.T) {
 					}},
 				}},
 			}
-			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, 0)
+			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, 0, nil, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -439,10 +439,55 @@ func TestValidate_DurationTolerance(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tr := makeTestTraining()
 			tr.SetDuration(tt.requestedMinutes)
-			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, tt.requestedMinutes)
+			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, tt.requestedMinutes, nil, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Validate() with requested=%dm, actual=%ds: error = %v, wantErr %v",
 					tt.requestedMinutes, actualDuration, err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidate_TargetMuscles(t *testing.T) {
+	validExercises := map[string]bool{"ex1": true, "ex2": true}
+	validModifiers := map[string]bool{}
+	validRoutines := map[string]bool{"work": true}
+	weightedModifiers := map[string]bool{}
+
+	base := func() Training {
+		return Training{
+			Name:        "Test",
+			Methodology: "strength",
+			Routines: []Routine{routine("work", 0, []Block{
+				block(1, 0, []Activity{
+					{ExerciseID: "ex1", Reps: 10},
+					{ExerciseID: "ex2", Reps: 10},
+				}),
+			})},
+		}
+	}
+
+	tests := []struct {
+		name    string
+		target  []string
+		actual  []string
+		wantErr bool
+	}{
+		{"all targets covered", []string{"chest", "arms"}, []string{"chest", "arms", "core"}, false},
+		{"exact match", []string{"chest", "arms"}, []string{"chest", "arms"}, false},
+		{"missing target muscle", []string{"chest", "arms", "legs"}, []string{"chest", "arms"}, true},
+		{"nil targets skips check", nil, []string{"chest"}, false},
+		{"empty targets skips check", []string{}, []string{"chest"}, false},
+		{"nil actuals skips check", []string{"chest"}, nil, false},
+		{"empty actuals skips check", []string{"chest"}, []string{}, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tr := base()
+			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, 0, tt.target, tt.actual)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
