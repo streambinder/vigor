@@ -374,8 +374,17 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			break
 		}
 
+		ve := validationErr.(*model.ValidationError)
+		failureEvent := event.TrainingGenerationFailureEvent{
+			Event:   event.Event{Time: time.Now()},
+			Model:   llmModel,
+			Reason:  ve.Reason(),
+			Message: ve.Error(),
+		}
+
 		if attempt < maxGenerationRetries {
 			log.Warn().
+				Interface("event", failureEvent).
 				Int("attempt", attempt+1).
 				Int("max_attempts", maxGenerationRetries+1).
 				Err(validationErr).Msg("generated training validation failed, retrying")
@@ -383,14 +392,9 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			continue
 		}
 
-		// last attempt also failed
 		log.Error().
-			Interface("event", event.TrainingGenerationFailureEvent{
-				Event:   event.Event{Time: time.Now()},
-				Model:   llmModel,
-				Reason:  "validation_error",
-				Message: validationErr.Error(),
-			}).Err(validationErr).Msg("generated training validation failed after all retries")
+			Interface("event", failureEvent).
+			Err(validationErr).Msg("generated training validation failed after all retries")
 		return nil, ErrMalformedTraining
 	}
 

@@ -2,7 +2,6 @@ package model
 
 import (
 	"encoding/json"
-	"errors"
 	"strconv"
 	"strings"
 	"time"
@@ -17,6 +16,17 @@ const WeightActivityDurationPerRep = 4 // NSCA/ACSM controlled tempo (2-0-2-0)
 
 // max acceptable drift between generated and requested duration
 const durationTolerancePct = 0.15
+
+// ValidationError is a structured validation failure with a machine-readable code.
+type ValidationError struct {
+	Code    string // e.g. "empty_name", "duration_mismatch"
+	Message string // human-readable description
+}
+
+func (e *ValidationError) Error() string { return e.Message }
+
+// Reason returns the full reason string for metrics logging (validation_error:code).
+func (e *ValidationError) Reason() string { return "validation_error:" + e.Code }
 
 // Valid activity feedback values (maps to -2..+2 slider)
 const (
@@ -194,10 +204,10 @@ func (t Training) DaysSince() int {
 // Validate checks that the training has valid structure.
 func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, requireWarmupCooldown bool, userRequestedMinutes int, targetMuscles []string, actualMuscles []string) error {
 	if t.Name == "" {
-		return errors.New("training name is empty")
+		return &ValidationError{"empty_name", "training name is empty"}
 	}
 	if len(t.Routines) == 0 {
-		return errors.New("training has no routines")
+		return &ValidationError{"no_routines", "training has no routines"}
 	}
 
 	// count routine types to enforce exactly one warmup and one cooldown when required
@@ -208,37 +218,37 @@ func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineType
 
 	if requireWarmupCooldown {
 		if routineCounts["warmup"] != 1 {
-			return errors.New("training must have exactly one warmup routine")
+			return &ValidationError{"missing_warmup", "training must have exactly one warmup routine"}
 		}
 		if routineCounts["cooldown"] != 1 {
-			return errors.New("training must have exactly one cooldown routine")
+			return &ValidationError{"missing_cooldown", "training must have exactly one cooldown routine"}
 		}
 	}
 
 	for i, routine := range t.Routines {
 		if routine.Type == "" {
-			return errors.New("routine " + strconv.Itoa(i) + " has no type")
+			return &ValidationError{"missing_routine_type", "routine " + strconv.Itoa(i) + " has no type"}
 		}
 		if !validRoutineTypes[routine.Type] {
-			return errors.New("routine " + strconv.Itoa(i) + " has invalid type: " + routine.Type)
+			return &ValidationError{"invalid_routine_type", "routine " + strconv.Itoa(i) + " has invalid type: " + routine.Type}
 		}
 		if len(routine.Blocks) == 0 {
-			return errors.New("routine " + strconv.Itoa(i) + " has no blocks")
+			return &ValidationError{"no_blocks", "routine " + strconv.Itoa(i) + " has no blocks"}
 		}
 		for j, block := range routine.Blocks {
 			if len(block.Activities) == 0 {
-				return errors.New("block " + strconv.Itoa(j) + " in routine " + strconv.Itoa(i) + " has no activities")
+				return &ValidationError{"no_activities", "block " + strconv.Itoa(j) + " in routine " + strconv.Itoa(i) + " has no activities"}
 			}
 			for k, activity := range block.Activities {
 				if activity.ExerciseID == "" {
-					return errors.New("activity " + strconv.Itoa(k) + " in block " + strconv.Itoa(j) + " has no exercise ID")
+					return &ValidationError{"missing_exercise", "activity " + strconv.Itoa(k) + " in block " + strconv.Itoa(j) + " has no exercise ID"}
 				}
 				if !validExerciseIDs[activity.ExerciseID] {
-					return errors.New("activity " + strconv.Itoa(k) + " has invalid exercise: " + activity.ExerciseID)
+					return &ValidationError{"invalid_exercise", "activity " + strconv.Itoa(k) + " has invalid exercise: " + activity.ExerciseID}
 				}
 				for _, mod := range activity.Modifiers {
 					if !validModifierIDs[mod] {
-						return errors.New("activity " + strconv.Itoa(k) + " has invalid modifier: " + mod)
+						return &ValidationError{"invalid_modifier", "activity " + strconv.Itoa(k) + " has invalid modifier: " + mod}
 					}
 				}
 				// weight_kg > 0 must have a weighted modifier (auto-attach adds "weight" before this runs)
@@ -251,7 +261,7 @@ func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineType
 						}
 					}
 					if !hasWeightedMod {
-						return errors.New("activity " + strconv.Itoa(k) + " has weight_kg > 0 but no weighted modifier")
+						return &ValidationError{"missing_weight_modifier", "activity " + strconv.Itoa(k) + " has weight_kg > 0 but no weighted modifier"}
 					}
 				}
 			}
@@ -263,7 +273,7 @@ func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineType
 		requestedSecs := float64(userRequestedMinutes * 60)
 		actualSecs := float64(t.CalculateDuration())
 		if actualSecs < requestedSecs*(1-durationTolerancePct) || actualSecs > requestedSecs*(1+durationTolerancePct) {
-			return errors.New("generated duration " + strconv.Itoa(int(actualSecs)/60) + "m deviates too much from requested " + strconv.Itoa(userRequestedMinutes) + "m")
+			return &ValidationError{"duration_mismatch", "generated duration " + strconv.Itoa(int(actualSecs)/60) + "m deviates too much from requested " + strconv.Itoa(userRequestedMinutes) + "m"}
 		}
 	}
 
@@ -275,7 +285,7 @@ func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineType
 		}
 		for _, m := range targetMuscles {
 			if !actualSet[m] {
-				return errors.New("training missing target muscle: " + m)
+				return &ValidationError{"missing_muscle", "training missing target muscle: " + m}
 			}
 		}
 	}
