@@ -263,7 +263,7 @@ func TestSetDuration_Strength_ScalesRepeats(t *testing.T) {
 	})
 
 	tr.SetDuration(15) // 15 min = 900s total, warmup=60 cooldown=60 → 780s work budget
-	// original work = 450s, budget = 780s, multiplier ≈ 1.73 → round(3 * 1.73) = round(5.2) = 5
+	// iterative scaling: starts at 3 repeats, adds +1 until closest to 900s total
 	if tr.Routines[1].Blocks[0].Repeats != 5 {
 		t.Errorf("strength SetDuration(15): repeats = %d, want 5", tr.Routines[1].Blocks[0].Repeats)
 	}
@@ -287,8 +287,7 @@ func TestSetDuration_Strength_ScalesDown(t *testing.T) {
 	})
 
 	tr.SetDuration(5) // 5 min = 300s, no warmup/cooldown → 300s work budget
-	// original: 6 repeats of (40+30+40) + 5×60 block rest = 660+300 = 960s
-	// multiplier = 300/960 ≈ 0.31 → round(6 * 0.31) = round(1.88) = 2
+	// iterative scaling: starts at 6 repeats (960s), removes -1 until closest to 300s
 	if tr.Routines[0].Blocks[0].Repeats != 2 {
 		t.Errorf("strength SetDuration(5): repeats = %d, want 2", tr.Routines[0].Blocks[0].Repeats)
 	}
@@ -326,15 +325,12 @@ func TestSetDuration_EMOM_ScalesRepeats(t *testing.T) {
 	})
 
 	// original: warmup=120 + work=15*60=900 + cooldown=60 = 1080s = 18m
-	// request 30m (1800s) → work budget = 1800-120-60 = 1620s → 27 target repeats
-	// ratio = 27/15 = 1.8 → block1: round(10*1.8)=18, block2: round(5*1.8)=9 → total=27
+	// request 30m (1800s) → work budget = 1620s → 27 total repeats needed
 	tr.SetDuration(30)
 
-	if tr.Routines[1].Blocks[0].Repeats != 18 {
-		t.Errorf("emom SetDuration(30): block1 repeats = %d, want 18", tr.Routines[1].Blocks[0].Repeats)
-	}
-	if tr.Routines[1].Blocks[1].Repeats != 9 {
-		t.Errorf("emom SetDuration(30): block2 repeats = %d, want 9", tr.Routines[1].Blocks[1].Repeats)
+	totalRepeats := tr.Routines[1].Blocks[0].Repeats + tr.Routines[1].Blocks[1].Repeats
+	if totalRepeats != 27 {
+		t.Errorf("emom SetDuration(30): total repeats = %d, want 27", totalRepeats)
 	}
 
 	total := tr.CalculateDuration()
@@ -384,7 +380,7 @@ func TestSetDuration_EMOM_RoundingDriftCorrection(t *testing.T) {
 }
 
 func TestSetDuration_MultipleWorkBlocks(t *testing.T) {
-	// two work blocks with different repeats, verify proportional scaling
+	// two work blocks with different repeats, verify duration accuracy
 	tr := makeTraining("circuit", []Routine{
 		routine("work", 0, []Block{
 			block(2, 30, []Activity{act(30, 0, 10), act(30, 0, 0)}), // 2 repeats
@@ -398,12 +394,129 @@ func TestSetDuration_MultipleWorkBlocks(t *testing.T) {
 
 	tr.SetDuration(requestedMinutes)
 
-	// both blocks should have roughly doubled repeats
-	if tr.Routines[0].Blocks[0].Repeats < 3 || tr.Routines[0].Blocks[0].Repeats > 5 {
-		t.Errorf("circuit SetDuration: block1 repeats = %d, want 3-5", tr.Routines[0].Blocks[0].Repeats)
+	// verify duration is within 15% of target
+	target := requestedMinutes * 60
+	total := tr.CalculateDuration()
+	low := float64(target) * 0.85
+	high := float64(target) * 1.15
+	if float64(total) < low || float64(total) > high {
+		t.Errorf("circuit SetDuration: total = %d, want within %.0f-%.0f", total, low, high)
 	}
-	if tr.Routines[0].Blocks[1].Repeats < 6 || tr.Routines[0].Blocks[1].Repeats > 10 {
-		t.Errorf("circuit SetDuration: block2 repeats = %d, want 6-10", tr.Routines[0].Blocks[1].Repeats)
+
+	// both blocks should still have at least 1 repeat
+	if tr.Routines[0].Blocks[0].Repeats < 1 || tr.Routines[0].Blocks[1].Repeats < 1 {
+		t.Errorf("circuit SetDuration: block repeats below 1: %d, %d",
+			tr.Routines[0].Blocks[0].Repeats, tr.Routines[0].Blocks[1].Repeats)
+	}
+}
+
+func TestSetDuration_DifferentPerRepeatCosts(t *testing.T) {
+	// block 1: cheap per repeat (short activity, no rest) → 30s/repeat
+	// block 2: expensive per repeat (long activity + rest) → 120s+60s=180s/repeat
+	// the iterative approach should still land within tolerance
+	tr := makeTraining("strength", []Routine{
+		routine("warmup", 0, []Block{
+			block(1, 0, []Activity{act(60, 0, 0)}),
+		}),
+		routine("work", 0, []Block{
+			block(2, 0, []Activity{act(30, 0, 0)}),  // 2 × 30s = 60s
+			block(2, 60, []Activity{act(120, 0, 0)}), // 2 × (120+60) - 60 last rest suppressed = 300s
+		}),
+		routine("cooldown", 0, []Block{
+			block(1, 0, []Activity{act(60, 0, 0)}),
+		}),
+	})
+
+	tr.SetDuration(15) // 15min = 900s
+
+	total := tr.CalculateDuration()
+	target := 900
+	low := float64(target) * (1 - durationTolerancePct)
+	high := float64(target) * (1 + durationTolerancePct)
+	if float64(total) < low || float64(total) > high {
+		t.Errorf("different costs SetDuration(15): total = %d, want within %.0f-%.0f", total, low, high)
+	}
+}
+
+func TestSetDuration_StopsWhenNoImprovement(t *testing.T) {
+	// single block: 1 repeat=600s, 2 repeats=1200s. target=700s.
+	// +1 gives |1200-700|=500 > |600-700|=100, so algorithm should stay at 1.
+	tr := makeTraining("strength", []Routine{
+		routine("work", 0, []Block{
+			block(1, 0, []Activity{act(600, 0, 0)}),
+		}),
+	})
+
+	tr.SetDuration(700 / 60) // ~11min
+
+	if tr.Routines[0].Blocks[0].Repeats != 1 {
+		t.Errorf("expected 1 repeat (closer to target), got %d", tr.Routines[0].Blocks[0].Repeats)
+	}
+}
+
+func TestSetDuration_WithinTolerance(t *testing.T) {
+	// regression test: various targets should produce durations within 15% tolerance
+	tests := []struct {
+		name        string
+		methodology string
+		routines    []Routine
+		minutes     int
+	}{
+		{
+			"strength 45min",
+			"strength",
+			[]Routine{
+				routine("warmup", 0, []Block{block(1, 0, []Activity{act(120, 0, 0)})}),
+				routine("work", 0, []Block{
+					block(3, 90, []Activity{act(0, 10, 30), act(0, 8, 0)}),
+					block(3, 90, []Activity{act(0, 12, 30), act(0, 10, 0)}),
+					block(3, 60, []Activity{act(0, 10, 0)}),
+				}),
+				routine("cooldown", 0, []Block{block(1, 0, []Activity{act(120, 0, 0)})}),
+			},
+			45,
+		},
+		{
+			"circuit 30min",
+			"circuit",
+			[]Routine{
+				routine("warmup", 0, []Block{block(1, 0, []Activity{act(60, 0, 0)})}),
+				routine("work", 0, []Block{
+					block(4, 30, []Activity{act(30, 0, 10), act(30, 0, 10), act(30, 0, 0)}),
+				}),
+				routine("cooldown", 0, []Block{block(1, 0, []Activity{act(60, 0, 0)})}),
+			},
+			30,
+		},
+		{
+			"emom 20min",
+			"emom",
+			[]Routine{
+				routine("warmup", 0, []Block{block(1, 0, []Activity{act(120, 0, 0)})}),
+				routine("work", 0, []Block{
+					block(5, 0, []Activity{act(0, 5, 0)}),
+					block(5, 0, []Activity{act(0, 8, 0)}),
+				}),
+				routine("cooldown", 0, []Block{block(1, 0, []Activity{act(60, 0, 0)})}),
+			},
+			20,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tr := makeTraining(tt.methodology, tt.routines)
+			tr.SetDuration(tt.minutes)
+
+			total := tr.CalculateDuration()
+			target := tt.minutes * 60
+			low := float64(target) * (1 - durationTolerancePct)
+			high := float64(target) * (1 + durationTolerancePct)
+			if float64(total) < low || float64(total) > high {
+				t.Errorf("%s: total = %ds (%.1fm), want within %.0f-%.0f",
+					tt.name, total, float64(total)/60, low, high)
+			}
+		})
 	}
 }
 

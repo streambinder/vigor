@@ -3,7 +3,6 @@ package model
 import (
 	"encoding/json"
 	"errors"
-	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -475,6 +474,74 @@ func (t *Training) workBudget(userRequestedMinutes int) int {
 	return userRequestedMinutes*60 - t.calcIntervalDuration("warmup") - t.calcIntervalDuration("cooldown")
 }
 
+// scaleWorkRepeats iteratively adjusts work block repeats ±1 to get
+// CalculateDuration() as close as possible to targetDuration seconds.
+func (t *Training) scaleWorkRepeats(targetDuration int) {
+	abs := func(x int) int {
+		if x < 0 {
+			return -x
+		}
+		return x
+	}
+
+	var blocks []*Block
+	for i := range t.Routines {
+		if t.Routines[i].Type != "work" {
+			continue
+		}
+		for j := range t.Routines[i].Blocks {
+			blocks = append(blocks, &t.Routines[i].Blocks[j])
+		}
+	}
+	if len(blocks) == 0 {
+		return
+	}
+
+	current := t.CalculateDuration()
+	for range 500 {
+		diff := targetDuration - current
+		if diff == 0 {
+			break
+		}
+
+		bestIdx := -1
+		bestDist := abs(diff)
+
+		if diff > 0 {
+			for i, b := range blocks {
+				b.Repeats++
+				if d := abs(targetDuration - t.CalculateDuration()); d < bestDist {
+					bestDist = d
+					bestIdx = i
+				}
+				b.Repeats--
+			}
+		} else {
+			for i, b := range blocks {
+				if b.Repeats <= 1 {
+					continue
+				}
+				b.Repeats--
+				if d := abs(targetDuration - t.CalculateDuration()); d < bestDist {
+					bestDist = d
+					bestIdx = i
+				}
+				b.Repeats++
+			}
+		}
+
+		if bestIdx < 0 {
+			break
+		}
+		if diff > 0 {
+			blocks[bestIdx].Repeats++
+		} else {
+			blocks[bestIdx].Repeats--
+		}
+		current = t.CalculateDuration()
+	}
+}
+
 // SetDuration computes and sets t.Duration based on methodology.
 // userRequestedMinutes is the user's requested total duration in minutes.
 // for non-amrap methodologies, it scales block repeats to match the target duration.
@@ -487,83 +554,9 @@ func (t *Training) SetDuration(userRequestedMinutes int) {
 		}
 		t.Duration = work
 
-	case "emom":
-		budget := t.workBudget(userRequestedMinutes)
-		if budget < 60 {
-			budget = 60
-		}
-		// count current total emom repeats across work blocks
-		var currentRepeats int
-		for _, r := range t.Routines {
-			if r.Type == "work" {
-				for _, b := range r.Blocks {
-					currentRepeats += b.Repeats
-				}
-			}
-		}
-		if currentRepeats == 0 {
-			break
-		}
-		targetRepeats := budget / 60
-		if targetRepeats < 1 {
-			targetRepeats = 1
-		}
-		// scale each block's repeats proportionally
-		ratio := float64(targetRepeats) / float64(currentRepeats)
-		var assigned int
-		for i := range t.Routines {
-			if t.Routines[i].Type != "work" {
-				continue
-			}
-			for j := range t.Routines[i].Blocks {
-				scaled := int(math.Round(float64(t.Routines[i].Blocks[j].Repeats) * ratio))
-				if scaled < 1 {
-					scaled = 1
-				}
-				t.Routines[i].Blocks[j].Repeats = scaled
-				assigned += scaled
-			}
-		}
-		// correct rounding drift: add/remove from last work block
-		if diff := targetRepeats - assigned; diff != 0 {
-			for i := len(t.Routines) - 1; i >= 0; i-- {
-				if t.Routines[i].Type != "work" {
-					continue
-				}
-				last := len(t.Routines[i].Blocks) - 1
-				t.Routines[i].Blocks[last].Repeats += diff
-				if t.Routines[i].Blocks[last].Repeats < 1 {
-					t.Routines[i].Blocks[last].Repeats = 1
-				}
-				break
-			}
-		}
-		t.Duration = t.CalculateDuration()
-
 	default:
-		// interval-based: strength, circuit, hiit, for_time, endurance, mobility
-		budget := t.workBudget(userRequestedMinutes)
-		if budget < 60 {
-			budget = 60
-		}
-		currentWork := t.calcIntervalDuration("work")
-		if currentWork == 0 {
-			t.Duration = t.CalculateDuration()
-			break
-		}
-		multiplier := float64(budget) / float64(currentWork)
-		for i := range t.Routines {
-			if t.Routines[i].Type != "work" {
-				continue
-			}
-			for j := range t.Routines[i].Blocks {
-				scaled := int(math.Round(float64(t.Routines[i].Blocks[j].Repeats) * multiplier))
-				if scaled < 1 {
-					scaled = 1
-				}
-				t.Routines[i].Blocks[j].Repeats = scaled
-			}
-		}
+		// interval-based + emom: iteratively adjust work block repeats
+		t.scaleWorkRepeats(userRequestedMinutes * 60)
 		t.Duration = t.CalculateDuration()
 	}
 }
