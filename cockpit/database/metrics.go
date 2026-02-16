@@ -105,7 +105,7 @@ func GetHandlerErrorStats(days int) ([]ErrorPoint, error) {
 	return results, err
 }
 
-// GetTrainingGenerationFailures returns daily failure counts grouped by reason
+// GetTrainingGenerationFailures returns daily failure counts grouped by model and reason
 func GetTrainingGenerationFailures(days int) ([]ErrorPoint, error) {
 	if Metrics == nil {
 		return nil, nil
@@ -118,11 +118,11 @@ func GetTrainingGenerationFailures(days int) ([]ErrorPoint, error) {
 	err := Metrics.Raw(fmt.Sprintf(`
 		SELECT
 			date(time) as day,
-			reason as "group",
+			model || ' ' || reason as "group",
 			count(*) as count
 		FROM %s
 		WHERE time > datetime('now', '-%d days')
-		GROUP BY day, reason
+		GROUP BY day, model, reason
 		ORDER BY day
 	`, stmt.Table, days)).Scan(&results).Error
 
