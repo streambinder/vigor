@@ -188,9 +188,8 @@ func ProgressiveMargin(completedTrainings int) float64 {
 
 // IsPositiveFeedback returns true if the feedback indicates successful completion.
 func IsPositiveFeedback(feedback string) bool {
-	return feedback != model.FeedbackHard &&
-		feedback != model.FeedbackTooHard &&
-		feedback != model.FeedbackSkipped
+	return feedback != model.FeedbackImpossible &&
+		feedback != model.FeedbackTooHard
 }
 
 // RecordProficiencies writes proficiency records for a user based on training activities.

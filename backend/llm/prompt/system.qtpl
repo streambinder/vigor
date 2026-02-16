@@ -65,7 +65,7 @@ ACTIVITY RULES:
 MODIFIERS: When feedback shows "too_easy", add modifier IDs from [MODIFIERS] section to activity.modifiers array. Never invent modifier IDs.
 {% endif %}
 
-PROGRESSION: Analyze feedback from [HISTORY]. For "too_easy": increase reps{% if hasModifiers %} or add weighted modifiers{% endif %}. For "too_hard": decrease reps.
+PROGRESSION: Analyze feedback from [HISTORY]. For "too_easy": increase reps{% if hasModifiers %} or add weighted modifiers{% endif %}. For "too_hard": decrease reps. For "impossible": REPLACE the exercise with a suitable alternative targeting the same muscle group.
 
 NAME: Generate a memorable 3-4 word title that:
 - Reflects workout character (intensity, focus, energy)

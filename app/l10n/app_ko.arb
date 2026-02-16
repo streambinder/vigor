@@ -285,8 +285,11 @@
   "howWasYourTraining": "트레이닝은 어떠셨나요?",
   "anyAdditionalComments": "추가 의견이 있으신가요?",
   "actualDuration": "실제 소요 시간 (분)",
-  "tooEasy": "너무 쉬움",
+  "impossible": "못 함",
   "tooHard": "너무 어려움",
+  "ok": "적절함",
+  "easy": "쉬움",
+  "tooEasy": "너무 쉬움",
   "flag": "표시",
 
   "profile": "프로필",

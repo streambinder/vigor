@@ -285,8 +285,11 @@
   "howWasYourTraining": "您的训练感觉如何？",
   "anyAdditionalComments": "有其他评论吗？",
   "actualDuration": "实际时长（分钟）",
-  "tooEasy": "太简单",
+  "impossible": "做不到",
   "tooHard": "太难",
+  "ok": "合适",
+  "easy": "简单",
+  "tooEasy": "太简单",
   "flag": "标记",
 
   "profile": "个人资料",

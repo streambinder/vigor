@@ -285,8 +285,11 @@
   "howWasYourTraining": "Как прошла тренировка?",
   "anyAdditionalComments": "Дополнительные комментарии?",
   "actualDuration": "Фактическая длительность (мин)",
-  "tooEasy": "Слишком легко",
+  "impossible": "Не могу",
   "tooHard": "Слишком сложно",
+  "ok": "ОК",
+  "easy": "Легко",
+  "tooEasy": "Слишком легко",
   "flag": "Отметить",
 
   "profile": "Профиль",

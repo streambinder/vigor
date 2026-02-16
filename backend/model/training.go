@@ -18,14 +18,13 @@ const WeightActivityDurationPerRep = 4 // NSCA/ACSM controlled tempo (2-0-2-0)
 // max acceptable drift between generated and requested duration
 const durationTolerancePct = 0.15
 
-// Valid activity feedback values
+// Valid activity feedback values (maps to -2..+2 slider)
 const (
-	FeedbackTooEasy = "too_easy"
-	FeedbackEasy    = "easy"
-	FeedbackOk      = "ok"
-	FeedbackHard    = "hard"
-	FeedbackTooHard = "too_hard"
-	FeedbackSkipped = "skipped"
+	FeedbackImpossible = "impossible" // -2: couldn't do it, replace next time
+	FeedbackTooHard    = "too_hard"   // -1: decrease intensity
+	FeedbackOk         = "ok"         //  0: appropriate difficulty
+	FeedbackEasy       = "easy"       // +1: somewhat easy
+	FeedbackTooEasy    = "too_easy"   // +2: trivially easy, increase intensity
 )
 
 // LLMPrompt holds the system/user prompt pair sent to the LLM.

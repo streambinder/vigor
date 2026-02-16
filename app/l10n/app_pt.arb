@@ -285,8 +285,11 @@
   "howWasYourTraining": "Como foi o teu treino?",
   "anyAdditionalComments": "Algum comentário adicional?",
   "actualDuration": "Duração real (min)",
-  "tooEasy": "Muito fácil",
+  "impossible": "Não consigo",
   "tooHard": "Muito difícil",
+  "ok": "OK",
+  "easy": "Fácil",
+  "tooEasy": "Muito fácil",
   "flag": "Sinalizar",
 
   "profile": "Perfil",

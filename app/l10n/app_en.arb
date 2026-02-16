@@ -417,8 +417,11 @@
   "howWasYourTraining": "How was your training?",
   "anyAdditionalComments": "Any additional comments?",
   "actualDuration": "Actual duration (min)",
-  "tooEasy": "Too easy",
+  "impossible": "Can't do",
   "tooHard": "Too hard",
+  "ok": "OK",
+  "easy": "Easy",
+  "tooEasy": "Too easy",
   "flag": "Flag",
 
   "profile": "Profile",

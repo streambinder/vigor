@@ -285,8 +285,11 @@
   "howWasYourTraining": "トレーニングはいかがでしたか？",
   "anyAdditionalComments": "追加のコメントはありますか？",
   "actualDuration": "実際の所要時間（分）",
-  "tooEasy": "簡単すぎる",
+  "impossible": "できない",
   "tooHard": "難しすぎる",
+  "ok": "適切",
+  "easy": "簡単",
+  "tooEasy": "簡単すぎる",
   "flag": "フラグ",
 
   "profile": "プロフィール",

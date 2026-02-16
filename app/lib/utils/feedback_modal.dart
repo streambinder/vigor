@@ -9,28 +9,58 @@ import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 import '../widgets/adaptive/adaptive.dart';
 
-// matches backend model.Feedback* constants
-enum ExerciseFeedback { none, tooEasy, easy, ok, hard, tooHard, skipped }
+// matches backend model.Feedback* constants, maps to -2..+2 slider
+enum ExerciseFeedback { none, impossible, tooHard, ok, easy, tooEasy }
 
 extension ExerciseFeedbackX on ExerciseFeedback {
   String toApiValue() => switch (this) {
-        ExerciseFeedback.tooEasy => 'too_easy',
-        ExerciseFeedback.easy => 'easy',
-        ExerciseFeedback.ok => 'ok',
-        ExerciseFeedback.hard => 'hard',
+        ExerciseFeedback.impossible => 'impossible',
         ExerciseFeedback.tooHard => 'too_hard',
-        ExerciseFeedback.skipped => 'skipped',
+        ExerciseFeedback.ok => 'ok',
+        ExerciseFeedback.easy => 'easy',
+        ExerciseFeedback.tooEasy => 'too_easy',
         ExerciseFeedback.none => '',
       };
 
   static ExerciseFeedback fromApiValue(String? value) => switch (value) {
-        'too_easy' => ExerciseFeedback.tooEasy,
-        'easy' => ExerciseFeedback.easy,
-        'ok' => ExerciseFeedback.ok,
-        'hard' => ExerciseFeedback.hard,
+        'impossible' => ExerciseFeedback.impossible,
         'too_hard' => ExerciseFeedback.tooHard,
-        'skipped' => ExerciseFeedback.skipped,
+        'ok' => ExerciseFeedback.ok,
+        'easy' => ExerciseFeedback.easy,
+        'too_easy' => ExerciseFeedback.tooEasy,
+        // migrate legacy values
+        'hard' => ExerciseFeedback.tooHard,
+        'skipped' => ExerciseFeedback.impossible,
         _ => ExerciseFeedback.none,
+      };
+
+  /// slider position: -2 (impossible) to +2 (too easy), null if unset
+  int? get sliderValue => switch (this) {
+        ExerciseFeedback.impossible => -2,
+        ExerciseFeedback.tooHard => -1,
+        ExerciseFeedback.ok => 0,
+        ExerciseFeedback.easy => 1,
+        ExerciseFeedback.tooEasy => 2,
+        ExerciseFeedback.none => null,
+      };
+
+  static ExerciseFeedback fromSliderValue(int value) => switch (value) {
+        -2 => ExerciseFeedback.impossible,
+        -1 => ExerciseFeedback.tooHard,
+        0 => ExerciseFeedback.ok,
+        1 => ExerciseFeedback.easy,
+        2 => ExerciseFeedback.tooEasy,
+        _ => ExerciseFeedback.none,
+      };
+
+  /// short label for the current slider position
+  String label(AppLocalizations l10n) => switch (this) {
+        ExerciseFeedback.impossible => l10n.impossible,
+        ExerciseFeedback.tooHard => l10n.tooHard,
+        ExerciseFeedback.ok => l10n.ok,
+        ExerciseFeedback.easy => l10n.easy,
+        ExerciseFeedback.tooEasy => l10n.tooEasy,
+        ExerciseFeedback.none => '',
       };
 }
 
@@ -466,56 +496,68 @@ class _ExerciseFeedbackRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final useLiquidGlass = PlatformHelper.useLiquidGlass;
-    final primaryColor = useLiquidGlass
-        ? LiquidGlassTheme.primaryColor
-        : Theme.of(context).colorScheme.primary;
+    final l10n = AppLocalizations.of(context);
+    final isActive = feedback != ExerciseFeedback.none;
+    final sliderValue = (feedback.sliderValue ?? 0).toDouble();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: Text(
-              name,
-              style: useLiquidGlass
-                  ? LiquidGlassTheme.bodyStyle
-                  : Theme.of(context).textTheme.bodyMedium,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          const SizedBox(width: 8),
-          // too easy (thumbs up)
-          IconButton(
-            icon: Icon(
-              Icons.thumb_up_outlined,
-              color: feedback == ExerciseFeedback.tooEasy ? primaryColor : VigorColors.stone,
-            ),
-            onPressed: () => onFeedbackChanged(
-              feedback == ExerciseFeedback.tooEasy ? ExerciseFeedback.none : ExerciseFeedback.tooEasy,
-            ),
-            tooltip: 'Too easy',
-          ),
-          // too hard (thumbs down)
-          IconButton(
-            icon: Icon(
-              Icons.thumb_down_outlined,
-              color: feedback == ExerciseFeedback.tooHard ? primaryColor : VigorColors.stone,
-            ),
-            onPressed: () => onFeedbackChanged(
-              feedback == ExerciseFeedback.tooHard ? ExerciseFeedback.none : ExerciseFeedback.tooHard,
-            ),
-            tooltip: 'Too hard',
-          ),
-          // flag (independent from feedback, only shown in completion mode)
-          if (showFlag)
-            IconButton(
-              icon: Icon(
-                isFlagged ? Icons.flag : Icons.flag_outlined,
-                color: isFlagged ? VigorColors.crimson : VigorColors.stone,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  name,
+                  style: useLiquidGlass
+                      ? LiquidGlassTheme.bodyStyle
+                      : Theme.of(context).textTheme.bodyMedium,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              onPressed: () => onFlagChanged(!isFlagged),
-              tooltip: 'Flag issue',
+              if (isActive)
+                Text(
+                  feedback.label(l10n),
+                  style: (useLiquidGlass
+                          ? LiquidGlassTheme.bodyStyle
+                          : Theme.of(context).textTheme.bodySmall)
+                      ?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              // flag (independent from feedback, only shown in completion mode)
+              if (showFlag)
+                IconButton(
+                  icon: Icon(
+                    isFlagged ? Icons.flag : Icons.flag_outlined,
+                    color: isFlagged ? VigorColors.crimson : VigorColors.stone,
+                    size: 20,
+                  ),
+                  onPressed: () => onFlagChanged(!isFlagged),
+                  tooltip: 'Flag issue',
+                  visualDensity: VisualDensity.compact,
+                ),
+            ],
+          ),
+          Opacity(
+            opacity: isActive ? 1.0 : 0.35,
+            child: SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                trackHeight: 3,
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+              ),
+              child: Slider(
+                value: sliderValue,
+                min: -2,
+                max: 2,
+                divisions: 4,
+                onChanged: (v) => onFeedbackChanged(ExerciseFeedbackX.fromSliderValue(v.round())),
+              ),
             ),
+          ),
         ],
       ),
     );
