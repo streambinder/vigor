@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -468,19 +469,101 @@ func (t *Training) CalculateDuration() int {
 	}
 }
 
+// workBudget returns the available work seconds after subtracting warmup/cooldown
+// from the user's requested duration.
+func (t *Training) workBudget(userRequestedMinutes int) int {
+	return userRequestedMinutes*60 - t.calcIntervalDuration("warmup") - t.calcIntervalDuration("cooldown")
+}
+
 // SetDuration computes and sets t.Duration based on methodology.
 // userRequestedMinutes is the user's requested total duration in minutes.
+// for non-amrap methodologies, it scales block repeats to match the target duration.
 func (t *Training) SetDuration(userRequestedMinutes int) {
 	switch t.Methodology {
 	case "amrap":
-		warmup := t.calcIntervalDuration("warmup")
-		cooldown := t.calcIntervalDuration("cooldown")
-		work := userRequestedMinutes*60 - warmup - cooldown
+		work := t.workBudget(userRequestedMinutes)
 		if work < 60 {
 			work = 60
 		}
 		t.Duration = work
+
+	case "emom":
+		budget := t.workBudget(userRequestedMinutes)
+		if budget < 60 {
+			budget = 60
+		}
+		// count current total emom repeats across work blocks
+		var currentRepeats int
+		for _, r := range t.Routines {
+			if r.Type == "work" {
+				for _, b := range r.Blocks {
+					currentRepeats += b.Repeats
+				}
+			}
+		}
+		if currentRepeats == 0 {
+			break
+		}
+		targetRepeats := budget / 60
+		if targetRepeats < 1 {
+			targetRepeats = 1
+		}
+		// scale each block's repeats proportionally
+		ratio := float64(targetRepeats) / float64(currentRepeats)
+		var assigned int
+		for i := range t.Routines {
+			if t.Routines[i].Type != "work" {
+				continue
+			}
+			for j := range t.Routines[i].Blocks {
+				scaled := int(math.Round(float64(t.Routines[i].Blocks[j].Repeats) * ratio))
+				if scaled < 1 {
+					scaled = 1
+				}
+				t.Routines[i].Blocks[j].Repeats = scaled
+				assigned += scaled
+			}
+		}
+		// correct rounding drift: add/remove from last work block
+		if diff := targetRepeats - assigned; diff != 0 {
+			for i := len(t.Routines) - 1; i >= 0; i-- {
+				if t.Routines[i].Type != "work" {
+					continue
+				}
+				last := len(t.Routines[i].Blocks) - 1
+				t.Routines[i].Blocks[last].Repeats += diff
+				if t.Routines[i].Blocks[last].Repeats < 1 {
+					t.Routines[i].Blocks[last].Repeats = 1
+				}
+				break
+			}
+		}
+		t.Duration = t.CalculateDuration()
+
 	default:
+		// interval-based: strength, circuit, hiit, for_time, endurance, mobility
+		budget := t.workBudget(userRequestedMinutes)
+		if budget < 60 {
+			budget = 60
+		}
+		currentWork := t.calcIntervalDuration("work")
+		if currentWork == 0 {
+			t.Duration = t.CalculateDuration()
+			break
+		}
+		multiplier := float64(budget) / float64(currentWork)
+		for i := range t.Routines {
+			if t.Routines[i].Type != "work" {
+				continue
+			}
+			for j := range t.Routines[i].Blocks {
+				scaled := int(math.Round(float64(t.Routines[i].Blocks[j].Repeats) * multiplier))
+				if scaled < 1 {
+					scaled = 1
+				}
+				t.Routines[i].Blocks[j].Repeats = scaled
+			}
+		}
 		t.Duration = t.CalculateDuration()
 	}
 }

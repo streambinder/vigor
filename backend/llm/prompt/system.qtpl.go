@@ -31,11 +31,7 @@ CONSTRAINTS:
 - Never program exercises contraindicated by user injuries.
 - Respond with valid JSON only.
 
-DURATION: Each rep ≈ `)
-//line llm/prompt/system.qtpl:14
-	qw422016.N().D(model.WeightActivityDurationPerRep)
-//line llm/prompt/system.qtpl:14
-	qw422016.N().S(`s for volume planning. Duration is computed server-side.
+DURATION: Duration is adjusted server-side by scaling block repeats. Focus on exercise selection, structure quality, and appropriate rest times. Use 2-4 repeats per block as a starting point.
 
 `)
 //line llm/prompt/system.qtpl:16

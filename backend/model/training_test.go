@@ -244,25 +244,166 @@ func TestSetDuration_AMRAP_MinimumWork(t *testing.T) {
 	}
 }
 
-func TestSetDuration_Strength(t *testing.T) {
+func TestSetDuration_Strength_ScalesRepeats(t *testing.T) {
+	// single work block, 3 repeats, ~450s of work (see TestCalculateDuration_Strength)
+	// request 15 min (900s) → should roughly double repeats
 	tr := makeTraining("strength", []Routine{
+		routine("warmup", 0, []Block{
+			block(1, 0, []Activity{act(60, 0, 0)}),
+		}),
 		routine("work", 0, []Block{
 			block(3, 60, []Activity{
+				act(0, 10, 30), // 40s work
+				act(0, 10, 0),  // 40s work
+			}),
+		}),
+		routine("cooldown", 0, []Block{
+			block(1, 0, []Activity{act(60, 0, 0)}),
+		}),
+	})
+
+	tr.SetDuration(15) // 15 min = 900s total, warmup=60 cooldown=60 → 780s work budget
+	// original work = 450s, budget = 780s, multiplier ≈ 1.73 → round(3 * 1.73) = round(5.2) = 5
+	if tr.Routines[1].Blocks[0].Repeats != 5 {
+		t.Errorf("strength SetDuration(15): repeats = %d, want 5", tr.Routines[1].Blocks[0].Repeats)
+	}
+
+	// verify duration is within tolerance of target
+	total := tr.CalculateDuration()
+	if total < 765 || total > 1035 { // 900 ± 15%
+		t.Errorf("strength SetDuration(15): total = %d, want within 765-1035", total)
+	}
+}
+
+func TestSetDuration_Strength_ScalesDown(t *testing.T) {
+	// work block with 6 repeats, request a short duration to verify scaling down
+	tr := makeTraining("strength", []Routine{
+		routine("work", 0, []Block{
+			block(6, 60, []Activity{
 				act(0, 10, 30),
 				act(0, 10, 0),
 			}),
 		}),
 	})
 
-	tr.SetDuration(45) // value doesn't matter for non-amrap
+	tr.SetDuration(5) // 5 min = 300s, no warmup/cooldown → 300s work budget
+	// original: 6 repeats of (40+30+40) + 5×60 block rest = 660+300 = 960s
+	// multiplier = 300/960 ≈ 0.31 → round(6 * 0.31) = round(1.88) = 2
+	if tr.Routines[0].Blocks[0].Repeats != 2 {
+		t.Errorf("strength SetDuration(5): repeats = %d, want 2", tr.Routines[0].Blocks[0].Repeats)
+	}
+}
 
-	// strength SetDuration → CalculateDuration()
-	// repeat 1: 40 + 30 + 40 + 60 = 170
-	// repeat 2: 40 + 30 + 40 + 60 = 170
-	// repeat 3: 40 + 30 + 40 = 110 (last of training)
-	// total = 450
-	if tr.Duration != 450 {
-		t.Errorf("strength SetDuration: Duration = %d, want 450", tr.Duration)
+func TestSetDuration_Strength_ClampsToOne(t *testing.T) {
+	// request very short duration → repeats should clamp to 1, never 0
+	tr := makeTraining("strength", []Routine{
+		routine("work", 0, []Block{
+			block(10, 60, []Activity{
+				act(0, 10, 30),
+				act(0, 10, 0),
+			}),
+		}),
+	})
+
+	tr.SetDuration(1) // 1 min = 60s → multiplier is very small
+	if tr.Routines[0].Blocks[0].Repeats < 1 {
+		t.Errorf("strength SetDuration(1): repeats = %d, want >= 1", tr.Routines[0].Blocks[0].Repeats)
+	}
+}
+
+func TestSetDuration_EMOM_ScalesRepeats(t *testing.T) {
+	tr := makeTraining("emom", []Routine{
+		routine("warmup", 0, []Block{
+			block(1, 0, []Activity{act(120, 0, 0)}),
+		}),
+		routine("work", 0, []Block{
+			block(10, 0, []Activity{act(0, 5, 0)}), // 10 rounds
+			block(5, 0, []Activity{act(0, 8, 0)}),  // 5 rounds
+		}),
+		routine("cooldown", 0, []Block{
+			block(1, 0, []Activity{act(60, 0, 0)}),
+		}),
+	})
+
+	// original: warmup=120 + work=15*60=900 + cooldown=60 = 1080s = 18m
+	// request 30m (1800s) → work budget = 1800-120-60 = 1620s → 27 target repeats
+	// ratio = 27/15 = 1.8 → block1: round(10*1.8)=18, block2: round(5*1.8)=9 → total=27
+	tr.SetDuration(30)
+
+	if tr.Routines[1].Blocks[0].Repeats != 18 {
+		t.Errorf("emom SetDuration(30): block1 repeats = %d, want 18", tr.Routines[1].Blocks[0].Repeats)
+	}
+	if tr.Routines[1].Blocks[1].Repeats != 9 {
+		t.Errorf("emom SetDuration(30): block2 repeats = %d, want 9", tr.Routines[1].Blocks[1].Repeats)
+	}
+
+	total := tr.CalculateDuration()
+	// warmup(120) + 27*60(1620) + cooldown(60) = 1800
+	if total != 1800 {
+		t.Errorf("emom SetDuration(30): total = %d, want 1800", total)
+	}
+}
+
+func TestSetDuration_EMOM_ScalesDown(t *testing.T) {
+	tr := makeTraining("emom", []Routine{
+		routine("work", 0, []Block{
+			block(20, 0, []Activity{act(0, 5, 0)}),
+		}),
+	})
+
+	// original: 20*60=1200s=20m. request 10m → 10 target repeats
+	tr.SetDuration(10)
+
+	if tr.Routines[0].Blocks[0].Repeats != 10 {
+		t.Errorf("emom SetDuration(10): repeats = %d, want 10", tr.Routines[0].Blocks[0].Repeats)
+	}
+}
+
+func TestSetDuration_EMOM_RoundingDriftCorrection(t *testing.T) {
+	// 3 blocks with repeats that cause rounding drift
+	tr := makeTraining("emom", []Routine{
+		routine("work", 0, []Block{
+			block(3, 0, []Activity{act(0, 5, 0)}), // 3 rounds
+			block(3, 0, []Activity{act(0, 5, 0)}), // 3 rounds
+			block(3, 0, []Activity{act(0, 5, 0)}), // 3 rounds → total 9
+		}),
+	})
+
+	// request 10m → 10 target repeats, ratio = 10/9 ≈ 1.11
+	// round(3*1.11) = round(3.33) = 3 per block → 9 assigned, need 10
+	// drift correction adds 1 to last block → 3, 3, 4
+	tr.SetDuration(10)
+
+	totalRepeats := 0
+	for _, b := range tr.Routines[0].Blocks {
+		totalRepeats += b.Repeats
+	}
+	if totalRepeats != 10 {
+		t.Errorf("emom rounding drift: total repeats = %d, want 10", totalRepeats)
+	}
+}
+
+func TestSetDuration_MultipleWorkBlocks(t *testing.T) {
+	// two work blocks with different repeats, verify proportional scaling
+	tr := makeTraining("circuit", []Routine{
+		routine("work", 0, []Block{
+			block(2, 30, []Activity{act(30, 0, 10), act(30, 0, 0)}), // 2 repeats
+			block(4, 30, []Activity{act(30, 0, 10), act(30, 0, 0)}), // 4 repeats
+		}),
+	})
+
+	// compute original work duration, then request double
+	originalWork := tr.calcIntervalDuration("work")
+	requestedMinutes := (originalWork * 2) / 60
+
+	tr.SetDuration(requestedMinutes)
+
+	// both blocks should have roughly doubled repeats
+	if tr.Routines[0].Blocks[0].Repeats < 3 || tr.Routines[0].Blocks[0].Repeats > 5 {
+		t.Errorf("circuit SetDuration: block1 repeats = %d, want 3-5", tr.Routines[0].Blocks[0].Repeats)
+	}
+	if tr.Routines[0].Blocks[1].Repeats < 6 || tr.Routines[0].Blocks[1].Repeats > 10 {
+		t.Errorf("circuit SetDuration: block2 repeats = %d, want 6-10", tr.Routines[0].Blocks[1].Repeats)
 	}
 }
 
@@ -393,10 +534,6 @@ func TestValidate_DurationTolerance(t *testing.T) {
 	validRoutines := map[string]bool{"work": true}
 	weightedModifiers := map[string]bool{}
 
-	// training with 3 blocks × 2 repeats × (40s work + 30s rest) + last activity no rest
-	// = 2 repeats of (40+30+40) with block rest 60 between repeats
-	// repeat 1: 40+30+40+60 = 170, repeat 2: 40+30+40 = 110 → block total 280
-	// 3 blocks × 280 = 840s = 14m
 	makeTestTraining := func() Training {
 		return Training{
 			Name:        "Test",
@@ -430,8 +567,10 @@ func TestValidate_DurationTolerance(t *testing.T) {
 		{"exact match", actualMinutes, false},
 		{"within tolerance (slightly over)", actualMinutes + 2, false},
 		{"within tolerance (slightly under)", actualMinutes - 2, false},
-		{"way over requested", actualMinutes * 3, true},
-		{"way under requested", actualMinutes / 3, true},
+		// SetDuration now scales repeats, so large upward mismatches get corrected
+		{"way over requested (scaled)", actualMinutes * 3, false},
+		// scaling down hits the 1-repeat clamp — rest times alone exceed 5m budget
+		{"way under requested (clamped)", actualMinutes / 3, true},
 		{"zero skips check", 0, false},
 	}
 

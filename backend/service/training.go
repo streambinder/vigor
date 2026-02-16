@@ -20,6 +20,7 @@ import (
 const (
 	recentTrainingDays       = 14
 	recentTrainingMaxResults = 5
+	maxGenerationRetries     = 2
 )
 
 const maxPromptLength = 500
@@ -242,41 +243,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		userID,
 	).Scan(&lastModel)
 
-	llmStart := time.Now()
-	training, llmPrompt, llmModel, err := llm.GenTraining(
-		profiles,
-		goalData,
-		workExercises,
-		warmupExercises,
-		cooldownExercises,
-		equipmentIDs,
-		llmModifiers,
-		favoriteExercises,
-		favoriteEquipmentIDs,
-		methodologyData,
-		methodologies,
-		prompt,
-		duration,
-		recentTrainings,
-		facts,
-		skipWarmupCooldown,
-		calibrationGaps,
-		lastModel,
-	)
-	if err != nil {
-		reason := "llm_error"
-		if errors.Is(err, llm.ErrLLMUnmarshal) {
-			reason = "unmarshal_error"
-		}
-		log.Error().
-			Interface("event", event.TrainingGenerationFailureEvent{
-				Event:   event.Event{Time: time.Now()},
-				Model:   llmModel,
-				Reason:  reason,
-				Message: err.Error(),
-			}).Err(err).Msg("training generation failed")
-		return nil, err
-	}
+	// build validation lookup tables once before the generation loop
 	validExerciseIDs := make(map[string]bool, len(workExercises)+len(warmupExercises)+len(cooldownExercises))
 	for _, e := range workExercises {
 		validExerciseIDs[e.ID] = true
@@ -295,58 +262,20 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			weightedModifierIDs[m.ID] = true
 		}
 	}
-	// always allow the auto-attached weight modifier
 	validModifierIDs[WeightModifier] = true
 	weightedModifierIDs[WeightModifier] = true
-
-	// auto-attach weight modifier to activities with weight_kg > 0 and no existing weighted modifier
-	for i := range training.Routines {
-		for j := range training.Routines[i].Blocks {
-			for k := range training.Routines[i].Blocks[j].Activities {
-				a := &training.Routines[i].Blocks[j].Activities[k]
-				if a.WeightKg <= 0 {
-					continue
-				}
-				hasWeighted := false
-				for _, mod := range a.Modifiers {
-					if weightedModifierIDs[mod] {
-						hasWeighted = true
-						break
-					}
-				}
-				if !hasWeighted {
-					a.Modifiers = append(a.Modifiers, WeightModifier)
-				}
-			}
-		}
-	}
 
 	validRoutineTypes := map[string]bool{"work": true}
 	if !skipWarmupCooldown {
 		validRoutineTypes["warmup"] = true
 		validRoutineTypes["cooldown"] = true
 	}
-	// reorder routines: warmup first, work in original order, cooldown last
-	training.Routines = reorderRoutines(training.Routines)
-	training.SetDuration(duration)
 
-	// collect muscles from work routine exercises (before validation so we can check coverage)
 	exerciseMuscles := make(map[string][]string, len(workExercises))
 	for _, ex := range workExercises {
 		exerciseMuscles[ex.ID] = ex.Muscles
 	}
-	muscleSet := make(map[string]bool)
-	for _, activity := range training.Activities() {
-		for _, muscle := range exerciseMuscles[activity.ExerciseID] {
-			muscleSet[muscle] = true
-		}
-	}
-	var actualMuscles []string
-	for muscle := range muscleSet {
-		actualMuscles = append(actualMuscles, muscle)
-	}
 
-	// resolve target muscles for validation: user-specified or all from DB
 	targetMuscles := muscles
 	if len(targetMuscles) == 0 {
 		var allMuscles []model.Muscle
@@ -359,14 +288,109 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		}
 	}
 
-	if err := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, weightedModifierIDs, !skipWarmupCooldown, duration, targetMuscles, actualMuscles); err != nil {
+	llmStart := time.Now()
+	var training *model.Training
+	var llmPrompt model.LLMPrompt
+	var llmModel string
+	var correctionHint string
+	var actualMuscles []string
+
+	for attempt := 0; attempt <= maxGenerationRetries; attempt++ {
+		var err error
+		training, llmPrompt, llmModel, err = llm.GenTraining(
+			profiles,
+			goalData,
+			workExercises,
+			warmupExercises,
+			cooldownExercises,
+			equipmentIDs,
+			llmModifiers,
+			favoriteExercises,
+			favoriteEquipmentIDs,
+			methodologyData,
+			methodologies,
+			prompt,
+			duration,
+			recentTrainings,
+			facts,
+			skipWarmupCooldown,
+			calibrationGaps,
+			lastModel,
+			correctionHint,
+		)
+		if err != nil {
+			reason := "llm_error"
+			if errors.Is(err, llm.ErrLLMUnmarshal) {
+				reason = "unmarshal_error"
+			}
+			log.Error().
+				Interface("event", event.TrainingGenerationFailureEvent{
+					Event:   event.Event{Time: time.Now()},
+					Model:   llmModel,
+					Reason:  reason,
+					Message: err.Error(),
+				}).Err(err).Msg("training generation failed")
+			return nil, err
+		}
+
+		// auto-attach weight modifier to activities with weight_kg > 0 and no existing weighted modifier
+		for i := range training.Routines {
+			for j := range training.Routines[i].Blocks {
+				for k := range training.Routines[i].Blocks[j].Activities {
+					a := &training.Routines[i].Blocks[j].Activities[k]
+					if a.WeightKg <= 0 {
+						continue
+					}
+					hasWeighted := false
+					for _, mod := range a.Modifiers {
+						if weightedModifierIDs[mod] {
+							hasWeighted = true
+							break
+						}
+					}
+					if !hasWeighted {
+						a.Modifiers = append(a.Modifiers, WeightModifier)
+					}
+				}
+			}
+		}
+
+		training.Routines = reorderRoutines(training.Routines)
+		training.SetDuration(duration)
+
+		muscleSet := make(map[string]bool)
+		for _, activity := range training.Activities() {
+			for _, muscle := range exerciseMuscles[activity.ExerciseID] {
+				muscleSet[muscle] = true
+			}
+		}
+		actualMuscles = nil
+		for muscle := range muscleSet {
+			actualMuscles = append(actualMuscles, muscle)
+		}
+
+		validationErr := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, weightedModifierIDs, !skipWarmupCooldown, duration, targetMuscles, actualMuscles)
+		if validationErr == nil {
+			break
+		}
+
+		if attempt < maxGenerationRetries {
+			log.Warn().
+				Int("attempt", attempt+1).
+				Int("max_attempts", maxGenerationRetries+1).
+				Err(validationErr).Msg("generated training validation failed, retrying")
+			correctionHint = validationErr.Error()
+			continue
+		}
+
+		// last attempt also failed
 		log.Error().
 			Interface("event", event.TrainingGenerationFailureEvent{
 				Event:   event.Event{Time: time.Now()},
 				Model:   llmModel,
 				Reason:  "validation_error",
-				Message: err.Error(),
-			}).Err(err).Msg("generated training validation failed")
+				Message: validationErr.Error(),
+			}).Err(validationErr).Msg("generated training validation failed after all retries")
 		return nil, ErrMalformedTraining
 	}
 

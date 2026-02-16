@@ -11,7 +11,7 @@ CONSTRAINTS:
 - Never program exercises contraindicated by user injuries.
 - Respond with valid JSON only.
 
-DURATION: Each rep ≈ {%d model.WeightActivityDurationPerRep %}s for volume planning. Duration is computed server-side.
+DURATION: Duration is adjusted server-side by scaling block repeats. Focus on exercise selection, structure quality, and appropriate rest times. Use 2-4 repeats per block as a starting point.
 
 {% if len(goals) > 0 %}
 GOALS drive design:

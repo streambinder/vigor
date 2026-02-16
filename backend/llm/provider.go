@@ -41,6 +41,8 @@ func getLLM(lastModel string) LLM {
 }
 
 // GenTraining generates a personalized training plan using an LLM.
+// correctionHint, when non-empty, is appended to the user prompt to guide the
+// model away from a previous validation failure (e.g. duration mismatch).
 func GenTraining(
 	profiles []model.Profile,
 	goals []model.Goal,
@@ -60,31 +62,36 @@ func GenTraining(
 	skipWarmupCooldown bool,
 	calibrationGaps map[string]int,
 	lastModel string,
+	correctionHint string,
 ) (*model.Training, model.LLMPrompt, string, error) {
 	goalIDs := make([]string, len(goals))
 	for i, g := range goals {
 		goalIDs[i] = g.ID
 	}
+	userMessage := prompt.GenTraining(
+		profiles,
+		goalIDs,
+		workExercises,
+		warmupExercises,
+		cooldownExercises,
+		equipment,
+		modifiers,
+		favoriteExercises,
+		favoriteEquipment,
+		methodology,
+		userPrompt,
+		duration,
+		recentTrainings,
+		facts,
+		skipWarmupCooldown,
+		calibrationGaps,
+	)
+	if correctionHint != "" {
+		userMessage += "\n\nCORRECTION (previous attempt failed server-side validation): " + correctionHint + ". Fix this issue and regenerate."
+	}
 	request := model.LLMPrompt{
 		System: prompt.System(goals, methodology, methodologies, skipWarmupCooldown, len(modifiers) > 0),
-		User: prompt.GenTraining(
-			profiles,
-			goalIDs,
-			workExercises,
-			warmupExercises,
-			cooldownExercises,
-			equipment,
-			modifiers,
-			favoriteExercises,
-			favoriteEquipment,
-			methodology,
-			userPrompt,
-			duration,
-			recentTrainings,
-			facts,
-			skipWarmupCooldown,
-			calibrationGaps,
-		),
+		User:   userMessage,
 	}
 	response, llmModel, err := getLLM(lastModel).query(
 		request,
