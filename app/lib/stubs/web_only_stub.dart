@@ -1,14 +1,20 @@
-// Stub for web_only.dart to allow compilation on non-web platforms
-// These are never actually called on mobile since we check kIsWeb
+// stub for web_only.dart — works on all platforms.
+// on web, delegates to the registered GoogleSignInPlugin via dynamic call
+// since conditional imports (dart.library.js_interop) don't resolve on web DDC.
+// on mobile, the kIsWeb guard in google_auth_screen prevents renderButton from being called.
 
 import 'package:flutter/widgets.dart';
+import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
 
-// Stub function that throws if somehow called on non-web
 Widget renderButton({GSIButtonConfiguration? configuration}) {
-  throw UnsupportedError('renderButton is only available on web');
+  // GoogleSignInPlugin is already registered as the platform instance on web.
+  // call with null config (uses plugin defaults) since our stub types
+  // aren't the same as google_sign_in_web's types.
+  final dynamic plugin = GoogleSignInPlatform.instance;
+  return plugin.renderButton() as Widget;
 }
 
-// Stub classes for button configuration
+// stub types so call sites compile on all platforms
 class GSIButtonConfiguration {
   const GSIButtonConfiguration({
     this.type,
@@ -28,13 +34,8 @@ class GSIButtonConfiguration {
 }
 
 enum GSIButtonType { standard, icon }
-
 enum GSIButtonTheme { outline, filledBlue, filledBlack }
-
 enum GSIButtonSize { large, medium, small }
-
 enum GSIButtonText { signinWith, signupWith, continueWith, signin }
-
 enum GSIButtonShape { rectangular, pill }
-
 enum GSIButtonLogoAlignment { left, center }

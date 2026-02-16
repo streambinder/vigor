@@ -12,9 +12,7 @@ import '../services/app_logger.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/vigor_logo.dart';
 
-// stub by default, real web impl only when dart:html is available
-import '../stubs/web_only_stub.dart' as web_only
-    if (dart.library.html) 'package:google_sign_in_web/web_only.dart';
+import '../stubs/web_only_stub.dart' as web_only;
 
 class GoogleAuthScreen extends StatefulWidget {
   const GoogleAuthScreen({super.key});
