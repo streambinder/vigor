@@ -52,8 +52,10 @@ class ExerciseModal {
                     Image.network(
                       _proxyImageUrl(exercise.reference),
                       fit: BoxFit.contain,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
+                      // frameBuilder works reliably on all platforms (unlike
+                      // loadingBuilder which may not fire on android for proxied GIFs)
+                      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                        if (wasSynchronouslyLoaded || frame != null) return child;
                         return Container(
                           height: 200,
                           color: VigorColors.stone.withValues(alpha: 0.1),
