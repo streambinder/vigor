@@ -16,6 +16,7 @@ type Exercise struct {
 	Muscles      pq.StringArray `gorm:"type:text[]" json:"muscles"`
 	Reference    string         `json:"reference"`
 	Instructions pq.StringArray `gorm:"type:text[]" json:"instructions"`
+	Cues         pq.StringArray `gorm:"type:text[]" json:"cues"`
 
 	// Progressions maps movement families to progression order (0-100).
 	// Higher values indicate more advanced exercises within that family.

@@ -19,6 +19,8 @@ class Exercise {
   final String reference;
   @JsonKey(name: 'instructions', defaultValue: [])
   final List<String> instructions;
+  @JsonKey(name: 'cues', defaultValue: [])
+  final List<String> cues;
   @JsonKey(name: 'progressions', defaultValue: {})
   final Map<String, dynamic> progressions;
 
@@ -29,6 +31,7 @@ class Exercise {
     required this.muscles,
     required this.reference,
     required this.instructions,
+    required this.cues,
     required this.progressions,
   });
 
