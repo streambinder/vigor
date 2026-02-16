@@ -1107,41 +1107,49 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // thumbnail
-        GestureDetector(
-          onTap: exercise != null ? () => ExerciseModal.show(context, exercise) : null,
-          child: SizedBox(
-            width: 72,
-            height: 72,
-            child: hasValidImage
-                ? CachedExerciseImage(
-                    imageUrl: exercise.reference,
-                    width: 72,
-                    height: 72,
-                    borderRadius: VigorRadius.radiusMd,
-                  )
-                : Container(
-                    decoration: BoxDecoration(
-                      color: VigorColors.stone.withValues(alpha: 0.1),
-                      borderRadius: VigorRadius.radiusMd,
-                    ),
-                    child: Center(child: Icon(Icons.fitness_center, size: 72 * 0.4, color: VigorColors.stone.withValues(alpha: 0.5))),
-                  ),
-          ),
-        ),
-        const SizedBox(width: VigorSpacing.md),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              MarqueeText(text: activity.name, style: VigorTypography.body.copyWith(fontWeight: FontWeight.w600, color: VigorColors.textPrimary(context))),
-              if (exercise != null && (exercise.equipment.isNotEmpty || exercise.muscles.isNotEmpty || activity.modifiers.isNotEmpty)) ...[
-                const SizedBox(height: VigorSpacing.xs),
-                _buildExerciseDetails(exercise, activity.modifiers),
+          child: GestureDetector(
+            onTap: exercise != null ? () => ExerciseModal.show(context, exercise) : null,
+            behavior: HitTestBehavior.opaque,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // thumbnail
+                SizedBox(
+                  width: 72,
+                  height: 72,
+                  child: hasValidImage
+                      ? CachedExerciseImage(
+                          imageUrl: exercise.reference,
+                          width: 72,
+                          height: 72,
+                          borderRadius: VigorRadius.radiusMd,
+                        )
+                      : Container(
+                          decoration: BoxDecoration(
+                            color: VigorColors.stone.withValues(alpha: 0.1),
+                            borderRadius: VigorRadius.radiusMd,
+                          ),
+                          child: Center(child: Icon(Icons.fitness_center, size: 72 * 0.4, color: VigorColors.stone.withValues(alpha: 0.5))),
+                        ),
+                ),
+                const SizedBox(width: VigorSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      MarqueeText(text: activity.name, style: VigorTypography.body.copyWith(fontWeight: FontWeight.w600, color: VigorColors.textPrimary(context))),
+                      if (exercise != null && (exercise.equipment.isNotEmpty || exercise.muscles.isNotEmpty || activity.modifiers.isNotEmpty)) ...[
+                        const SizedBox(height: VigorSpacing.xs),
+                        _buildExerciseDetails(exercise, activity.modifiers),
+                      ],
+                      const SizedBox(height: VigorSpacing.sm),
+                      _buildActivityTags(activity),
+                    ],
+                  ),
+                ),
               ],
-              const SizedBox(height: VigorSpacing.sm),
-              _buildActivityTags(activity),
-            ],
+            ),
           ),
         ),
         if (training.completedAt == null)
