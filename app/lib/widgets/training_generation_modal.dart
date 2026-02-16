@@ -57,6 +57,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   List<String> _availableMethodologies = [];
   bool _advancedExpanded = false;
   List<int>? _recommendedDurationRange;
+  late bool _useRecommendedDuration;
 
   // rotating status message state
   Timer? _messageTimer;
@@ -69,6 +70,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   void initState() {
     super.initState();
     final prefs = context.read<PreferencesService>();
+    _useRecommendedDuration = prefs.useRecommendedDuration;
     _duration = prefs.defaultDuration;
     _includeWarmupCooldown = prefs.warmupCooldown;
     final defaultId = prefs.defaultGymId;
@@ -136,7 +138,14 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     if (response.isSuccess && response.data != null) {
       final mins = response.data!.recommendation.sessionDurationMins;
       if (mins.isNotEmpty) {
-        setState(() => _recommendedDurationRange = mins);
+        setState(() {
+          _recommendedDurationRange = mins;
+          if (_useRecommendedDuration) {
+            // snap to midpoint of recommended range, rounded to nearest 5 min (slider step)
+            final midpoint = (mins[0] + mins[mins.length - 1]) / 2.0;
+            _duration = (midpoint / 5).round() * 5;
+          }
+        });
       }
     }
   }

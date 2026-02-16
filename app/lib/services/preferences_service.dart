@@ -8,6 +8,7 @@ class PreferencesService {
   static const String _defaultDurationKey = 'default_duration';
   static const String _intervalJingleKey = 'interval_jingle';
   static const String _warmupCooldownKey = 'warmup_cooldown';
+  static const String _useRecommendedDurationKey = 'use_recommended_duration';
   static const int defaultDurationFallback = 60;
 
   SharedPreferences? _prefs;
@@ -72,5 +73,11 @@ class PreferencesService {
 
   Future<void> setWarmupCooldown(bool enabled) async {
     await _prefs?.setBool(_warmupCooldownKey, enabled);
+  }
+
+  bool get useRecommendedDuration => _prefs?.getBool(_useRecommendedDurationKey) ?? true;
+
+  Future<void> setUseRecommendedDuration(bool enabled) async {
+    await _prefs?.setBool(_useRecommendedDurationKey, enabled);
   }
 }

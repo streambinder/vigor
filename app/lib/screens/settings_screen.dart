@@ -17,6 +17,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late int _defaultDuration;
   late bool _intervalJingle;
   late bool _warmupCooldown;
+  late bool _useRecommendedDuration;
 
   @override
   void initState() {
@@ -25,6 +26,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _defaultDuration = prefs.defaultDuration;
     _intervalJingle = prefs.intervalJingle;
     _warmupCooldown = prefs.warmupCooldown;
+    _useRecommendedDuration = prefs.useRecommendedDuration;
   }
 
   @override
@@ -195,20 +197,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(l10n.defaultDuration, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
-                  Text('$_defaultDuration min', style: VigorTypography.data.copyWith(color: VigorColors.indigo, fontWeight: FontWeight.w600)),
+                  Expanded(
+                    child: Text(l10n.defaultDuration, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+                  ),
+                  Text(
+                    _useRecommendedDuration ? l10n.recommended : '$_defaultDuration min',
+                    style: VigorTypography.data.copyWith(
+                      color: VigorColors.indigo,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
-              Slider(
-                value: _defaultDuration.toDouble(),
-                min: 10,
-                max: 180,
-                divisions: 34,
-                activeColor: VigorColors.indigo,
-                onChanged: (value) {
-                  setState(() => _defaultDuration = value.round());
-                  context.read<PreferencesService>().setDefaultDuration(value.round());
-                },
+              const SizedBox(height: VigorSpacing.xs),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(l10n.recommended, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
+                  Switch(
+                    value: _useRecommendedDuration,
+                    activeColor: VigorColors.indigo,
+                    onChanged: (value) {
+                      setState(() => _useRecommendedDuration = value);
+                      context.read<PreferencesService>().setUseRecommendedDuration(value);
+                    },
+                  ),
+                ],
+              ),
+              IgnorePointer(
+                ignoring: _useRecommendedDuration,
+                child: AnimatedOpacity(
+                  opacity: _useRecommendedDuration ? 0.3 : 1.0,
+                  duration: VigorAnimation.fast,
+                  child: Slider(
+                    value: _defaultDuration.toDouble(),
+                    min: 10,
+                    max: 180,
+                    divisions: 34,
+                    activeColor: VigorColors.indigo,
+                    onChanged: (value) {
+                      setState(() => _defaultDuration = value.round());
+                      context.read<PreferencesService>().setDefaultDuration(value.round());
+                    },
+                  ),
+                ),
               ),
               const SizedBox(height: VigorSpacing.sm),
               Row(
