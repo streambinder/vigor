@@ -921,7 +921,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String calibrationFamiliesLearned(int calibrated, int total) {
-    return '$total中$calibratedの動作パターンを学習済み';
+    return '$calibrated/$total 動作パターンを学習済み';
   }
 
   @override

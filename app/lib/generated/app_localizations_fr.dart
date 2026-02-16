@@ -945,7 +945,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String calibrationFamiliesLearned(int calibrated, int total) {
-    return '$calibrated sur $total schémas moteurs appris';
+    return '$calibrated/$total schémas moteurs appris';
   }
 
   @override

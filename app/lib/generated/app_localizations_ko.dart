@@ -921,7 +921,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String calibrationFamiliesLearned(int calibrated, int total) {
-    return '$total개 중 $calibrated개 동작 패턴 학습됨';
+    return '$calibrated/$total 동작 패턴 학습됨';
   }
 
   @override

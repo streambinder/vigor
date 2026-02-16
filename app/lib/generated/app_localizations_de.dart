@@ -946,7 +946,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String calibrationFamiliesLearned(int calibrated, int total) {
-    return '$calibrated von $total Bewegungsmuster gelernt';
+    return '$calibrated/$total Bewegungsmuster gelernt';
   }
 
   @override

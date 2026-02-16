@@ -919,7 +919,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String calibrationFamiliesLearned(int calibrated, int total) {
-    return '已学习 $calibrated/$total 个运动模式';
+    return '$calibrated/$total 运动模式已学习';
   }
 
   @override

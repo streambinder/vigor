@@ -333,27 +333,36 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: VigorSpacing.sm),
           AdaptiveCard(
             padding: VigorSpacing.paddingMd,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // segmented arc showing per-family calibration status
-                Center(child: _buildCalibrationRing(context, segments)),
-                const SizedBox(height: VigorSpacing.md),
-                // families learned count
-                Text(
-                  l10n.calibrationFamiliesLearned(calibrated, total),
-                  style: VigorTypography.data.copyWith(
-                    color: VigorColors.textPrimary(context),
-                    fontWeight: FontWeight.w600,
+                // left column: text + click icon
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.calibrationFamiliesLearned(calibrated, total),
+                        style: VigorTypography.data.copyWith(
+                          color: VigorColors.textPrimary(context),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: VigorSpacing.xs),
+                      Text(
+                        l10n.calibrationDescription,
+                        style: VigorTypography.caption.copyWith(
+                          color: VigorColors.textSecondary(context),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: VigorSpacing.xs),
-                // motivational copy
-                Text(
-                  l10n.calibrationInProgress,
-                  style: VigorTypography.caption.copyWith(
-                    color: VigorColors.textSecondary(context),
-                  ),
+                const SizedBox(width: VigorSpacing.lg),
+                // segmented arc on right
+                Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: _buildCalibrationRing(context, segments),
                 ),
               ],
             ),

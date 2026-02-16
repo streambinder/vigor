@@ -323,7 +323,7 @@
   "calibrationNeeded": "最初のトレーニングを完了して、Vigorがあなたのレベルに合わせた推奨を調整できるようにしましょう",
   "calibrationDescription": "キャリブレーション中、プラットフォームはフィードバックからデータを収集し、あなたのフィットネス状態とレベルの初期評価を行います",
   "calibrationInProgress": "トレーニングを重ねるごとにプランが賢くなります",
-  "calibrationFamiliesLearned": "{total}中{calibrated}の動作パターンを学習済み",
+  "calibrationFamiliesLearned": "{calibrated}/{total} 動作パターンを学習済み",
   "capabilities": "能力",
   "muscleHeatMap": "筋肉ヒートマップ",
   "heatResting": "休息中",

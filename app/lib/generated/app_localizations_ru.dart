@@ -934,7 +934,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String calibrationFamiliesLearned(int calibrated, int total) {
-    return '$calibrated из $total двигательных паттернов изучено';
+    return '$calibrated/$total двигательных паттернов изучено';
   }
 
   @override

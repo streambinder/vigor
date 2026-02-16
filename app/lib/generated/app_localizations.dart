@@ -1827,7 +1827,7 @@ abstract class AppLocalizations {
   /// No description provided for @calibrationFamiliesLearned.
   ///
   /// In en, this message translates to:
-  /// **'{calibrated} of {total} movement patterns learned'**
+  /// **'{calibrated}/{total} movement patterns learned'**
   String calibrationFamiliesLearned(int calibrated, int total);
 
   /// No description provided for @capabilities.

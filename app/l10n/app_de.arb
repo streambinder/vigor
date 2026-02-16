@@ -323,7 +323,7 @@
   "calibrationNeeded": "Absolviere dein erstes Training, damit Vigor die Empfehlungen auf dein Level abstimmen kann",
   "calibrationDescription": "Während der Kalibrierung sammelt die Plattform Daten aus deinem Feedback, um eine erste Einschätzung deines Fitnesszustands und Levels zu machen",
   "calibrationInProgress": "Deine Trainings werden mit jeder Einheit intelligenter",
-  "calibrationFamiliesLearned": "{calibrated} von {total} Bewegungsmuster gelernt",
+  "calibrationFamiliesLearned": "{calibrated}/{total} Bewegungsmuster gelernt",
   "capabilities": "Fähigkeiten",
   "muscleHeatMap": "Muskel-Heatmap",
   "heatResting": "Ruhend",

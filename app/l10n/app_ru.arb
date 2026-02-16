@@ -323,7 +323,7 @@
   "calibrationNeeded": "Завершите первую тренировку, чтобы Vigor откалибровал рекомендации под ваш уровень",
   "calibrationDescription": "Во время калибровки платформа собирает данные из ваших отзывов, чтобы сделать первоначальную оценку вашего физического состояния и уровня",
   "calibrationInProgress": "Ваши тренировки становятся умнее с каждым занятием",
-  "calibrationFamiliesLearned": "{calibrated} из {total} двигательных паттернов изучено",
+  "calibrationFamiliesLearned": "{calibrated}/{total} двигательных паттернов изучено",
   "capabilities": "Возможности",
   "muscleHeatMap": "Тепловая карта мышц",
   "heatResting": "В покое",

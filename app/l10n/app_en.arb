@@ -465,7 +465,7 @@
   "calibrationNeeded": "Complete your first training for Vigor to calibrate recommendations to your level",
   "calibrationDescription": "During calibration, the platform collects data from your feedback to make an initial assessment of your fitness level",
   "calibrationInProgress": "Your trainings are getting smarter with each session",
-  "calibrationFamiliesLearned": "{calibrated} of {total} movement patterns learned",
+  "calibrationFamiliesLearned": "{calibrated}/{total} movement patterns learned",
   "@calibrationFamiliesLearned": {
     "placeholders": {
       "calibrated": {"type": "int"},
