@@ -303,7 +303,8 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	}
 	// reorder routines: warmup first, work in original order, cooldown last
 	training.Routines = reorderRoutines(training.Routines)
-	if err := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, weightedModifierIDs, !skipWarmupCooldown); err != nil {
+	training.SetDuration(duration)
+	if err := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, weightedModifierIDs, !skipWarmupCooldown, duration); err != nil {
 		log.Error().
 			Interface("event", event.TrainingGenerationFailureEvent{
 				Event:   event.Event{Time: time.Now()},
@@ -313,7 +314,6 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			}).Err(err).Msg("generated training validation failed")
 		return nil, ErrMalformedTraining
 	}
-	training.SetDuration(duration)
 
 	log.Info().
 		Interface("event", event.TrainingGenerationEvent{

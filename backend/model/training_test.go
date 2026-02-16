@@ -379,9 +379,70 @@ func TestValidate_WeightModifierConsistency(t *testing.T) {
 					}},
 				}},
 			}
-			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false)
+			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, 0)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidate_DurationTolerance(t *testing.T) {
+	validExercises := map[string]bool{"ex1": true}
+	validModifiers := map[string]bool{}
+	validRoutines := map[string]bool{"work": true}
+	weightedModifiers := map[string]bool{}
+
+	// training with 3 blocks × 2 repeats × (40s work + 30s rest) + last activity no rest
+	// = 2 repeats of (40+30+40) with block rest 60 between repeats
+	// repeat 1: 40+30+40+60 = 170, repeat 2: 40+30+40 = 110 → block total 280
+	// 3 blocks × 280 = 840s = 14m
+	makeTestTraining := func() Training {
+		return Training{
+			Name:        "Test",
+			Methodology: "strength",
+			Routines: []Routine{routine("work", 0, []Block{
+				block(2, 60, []Activity{
+					{ExerciseID: "ex1", Reps: 10, Rest: 30},
+					{ExerciseID: "ex1", Reps: 10, Rest: 0},
+				}),
+				block(2, 60, []Activity{
+					{ExerciseID: "ex1", Reps: 10, Rest: 30},
+					{ExerciseID: "ex1", Reps: 10, Rest: 0},
+				}),
+				block(2, 60, []Activity{
+					{ExerciseID: "ex1", Reps: 10, Rest: 30},
+					{ExerciseID: "ex1", Reps: 10, Rest: 0},
+				}),
+			})},
+		}
+	}
+
+	tr := makeTestTraining()
+	actualDuration := tr.CalculateDuration()
+	actualMinutes := actualDuration / 60 // 14m
+
+	tests := []struct {
+		name             string
+		requestedMinutes int
+		wantErr          bool
+	}{
+		{"exact match", actualMinutes, false},
+		{"within tolerance (slightly over)", actualMinutes + 2, false},
+		{"within tolerance (slightly under)", actualMinutes - 2, false},
+		{"way over requested", actualMinutes * 3, true},
+		{"way under requested", actualMinutes / 3, true},
+		{"zero skips check", 0, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tr := makeTestTraining()
+			tr.SetDuration(tt.requestedMinutes)
+			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, tt.requestedMinutes)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Validate() with requested=%dm, actual=%ds: error = %v, wantErr %v",
+					tt.requestedMinutes, actualDuration, err, tt.wantErr)
 			}
 		})
 	}

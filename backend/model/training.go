@@ -15,6 +15,9 @@ import (
 
 const WeightActivityDurationPerRep = 4 // NSCA/ACSM controlled tempo (2-0-2-0)
 
+// max acceptable drift between generated and requested duration
+const durationTolerancePct = 0.15
+
 // Valid activity feedback values
 const (
 	FeedbackTooEasy = "too_easy"
@@ -190,7 +193,7 @@ func (t Training) DaysSince() int {
 }
 
 // Validate checks that the training has valid structure.
-func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, requireWarmupCooldown bool) error {
+func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, requireWarmupCooldown bool, userRequestedMinutes int) error {
 	if t.Name == "" {
 		return errors.New("training name is empty")
 	}
@@ -255,6 +258,16 @@ func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineType
 			}
 		}
 	}
+
+	// check generated duration is within tolerance of what the user asked for
+	if userRequestedMinutes > 0 {
+		requestedSecs := float64(userRequestedMinutes * 60)
+		actualSecs := float64(t.CalculateDuration())
+		if actualSecs < requestedSecs*(1-durationTolerancePct) || actualSecs > requestedSecs*(1+durationTolerancePct) {
+			return errors.New("generated duration " + strconv.Itoa(int(actualSecs)/60) + "m deviates too much from requested " + strconv.Itoa(userRequestedMinutes) + "m")
+		}
+	}
+
 	return nil
 }
 
