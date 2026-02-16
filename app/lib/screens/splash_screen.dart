@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../design/tokens.dart';
-import '../generated/app_localizations.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/vigor_logo.dart';
 
@@ -9,29 +7,8 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final textColor = VigorColors.textPrimary(context);
-
-    return AdaptiveScaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // vigor logo icon
-            const VigorLogo(size: 100),
-            const SizedBox(height: VigorSpacing.lg),
-            Text(
-              l10n.appName.toUpperCase(),
-              style: VigorTypography.display.copyWith(
-                color: textColor,
-                letterSpacing: 4,
-              ),
-            ),
-            const SizedBox(height: VigorSpacing.md),
-            const AdaptiveLoadingIndicator(),
-          ],
-        ),
-      ),
+    return const AdaptiveScaffold(
+      body: Center(child: VigorLogo(size: 100)),
     );
   }
 }
