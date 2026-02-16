@@ -129,6 +129,30 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		return nil, err
 	}
 
+	// when methodology is auto, compute calibration gaps to guide LLM toward uncalibrated families
+	var calibrationGaps map[string]int
+	if methodology == "" {
+		calibration, err := GetProficiencyCalibration(userID)
+		if err != nil {
+			return nil, err
+		}
+		var allFamilies []model.MovementFamily
+		if err := database.Knowledge.Find(&allFamilies).Error; err != nil {
+			return nil, err
+		}
+		calibrationGaps = make(map[string]int)
+		for _, family := range allFamilies {
+			count := calibration[family.ID]
+			if count < CalibrationThreshold {
+				calibrationGaps[family.ID] = count
+			}
+		}
+		// nothing to nudge if fully calibrated
+		if len(calibrationGaps) == 0 {
+			calibrationGaps = nil
+		}
+	}
+
 	methodologyData, err := rag.RetrieveMethodology(methodology)
 	if err != nil {
 		return nil, err
@@ -236,6 +260,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		recentTrainings,
 		facts,
 		skipWarmupCooldown,
+		calibrationGaps,
 		lastModel,
 	)
 	if err != nil {

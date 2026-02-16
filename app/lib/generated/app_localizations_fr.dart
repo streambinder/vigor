@@ -825,6 +825,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get instructions => 'Instructions';
 
   @override
+  String get cues => 'Conseils';
+
+  @override
   String get howWasYourTraining => 'Comment s\'est passé ton entraînement ?';
 
   @override
@@ -834,10 +837,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get actualDuration => 'Durée réelle (min)';
 
   @override
-  String get tooEasy => 'Trop facile';
+  String get impossible => 'Impossible';
 
   @override
   String get tooHard => 'Trop difficile';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get easy => 'Facile';
+
+  @override
+  String get tooEasy => 'Trop facile';
 
   @override
   String get flag => 'Signaler';
@@ -926,6 +938,15 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get calibrationDescription =>
       'Pendant le calibrage, la plateforme collecte des données de vos retours pour faire une première évaluation de votre condition physique et niveau';
+
+  @override
+  String get calibrationInProgress =>
+      'Vos entraînements deviennent plus intelligents à chaque séance';
+
+  @override
+  String calibrationFamiliesLearned(int calibrated, int total) {
+    return '$calibrated sur $total schémas moteurs appris';
+  }
 
   @override
   String get capabilities => 'Capacités';

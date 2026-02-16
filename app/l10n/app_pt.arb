@@ -322,6 +322,8 @@
   "calibrationGlobal": "Global",
   "calibrationNeeded": "Complete seu primeiro treino para que o Vigor calibre as recomendações ao seu nível",
   "calibrationDescription": "Durante a calibração, a plataforma coleta dados dos seus feedbacks para fazer uma avaliação inicial do seu estado físico e nível",
+  "calibrationInProgress": "Seus treinos ficam mais inteligentes a cada sessão",
+  "calibrationFamiliesLearned": "{calibrated} de {total} padrões de movimento aprendidos",
   "capabilities": "Capacidades",
   "muscleHeatMap": "Mapa de Calor Muscular",
   "heatResting": "Em repouso",

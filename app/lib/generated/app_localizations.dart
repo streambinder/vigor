@@ -1602,6 +1602,12 @@ abstract class AppLocalizations {
   /// **'Instructions'**
   String get instructions;
 
+  /// No description provided for @cues.
+  ///
+  /// In en, this message translates to:
+  /// **'Cues'**
+  String get cues;
+
   /// No description provided for @howWasYourTraining.
   ///
   /// In en, this message translates to:
@@ -1620,17 +1626,35 @@ abstract class AppLocalizations {
   /// **'Actual duration (min)'**
   String get actualDuration;
 
-  /// No description provided for @tooEasy.
+  /// No description provided for @impossible.
   ///
   /// In en, this message translates to:
-  /// **'Too easy'**
-  String get tooEasy;
+  /// **'Can\'t do'**
+  String get impossible;
 
   /// No description provided for @tooHard.
   ///
   /// In en, this message translates to:
   /// **'Too hard'**
   String get tooHard;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @easy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get easy;
+
+  /// No description provided for @tooEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Too easy'**
+  String get tooEasy;
 
   /// No description provided for @flag.
   ///
@@ -1793,6 +1817,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'During calibration, the platform collects data from your feedback to make an initial assessment of your fitness level'**
   String get calibrationDescription;
+
+  /// No description provided for @calibrationInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Your trainings are getting smarter with each session'**
+  String get calibrationInProgress;
+
+  /// No description provided for @calibrationFamiliesLearned.
+  ///
+  /// In en, this message translates to:
+  /// **'{calibrated} of {total} movement patterns learned'**
+  String calibrationFamiliesLearned(int calibrated, int total);
 
   /// No description provided for @capabilities.
   ///

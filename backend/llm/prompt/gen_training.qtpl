@@ -1,5 +1,6 @@
 {% package prompt %}
 
+{% import "fmt" %}
 {% import "strings" %}
 {% import "github.com/streambinder/vigor/model" %}
 
@@ -19,6 +20,7 @@
     recentTrainings []model.Training,
     facts []model.Fact,
     skipWarmupCooldown bool,
+    calibrationGaps map[string]int,
 ) -%}
 Generate a {%d duration %}-minute training.
 {% if skipWarmupCooldown %}
@@ -69,6 +71,13 @@ Age:{%d profile.Age() %} Height:{%f.0 profile.Height %}cm Weight:{%f.0 profile.W
 {% if !skipWarmupCooldown %}
 [WARMUP] {%d len(warmupExercises) %} options
 {% for _, exercise := range warmupExercises %}{%s exercise.ID %}, {% endfor %}
+
+{% endif %}
+{% if len(calibrationGaps) > 0 %}
+[CALIBRATION]
+The platform is still calibrating this user's fitness level. Prioritize exercises from these under-sampled movement families:
+{% for family, count := range calibrationGaps %}- {%s family %} ({%s fmt.Sprintf("%d/5", count) %})
+{% endfor %}Choose a methodology that covers as many of these families as possible.
 
 {% endif %}
 [WORK] {%d len(workExercises) %} options

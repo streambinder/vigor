@@ -803,6 +803,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get instructions => '지침';
 
   @override
+  String get cues => '포인트';
+
+  @override
   String get howWasYourTraining => '트레이닝은 어떠셨나요?';
 
   @override
@@ -812,10 +815,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get actualDuration => '실제 소요 시간 (분)';
 
   @override
-  String get tooEasy => '너무 쉬움';
+  String get impossible => '못 함';
 
   @override
   String get tooHard => '너무 어려움';
+
+  @override
+  String get ok => '적절함';
+
+  @override
+  String get easy => '쉬움';
+
+  @override
+  String get tooEasy => '너무 쉬움';
 
   @override
   String get flag => '표시';
@@ -903,6 +915,14 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get calibrationDescription =>
       '보정 기간 동안 플랫폼은 피드백 데이터를 수집하여 당신의 체력 상태와 수준에 대한 초기 평가를 합니다';
+
+  @override
+  String get calibrationInProgress => '매 세션마다 당신의 운동이 더 스마트해집니다';
+
+  @override
+  String calibrationFamiliesLearned(int calibrated, int total) {
+    return '$total개 중 $calibrated개 동작 패턴 학습됨';
+  }
 
   @override
   String get capabilities => '능력';

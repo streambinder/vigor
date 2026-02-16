@@ -815,6 +815,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get instructions => 'Инструкции';
 
   @override
+  String get cues => 'Подсказки';
+
+  @override
   String get howWasYourTraining => 'Как прошла тренировка?';
 
   @override
@@ -824,10 +827,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String get actualDuration => 'Фактическая длительность (мин)';
 
   @override
-  String get tooEasy => 'Слишком легко';
+  String get impossible => 'Не могу';
 
   @override
   String get tooHard => 'Слишком сложно';
+
+  @override
+  String get ok => 'ОК';
+
+  @override
+  String get easy => 'Легко';
+
+  @override
+  String get tooEasy => 'Слишком легко';
 
   @override
   String get flag => 'Отметить';
@@ -915,6 +927,15 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get calibrationDescription =>
       'Во время калибровки платформа собирает данные из ваших отзывов, чтобы сделать первоначальную оценку вашего физического состояния и уровня';
+
+  @override
+  String get calibrationInProgress =>
+      'Ваши тренировки становятся умнее с каждым занятием';
+
+  @override
+  String calibrationFamiliesLearned(int calibrated, int total) {
+    return '$calibrated из $total двигательных паттернов изучено';
+  }
 
   @override
   String get capabilities => 'Возможности';

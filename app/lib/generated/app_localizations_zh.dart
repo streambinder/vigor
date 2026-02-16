@@ -803,6 +803,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get instructions => '说明';
 
   @override
+  String get cues => '提示';
+
+  @override
   String get howWasYourTraining => '您的训练感觉如何？';
 
   @override
@@ -812,10 +815,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get actualDuration => '实际时长（分钟）';
 
   @override
-  String get tooEasy => '太简单';
+  String get impossible => '做不到';
 
   @override
   String get tooHard => '太难';
+
+  @override
+  String get ok => '合适';
+
+  @override
+  String get easy => '简单';
+
+  @override
+  String get tooEasy => '太简单';
 
   @override
   String get flag => '标记';
@@ -901,6 +913,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get calibrationDescription => '在校准期间，平台会收集您的反馈数据，对您的健身状态和水平进行初步评估';
+
+  @override
+  String get calibrationInProgress => '每次训练都让你的计划更智能';
+
+  @override
+  String calibrationFamiliesLearned(int calibrated, int total) {
+    return '已学习 $calibrated/$total 个运动模式';
+  }
 
   @override
   String get capabilities => '能力';

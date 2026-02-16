@@ -803,6 +803,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get instructions => '手順';
 
   @override
+  String get cues => 'ポイント';
+
+  @override
   String get howWasYourTraining => 'トレーニングはいかがでしたか？';
 
   @override
@@ -812,10 +815,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String get actualDuration => '実際の所要時間（分）';
 
   @override
-  String get tooEasy => '簡単すぎる';
+  String get impossible => 'できない';
 
   @override
   String get tooHard => '難しすぎる';
+
+  @override
+  String get ok => '適切';
+
+  @override
+  String get easy => '簡単';
+
+  @override
+  String get tooEasy => '簡単すぎる';
 
   @override
   String get flag => 'フラグ';
@@ -903,6 +915,14 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get calibrationDescription =>
       'キャリブレーション中、プラットフォームはフィードバックからデータを収集し、あなたのフィットネス状態とレベルの初期評価を行います';
+
+  @override
+  String get calibrationInProgress => 'トレーニングを重ねるごとにプランが賢くなります';
+
+  @override
+  String calibrationFamiliesLearned(int calibrated, int total) {
+    return '$total中$calibratedの動作パターンを学習済み';
+  }
 
   @override
   String get capabilities => '能力';

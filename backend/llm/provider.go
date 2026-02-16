@@ -58,6 +58,7 @@ func GenTraining(
 	recentTrainings []model.Training,
 	facts []model.Fact,
 	skipWarmupCooldown bool,
+	calibrationGaps map[string]int,
 	lastModel string,
 ) (*model.Training, model.LLMPrompt, string, error) {
 	goalIDs := make([]string, len(goals))
@@ -82,6 +83,7 @@ func GenTraining(
 			recentTrainings,
 			facts,
 			skipWarmupCooldown,
+			calibrationGaps,
 		),
 	}
 	response, llmModel, err := getLLM(lastModel).query(
