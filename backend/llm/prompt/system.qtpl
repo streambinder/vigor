@@ -35,6 +35,7 @@ REASONING (complete before generating routines):
    - feedback: how it responds to past feedback
    - variety: why it adds diversity
    - injury: how it avoids/accommodates injury
+5. Self-check: before finalizing, verify: (a) all target muscle groups are covered, (b) no contraindicated exercises are included, (c) exercise IDs are from [WORK]/[WARMUP]/[COOLDOWN] lists only, (d) rest times match methodology. Fix any issues found.
 
 {% if methodology != nil %}
 METHODOLOGY (applies to work routine ONLY, not warmup/cooldown): {%s methodology.ID %}
