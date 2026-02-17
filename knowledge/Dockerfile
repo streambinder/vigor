@@ -1,6 +1,6 @@
 # docker build -t ghcr.io/streambinder/vigor/knowledge:latest -f knowledge/Dockerfile --network host .
 
-FROM golang:1.25-alpine AS bootstrap-builder
+FROM golang:1.25.4-alpine3.22 AS bootstrap-builder
 RUN apk add --no-cache gcc musl-dev
 WORKDIR /build/knowledge
 COPY knowledge/go.mod knowledge/go.sum ./

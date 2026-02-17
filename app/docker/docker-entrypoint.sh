@@ -19,7 +19,8 @@ cat /usr/share/nginx/html/config.js
 
 # inject version metadata into index.html as meta tag for debugging
 if [ -f /usr/share/nginx/html/index.html ]; then
-  sed -i "s|<head>|<head>\n  <meta name=\"app-version\" content=\"${BUILD_VERSION}\">|" /usr/share/nginx/html/index.html
+  sed -i 's|<head>|<head>\
+  <meta name="app-version" content="'"${BUILD_VERSION}"'">|' /usr/share/nginx/html/index.html
   echo "Version metadata injected into index.html: ${BUILD_VERSION}"
 fi
 

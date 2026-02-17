@@ -23,20 +23,20 @@ The identity bridges the gap between the app’s rigorous backend (RAG, vector e
 - **Name:** **Vigor**
 - **The Technical Bridge:** In the app’s backend, the AI analyzes "patterns" (Movement Families) and "forms" (Vector Embeddings) to calibrate the user.
 - **The Promise:** By practicing with Vigor (the AI’s plan), the user masters the form.
-    
+
 
 ### 2.2 Aesthetic Philosophy
 
 The design system is grounded in four specific Japanese principles:
 
 1. **Kanso (Radical Simplicity):** Eliminate visual clutter. If a pixel doesn't convey data (proficiency, heat, time), remove it.
-    
+
 2. **Fukinsei (Intentional Asymmetry):** The UI avoids rigid, equal grids. Important elements (e.g., a recovering muscle group) take up more visual weight organically.
-    
+
 3. **Kintsugi (Golden Repair):** The metaphor for hypertrophy. We break muscle fibers to rebuild them stronger. High-proficiency stats are rendered in gold.
-    
+
 4. **Seijaku (Stillness in Motion):** The interface is calm. No flashing lights, confetti, or erratic animations.
-    
+
 
 ---
 
@@ -47,11 +47,11 @@ The design system is grounded in four specific Japanese principles:
 The logo combines the organic _Enso_ (Zen circle) with the precision of vector geometry.
 
 - **The Shape:** An open brush-stroke circle. The gap represents _Fukinsei_—the idea that the work is never finished; there is always room for calibration.
-    
+
 - **The Construction:** The "brush stroke" is actually constructed of distinct vector nodes, representing the **11 Movement Families**.
-    
+
 - **Dynamic Behavior:** In the app, the stroke weight thickens based on the user's "Calibration Confidence." A new user sees a thin line; a veteran sees a bold, solid mark.
-    
+
 
 ### 3.2 Color Palette: "Elements & Heat"
 
@@ -72,23 +72,23 @@ We avoid artificial neons. The palette is derived from natural materials and the
 A pairing that balances the AI's calculation with the human's reading experience.
 
 - **Headlines:** **Space Grotesk**
-    
+
     - _Role:_ Branding, Motivation, Headers.
-        
+
     - _Vibe:_ Geometric but with idiosyncratic quirks.
-        
+
 - **Body:** **Inter (Variable)**
-    
+
     - _Role:_ Content, Instructions, Long-form text.
-        
+
     - _Vibe:_ Invisible, highly legible on small screens.
-        
+
 - **Data & Code:** **JetBrains Mono**
-    
+
     - _Role:_ Calibration scores, Rep counts, Timers, RAG confidence intervals.
-        
+
     - _Vibe:_ Reminds the user that a machine is calculating this.
-        
+
 
 ---
 
@@ -99,31 +99,31 @@ A pairing that balances the AI's calculation with the human's reading experience
 Most apps only show progress going up. VIGOR visualizes the reality of **Proficiency Decay** (the 30-day half-life).
 
 - **The Ink Fill:** Movement Family icons act as vessels. Training fills them with "Ink."
-    
+
 - **The Fade:** Over 30 days of inactivity, the ink desaturates and lowers to the 30% floor.
-    
+
 - **Psychology:** This visually enforces the "Use it or lose it" scientific principle without shaming the user.
-    
+
 
 ### 4.2 Layout: The Masonry Dashboard
 
 Using the principle of _Fukinsei_ (Asymmetry):
 
 - The dashboard is not a static list. It is a dynamic masonry grid.
-    
+
 - If **Leg Recovery** is critical today (high muscle heat), that card expands to take up 50% of the screen.
-    
+
 - If **Calibration** is low, the "Test Yourself" card becomes the focal point.
-    
+
 
 ### 4.3 Motion: "Liquid Feedback"
 
 - **Input:** When rating RPE (Rate of Perceived Exertion), the UI reacts like water.
-    
+
 - **Transition:** Screens do not "slide" or "pop." They dissolve and reshape, mimicking the rearrangement of the vector database.
-    
+
 - **Loading:** Never use a spinning wheel. Use "Thought Process" text: _Analyzing constraints... Merging partner profiles... Calculating load..._
-    
+
 
 ---
 
@@ -134,9 +134,9 @@ Using the principle of _Fukinsei_ (Asymmetry):
 The AI is not a cheerleader. It does not use exclamation points. It is an objective, trusted partner.
 
 - **Voice:** Precise, Knowledgeable, Calm.
-    
+
 - **Tone:** Analytical but deeply personalized.
-    
+
 
 ### 5.2 Lexicon Shift
 
@@ -153,11 +153,11 @@ We redefine fitness terms to align with the engineering-meets-biology backend.
 ### 5.3 Dialogue Examples
 
 > **Standard App:** "Great job! You crushed that workout! Keep it up!"
-> 
+>
 > **Vigor:** "Session complete. Vertical Pull capacity increased by 1.2%. Deltoid heat is elevated; 48-hour recovery recommended."
 
 > **Standard App:** "Warning: Don't do this if your knee hurts."
-> 
+>
 > **Vigor:** "Constraint Detected: Right Knee Meniscus (2024). Optimization: Replacing Squat Jump with Low-Impact Box Step-up."
 
 ---
@@ -167,29 +167,29 @@ We redefine fitness terms to align with the engineering-meets-biology backend.
 ### 6.1 Mobile (The Brain)
 
 - **Role:** Deep dive, planning, and partner management.
-    
+
 - **Key Feature:** **Constraint Merging Visualization.** When training with a partner, two Venn diagram circles overlap. The intersection is the safe workout zone.
-    
+
 - **Iconography:** 11 Abstract Glyphs for movement families (Single stroke, uniform width).
-    
+
 
 ### 6.2 Watch (The Pulse)
 
 - **Role:** Execution and telemetry.
-    
+
 - **Design:** _Kanso_ (Radical Simplicity).
-    
+
 - **Display:** Black background (OLED battery saving). High-contrast **JetBrains Mono** numbers for timers.
-    
+
 - **Input:** Use the Digital Crown to "dial in" RPE. Haptic feedback replaces visual noise for tempo (EMOM/HIIT).
-    
+
 
 ### 6.3 Web (The Archive)
 
 - **Role:** Analytics and macro-view.
-    
+
 - **Key Feature:** **Vector Space Visualization.** A WebGL view of the 384-dimensional embedding space. The user sees their "dot" moving closer to the "Ideal Form" cluster over months of training.
-    
+
 
 ---
 
@@ -197,15 +197,13 @@ We redefine fitness terms to align with the engineering-meets-biology backend.
 
 ### Color Variables
 
-CSS
-
-```
+```css
 :root {
   /* Structure */
   --vigor-sumi: #0F1115;
   --vigor-washi: #F2F0EB;
   --vigor-stone: #888C94;
-  
+
   /* Status/Data */
   --vigor-gold: #D4AF37;
   --vigor-indigo: #2B4C5D;
@@ -216,9 +214,7 @@ CSS
 
 ### Typography Definition
 
-CSS
-
-```
+```css
 /* Tailwind Config Example */
 {
   theme: {
@@ -234,12 +230,11 @@ CSS
 ### Accessibility Notes
 
 - **Heat Maps:** Do not rely on color alone for muscle heat.
-    
-    - _Cool:_ Smooth fill.
-        
-    - _Warm:_ Diagonal hatch pattern.
-        
-    - _Hot:_ Stippled/Noise texture.
-        
-- **Contrast:** All "Washi" text on "Sumi" backgrounds must meet WCAG AAA standards (Contrast ratio > 7:1).Here is the comprehensive Brand Identity Report for **Vigor**. It is formatted as a formal design document, ready for distribution to stakeholders, UI designers, and developers.
 
+    - _Cool:_ Smooth fill.
+
+    - _Warm:_ Diagonal hatch pattern.
+
+    - _Hot:_ Stippled/Noise texture.
+
+- **Contrast:** All "Washi" text on "Sumi" backgrounds must meet WCAG AAA standards (Contrast ratio > 7:1).

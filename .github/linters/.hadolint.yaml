@@ -2,6 +2,7 @@
 failure-threshold: warning
 
 ignored:
+  - DL3002 # Last USER should not be root (nginx needs root to bind port 80)
   - DL3018 # Pin versions in apk add
   - DL3008 # Pin versions in apt install
   - SC2215 # This flag is used as a command name
