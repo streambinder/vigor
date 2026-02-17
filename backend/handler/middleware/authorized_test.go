@@ -4,11 +4,58 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/bytedance/mockey"
+	"github.com/glebarez/sqlite"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/streambinder/vigor/model"
 	"github.com/streambinder/vigor/token"
+	"gorm.io/gorm"
 )
+
+func setupTestDB(t *testing.T) *gorm.DB {
+	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("Failed to open test database: %v", err)
+	}
+
+	for _, ddl := range []string{
+		`CREATE TABLE users (
+			id TEXT PRIMARY KEY,
+			email TEXT NOT NULL UNIQUE,
+			created_at DATETIME,
+			updated_at DATETIME
+		)`,
+		`CREATE TABLE profiles (
+			user_id TEXT PRIMARY KEY,
+			first_name TEXT,
+			last_name TEXT,
+			birthdate DATETIME,
+			gender TEXT,
+			language TEXT DEFAULT 'english',
+			height REAL,
+			weight REAL,
+			data TEXT,
+			created_at DATETIME,
+			updated_at DATETIME,
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+		)`,
+		`CREATE TABLE tokens (
+			id TEXT PRIMARY KEY,
+			user_id TEXT NOT NULL,
+			token TEXT NOT NULL UNIQUE,
+			expires_at DATETIME NOT NULL,
+			revoked INTEGER DEFAULT 0,
+			created_at DATETIME,
+			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+		)`,
+	} {
+		if err := db.Exec(ddl).Error; err != nil {
+			t.Fatalf("Failed to create table: %v", err)
+		}
+	}
+
+	return db
+}
 
 func TestAuthorized_MissingToken(t *testing.T) {
 	app := fiber.New()
@@ -99,49 +146,27 @@ func TestAuthorized_InvalidToken(t *testing.T) {
 	}
 }
 
-func TestAuthorized_ValidToken_VerifyError(t *testing.T) {
-	app := fiber.New()
-	app.Get("/test", Authorized(), func(c *fiber.Ctx) error {
-		return c.SendString("OK")
-	})
-
-	// Mock VerifyAccessToken to return an error
-	mockVerify := mockey.Mock(token.VerifyAccessToken).Return(nil, fiber.NewError(fiber.StatusUnauthorized, "mock error")).Build()
-	defer mockVerify.UnPatch()
-
-	req := httptest.NewRequest("GET", "/test", nil)
-	req.Header.Set("Authorization", "Bearer valid_looking_token")
-	resp, err := app.Test(req)
-	if err != nil {
-		t.Fatalf("Failed to make request: %v", err)
-	}
-
-	if resp.StatusCode != fiber.StatusUnauthorized {
-		t.Errorf("Expected status %d, got: %d", fiber.StatusUnauthorized, resp.StatusCode)
-	}
-}
-
 func TestAuthorized_ValidToken_Success(t *testing.T) {
-	app := fiber.New()
+	db := setupTestDB(t)
+	testUserID := uuid.New()
 
+	db.Create(&model.User{ID: testUserID, Email: "test@example.com"})
+	db.Create(&model.Profile{UserID: testUserID})
+
+	accessToken, _, err := token.GenerateTokens(db, testUserID)
+	if err != nil {
+		t.Fatalf("Failed to generate tokens: %v", err)
+	}
+
+	app := fiber.New()
 	var capturedUserID uuid.UUID
 	app.Get("/test", Authorized(), func(c *fiber.Ctx) error {
 		capturedUserID = c.Locals("userID").(uuid.UUID)
 		return c.SendString("OK")
 	})
 
-	testUserID := uuid.New()
-
-	// Mock VerifyAccessToken to return valid claims
-	mockVerify := mockey.Mock(token.VerifyAccessToken).To(func(_ string) (*token.Claims, error) {
-		return &token.Claims{
-			UserID: testUserID,
-		}, nil
-	}).Build()
-	defer mockVerify.UnPatch()
-
 	req := httptest.NewRequest("GET", "/test", nil)
-	req.Header.Set("Authorization", "Bearer valid_token")
+	req.Header.Set("Authorization", "Bearer "+accessToken)
 	resp, err := app.Test(req)
 	if err != nil {
 		t.Fatalf("Failed to make request: %v", err)

@@ -51,28 +51,36 @@ func GetAverageProficiencies(userIDs []uuid.UUID) (map[string]float64, error) {
 		return GetProficiencies(userIDs[0])
 	}
 
-	familySums := make(map[string]float64)
-	familyCounts := make(map[string]int)
-
+	allProficiencies := make([]map[string]float64, 0, len(userIDs))
 	for _, userID := range userIDs {
 		proficiencies, err := GetProficiencies(userID)
 		if err != nil {
 			return nil, err
 		}
+		allProficiencies = append(allProficiencies, proficiencies)
+	}
+	return averageProficiencies(allProficiencies), nil
+}
+
+// averageProficiencies computes the average proficiency per movement family,
+// only including families where all users have proficiency data.
+func averageProficiencies(allProficiencies []map[string]float64) map[string]float64 {
+	familySums := make(map[string]float64)
+	familyCounts := make(map[string]int)
+	for _, proficiencies := range allProficiencies {
 		for family, value := range proficiencies {
 			familySums[family] += value
 			familyCounts[family]++
 		}
 	}
 
-	// only include families where all users have proficiency data
 	result := make(map[string]float64)
 	for family, sum := range familySums {
-		if familyCounts[family] == len(userIDs) {
-			result[family] = sum / float64(len(userIDs))
+		if familyCounts[family] == len(allProficiencies) {
+			result[family] = sum / float64(len(allProficiencies))
 		}
 	}
-	return result, nil
+	return result
 }
 
 // GetProficiencyCalibration returns calibration count per movement family (number of records).

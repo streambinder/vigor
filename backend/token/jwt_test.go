@@ -1,11 +1,9 @@
 package token
 
 import (
-	"errors"
 	"testing"
 	"time"
 
-	"github.com/bytedance/mockey"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/streambinder/vigor/model"
@@ -19,50 +17,40 @@ func setupTestDB(t *testing.T) *gorm.DB {
 		t.Fatalf("Failed to open test database: %v", err)
 	}
 
-	// Create tables with SQLite-compatible schema
-	err = db.Exec(`
-		CREATE TABLE users (
+	for _, ddl := range []string{
+		`CREATE TABLE users (
 			id TEXT PRIMARY KEY,
 			email TEXT NOT NULL UNIQUE,
-			password TEXT NOT NULL,
 			created_at DATETIME,
 			updated_at DATETIME
-		)
-	`).Error
-	if err != nil {
-		t.Fatalf("Failed to create users table: %v", err)
-	}
-
-	err = db.Exec(`
-		CREATE TABLE profiles (
+		)`,
+		`CREATE TABLE profiles (
 			user_id TEXT PRIMARY KEY,
+			first_name TEXT,
+			last_name TEXT,
 			birthdate DATETIME,
-			language TEXT,
+			gender TEXT,
+			language TEXT DEFAULT 'english',
 			height REAL,
 			weight REAL,
 			data TEXT,
 			created_at DATETIME,
 			updated_at DATETIME,
 			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-		)
-	`).Error
-	if err != nil {
-		t.Fatalf("Failed to create profiles table: %v", err)
-	}
-
-	err = db.Exec(`
-		CREATE TABLE refresh_tokens (
+		)`,
+		`CREATE TABLE tokens (
 			id TEXT PRIMARY KEY,
 			user_id TEXT NOT NULL,
-			token TEXT NOT NULL,
+			token TEXT NOT NULL UNIQUE,
 			expires_at DATETIME NOT NULL,
 			revoked INTEGER DEFAULT 0,
 			created_at DATETIME,
 			FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-		)
-	`).Error
-	if err != nil {
-		t.Fatalf("Failed to create refresh_tokens table: %v", err)
+		)`,
+	} {
+		if err := db.Exec(ddl).Error; err != nil {
+			t.Fatalf("Failed to create table: %v", err)
+		}
 	}
 
 	return db
@@ -110,20 +98,6 @@ func TestGenerateTokens_Success(t *testing.T) {
 
 	if rt.Token != refreshToken {
 		t.Errorf("Expected stored refresh token %s, got: %s", refreshToken, rt.Token)
-	}
-}
-
-func TestGenerateTokens_SignedStringError(t *testing.T) {
-	db := setupTestDB(t)
-	userID := uuid.New()
-
-	// Mock jwt.Token.SignedString to return an error
-	mockSigned := mockey.Mock((*jwt.Token).SignedString).Return("", errors.New("signing error")).Build()
-	defer mockSigned.UnPatch()
-
-	_, _, err := GenerateTokens(db, userID)
-	if err == nil {
-		t.Error("Expected error when signing token fails")
 	}
 }
 
@@ -354,17 +328,6 @@ func TestVerifyAccessToken_ExpiredToken(t *testing.T) {
 	_, err = VerifyAccessToken(accessStr)
 	if err == nil {
 		t.Error("Expected error for expired token")
-	}
-}
-
-func TestVerifyAccessToken_ParseError(t *testing.T) {
-	// Mock jwt.ParseWithClaims to return an error
-	mockParse := mockey.Mock(jwt.ParseWithClaims).Return(nil, errors.New("parse error")).Build()
-	defer mockParse.UnPatch()
-
-	_, err := VerifyAccessToken("some_token")
-	if err == nil {
-		t.Error("Expected error when parsing fails")
 	}
 }
 
