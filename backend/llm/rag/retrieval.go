@@ -211,7 +211,8 @@ func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equi
 	}
 
 	// hybrid scoring: blend cosine similarity (1 - distance) with keyword ts_rank.
-	// ts_rank is normalized against the max in the result set via a window function in the outer query.
+	// when keywords are present, we compute the hybrid score in a two-step query:
+	// inner query computes raw scores, outer query normalizes and fuses them.
 	selectClause := `DISTINCT exercise_embeddings.exercise_id,
 		        exercise_embeddings.text,
 		        exercise_embeddings.embedding <=> ? as distance,
@@ -277,25 +278,33 @@ func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equi
 		query = query.Where("exercises.muscles[1] = ANY(?)", pq.Array(muscles))
 	}
 
-	// hybrid scoring: fuse vector similarity with keyword relevance, then randomize
-	orderClause := "has_equipment DESC, distance ASC"
+	// hybrid scoring: fuse vector similarity with keyword relevance, then randomize.
+	// DISTINCT prevents window functions in ORDER BY, so we use a two-layer subquery:
+	// inner = DISTINCT + vector-sorted candidates, outer = hybrid re-ranking.
+	innerQuery := query.Order("has_equipment DESC, distance ASC").Limit(MaxWorkExercises * 3)
+
 	if hasKeywords {
-		// (1 - distance) is the vector similarity score [0,1]; keyword_rank is unnormalized so we use
-		// a window-function max to normalize it into [0,1] before weighting.
-		// nullif prevents division by zero when no keywords match at all.
-		orderClause = fmt.Sprintf(
-			"has_equipment DESC, (%f * (1 - distance) + %f * keyword_rank / NULLIF(MAX(keyword_rank) OVER (), 0)) DESC",
+		orderClause := fmt.Sprintf(
+			"(%f * (1 - distance) + %f * keyword_rank / NULLIF(MAX(keyword_rank) OVER (), 0)) DESC",
 			vectorWeight, keywordWeight,
 		)
-	}
-
-	if err := database.Knowledge.
-		Table("(?) AS pool", query.Order(orderClause).Limit(MaxWorkExercises*3)).
-		Order("RANDOM()").
-		Limit(MaxWorkExercises * 3).
-		Scan(&results).
-		Error; err != nil {
-		return nil, fmt.Errorf("failed to execute similarity search: %w", err)
+		if err := database.Knowledge.
+			Table("(?) AS pool", innerQuery).
+			Order(orderClause).
+			Limit(MaxWorkExercises * 3).
+			Scan(&results).
+			Error; err != nil {
+			return nil, fmt.Errorf("failed to execute similarity search: %w", err)
+		}
+	} else {
+		if err := database.Knowledge.
+			Table("(?) AS pool", innerQuery).
+			Order("RANDOM()").
+			Limit(MaxWorkExercises * 3).
+			Scan(&results).
+			Error; err != nil {
+			return nil, fmt.Errorf("failed to execute similarity search: %w", err)
+		}
 	}
 
 	exercises := make([]model.Exercise, 0, len(results))
