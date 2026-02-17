@@ -23,6 +23,10 @@ const (
 	MaxExerciseDistance     = 0.2 // Maximum cosine distance for exercise matching
 	WarmupCooldownMaxScore = 25  // max progression score for warmup/cooldown exercises
 	MinPerMuscleExercises  = 2   // minimum exercises per muscle group after proficiency filtering
+
+	// hybrid search weights: vector similarity vs keyword relevance
+	vectorWeight  = 0.7
+	keywordWeight = 0.3
 )
 
 // validFamilyName ensures family names are safe for SQL interpolation (JSONB ? operator can't use placeholders).
@@ -64,6 +68,7 @@ func RetrieveAllMethodologies() ([]model.Methodology, error) {
 // RetrieveWorkExercises retrieves exercises for the main training phase via RAG.
 // Uses per-muscle-group balanced retrieval to guarantee coverage across all muscle groups.
 // Each group gets its own retrieval + proficiency filtering pipeline so no group can be starved.
+// Combines vector similarity with keyword relevance (hybrid search) for better recall.
 func RetrieveWorkExercises(
 	profiles []model.Profile,
 	goals []string,
@@ -79,6 +84,9 @@ func RetrieveWorkExercises(
 	if err != nil {
 		return nil, err
 	}
+
+	// build keyword query from structured inputs for hybrid search
+	keywordQuery := buildKeywordQuery(goals, equipment, muscles, prompt)
 
 	// collect methodology family names to filter out non-methodology exercises (e.g. mobility in strength)
 	var methodologyFamilies []string
@@ -100,7 +108,7 @@ func RetrieveWorkExercises(
 		}
 	}
 
-	return retrieveBalancedByMuscle(exerciseEmbedding, methodology, equipment, targetMuscles, methodologyFamilies, proficiencies, proficiencyMargin), nil
+	return retrieveBalancedByMuscle(exerciseEmbedding, keywordQuery, methodology, equipment, targetMuscles, methodologyFamilies, proficiencies, proficiencyMargin), nil
 }
 
 // retrieveBalancedByMuscle queries and filters exercises per muscle group independently,
@@ -108,6 +116,7 @@ func RetrieveWorkExercises(
 // with graceful degradation, so equipment/proficiency constraints on one group can't starve it.
 func retrieveBalancedByMuscle(
 	exerciseEmbedding []float32,
+	keywordQuery string,
 	methodology *model.Methodology,
 	equipment []string,
 	muscles []string,
@@ -134,7 +143,7 @@ func retrieveBalancedByMuscle(
 
 	for _, muscle := range muscles {
 		// retrieve candidates for this muscle group
-		candidates, err := retrieveBySimilarity(exerciseEmbedding, equipment, []string{muscle}, methodologyFamilies)
+		candidates, err := retrieveBySimilarity(exerciseEmbedding, keywordQuery, equipment, []string{muscle}, methodologyFamilies)
 		if err != nil {
 			log.Warn().Err(err).Str("muscle", muscle).Msg("failed to retrieve exercises for muscle group")
 			continue
@@ -190,9 +199,10 @@ func filterByProficiencyPerMuscle(exercises []model.Exercise, proficiencies map[
 	return filtered
 }
 
-// retrieveBySimilarity performs embedding similarity search with optional methodology families filter.
-// When families are provided, only exercises belonging to at least one of those families are returned.
-func retrieveBySimilarity(exerciseEmbedding []float32, equipment []string, muscles []string, families []string) ([]model.Exercise, error) {
+// retrieveBySimilarity performs hybrid search combining embedding cosine similarity
+// with full-text keyword relevance. When keywordQuery is non-empty, scores are fused
+// (0.7 vector + 0.3 keyword) to surface both semantically and lexically relevant exercises.
+func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equipment []string, muscles []string, families []string) ([]model.Exercise, error) {
 	var results []struct {
 		ExerciseID string
 		Text       string
@@ -200,13 +210,30 @@ func retrieveBySimilarity(exerciseEmbedding []float32, equipment []string, muscl
 		Exercise   model.Exercise `gorm:"embedded"`
 	}
 
-	query := database.Knowledge.
-		Table("exercise_embeddings").
-		Select(`DISTINCT exercise_embeddings.exercise_id,
+	// hybrid scoring: blend cosine similarity (1 - distance) with keyword ts_rank.
+	// ts_rank is normalized against the max in the result set via a window function in the outer query.
+	selectClause := `DISTINCT exercise_embeddings.exercise_id,
 		        exercise_embeddings.text,
 		        exercise_embeddings.embedding <=> ? as distance,
 		        EXISTS (SELECT 1 FROM exercise_equipment WHERE exercise_equipment.exercise_id = exercises.id) as has_equipment,
-		        exercises.*`, pgvector.NewVector(exerciseEmbedding)).
+		        exercises.*`
+	selectArgs := []interface{}{pgvector.NewVector(exerciseEmbedding)}
+
+	hasKeywords := keywordQuery != ""
+	if hasKeywords {
+		// add ts_rank column for keyword relevance
+		selectClause = `DISTINCT exercise_embeddings.exercise_id,
+		        exercise_embeddings.text,
+		        exercise_embeddings.embedding <=> ? as distance,
+		        ts_rank(to_tsvector('simple', exercise_embeddings.text), plainto_tsquery('simple', ?)) as keyword_rank,
+		        EXISTS (SELECT 1 FROM exercise_equipment WHERE exercise_equipment.exercise_id = exercises.id) as has_equipment,
+		        exercises.*`
+		selectArgs = []interface{}{pgvector.NewVector(exerciseEmbedding), keywordQuery}
+	}
+
+	query := database.Knowledge.
+		Table("exercise_embeddings").
+		Select(selectClause, selectArgs...).
 		Joins("JOIN exercises ON exercises.id = exercise_embeddings.exercise_id")
 
 	// filter by methodology families: exercise must belong to at least one
@@ -250,8 +277,20 @@ func retrieveBySimilarity(exerciseEmbedding []float32, equipment []string, muscl
 		query = query.Where("exercises.muscles[1] = ANY(?)", pq.Array(muscles))
 	}
 
+	// hybrid scoring: fuse vector similarity with keyword relevance, then randomize
+	orderClause := "has_equipment DESC, distance ASC"
+	if hasKeywords {
+		// (1 - distance) is the vector similarity score [0,1]; keyword_rank is unnormalized so we use
+		// a window-function max to normalize it into [0,1] before weighting.
+		// nullif prevents division by zero when no keywords match at all.
+		orderClause = fmt.Sprintf(
+			"has_equipment DESC, (%f * (1 - distance) + %f * keyword_rank / NULLIF(MAX(keyword_rank) OVER (), 0)) DESC",
+			vectorWeight, keywordWeight,
+		)
+	}
+
 	if err := database.Knowledge.
-		Table("(?) AS pool", query.Order("has_equipment DESC, distance ASC").Limit(MaxWorkExercises*3)).
+		Table("(?) AS pool", query.Order(orderClause).Limit(MaxWorkExercises*3)).
 		Order("RANDOM()").
 		Limit(MaxWorkExercises * 3).
 		Scan(&results).
@@ -266,7 +305,8 @@ func retrieveBySimilarity(exerciseEmbedding []float32, equipment []string, muscl
 	return exercises, nil
 }
 
-// QueryUserFacts retrieves facts relevant to the users' profiles and prompt.
+// RetrieveUserFacts retrieves facts relevant to the users' profiles and prompt.
+// Uses hybrid search combining vector similarity with keyword relevance.
 func RetrieveUserFacts(profiles []model.Profile, goals []string, prompt string) ([]model.Fact, error) {
 	embeddingText := GenProfile(profiles, goals, nil, nil, prompt)
 	embedding, err := embedding.GenVector(embeddingText)
@@ -274,25 +314,54 @@ func RetrieveUserFacts(profiles []model.Profile, goals []string, prompt string) 
 		return nil, err
 	}
 
-	var (
-		vector  = pgvector.NewVector(embedding)
-		results []struct {
-			FactID   string
-			Text     string
-			Distance float64
-			Fact     model.Fact `gorm:"embedded"`
+	keywordQuery := buildKeywordQuery(goals, nil, nil, prompt)
+	vector := pgvector.NewVector(embedding)
+
+	var results []struct {
+		FactID   string
+		Text     string
+		Distance float64
+		Fact     model.Fact `gorm:"embedded"`
+	}
+
+	if keywordQuery != "" {
+		// hybrid: wrap pure-vector results with keyword re-ranking
+		innerQuery := database.Knowledge.
+			Table("fact_embeddings").
+			Select(`fact_embeddings.fact_id, fact_embeddings.text,
+				fact_embeddings.embedding <=> ? as distance,
+				ts_rank(to_tsvector('simple', fact_embeddings.text), plainto_tsquery('simple', ?)) as keyword_rank,
+				facts.*`, vector, keywordQuery).
+			Joins("JOIN facts ON facts.id = fact_embeddings.fact_id").
+			Where("fact_embeddings.embedding <=> ? < ?", vector, MaxFactDistance).
+			Order("distance ASC").
+			Limit(MaxPromptFacts * 3) // over-fetch for re-ranking
+
+		orderClause := fmt.Sprintf(
+			"(%f * (1 - distance) + %f * keyword_rank / NULLIF(MAX(keyword_rank) OVER (), 0)) DESC",
+			vectorWeight, keywordWeight,
+		)
+		if err := database.Knowledge.
+			Table("(?) AS pool", innerQuery).
+			Order(orderClause).
+			Limit(MaxPromptFacts).
+			Scan(&results).
+			Error; err != nil {
+			return nil, fmt.Errorf("failed to execute hybrid fact search: %w", err)
 		}
-	)
-	if err := database.Knowledge.
-		Table("fact_embeddings").
-		Select("fact_embeddings.fact_id, fact_embeddings.text, fact_embeddings.embedding <=> ? as distance, facts.*", vector).
-		Joins("JOIN facts ON facts.id = fact_embeddings.fact_id").
-		Where("fact_embeddings.embedding <=> ? < ?", vector, MaxFactDistance).
-		Order("distance ASC").
-		Limit(MaxPromptFacts).
-		Scan(&results).
-		Error; err != nil {
-		return nil, fmt.Errorf("failed to execute similarity search: %w", err)
+	} else {
+		// pure vector search fallback when no keyword terms available
+		if err := database.Knowledge.
+			Table("fact_embeddings").
+			Select("fact_embeddings.fact_id, fact_embeddings.text, fact_embeddings.embedding <=> ? as distance, facts.*", vector).
+			Joins("JOIN facts ON facts.id = fact_embeddings.fact_id").
+			Where("fact_embeddings.embedding <=> ? < ?", vector, MaxFactDistance).
+			Order("distance ASC").
+			Limit(MaxPromptFacts).
+			Scan(&results).
+			Error; err != nil {
+			return nil, fmt.Errorf("failed to execute similarity search: %w", err)
+		}
 	}
 
 	facts := make([]model.Fact, 0, len(results))
@@ -457,4 +526,20 @@ func filterWithConstraints(exercises []model.Exercise, proficiencies map[string]
 		}
 	}
 	return filtered
+}
+
+// buildKeywordQuery extracts key terms from structured inputs for full-text search.
+// uses underscores as-is since exercise/fact text contains IDs like "barbell_bench_press".
+func buildKeywordQuery(goals, equipment, muscles []string, prompt string) string {
+	var terms []string
+	terms = append(terms, goals...)
+	terms = append(terms, equipment...)
+	terms = append(terms, muscles...)
+	if prompt != "" {
+		terms = append(terms, strings.Fields(prompt)...)
+	}
+	if len(terms) == 0 {
+		return ""
+	}
+	return strings.Join(terms, " ")
 }
