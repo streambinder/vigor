@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -324,6 +325,18 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 					Message: err.Error(),
 				}).Err(err).Msg("training generation failed")
 			return nil, err
+		}
+
+		// normalize modifier IDs from LLM output (e.g. "weighted_vest" -> "weighted vest")
+		for i := range training.Routines {
+			for j := range training.Routines[i].Blocks {
+				for k := range training.Routines[i].Blocks[j].Activities {
+					a := &training.Routines[i].Blocks[j].Activities[k]
+					for m := range a.Modifiers {
+						a.Modifiers[m] = strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(a.Modifiers[m], "_", " "), "-", " "))
+					}
+				}
+			}
 		}
 
 		// auto-attach weight modifier to activities with weight_kg > 0 and no existing weighted modifier
