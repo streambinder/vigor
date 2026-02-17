@@ -1006,7 +1006,6 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "balance": 60,
       "vertical_push": 50
     },
     "cues": []
@@ -2546,7 +2545,7 @@
       "Switch hands and repeat the exercise"
     ],
     "progressions": {
-      "carry": 70
+      "core": 45
     },
     "cues": []
   },
@@ -26691,7 +26690,7 @@
       "To finish, stop walking and carefully lower the dumbbells to your sides"
     ],
     "progressions": {
-      "carry": 45
+      "core": 45
     },
     "cues": [
       "Stand tall with shoulders back",

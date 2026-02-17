@@ -98,20 +98,6 @@
     ]
   },
   {
-    "id": "carry",
-    "aliases": [
-      "carry",
-      "loaded carry",
-      "farmer walk",
-      "trasporto",
-      "acarreo",
-      "portage",
-      "Tragen",
-      "transporte",
-      "перенос"
-    ]
-  },
-  {
     "id": "cardio",
     "aliases": [
       "cardio",
@@ -137,18 +123,6 @@
       "Mobilität",
       "mobilidade",
       "мобильность"
-    ]
-  },
-  {
-    "id": "balance",
-    "aliases": [
-      "balance",
-      "proprioception",
-      "equilibrio",
-      "équilibre",
-      "Gleichgewicht",
-      "equilíbrio",
-      "баланс"
     ]
   }
 ]
