@@ -55,9 +55,6 @@ func (llm *OpenAI) query(prompt model.LLMPrompt, temperature float64, maxTokens 
 			},
 		},
 	}
-	// slight penalty to encourage variety, but not too high to avoid breaking valid repetitions
-	params.SetExtraFields(map[string]any{"repeat_penalty": 1.05})
-
 	promptJSON, _ := json.Marshal(prompt)
 	log.Debug().Str("provider", llm.provider).Str("model", llm.model).RawJSON("request", promptJSON).Msg("Sending request to LLM")
 	completion, err := llm.client.Chat.Completions.New(ctx, params)

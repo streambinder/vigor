@@ -95,7 +95,7 @@ func GenTraining(
 	}
 	response, llmModel, err := getLLM(lastModel).query(
 		request,
-		0.35, // Balanced: structured output + training variety
+		0.35, // low temperature for structured JSON output reliability
 		16000,
 	)
 	if err != nil {
