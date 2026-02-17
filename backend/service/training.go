@@ -236,13 +236,6 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		return nil, err
 	}
 
-	// round-robin: find the model used in the user's most recent training
-	var lastModel string
-	database.DB.Raw(
-		`SELECT prompt->>'model' FROM trainings WHERE user_id = ? AND prompt->>'model' IS NOT NULL ORDER BY created_at DESC LIMIT 1`,
-		userID,
-	).Scan(&lastModel)
-
 	// build validation lookup tables once before the generation loop
 	validExerciseIDs := make(map[string]bool, len(workExercises)+len(warmupExercises)+len(cooldownExercises))
 	for _, e := range workExercises {
@@ -315,7 +308,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			facts,
 			skipWarmupCooldown,
 			calibrationGaps,
-			lastModel,
+			llmModel,
 			correctionHint,
 		)
 		if err != nil {

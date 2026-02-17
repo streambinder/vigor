@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/llm/prompt"
@@ -22,25 +23,24 @@ type LLM interface {
 	query(prompt model.LLMPrompt, temperature float64, maxTokens int) ([]byte, string, error)
 }
 
-// getLLM picks the next provider via round-robin based on lastModel.
-// Empty or unrecognized lastModel falls back to providers[0].
-func getLLM(lastModel string) LLM {
+// getLLM selects a provider. If model is non-empty, returns that specific provider
+// (for retry consistency). Otherwise picks randomly.
+func getLLM(model string) LLM {
 	if len(providers) == 0 {
 		log.Fatal().Msg("No LLMs available")
 	}
-
-	if lastModel != "" {
-		for i, p := range providers {
-			if oai, ok := p.(*OpenAI); ok && oai.model == lastModel {
-				return providers[(i+1)%len(providers)]
+	if model != "" {
+		for _, p := range providers {
+			if oai, ok := p.(*OpenAI); ok && oai.model == model {
+				return p
 			}
 		}
 	}
-
-	return providers[0]
+	return providers[rand.Intn(len(providers))]
 }
 
 // GenTraining generates a personalized training plan using an LLM.
+// lastModel, when non-empty, pins retries to the same provider.
 // correctionHint, when non-empty, is appended to the user prompt to guide the
 // model away from a previous validation failure (e.g. duration mismatch).
 func GenTraining(
