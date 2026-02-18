@@ -540,6 +540,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get failedToCompleteTraining => '完成训练失败';
 
   @override
+  String get feedback => '反馈';
+
+  @override
   String get feedbackUpdated => '反馈已更新';
 
   @override

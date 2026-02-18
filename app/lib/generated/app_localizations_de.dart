@@ -559,6 +559,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Training konnte nicht abgeschlossen werden';
 
   @override
+  String get feedback => 'Feedback';
+
+  @override
   String get feedbackUpdated => 'Feedback aktualisiert';
 
   @override

@@ -559,6 +559,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get failedToCompleteTraining => 'Error al completar el entrenamiento';
 
   @override
+  String get feedback => 'Feedback';
+
+  @override
   String get feedbackUpdated => 'Feedback actualizado';
 
   @override

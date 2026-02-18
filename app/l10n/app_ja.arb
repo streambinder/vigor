@@ -190,6 +190,7 @@
   "failedToCloneTraining": "トレーニングの複製に失敗しました",
   "trainingMarkedAsComplete": "トレーニングが完了しました",
   "failedToCompleteTraining": "トレーニングの完了に失敗しました",
+  "feedback": "フィードバック",
   "feedbackUpdated": "フィードバックを更新しました",
   "failedToUpdateFeedback": "フィードバックの更新に失敗しました",
   "reportSubmitted": "レポートが送信されました",

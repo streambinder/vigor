@@ -558,6 +558,9 @@ class AppLocalizationsIt extends AppLocalizations {
       'Impossibile completare l\'allenamento';
 
   @override
+  String get feedback => 'Feedback';
+
+  @override
   String get feedbackUpdated => 'Feedback aggiornato';
 
   @override

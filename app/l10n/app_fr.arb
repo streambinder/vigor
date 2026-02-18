@@ -190,6 +190,7 @@
   "failedToCloneTraining": "Échec du clonage de l'entraînement",
   "trainingMarkedAsComplete": "Entraînement terminé",
   "failedToCompleteTraining": "Échec de la complétion de l'entraînement",
+  "feedback": "Feedback",
   "feedbackUpdated": "Feedback mis à jour",
   "failedToUpdateFeedback": "Échec de la mise à jour du feedback",
   "reportSubmitted": "Signalement envoyé",

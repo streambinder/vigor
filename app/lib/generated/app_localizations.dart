@@ -1116,6 +1116,12 @@ abstract class AppLocalizations {
   /// **'Failed to complete training'**
   String get failedToCompleteTraining;
 
+  /// No description provided for @feedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback'**
+  String get feedback;
+
   /// No description provided for @feedbackUpdated.
   ///
   /// In en, this message translates to:

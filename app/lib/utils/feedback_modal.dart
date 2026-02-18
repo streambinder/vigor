@@ -197,7 +197,9 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
         : _minDuration;
     _exerciseFeedback = {
       for (final a in widget.activities)
-        a.id: ExerciseFeedbackX.fromApiValue(a.feedback),
+        a.id: a.feedback != null && a.feedback!.isNotEmpty
+            ? ExerciseFeedbackX.fromApiValue(a.feedback)
+            : ExerciseFeedback.ok,
     };
     _flaggedActivities = {};
   }
@@ -288,7 +290,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
                 child: Text(
-                  l10n.howWasYourTraining,
+                  l10n.feedback,
                   style: useLiquidGlass
                       ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 20)
                       : Theme.of(context).textTheme.titleLarge,
@@ -429,6 +431,15 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                         onChanged: (_) => setState(() {}),
                       ),
                       const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          l10n.exercises,
+                          style: useLiquidGlass
+                              ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
+                              : Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
                       ...widget.activities.map((a) => _ExerciseFeedbackRow(
                             name: a.name,
                             feedback: _exerciseFeedback[a.id]!,
@@ -498,7 +509,14 @@ class _ExerciseFeedbackRow extends StatelessWidget {
     final useLiquidGlass = PlatformHelper.useLiquidGlass;
     final l10n = AppLocalizations.of(context);
     final isActive = feedback != ExerciseFeedback.none;
-    final sliderValue = (feedback.sliderValue ?? 0).toDouble();
+    // invert: slider -2 = too easy (left), +2 = impossible (right)
+    final sliderValue = -(feedback.sliderValue ?? 0).toDouble();
+
+    final activeColor = switch (feedback) {
+      ExerciseFeedback.tooEasy || ExerciseFeedback.easy => VigorColors.indigo,
+      ExerciseFeedback.ok || ExerciseFeedback.none => VigorColors.stone,
+      ExerciseFeedback.tooHard || ExerciseFeedback.impossible => VigorColors.persimmon,
+    };
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -516,17 +534,16 @@ class _ExerciseFeedbackRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (isActive)
-                Text(
-                  feedback.label(l10n),
-                  style: (useLiquidGlass
-                          ? LiquidGlassTheme.bodyStyle
-                          : Theme.of(context).textTheme.bodySmall)
-                      ?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                  ),
+              Text(
+                isActive ? feedback.label(l10n) : l10n.ok,
+                style: (useLiquidGlass
+                        ? LiquidGlassTheme.bodyStyle
+                        : Theme.of(context).textTheme.bodySmall)
+                    ?.copyWith(
+                  color: isActive ? activeColor : VigorColors.stone,
+                  fontWeight: FontWeight.w600,
                 ),
+              ),
               // flag (independent from feedback, only shown in completion mode)
               if (showFlag)
                 IconButton(
@@ -548,13 +565,16 @@ class _ExerciseFeedbackRow extends StatelessWidget {
                 trackHeight: 3,
                 thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
                 overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                activeTrackColor: activeColor,
+                thumbColor: activeColor,
+                inactiveTrackColor: activeColor.withValues(alpha: 0.2),
               ),
               child: Slider(
                 value: sliderValue,
                 min: -2,
                 max: 2,
                 divisions: 4,
-                onChanged: (v) => onFeedbackChanged(ExerciseFeedbackX.fromSliderValue(v.round())),
+                onChanged: (v) => onFeedbackChanged(ExerciseFeedbackX.fromSliderValue(-v.round())),
               ),
             ),
           ),
