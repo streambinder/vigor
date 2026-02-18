@@ -135,12 +135,18 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		}
 	}
 
-	// build base query matching by family with proficiency-based upper bound
+	// build base query matching by family with proficiency-based upper bound,
+	// ensuring the replacement shares the same dominant family as the original
 	baseQuery := func() *gorm.DB {
 		q := database.Knowledge.
 			Model(&model.Exercise{}).
 			Where(fmt.Sprintf("exercises.progressions ? '%s'", primaryFamily)).
-			Where(fmt.Sprintf("(exercises.progressions->>'%s')::float <= ?", primaryFamily), maxAllowed)
+			Where(fmt.Sprintf("(exercises.progressions->>'%s')::float <= ?", primaryFamily), maxAllowed).
+			// replacement must have the same dominant family: no other family scores higher
+			Where(fmt.Sprintf(`NOT EXISTS (
+				SELECT 1 FROM jsonb_each_text(exercises.progressions) AS kv
+				WHERE kv.key != '%s' AND kv.value::float > (exercises.progressions->>'%s')::float
+			)`, primaryFamily, primaryFamily))
 		if len(excludeIDs) > 0 {
 			q = q.Where("id NOT IN ?", excludeIDs)
 		}
@@ -162,22 +168,35 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		return q
 	}
 
+	// bias ordering based on activity feedback: if the user said it was too hard,
+	// prefer lower progression scores; if too easy, prefer higher
+	orderClause := "RANDOM()"
+	switch activity.Feedback {
+	case model.FeedbackImpossible, model.FeedbackTooHard:
+		orderClause = fmt.Sprintf("(exercises.progressions->>'%s')::float ASC, RANDOM()", primaryFamily)
+	case model.FeedbackEasy, model.FeedbackTooEasy:
+		orderClause = fmt.Sprintf("(exercises.progressions->>'%s')::float DESC, RANDOM()", primaryFamily)
+	}
+
 	var newExercise model.Exercise
 
 	if len(currentExercise.Muscles) > 0 {
+		// try exact muscle match or primary muscle match
 		err := baseQuery().
 			Where("(muscles @> ? AND muscles <@ ?) OR muscles[1] = ?",
 				pq.Array(currentExercise.Muscles), pq.Array(currentExercise.Muscles),
 				currentExercise.Muscles[0]).
-			Order("RANDOM()").First(&newExercise).Error
+			Order(orderClause).First(&newExercise).Error
 		if err != nil {
-			// fallback: try without muscle matching
-			if err := baseQuery().Order("RANDOM()").First(&newExercise).Error; err != nil {
+			// primary muscle must still match — don't drop muscle constraint entirely
+			if err := baseQuery().
+				Where("muscles[1] = ?", currentExercise.Muscles[0]).
+				Order(orderClause).First(&newExercise).Error; err != nil {
 				return model.Activity{}, ErrNoAlternativeFound
 			}
 		}
 	} else {
-		if err := baseQuery().Order("RANDOM()").First(&newExercise).Error; err != nil {
+		if err := baseQuery().Order(orderClause).First(&newExercise).Error; err != nil {
 			return model.Activity{}, ErrNoAlternativeFound
 		}
 	}
