@@ -232,12 +232,21 @@ func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineType
 		if !validRoutineTypes[routine.Type] {
 			return &ValidationError{"invalid_routine_type", "routine " + strconv.Itoa(i) + " has invalid type: " + routine.Type}
 		}
+		if routine.Rest < 0 {
+			return &ValidationError{"negative_routine_rest", "routine " + strconv.Itoa(i) + " has negative rest"}
+		}
 		if len(routine.Blocks) == 0 {
 			return &ValidationError{"no_blocks", "routine " + strconv.Itoa(i) + " has no blocks"}
 		}
 		for j, block := range routine.Blocks {
 			if len(block.Activities) == 0 {
 				return &ValidationError{"no_activities", "block " + strconv.Itoa(j) + " in routine " + strconv.Itoa(i) + " has no activities"}
+			}
+			if block.Repeats <= 0 {
+				return &ValidationError{"zero_repeats", "block " + strconv.Itoa(j) + " in routine " + strconv.Itoa(i) + " has no repeats"}
+			}
+			if block.Rest < 0 {
+				return &ValidationError{"negative_block_rest", "block " + strconv.Itoa(j) + " in routine " + strconv.Itoa(i) + " has negative rest"}
 			}
 			for k, activity := range block.Activities {
 				if activity.ExerciseID == "" {
@@ -264,8 +273,32 @@ func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineType
 						return &ValidationError{"missing_weight_modifier", "activity " + strconv.Itoa(k) + " has weight_kg > 0 but no weighted modifier"}
 					}
 				}
+				if activity.Duration == 0 && activity.Reps == 0 {
+					return &ValidationError{"no_duration_or_reps", "activity " + strconv.Itoa(k) + " in block " + strconv.Itoa(j) + " has neither duration nor reps"}
+				}
+				if activity.Duration < 0 {
+					return &ValidationError{"negative_duration", "activity " + strconv.Itoa(k) + " in block " + strconv.Itoa(j) + " has negative duration"}
+				}
+				if activity.Reps < 0 {
+					return &ValidationError{"negative_reps", "activity " + strconv.Itoa(k) + " in block " + strconv.Itoa(j) + " has negative reps"}
+				}
+				if activity.Rest < 0 {
+					return &ValidationError{"negative_activity_rest", "activity " + strconv.Itoa(k) + " in block " + strconv.Itoa(j) + " has negative rest"}
+				}
+				if activity.WeightKg < 0 {
+					return &ValidationError{"negative_weight", "activity " + strconv.Itoa(k) + " in block " + strconv.Itoa(j) + " has negative weight"}
+				}
 			}
 		}
+	}
+
+	// validate methodology before duration check (CalculateDuration switches on it)
+	validMethodologies := map[string]bool{
+		"strength": true, "circuit": true, "emom": true, "amrap": true,
+		"hiit": true, "for_time": true, "endurance": true, "mobility": true,
+	}
+	if !validMethodologies[t.Methodology] {
+		return &ValidationError{"invalid_methodology", "invalid methodology: " + t.Methodology}
 	}
 
 	// check generated duration is within tolerance of what the user asked for

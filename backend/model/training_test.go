@@ -624,7 +624,8 @@ func TestValidate_WeightModifierConsistency(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tr := Training{
-				Name: "Test",
+				Name:        "Test",
+				Methodology: "strength",
 				Routines: []Routine{{
 					Type: "work",
 					Blocks: []Block{{
@@ -740,6 +741,121 @@ func TestValidate_TargetMuscles(t *testing.T) {
 			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, 0, tt.target, tt.actual)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidate_NewChecks(t *testing.T) {
+	validExercises := map[string]bool{"ex1": true}
+	validModifiers := map[string]bool{}
+	validRoutines := map[string]bool{"work": true}
+	weightedModifiers := map[string]bool{}
+
+	// base valid training — all new checks pass
+	base := func() Training {
+		return Training{
+			Name:        "Test",
+			Methodology: "strength",
+			Routines: []Routine{routine("work", 0, []Block{
+				block(1, 0, []Activity{{ExerciseID: "ex1", Reps: 10}}),
+			})},
+		}
+	}
+
+	tests := []struct {
+		name     string
+		mutate   func(*Training)
+		wantCode string
+	}{
+		{
+			"valid training passes",
+			func(tr *Training) {},
+			"",
+		},
+		{
+			"zero repeats",
+			func(tr *Training) { tr.Routines[0].Blocks[0].Repeats = 0 },
+			"zero_repeats",
+		},
+		{
+			"negative repeats",
+			func(tr *Training) { tr.Routines[0].Blocks[0].Repeats = -1 },
+			"zero_repeats",
+		},
+		{
+			"invalid methodology",
+			func(tr *Training) { tr.Methodology = "crossfit" },
+			"invalid_methodology",
+		},
+		{
+			"empty methodology",
+			func(tr *Training) { tr.Methodology = "" },
+			"invalid_methodology",
+		},
+		{
+			"no duration or reps",
+			func(tr *Training) {
+				tr.Routines[0].Blocks[0].Activities[0].Reps = 0
+				tr.Routines[0].Blocks[0].Activities[0].Duration = 0
+			},
+			"no_duration_or_reps",
+		},
+		{
+			"negative duration",
+			func(tr *Training) { tr.Routines[0].Blocks[0].Activities[0].Duration = -1 },
+			"negative_duration",
+		},
+		{
+			"negative reps",
+			func(tr *Training) {
+				tr.Routines[0].Blocks[0].Activities[0].Reps = -1
+				tr.Routines[0].Blocks[0].Activities[0].Duration = 10 // avoid no_duration_or_reps
+			},
+			"negative_reps",
+		},
+		{
+			"negative activity rest",
+			func(tr *Training) { tr.Routines[0].Blocks[0].Activities[0].Rest = -1 },
+			"negative_activity_rest",
+		},
+		{
+			"negative block rest",
+			func(tr *Training) { tr.Routines[0].Blocks[0].Rest = -1 },
+			"negative_block_rest",
+		},
+		{
+			"negative routine rest",
+			func(tr *Training) { tr.Routines[0].Rest = -1 },
+			"negative_routine_rest",
+		},
+		{
+			"negative weight",
+			func(tr *Training) { tr.Routines[0].Blocks[0].Activities[0].WeightKg = -1 },
+			"negative_weight",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tr := base()
+			tt.mutate(&tr)
+			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, 0, nil, nil)
+			if tt.wantCode == "" {
+				if err != nil {
+					t.Errorf("Validate() unexpected error: %v", err)
+				}
+				return
+			}
+			if err == nil {
+				t.Fatalf("Validate() expected error with code %q, got nil", tt.wantCode)
+			}
+			ve, ok := err.(*ValidationError)
+			if !ok {
+				t.Fatalf("Validate() error is not *ValidationError: %T", err)
+			}
+			if ve.Code != tt.wantCode {
+				t.Errorf("Validate() error code = %q, want %q", ve.Code, tt.wantCode)
 			}
 		})
 	}

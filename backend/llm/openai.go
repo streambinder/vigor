@@ -1,7 +1,6 @@
 package llm
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -71,11 +70,6 @@ func (llm *OpenAI) query(prompt model.LLMPrompt, temperature float64, maxTokens 
 
 	log.Info().Str("provider", llm.provider).Str("model", llm.model).Dur("latency", time.Since(start)).Msg("LLM query completed")
 
-	var content bytes.Buffer
-	if err := json.Compact(&content, []byte(completionChoice.Message.Content)); err != nil {
-		return nil, llm.model, fmt.Errorf("unable to compact response from %s: %s", llm.provider, err)
-	}
-
-	log.Debug().Str("provider", llm.provider).Dur("latency", time.Since(start)).RawJSON("request", promptJSON).RawJSON("content", content.Bytes()).Msg("Received LLM response")
-	return content.Bytes(), llm.model, nil
+	log.Debug().Str("provider", llm.provider).Dur("latency", time.Since(start)).RawJSON("request", promptJSON).Str("content", completionChoice.Message.Content).Msg("Received LLM response")
+	return []byte(completionChoice.Message.Content), llm.model, nil
 }
