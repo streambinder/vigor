@@ -11,22 +11,24 @@ import 'training_interval.dart';
 /// Controller for EMOM (Every Minute On the Minute) timer mode
 ///
 /// Behavior:
-/// - Each minute: user cycles through all activities in block
+/// - Each minute: user cycles through all activities in current block
 /// - User taps/skips to advance to next activity
 /// - After completing last activity, rest for remainder of minute
 /// - At minute boundary, automatically resets to first activity
-/// - Total minutes = block.repeats
+/// - When all minutes in a block are exhausted, optional rest then next block
+/// - Total minutes per block = block.repeats
 class EmomController extends TimerController {
   final Training training;
   final Routine routine;
-  final Block block;
+  final List<Block> blocks;
 
   Timer? _timer;
   int _secondsInMinute = 60;
-  int _currentMinute = 1;
-  int _totalMinutes = 0;
+  int _currentMinuteInBlock = 1;  // 1-based minute within current block
+  int _currentBlockIndex = 0;
   int _currentActivityIndex = 0;
   bool _isResting = false;  // completed all activities, resting until minute ends
+  bool _isBlockRest = false; // resting between blocks
   bool _isPaused = false;
   bool _isCompleted = false;
   bool _hasStarted = false;
@@ -35,10 +37,13 @@ class EmomController extends TimerController {
   EmomController({
     required this.training,
     required this.routine,
-    required this.block,
-  }) {
-    _totalMinutes = block.repeats > 0 ? block.repeats : 1;
-  }
+    required this.blocks,
+  });
+
+  Block get _currentBlock => blocks[_currentBlockIndex];
+
+  int get _currentBlockRepeats =>
+      _currentBlock.repeats > 0 ? _currentBlock.repeats : 1;
 
   @override
   int get remainingSeconds => _secondsInMinute;
@@ -56,39 +61,59 @@ class EmomController extends TimerController {
   bool get canGoBack => _history.isNotEmpty;
 
   @override
-  int get currentRound => _currentMinute;
+  int get currentRound => _currentMinuteInBlock;
 
   @override
-  int get totalRounds => _totalMinutes;
+  int get totalRounds => _currentBlockRepeats;
 
   /// Whether user completed all activities and is resting until minute ends
-  bool get isResting => _isResting;
+  bool get isResting => _isResting || _isBlockRest;
 
   /// Current activity index within block (0-based)
   int get activityIndex => _currentActivityIndex;
 
-  /// Total activities in block
-  int get totalActivities => block.activities.length;
+  /// Total activities in current block
+  int get totalActivities => _currentBlock.activities.length;
 
   /// Whether current activity is the last in the block
-  bool get isLastActivity => _currentActivityIndex >= block.activities.length - 1;
+  bool get isLastActivity => _currentActivityIndex >= _currentBlock.activities.length - 1;
+
+  /// Current block index (0-based)
+  int get currentBlockIndex => _currentBlockIndex;
+
+  /// Total number of blocks
+  int get totalBlocks => blocks.length;
 
   Activity? get _currentActivity =>
-      _currentActivityIndex < block.activities.length
-          ? block.activities[_currentActivityIndex]
+      _currentActivityIndex < _currentBlock.activities.length
+          ? _currentBlock.activities[_currentActivityIndex]
           : null;
 
   @override
   TrainingInterval? get currentInterval {
+    if (_isBlockRest) {
+      return TrainingInterval(
+        type: IntervalType.rest,
+        duration: _secondsInMinute,
+        routineName: routine.type,
+        activityNumber: _currentBlockIndex + 1,
+        totalActivities: blocks.length,
+        blockNumber: _currentBlockIndex + 1,
+        totalBlocks: blocks.length,
+        routineNumber: 1,
+        totalRoutines: 1,
+      );
+    }
+
     if (_isResting) {
       return TrainingInterval(
         type: IntervalType.rest,
         duration: _secondsInMinute,
         routineName: routine.type,
-        activityNumber: _currentMinute,
-        totalActivities: _totalMinutes,
-        blockNumber: 1,
-        totalBlocks: 1,
+        activityNumber: _currentMinuteInBlock,
+        totalActivities: _currentBlockRepeats,
+        blockNumber: _currentBlockIndex + 1,
+        totalBlocks: blocks.length,
         routineNumber: 1,
         totalRoutines: 1,
       );
@@ -105,9 +130,9 @@ class EmomController extends TimerController {
       activity: activity,
       exercise: _parseExercise(activity.detail),
       activityNumber: _currentActivityIndex + 1,
-      totalActivities: block.activities.length,
-      blockNumber: _currentMinute,
-      totalBlocks: _totalMinutes,
+      totalActivities: _currentBlock.activities.length,
+      blockNumber: _currentMinuteInBlock,
+      totalBlocks: _currentBlockRepeats,
       routineNumber: 1,
       totalRoutines: 1,
     );
@@ -116,10 +141,13 @@ class EmomController extends TimerController {
   @override
   List<TrainingInterval> get upcomingIntervals {
     final upcoming = <TrainingInterval>[];
+    if (_isBlockRest) return upcoming;
 
-    // show remaining activities in current minute
-    for (int i = _currentActivityIndex + 1; i < block.activities.length && upcoming.length < 5; i++) {
-      final activity = block.activities[i];
+    // remaining activities in current minute
+    for (int i = _currentActivityIndex + 1;
+        i < _currentBlock.activities.length && upcoming.length < 5;
+        i++) {
+      final activity = _currentBlock.activities[i];
       upcoming.add(TrainingInterval(
         type: IntervalType.work,
         duration: 0,
@@ -128,20 +156,20 @@ class EmomController extends TimerController {
         activity: activity,
         exercise: _parseExercise(activity.detail),
         activityNumber: i + 1,
-        totalActivities: block.activities.length,
-        blockNumber: _currentMinute,
-        totalBlocks: _totalMinutes,
+        totalActivities: _currentBlock.activities.length,
+        blockNumber: _currentMinuteInBlock,
+        totalBlocks: _currentBlockRepeats,
         routineNumber: 1,
         totalRoutines: 1,
       ));
     }
 
-    // show activities from next minutes
-    for (int nextMinute = _currentMinute + 1;
-        nextMinute <= _totalMinutes && upcoming.length < 5;
+    // remaining minutes in current block
+    for (int nextMinute = _currentMinuteInBlock + 1;
+        nextMinute <= _currentBlockRepeats && upcoming.length < 5;
         nextMinute++) {
-      for (int i = 0; i < block.activities.length && upcoming.length < 5; i++) {
-        final activity = block.activities[i];
+      for (int i = 0; i < _currentBlock.activities.length && upcoming.length < 5; i++) {
+        final activity = _currentBlock.activities[i];
         upcoming.add(TrainingInterval(
           type: IntervalType.work,
           duration: 0,
@@ -150,12 +178,37 @@ class EmomController extends TimerController {
           activity: activity,
           exercise: _parseExercise(activity.detail),
           activityNumber: i + 1,
-          totalActivities: block.activities.length,
+          totalActivities: _currentBlock.activities.length,
           blockNumber: nextMinute,
-          totalBlocks: _totalMinutes,
+          totalBlocks: _currentBlockRepeats,
           routineNumber: 1,
           totalRoutines: 1,
         ));
+      }
+    }
+
+    // activities from subsequent blocks
+    for (int bi = _currentBlockIndex + 1; bi < blocks.length && upcoming.length < 5; bi++) {
+      final block = blocks[bi];
+      final blockRepeats = block.repeats > 0 ? block.repeats : 1;
+      for (int minute = 1; minute <= blockRepeats && upcoming.length < 5; minute++) {
+        for (int i = 0; i < block.activities.length && upcoming.length < 5; i++) {
+          final activity = block.activities[i];
+          upcoming.add(TrainingInterval(
+            type: IntervalType.work,
+            duration: 0,
+            routineName: routine.type,
+            activityName: activity.displayName,
+            activity: activity,
+            exercise: _parseExercise(activity.detail),
+            activityNumber: i + 1,
+            totalActivities: block.activities.length,
+            blockNumber: minute,
+            totalBlocks: blockRepeats,
+            routineNumber: 1,
+            totalRoutines: 1,
+          ));
+        }
       }
     }
 
@@ -193,6 +246,21 @@ class EmomController extends TimerController {
   void skipForward() {
     if (_isCompleted) return;
     wasSkipped = true;
+
+    if (_isBlockRest) {
+      _saveHistory();
+      _advanceToNextBlock();
+      return;
+    }
+
+    if (_isResting) {
+      // skip the within-minute rest, jump to next minute boundary
+      _saveHistory();
+      _timer?.cancel();
+      _onMinuteBoundary();
+      return;
+    }
+
     _advanceActivity();
   }
 
@@ -206,7 +274,6 @@ class EmomController extends TimerController {
 
   @override
   void onUserAction() {
-    // same as skip forward - advance to next activity
     wasSkipped = true;
     skipForward();
   }
@@ -223,7 +290,7 @@ class EmomController extends TimerController {
     _saveHistory();
     _currentActivityIndex++;
 
-    if (_currentActivityIndex >= block.activities.length) {
+    if (_currentActivityIndex >= _currentBlock.activities.length) {
       // completed all activities in minute, rest until minute ends
       _isResting = true;
     }
@@ -238,13 +305,15 @@ class EmomController extends TimerController {
 
       if (_secondsInMinute > 0) {
         _secondsInMinute--;
-        // play countdown jingle at 3, 2, 1 seconds before minute boundary (only during training)
         shouldPlayCountdownJingle = _hasStarted && _secondsInMinute >= 1 && _secondsInMinute <= 3;
         notifyListeners();
       } else {
         timer.cancel();
         if (!_hasStarted) {
           startTraining();
+        } else if (_isBlockRest) {
+          // block rest finished, start next block
+          _advanceToNextBlock();
         } else {
           _onMinuteBoundary();
         }
@@ -256,17 +325,50 @@ class EmomController extends TimerController {
     _secondsInMinute = 60;
     _currentActivityIndex = 0;
     _isResting = false;
+    _isBlockRest = false;
     notifyListeners();
     _startTimer();
   }
 
   void _onMinuteBoundary() {
-    _currentMinute++;
-    if (_currentMinute > _totalMinutes) {
-      _completeTraining();
+    _currentMinuteInBlock++;
+    if (_currentMinuteInBlock > _currentBlockRepeats) {
+      // block finished — check for rest between blocks
+      if (_currentBlockIndex < blocks.length - 1 && _currentBlock.rest > 0) {
+        _startBlockRest();
+      } else {
+        _tryAdvanceBlock();
+      }
     } else {
       _startMinute();
     }
+  }
+
+  void _startBlockRest() {
+    _isBlockRest = true;
+    _isResting = false;
+    _secondsInMinute = _currentBlock.rest;
+    notifyListeners();
+    _startTimer();
+  }
+
+  void _tryAdvanceBlock() {
+    if (_currentBlockIndex < blocks.length - 1) {
+      _advanceToNextBlock();
+    } else {
+      _completeTraining();
+    }
+  }
+
+  void _advanceToNextBlock() {
+    _currentBlockIndex++;
+    if (_currentBlockIndex >= blocks.length) {
+      _completeTraining();
+      return;
+    }
+    _currentMinuteInBlock = 1;
+    _isBlockRest = false;
+    _startMinute();
   }
 
   void _completeTraining() {
@@ -277,19 +379,23 @@ class EmomController extends TimerController {
 
   void _saveHistory() {
     _history.add(_EmomHistoryEntry(
-      minute: _currentMinute,
+      blockIndex: _currentBlockIndex,
+      minute: _currentMinuteInBlock,
       activityIndex: _currentActivityIndex,
       secondsRemaining: _secondsInMinute,
       isResting: _isResting,
+      isBlockRest: _isBlockRest,
     ));
   }
 
   void _restoreHistory() {
     final entry = _history.removeLast();
-    _currentMinute = entry.minute;
+    _currentBlockIndex = entry.blockIndex;
+    _currentMinuteInBlock = entry.minute;
     _currentActivityIndex = entry.activityIndex;
     _secondsInMinute = entry.secondsRemaining;
     _isResting = entry.isResting;
+    _isBlockRest = entry.isBlockRest;
     _isCompleted = false;
   }
 
@@ -304,15 +410,19 @@ class EmomController extends TimerController {
 }
 
 class _EmomHistoryEntry {
+  final int blockIndex;
   final int minute;
   final int activityIndex;
   final int secondsRemaining;
   final bool isResting;
+  final bool isBlockRest;
 
   _EmomHistoryEntry({
+    required this.blockIndex,
     required this.minute,
     required this.activityIndex,
     required this.secondsRemaining,
     required this.isResting,
+    required this.isBlockRest,
   });
 }

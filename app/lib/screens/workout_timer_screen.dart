@@ -93,13 +93,11 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
         return IntervalController(training: widget.training);
 
       case TimerMode.emom:
-        // EMOM uses the first block of the work routine
-        final block = segment.blocks.isNotEmpty ? segment.blocks.first : null;
-        if (block == null) return IntervalController(training: widget.training);
+        if (segment.blocks.isEmpty) return IntervalController(training: widget.training);
         return EmomController(
           training: widget.training,
           routine: segment.routine,
-          block: block,
+          blocks: segment.blocks,
         );
 
       case TimerMode.amrap:
@@ -376,6 +374,8 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
           activityIndex: emomController.activityIndex,
           totalActivities: emomController.totalActivities,
           isResting: emomController.isResting,
+          currentBlock: emomController.currentBlockIndex + 1,
+          totalBlocks: emomController.totalBlocks,
         );
 
       case TimerMode.amrap:

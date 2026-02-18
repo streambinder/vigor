@@ -18,6 +18,8 @@ class EmomDisplay extends StatelessWidget {
   final int activityIndex;
   final int totalActivities;
   final bool isResting;
+  final int currentBlock;
+  final int totalBlocks;
 
   const EmomDisplay({
     super.key,
@@ -28,6 +30,8 @@ class EmomDisplay extends StatelessWidget {
     required this.activityIndex,
     required this.totalActivities,
     required this.isResting,
+    required this.currentBlock,
+    required this.totalBlocks,
   });
 
   String _formatTime(int seconds) {
@@ -48,6 +52,20 @@ class EmomDisplay extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (totalBlocks > 1) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.lg, vertical: VigorSpacing.sm),
+            decoration: BoxDecoration(
+              color: VigorColors.stone.withValues(alpha: 0.15),
+              borderRadius: VigorRadius.radiusMd,
+            ),
+            child: Text(
+              'BLOCK $currentBlock / $totalBlocks',
+              style: VigorTypography.label.copyWith(color: VigorColors.stone, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: VigorSpacing.sm),
+        ],
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
