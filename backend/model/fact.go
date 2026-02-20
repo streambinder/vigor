@@ -41,7 +41,7 @@ type Fact struct {
 type FactEmbedding struct {
 	ID        uuid.UUID       `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Text      string          `gorm:"type:text;not null" json:"text"`
-	Embedding pgvector.Vector `gorm:"type:vector(384)" json:"-"`
+	Embedding pgvector.Vector `gorm:"type:vector(768)" json:"-"`
 
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`

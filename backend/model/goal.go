@@ -25,7 +25,7 @@ type Goal struct {
 type GoalEmbedding struct {
 	ID        uint            `gorm:"primaryKey" json:"id"`
 	Text      string          `gorm:"type:text;not null;uniqueIndex:idx_goal_text" json:"text"`
-	Embedding pgvector.Vector `gorm:"type:vector(384)" json:"-"`
+	Embedding pgvector.Vector `gorm:"type:vector(768)" json:"-"`
 
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`

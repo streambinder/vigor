@@ -13,19 +13,20 @@ type EmbeddingModel interface {
 	vectorize(string) ([]float32, error)
 }
 
-func getProvider() EmbeddingModel {
+// GenVector generates an embedding vector for a given payload,
+// iterating through providers in priority order with fallback.
+func GenVector(sequence string) ([]float32, error) {
 	if len(providers) == 0 {
 		log.Fatal().Msg("No EmbeddingModel available")
 	}
 
-	return providers[0]
-}
-
-// GenVector generates an embedding vector for a given payload
-func GenVector(sequence string) ([]float32, error) {
-	embedding, err := getProvider().vectorize(sequence)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate embedding: %s", err)
+	for _, provider := range providers {
+		vector, err := provider.vectorize(sequence)
+		if err != nil {
+			log.Warn().Err(err).Msg("Embedding provider failed, trying next")
+			continue
+		}
+		return vector, nil
 	}
-	return embedding, nil
+	return nil, fmt.Errorf("all embedding providers failed")
 }

@@ -174,38 +174,54 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           build-args: |
             BUILD_VERSION=${{ github.sha }}
-  # knowledge-docker:
-  #   runs-on: ubuntu-latest
-  #   needs:
-  #     [
-  #       # super-linter,
-  #       gofumpt,
-  #       go-channel-closure,
-  #       go-http-body-closure,
-  #       go-mockey-unpatch,
-  #     ]
-  #   if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
-  #   permissions:
-  #     contents: read
-  #     packages: write
-  #   steps:
-  #     - uses: actions/checkout@v6
-  #       with:
-  #         persist-credentials: false
-  #     - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130
-  #     - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
-  #     - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
-  #       with:
-  #         registry: ghcr.io
-  #         username: ${{ github.repository_owner }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
-  #     - uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
-  #       with:
-  #         context: .
-  #         file: knowledge/Dockerfile
-  #         platforms: ${{ env.DOCKER_PLATFORMS }}
-  #         tags: ghcr.io/streambinder/vigor/knowledge:latest
-  #         push: ${{ github.event_name != 'pull_request' }}
+  knowledge-docker:
+    runs-on: ubuntu-latest
+    needs:
+      [
+        gofumpt,
+        go-channel-closure,
+        go-http-body-closure,
+        go-mockey-unpatch,
+      ]
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
+        id: changes
+        with:
+          filters: |
+            knowledge:
+              - 'knowledge/**'
+              - 'backend/model/**'
+              - 'backend/llm/embedding/**'
+              - 'backend/llm/rag/**'
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130
+        if: steps.changes.outputs.knowledge == 'true'
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+        if: steps.changes.outputs.knowledge == 'true'
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+        if: steps.changes.outputs.knowledge == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        if: steps.changes.outputs.knowledge == 'true'
+        with:
+          context: .
+          file: knowledge/Dockerfile
+          platforms: ${{ env.DOCKER_PLATFORMS }}
+          tags: ghcr.io/streambinder/vigor/knowledge:latest
+          push: true
+          build-args: |
+            OPENROUTER_EMBEDDING_MODELS=google/gemini-embedding-001
+          secrets: |
+            openrouter_api_key=${{ secrets.OPENROUTER_API_KEY }}
   # backend-test:
   #   runs-on: ubuntu-latest
   #   needs:

@@ -57,9 +57,6 @@ services:
     build:
       context: .
       dockerfile: knowledge/Dockerfile
-    depends_on:
-      embedding:
-        condition: service_healthy
     environment:
       POSTGRES_DB: db
       POSTGRES_USER: user

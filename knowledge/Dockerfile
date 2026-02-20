@@ -1,4 +1,6 @@
-# docker build -t ghcr.io/streambinder/vigor/knowledge:latest -f knowledge/Dockerfile --network host .
+# docker build -t ghcr.io/streambinder/vigor/knowledge:latest -f knowledge/Dockerfile \
+#   --secret id=openrouter_api_key,env=OPENROUTER_API_KEY \
+#   --build-arg OPENROUTER_EMBEDDING_MODELS=google/gemini-embedding-001 .
 
 FROM golang:1.25.4-alpine3.22 AS bootstrap-builder
 RUN apk add --no-cache gcc musl-dev
@@ -11,11 +13,14 @@ COPY knowledge/main.go ./
 RUN CGO_ENABLED=0 go build -o bootstrap main.go
 
 FROM pgvector/pgvector:0.8.1-pg18 AS data-builder
+ARG OPENROUTER_EMBEDDING_MODELS
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 USER postgres
 WORKDIR /build
 COPY --from=bootstrap-builder /build/knowledge/bootstrap /usr/local/bin/bootstrap
 COPY knowledge/features features
-RUN initdb -D /tmp/pgdata && \
+RUN --mount=type=secret,id=openrouter_api_key,uid=999 initdb -D /tmp/pgdata && \
   pg_ctl -D /tmp/pgdata -o "-k /tmp" start && \
   pg_isready -t 30 -h /tmp && \
   psql -h /tmp -U postgres -c "CREATE DATABASE db;" && \
@@ -25,7 +30,7 @@ RUN initdb -D /tmp/pgdata && \
   psql -h /tmp -U postgres -d db -c "CREATE EXTENSION IF NOT EXISTS vector;" && \
   psql -h /tmp -U postgres -d db -c "GRANT ALL ON SCHEMA public TO \"user\";" && \
   # checkov:skip=CKV_SECRET_4:Temporary build-time credentials for local database bootstrap
-  sh -c "DATABASE_URL='postgres://user:password@/db?host=/tmp' INFINITY_TIERS=http://host.docker.internal:7997 bootstrap" && \
+  sh -c "DATABASE_URL='postgres://user:password@/db?host=/tmp' OPENROUTER_API_KEY=$(cat /run/secrets/openrouter_api_key) OPENROUTER_EMBEDDING_MODELS='$OPENROUTER_EMBEDDING_MODELS' bootstrap" && \
   pg_dump -h /tmp -U postgres -d db --clean --if-exists >/build/init.sql && \
   pg_ctl -D /tmp/pgdata stop
 
