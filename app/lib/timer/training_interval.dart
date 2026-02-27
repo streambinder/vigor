@@ -6,6 +6,7 @@ enum IntervalType { work, rest }
 class TrainingInterval {
   final IntervalType type;
   final int duration;
+  final bool isRepBased;
   final String routineName;
   final String? activityName;
   final Activity? activity;
@@ -20,6 +21,7 @@ class TrainingInterval {
   TrainingInterval({
     required this.type,
     required this.duration,
+    this.isRepBased = false,
     required this.routineName,
     this.activityName,
     this.activity,

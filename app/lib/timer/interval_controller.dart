@@ -108,6 +108,19 @@ class IntervalController extends TimerController {
 
   void _startTimer() {
     _timer?.cancel();
+    // rep-based work intervals don't auto-advance, only tick elapsed time
+    final isRepBasedWork = _hasStarted &&
+        _currentIntervalIndex < _intervals.length &&
+        _intervals[_currentIntervalIndex].isRepBased;
+    if (isRepBasedWork) {
+      _remainingSeconds = 0;
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (_isPaused) return;
+        tickElapsed();
+      });
+      notifyListeners();
+      return;
+    }
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_isPaused) return;
       if (_hasStarted) tickElapsed();
@@ -195,12 +208,14 @@ class IntervalController extends TimerController {
             activityCounter++;
             final exercise = _parseExercise(activity.detail);
 
+            final isRepBased = activity.duration == 0 && activity.reps > 0;
             final workDuration = activity.duration > 0
                 ? activity.duration
                 : (activity.reps > 0 ? activity.reps * 4 : 30);
             intervals.add(TrainingInterval(
               type: IntervalType.work,
               duration: workDuration,
+              isRepBased: isRepBased,
               routineName: routine.type,
               activityName: activity.displayName,
               activity: activity,
