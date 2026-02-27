@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/training.dart';
@@ -56,6 +57,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
   @override
   void initState() {
     super.initState();
+    WakelockPlus.enable();
     _segments = RoutineSegment.buildSegments(
       widget.training.routines,
       widget.training.methodology,
@@ -66,6 +68,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
 
   @override
   void dispose() {
+    WakelockPlus.disable();
     _controller?.removeListener(_onControllerUpdate);
     _controller?.dispose();
     super.dispose();
