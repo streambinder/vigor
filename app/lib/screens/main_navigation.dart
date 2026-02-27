@@ -1,8 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../config/api_config.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/gym.dart';
+import '../providers/auth_provider.dart';
 import '../services/service_locator.dart';
 import '../utils/platform_helper.dart';
 import '../widgets/navigation/liquid_glass_nav_bar.dart';
@@ -60,6 +63,34 @@ class MainNavigationState extends State<MainNavigation> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  /// builds a small circular avatar for the profile tab icon,
+  /// falls back to person icon if user has no avatar
+  Widget _buildProfileTabAvatar(String userId, bool isSelected) {
+    final borderColor = isSelected ? VigorColors.indigo : VigorColors.stone;
+    return CachedNetworkImage(
+      imageUrl: ApiConfig.avatarUrl(userId),
+      imageBuilder: (context, imageProvider) => Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+          border: Border.all(color: borderColor, width: 1.5),
+        ),
+      ),
+      placeholder: (context, url) => Icon(
+        Icons.person_rounded,
+        color: isSelected ? VigorColors.indigo : VigorColors.stone,
+        size: 24,
+      ),
+      errorWidget: (context, url, error) => Icon(
+        Icons.person_rounded,
+        color: isSelected ? VigorColors.indigo : VigorColors.stone,
+        size: 24,
       ),
     );
   }
@@ -123,6 +154,7 @@ class MainNavigationState extends State<MainNavigation> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final fab = _buildFAB(l10n);
+    final userId = context.watch<AuthProvider>().currentUser?.id;
 
     if (PlatformHelper.useLiquidGlass) {
       // iOS-style with Liquid Glass navigation
@@ -164,6 +196,9 @@ class MainNavigationState extends State<MainNavigation> {
                   LiquidGlassNavItem(
                     icon: Icons.person_rounded,
                     label: l10n.navProfile,
+                    customIcon: userId != null
+                        ? _buildProfileTabAvatar(userId, _currentIndex == 2)
+                        : null,
                   ),
                 ],
               ),
@@ -173,6 +208,13 @@ class MainNavigationState extends State<MainNavigation> {
       );
     } else {
       // Material Design navigation with IndexedStack
+      final profileIcon = userId != null
+          ? _buildProfileTabAvatar(userId, false)
+          : const Icon(Icons.person_outline);
+      final profileSelectedIcon = userId != null
+          ? _buildProfileTabAvatar(userId, true)
+          : const Icon(Icons.person_rounded);
+
       return Scaffold(
         body: IndexedStack(
           index: _currentIndex,
@@ -194,8 +236,8 @@ class MainNavigationState extends State<MainNavigation> {
               label: l10n.navActivity,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.person_outline),
-              selectedIcon: const Icon(Icons.person_rounded),
+              icon: profileIcon,
+              selectedIcon: profileSelectedIcon,
               label: l10n.navProfile,
             ),
           ],

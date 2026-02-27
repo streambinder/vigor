@@ -5,10 +5,12 @@ import '../../design/tokens.dart';
 class LiquidGlassNavItem {
   final IconData icon;
   final String label;
+  final Widget? customIcon;
 
   const LiquidGlassNavItem({
     required this.icon,
     required this.label,
+    this.customIcon,
   });
 }
 
@@ -103,7 +105,7 @@ class LiquidGlassNavBar extends StatelessWidget {
                       : Colors.transparent,
                   borderRadius: VigorRadius.radiusFull,
                 ),
-                child: Icon(
+                child: item.customIcon ?? Icon(
                   item.icon,
                   color: isSelected ? VigorColors.indigo : unselectedColor,
                   size: 24,
