@@ -2,7 +2,7 @@
   {
     "id": "strength",
     "name": "Strength Training",
-    "description": "Traditional lifting with sets × reps × weight, longer rest (2-3min between sets). Focus on progressive overload and compound movements. Create multiple blocks as needed, each grouping exercises with similar rest needs. Repeats = sets per exercise. Activities MUST use reps (never duration).",
+    "description": "Traditional lifting with sets × reps × weight. Focus on progressive overload and compound movements. Create multiple blocks as needed, each grouping exercises with similar rest needs. Repeats = sets per exercise. Activities MUST use reps (never duration). REST RULES: set each activity's rest based on exercise type — compound lifts (squat, deadlift, bench, overhead press, rows) → 120-180s; isolation/accessory (curls, lateral raises, tricep extensions, calf raises, flyes) → 60-90s.",
     "work": {
       "horizontal_push": { "min": 25 },
       "horizontal_pull": { "min": 25 },
