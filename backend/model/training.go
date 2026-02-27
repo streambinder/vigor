@@ -215,7 +215,7 @@ func (t Training) DaysSince() int {
 }
 
 // Validate checks that the training has valid structure.
-func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, requireWarmupCooldown bool, userRequestedMinutes int, targetMuscles []string, actualMuscles []string) error {
+func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, requireWarmupCooldown bool, userRequestedMinutes int, targetMuscles []string, actualMuscles []string, cooldownExerciseMuscles map[string]string) error {
 	if t.Name == "" {
 		return &ValidationError{"empty_name", "training name is empty"}
 	}
@@ -332,6 +332,37 @@ func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineType
 		for _, m := range targetMuscles {
 			if !actualSet[m] {
 				return &ValidationError{"missing_muscle", "training missing target muscle: " + m}
+			}
+		}
+	}
+
+	// validate cooldown muscle coverage: every muscle group available in the cooldown pool
+	// must be covered by at least one cooldown activity
+	if requireWarmupCooldown && len(cooldownExerciseMuscles) > 0 {
+		// collect available muscles from cooldown pool
+		availableMuscles := make(map[string]bool)
+		for _, muscle := range cooldownExerciseMuscles {
+			availableMuscles[muscle] = true
+		}
+
+		// collect muscles actually covered by cooldown activities
+		coveredMuscles := make(map[string]bool)
+		for _, routine := range t.Routines {
+			if routine.Type != "cooldown" {
+				continue
+			}
+			for _, block := range routine.Blocks {
+				for _, activity := range block.Activities {
+					if muscle, ok := cooldownExerciseMuscles[activity.ExerciseID]; ok {
+						coveredMuscles[muscle] = true
+					}
+				}
+			}
+		}
+
+		for muscle := range availableMuscles {
+			if !coveredMuscles[muscle] {
+				return &ValidationError{"missing_cooldown_muscle", "cooldown missing stretch for muscle: " + muscle}
 			}
 		}
 	}

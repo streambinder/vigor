@@ -85,7 +85,7 @@ The platform is still calibrating this user's fitness level. Prioritize exercise
 
 {% if !skipWarmupCooldown %}
 [COOLDOWN] {%d len(cooldownExercises) %} options
-{% for _, exercise := range cooldownExercises %}{%s exercise.ID %}, {% endfor %}
+{% for _, exercise := range cooldownExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}, {% endfor %}
 
 {% endif %}
 {% if len(recentTrainings) > 0 %}

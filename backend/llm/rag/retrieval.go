@@ -17,11 +17,11 @@ import (
 const (
 	MaxWorkExercises       = 15 // RAG-based retrieval for main training (reduced from 30)
 	MaxWarmupExercises     = 6  // random selection for warmup
-	MaxCooldownExercises   = 4  // random selection for cooldown
+	CooldownPerMuscle      = 2  // cooldown exercises per muscle group
 	MaxPromptFacts         = 5
 	MaxFactDistance         = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
 	MaxExerciseDistance     = 0.2 // Maximum cosine distance for exercise matching
-	WarmupCooldownMaxScore = 25  // max progression score for warmup/cooldown exercises
+	WarmupCooldownMaxScore = 30  // max progression score for warmup/cooldown exercises
 	MinPerMuscleExercises  = 2   // minimum exercises per muscle group after proficiency filtering
 
 	// hybrid search weights: vector similarity vs keyword relevance
@@ -424,24 +424,55 @@ func RetrieveWarmupExercises() ([]model.Exercise, error) {
 	return exercises, nil
 }
 
-// RetrieveCooldownExercises retrieves exercises for the cooldown phase via random selection.
-// Filters by mobility family with low progression scores, bodyweight exercises only.
-func RetrieveCooldownExercises() ([]model.Exercise, error) {
-	var exercises []model.Exercise
-	if err := database.Knowledge.
-		Where("exercises.progressions ? 'mobility'").
-		Where(fmt.Sprintf("(exercises.progressions->>'mobility')::float < %d", WarmupCooldownMaxScore)).
-		Where(`NOT EXISTS (
-			SELECT 1 FROM exercise_equipment
-			WHERE exercise_equipment.exercise_id = exercises.id
-		)`).
-		Order("RANDOM()").
-		Limit(MaxCooldownExercises).
-		Find(&exercises).
-		Error; err != nil {
-		return nil, fmt.Errorf("failed to query cooldown exercises: %w", err)
+// RetrieveCooldownExercises retrieves exercises for the cooldown phase, balanced across target muscles.
+// Picks CooldownPerMuscle random mobility exercises per muscle group, deduplicates.
+// Falls back to all muscles from DB when none provided.
+func RetrieveCooldownExercises(muscles []string) ([]model.Exercise, error) {
+	if len(muscles) == 0 {
+		var allMuscles []model.Muscle
+		if err := database.Knowledge.Find(&allMuscles).Error; err != nil {
+			return nil, fmt.Errorf("failed to get muscles: %w", err)
+		}
+		for _, m := range allMuscles {
+			muscles = append(muscles, m.ID)
+		}
 	}
-	return exercises, nil
+
+	var combined []model.Exercise
+	seen := make(map[string]bool)
+
+	for _, muscle := range muscles {
+		var exercises []model.Exercise
+		if err := database.Knowledge.
+			Where("exercises.muscles[1] = ?", muscle).
+			Where("exercises.progressions ? 'mobility'").
+			Where(fmt.Sprintf("(exercises.progressions->>'mobility')::float < %d", WarmupCooldownMaxScore)).
+			Where(`NOT EXISTS (
+				SELECT 1 FROM exercise_equipment
+				WHERE exercise_equipment.exercise_id = exercises.id
+			)`).
+			Order("RANDOM()").
+			Limit(CooldownPerMuscle).
+			Find(&exercises).
+			Error; err != nil {
+			log.Warn().Err(err).Str("muscle", muscle).Msg("failed to query cooldown exercises for muscle")
+			continue
+		}
+
+		for _, ex := range exercises {
+			if !seen[ex.ID] {
+				seen[ex.ID] = true
+				combined = append(combined, ex)
+			}
+		}
+	}
+
+	// shuffle to avoid muscle ordering bias
+	rand.Shuffle(len(combined), func(i, j int) {
+		combined[i], combined[j] = combined[j], combined[i]
+	})
+
+	return combined, nil
 }
 
 // RetrieveFavoriteExercises matches user's favorite exercise strings to canonical exercises via embeddings.

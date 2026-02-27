@@ -443,6 +443,16 @@ The platform is still calibrating this user's fitness level. Prioritize exercise
 //line llm/prompt/gen_training.qtpl:88
 			qw422016.E().S(exercise.ID)
 //line llm/prompt/gen_training.qtpl:88
+			if len(exercise.Muscles) > 0 {
+//line llm/prompt/gen_training.qtpl:88
+				qw422016.N().S(`[`)
+//line llm/prompt/gen_training.qtpl:88
+				qw422016.E().S(exercise.Muscles[0])
+//line llm/prompt/gen_training.qtpl:88
+				qw422016.N().S(`]`)
+//line llm/prompt/gen_training.qtpl:88
+			}
+//line llm/prompt/gen_training.qtpl:88
 			qw422016.N().S(`, `)
 //line llm/prompt/gen_training.qtpl:88
 		}

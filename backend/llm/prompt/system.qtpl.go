@@ -132,7 +132,7 @@ STRUCTURE:
 - You MUST generate exactly ONE warmup routine and exactly ONE cooldown routine. Never omit or duplicate.
 - warmup (5-10min): dynamic movements preparing muscles used in work phase. AVOID exercises targeting injured areas.
 - work: main training per methodology
-- cooldown (5min): static stretches for muscles worked. AVOID stretches aggravating injuries.
+- cooldown: static stretches for muscles worked. Use [primary_muscle] hints to cover ALL muscle groups present in the [COOLDOWN] list. AVOID stretches aggravating injuries.
 `)
 //line llm/prompt/system.qtpl:54
 	} else {

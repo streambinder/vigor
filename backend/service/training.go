@@ -179,7 +179,21 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	if err != nil {
 		return nil, err
 	}
-	cooldownExercises, err := rag.RetrieveCooldownExercises()
+
+	// resolve target muscles early: needed for cooldown retrieval and later validation
+	targetMuscles := muscles
+	if len(targetMuscles) == 0 {
+		var allMuscles []model.Muscle
+		if err := database.Knowledge.Find(&allMuscles).Error; err != nil {
+			return nil, err
+		}
+		targetMuscles = make([]string, len(allMuscles))
+		for i, m := range allMuscles {
+			targetMuscles[i] = m.ID
+		}
+	}
+
+	cooldownExercises, err := rag.RetrieveCooldownExercises(targetMuscles)
 	if err != nil {
 		return nil, err
 	}
@@ -270,15 +284,11 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		exerciseMuscles[ex.ID] = ex.Muscles
 	}
 
-	targetMuscles := muscles
-	if len(targetMuscles) == 0 {
-		var allMuscles []model.Muscle
-		if err := database.Knowledge.Find(&allMuscles).Error; err != nil {
-			return nil, err
-		}
-		targetMuscles = make([]string, len(allMuscles))
-		for i, m := range allMuscles {
-			targetMuscles[i] = m.ID
+	// map cooldown exercise ID → primary muscle for coverage validation
+	cooldownExerciseMuscles := make(map[string]string, len(cooldownExercises))
+	for _, ex := range cooldownExercises {
+		if len(ex.Muscles) > 0 {
+			cooldownExerciseMuscles[ex.ID] = ex.Muscles[0]
 		}
 	}
 
@@ -375,7 +385,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			actualMuscles = append(actualMuscles, muscle)
 		}
 
-		validationErr := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, weightedModifierIDs, !skipWarmupCooldown, duration, targetMuscles, actualMuscles)
+		validationErr := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, weightedModifierIDs, !skipWarmupCooldown, duration, targetMuscles, actualMuscles, cooldownExerciseMuscles)
 		if validationErr == nil {
 			break
 		}
