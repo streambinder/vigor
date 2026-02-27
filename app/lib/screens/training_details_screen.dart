@@ -394,46 +394,49 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         children: [
           Text(l10n.exercises, style: VigorTypography.label.copyWith(color: VigorColors.stone, fontWeight: FontWeight.w600)),
           const SizedBox(height: VigorSpacing.sm),
-          ...exercises.map((e) => Padding(
-            padding: const EdgeInsets.only(bottom: VigorSpacing.sm),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 6, right: VigorSpacing.sm),
-                  width: 5,
-                  height: 5,
-                  decoration: const BoxDecoration(color: VigorColors.stone, shape: BoxShape.circle),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(e.id, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
-                      if (e.rationale.isNotEmpty) ...[
-                        const SizedBox(height: VigorSpacing.xs),
-                        Wrap(
-                          spacing: VigorSpacing.xs,
-                          runSpacing: VigorSpacing.xs,
-                          children: e.rationale.entries.map((entry) {
-                            final accentColor = VigorColors.indigoAdaptive(context);
-                            return Container(
-                              padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: accentColor.withValues(alpha: 0.15),
-                                borderRadius: VigorRadius.radiusXs,
-                              ),
-                              child: Text('${entry.key}: ${entry.value}', style: VigorTypography.caption.copyWith(color: accentColor, fontSize: 10)),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ],
+          ...exercises.map((e) {
+            final rationaleEntries = e.rationale.toJson().entries.where((entry) => entry.value != '').toList();
+            return Padding(
+              padding: const EdgeInsets.only(bottom: VigorSpacing.sm),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 6, right: VigorSpacing.sm),
+                    width: 5,
+                    height: 5,
+                    decoration: const BoxDecoration(color: VigorColors.stone, shape: BoxShape.circle),
                   ),
-                ),
-              ],
-            ),
-          )),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(e.id, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+                        if (rationaleEntries.isNotEmpty) ...[
+                          const SizedBox(height: VigorSpacing.xs),
+                          Wrap(
+                            spacing: VigorSpacing.xs,
+                            runSpacing: VigorSpacing.xs,
+                            children: rationaleEntries.map((entry) {
+                              final accentColor = VigorColors.indigoAdaptive(context);
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: accentColor.withValues(alpha: 0.15),
+                                  borderRadius: VigorRadius.radiusXs,
+                                ),
+                                child: Text('${entry.key}: ${entry.value}', style: VigorTypography.caption.copyWith(color: accentColor, fontSize: 10)),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
         ],
       ),
     );

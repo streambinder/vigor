@@ -84,10 +84,23 @@ type ProgressionAdjustment struct {
 	Reason     string `json:"reason" prompt:"Why this adjustment was made (e.g. 'user marked too easy', 'user marked too hard', 'progressive overload')"`
 }
 
+// ExerciseRationale captures brief reasons per scoring category for an exercise choice.
+type ExerciseRationale struct {
+	Goal        string `json:"goal" prompt:"3-8 words"`
+	Muscle      string `json:"muscle" prompt:"3-8 words"`
+	Methodology string `json:"methodology" prompt:"3-8 words"`
+	Favorite    string `json:"favorite" prompt:"3-8 words"`
+	Equipment   string `json:"equipment" prompt:"3-8 words"`
+	Progression string `json:"progression" prompt:"3-8 words"`
+	Feedback    string `json:"feedback" prompt:"3-8 words"`
+	Variety     string `json:"variety" prompt:"3-8 words"`
+	Injury      string `json:"injury" prompt:"3-8 words"`
+}
+
 // ExerciseSelection captures an exercise choice with its rationale categories.
 type ExerciseSelection struct {
 	ID        string            `json:"id" prompt:"Exercise ID from list"`
-	Rationale map[string]string `json:"rationale" prompt:"Brief reason per category (3-8 words each);keys:goal,muscle,methodology,favorite,equipment,progression,feedback,variety,injury"`
+	Rationale ExerciseRationale `json:"rationale" prompt:"Brief reason per category (3-8 words each)"`
 }
 
 // TrainingReasoning captures the model's thought process before generating training structure.
