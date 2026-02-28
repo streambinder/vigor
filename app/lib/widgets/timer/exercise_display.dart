@@ -43,7 +43,7 @@ class ExerciseDisplay extends StatelessWidget {
             _buildExerciseImage(context, exercise, imageSize),
             const SizedBox(height: VigorSpacing.lg),
           ],
-          if (activity != null && (activity.reps > 0 || activity.weightKg > 0)) ...[
+          if (activity != null && (activity.reps > 0 || activity.weightKg > 0 || activity.modifiers.isNotEmpty)) ...[
             _buildRepsWeightChip(context, activity, isDark),
             const SizedBox(height: VigorSpacing.md),
           ],
@@ -126,6 +126,15 @@ class ExerciseDisplay extends StatelessWidget {
             const SizedBox(width: 4),
             Text(
               '${activity.weightKg} kg',
+              style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context)),
+            ),
+          ],
+          if (activity.modifiers.isNotEmpty) ...[
+            if (activity.reps > 0 || activity.weightKg > 0) const SizedBox(width: VigorSpacing.md),
+            const Icon(Icons.tune, size: 20, color: VigorColors.stone),
+            const SizedBox(width: 4),
+            Text(
+              activity.modifiers.join(' · '),
               style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context)),
             ),
           ],

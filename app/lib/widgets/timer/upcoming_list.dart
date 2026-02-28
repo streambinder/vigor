@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../design/tokens.dart';
 import '../../generated/app_localizations.dart';
+import '../../models/activity.dart';
 import '../../models/exercise.dart';
 import '../../timer/training_interval.dart';
 import '../../utils/exercise_modal.dart';
@@ -65,20 +66,57 @@ class _UpcomingItem extends StatelessWidget {
           _buildThumbnail(context, interval.exercise, isRest),
           const SizedBox(width: VigorSpacing.sm),
           Expanded(
-            child: Text(
-              name,
-              style: VigorTypography.body.copyWith(
-                fontWeight: isRest ? FontWeight.normal : FontWeight.w500,
-                color: isRest ? VigorColors.textMuted(context) : VigorColors.textPrimary(context),
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: VigorTypography.body.copyWith(
+                    fontWeight: isRest ? FontWeight.normal : FontWeight.w500,
+                    color: isRest ? VigorColors.textMuted(context) : VigorColors.textPrimary(context),
+                  ),
+                ),
+                if (!isRest && interval.activity != null && _hasDetails(interval.activity!)) ...[
+                  const SizedBox(height: VigorSpacing.xs),
+                  _buildActivityTags(interval.activity!),
+                ],
+              ],
             ),
           ),
-          Text(
-            '${interval.duration}s',
-            style: VigorTypography.data.copyWith(
-              color: VigorColors.textMuted(context),
-            ),
-          ),
+        ],
+      ),
+    );
+  }
+
+  bool _hasDetails(Activity activity) =>
+      activity.reps > 0 || activity.weightKg > 0 || activity.duration > 0 || activity.modifiers.isNotEmpty;
+
+  Widget _buildActivityTags(Activity activity) {
+    return Wrap(
+      spacing: VigorSpacing.xs,
+      runSpacing: VigorSpacing.xs,
+      children: [
+        if (activity.reps > 0) _buildTag(Icons.repeat, '${activity.reps}'),
+        if (activity.weightKg > 0) _buildTag(Icons.fitness_center, '${activity.weightKg}kg'),
+        if (activity.duration > 0) _buildTag(Icons.timer, '${activity.duration}s'),
+        if (activity.modifiers.isNotEmpty) _buildTag(Icons.tune, activity.modifiers.join(' · ')),
+      ],
+    );
+  }
+
+  Widget _buildTag(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+      decoration: BoxDecoration(
+        color: VigorColors.stone.withValues(alpha: 0.1),
+        borderRadius: VigorRadius.radiusSm,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 11, color: VigorColors.stone),
+          const SizedBox(width: VigorSpacing.xs),
+          Text(label, style: VigorTypography.data.copyWith(fontSize: 11, fontWeight: FontWeight.w600, color: VigorColors.stone)),
         ],
       ),
     );

@@ -132,7 +132,7 @@ class EmomDisplay extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: VigorSpacing.sm),
-          if (activity != null && activity.reps > 0) _buildRepsChip(context, activity, isDark),
+          if (activity != null && (activity.reps > 0 || activity.modifiers.isNotEmpty)) _buildRepsChip(context, activity, isDark),
         ],
 
         const SizedBox(height: VigorSpacing.lg),
@@ -165,17 +165,24 @@ class EmomDisplay extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.fitness_center, size: 20, color: VigorColors.stone),
-          const SizedBox(width: 4),
-          Text('${activity.reps} reps', style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context))),
+          if (activity.reps > 0) ...[
+            const Icon(Icons.fitness_center, size: 20, color: VigorColors.stone),
+            const SizedBox(width: 4),
+            Text('${activity.reps} reps', style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context))),
+          ],
           if (activity.weightKg > 0) ...[
-            const SizedBox(width: VigorSpacing.md),
+            if (activity.reps > 0) const SizedBox(width: VigorSpacing.md),
             const Icon(Icons.scale, size: 20, color: VigorColors.stone),
             const SizedBox(width: 4),
             Text('${activity.weightKg} kg', style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context))),
           ],
+          if (activity.modifiers.isNotEmpty) ...[
+            if (activity.reps > 0 || activity.weightKg > 0) const SizedBox(width: VigorSpacing.md),
+            const Icon(Icons.tune, size: 20, color: VigorColors.stone),
+            const SizedBox(width: 4),
+            Text(activity.modifiers.join(' · '), style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context))),
+          ],
         ],
-      ),
-    );
+      ),    );
   }
 }

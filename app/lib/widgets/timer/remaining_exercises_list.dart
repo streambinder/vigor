@@ -242,9 +242,12 @@ class _ExerciseItem extends StatelessWidget {
                     color: isRest ? VigorColors.textMuted(context) : VigorColors.textPrimary(context),
                   ),
                 ),
-                if (activity != null && activity.reps > 0)
+                if (activity != null && (activity.reps > 0 || activity.modifiers.isNotEmpty))
                   Text(
-                    '${activity.reps} reps${activity.weightKg > 0 ? ' • ${activity.weightKg} kg' : ''}',
+                    [
+                      if (activity.reps > 0) '${activity.reps} reps${activity.weightKg > 0 ? ' • ${activity.weightKg} kg' : ''}',
+                      if (activity.modifiers.isNotEmpty) activity.modifiers.join(' · '),
+                    ].join(' • '),
                     style: VigorTypography.caption.copyWith(color: VigorColors.textMuted(context)),
                   ),
               ],
