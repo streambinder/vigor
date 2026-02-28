@@ -485,19 +485,9 @@ func RetrieveFavoriteExercises(favorites []string) ([]model.Exercise, error) {
 		return nil, nil
 	}
 
-	// generate embeddings for each favorite
-	favoriteEmbeddings := make([][]float32, 0, len(favorites))
-	for _, fav := range favorites {
-		vec, err := embedding.GenVector(fav)
-		if err != nil {
-			log.Warn().Err(err).Str("favorite", fav).Msg("Failed to generate embedding for favorite exercise")
-			continue
-		}
-		favoriteEmbeddings = append(favoriteEmbeddings, vec)
-	}
-
-	if len(favoriteEmbeddings) == 0 {
-		return nil, nil
+	favoriteEmbeddings, err := embedding.GenVectors(favorites)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate favorite embeddings: %w", err)
 	}
 
 	// build dynamic OR clause for matching using cosine distance
