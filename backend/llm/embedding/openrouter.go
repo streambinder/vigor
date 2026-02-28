@@ -42,37 +42,48 @@ func init() {
 	}
 }
 
-func (provider *OpenRouter) vectorize(sequence string) ([]float32, error) {
+func (provider *OpenRouter) vectorizeBatch(sequences []string) ([][]float32, error) {
 	start := time.Now()
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
 
 	resp, err := provider.client.Embeddings.New(ctx, openai.EmbeddingNewParams{
 		Model:      provider.model,
-		Input:      openai.EmbeddingNewParamsInputUnion{OfString: openai.String(sequence)},
+		Input:      openai.EmbeddingNewParamsInputUnion{OfArrayOfStrings: sequences},
 		Dimensions: openai.Int(768),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("openrouter embedding (%s): %s", provider.model, err)
 	}
 
-	if len(resp.Data) == 0 || len(resp.Data[0].Embedding) == 0 {
-		return nil, fmt.Errorf("openrouter embedding (%s): empty response", provider.model)
+	if len(resp.Data) != len(sequences) {
+		return nil, fmt.Errorf("openrouter embedding (%s): expected %d results, got %d", provider.model, len(sequences), len(resp.Data))
 	}
 
-	// sdk returns float64, convert to float32 for pgvector
-	raw := resp.Data[0].Embedding
-	vector := make([]float32, len(raw))
-	for i, v := range raw {
-		vector[i] = float32(v)
+	// sdk returns float64, convert to float32 for pgvector.
+	// use Index field for correct ordering — API doesn't guarantee sequential order.
+	vectors := make([][]float32, len(sequences))
+	for _, d := range resp.Data {
+		if d.Index < 0 || int(d.Index) >= len(sequences) {
+			return nil, fmt.Errorf("openrouter embedding (%s): index %d out of range", provider.model, d.Index)
+		}
+		if len(d.Embedding) == 0 {
+			return nil, fmt.Errorf("openrouter embedding (%s): empty vector at index %d", provider.model, d.Index)
+		}
+		vec := make([]float32, len(d.Embedding))
+		for j, v := range d.Embedding {
+			vec[j] = float32(v)
+		}
+		vectors[d.Index] = vec
 	}
 
 	log.Info().
 		Str("provider", "openrouter").
 		Str("model", provider.model).
-		Int("vector_dim", len(vector)).
+		Int("batch_size", len(sequences)).
+		Int("vector_dim", len(vectors[0])).
 		Dur("latency", time.Since(start)).
-		Msg("Embedding generation completed")
+		Msg("Batch embedding completed")
 
-	return vector, nil
+	return vectors, nil
 }

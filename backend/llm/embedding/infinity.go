@@ -19,7 +19,7 @@ type Infinity struct {
 }
 
 type infinityRequest struct {
-	Input string `json:"input"`
+	Input any    `json:"input"`
 	Model string `json:"model,omitempty"`
 }
 
@@ -40,24 +40,15 @@ func init() {
 	}
 }
 
-func (provider *Infinity) vectorize(sequence string) ([]float32, error) {
+func (provider *Infinity) vectorizeBatch(sequences []string) ([][]float32, error) {
 	start := time.Now()
 
-	jsonPayload, err := json.Marshal(infinityRequest{Input: sequence})
+	jsonPayload, err := json.Marshal(infinityRequest{Input: sequences})
 	if err != nil {
 		return nil, fmt.Errorf("unable to create infinity payload: %s", err)
 	}
 
-	excerpt := sequence
-	if len(sequence) > 10 {
-		excerpt = fmt.Sprintf("%s...", sequence[:10])
-	}
 	endpoint := fmt.Sprintf("%s/embeddings", provider.uri)
-	log.Debug().
-		Str("endpoint", endpoint).
-		Str("sequence_preview", excerpt).
-		Msg("Sending embedding request to infinity")
-
 	request, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonPayload))
 	if err != nil {
 		return nil, fmt.Errorf("unable to create infinity request: %s", err)
@@ -88,18 +79,25 @@ func (provider *Infinity) vectorize(sequence string) ([]float32, error) {
 		return nil, fmt.Errorf("unable to unmarshal infinity response: %s", err)
 	}
 
-	if len(response.Data) == 0 || len(response.Data[0].Embedding) == 0 {
-		return nil, fmt.Errorf("empty embedding vector in infinity response")
+	if len(response.Data) != len(sequences) {
+		return nil, fmt.Errorf("infinity: expected %d results, got %d", len(sequences), len(response.Data))
 	}
 
-	vector := response.Data[0].Embedding
+	vectors := make([][]float32, len(response.Data))
+	for i, d := range response.Data {
+		if len(d.Embedding) == 0 {
+			return nil, fmt.Errorf("empty embedding vector at index %d in infinity response", i)
+		}
+		vectors[i] = d.Embedding
+	}
 
 	log.Info().
 		Str("provider", "infinity").
 		Str("endpoint", endpoint).
-		Int("vector_dim", len(vector)).
+		Int("batch_size", len(sequences)).
+		Int("vector_dim", len(vectors[0])).
 		Dur("latency", time.Since(start)).
-		Msg("Embedding generation completed")
+		Msg("Batch embedding completed")
 
-	return vector, nil
+	return vectors, nil
 }

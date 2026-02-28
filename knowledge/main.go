@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/google/uuid"
 	"github.com/pgvector/pgvector-go"
 	"github.com/streambinder/vigor/llm/embedding"
 	"github.com/streambinder/vigor/llm/rag"
@@ -99,24 +100,16 @@ func boostrapExercises(gormDB *gorm.DB) error {
 		return err
 	}
 
+	// first pass: insert all rows, collect texts for embedding
+	type embeddingEntry struct {
+		exerciseID string
+		text       string
+	}
+	var entries []embeddingEntry
+	var texts []string
+
 	for _, row := range rows {
 		if err := gormDB.Save(&row).Error; err != nil {
-			return err
-		}
-
-		text := rag.GenExercise(row)
-		vector, err := embedding.GenVector(text)
-		if err != nil {
-			return err
-		}
-
-		gormDB.Where("exercise_id = ?", row.ID).Delete(&model.ExerciseEmbedding{})
-		if err := gormDB.Create(
-			&model.ExerciseEmbedding{
-				ExerciseID: row.ID,
-				Text:       text,
-				Embedding:  pgvector.NewVector(vector)},
-		).Error; err != nil {
 			return err
 		}
 
@@ -128,6 +121,28 @@ func boostrapExercises(gormDB *gorm.DB) error {
 			if err := gormDB.Model(&row).Association("EquipmentList").Replace(&equipmentList); err != nil {
 				return err
 			}
+		}
+
+		text := rag.GenExercise(row)
+		entries = append(entries, embeddingEntry{exerciseID: row.ID, text: text})
+		texts = append(texts, text)
+	}
+
+	// batch embed all texts
+	vectors, err := embedding.GenVectors(texts)
+	if err != nil {
+		return err
+	}
+
+	// second pass: insert embeddings
+	for i, entry := range entries {
+		gormDB.Where("exercise_id = ?", entry.exerciseID).Delete(&model.ExerciseEmbedding{})
+		if err := gormDB.Create(&model.ExerciseEmbedding{
+			ExerciseID: entry.exerciseID,
+			Text:       entry.text,
+			Embedding:  pgvector.NewVector(vectors[i]),
+		}).Error; err != nil {
+			return err
 		}
 	}
 
@@ -145,6 +160,14 @@ func bootstrapEquipment(gormDB *gorm.DB) error {
 		return err
 	}
 
+	// first pass: insert all rows, collect alias texts
+	type embeddingEntry struct {
+		equipmentID string
+		text        string
+	}
+	var entries []embeddingEntry
+	var texts []string
+
 	for _, row := range rows {
 		if err := gormDB.Save(&row).Error; err != nil {
 			return err
@@ -158,18 +181,25 @@ func bootstrapEquipment(gormDB *gorm.DB) error {
 		}
 
 		for _, alias := range aliases {
-			vector, err := embedding.GenVector(alias)
-			if err != nil {
-				return err
-			}
-			if err := gormDB.Create(
-				&model.EquipmentEmbedding{
-					EquipmentID: row.ID,
-					Text:        alias,
-					Embedding:   pgvector.NewVector(vector),
-				}).Error; err != nil {
-				return err
-			}
+			entries = append(entries, embeddingEntry{equipmentID: row.ID, text: alias})
+			texts = append(texts, alias)
+		}
+	}
+
+	// batch embed all texts
+	vectors, err := embedding.GenVectors(texts)
+	if err != nil {
+		return err
+	}
+
+	// second pass: insert embeddings
+	for i, entry := range entries {
+		if err := gormDB.Create(&model.EquipmentEmbedding{
+			EquipmentID: entry.equipmentID,
+			Text:        entry.text,
+			Embedding:   pgvector.NewVector(vectors[i]),
+		}).Error; err != nil {
+			return err
 		}
 	}
 
@@ -187,6 +217,14 @@ func bootstrapGoals(gormDB *gorm.DB) error {
 		return err
 	}
 
+	// first pass: insert all rows, collect texts
+	type embeddingEntry struct {
+		goalID string
+		text   string
+	}
+	var entries []embeddingEntry
+	var texts []string
+
 	for _, row := range rows {
 		if err := gormDB.Save(&row).Error; err != nil {
 			return err
@@ -194,41 +232,36 @@ func bootstrapGoals(gormDB *gorm.DB) error {
 
 		gormDB.Where("goal_id = ?", row.ID).Delete(&model.GoalEmbedding{})
 
-		// generate embedding for description
 		if row.Description != "" {
-			vector, err := embedding.GenVector(row.Description)
-			if err != nil {
-				return err
-			}
-			if err := gormDB.Create(
-				&model.GoalEmbedding{
-					GoalID:    row.ID,
-					Text:      row.Description,
-					Embedding: pgvector.NewVector(vector),
-				}).Error; err != nil {
-				return err
-			}
+			entries = append(entries, embeddingEntry{goalID: row.ID, text: row.Description})
+			texts = append(texts, row.Description)
 		}
 
-		// generate embeddings for aliases
 		aliases := row.Aliases
 		if len(aliases) == 0 {
 			aliases = []string{row.ID}
 		}
 
 		for _, alias := range aliases {
-			vector, err := embedding.GenVector(alias)
-			if err != nil {
-				return err
-			}
-			if err := gormDB.Create(
-				&model.GoalEmbedding{
-					GoalID:    row.ID,
-					Text:      alias,
-					Embedding: pgvector.NewVector(vector),
-				}).Error; err != nil {
-				return err
-			}
+			entries = append(entries, embeddingEntry{goalID: row.ID, text: alias})
+			texts = append(texts, alias)
+		}
+	}
+
+	// batch embed all texts
+	vectors, err := embedding.GenVectors(texts)
+	if err != nil {
+		return err
+	}
+
+	// second pass: insert embeddings
+	for i, entry := range entries {
+		if err := gormDB.Create(&model.GoalEmbedding{
+			GoalID:    entry.goalID,
+			Text:      entry.text,
+			Embedding: pgvector.NewVector(vectors[i]),
+		}).Error; err != nil {
+			return err
 		}
 	}
 
@@ -246,6 +279,14 @@ func bootstrapModifiers(gormDB *gorm.DB) error {
 		return err
 	}
 
+	// first pass: insert all rows, collect alias texts
+	type embeddingEntry struct {
+		modifierID string
+		text       string
+	}
+	var entries []embeddingEntry
+	var texts []string
+
 	for _, row := range rows {
 		if err := gormDB.Save(&row).Error; err != nil {
 			return err
@@ -259,18 +300,25 @@ func bootstrapModifiers(gormDB *gorm.DB) error {
 		}
 
 		for _, alias := range aliases {
-			vector, err := embedding.GenVector(alias)
-			if err != nil {
-				return err
-			}
-			if err := gormDB.Create(
-				&model.ModifierEmbedding{
-					ModifierID: row.ID,
-					Text:       alias,
-					Embedding:  pgvector.NewVector(vector)},
-			).Error; err != nil {
-				return err
-			}
+			entries = append(entries, embeddingEntry{modifierID: row.ID, text: alias})
+			texts = append(texts, alias)
+		}
+	}
+
+	// batch embed all texts
+	vectors, err := embedding.GenVectors(texts)
+	if err != nil {
+		return err
+	}
+
+	// second pass: insert embeddings
+	for i, entry := range entries {
+		if err := gormDB.Create(&model.ModifierEmbedding{
+			ModifierID: entry.modifierID,
+			Text:       entry.text,
+			Embedding:  pgvector.NewVector(vectors[i]),
+		}).Error; err != nil {
+			return err
 		}
 	}
 
@@ -288,6 +336,14 @@ func boostrapFacts(gormDB *gorm.DB) error {
 		return err
 	}
 
+	// first pass: insert all rows, collect texts
+	type embeddingEntry struct {
+		factID uuid.UUID
+		text   string
+	}
+	var entries []embeddingEntry
+	var texts []string
+
 	for i := range rows {
 		row := &rows[i]
 		if err := gormDB.Where("content = ?", row.Content).FirstOrCreate(row).Error; err != nil {
@@ -295,17 +351,24 @@ func boostrapFacts(gormDB *gorm.DB) error {
 		}
 
 		text := rag.GenFact(*row)
-		vector, err := embedding.GenVector(text)
-		if err != nil {
-			return err
-		}
+		entries = append(entries, embeddingEntry{factID: row.ID, text: text})
+		texts = append(texts, text)
+	}
 
-		gormDB.Where("fact_id = ?", row.ID).Delete(&model.FactEmbedding{})
-		if err := gormDB.Create(
-			&model.FactEmbedding{FactID: row.ID,
-				Text:      text,
-				Embedding: pgvector.NewVector(vector)},
-		).Error; err != nil {
+	// batch embed all texts
+	vectors, err := embedding.GenVectors(texts)
+	if err != nil {
+		return err
+	}
+
+	// second pass: insert embeddings
+	for i, entry := range entries {
+		gormDB.Where("fact_id = ?", entry.factID).Delete(&model.FactEmbedding{})
+		if err := gormDB.Create(&model.FactEmbedding{
+			FactID:    entry.factID,
+			Text:      entry.text,
+			Embedding: pgvector.NewVector(vectors[i]),
+		}).Error; err != nil {
 			return err
 		}
 	}
