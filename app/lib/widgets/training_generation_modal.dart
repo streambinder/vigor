@@ -1154,52 +1154,60 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
   Widget _buildFormView() {
     final l10n = AppLocalizations.of(context);
-    return SingleChildScrollView(
-      padding: VigorSpacing.paddingLg,
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l10n.generateTraining,
-              style: VigorTypography.headline.copyWith(
-                fontSize: 24,
-                color: VigorColors.textPrimary(context),
+    return Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: SingleChildScrollView(
+              padding: VigorSpacing.paddingLg.copyWith(bottom: 0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.generateTraining,
+                    style: VigorTypography.headline.copyWith(
+                      fontSize: 24,
+                      color: VigorColors.textPrimary(context),
+                    ),
+                  ),
+                  const SizedBox(height: VigorSpacing.lg),
+
+                  // Duration slider with recommended range
+                  _buildDurationSlider(l10n),
+                  const SizedBox(height: VigorSpacing.md),
+
+                  // Equipment mode selection
+                  _buildEquipmentSection(),
+                  const SizedBox(height: VigorSpacing.md),
+
+                  // Partners section
+                  _buildPartnersSection(),
+                  const SizedBox(height: VigorSpacing.md),
+
+                  // Advanced settings collapsible
+                  _buildAdvancedHeader(),
+                  AnimatedSize(
+                    duration: VigorAnimation.medium,
+                    curve: VigorAnimation.defaultCurve,
+                    alignment: Alignment.topCenter,
+                    child: _advancedExpanded
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: VigorSpacing.md),
+                            child: _buildAdvancedContent(),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: VigorSpacing.lg),
-
-            // Duration slider with recommended range
-            _buildDurationSlider(l10n),
-            const SizedBox(height: VigorSpacing.md),
-
-            // Equipment mode selection
-            _buildEquipmentSection(),
-            const SizedBox(height: VigorSpacing.md),
-
-            // Partners section
-            _buildPartnersSection(),
-            const SizedBox(height: VigorSpacing.md),
-
-            // Advanced settings collapsible
-            _buildAdvancedHeader(),
-            AnimatedSize(
-              duration: VigorAnimation.medium,
-              curve: VigorAnimation.defaultCurve,
-              alignment: Alignment.topCenter,
-              child: _advancedExpanded
-                  ? Padding(
-                      padding: const EdgeInsets.only(top: VigorSpacing.md),
-                      child: _buildAdvancedContent(),
-                    )
-                  : const SizedBox.shrink(),
-            ),
-            const SizedBox(height: VigorSpacing.lg),
-
-            // Action buttons
-            Row(
+          ),
+          // pinned action buttons
+          Padding(
+            padding: VigorSpacing.paddingLg.copyWith(top: VigorSpacing.md),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 AdaptiveTextButton(
@@ -1213,8 +1221,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
