@@ -1,7 +1,9 @@
 package token
 
 import (
+	"crypto/rand"
 	"errors"
+	"math/big"
 	"os"
 	"time"
 
@@ -33,7 +35,7 @@ func GenerateTokens(db *gorm.DB, userID uuid.UUID) (string, string, error) {
 		return "", "", err
 	}
 
-	refreshStr := generateRandomString(64)
+	refreshStr := GenerateRandomString(64)
 	db.Create(&model.RefreshToken{
 		UserID:    userID,
 		Token:     refreshStr,
@@ -81,11 +83,18 @@ func VerifyAccessToken(tokenStr string) (*Claims, error) {
 	return claims, nil
 }
 
-func generateRandomString(n int) string {
+// GenerateRandomString produces a cryptographically random base62 string of length n.
+// uses rejection-free big.Int sampling to avoid modulo bias.
+func GenerateRandomString(n int) string {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	max := big.NewInt(int64(len(letters)))
 	b := make([]byte, n)
 	for i := range b {
-		b[i] = letters[time.Now().UnixNano()%int64(len(letters))]
+		idx, err := rand.Int(rand.Reader, max)
+		if err != nil {
+			panic("crypto/rand failed: " + err.Error())
+		}
+		b[i] = letters[idx.Int64()]
 	}
 	return string(b)
 }

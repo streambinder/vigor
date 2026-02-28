@@ -441,5 +441,19 @@
   "@nSelected": { "placeholders": { "count": { "type": "int" } } },
   "deleteSelectedTrainings": "¿Eliminar {count} entrenamientos?",
   "@deleteSelectedTrainings": { "placeholders": { "count": { "type": "int" } } },
-  "trainingsDeletedSuccessfully": "Entrenamientos eliminados correctamente"
+  "trainingsDeletedSuccessfully": "Entrenamientos eliminados correctamente",
+
+  "shareByLink": "Share Link",
+  "addToMyTrainings": "Add to My Trainings",
+  "sharedBy": "Shared by {name}",
+  "@sharedBy": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "linkCopied": "Link copied to clipboard",
+  "trainingNotFound": "Training not found",
+  "trainingAddedSuccessfully": "Training added successfully",
+  "failedToAddTraining": "Failed to add training",
+  "loginToAdd": "Log in to add this training"
 }

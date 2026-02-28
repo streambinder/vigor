@@ -335,4 +335,33 @@ class TrainingService {
       );
     }
   }
+
+  Future<ApiResponse<Map<String, String>>> shareTraining(String trainingId) async {
+    final response = await _apiService.post('/training/share/$trainingId');
+    if (response.isSuccess && response.data != null) {
+      try {
+        return ApiResponse.success({
+          'token': response.data!['token'] as String,
+          'url': response.data!['url'] as String,
+        }, response.statusCode);
+      } catch (e) {
+        return ApiResponse.error('Failed to parse share link', response.statusCode);
+      }
+    }
+    return ApiResponse.error(response.error ?? 'Failed to share training', response.statusCode);
+  }
+
+  Future<ApiResponse<Training>> claimSharedTraining(String token) async {
+    final response = await _apiService.post('/training/shared/$token/claim');
+    if (response.isSuccess && response.data != null) {
+      try {
+        final training = Training.fromJson(response.data!);
+        onDataChanged?.call();
+        return ApiResponse.success(training, response.statusCode);
+      } catch (e) {
+        return ApiResponse.error('Failed to parse claimed training', response.statusCode);
+      }
+    }
+    return ApiResponse.error(response.error ?? 'Failed to claim training', response.statusCode);
+  }
 }

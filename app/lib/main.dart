@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:provider/provider.dart';
+import 'package:app_links/app_links.dart';
 import 'design/tokens.dart';
 import 'design/vigor_theme.dart';
 import 'generated/app_localizations.dart';
@@ -10,6 +14,7 @@ import 'providers/theme_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/google_auth_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/shared_training_screen.dart';
 import 'services/secure_storage_service.dart';
 import 'services/preferences_service.dart';
 import 'services/service_locator.dart';
@@ -17,6 +22,7 @@ import 'services/app_logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  usePathUrlStrategy();
   AppLogger.info('vigor app starting');
 
   // Initialize secure storage and fail fast if not available
@@ -132,7 +138,16 @@ class VigorApp extends StatelessWidget {
           theme: VigorTheme.light,
           darkTheme: VigorTheme.dark,
           themeMode: themeProvider.themeMode,
-          home: const AuthenticationWrapper(),
+          onGenerateRoute: (settings) {
+            final uri = Uri.parse(settings.name ?? '/');
+            // /t/<token> → shared training screen
+            if (uri.pathSegments.length == 2 && uri.pathSegments[0] == 't') {
+              return MaterialPageRoute(
+                builder: (_) => SharedTrainingScreen(token: uri.pathSegments[1]),
+              );
+            }
+            return MaterialPageRoute(builder: (_) => const AuthenticationWrapper());
+          },
           debugShowCheckedModeBanner: false,
         ),
       ),
@@ -149,12 +164,45 @@ class AuthenticationWrapper extends StatefulWidget {
 }
 
 class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
+  late final AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
+
   @override
   void initState() {
     super.initState();
+    _appLinks = AppLinks();
+    _initDeepLinks();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthProvider>().initialize();
     });
+  }
+
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _initDeepLinks() async {
+    // cold start
+    try {
+      final initialLink = await _appLinks.getInitialLink();
+      if (initialLink != null) _handleDeepLink(initialLink);
+    } catch (_) {}
+
+    // warm start
+    _linkSubscription = _appLinks.uriLinkStream.listen(_handleDeepLink);
+  }
+
+  void _handleDeepLink(Uri uri) {
+    if (uri.pathSegments.length == 2 && uri.pathSegments[0] == 't') {
+      final token = uri.pathSegments[1];
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => SharedTrainingScreen(token: token)),
+        );
+      }
+    }
   }
 
   @override

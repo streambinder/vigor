@@ -1287,4 +1287,30 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get trainingsDeletedSuccessfully =>
       'Allenamenti eliminati con successo';
+
+  @override
+  String get shareByLink => 'Condividi Link';
+
+  @override
+  String get addToMyTrainings => 'Aggiungi ai Miei Allenamenti';
+
+  @override
+  String sharedBy(String name) {
+    return 'Condiviso da $name';
+  }
+
+  @override
+  String get linkCopied => 'Link copiato negli appunti';
+
+  @override
+  String get trainingNotFound => 'Allenamento non trovato';
+
+  @override
+  String get trainingAddedSuccessfully => 'Allenamento aggiunto con successo';
+
+  @override
+  String get failedToAddTraining => 'Impossibile aggiungere l\'allenamento';
+
+  @override
+  String get loginToAdd => 'Accedi per aggiungere questo allenamento';
 }

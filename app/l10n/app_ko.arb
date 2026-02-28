@@ -441,5 +441,19 @@
   "@nSelected": { "placeholders": { "count": { "type": "int" } } },
   "deleteSelectedTrainings": "{count}개 훈련을 삭제하시겠습니까?",
   "@deleteSelectedTrainings": { "placeholders": { "count": { "type": "int" } } },
-  "trainingsDeletedSuccessfully": "훈련이 삭제되었습니다"
+  "trainingsDeletedSuccessfully": "훈련이 삭제되었습니다",
+
+  "shareByLink": "Share Link",
+  "addToMyTrainings": "Add to My Trainings",
+  "sharedBy": "Shared by {name}",
+  "@sharedBy": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "linkCopied": "Link copied to clipboard",
+  "trainingNotFound": "Training not found",
+  "trainingAddedSuccessfully": "Training added successfully",
+  "failedToAddTraining": "Failed to add training",
+  "loginToAdd": "Log in to add this training"
 }

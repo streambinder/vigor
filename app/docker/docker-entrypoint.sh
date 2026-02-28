@@ -9,6 +9,7 @@ BUILD_TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 cat > /usr/share/nginx/html/config.js <<EOF
 window.ENV = {
   API_URL: "${API_URL:-http://localhost:8080}",
+  FRONTEND_URL: "${FRONTEND_URL:-http://localhost:8080}",
   BUILD_VERSION: "${BUILD_VERSION}",
   BUILD_TIMESTAMP: "${BUILD_TIMESTAMP}"
 };

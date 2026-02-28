@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "it.davidepucci.vigor",
+    "sha256_cert_fingerprints": ["84:03:60:6A:48:31:CA:C1:60:4D:92:23:B8:0D:8F:F8:4F:31:E3:08:BB:62:79:D7:BA:54:8C:64:57:38:E1:A4"]
+  }
+}]

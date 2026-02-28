@@ -2459,6 +2459,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Trainings deleted successfully'**
   String get trainingsDeletedSuccessfully;
+
+  /// No description provided for @shareByLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Link'**
+  String get shareByLink;
+
+  /// No description provided for @addToMyTrainings.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to My Trainings'**
+  String get addToMyTrainings;
+
+  /// No description provided for @sharedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared by {name}'**
+  String sharedBy(String name);
+
+  /// No description provided for @linkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied to clipboard'**
+  String get linkCopied;
+
+  /// No description provided for @trainingNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Training not found'**
+  String get trainingNotFound;
+
+  /// No description provided for @trainingAddedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Training added successfully'**
+  String get trainingAddedSuccessfully;
+
+  /// No description provided for @failedToAddTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add training'**
+  String get failedToAddTraining;
+
+  /// No description provided for @loginToAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to add this training'**
+  String get loginToAdd;
 }
 
 class _AppLocalizationsDelegate

@@ -42,6 +42,7 @@ func Init() *fiber.App {
 	initMovementFamily(app)
 	initMethodology(app)
 	initTraining(app)
+	initShare(app)
 	initActivity(app)
 	initProgress(app)
 	initReport(app)

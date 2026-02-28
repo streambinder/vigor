@@ -1248,4 +1248,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get trainingsDeletedSuccessfully => '训练已成功删除';
+
+  @override
+  String get shareByLink => 'Share Link';
+
+  @override
+  String get addToMyTrainings => 'Add to My Trainings';
+
+  @override
+  String sharedBy(String name) {
+    return 'Shared by $name';
+  }
+
+  @override
+  String get linkCopied => 'Link copied to clipboard';
+
+  @override
+  String get trainingNotFound => 'Training not found';
+
+  @override
+  String get trainingAddedSuccessfully => 'Training added successfully';
+
+  @override
+  String get failedToAddTraining => 'Failed to add training';
+
+  @override
+  String get loginToAdd => 'Log in to add this training';
 }

@@ -88,6 +88,7 @@ services:
       OPENROUTER_MODELS: openai/gpt-oss-20b:free
       GOOGLE_CLIENT_ID: 123123123-abcedfghilmnopqrstuvz.apps.googleusercontent.com
       METRICS_URL: /data/metrics.db
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
     volumes:
       - metrics_data:/data
     networks:

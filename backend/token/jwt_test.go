@@ -353,12 +353,12 @@ func TestVerifyAccessToken_InvalidClaims(t *testing.T) {
 
 func TestGenerateRandomString(t *testing.T) {
 	// Test that it generates strings of the correct length
-	str1 := generateRandomString(32)
+	str1 := GenerateRandomString(32)
 	if len(str1) != 32 {
 		t.Errorf("Expected string length 32, got: %d", len(str1))
 	}
 
-	str2 := generateRandomString(64)
+	str2 := GenerateRandomString(64)
 	if len(str2) != 64 {
 		t.Errorf("Expected string length 64, got: %d", len(str2))
 	}

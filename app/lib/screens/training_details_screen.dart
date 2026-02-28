@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
@@ -223,6 +225,28 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       } else {
         AdaptiveNotification.showError(context: context, message: l10n.failedToCloneTraining, rawError: response.error);
       }
+    }
+  }
+
+  Future<void> _shareByLink(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final response = await context.read<ServiceLocator>().trainingService.shareTraining(training.id);
+
+    if (!context.mounted) return;
+
+    if (response.isSuccess && response.data != null) {
+      final url = response.data!['url']!;
+      try {
+        await Share.share(url);
+      } catch (_) {
+        // fallback: copy to clipboard (e.g. web where share sheet unavailable)
+        await Clipboard.setData(ClipboardData(text: url));
+        if (context.mounted) {
+          AdaptiveNotification.show(context: context, message: l10n.linkCopied);
+        }
+      }
+    } else {
+      AdaptiveNotification.showError(context: context, message: l10n.failedToShareTraining, rawError: response.error);
     }
   }
 
@@ -868,6 +892,9 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             _cloneTraining(context);
             break;
           case 'share':
+            _shareByLink(context);
+            break;
+          case 'share_with_user':
             _showCopyTrainingDialog(context);
             break;
           case 'add_partner':
@@ -899,9 +926,19 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           value: 'share',
           child: Row(
             children: [
+              const Icon(Icons.link, size: 20, color: VigorColors.stone),
+              const SizedBox(width: VigorSpacing.sm),
+              Text(l10n.shareByLink, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'share_with_user',
+          child: Row(
+            children: [
               const Icon(Icons.share, size: 20, color: VigorColors.stone),
               const SizedBox(width: VigorSpacing.sm),
-              Text(l10n.share, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+              Text(l10n.shareWithUser, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
             ],
           ),
         ),
