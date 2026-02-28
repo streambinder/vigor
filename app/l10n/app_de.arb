@@ -121,6 +121,8 @@
   "favoriteWorkoutTypes": "Bevorzugte Trainingsarten",
   "workoutTypeStrength": "Kraft",
   "workoutTypeStrengthDescription": "Maximalkraft mit schweren Lasten und voller Erholung aufbauen",
+  "workoutTypeSupersets": "Supersätze",
+  "workoutTypeSupersetsDescription": "Gegenüberliegende Muskeln direkt nacheinander für zeiteffizientes Training",
   "workoutTypeCircuit": "Zirkel",
   "workoutTypeCircuitDescription": "Wechseln Sie zwischen Stationen mit minimaler Pause für Konditionierung",
   "workoutTypeEmom": "EMOM",

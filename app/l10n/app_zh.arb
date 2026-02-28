@@ -121,6 +121,8 @@
   "favoriteWorkoutTypes": "偏好的训练类型",
   "workoutTypeStrength": "力量",
   "workoutTypeStrengthDescription": "使用重负荷和充分休息来增强最大力量",
+  "workoutTypeSupersets": "超级组",
+  "workoutTypeSupersetsDescription": "交替训练对抗肌群，高效利用时间",
   "workoutTypeCircuit": "循环",
   "workoutTypeCircuitDescription": "在各站之间以最少休息进行体能训练",
   "workoutTypeEmom": "EMOM",

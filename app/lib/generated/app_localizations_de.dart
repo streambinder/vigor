@@ -345,6 +345,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Maximalkraft mit schweren Lasten und voller Erholung aufbauen';
 
   @override
+  String get workoutTypeSupersets => 'Supersätze';
+
+  @override
+  String get workoutTypeSupersetsDescription =>
+      'Gegenüberliegende Muskeln direkt nacheinander für zeiteffizientes Training';
+
+  @override
   String get workoutTypeCircuit => 'Zirkel';
 
   @override

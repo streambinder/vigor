@@ -335,6 +335,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get workoutTypeStrengthDescription => '使用重负荷和充分休息来增强最大力量';
 
   @override
+  String get workoutTypeSupersets => '超级组';
+
+  @override
+  String get workoutTypeSupersetsDescription => '交替训练对抗肌群，高效利用时间';
+
+  @override
   String get workoutTypeCircuit => '循环';
 
   @override

@@ -340,6 +340,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'Развивайте максимальную силу с тяжёлыми весами и полным отдыхом';
 
   @override
+  String get workoutTypeSupersets => 'Суперсеты';
+
+  @override
+  String get workoutTypeSupersetsDescription =>
+      'Чередуйте противоположные мышцы для эффективной тренировки';
+
+  @override
   String get workoutTypeCircuit => 'Круговая';
 
   @override

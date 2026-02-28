@@ -40,6 +40,7 @@ class KnowledgeLabels {
     return switch (id) {
       'auto' => l10n.methodologyAuto,
       'strength' => l10n.workoutTypeStrength,
+      'supersets' => l10n.workoutTypeSupersets,
       'circuit' => l10n.workoutTypeCircuit,
       'emom' => l10n.workoutTypeEmom,
       'amrap' => l10n.workoutTypeAmrap,
@@ -54,6 +55,7 @@ class KnowledgeLabels {
   static String methodologyDescription(String id, AppLocalizations l10n) {
     return switch (id) {
       'strength' => l10n.workoutTypeStrengthDescription,
+      'supersets' => l10n.workoutTypeSupersetsDescription,
       'circuit' => l10n.workoutTypeCircuitDescription,
       'emom' => l10n.workoutTypeEmomDescription,
       'amrap' => l10n.workoutTypeAmrapDescription,

@@ -335,6 +335,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get workoutTypeStrengthDescription => '무거운 중량과 충분한 휴식으로 최대 근력 구축';
 
   @override
+  String get workoutTypeSupersets => '슈퍼세트';
+
+  @override
+  String get workoutTypeSupersetsDescription => '대항근을 연속으로 훈련하여 시간 효율적인 운동';
+
+  @override
   String get workoutTypeCircuit => '서킷';
 
   @override

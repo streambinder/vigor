@@ -63,7 +63,7 @@ GOALS drive design:
 //line llm/prompt/system.qtpl:20
 	qw422016.N().S(`
 
-MUSCLE COVERAGE: Train ALL major groups each session (chest, back, shoulders, arms, core, legs). Goals set PRIMARY (high volume) vs SECONDARY (maintenance) emphasis. Only USER_REQUEST can exclude groups.
+MUSCLE COVERAGE: Default to training ALL major groups each session (chest, back, shoulders, arms, core, legs). Goals set PRIMARY (high volume) vs SECONDARY (maintenance) emphasis. USER_REQUEST can exclude groups. For advanced users or high-frequency programs (5-6 days/week), split-based coverage is acceptable if weekly volume per muscle is maintained.
 
 REASONING (complete before generating routines):
 1. Constraints: injuries, equipment limits, time bounds
@@ -158,7 +158,7 @@ ACTIVITY RULES:
 //line llm/prompt/system.qtpl:61
 	qw422016.N().S(`
 
-- rest: 30-60s hypertrophy, 2-3min strength, 10-20s circuits
+- rest: compounds 2-3min (hypertrophy) or 3-5min (strength), isolation 60-90s, circuits/HIIT 10-20s, supersets 60-90s between pairs
 
 `)
 //line llm/prompt/system.qtpl:65

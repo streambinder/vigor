@@ -121,6 +121,8 @@
   "favoriteWorkoutTypes": "好みのワークアウトタイプ",
   "workoutTypeStrength": "筋力",
   "workoutTypeStrengthDescription": "重い負荷と十分な休息で最大筋力を構築",
+  "workoutTypeSupersets": "スーパーセット",
+  "workoutTypeSupersetsDescription": "拮抗筋を連続して鍛え、時間効率の良いトレーニング",
   "workoutTypeCircuit": "サーキット",
   "workoutTypeCircuitDescription": "最小限の休息でステーション間を移動してコンディショニング",
   "workoutTypeEmom": "EMOM",

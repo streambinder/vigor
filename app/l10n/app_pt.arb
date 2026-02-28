@@ -121,6 +121,8 @@
   "favoriteWorkoutTypes": "Tipos de Treino Preferidos",
   "workoutTypeStrength": "Força",
   "workoutTypeStrengthDescription": "Desenvolva força máxima com cargas pesadas e descanso completo",
+  "workoutTypeSupersets": "Superséries",
+  "workoutTypeSupersetsDescription": "Combine músculos opostos em sequência para treino eficiente",
   "workoutTypeCircuit": "Circuito",
   "workoutTypeCircuitDescription": "Passe pelas estações com descanso mínimo para condicionamento",
   "workoutTypeEmom": "EMOM",

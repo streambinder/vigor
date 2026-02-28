@@ -335,6 +335,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get workoutTypeStrengthDescription => '重い負荷と十分な休息で最大筋力を構築';
 
   @override
+  String get workoutTypeSupersets => 'スーパーセット';
+
+  @override
+  String get workoutTypeSupersetsDescription => '拮抗筋を連続して鍛え、時間効率の良いトレーニング';
+
+  @override
   String get workoutTypeCircuit => 'サーキット';
 
   @override

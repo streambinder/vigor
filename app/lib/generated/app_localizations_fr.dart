@@ -343,6 +343,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Développez la force maximale avec des charges lourdes et repos complet';
 
   @override
+  String get workoutTypeSupersets => 'Supersets';
+
+  @override
+  String get workoutTypeSupersetsDescription =>
+      'Enchaînez muscles opposés pour un entraînement rapide et efficace';
+
+  @override
   String get workoutTypeCircuit => 'Circuit';
 
   @override

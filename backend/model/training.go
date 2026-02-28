@@ -129,7 +129,7 @@ type Training struct {
 
 	Name        string         `gorm:"not null" json:"name" prompt:"3-4 word action-oriented title (see NAME rules)"`
 	Description string         `gorm:"not null" json:"description" prompt:"-"`
-	Methodology string         `gorm:"column:methodology;not null" json:"methodology" prompt:"Methodology;enum:strength,circuit,emom,amrap,hiit,for_time,endurance,mobility"`
+	Methodology string         `gorm:"column:methodology;not null" json:"methodology" prompt:"Methodology;enum:strength,supersets,circuit,emom,amrap,hiit,for_time,endurance,mobility"`
 	Duration    int            `gorm:"not null" json:"duration" prompt:"Total seconds"`
 	Equipment   pq.StringArray `gorm:"type:text[]" json:"equipment" prompt:"-"`
 	Goals       pq.StringArray `gorm:"type:text[]" json:"goals" prompt:"-"`
@@ -307,7 +307,7 @@ func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineType
 
 	// validate methodology before duration check (CalculateDuration switches on it)
 	validMethodologies := map[string]bool{
-		"strength": true, "circuit": true, "emom": true, "amrap": true,
+		"strength": true, "supersets": true, "circuit": true, "emom": true, "amrap": true,
 		"hiit": true, "for_time": true, "endurance": true, "mobility": true,
 	}
 	if !validMethodologies[t.Methodology] {

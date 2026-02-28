@@ -2,7 +2,7 @@
   {
     "id": "strength",
     "name": "Strength Training",
-    "description": "Traditional lifting with sets × reps × weight. Focus on progressive overload and compound movements. Create multiple blocks as needed, each grouping exercises with similar rest needs. Repeats = sets per exercise. Activities MUST use reps (never duration). REST RULES: set each activity's rest based on exercise type — compound lifts (squat, deadlift, bench, overhead press, rows) → 120-180s; isolation/accessory (curls, lateral raises, tricep extensions, calf raises, flyes) → 60-90s.",
+    "description": "Traditional lifting with sets × reps × weight. Focus on progressive overload and compound movements. Create multiple blocks as needed, each grouping exercises with similar rest needs. Repeats = sets per exercise. Activities MUST use reps (never duration). REST RULES: set each activity's rest based on exercise type — compound lifts (squat, deadlift, bench, overhead press, rows) → 180-300s; isolation/accessory (curls, lateral raises, tricep extensions, calf raises, flyes) → 60-90s.",
     "work": {
       "horizontal_push": { "min": 25 },
       "horizontal_pull": { "min": 25 },
@@ -11,6 +11,20 @@
       "squat": { "min": 25 },
       "hinge": { "min": 25 },
       "core": { "min": 20 }
+    }
+  },
+  {
+    "id": "supersets",
+    "name": "Superset Training",
+    "description": "Pair agonist-antagonist or complementary exercises back-to-back with no rest between paired exercises and 60-90s rest between pairs. Cuts training time ~50% vs traditional sets with similar hypertrophy. Create blocks where each block contains exactly TWO exercises (the superset pair). Repeats = sets per pair. Activities MUST use reps (never duration). First activity in each block: rest = 0 (immediate transition to second exercise). Second activity: rest = 60-90s (recovery before next pair). Pair examples: chest/back, biceps/triceps, quads/hamstrings.",
+    "work": {
+      "horizontal_push": { "min": 25 },
+      "horizontal_pull": { "min": 25 },
+      "vertical_push": { "min": 20 },
+      "vertical_pull": { "min": 20 },
+      "squat": { "min": 20 },
+      "hinge": { "min": 20 },
+      "core": { "min": 15 }
     }
   },
   {
@@ -83,7 +97,7 @@
   {
     "id": "mobility",
     "name": "Mobility Training",
-    "description": "Flexibility and range of motion focus. Hold stretches, controlled movements, recovery-oriented. Hold stretches for 15-60s per position. Activities MUST use duration (never reps), no load.",
+    "description": "Flexibility and range of motion focus. Include static holds (15-60s), dynamic mobility drills, and PNF (contract-relax) sequences. PNF: use reps for contract-relax cycles (3-5 reps of 5-6s contract + relax). Static holds and dynamic drills use duration. Loaded stretching at light intensity is acceptable for combined flexibility and hypertrophy stimulus.",
     "work": {
       "mobility": { "min": 15, "max": 70 }
     }

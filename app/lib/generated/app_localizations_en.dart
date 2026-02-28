@@ -341,6 +341,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Build maximal force with heavy loads and full rest';
 
   @override
+  String get workoutTypeSupersets => 'Supersets';
+
+  @override
+  String get workoutTypeSupersetsDescription =>
+      'Pair opposing muscles back-to-back for time-efficient training';
+
+  @override
   String get workoutTypeCircuit => 'Circuit';
 
   @override

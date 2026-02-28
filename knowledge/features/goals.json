@@ -1,7 +1,7 @@
 [
   {
     "id": "hypertrophy",
-    "description": "Prioritize moderate rep ranges (6-12) with controlled tempo for time under tension. Rest 60-90s between sets. Emphasize compound movements as primary exercises with isolation finishers. High training volume (3-4 sets per exercise). Progressive overload is key—increase weight when feedback shows too_easy.",
+    "description": "Hypertrophy occurs across 6-30 reps when taken near failure; prioritize 6-12 for compounds, 12-20 for isolation. Rest 2-3 min for compounds (allows more volume), 60-90s for isolation. Emphasize compound movements as primary exercises with isolation finishers. High training volume (3-4 sets per exercise). Progressive overload is key—increase weight when feedback shows too_easy.",
     "aliases": [
       "hypertrophy",
       "muscle building",
@@ -47,7 +47,7 @@
   },
   {
     "id": "fat loss",
-    "description": "Favor high-energy-expenditure circuits and supersets. Shorter rest periods (30-45s) to maintain elevated heart rate. Include compound movements and metabolic finishers. Higher rep ranges (12-15+) with moderate weights. Balance resistance training with cardio elements for sustained caloric burn.",
+    "description": "Favor high-energy-expenditure circuits and supersets. Rest 30-45s for circuits/HIIT, 60-90s for supersets between pairs. Include compound movements and metabolic finishers. Higher rep ranges (12-15+) with moderate weights. Balance resistance training with cardio elements for sustained caloric burn.",
     "aliases": [
       "fat loss",
       "lose weight",
@@ -98,7 +98,7 @@
   },
   {
     "id": "toning",
-    "description": "Moderate resistance with higher reps (12-15) for muscular endurance and definition. Include both compound and isolation exercises for balanced muscle development. Moderate rest periods (45-60s). Emphasize controlled movement quality and mind-muscle connection over heavy loads.",
+    "description": "Moderate resistance with higher reps (12-15) for muscular endurance and definition. Include both compound and isolation exercises for balanced muscle development. Rest 60-90s for compounds, 30-45s for isolation and supersets. Emphasize controlled movement quality and mind-muscle connection over heavy loads.",
     "aliases": [
       "toning",
       "muscle tone",

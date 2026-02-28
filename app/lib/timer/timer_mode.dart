@@ -28,7 +28,7 @@ extension TimerModeExt on TimerMode {
       case 'for_time':
         return TimerMode.forTime;
       default:
-        // strength, circuit, hiit, mobility, endurance all use interval mode
+        // strength, supersets, circuit, hiit, mobility, endurance all use interval mode
         return TimerMode.interval;
     }
   }

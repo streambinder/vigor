@@ -225,7 +225,7 @@
     "reference": "https://doi.org/10.1007/s40279-014-0153-5",
     "area": "performance",
     "tags": ["cardio", "interference", "concurrent training"],
-    "content": "Separate cardio and strength by 6-8 hours to minimize interference. Low-intensity cardio produces minimal interference with strength gains."
+    "content": "Separating cardio and strength by 6+ hours can reduce interference, but the effect is less severe than traditionally believed. Low-intensity cardio and well-programmed HIIT produce minimal interference with strength and hypertrophy gains."
   },
   {
     "reference": "https://doi.org/10.1080/02701367.2010.10599691",
@@ -538,5 +538,281 @@
     "area": "programming",
     "tags": ["progression rate", "strength", "experience"],
     "content": "Strength progression: beginners add load weekly, intermediates every 2-4 weeks, advanced monthly or longer. Slower progression = longer career."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-021-01636-1",
+    "area": "programming",
+    "tags": ["periodization", "undulating", "linear", "strength"],
+    "content": "Undulating periodization produces superior strength gains over linear periodization in trained individuals. Hypertrophy shows no significant difference between periodization models when volume is equated."
+  },
+  {
+    "reference": "https://doi.org/10.7717/peerj.3695",
+    "area": "programming",
+    "tags": ["periodization", "undulating", "hypertrophy", "volume"],
+    "content": "Linear and daily undulating periodization produce similar hypertrophy outcomes when training volume is matched. The choice between models should be driven by strength goals and training experience rather than muscle growth targets."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-017-0734-y",
+    "area": "programming",
+    "tags": ["periodization", "strength", "meta-analysis"],
+    "content": "Periodized programs produce significantly greater maximal strength gains than non-periodized programs. Any form of systematic variation in volume and intensity outperforms fixed-scheme training."
+  },
+  {
+    "reference": "https://doi.org/10.1519/JSC.0000000000000712",
+    "area": "programming",
+    "tags": ["periodization", "linear", "undulating", "comparison"],
+    "content": "Both linear and undulating periodization are effective for strength development, with undulating models showing a slight edge. Beginners benefit equally from either approach; advanced lifters favor undulating schemes."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fphys.2024.1511961",
+    "area": "conditioning",
+    "tags": ["EMOM", "AMRAP", "metabolic", "interval"],
+    "content": "EMOM protocols produce lower heart rate, oxygen consumption, and blood lactate than rounds-for-time (AMRAP-style) formats at matched volume. EMOM is better suited for technique work; AMRAP drives greater cardiovascular and metabolic stress."
+  },
+  {
+    "reference": "https://doi.org/10.1519/JSC.0000000000000868",
+    "area": "conditioning",
+    "tags": ["work-rest-ratio", "HIIT", "interval", "endurance"],
+    "content": "Shorter rest intervals (30s) in HIIT favor endurance adaptations like time-trial performance. Longer rest intervals (80-120s) favor peak power development. Match work-to-rest ratio to training goal."
+  },
+  {
+    "reference": "https://doi.org/10.1519/JSC.0000000000005118",
+    "area": "conditioning",
+    "tags": ["Tabata", "HIIT", "endurance", "power"],
+    "content": "Tabata-protocol HIIT (20s work / 10s rest) improves both aerobic and anaerobic capacity simultaneously. Calisthenics-based Tabata produces strength and power gains alongside endurance benefits compared to running-based protocols."
+  },
+  {
+    "reference": "https://doi.org/10.1080/02640414.2018.1555906",
+    "area": "programming",
+    "tags": ["frequency", "hypertrophy", "volume-equated", "training-split"],
+    "content": "When total weekly volume is equated, training frequency does not significantly impact hypertrophy. Volume is the primary driver—individuals can distribute sets across sessions based on personal preference and schedule."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-024-02123-z",
+    "area": "programming",
+    "tags": ["volume", "older-adults", "hypertrophy", "strength"],
+    "content": "In older adults, moderate resistance training volumes optimize both lean body mass and lower-body strength. Excessive volume may not yield additional benefits and can impair recovery in aging populations."
+  },
+  {
+    "reference": "https://doi.org/10.1055/a-0905-3103",
+    "area": "recovery",
+    "tags": ["sleep", "recovery", "performance", "athletes"],
+    "content": "Sleep extension improves reaction time, sprint performance, and accuracy in athletes. Banking extra sleep before anticipated deprivation can buffer performance decrements. Prioritize 7-9 hours as the single highest-impact recovery tool."
+  },
+  {
+    "reference": "https://doi.org/10.1249/MSS.0000000000002137",
+    "area": "recovery",
+    "tags": ["sleep-deprivation", "muscle-recovery", "hormones"],
+    "content": "Total sleep deprivation after exercise does not delay muscle strength recovery but elevates cortisol, IL-6, and the cortisol-to-testosterone ratio. Hormonal disruption from poor sleep accumulates over time even if acute strength seems unaffected."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fphys.2025.1525726",
+    "area": "recovery",
+    "tags": ["cold-water-immersion", "DOMS", "recovery", "protocol"],
+    "content": "Optimal cold water immersion for soreness reduction is 10-15 minutes at 11-15°C. For neuromuscular recovery and reducing muscle damage markers, use 10-15 minutes at 5-10°C. Extreme cold or duration is not more effective."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fphys.2019.00376",
+    "area": "recovery",
+    "tags": ["foam-rolling", "recovery", "flexibility", "warm-up"],
+    "content": "Foam rolling produces small but relevant improvements in sprint performance (+0.7%) and flexibility (+4%). Its best evidence is as a warm-up tool. Recovery effects on strength and soreness are modest at best (~3-6%)."
+  },
+  {
+    "reference": "https://doi.org/10.1177/2165079916685568",
+    "area": "conditioning",
+    "tags": ["CrossFit", "functional-training", "injury-rate", "fitness"],
+    "content": "CrossFit injury rates are comparable to other high-intensity training modalities like Olympic weightlifting and powerlifting. Benefits include improved cardiovascular fitness and body composition. Pre-existing injuries are the main risk factor."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-025-02225-2",
+    "area": "performance",
+    "tags": ["specificity", "transfer", "strength", "sport-specific"],
+    "content": "Dynamic resistance training transfers to untrained isometric strength at roughly half the effect size. Strength gains are highly task-specific—train the movement pattern you need to improve, not just the muscles involved."
+  },
+  {
+    "reference": "https://doi.org/10.1080/02640414.2025.2567805",
+    "area": "technique",
+    "tags": ["lengthened-partials", "ROM", "hypertrophy"],
+    "content": "Lengthened partial range-of-motion repetitions produce comparable hypertrophy to full range of motion in trained individuals. Training at stretched muscle lengths is the key stimulus—achievable through either full ROM or lengthened partials."
+  },
+  {
+    "reference": "https://doi.org/10.7717/peerj.18904",
+    "area": "technique",
+    "tags": ["lengthened-partials", "hypertrophy", "resistance-training"],
+    "content": "Lengthened partial reps elicit similar muscle thickness and strength-endurance gains as full ROM in 8-week upper-body programs. Trainees can choose either approach without sacrificing hypertrophy outcomes."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s40798-023-00620-5",
+    "area": "technique",
+    "tags": ["drop-sets", "hypertrophy", "time-efficiency"],
+    "content": "Drop sets produce equivalent hypertrophy to traditional sets but in half to one-third the training time. They are an efficient strategy for time-constrained lifters, not a superior growth stimulus."
+  },
+  {
+    "reference": "https://doi.org/10.3390/jfmk11010080",
+    "area": "technique",
+    "tags": ["rest-pause", "advanced-techniques", "strength"],
+    "content": "Advanced methods (rest-pause, drop sets, cluster sets) show a small significant advantage for strength over traditional training but negligible hypertrophy benefit. Rest-pause shows the most promise for modest hypertrophic advantage among advanced techniques."
+  },
+  {
+    "reference": "https://doi.org/10.1111/cpf.12622",
+    "area": "mobility",
+    "tags": ["loaded-stretching", "hypertrophy", "flexibility"],
+    "content": "Passive low-intensity stretching does not induce muscle hypertrophy. Loaded stretching or stretching between resistance training sets may promote growth when sufficient tensile strain is applied. Animal models show sarcomere addition under loaded stretch."
+  },
+  {
+    "reference": "https://doi.org/10.52082/jssm.2024.156",
+    "area": "mobility",
+    "tags": ["warm-up", "static-stretching", "dynamic-stretching"],
+    "content": "Static stretching before training does not impair lower-limb power when kept under 60 seconds per muscle. Dynamic stretching and post-activation potentiation protocols are superior for enhancing explosive performance in warm-ups."
+  },
+  {
+    "reference": "https://doi.org/10.1249/MSS.0000000000002706",
+    "area": "psychology",
+    "tags": ["visualization", "motor-imagery", "detraining", "strength"],
+    "content": "Motor imagery practice during forced detraining maintains and even increases strength (2-9% gains) in professional athletes. Three mental rehearsal sessions per week can prevent performance losses during injury layoffs or travel."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s13102-025-01470-2",
+    "area": "psychology",
+    "tags": ["music", "performance", "motivation", "perceived-exertion"],
+    "content": "Preferred music reduces perceived exertion by ~0.36 SMD and increases motivation by ~0.85 SMD during training. Strength endurance, maximal strength, and power output all improve significantly. Speed and aerobic endurance show no benefit."
+  },
+  {
+    "reference": "https://doi.org/10.1051/jbio/2025011",
+    "area": "psychology",
+    "tags": ["mental-imagery", "mind-muscle", "strength"],
+    "content": "Mental imagery reinforces the mind-muscle connection and can enhance strength output in athletes. Combining physical and mental practice produces superior strength adaptations compared to physical practice alone."
+  },
+  {
+    "reference": "https://doi.org/10.1002/jor.24043",
+    "area": "injury",
+    "tags": ["ACL", "injury-prevention", "neuromuscular"],
+    "content": "Neuromuscular training programs reduce ACL injury risk by 50% overall and by 67% for non-contact ACL injuries in female athletes. Programs should include plyometrics, balance, and strength components for maximum protective effect."
+  },
+  {
+    "reference": "https://pubmed.ncbi.nlm.nih.gov/34875981/",
+    "area": "injury",
+    "tags": ["spine", "deadlift", "lumbar", "biomechanics"],
+    "content": "Heavy deadlifts produce spinal compressive loads of 5-18 kN and shear forces of 1.3-3.2 kN. These exceed occupational safety thresholds. Proper bracing, progressive loading, and avoiding excessive fatigue are critical for spine health."
+  },
+  {
+    "reference": "https://doi.org/10.3390/healthcare10061129",
+    "area": "physiology",
+    "tags": ["bone-density", "aging", "resistance-training", "osteoporosis"],
+    "content": "Resistance training in older adults produces modest bone density improvements at the hip (+0.64%) and spine (+0.62%) over 12-52 weeks. The primary benefit is prevention of bone loss rather than significant bone building."
+  },
+  {
+    "reference": "https://doi.org/10.1002/jcsm.70162",
+    "area": "physiology",
+    "tags": ["sarcopenia", "older-adults", "resistance-training"],
+    "content": "Resistance training is the most effective intervention for improving muscle mass and function in sarcopenic older adults. Training 2-3 times per week at moderate-to-high intensity produces the most consistent outcomes."
+  },
+  {
+    "reference": "https://doi.org/10.1249/MSS.0000000000002773",
+    "area": "performance",
+    "tags": ["circadian", "time-of-day", "strength", "power"],
+    "content": "Anaerobic power and jump height peak between 1-8 PM, with the strongest effect in Wingate power output (ES 0.73). Strength peaks between 2-9 PM. Endurance shows minimal diurnal variation. Schedule max-effort sessions in the afternoon when possible."
+  },
+  {
+    "reference": "https://doi.org/10.1080/07420528.2019.1567524",
+    "area": "performance",
+    "tags": ["time-of-day", "hypertrophy", "strength", "circadian"],
+    "content": "Training consistently at the same time of day produces the best adaptations regardless of morning or evening scheduling. If forced to choose, evening training shows a slight edge for strength and hypertrophy due to circadian hormone profiles."
+  },
+  {
+    "reference": "https://doi.org/10.1016/j.jbmt.2025.08.003",
+    "area": "nutrition",
+    "tags": ["fasted-training", "fed-training", "body-composition"],
+    "content": "Fasted vs fed resistance training produces similar effects on muscle mass, hypertrophy, and strength. Fasted training may slightly favor fat loss. Meal timing around training is less critical than total daily intake for body composition."
+  },
+  {
+    "reference": "https://doi.org/10.1152/japplphysiol.00642.2025",
+    "area": "programming",
+    "tags": ["concurrent-training", "interference", "aerobic", "hypertrophy"],
+    "content": "Concurrent long-interval HIIT and resistance training does not impair muscle protein synthesis or hypertrophy over 16 weeks. The interference effect is less severe than traditionally believed when HIIT is properly programmed with adequate recovery."
+  },
+  {
+    "reference": "https://doi.org/10.1097/MD.0000000000041055",
+    "area": "programming",
+    "tags": ["concurrent-training", "interference", "strength"],
+    "content": "The interference effect in concurrent training depends on training status, session order, and modality—not on combining cardio and strength per se. Separating sessions by 6+ hours and prioritizing the primary goal first minimizes interference."
+  },
+  {
+    "reference": "https://doi.org/10.1016/j.jesf.2023.09.001",
+    "area": "performance",
+    "tags": ["altitude", "hypoxic-training", "VO2max", "endurance"],
+    "content": "All hypoxic training paradigms improve VO2max, with effect sizes ranging from 1.45 to 7.10. Intermittent hypoxia interval training is most effective for athletes; intermittent hypoxic training works best for non-athletes."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s40798-022-00421-2",
+    "area": "recovery",
+    "tags": ["vibration-foam-roller", "recovery", "flexibility"],
+    "content": "Vibration foam rollers show small additional benefits over standard foam rollers for flexibility and pain reduction. The vibration component does not significantly improve strength or power recovery beyond regular foam rolling."
+  },
+  {
+    "reference": "https://doi.org/10.1097/MD.0000000000046781",
+    "area": "recovery",
+    "tags": ["cold-water-immersion", "cryotherapy", "DOMS"],
+    "content": "Cold water immersion and whole-body cryotherapy both reduce DOMS and improve jump performance recovery after strenuous exercise. CWI shows a slight edge for soreness reduction; cryotherapy is marginally better for functional recovery."
+  },
+  {
+    "reference": "https://doi.org/10.3390/ijerph20021439",
+    "area": "mobility",
+    "tags": ["PNF", "foam-rolling", "hamstring", "flexibility"],
+    "content": "PNF stretching produces greater acute hamstring flexibility gains than foam rolling in amateur athletes. For maximum ROM improvements, PNF (contract-relax) remains the gold standard stretching technique, superior to static and dynamic methods."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s12889-020-09355-4",
+    "area": "programming",
+    "tags": ["calisthenics", "bodyweight", "progressive-overload"],
+    "content": "Daily bodyweight calisthenics programs of just a few minutes can produce measurable strength adaptations when progressively overloaded through leverage changes, tempo manipulation, and unilateral variations. Consistency matters more than session duration."
+  },
+  {
+    "reference": "https://doi.org/10.1080/02701367.2024.2410394",
+    "area": "conditioning",
+    "tags": ["calisthenics", "EPOC", "fat-oxidation", "bodyweight"],
+    "content": "Calisthenics-based training produces greater excess post-exercise oxygen consumption and fat oxidation compared to steady-state cardio at matched oxygen consumption. Bodyweight circuits are an effective metabolic conditioning tool."
+  },
+  {
+    "reference": "https://doi.org/10.7717/peerj.14412",
+    "area": "psychology",
+    "tags": ["motor-imagery", "muscle-contraction", "visualization"],
+    "content": "Motor imagery training improves skeletal muscle contractile properties even without physical movement. Regular mental rehearsal of exercises enhances neuromuscular efficiency, making it a viable supplement to physical training."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fphys.2025.1617104",
+    "area": "performance",
+    "tags": ["core-training", "upper-body", "power", "sport-specific"],
+    "content": "Heavy-resistance core training transfers to improved upper-body strength and power output in junior athletes. Core stability is a force transmission link—weak core limits extremity power expression regardless of limb strength."
+  },
+  {
+    "reference": "https://doi.org/10.1016/j.ejrad.2019.01.033",
+    "area": "injury",
+    "tags": ["knee-health", "patellar", "ACL", "prevention"],
+    "content": "Patellar alignment and trochlear morphology influence long-term knee joint health after ACL reconstruction. Targeted VMO strengthening and balanced quad/hamstring ratios help preserve patellofemoral joint integrity."
+  },
+  {
+    "reference": "https://doi.org/10.1136/bjsports-2022-105496",
+    "area": "injury",
+    "tags": ["knee", "osteoarthritis", "injury", "prevention"],
+    "content": "Traumatic knee injury significantly increases lifetime osteoarthritis risk. Meniscal and ACL injuries carry the highest risk. Prehabilitation through neuromuscular training and avoiding excessive joint loading during early rehabilitation reduces long-term joint degeneration."
+  },
+  {
+    "reference": "https://doi.org/10.1519/JSC.0b013e31827de07d",
+    "area": "technique",
+    "tags": ["valsalva", "bracing", "intra-abdominal-pressure"],
+    "content": "The Valsalva maneuver significantly increases intra-abdominal pressure and spinal stability during heavy lifts. It is not contraindicated in healthy trained individuals. Proper bracing technique is essential for spine protection under heavy loads."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fphys.2025.1560453",
+    "area": "conditioning",
+    "tags": ["HIIT", "Tabata", "metabolic", "obesity"],
+    "content": "High-intensity Tabata-style training modulates hepatokines and metabolic markers more effectively than moderate-intensity continuous training in individuals with obesity. Short intense protocols drive systemic metabolic improvements beyond what steady-state achieves."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-023-01879-0",
+    "area": "performance",
+    "tags": ["morning-training", "evening-training", "metabolic"],
+    "content": "Morning exercise produces greater improvements in fat oxidation and insulin sensitivity. Evening exercise favors strength and power output due to higher core temperature and circadian hormone peaks. Choose training time based on primary goal."
   }
 ]

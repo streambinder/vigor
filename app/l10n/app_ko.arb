@@ -121,6 +121,8 @@
   "favoriteWorkoutTypes": "선호하는 운동 유형",
   "workoutTypeStrength": "근력",
   "workoutTypeStrengthDescription": "무거운 중량과 충분한 휴식으로 최대 근력 구축",
+  "workoutTypeSupersets": "슈퍼세트",
+  "workoutTypeSupersetsDescription": "대항근을 연속으로 훈련하여 시간 효율적인 운동",
   "workoutTypeCircuit": "서킷",
   "workoutTypeCircuitDescription": "최소한의 휴식으로 스테이션 간 이동하며 컨디셔닝",
   "workoutTypeEmom": "EMOM",

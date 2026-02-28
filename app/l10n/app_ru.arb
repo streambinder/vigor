@@ -121,6 +121,8 @@
   "favoriteWorkoutTypes": "Предпочитаемые Типы Тренировок",
   "workoutTypeStrength": "Сила",
   "workoutTypeStrengthDescription": "Развивайте максимальную силу с тяжёлыми весами и полным отдыхом",
+  "workoutTypeSupersets": "Суперсеты",
+  "workoutTypeSupersetsDescription": "Чередуйте противоположные мышцы для эффективной тренировки",
   "workoutTypeCircuit": "Круговая",
   "workoutTypeCircuitDescription": "Переходите между станциями с минимальным отдыхом для кондиционирования",
   "workoutTypeEmom": "EMOM",

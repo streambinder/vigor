@@ -738,6 +738,18 @@ abstract class AppLocalizations {
   /// **'Build maximal force with heavy loads and full rest'**
   String get workoutTypeStrengthDescription;
 
+  /// No description provided for @workoutTypeSupersets.
+  ///
+  /// In en, this message translates to:
+  /// **'Supersets'**
+  String get workoutTypeSupersets;
+
+  /// No description provided for @workoutTypeSupersetsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Pair opposing muscles back-to-back for time-efficient training'**
+  String get workoutTypeSupersetsDescription;
+
   /// No description provided for @workoutTypeCircuit.
   ///
   /// In en, this message translates to:

@@ -156,6 +156,8 @@
   "favoriteWorkoutTypes": "Preferred Workout Types",
   "workoutTypeStrength": "Strength",
   "workoutTypeStrengthDescription": "Build maximal force with heavy loads and full rest",
+  "workoutTypeSupersets": "Supersets",
+  "workoutTypeSupersetsDescription": "Pair opposing muscles back-to-back for time-efficient training",
   "workoutTypeCircuit": "Circuit",
   "workoutTypeCircuitDescription": "Move through stations with minimal rest for conditioning",
   "workoutTypeEmom": "EMOM",
