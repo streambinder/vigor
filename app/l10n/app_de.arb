@@ -346,7 +346,9 @@
   "warmupCooldown": "Aufwärmen und Abkühlen",
 
   "timer": "Timer",
-  "intervalJingle": "Ton bei Intervallende",
+  "intervalJingle": "Pfeife bei Intervallwechsel",
+  "duckOtherAudio": "Andere Audiowiedergabe leiser",
+  "duckOtherAudioDescription": "Reduziert die Lautstärke von Musik und anderen Apps während des Pfiffs",
 
   "goalHypertrophy": "Muskelaufbau",
   "goalHypertrophyDescription": "Baue Muskelmasse mit gezieltem Krafttraining auf",

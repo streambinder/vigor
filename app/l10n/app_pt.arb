@@ -346,7 +346,9 @@
   "warmupCooldown": "Aquecimento e arrefecimento",
 
   "timer": "Temporizador",
-  "intervalJingle": "Som ao completar intervalo",
+  "intervalJingle": "Apito na troca de intervalo",
+  "duckOtherAudio": "Baixar outro áudio",
+  "duckOtherAudioDescription": "Reduz o volume de música e outros apps durante o apito",
 
   "goalHypertrophy": "Hipertrofia",
   "goalHypertrophyDescription": "Aumente a massa muscular com treino de resistência",

@@ -305,7 +305,7 @@ class EmomController extends TimerController {
 
       if (_secondsInMinute > 0) {
         _secondsInMinute--;
-        shouldPlayCountdownJingle = _hasStarted && _secondsInMinute >= 1 && _secondsInMinute <= 3;
+        shouldPlayCountdownJingle = _hasStarted && _secondsInMinute == 3;
         notifyListeners();
       } else {
         timer.cancel();

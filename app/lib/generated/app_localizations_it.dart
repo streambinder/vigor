@@ -1007,7 +1007,14 @@ class AppLocalizationsIt extends AppLocalizations {
   String get timer => 'Timer';
 
   @override
-  String get intervalJingle => 'Suono a fine intervallo';
+  String get intervalJingle => 'Fischietto al cambio intervallo';
+
+  @override
+  String get duckOtherAudio => 'Abbassa altro audio';
+
+  @override
+  String get duckOtherAudioDescription =>
+      'Riduce il volume della musica e altre app durante il fischietto';
 
   @override
   String get goalHypertrophy => 'Massa Muscolare';

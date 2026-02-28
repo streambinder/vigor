@@ -346,7 +346,9 @@
   "warmupCooldown": "워밍업 및 쿨다운",
 
   "timer": "타이머",
-  "intervalJingle": "인터벌 완료 시 소리",
+  "intervalJingle": "인터벌 전환 시 호루라기",
+  "duckOtherAudio": "다른 오디오 줄이기",
+  "duckOtherAudioDescription": "호루라기 중 음악 및 다른 앱의 볼륨을 줄입니다",
 
   "goalHypertrophy": "근육 증가",
   "goalHypertrophyDescription": "타겟 저항 훈련으로 근육량 증가",

@@ -346,7 +346,9 @@
   "warmupCooldown": "热身和放松",
 
   "timer": "计时器",
-  "intervalJingle": "间隔完成时播放提示音",
+  "intervalJingle": "间隔切换时吹哨",
+  "duckOtherAudio": "降低其他音频",
+  "duckOtherAudioDescription": "吹哨时降低音乐和其他应用的音量",
 
   "goalHypertrophy": "增肌",
   "goalHypertrophyDescription": "通过针对性力量训练增加肌肉量",

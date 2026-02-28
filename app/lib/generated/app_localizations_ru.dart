@@ -996,7 +996,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get timer => 'Таймер';
 
   @override
-  String get intervalJingle => 'Звук при завершении интервала';
+  String get intervalJingle => 'Свисток при смене интервала';
+
+  @override
+  String get duckOtherAudio => 'Приглушить другое аудио';
+
+  @override
+  String get duckOtherAudioDescription =>
+      'Уменьшает громкость музыки и других приложений во время свистка';
 
   @override
   String get goalHypertrophy => 'Набор массы';

@@ -997,7 +997,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timer => 'Timer';
 
   @override
-  String get intervalJingle => 'Jingle at interval completion';
+  String get intervalJingle => 'Whistle at interval change';
+
+  @override
+  String get duckOtherAudio => 'Lower other audio';
+
+  @override
+  String get duckOtherAudioDescription =>
+      'Reduce volume of music and other apps during whistle';
 
   @override
   String get goalHypertrophy => 'Muscle Building';

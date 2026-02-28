@@ -1007,7 +1007,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get timer => 'Minuteur';
 
   @override
-  String get intervalJingle => 'Son à la fin d\'intervalle';
+  String get intervalJingle => 'Sifflet au changement d\'intervalle';
+
+  @override
+  String get duckOtherAudio => 'Baisser l\'autre audio';
+
+  @override
+  String get duckOtherAudioDescription =>
+      'Réduit le volume de la musique et des autres apps pendant le sifflet';
 
   @override
   String get goalHypertrophy => 'Prise de Masse';

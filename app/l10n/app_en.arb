@@ -494,7 +494,9 @@
   "warmupCooldown": "Warmup and cooldown",
 
   "timer": "Timer",
-  "intervalJingle": "Jingle at interval completion",
+  "intervalJingle": "Whistle at interval change",
+  "duckOtherAudio": "Lower other audio",
+  "duckOtherAudioDescription": "Reduce volume of music and other apps during whistle",
 
   "goalHypertrophy": "Muscle Building",
   "goalHypertrophyDescription": "Build muscle size with targeted resistance training",

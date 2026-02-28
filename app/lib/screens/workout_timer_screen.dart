@@ -62,7 +62,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
       widget.training.routines,
       widget.training.methodology,
     );
-    _audioService.initialize();
+    _initializeAudio();
     _startCurrentSegment();
   }
 
@@ -135,28 +135,25 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
     if (_controller?.isCompleted == true) {
       _accumulatedElapsedSeconds += _controller?.elapsedSeconds ?? 0;
       _captureMethodologyStats();
-      _playJingleIfEnabled();
       _advanceToNextSegment();
       return;
     }
 
-    // play countdown jingle for last 3 seconds of interval
+    // play countdown whistle for last 3 seconds of interval
+    // this IS the referee whistle pattern: short at 3s, short at 2s, long at 1s
     if (_controller?.shouldPlayCountdownJingle == true) {
-      _playJingleIfEnabled();
+      _playWhistleIfEnabled();
       _controller?.shouldPlayCountdownJingle = false;
     }
 
-    // detect interval transition by comparing stable keys
+    // detect interval transition — reset skip flag but don't play extra sound,
+    // the 3/2/1 countdown whistles already signal the transition
     final currentInterval = _controller?.currentInterval;
     final currentKey = _intervalKey(currentInterval);
     if (_controller?.hasStarted == true &&
         currentKey != null &&
         _previousIntervalKey != null &&
         currentKey != _previousIntervalKey) {
-      // only play jingle on natural timer transitions, not skips
-      if (_controller?.wasSkipped != true) {
-        _playJingleIfEnabled();
-      }
       _controller?.wasSkipped = false;
     }
     _previousIntervalKey = currentKey;
@@ -199,9 +196,15 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
     return '${interval.type}:${interval.activityNumber}:${interval.blockNumber}:${interval.routineNumber}';
   }
 
-  void _playJingleIfEnabled() {
+  Future<void> _initializeAudio() async {
+    await _audioService.initialize();
+    final prefs = context.read<PreferencesService>();
+    await _audioService.setDuckOtherAudio(prefs.duckOtherAudio);
+  }
+
+  void _playWhistleIfEnabled() {
     if (context.read<PreferencesService>().intervalJingle) {
-      _audioService.playJingle();
+      _audioService.playWhistle();
     }
   }
 

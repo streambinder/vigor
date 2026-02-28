@@ -980,7 +980,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get timer => '计时器';
 
   @override
-  String get intervalJingle => '间隔完成时播放提示音';
+  String get intervalJingle => '间隔切换时吹哨';
+
+  @override
+  String get duckOtherAudio => '降低其他音频';
+
+  @override
+  String get duckOtherAudioDescription => '吹哨时降低音乐和其他应用的音量';
 
   @override
   String get goalHypertrophy => '增肌';

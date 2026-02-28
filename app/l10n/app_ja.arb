@@ -346,7 +346,9 @@
   "warmupCooldown": "ウォームアップとクールダウン",
 
   "timer": "タイマー",
-  "intervalJingle": "インターバル完了時にサウンド",
+  "intervalJingle": "インターバル切替時にホイッスル",
+  "duckOtherAudio": "他のオーディオを下げる",
+  "duckOtherAudioDescription": "ホイッスル中に音楽や他のアプリの音量を下げます",
 
   "goalHypertrophy": "筋肥大",
   "goalHypertrophyDescription": "ターゲットを絞った筋トレで筋肉量を増やす",

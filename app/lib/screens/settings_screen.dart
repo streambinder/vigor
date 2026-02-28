@@ -16,6 +16,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   late int _defaultDuration;
   late bool _intervalJingle;
+  late bool _duckOtherAudio;
   late bool _warmupCooldown;
   late bool _useRecommendedDuration;
 
@@ -25,6 +26,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final prefs = context.read<PreferencesService>();
     _defaultDuration = prefs.defaultDuration;
     _intervalJingle = prefs.intervalJingle;
+    _duckOtherAudio = prefs.duckOtherAudio;
     _warmupCooldown = prefs.warmupCooldown;
     _useRecommendedDuration = prefs.useRecommendedDuration;
   }
@@ -152,14 +154,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
             color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
             borderRadius: VigorRadius.radiusMd,
           ),
-          child: SwitchListTile(
-            title: Text(l10n.intervalJingle, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
-            value: _intervalJingle,
-            activeColor: VigorColors.indigo,
-            onChanged: (value) {
-              setState(() => _intervalJingle = value);
-              context.read<PreferencesService>().setIntervalJingle(value);
-            },
+          child: Column(
+            children: [
+              SwitchListTile(
+                title: Text(l10n.intervalJingle, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+                value: _intervalJingle,
+                activeColor: VigorColors.indigo,
+                onChanged: (value) {
+                  setState(() => _intervalJingle = value);
+                  context.read<PreferencesService>().setIntervalJingle(value);
+                },
+              ),
+              Divider(height: 1, color: VigorColors.border(context)),
+              IgnorePointer(
+                ignoring: !_intervalJingle,
+                child: AnimatedOpacity(
+                  opacity: _intervalJingle ? 1.0 : 0.3,
+                  duration: VigorAnimation.fast,
+                  child: SwitchListTile(
+                    title: Text(l10n.duckOtherAudio, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+                    subtitle: Text(l10n.duckOtherAudioDescription, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
+                    value: _duckOtherAudio,
+                    activeColor: VigorColors.indigo,
+                    onChanged: (value) {
+                      setState(() => _duckOtherAudio = value);
+                      context.read<PreferencesService>().setDuckOtherAudio(value);
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],

@@ -982,7 +982,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get timer => 'タイマー';
 
   @override
-  String get intervalJingle => 'インターバル完了時にサウンド';
+  String get intervalJingle => 'インターバル切替時にホイッスル';
+
+  @override
+  String get duckOtherAudio => '他のオーディオを下げる';
+
+  @override
+  String get duckOtherAudioDescription => 'ホイッスル中に音楽や他のアプリの音量を下げます';
 
   @override
   String get goalHypertrophy => '筋肥大';

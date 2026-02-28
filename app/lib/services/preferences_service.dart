@@ -7,6 +7,7 @@ class PreferencesService {
   static const String _themeModeKey = 'theme_mode';
   static const String _defaultDurationKey = 'default_duration';
   static const String _intervalJingleKey = 'interval_jingle';
+  static const String _duckOtherAudioKey = 'duck_other_audio';
   static const String _warmupCooldownKey = 'warmup_cooldown';
   static const String _useRecommendedDurationKey = 'use_recommended_duration';
   static const int defaultDurationFallback = 60;
@@ -67,6 +68,12 @@ class PreferencesService {
 
   Future<void> setIntervalJingle(bool enabled) async {
     await _prefs?.setBool(_intervalJingleKey, enabled);
+  }
+
+  bool get duckOtherAudio => _prefs?.getBool(_duckOtherAudioKey) ?? true;
+
+  Future<void> setDuckOtherAudio(bool enabled) async {
+    await _prefs?.setBool(_duckOtherAudioKey, enabled);
   }
 
   bool get warmupCooldown => _prefs?.getBool(_warmupCooldownKey) ?? true;

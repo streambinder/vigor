@@ -123,7 +123,7 @@ class IntervalController extends TimerController {
 
       if (_remainingSeconds > 0) {
         _remainingSeconds--;
-        shouldPlayCountdownJingle = _hasStarted && _remainingSeconds >= 1 && _remainingSeconds <= 3;
+        shouldPlayCountdownJingle = _hasStarted && _remainingSeconds == 3;
         notifyListeners();
       } else {
         timer.cancel();

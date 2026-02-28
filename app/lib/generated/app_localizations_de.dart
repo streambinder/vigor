@@ -1008,7 +1008,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get timer => 'Timer';
 
   @override
-  String get intervalJingle => 'Ton bei Intervallende';
+  String get intervalJingle => 'Pfeife bei Intervallwechsel';
+
+  @override
+  String get duckOtherAudio => 'Andere Audiowiedergabe leiser';
+
+  @override
+  String get duckOtherAudioDescription =>
+      'Reduziert die Lautstärke von Musik und anderen Apps während des Pfiffs';
 
   @override
   String get goalHypertrophy => 'Muskelaufbau';

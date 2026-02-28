@@ -1000,7 +1000,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get timer => 'Temporizador';
 
   @override
-  String get intervalJingle => 'Som ao completar intervalo';
+  String get intervalJingle => 'Apito na troca de intervalo';
+
+  @override
+  String get duckOtherAudio => 'Baixar outro áudio';
+
+  @override
+  String get duckOtherAudioDescription =>
+      'Reduz o volume de música e outros apps durante o apito';
 
   @override
   String get goalHypertrophy => 'Hipertrofia';

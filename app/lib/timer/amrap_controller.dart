@@ -180,7 +180,7 @@ class AmrapController extends TimerController {
 
       if (_globalSecondsRemaining > 0) {
         _globalSecondsRemaining--;
-        shouldPlayCountdownJingle = !isCountdown && _globalSecondsRemaining >= 1 && _globalSecondsRemaining <= 3;
+        shouldPlayCountdownJingle = !isCountdown && _globalSecondsRemaining == 3;
         notifyListeners();
       } else {
         timer.cancel();

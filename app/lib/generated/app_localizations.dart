@@ -1947,8 +1947,20 @@ abstract class AppLocalizations {
   /// No description provided for @intervalJingle.
   ///
   /// In en, this message translates to:
-  /// **'Jingle at interval completion'**
+  /// **'Whistle at interval change'**
   String get intervalJingle;
+
+  /// No description provided for @duckOtherAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower other audio'**
+  String get duckOtherAudio;
+
+  /// No description provided for @duckOtherAudioDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce volume of music and other apps during whistle'**
+  String get duckOtherAudioDescription;
 
   /// No description provided for @goalHypertrophy.
   ///

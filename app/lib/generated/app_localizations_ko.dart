@@ -982,7 +982,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get timer => '타이머';
 
   @override
-  String get intervalJingle => '인터벌 완료 시 소리';
+  String get intervalJingle => '인터벌 전환 시 호루라기';
+
+  @override
+  String get duckOtherAudio => '다른 오디오 줄이기';
+
+  @override
+  String get duckOtherAudioDescription => '호루라기 중 음악 및 다른 앱의 볼륨을 줄입니다';
 
   @override
   String get goalHypertrophy => '근육 증가';

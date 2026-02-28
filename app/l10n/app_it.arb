@@ -346,7 +346,9 @@
   "warmupCooldown": "Riscaldamento e defaticamento",
 
   "timer": "Timer",
-  "intervalJingle": "Suono a fine intervallo",
+  "intervalJingle": "Fischietto al cambio intervallo",
+  "duckOtherAudio": "Abbassa altro audio",
+  "duckOtherAudioDescription": "Riduce il volume della musica e altre app durante il fischietto",
 
   "goalHypertrophy": "Massa Muscolare",
   "goalHypertrophyDescription": "Aumenta la massa muscolare con allenamenti di resistenza mirati",

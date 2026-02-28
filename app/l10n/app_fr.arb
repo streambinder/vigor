@@ -346,7 +346,9 @@
   "warmupCooldown": "Échauffement et récupération",
 
   "timer": "Minuteur",
-  "intervalJingle": "Son à la fin d'intervalle",
+  "intervalJingle": "Sifflet au changement d'intervalle",
+  "duckOtherAudio": "Baisser l'autre audio",
+  "duckOtherAudioDescription": "Réduit le volume de la musique et des autres apps pendant le sifflet",
 
   "goalHypertrophy": "Prise de Masse",
   "goalHypertrophyDescription": "Développe la masse musculaire avec un entraînement ciblé",

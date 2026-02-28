@@ -1004,7 +1004,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get timer => 'Temporizador';
 
   @override
-  String get intervalJingle => 'Sonido al completar intervalo';
+  String get intervalJingle => 'Silbato al cambio de intervalo';
+
+  @override
+  String get duckOtherAudio => 'Bajar otro audio';
+
+  @override
+  String get duckOtherAudioDescription =>
+      'Reduce el volumen de música y otras apps durante el silbato';
 
   @override
   String get goalHypertrophy => 'Desarrollo Muscular';
