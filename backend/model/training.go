@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/encoder"
 	"gorm.io/datatypes"
 )
@@ -595,6 +596,11 @@ func (t *Training) scaleWorkRepeats(targetDuration int) {
 			blocks[bestIdx].Repeats--
 		}
 		current = t.CalculateDuration()
+		log.Debug().
+			Int("block", bestIdx).Int("repeats", blocks[bestIdx].Repeats).
+			Int("duration", current).Int("target", targetDuration).
+			Bool("increased", diff > 0).
+			Msg("scaled block repeats")
 	}
 }
 
