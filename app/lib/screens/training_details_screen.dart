@@ -505,7 +505,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   Future<void> _launchUrl(String url) async {
     final uri = Uri.tryParse(url);
-    if (uri != null && await canLaunchUrl(uri)) {
+    if (uri != null) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
