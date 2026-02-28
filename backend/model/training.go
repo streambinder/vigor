@@ -533,6 +533,9 @@ func (t *Training) workBudget(userRequestedMinutes int) int {
 
 // scaleWorkRepeats iteratively adjusts work block repeats ±1 to get
 // CalculateDuration() as close as possible to targetDuration seconds.
+// preserves the proportional ratio between blocks as set by the LLM:
+// when scaling up, prefers the block with the lowest current/original ratio;
+// when scaling down, prefers the block with the highest ratio.
 func (t *Training) scaleWorkRepeats(targetDuration int) {
 	abs := func(x int) int {
 		if x < 0 {
@@ -554,6 +557,12 @@ func (t *Training) scaleWorkRepeats(targetDuration int) {
 		return
 	}
 
+	// snapshot LLM-assigned repeats to preserve proportional scaling
+	original := make([]int, len(blocks))
+	for i, b := range blocks {
+		original[i] = max(b.Repeats, 1)
+	}
+
 	current := t.CalculateDuration()
 	for range 500 {
 		diff := targetDuration - current
@@ -563,15 +572,24 @@ func (t *Training) scaleWorkRepeats(targetDuration int) {
 
 		bestIdx := -1
 		bestDist := abs(diff)
+		bestRatio := 0.0
 
 		if diff > 0 {
 			for i, b := range blocks {
 				b.Repeats++
-				if d := abs(targetDuration - t.CalculateDuration()); d < bestDist {
+				d := abs(targetDuration - t.CalculateDuration())
+				b.Repeats--
+				if d > bestDist {
+					continue
+				}
+				ratio := float64(b.Repeats) / float64(original[i])
+				// prefer block with lowest scale ratio (least inflated),
+				// fall back to closest distance as tiebreaker
+				if bestIdx < 0 || ratio < bestRatio || (ratio == bestRatio && d < bestDist) {
 					bestDist = d
 					bestIdx = i
+					bestRatio = ratio
 				}
-				b.Repeats--
 			}
 		} else {
 			for i, b := range blocks {
@@ -579,11 +597,18 @@ func (t *Training) scaleWorkRepeats(targetDuration int) {
 					continue
 				}
 				b.Repeats--
-				if d := abs(targetDuration - t.CalculateDuration()); d < bestDist {
+				d := abs(targetDuration - t.CalculateDuration())
+				b.Repeats++
+				if d > bestDist {
+					continue
+				}
+				ratio := float64(b.Repeats) / float64(original[i])
+				// prefer block with highest scale ratio (most inflated)
+				if bestIdx < 0 || ratio > bestRatio || (ratio == bestRatio && d < bestDist) {
 					bestDist = d
 					bestIdx = i
+					bestRatio = ratio
 				}
-				b.Repeats++
 			}
 		}
 
@@ -610,10 +635,7 @@ func (t *Training) scaleWorkRepeats(targetDuration int) {
 func (t *Training) SetDuration(userRequestedMinutes int) {
 	switch t.Methodology {
 	case "amrap":
-		work := t.workBudget(userRequestedMinutes)
-		if work < 60 {
-			work = 60
-		}
+		work := max(t.workBudget(userRequestedMinutes), 60)
 		t.Duration = work
 
 	default:

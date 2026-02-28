@@ -454,6 +454,76 @@ func TestSetDuration_StopsWhenNoImprovement(t *testing.T) {
 	}
 }
 
+func TestSetDuration_BalancesBlockRepeats(t *testing.T) {
+	// two superset blocks with different per-repeat costs:
+	// block 0: cheap (~100s/repeat), block 1: expensive (~180s/repeat)
+	// without balancing, the cheap block would get all the increments (e.g. 3→12)
+	// while the expensive one stays at 3. the algorithm should distribute evenly.
+	tr := makeTraining("supersets", []Routine{
+		routine("work", 0, []Block{
+			block(3, 60, []Activity{
+				act(0, 8, 0),  // ~32s work
+				act(0, 10, 60), // ~40s work + 60s rest
+			}),
+			block(3, 60, []Activity{
+				act(0, 10, 0),  // ~40s work
+				act(0, 12, 60), // ~48s work + 60s rest
+			}),
+		}),
+	})
+
+	tr.SetDuration(35) // 35 min = 2100s
+
+	r0 := tr.Routines[0].Blocks[0].Repeats
+	r1 := tr.Routines[0].Blocks[1].Repeats
+
+	// both started at 3, so proportional scaling = equal scaling.
+	// blocks should be within 2 repeats of each other.
+	diff := r0 - r1
+	if diff < 0 {
+		diff = -diff
+	}
+	if diff > 2 {
+		t.Errorf("blocks unbalanced: block0=%d, block1=%d (diff=%d, want <= 2)", r0, r1, diff)
+	}
+
+	// verify duration is still within tolerance
+	total := tr.CalculateDuration()
+	target := 2100
+	low := float64(target) * (1 - durationTolerancePct)
+	high := float64(target) * (1 + durationTolerancePct)
+	if float64(total) < low || float64(total) > high {
+		t.Errorf("balanced SetDuration(35): total = %d, want within %.0f-%.0f", total, low, high)
+	}
+}
+
+func TestSetDuration_PreservesRepeatRatio(t *testing.T) {
+	// block 0 starts at 2 repeats, block 1 starts at 6 repeats (1:3 ratio).
+	// after scaling up, the ratio should be roughly preserved — block 1 should
+	// always have more repeats than block 0.
+	tr := makeTraining("supersets", []Routine{
+		routine("work", 0, []Block{
+			block(2, 60, []Activity{
+				act(0, 8, 0),
+				act(0, 10, 60),
+			}),
+			block(6, 60, []Activity{
+				act(0, 10, 0),
+				act(0, 12, 60),
+			}),
+		}),
+	})
+
+	tr.SetDuration(45) // 45 min = 2700s
+
+	r0 := tr.Routines[0].Blocks[0].Repeats
+	r1 := tr.Routines[0].Blocks[1].Repeats
+
+	if r1 <= r0 {
+		t.Errorf("ratio not preserved: block0=%d, block1=%d (block1 should be > block0 since it started 6 vs 2)", r0, r1)
+	}
+}
+
 func TestSetDuration_WithinTolerance(t *testing.T) {
 	// regression test: various targets should produce durations within 15% tolerance
 	tests := []struct {
