@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'tokens.dart';
 
 /// Vigor unified theme builder
@@ -249,21 +250,17 @@ class VigorTheme {
   }
 
   static AppBarTheme _appBarTheme(Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
     return AppBarTheme(
       centerTitle: false,
       elevation: 0,
       scrolledUnderElevation: 0,
-      backgroundColor: brightness == Brightness.dark
-          ? VigorColors.darkBackground
-          : VigorColors.lightBackground,
-      foregroundColor: brightness == Brightness.dark
-          ? VigorColors.darkTextPrimary
-          : VigorColors.lightTextPrimary,
+      backgroundColor: isDark ? VigorColors.darkBackground : VigorColors.lightBackground,
+      foregroundColor: isDark ? VigorColors.darkTextPrimary : VigorColors.lightTextPrimary,
       titleTextStyle: VigorTypography.headline.copyWith(
-        color: brightness == Brightness.dark
-            ? VigorColors.darkTextPrimary
-            : VigorColors.lightTextPrimary,
+        color: isDark ? VigorColors.darkTextPrimary : VigorColors.lightTextPrimary,
       ),
+      systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
     );
   }
 
