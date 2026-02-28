@@ -431,5 +431,11 @@
   "loadingRetryMsg3": "もう少し — もう一度",
   "loadingRetryMsg4": "もう一回、お待ちください",
   "loadingRetryMsg5": "おっと、再調整中...",
-  "loadingRetryMsg6": "あと少しだった — もう一度"
+  "loadingRetryMsg6": "あと少しだった — もう一度",
+
+  "nSelected": "{count}件選択中",
+  "@nSelected": { "placeholders": { "count": { "type": "int" } } },
+  "deleteSelectedTrainings": "{count}件のトレーニングを削除しますか？",
+  "@deleteSelectedTrainings": { "placeholders": { "count": { "type": "int" } } },
+  "trainingsDeletedSuccessfully": "トレーニングを削除しました"
 }

@@ -431,5 +431,11 @@
   "loadingRetryMsg3": "не совсем — ещё одна попытка",
   "loadingRetryMsg4": "ещё одна попытка, подождите",
   "loadingRetryMsg5": "ой, перекалибровка...",
-  "loadingRetryMsg6": "почти получилось — пробую снова"
+  "loadingRetryMsg6": "почти получилось — пробую снова",
+
+  "nSelected": "{count} выбрано",
+  "@nSelected": { "placeholders": { "count": { "type": "int" } } },
+  "deleteSelectedTrainings": "Удалить {count} тренировок?",
+  "@deleteSelectedTrainings": { "placeholders": { "count": { "type": "int" } } },
+  "trainingsDeletedSuccessfully": "Тренировки успешно удалены"
 }

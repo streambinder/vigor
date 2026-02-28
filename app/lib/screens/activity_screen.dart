@@ -22,7 +22,10 @@ class ActivityScreen extends StatefulWidget {
 class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProviderStateMixin {
   bool _isLoading = false;
   bool _hasLoadedOnce = false;
+  bool _isDeleting = false;
   final Map<String, int> _partnerCounts = {};
+  final Set<String> _selectedIds = {};
+  bool get _isSelecting => _selectedIds.isNotEmpty;
 
   late TabController _tabController;
 
@@ -32,7 +35,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) return;
-      setState(() {});
+      setState(() => _selectedIds.clear());
     });
   }
 
@@ -105,6 +108,45 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     }
   }
 
+  Future<void> _deleteSelected() async {
+    final l10n = AppLocalizations.of(context);
+    final count = _selectedIds.length;
+
+    final confirmed = await AdaptiveAlertDialog.show<bool>(
+      context: context,
+      title: l10n.deleteTraining,
+      content: l10n.deleteSelectedTrainings(count),
+      actions: [
+        AdaptiveDialogAction(label: l10n.cancel, onPressed: () => Navigator.of(context).pop(false)),
+        AdaptiveDialogAction(label: l10n.delete, isDestructive: true, onPressed: () => Navigator.of(context).pop(true)),
+      ],
+    );
+
+    if (confirmed != true || !mounted) return;
+    setState(() => _isDeleting = true);
+
+    final trainingService = context.read<ServiceLocator>().trainingService;
+    bool hadError = false;
+    for (final id in _selectedIds.toList()) {
+      final response = await trainingService.deleteTraining(id);
+      if (!response.isSuccess) hadError = true;
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _selectedIds.clear();
+      _isDeleting = false;
+    });
+    await context.read<ServiceLocator>().refreshTrainings();
+    if (mounted) {
+      if (hadError) {
+        AdaptiveNotification.showError(context: context, message: l10n.failedToDeleteTraining);
+      } else {
+        AdaptiveNotification.show(context: context, message: l10n.trainingsDeletedSuccessfully);
+      }
+    }
+  }
+
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final diff = now.difference(date).inDays;
@@ -161,25 +203,52 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       valueListenable: locator.trainingsNotifier,
       builder: (context, trainings, _) => ValueListenableBuilder<List<Gym>?>(
         valueListenable: locator.gymsNotifier,
-        builder: (context, gyms, _) => AdaptiveScaffold(
-          appBar: AdaptiveAppBar(
-            title: Text(l10n.activity),
-            actions: [
-              AdaptiveIconButton(
-                icon: const Icon(Icons.refresh),
-                tooltip: l10n.refresh,
-                onPressed: _loadData,
-              ),
-            ],
-          ),
-          body: RefreshIndicator(
-            onRefresh: _loadData,
-            color: VigorColors.persimmon,
-            child: _isLoading
-                ? const Center(child: AdaptiveLoadingIndicator())
-                : trainings == null || trainings.isEmpty
-                    ? _buildEmptyState(l10n, gyms ?? [])
-                    : _buildContent(l10n, isDark, trainings),
+        builder: (context, gyms, _) => PopScope(
+          canPop: !_isSelecting,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) setState(() => _selectedIds.clear());
+          },
+          child: AdaptiveScaffold(
+            appBar: _isSelecting
+                ? AdaptiveAppBar(
+                    leading: AdaptiveIconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => setState(() => _selectedIds.clear()),
+                    ),
+                    title: Text(l10n.nSelected(_selectedIds.length)),
+                    actions: [
+                      if (_isDeleting)
+                        const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: SizedBox(width: 20, height: 20, child: AdaptiveLoadingIndicator()),
+                        )
+                      else
+                        AdaptiveIconButton(
+                          icon: const Icon(Icons.delete),
+                          tooltip: l10n.delete,
+                          onPressed: _deleteSelected,
+                        ),
+                    ],
+                  )
+                : AdaptiveAppBar(
+                    title: Text(l10n.activity),
+                    actions: [
+                      AdaptiveIconButton(
+                        icon: const Icon(Icons.refresh),
+                        tooltip: l10n.refresh,
+                        onPressed: _loadData,
+                      ),
+                    ],
+                  ),
+            body: RefreshIndicator(
+              onRefresh: _loadData,
+              color: VigorColors.persimmon,
+              child: _isLoading
+                  ? const Center(child: AdaptiveLoadingIndicator())
+                  : trainings == null || trainings.isEmpty
+                      ? _buildEmptyState(l10n, gyms ?? [])
+                      : _buildContent(l10n, isDark, trainings),
+            ),
           ),
         ),
       ),
@@ -346,17 +415,30 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     final isStale = _isStaleTraining(training);
     final isCompleted = _isCompletedTraining(training);
     final partnerCount = _partnerCounts[training.id] ?? 0;
+    final isSelected = _selectedIds.contains(training.id);
 
     return Container(
       key: key,
       decoration: BoxDecoration(
         color: VigorColors.surface(context),
         borderRadius: VigorRadius.radiusMd,
+        border: isSelected ? Border.all(color: VigorColors.indigo, width: 2) : null,
       ),
       child: InkWell(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => TrainingDetailsScreen(training: training)),
-        ),
+        onTap: _isSelecting
+            ? () => setState(() {
+                  if (isSelected) {
+                    _selectedIds.remove(training.id);
+                  } else {
+                    _selectedIds.add(training.id);
+                  }
+                })
+            : () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => TrainingDetailsScreen(training: training)),
+                ),
+        onLongPress: _isSelecting
+            ? null
+            : () => setState(() => _selectedIds.add(training.id)),
         borderRadius: VigorRadius.radiusMd,
         child: Padding(
           padding: VigorSpacing.paddingMd,
@@ -366,6 +448,11 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
               // header row
               Row(
                 children: [
+                  if (isSelected)
+                    Padding(
+                      padding: const EdgeInsets.only(right: VigorSpacing.sm),
+                      child: Icon(Icons.check_circle, size: 20, color: VigorColors.indigo),
+                    ),
                   // methodology badge
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

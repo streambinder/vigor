@@ -1223,4 +1223,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get loadingRetryMsg6 => '差点就好了——再试';
+
+  @override
+  String nSelected(int count) {
+    return '已选择$count项';
+  }
+
+  @override
+  String deleteSelectedTrainings(int count) {
+    return '删除$count个训练？';
+  }
+
+  @override
+  String get trainingsDeletedSuccessfully => '训练已成功删除';
 }

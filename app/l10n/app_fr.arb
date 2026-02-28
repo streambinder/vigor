@@ -431,5 +431,11 @@
   "loadingRetryMsg3": "pas tout à fait — encore un essai",
   "loadingRetryMsg4": "encore un essai, un instant",
   "loadingRetryMsg5": "oops, recalibrage...",
-  "loadingRetryMsg6": "j'y étais presque — on réessaie"
+  "loadingRetryMsg6": "j'y étais presque — on réessaie",
+
+  "nSelected": "{count} sélectionnés",
+  "@nSelected": { "placeholders": { "count": { "type": "int" } } },
+  "deleteSelectedTrainings": "Supprimer {count} entraînements ?",
+  "@deleteSelectedTrainings": { "placeholders": { "count": { "type": "int" } } },
+  "trainingsDeletedSuccessfully": "Entraînements supprimés avec succès"
 }

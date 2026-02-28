@@ -1252,4 +1252,17 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get loadingRetryMsg6 => 'quase lá — tentando de novo';
+
+  @override
+  String nSelected(int count) {
+    return '$count selecionados';
+  }
+
+  @override
+  String deleteSelectedTrainings(int count) {
+    return 'Excluir $count treinos?';
+  }
+
+  @override
+  String get trainingsDeletedSuccessfully => 'Treinos excluídos com sucesso';
 }

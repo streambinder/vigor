@@ -1225,4 +1225,17 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get loadingRetryMsg6 => 'あと少しだった — もう一度';
+
+  @override
+  String nSelected(int count) {
+    return '$count件選択中';
+  }
+
+  @override
+  String deleteSelectedTrainings(int count) {
+    return '$count件のトレーニングを削除しますか？';
+  }
+
+  @override
+  String get trainingsDeletedSuccessfully => 'トレーニングを削除しました';
 }

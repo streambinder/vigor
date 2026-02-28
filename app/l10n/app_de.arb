@@ -431,5 +431,11 @@
   "loadingRetryMsg3": "nicht ganz — noch ein Versuch",
   "loadingRetryMsg4": "noch ein Versuch, Moment",
   "loadingRetryMsg5": "oops, wird neu kalibriert...",
-  "loadingRetryMsg6": "fast gehabt — nochmal"
+  "loadingRetryMsg6": "fast gehabt — nochmal",
+
+  "nSelected": "{count} ausgewählt",
+  "@nSelected": { "placeholders": { "count": { "type": "int" } } },
+  "deleteSelectedTrainings": "{count} Trainings löschen?",
+  "@deleteSelectedTrainings": { "placeholders": { "count": { "type": "int" } } },
+  "trainingsDeletedSuccessfully": "Trainings erfolgreich gelöscht"
 }

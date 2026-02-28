@@ -599,5 +599,19 @@
   "loadingRetryMsg3": "not quite — giving it another shot",
   "loadingRetryMsg4": "one more try, hang tight",
   "loadingRetryMsg5": "oops, recalibrating...",
-  "loadingRetryMsg6": "almost had it — trying again"
+  "loadingRetryMsg6": "almost had it — trying again",
+
+  "nSelected": "{count} selected",
+  "@nSelected": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "deleteSelectedTrainings": "Delete {count} trainings?",
+  "@deleteSelectedTrainings": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "trainingsDeletedSuccessfully": "Trainings deleted successfully"
 }

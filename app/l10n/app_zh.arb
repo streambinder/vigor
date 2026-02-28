@@ -431,5 +431,11 @@
   "loadingRetryMsg3": "差一点——再来一次",
   "loadingRetryMsg4": "再试一次，稍等",
   "loadingRetryMsg5": "哎呀，重新校准...",
-  "loadingRetryMsg6": "差点就好了——再试"
+  "loadingRetryMsg6": "差点就好了——再试",
+
+  "nSelected": "已选择{count}项",
+  "@nSelected": { "placeholders": { "count": { "type": "int" } } },
+  "deleteSelectedTrainings": "删除{count}个训练？",
+  "@deleteSelectedTrainings": { "placeholders": { "count": { "type": "int" } } },
+  "trainingsDeletedSuccessfully": "训练已成功删除"
 }

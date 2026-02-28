@@ -1225,4 +1225,17 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get loadingRetryMsg6 => '거의 됐어요 — 다시 시도';
+
+  @override
+  String nSelected(int count) {
+    return '$count개 선택됨';
+  }
+
+  @override
+  String deleteSelectedTrainings(int count) {
+    return '$count개 훈련을 삭제하시겠습니까?';
+  }
+
+  @override
+  String get trainingsDeletedSuccessfully => '훈련이 삭제되었습니다';
 }

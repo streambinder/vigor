@@ -1248,4 +1248,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loadingRetryMsg6 => 'almost had it — trying again';
+
+  @override
+  String nSelected(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String deleteSelectedTrainings(int count) {
+    return 'Delete $count trainings?';
+  }
+
+  @override
+  String get trainingsDeletedSuccessfully => 'Trainings deleted successfully';
 }

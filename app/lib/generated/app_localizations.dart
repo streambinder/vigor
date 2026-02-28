@@ -2417,6 +2417,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'almost had it — trying again'**
   String get loadingRetryMsg6;
+
+  /// No description provided for @nSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String nSelected(int count);
+
+  /// No description provided for @deleteSelectedTrainings.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count} trainings?'**
+  String deleteSelectedTrainings(int count);
+
+  /// No description provided for @trainingsDeletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Trainings deleted successfully'**
+  String get trainingsDeletedSuccessfully;
 }
 
 class _AppLocalizationsDelegate

@@ -431,5 +431,11 @@
   "loadingRetryMsg3": "아쉽네요 — 한 번 더",
   "loadingRetryMsg4": "한 번 더, 잠시만요",
   "loadingRetryMsg5": "이런, 재조정 중...",
-  "loadingRetryMsg6": "거의 됐어요 — 다시 시도"
+  "loadingRetryMsg6": "거의 됐어요 — 다시 시도",
+
+  "nSelected": "{count}개 선택됨",
+  "@nSelected": { "placeholders": { "count": { "type": "int" } } },
+  "deleteSelectedTrainings": "{count}개 훈련을 삭제하시겠습니까?",
+  "@deleteSelectedTrainings": { "placeholders": { "count": { "type": "int" } } },
+  "trainingsDeletedSuccessfully": "훈련이 삭제되었습니다"
 }

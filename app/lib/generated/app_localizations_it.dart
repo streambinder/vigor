@@ -1259,4 +1259,18 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get loadingRetryMsg6 => 'quasi ci siamo — riprovo';
+
+  @override
+  String nSelected(int count) {
+    return '$count selezionati';
+  }
+
+  @override
+  String deleteSelectedTrainings(int count) {
+    return 'Eliminare $count allenamenti?';
+  }
+
+  @override
+  String get trainingsDeletedSuccessfully =>
+      'Allenamenti eliminati con successo';
 }

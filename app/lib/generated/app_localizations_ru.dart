@@ -1247,4 +1247,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get loadingRetryMsg6 => 'почти получилось — пробую снова';
+
+  @override
+  String nSelected(int count) {
+    return '$count выбрано';
+  }
+
+  @override
+  String deleteSelectedTrainings(int count) {
+    return 'Удалить $count тренировок?';
+  }
+
+  @override
+  String get trainingsDeletedSuccessfully => 'Тренировки успешно удалены';
 }
