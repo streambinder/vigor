@@ -634,7 +634,7 @@ func TestValidate_WeightModifierConsistency(t *testing.T) {
 					}},
 				}},
 			}
-			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, 0, nil, nil, nil)
+			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, 0, nil, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -692,7 +692,7 @@ func TestValidate_DurationTolerance(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tr := makeTestTraining()
 			tr.SetDuration(tt.requestedMinutes)
-			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, tt.requestedMinutes, nil, nil, nil)
+			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, tt.requestedMinutes, nil, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Validate() with requested=%dm, actual=%ds: error = %v, wantErr %v",
 					tt.requestedMinutes, actualDuration, err, tt.wantErr)
@@ -738,85 +738,9 @@ func TestValidate_TargetMuscles(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tr := base()
-			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, 0, tt.target, tt.actual, nil)
+			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, 0, tt.target, tt.actual)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestValidate_CooldownMuscleCoverage(t *testing.T) {
-	validExercises := map[string]bool{"ex1": true, "cd-back": true, "cd-legs": true, "cd-arms": true}
-	validModifiers := map[string]bool{}
-	validRoutines := map[string]bool{"warmup": true, "work": true, "cooldown": true}
-	weightedModifiers := map[string]bool{}
-
-	cooldownMuscles := map[string]string{
-		"cd-back": "back",
-		"cd-legs": "legs",
-		"cd-arms": "arms",
-	}
-
-	base := func(cooldownActivities []Activity) Training {
-		return Training{
-			Name:        "Test",
-			Methodology: "strength",
-			Routines: []Routine{
-				routine("warmup", 0, []Block{block(1, 0, []Activity{{ExerciseID: "ex1", Duration: 60}})}),
-				routine("work", 0, []Block{block(1, 0, []Activity{{ExerciseID: "ex1", Reps: 10}})}),
-				routine("cooldown", 0, []Block{block(1, 0, cooldownActivities)}),
-			},
-		}
-	}
-
-	tests := []struct {
-		name     string
-		activities []Activity
-		wantErr  bool
-	}{
-		{
-			"all muscles covered",
-			[]Activity{
-				{ExerciseID: "cd-back", Duration: 30},
-				{ExerciseID: "cd-legs", Duration: 30},
-				{ExerciseID: "cd-arms", Duration: 30},
-			},
-			false,
-		},
-		{
-			"missing legs",
-			[]Activity{
-				{ExerciseID: "cd-back", Duration: 30},
-				{ExerciseID: "cd-arms", Duration: 30},
-			},
-			true,
-		},
-		{
-			"nil cooldown map skips check",
-			[]Activity{
-				{ExerciseID: "cd-back", Duration: 30},
-			},
-			false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tr := base(tt.activities)
-			cm := cooldownMuscles
-			if tt.name == "nil cooldown map skips check" {
-				cm = nil
-			}
-			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, true, 0, nil, nil, cm)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			if err != nil && tt.wantErr {
-				ve := err.(*ValidationError)
-				if ve.Code != "missing_cooldown_muscle" {
-					t.Errorf("Validate() error code = %q, want missing_cooldown_muscle", ve.Code)
-				}
 			}
 		})
 	}
@@ -916,7 +840,7 @@ func TestValidate_NewChecks(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tr := base()
 			tt.mutate(&tr)
-			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, 0, nil, nil, nil)
+			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, 0, nil, nil)
 			if tt.wantCode == "" {
 				if err != nil {
 					t.Errorf("Validate() unexpected error: %v", err)

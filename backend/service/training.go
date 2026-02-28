@@ -284,14 +284,6 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		exerciseMuscles[ex.ID] = ex.Muscles
 	}
 
-	// map cooldown exercise ID → primary muscle for coverage validation
-	cooldownExerciseMuscles := make(map[string]string, len(cooldownExercises))
-	for _, ex := range cooldownExercises {
-		if len(ex.Muscles) > 0 {
-			cooldownExerciseMuscles[ex.ID] = ex.Muscles[0]
-		}
-	}
-
 	llmStart := time.Now()
 	var training *model.Training
 	var llmPrompt model.LLMPrompt
@@ -385,7 +377,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			actualMuscles = append(actualMuscles, muscle)
 		}
 
-		validationErr := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, weightedModifierIDs, !skipWarmupCooldown, duration, targetMuscles, actualMuscles, cooldownExerciseMuscles)
+		validationErr := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, weightedModifierIDs, !skipWarmupCooldown, duration, targetMuscles, actualMuscles)
 		if validationErr == nil {
 			break
 		}

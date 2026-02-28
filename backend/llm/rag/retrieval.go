@@ -250,6 +250,10 @@ func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equi
 		if len(familyClauses) > 0 {
 			query = query.Where("(" + strings.Join(familyClauses, " OR ") + ")")
 		}
+	} else {
+		// auto methodology: exclude mobility-only exercises from work candidates
+		// (exercises with mobility + another family are kept)
+		query = query.Where(`NOT (exercises.progressions ? 'mobility' AND (SELECT count(*) FROM jsonb_each(exercises.progressions) AS kv) = 1)`)
 	}
 
 	// filter by user equipment
