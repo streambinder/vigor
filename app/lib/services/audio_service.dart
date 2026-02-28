@@ -47,7 +47,9 @@ class AudioService {
 
   Future<void> playWhistle() async {
     if (!_initialized) await initialize();
-    await _player.stop();
+    // seek instead of stop — stop() leaves Android's MediaPlayer in a state
+    // where resume() won't replay without re-preparing the source
+    await _player.seek(Duration.zero);
     await _player.resume();
   }
 
