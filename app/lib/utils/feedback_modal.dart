@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/activity_ext.dart';
+import '../models/exercise.dart';
 import '../models/training.dart';
 import '../models/training_feedback.dart';
 import '../theme/liquid_glass_theme.dart';
+import '../utils/exercise_modal.dart';
 import '../utils/platform_helper.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../widgets/cached_exercise_image.dart';
 
 // matches backend model.Feedback* constants, maps to -2..+2 slider
 enum ExerciseFeedback { none, impossible, tooHard, ok, easy, tooEasy }
@@ -80,16 +83,18 @@ class FeedbackResult {
 
 class FeedbackModal {
   /// extracts unique activities from work routines
-  static List<({String id, String exerciseId, String name, String? feedback})> _getWorkActivities(Training training) {
+  static List<({String id, String exerciseId, String name, String? feedback, Exercise? exercise})> _getWorkActivities(Training training) {
     final seen = <String>{};
-    final activities = <({String id, String exerciseId, String name, String? feedback})>[];
+    final activities = <({String id, String exerciseId, String name, String? feedback, Exercise? exercise})>[];
     for (final routine in training.routines) {
       if (routine.type != 'work') continue;
       for (final block in routine.blocks) {
         for (final activity in block.activities) {
           if (!seen.contains(activity.exerciseId)) {
             seen.add(activity.exerciseId);
-            activities.add((id: activity.id, exerciseId: activity.exerciseId, name: activity.displayName, feedback: activity.feedback));
+            Exercise? exercise;
+            try { exercise = Exercise.fromJson(activity.detail); } catch (_) {}
+            activities.add((id: activity.id, exerciseId: activity.exerciseId, name: activity.displayName, feedback: activity.feedback, exercise: exercise));
           }
         }
       }
@@ -152,7 +157,7 @@ class FeedbackModal {
 }
 
 class _FeedbackDialogContent extends StatefulWidget {
-  final List<({String id, String exerciseId, String name, String? feedback})> activities;
+  final List<({String id, String exerciseId, String name, String? feedback, Exercise? exercise})> activities;
   final bool showReports;
   final TrainingFeedback? initialFeedback;
   final String? messagePrefix;
@@ -442,6 +447,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                       ),
                       ...widget.activities.map((a) => _ExerciseFeedbackRow(
                             name: a.name,
+                            exercise: a.exercise,
                             feedback: _exerciseFeedback[a.id]!,
                             isFlagged: _flaggedActivities.contains(a.id),
                             showFlag: widget.showReports,
@@ -489,6 +495,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
 
 class _ExerciseFeedbackRow extends StatelessWidget {
   final String name;
+  final Exercise? exercise;
   final ExerciseFeedback feedback;
   final bool isFlagged;
   final bool showFlag;
@@ -497,6 +504,7 @@ class _ExerciseFeedbackRow extends StatelessWidget {
 
   const _ExerciseFeedbackRow({
     required this.name,
+    this.exercise,
     required this.feedback,
     required this.isFlagged,
     required this.showFlag,
@@ -525,6 +533,19 @@ class _ExerciseFeedbackRow extends StatelessWidget {
         children: [
           Row(
             children: [
+              if (exercise != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: VigorSpacing.sm),
+                  child: GestureDetector(
+                    onTap: () => ExerciseModal.show(context, exercise!),
+                    child: CachedExerciseImage(
+                      imageUrl: exercise!.reference,
+                      width: 28,
+                      height: 28,
+                      isCircular: true,
+                    ),
+                  ),
+                ),
               Expanded(
                 child: Text(
                   name,
