@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'training_interval.dart';
 
@@ -8,11 +9,32 @@ abstract class TimerController extends ChangeNotifier {
   /// Screens should check this to avoid playing jingle on skip
   bool wasSkipped = false;
 
-  /// Tracks total elapsed seconds (excluding pauses, including rest)
+  /// Independent elapsed timer — runs continuously, unaffected by interval transitions
+  Timer? _elapsedTimer;
   int _totalElapsedSeconds = 0;
+  bool _elapsedRunning = false;
   int get elapsedSeconds => _totalElapsedSeconds;
+
+  /// Start the elapsed clock (call once when training begins)
   @protected
-  void tickElapsed() => _totalElapsedSeconds++;
+  void startElapsedTimer() {
+    if (_elapsedRunning) return;
+    _elapsedRunning = true;
+    _elapsedTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!isPaused) {
+        _totalElapsedSeconds++;
+        notifyListeners();
+      }
+    });
+  }
+
+  /// Stop the elapsed clock (call on completion)
+  @protected
+  void stopElapsedTimer() {
+    _elapsedTimer?.cancel();
+    _elapsedTimer = null;
+    _elapsedRunning = false;
+  }
 
   /// Set to true when countdown reaches 3, 2, or 1 seconds
   /// Screens should play countdown jingle when this is true
@@ -81,5 +103,9 @@ abstract class TimerController extends ChangeNotifier {
 
   /// Clean up timer resources
   @override
-  void dispose();
+  @mustCallSuper
+  void dispose() {
+    stopElapsedTimer();
+    super.dispose();
+  }
 }

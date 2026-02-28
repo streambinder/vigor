@@ -291,7 +291,21 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
 
     return AdaptiveScaffold(
       appBar: AdaptiveAppBar(
-        title: Text(widget.training.name),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(widget.training.name, overflow: TextOverflow.ellipsis),
+            if (!_workoutCompleted)
+              Text(
+                _formatDuration(_accumulatedElapsedSeconds + (_controller?.elapsedSeconds ?? 0)),
+                style: VigorTypography.data.copyWith(
+                  color: VigorColors.textSecondary(context),
+                  fontSize: 12,
+                ),
+              ),
+          ],
+        ),
         leading: AdaptiveIconButton(
           icon: const Icon(Icons.close),
           onPressed: _showExitDialog,

@@ -226,6 +226,7 @@ class EmomController extends TimerController {
     if (_hasStarted) return;
     _timer?.cancel();
     _hasStarted = true;
+    startElapsedTimer();
     _startMinute();
     notifyListeners();
   }
@@ -301,7 +302,6 @@ class EmomController extends TimerController {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_isPaused) return;
-      if (_hasStarted) tickElapsed();
 
       if (_secondsInMinute > 0) {
         _secondsInMinute--;
@@ -312,7 +312,6 @@ class EmomController extends TimerController {
         if (!_hasStarted) {
           startTraining();
         } else if (_isBlockRest) {
-          // block rest finished, start next block
           _advanceToNextBlock();
         } else {
           _onMinuteBoundary();
@@ -373,6 +372,7 @@ class EmomController extends TimerController {
 
   void _completeTraining() {
     _timer?.cancel();
+    stopElapsedTimer();
     _isCompleted = true;
     notifyListeners();
   }

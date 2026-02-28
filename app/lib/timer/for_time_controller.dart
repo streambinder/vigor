@@ -131,7 +131,8 @@ class ForTimeController extends TimerController {
     _timer?.cancel();
     _hasStarted = true;
     _elapsedSeconds = 0;
-    _startElapsedTimer();
+    startElapsedTimer();
+    _startWorkTimer();
     notifyListeners();
   }
 
@@ -202,11 +203,10 @@ class ForTimeController extends TimerController {
     });
   }
 
-  void _startElapsedTimer() {
+  void _startWorkTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_isPaused) return;
-      tickElapsed();
       _elapsedSeconds++;
       notifyListeners();
     });
@@ -214,6 +214,7 @@ class ForTimeController extends TimerController {
 
   void _completeTraining() {
     _timer?.cancel();
+    stopElapsedTimer();
     _completionTime = _elapsedSeconds;
     _isCompleted = true;
     notifyListeners();

@@ -119,6 +119,7 @@ class AmrapController extends TimerController {
     if (_hasStarted) return;
     _timer?.cancel();
     _hasStarted = true;
+    startElapsedTimer();
     _globalSecondsRemaining = totalSeconds;
     _startTimer(isCountdown: false);
     notifyListeners();
@@ -176,11 +177,9 @@ class AmrapController extends TimerController {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_isPaused) return;
-      if (!isCountdown) tickElapsed();
 
       if (_globalSecondsRemaining > 0) {
         _globalSecondsRemaining--;
-        // play countdown jingle at 3, 2, 1 seconds before workout ends (only during training)
         shouldPlayCountdownJingle = !isCountdown && _globalSecondsRemaining >= 1 && _globalSecondsRemaining <= 3;
         notifyListeners();
       } else {
@@ -196,6 +195,7 @@ class AmrapController extends TimerController {
 
   void _completeTraining() {
     _timer?.cancel();
+    stopElapsedTimer();
     _isCompleted = true;
     notifyListeners();
   }

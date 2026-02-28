@@ -59,6 +59,7 @@ class IntervalController extends TimerController {
     if (_hasStarted) return;
     _timer?.cancel();
     _hasStarted = true;
+    startElapsedTimer();
     _startCurrentInterval();
     notifyListeners();
   }
@@ -108,26 +109,20 @@ class IntervalController extends TimerController {
 
   void _startTimer() {
     _timer?.cancel();
-    // rep-based work intervals don't auto-advance, only tick elapsed time
+    // rep-based work intervals don't auto-advance — elapsed is tracked by base class
     final isRepBasedWork = _hasStarted &&
         _currentIntervalIndex < _intervals.length &&
         _intervals[_currentIntervalIndex].isRepBased;
     if (isRepBasedWork) {
       _remainingSeconds = 0;
-      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (_isPaused) return;
-        tickElapsed();
-      });
       notifyListeners();
       return;
     }
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_isPaused) return;
-      if (_hasStarted) tickElapsed();
 
       if (_remainingSeconds > 0) {
         _remainingSeconds--;
-        // play countdown jingle at 3, 2, 1 seconds (only during training, not initial countdown)
         shouldPlayCountdownJingle = _hasStarted && _remainingSeconds >= 1 && _remainingSeconds <= 3;
         notifyListeners();
       } else {
@@ -166,6 +161,7 @@ class IntervalController extends TimerController {
 
   void _completeTraining() {
     _timer?.cancel();
+    stopElapsedTimer();
     _isCompleted = true;
     notifyListeners();
   }
