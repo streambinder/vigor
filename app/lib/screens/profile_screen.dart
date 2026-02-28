@@ -137,6 +137,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return AdaptiveScaffold(
       appBar: AdaptiveAppBar(
+        automaticallyImplyLeading: false,
         title: Text(l10n.profile),
         actions: [
           AdaptiveIconButton(

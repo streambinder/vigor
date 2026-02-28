@@ -231,6 +231,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                     ],
                   )
                 : AdaptiveAppBar(
+                    automaticallyImplyLeading: false,
                     title: Text(l10n.activity),
                     actions: [
                       AdaptiveIconButton(

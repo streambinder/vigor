@@ -103,6 +103,7 @@ class _HomePageState extends State<HomePage> {
 
     return AdaptiveScaffold(
       appBar: AdaptiveAppBar(
+        automaticallyImplyLeading: false,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
