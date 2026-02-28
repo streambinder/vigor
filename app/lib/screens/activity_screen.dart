@@ -417,7 +417,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
               // metadata row - use data typography for durations/counts
               Row(
                 children: [
-                  _buildDataChip(Icons.schedule, _formatDuration(training.duration)),
+                  _buildDataChip(Icons.schedule, _formatDuration(training.completedIn ?? training.duration)),
                   const SizedBox(width: VigorSpacing.sm),
                   _buildDataChip(Icons.calendar_today, isAvailable
                       ? _formatDate(training.createdAt)

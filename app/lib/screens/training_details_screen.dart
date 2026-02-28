@@ -747,7 +747,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       runSpacing: VigorSpacing.sm,
       children: [
         _buildMethodologyBadge(training.methodology),
-        _buildMetaChip(Icons.schedule, _formatDuration(training.duration)),
+        _buildMetaChip(Icons.schedule, _formatDuration(training.completedIn ?? training.duration)),
         _buildMetaChip(Icons.calendar_today, _formatDate(training.completedAt ?? training.createdAt)),
         if (_partnerCount > 0) _buildMetaChip(Icons.people, '${1 + _partnerCount}'),
         if (training.gym != null) _buildMetaChip(Icons.location_on, training.gym!.name),
