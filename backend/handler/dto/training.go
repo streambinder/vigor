@@ -35,10 +35,12 @@ type DeleteTrainingResponse struct {
 
 // PostTrainingCompleteRequest represents the request for POST /training/complete/:id
 type PostTrainingCompleteRequest struct {
-	Feedback         model.TrainingFeedback `json:"feedback"`
-	ActivityFeedback map[string]string      `json:"activityFeedback"`
-	ActivityReports  []string               `json:"activityReports"`
-	CompletedIn      *int                   `json:"completedIn"`
+	Quality          *bool             `json:"quality"`
+	QualityReason    string            `json:"qualityReason"`
+	Message          string            `json:"message"`
+	ActivityFeedback map[string]string `json:"activityFeedback"`
+	ActivityReports  []string          `json:"activityReports"`
+	CompletedIn      *int              `json:"completedIn"`
 }
 
 // PostTrainingCompleteResponse represents the response for POST /training/complete/:id

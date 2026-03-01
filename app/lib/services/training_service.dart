@@ -1,6 +1,6 @@
 import 'dart:ui';
-import '../models/activity.dart';
 import '../models/api_response.dart';
+import '../models/activity.dart';
 import '../models/partner.dart';
 import '../models/training.dart';
 import '../models/training_feedback.dart';
@@ -149,7 +149,9 @@ class TrainingService {
 
     final body = <String, dynamic>{};
     if (feedback != null) {
-      body['feedback'] = feedback.toJson();
+      body['quality'] = feedback.quality;
+      body['qualityReason'] = feedback.qualityReason;
+      body['message'] = feedback.message;
     }
     if (activityFeedback != null && activityFeedback.isNotEmpty) {
       body['activityFeedback'] = activityFeedback;
@@ -192,7 +194,9 @@ class TrainingService {
 
     final body = <String, dynamic>{};
     if (feedback != null) {
-      body['feedback'] = feedback.toJson();
+      body['quality'] = feedback.quality;
+      body['qualityReason'] = feedback.qualityReason;
+      body['message'] = feedback.message;
     }
     if (activityFeedback != null) {
       body['activityFeedback'] = activityFeedback;
@@ -219,6 +223,23 @@ class TrainingService {
         response.statusCode,
       );
     }
+  }
+
+  Future<ApiResponse<TrainingFeedback?>> getUserFeedback(String trainingId) async {
+    final response = await _apiService.get('/training/feedback/$trainingId');
+
+    if (response.isSuccess && response.data != null) {
+      try {
+        return ApiResponse.success(TrainingFeedback.fromJson(response.data!), response.statusCode);
+      } catch (e) {
+        return ApiResponse.error('Failed to parse feedback', response.statusCode);
+      }
+    }
+    // 404 = no feedback yet, not an error
+    if (response.statusCode == 404) {
+      return ApiResponse.success(null, response.statusCode);
+    }
+    return ApiResponse.error(response.error ?? 'Failed to fetch feedback', response.statusCode);
   }
 
   Future<ApiResponse<String>> addPartner(String trainingId, String partner) async {

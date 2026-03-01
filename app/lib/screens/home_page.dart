@@ -15,9 +15,11 @@ import '../utils/knowledge_labels.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/progress/progress.dart';
 import '../models/progress.dart';
+import '../models/training.dart';
 import '../services/progress_service.dart';
 import '../services/service_locator.dart';
 import '../widgets/vigor_logo.dart';
+import 'training_details_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -156,6 +158,12 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
         child: _buildHeroStats(l10n, families),
       ),
+      // pending feedback card for partnered trainings missing user feedback
+      if (_progress!.pendingFeedback.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+          child: _buildPendingFeedbackCard(l10n),
+        ),
       // calibration card — only during calibration phase
       if (isCalibrating)
         Padding(
@@ -184,6 +192,71 @@ class _HomePageState extends State<HomePage> {
       padding: VigorSpacing.paddingLg,
       itemCount: sections.length,
       itemBuilder: (context, index) => sections[index],
+    );
+  }
+
+  Widget _buildPendingFeedbackCard(AppLocalizations l10n) {
+    final pending = _progress!.pendingFeedback;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.rate_review, color: VigorColors.persimmon, size: 24),
+            const SizedBox(width: VigorSpacing.sm),
+            Text(
+              l10n.pendingFeedbacks,
+              style: VigorTypography.headline.copyWith(
+                fontSize: 18,
+                color: VigorColors.textPrimary(context),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: VigorSpacing.sm),
+        AdaptiveCard(
+          padding: VigorSpacing.paddingMd,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.pendingFeedbacksDescription,
+                style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context)),
+              ),
+              const SizedBox(height: VigorSpacing.sm),
+              for (final t in pending)
+                InkWell(
+                  onTap: () => _openPendingTraining(t.id),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: VigorSpacing.xs),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            t.name,
+                            style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Icon(Icons.chevron_right, color: VigorColors.stone, size: 20),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _openPendingTraining(String trainingId) async {
+    final response = await context.read<ServiceLocator>().trainingService.getTrainings();
+    if (!response.isSuccess || !mounted) return;
+    final training = response.data?.where((t) => t.id == trainingId).firstOrNull;
+    if (training == null || !mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => TrainingDetailsScreen(training: training)),
     );
   }
 

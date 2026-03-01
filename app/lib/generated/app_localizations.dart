@@ -2507,6 +2507,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Log in to add this training'**
   String get loginToAdd;
+
+  /// No description provided for @pendingFeedbacks.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending feedbacks'**
+  String get pendingFeedbacks;
+
+  /// No description provided for @pendingFeedbacksDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Some of your trainings are marked as complete but have no feedback from you. Feedback helps improve your future training recommendations.'**
+  String get pendingFeedbacksDescription;
 }
 
 class _AppLocalizationsDelegate

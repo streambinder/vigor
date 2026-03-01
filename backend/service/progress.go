@@ -88,11 +88,21 @@ func GetProgress(userID uuid.UUID) (model.Progress, error) {
 	// muscle impact still computed live (14-day window is fast)
 	muscles := CalculateMuscleImpact(userID, exerciseMap, allMuscles)
 
+	// find completed partnered trainings missing this user's feedback
+	var pendingFeedback []model.PendingFeedbackTraining
+	database.DB.Raw(`
+		SELECT t.id, t.name, t.completed_at FROM trainings t
+		JOIN partners p ON p.training_id = t.id
+		WHERE (t.user_id = ? OR p.user_id = ?) AND t.completed_at IS NOT NULL
+		AND NOT EXISTS (SELECT 1 FROM training_feedbacks tf WHERE tf.training_id = t.id AND tf.user_id = ?)
+	`, userID, userID, userID).Scan(&pendingFeedback)
+
 	return model.Progress{
 		Families:           families,
 		Muscles:            muscles,
 		Trainings:          trainingsComplete,
 		TrainingsPartnered: partneredTrainings,
+		PendingFeedback:    pendingFeedback,
 	}, nil
 }
 

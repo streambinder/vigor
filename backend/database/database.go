@@ -48,6 +48,7 @@ func Init() error {
 		&model.Proficiency{},
 		&model.Avatar{},
 		&model.SharedLink{},
+		&model.TrainingFeedback{},
 	); err != nil {
 		return fmt.Errorf("failed to migrate database: %w", err)
 	}

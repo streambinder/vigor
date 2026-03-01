@@ -6,7 +6,6 @@ import 'training_reasoning.dart';
 import 'training_reference.dart';
 import 'routine.dart';
 import 'training_prompt.dart';
-import 'training_feedback.dart';
 import 'gym.dart';
 
 part 'training.g.dart';
@@ -41,8 +40,6 @@ class Training {
   final List<Routine> routines;
   @JsonKey(name: 'prompt')
   final TrainingPrompt prompt;
-  @JsonKey(name: 'feedback')
-  final TrainingFeedback feedback;
   @JsonKey(name: 'completed_at', toJson: _nullableDateTimeToJson)
   final DateTime? completedAt;
   @JsonKey(name: 'completed_in')
@@ -73,7 +70,6 @@ class Training {
     required this.factIndices,
     required this.routines,
     required this.prompt,
-    required this.feedback,
     this.completedAt,
     this.completedIn,
     required this.createdAt,

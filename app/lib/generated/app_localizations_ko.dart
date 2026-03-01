@@ -1276,4 +1276,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get loginToAdd => 'Log in to add this training';
+
+  @override
+  String get pendingFeedbacks => '대기 중인 피드백';
+
+  @override
+  String get pendingFeedbacksDescription =>
+      '완료된 훈련 중 피드백이 없는 항목이 있습니다. 피드백은 향후 훈련 추천을 개선하는 데 도움이 됩니다.';
 }

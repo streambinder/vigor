@@ -27,8 +27,6 @@ class Activity {
   final int rest;
   @JsonKey(name: 'detail', defaultValue: {})
   final Map<String, dynamic> detail;
-  @JsonKey(name: 'feedback', defaultValue: '')
-  final String feedback;
 
   Activity({
     required this.id,
@@ -41,7 +39,6 @@ class Activity {
     required this.modifiers,
     required this.rest,
     required this.detail,
-    required this.feedback,
   });
 
   factory Activity.fromJson(Map<String, dynamic> json) => _$ActivityFromJson(json);

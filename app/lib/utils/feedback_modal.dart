@@ -83,9 +83,9 @@ class FeedbackResult {
 
 class FeedbackModal {
   /// extracts unique activities from work routines
-  static List<({String id, String exerciseId, String name, String? feedback, Exercise? exercise})> _getWorkActivities(Training training) {
+  static List<({String id, String exerciseId, String name, Exercise? exercise})> _getWorkActivities(Training training) {
     final seen = <String>{};
-    final activities = <({String id, String exerciseId, String name, String? feedback, Exercise? exercise})>[];
+    final activities = <({String id, String exerciseId, String name, Exercise? exercise})>[];
     for (final routine in training.routines) {
       if (routine.type != 'work') continue;
       for (final block in routine.blocks) {
@@ -94,7 +94,7 @@ class FeedbackModal {
             seen.add(activity.exerciseId);
             Exercise? exercise;
             try { exercise = Exercise.fromJson(activity.detail); } catch (_) {}
-            activities.add((id: activity.id, exerciseId: activity.exerciseId, name: activity.displayName, feedback: activity.feedback, exercise: exercise));
+            activities.add((id: activity.id, exerciseId: activity.exerciseId, name: activity.displayName, exercise: exercise));
           }
         }
       }
@@ -114,7 +114,7 @@ class FeedbackModal {
     final activities = _getWorkActivities(training);
     if (activities.isEmpty) {
       return FeedbackResult(
-        feedback: TrainingFeedback(qualityReason: '', message: messagePrefix ?? ''),
+        feedback: TrainingFeedback(qualityReason: '', message: messagePrefix ?? '', createdAt: DateTime.now()),
         activityFeedback: {},
         activityReports: [],
       );
@@ -133,11 +133,11 @@ class FeedbackModal {
   }
 
   /// shows the feedback modal for updating existing feedback (no reports, pre-populated values)
-  static Future<FeedbackResult?> showForUpdate(BuildContext context, Training training) async {
+  static Future<FeedbackResult?> showForUpdate(BuildContext context, Training training, {TrainingFeedback? existingFeedback}) async {
     final activities = _getWorkActivities(training);
     if (activities.isEmpty) {
       return FeedbackResult(
-        feedback: TrainingFeedback(qualityReason: '', message: ''),
+        feedback: TrainingFeedback(qualityReason: '', message: '', createdAt: DateTime.now()),
         activityFeedback: {},
         activityReports: [],
       );
@@ -149,7 +149,7 @@ class FeedbackModal {
       builder: (context) => _FeedbackDialogContent(
         activities: activities,
         showReports: false,
-        initialFeedback: training.feedback,
+        initialFeedback: existingFeedback,
         elapsedSeconds: training.completedIn,
       ),
     );
@@ -157,7 +157,7 @@ class FeedbackModal {
 }
 
 class _FeedbackDialogContent extends StatefulWidget {
-  final List<({String id, String exerciseId, String name, String? feedback, Exercise? exercise})> activities;
+  final List<({String id, String exerciseId, String name, Exercise? exercise})> activities;
   final bool showReports;
   final TrainingFeedback? initialFeedback;
   final String? messagePrefix;
@@ -200,10 +200,11 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
     _durationMinutes = widget.elapsedSeconds != null && widget.elapsedSeconds! > 0
         ? min(_maxDuration, max(_minDuration, (widget.elapsedSeconds! / 60).roundToDouble()))
         : _minDuration;
+    final afb = widget.initialFeedback?.activityFeedback ?? {};
     _exerciseFeedback = {
       for (final a in widget.activities)
-        a.id: a.feedback != null && a.feedback!.isNotEmpty
-            ? ExerciseFeedbackX.fromApiValue(a.feedback)
+        a.id: (afb[a.exerciseId] ?? '').isNotEmpty
+            ? ExerciseFeedbackX.fromApiValue(afb[a.exerciseId])
             : ExerciseFeedback.ok,
     };
     _flaggedActivities = {};
@@ -258,6 +259,7 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
         quality: _trainingQuality,
         qualityReason: _trainingQuality == false ? _qualityReasonController.text.trim() : '',
         message: message,
+        createdAt: DateTime.now(),
       ),
       activityFeedback: activityFeedback,
       activityReports: activityReports,

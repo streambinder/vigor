@@ -168,15 +168,7 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		return q
 	}
 
-	// bias ordering based on activity feedback: if the user said it was too hard,
-	// prefer lower progression scores; if too easy, prefer higher
 	orderClause := "RANDOM()"
-	switch activity.Feedback {
-	case model.FeedbackImpossible, model.FeedbackTooHard:
-		orderClause = fmt.Sprintf("(exercises.progressions->>'%s')::float ASC, RANDOM()", primaryFamily)
-	case model.FeedbackEasy, model.FeedbackTooEasy:
-		orderClause = fmt.Sprintf("(exercises.progressions->>'%s')::float DESC, RANDOM()", primaryFamily)
-	}
 
 	var newExercise model.Exercise
 

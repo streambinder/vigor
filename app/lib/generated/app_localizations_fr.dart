@@ -1314,4 +1314,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get loginToAdd => 'Log in to add this training';
+
+  @override
+  String get pendingFeedbacks => 'Feedbacks en attente';
+
+  @override
+  String get pendingFeedbacksDescription =>
+      'Certains de vos entraînements sont marqués comme terminés mais n\'ont pas encore votre feedback. Le feedback aide à améliorer les recommandations pour vos futurs entraînements.';
 }

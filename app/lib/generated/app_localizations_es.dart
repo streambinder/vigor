@@ -1310,4 +1310,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get loginToAdd => 'Log in to add this training';
+
+  @override
+  String get pendingFeedbacks => 'Feedbacks pendientes';
+
+  @override
+  String get pendingFeedbacksDescription =>
+      'Algunos de tus entrenamientos están marcados como completados pero no tienen tu feedback. El feedback ayuda a mejorar las recomendaciones para tus futuros entrenamientos.';
 }

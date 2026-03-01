@@ -1274,4 +1274,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get loginToAdd => 'Log in to add this training';
+
+  @override
+  String get pendingFeedbacks => '待提交反馈';
+
+  @override
+  String get pendingFeedbacksDescription => '部分训练已完成但尚未提交反馈。反馈有助于改善未来的训练推荐。';
 }

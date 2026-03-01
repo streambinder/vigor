@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/llm/prompt"
 	"github.com/streambinder/vigor/model"
@@ -58,6 +59,7 @@ func GenTraining(
 	userPrompt string,
 	duration int,
 	recentTrainings []model.Training,
+	recentFeedback map[uuid.UUID]model.TrainingFeedback,
 	facts []model.Fact,
 	skipWarmupCooldown bool,
 	calibrationGaps map[string]int,
@@ -82,6 +84,7 @@ func GenTraining(
 		userPrompt,
 		duration,
 		recentTrainings,
+		recentFeedback,
 		facts,
 		skipWarmupCooldown,
 		calibrationGaps,

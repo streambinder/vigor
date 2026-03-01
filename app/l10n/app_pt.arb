@@ -455,5 +455,7 @@
   "trainingNotFound": "Training not found",
   "trainingAddedSuccessfully": "Training added successfully",
   "failedToAddTraining": "Failed to add training",
-  "loginToAdd": "Log in to add this training"
+  "loginToAdd": "Log in to add this training",
+  "pendingFeedbacks": "Feedbacks pendentes",
+  "pendingFeedbacksDescription": "Alguns dos seus treinos estão marcados como concluídos mas não têm o seu feedback. O feedback ajuda a melhorar as recomendações para os seus futuros treinos."
 }

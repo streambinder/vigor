@@ -15,6 +15,7 @@ func initTraining(app *fiber.App) {
 	app.Post("/training", middleware.Authorized(), postTraining)
 	app.Post("/training/complete/:id", middleware.Authorized(), postTrainingCompleteById)
 	app.Put("/training/feedback/:id", middleware.Authorized(), putTrainingFeedbackById)
+	app.Get("/training/feedback/:id", middleware.Authorized(), getTrainingFeedbackById)
 	app.Post("/training/partner/:id", middleware.Authorized(), postTrainingPartner)
 	app.Post("/training/copy/:id", middleware.Authorized(), postTrainingCopy)
 	app.Get("/training", middleware.Authorized(), getTraining)
@@ -121,7 +122,9 @@ func postTrainingCompleteById(c *fiber.Ctx) error {
 	training, err := service.CompleteTraining(
 		c.Locals("userID").(uuid.UUID),
 		trainingID,
-		req.Feedback,
+		req.Quality,
+		req.QualityReason,
+		req.Message,
 		req.ActivityFeedback,
 		req.ActivityReports,
 		req.CompletedIn,
@@ -150,7 +153,9 @@ func putTrainingFeedbackById(c *fiber.Ctx) error {
 	training, err := service.UpdateTrainingFeedback(
 		c.Locals("userID").(uuid.UUID),
 		trainingID,
-		req.Feedback,
+		req.Quality,
+		req.QualityReason,
+		req.Message,
 		req.ActivityFeedback,
 		req.CompletedIn,
 	)
@@ -166,6 +171,23 @@ func putTrainingFeedbackById(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(dto.PostTrainingCompleteResponse{Message: "feedback updated successfully", Training: *training})
+}
+
+func getTrainingFeedbackById(c *fiber.Ctx) error {
+	trainingID := c.Params("id")
+	if trainingID == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "training id is required"})
+	}
+
+	feedback, err := service.GetUserFeedback(c.Locals("userID").(uuid.UUID), trainingID)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch feedback"})
+	}
+	if feedback == nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "no feedback found"})
+	}
+
+	return c.JSON(feedback)
 }
 
 func postTrainingPartner(c *fiber.Ctx) error {

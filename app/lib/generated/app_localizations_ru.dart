@@ -1300,4 +1300,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get loginToAdd => 'Log in to add this training';
+
+  @override
+  String get pendingFeedbacks => 'Ожидающие отзывы';
+
+  @override
+  String get pendingFeedbacksDescription =>
+      'Некоторые ваши тренировки отмечены как завершённые, но не имеют вашего отзыва. Отзывы помогают улучшить рекомендации для будущих тренировок.';
 }

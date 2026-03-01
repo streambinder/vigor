@@ -12,6 +12,7 @@ import '../models/activity.dart';
 import '../models/exercise.dart';
 import '../models/exercise_selection.dart';
 import '../models/progression_adjustment.dart';
+import '../models/training_feedback.dart';
 import '../providers/auth_provider.dart';
 import '../services/service_locator.dart';
 import '../widgets/adaptive/adaptive.dart';
@@ -35,6 +36,7 @@ class TrainingDetailsScreen extends StatefulWidget {
 class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   late Training _training;
   int _partnerCount = 0;
+  TrainingFeedback? _userFeedback;
 
   Training get training => _training;
 
@@ -43,12 +45,20 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     super.initState();
     _training = widget.training;
     _loadPartners();
+    if (_training.completedAt != null) _loadUserFeedback();
   }
 
   Future<void> _loadPartners() async {
     final response = await context.read<ServiceLocator>().trainingService.getPartners(training.id);
     if (response.isSuccess && mounted) {
       setState(() => _partnerCount = response.data?.length ?? 0);
+    }
+  }
+
+  Future<void> _loadUserFeedback() async {
+    final response = await context.read<ServiceLocator>().trainingService.getUserFeedback(training.id);
+    if (response.isSuccess && mounted) {
+      setState(() => _userFeedback = response.data);
     }
   }
 
@@ -145,7 +155,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   Future<void> _updateFeedback(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
     final trainingService = context.read<ServiceLocator>().trainingService;
-    final result = await FeedbackModal.showForUpdate(context, training);
+    final result = await FeedbackModal.showForUpdate(context, training, existingFeedback: _userFeedback);
     if (result == null) return;
 
     final response = await trainingService.updateFeedback(
@@ -868,17 +878,17 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           ),
         )),
         if (!isCompleted)
-          // mark as complete = primary CTA (persimmon)
+          // mark as complete = primary CTA (persimmon), any participant can complete
           Expanded(child: _buildActionButton(
             icon: Icons.check_circle_outline,
             label: l10n.markAsComplete,
             color: VigorColors.persimmon,
-            onPressed: isOwner ? () => _completeTraining(context) : null,
+            onPressed: () => _completeTraining(context),
           ))
         else
           Expanded(child: _buildActionButton(
             icon: Icons.rate_review,
-            label: l10n.updateFeedback,
+            label: _userFeedback != null ? l10n.updateFeedback : l10n.feedback,
             color: indigoColor,
             onPressed: () => _updateFeedback(context),
           )),

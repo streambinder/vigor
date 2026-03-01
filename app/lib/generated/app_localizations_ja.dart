@@ -1276,4 +1276,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get loginToAdd => 'Log in to add this training';
+
+  @override
+  String get pendingFeedbacks => '未提出のフィードバック';
+
+  @override
+  String get pendingFeedbacksDescription =>
+      '完了済みのトレーニングにフィードバックが未提出です。フィードバックは今後のトレーニング提案の改善に役立ちます。';
 }

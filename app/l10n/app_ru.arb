@@ -455,5 +455,7 @@
   "trainingNotFound": "Training not found",
   "trainingAddedSuccessfully": "Training added successfully",
   "failedToAddTraining": "Failed to add training",
-  "loginToAdd": "Log in to add this training"
+  "loginToAdd": "Log in to add this training",
+  "pendingFeedbacks": "Ожидающие отзывы",
+  "pendingFeedbacksDescription": "Некоторые ваши тренировки отмечены как завершённые, но не имеют вашего отзыва. Отзывы помогают улучшить рекомендации для будущих тренировок."
 }

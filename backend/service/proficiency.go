@@ -201,7 +201,7 @@ func IsPositiveFeedback(feedback string) bool {
 }
 
 // RecordProficiencies writes proficiency records for a user based on training activities.
-func RecordProficiencies(userID, trainingID uuid.UUID, activities []*model.Activity, exerciseMap map[string]*model.Exercise, modifierMap map[string]*model.Modifier) error {
+func RecordProficiencies(userID, trainingID uuid.UUID, activities []*model.Activity, activityFeedback map[string]string, exerciseMap map[string]*model.Exercise, modifierMap map[string]*model.Modifier) error {
 	// get current max per movement family for this user
 	currentMax := make(map[string]float64)
 	var existing []struct {
@@ -221,7 +221,8 @@ func RecordProficiencies(userID, trainingID uuid.UUID, activities []*model.Activ
 	// process activities
 	toInsert := make([]model.Proficiency, 0)
 	for _, activity := range activities {
-		if !IsPositiveFeedback(activity.Feedback) {
+		feedback := activityFeedback[activity.ExerciseID]
+		if !IsPositiveFeedback(feedback) {
 			continue
 		}
 

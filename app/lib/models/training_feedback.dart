@@ -7,20 +7,37 @@ part 'training_feedback.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class TrainingFeedback {
+  @JsonKey(name: 'id', defaultValue: '')
+  final String id;
+  @JsonKey(name: 'trainingId', defaultValue: '')
+  final String trainingId;
+  @JsonKey(name: 'userId', defaultValue: '')
+  final String userId;
   @JsonKey(name: 'quality')
   final bool? quality;
   @JsonKey(name: 'qualityReason', defaultValue: '')
   final String qualityReason;
   @JsonKey(name: 'message', defaultValue: '')
   final String message;
+  @JsonKey(name: 'activityFeedback', defaultValue: {})
+  final Map<String, dynamic> activityFeedback;
+  @JsonKey(name: 'createdAt', toJson: _dateTimeToJson)
+  final DateTime createdAt;
 
   TrainingFeedback({
+    this.id = '',
+    this.trainingId = '',
+    this.userId = '',
     this.quality,
     required this.qualityReason,
     required this.message,
+    this.activityFeedback = const {},
+    required this.createdAt,
   });
 
   factory TrainingFeedback.fromJson(Map<String, dynamic> json) => _$TrainingFeedbackFromJson(json);
 
   Map<String, dynamic> toJson() => _$TrainingFeedbackToJson(this);
+
+  static String _dateTimeToJson(DateTime dt) => dt.toUtc().toIso8601String();
 }

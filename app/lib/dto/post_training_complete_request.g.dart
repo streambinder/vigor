@@ -9,7 +9,9 @@ part of 'post_training_complete_request.dart';
 PostTrainingCompleteRequest _$PostTrainingCompleteRequestFromJson(
   Map<String, dynamic> json,
 ) => PostTrainingCompleteRequest(
-  feedback: TrainingFeedback.fromJson(json['feedback'] as Map<String, dynamic>),
+  quality: json['quality'] as bool?,
+  qualityReason: json['qualityReason'] as String? ?? '',
+  message: json['message'] as String? ?? '',
   activityFeedback:
       (json['activityFeedback'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, e as String),
@@ -26,7 +28,9 @@ PostTrainingCompleteRequest _$PostTrainingCompleteRequestFromJson(
 Map<String, dynamic> _$PostTrainingCompleteRequestToJson(
   PostTrainingCompleteRequest instance,
 ) => <String, dynamic>{
-  'feedback': instance.feedback.toJson(),
+  'quality': instance.quality,
+  'qualityReason': instance.qualityReason,
+  'message': instance.message,
   'activityFeedback': instance.activityFeedback,
   'activityReports': instance.activityReports,
   'completedIn': instance.completedIn,

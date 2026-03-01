@@ -16,6 +16,7 @@ import (
 	"github.com/streambinder/vigor/model"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 const (
@@ -251,6 +252,20 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		return nil, err
 	}
 
+	// batch-load user's feedback for recent trainings
+	recentFeedback := make(map[uuid.UUID]model.TrainingFeedback)
+	if len(recentTrainings) > 0 {
+		trainingIDs := make([]uuid.UUID, len(recentTrainings))
+		for i, t := range recentTrainings {
+			trainingIDs[i] = t.ID
+		}
+		var feedbacks []model.TrainingFeedback
+		database.DB.Where("user_id = ? AND training_id IN ?", userID, trainingIDs).Find(&feedbacks)
+		for _, fb := range feedbacks {
+			recentFeedback[fb.TrainingID] = fb
+		}
+	}
+
 	// build validation lookup tables once before the generation loop
 	validExerciseIDs := make(map[string]bool, len(workExercises)+len(warmupExercises)+len(cooldownExercises))
 	for _, e := range workExercises {
@@ -308,6 +323,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			prompt,
 			duration,
 			recentTrainings,
+			recentFeedback,
 			facts,
 			skipWarmupCooldown,
 			calibrationGaps,
@@ -545,8 +561,8 @@ func DeleteTraining(userID uuid.UUID, trainingID string) (isOwner bool, err erro
 	return false, nil
 }
 
-// CompleteTraining marks a training as completed.
-func CompleteTraining(userID uuid.UUID, trainingID string, feedback model.TrainingFeedback, activityFeedback map[string]string, activityReports []string, completedIn *int) (*model.Training, error) {
+// CompleteTraining marks a training as completed and records the calling user's feedback.
+func CompleteTraining(userID uuid.UUID, trainingID string, quality *bool, qualityReason, message string, activityFeedback map[string]string, activityReports []string, completedIn *int) (*model.Training, error) {
 	var training model.Training
 	if err := database.DB.
 		Preload("Gym").
@@ -560,19 +576,15 @@ func CompleteTraining(userID uuid.UUID, trainingID string, feedback model.Traini
 	now := time.Now()
 	training.CompletedAt = &now
 	training.CompletedIn = completedIn
-	training.Feedback = datatypes.NewJSONType(feedback)
 
 	if err := database.DB.Save(&training).Error; err != nil {
 		return nil, err
 	}
 
-	if len(activityFeedback) > 0 {
-		for _, activity := range training.Activities() {
-			if fb, ok := activityFeedback[activity.ExerciseID]; ok {
-				activity.Feedback = fb
-				database.DB.Model(activity).Update("feedback", fb)
-			}
-		}
+	// upsert per-user feedback
+	activityFeedbackJSON, _ := json.Marshal(activityFeedback)
+	if err := upsertTrainingFeedback(userID, training.ID, quality, qualityReason, message, activityFeedbackJSON); err != nil {
+		return nil, err
 	}
 
 	if len(activityReports) > 0 {
@@ -587,16 +599,16 @@ func CompleteTraining(userID uuid.UUID, trainingID string, feedback model.Traini
 		}
 	}
 
-	// record proficiencies for owner and partners
-	if err := recordTrainingProficiencies(&training); err != nil {
+	// record proficiencies for submitting user only
+	if err := recordUserProficiencies(&training, userID, activityFeedback); err != nil {
 		log.Error().Err(err).Msg("failed to record proficiencies")
 	}
 
 	return &training, nil
 }
 
-// UpdateTrainingFeedback updates feedback on an already-completed training.
-func UpdateTrainingFeedback(userID uuid.UUID, trainingID string, feedback model.TrainingFeedback, activityFeedback map[string]string, completedIn *int) (*model.Training, error) {
+// UpdateTrainingFeedback updates feedback on an already-completed training for the calling user.
+func UpdateTrainingFeedback(userID uuid.UUID, trainingID string, quality *bool, qualityReason, message string, activityFeedback map[string]string, completedIn *int) (*model.Training, error) {
 	var training model.Training
 	if err := database.DB.
 		Preload("Gym").
@@ -611,33 +623,55 @@ func UpdateTrainingFeedback(userID uuid.UUID, trainingID string, feedback model.
 		return nil, ErrTrainingNotCompleted
 	}
 
-	training.Feedback = datatypes.NewJSONType(feedback)
 	if completedIn != nil {
 		training.CompletedIn = completedIn
+		database.DB.Model(&training).Update("completed_in", completedIn)
 	}
-	if err := database.DB.Save(&training).Error; err != nil {
+
+	// upsert per-user feedback
+	activityFeedbackJSON, _ := json.Marshal(activityFeedback)
+	if err := upsertTrainingFeedback(userID, training.ID, quality, qualityReason, message, activityFeedbackJSON); err != nil {
 		return nil, err
 	}
 
-	if len(activityFeedback) > 0 {
-		for _, activity := range training.Activities() {
-			if fb, ok := activityFeedback[activity.ExerciseID]; ok {
-				activity.Feedback = fb
-				database.DB.Model(activity).Update("feedback", fb)
-			}
-		}
-	}
-
-	// delete old proficiencies for this training, then re-record
-	database.DB.Where("training_id = ?", training.ID).Delete(&model.Proficiency{})
-	if err := recordTrainingProficiencies(&training); err != nil {
+	// delete old proficiencies for this user+training, then re-record
+	database.DB.Where("training_id = ? AND user_id = ?", training.ID, userID).Delete(&model.Proficiency{})
+	if err := recordUserProficiencies(&training, userID, activityFeedback); err != nil {
 		log.Error().Err(err).Msg("failed to record proficiencies")
 	}
 
 	return &training, nil
 }
 
-func recordTrainingProficiencies(training *model.Training) error {
+// upsertTrainingFeedback creates or updates a per-user feedback row.
+func upsertTrainingFeedback(userID, trainingID uuid.UUID, quality *bool, qualityReason, message string, activityFeedbackJSON []byte) error {
+	fb := model.TrainingFeedback{
+		TrainingID:       trainingID,
+		UserID:           userID,
+		Quality:          quality,
+		QualityReason:    qualityReason,
+		Message:          message,
+		ActivityFeedback: activityFeedbackJSON,
+	}
+	return database.DB.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "training_id"}, {Name: "user_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"quality", "quality_reason", "message", "activity_feedback", "updated_at"}),
+	}).Create(&fb).Error
+}
+
+// GetUserFeedback returns the calling user's feedback for a training, or nil if none exists.
+func GetUserFeedback(userID uuid.UUID, trainingID string) (*model.TrainingFeedback, error) {
+	var fb model.TrainingFeedback
+	if err := database.DB.First(&fb, "training_id = ? AND user_id = ?", trainingID, userID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &fb, nil
+}
+
+func recordUserProficiencies(training *model.Training, userID uuid.UUID, activityFeedback map[string]string) error {
 	var allExercises []model.Exercise
 	if err := database.Knowledge.Find(&allExercises).Error; err != nil {
 		return err
@@ -656,23 +690,7 @@ func recordTrainingProficiencies(training *model.Training) error {
 		modifierMap[allModifiers[i].ID] = &allModifiers[i]
 	}
 
-	activities := training.Activities()
-
-	// record for training owner
-	if err := RecordProficiencies(training.UserID, training.ID, activities, exerciseMap, modifierMap); err != nil {
-		return err
-	}
-
-	// record for partners
-	var partners []model.Partner
-	database.DB.Where("training_id = ?", training.ID).Find(&partners)
-	for _, partner := range partners {
-		if err := RecordProficiencies(partner.UserID, training.ID, activities, exerciseMap, modifierMap); err != nil {
-			log.Error().Err(err).Str("partner", partner.UserID.String()).Msg("failed to record partner proficiencies")
-		}
-	}
-
-	return nil
+	return RecordProficiencies(userID, training.ID, training.Activities(), activityFeedback, exerciseMap, modifierMap)
 }
 
 // AddTrainingPartner adds a partner to an existing training.

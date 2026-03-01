@@ -1,7 +1,9 @@
 {% package prompt %}
 
+{% import "encoding/json" %}
 {% import "fmt" %}
 {% import "strings" %}
+{% import "github.com/google/uuid" %}
 {% import "github.com/streambinder/vigor/model" %}
 
 {% func GenTraining(
@@ -18,6 +20,7 @@
     userPrompt string,
     duration int,
     recentTrainings []model.Training,
+    recentFeedback map[uuid.UUID]model.TrainingFeedback,
     facts []model.Fact,
     skipWarmupCooldown bool,
     calibrationGaps map[string]int,
@@ -91,10 +94,10 @@ The platform is still calibrating this user's fitness level. Prioritize exercise
 {% if len(recentTrainings) > 0 %}
 [HISTORY]
 {% for _, training := range recentTrainings %}
-- "{%s training.Name %}" | {%d training.DaysSince() %}d ago | {%s training.Methodology %}{% if training.CompletedIn != nil %} | {%d *training.CompletedIn / 60 %}min actual{% endif %}{% code fb := training.Feedback.Data() %}{% if fb.Quality != nil %}{% if *fb.Quality %} | Quality: good{% else %} | Quality: bad{% if fb.QualityReason != "" %} ({%s fb.QualityReason %}){% endif %}{% endif %}{% endif %}{% if fb.Message != "" %} | Feedback: "{%s fb.Message %}"{% endif %}
-{% code activitiesWithFeedback := training.Activities() %}
-{% for _, a := range activitiesWithFeedback %}{% if len(a.Feedback) > 0 %}  {%s a.ExerciseID %}: {%s a.Feedback %}
-{% endif %}{% endfor %}
+{% code fb, hasFb := recentFeedback[training.ID] %}
+- "{%s training.Name %}" | {%d training.DaysSince() %}d ago | {%s training.Methodology %}{% if training.CompletedIn != nil %} | {%d *training.CompletedIn / 60 %}min actual{% endif %}{% if hasFb && fb.Quality != nil %}{% if *fb.Quality %} | Quality: good{% else %} | Quality: bad{% if fb.QualityReason != "" %} ({%s fb.QualityReason %}){% endif %}{% endif %}{% endif %}{% if hasFb && fb.Message != "" %} | Feedback: "{%s fb.Message %}"{% endif %}
+{% if hasFb %}{% code var afb map[string]string; json.Unmarshal(fb.ActivityFeedback, &afb) %}{% for exID, exFb := range afb %}{% if len(exFb) > 0 %}  {%s exID %}: {%s exFb %}
+{% endif %}{% endfor %}{% endif %}
 {% endfor %}
 {% endif %}
 {% if len(facts) > 0 %}

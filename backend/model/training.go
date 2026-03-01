@@ -113,11 +113,17 @@ type TrainingReasoning struct {
 	Exercises   []ExerciseSelection   `json:"exercises" prompt:"Selected exercises with rationale"`
 }
 
-// TrainingFeedback captures structured feedback for a completed training.
+// TrainingFeedback captures per-user structured feedback for a completed training.
 type TrainingFeedback struct {
-	Quality       *bool  `json:"quality"`       // nil = not rated, true = good, false = bad
-	QualityReason string `json:"qualityReason"` // reason when quality is bad
-	Message       string `json:"message"`       // user free-text comments
+	ID               uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	TrainingID       uuid.UUID      `gorm:"type:uuid;not null;uniqueIndex:idx_feedback_training_user" json:"trainingId"`
+	UserID           uuid.UUID      `gorm:"type:uuid;not null;uniqueIndex:idx_feedback_training_user" json:"userId"`
+	Quality          *bool          `json:"quality"`
+	QualityReason    string         `json:"qualityReason"`
+	Message          string         `json:"message"`
+	ActivityFeedback datatypes.JSON `gorm:"type:jsonb" json:"activityFeedback"` // map[exerciseID]string
+	CreatedAt        time.Time      `json:"createdAt"`
+	UpdatedAt        time.Time      `json:"-"`
 }
 
 // TrainingReference holds a resolved fact excerpt with its source URL.
@@ -146,7 +152,6 @@ type Training struct {
 	FactIndices []int          `gorm:"-" json:"fact_indices" prompt:"Indices of [FACTS] used (e.g. [0,2]), empty if none"`
 	Routines    []Routine      `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"routines" prompt:"Training routines"`
 	Prompt   datatypes.JSONType[TrainingPrompt]    `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
-	Feedback datatypes.JSONType[TrainingFeedback] `gorm:"type:jsonb" json:"feedback" prompt:"-"`
 
 	CompletedAt *time.Time `json:"completed_at" prompt:"-"`
 	CompletedIn *int       `json:"completed_in" prompt:"-"`
@@ -203,15 +208,9 @@ type Activity struct {
 	Modifiers  pq.StringArray `gorm:"type:text[]" json:"modifiers" prompt:"Modifier IDs (empty if none)"`
 	Rest       int            `gorm:"not null" json:"rest" prompt:"Rest after (s)"`
 	Detail     datatypes.JSON `gorm:"type:jsonb,not null" json:"detail" prompt:"-"`
-	Feedback   string         `json:"feedback" prompt:"-"` // too_easy, easy, ok, hard, too_hard, skipped
 
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
-}
-
-// HasFeedback returns true if the activity has any feedback recorded.
-func (a *Activity) HasFeedback() bool {
-	return a.Feedback != ""
 }
 
 func (t Training) DaysSince() int {
@@ -394,7 +393,6 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 	clone.UserID = newUserID
 	clone.ParentID = &t.ID
 	clone.Prompt = datatypes.NewJSONType(TrainingPrompt{})
-	clone.Feedback = datatypes.NewJSONType(TrainingFeedback{})
 	clone.CompletedAt = nil
 	clone.CompletedIn = nil
 	clone.CreatedAt = time.Time{}
@@ -414,7 +412,6 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 			for k := range clone.Routines[i].Blocks[j].Activities {
 				clone.Routines[i].Blocks[j].Activities[k].ID = ""
 				clone.Routines[i].Blocks[j].Activities[k].BlockID = ""
-				clone.Routines[i].Blocks[j].Activities[k].Feedback = ""
 				clone.Routines[i].Blocks[j].Activities[k].CreatedAt = time.Time{}
 				clone.Routines[i].Blocks[j].Activities[k].UpdatedAt = time.Time{}
 			}

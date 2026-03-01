@@ -455,5 +455,7 @@
   "trainingNotFound": "Training not found",
   "trainingAddedSuccessfully": "Training added successfully",
   "failedToAddTraining": "Failed to add training",
-  "loginToAdd": "Log in to add this training"
+  "loginToAdd": "Log in to add this training",
+  "pendingFeedbacks": "대기 중인 피드백",
+  "pendingFeedbacksDescription": "완료된 훈련 중 피드백이 없는 항목이 있습니다. 피드백은 향후 훈련 추천을 개선하는 데 도움이 됩니다."
 }
