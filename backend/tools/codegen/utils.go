@@ -43,10 +43,17 @@ func toCamelCase(s string) string {
 	if s == "ID" {
 		return "id"
 	}
+	if s == "URL" {
+		return "url"
+	}
 	if strings.HasSuffix(s, "ID") {
 		// UserID -> userId
 		base := s[:len(s)-2]
 		return toCamelCase(base) + "Id"
+	}
+	if strings.HasSuffix(s, "URL") {
+		base := s[:len(s)-3]
+		return toCamelCase(base) + "Url"
 	}
 
 	// Convert PascalCase to camelCase

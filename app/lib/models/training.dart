@@ -3,6 +3,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 import 'training_reasoning.dart';
+import 'training_reference.dart';
 import 'routine.dart';
 import 'training_prompt.dart';
 import 'training_feedback.dart';
@@ -33,7 +34,9 @@ class Training {
   @JsonKey(name: 'request', defaultValue: '')
   final String request;
   @JsonKey(name: 'references', defaultValue: [])
-  final List<String> references;
+  final List<TrainingReference> references;
+  @JsonKey(name: 'fact_indices', defaultValue: [])
+  final List<int> factIndices;
   @JsonKey(name: 'routines', defaultValue: [])
   final List<Routine> routines;
   @JsonKey(name: 'prompt')
@@ -67,6 +70,7 @@ class Training {
     required this.muscles,
     required this.request,
     required this.references,
+    required this.factIndices,
     required this.routines,
     required this.prompt,
     required this.feedback,

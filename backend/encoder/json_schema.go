@@ -144,12 +144,20 @@ func buildPropertySchema(t reflect.Type, description string, enumValues []string
 		prop["type"] = "boolean"
 	case reflect.Slice, reflect.Array:
 		prop["type"] = "array"
-		// Handle slice element type
 		elemType := t.Elem()
-		if elemType.Kind() == reflect.String {
+		switch elemType.Kind() {
+		case reflect.String:
 			prop["items"] = map[string]interface{}{"type": "string"}
-		} else if elemType.Kind() == reflect.Struct || (elemType.Kind() == reflect.Pointer && elemType.Elem().Kind() == reflect.Struct) {
-			prop["items"] = jsonSchemaForType(elemType)
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			prop["items"] = map[string]interface{}{"type": "integer"}
+		case reflect.Struct, reflect.Pointer:
+			if elemType.Kind() == reflect.Pointer {
+				elemType = elemType.Elem()
+			}
+			if elemType.Kind() == reflect.Struct {
+				prop["items"] = jsonSchemaForType(elemType)
+			}
 		}
 	case reflect.Map:
 		// Handle map[string]string as object with additionalProperties

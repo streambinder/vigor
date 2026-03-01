@@ -582,17 +582,17 @@ The platform is still calibrating this user's fitness level. Prioritize exercise
 Apply when relevant to selected exercises:
 `)
 //line llm/prompt/gen_training.qtpl:103
-		for _, fact := range facts {
+		for i, fact := range facts {
 //line llm/prompt/gen_training.qtpl:103
-			qw422016.N().S(`- `)
+			qw422016.N().S(`- [F`)
+//line llm/prompt/gen_training.qtpl:103
+			qw422016.N().D(i)
+//line llm/prompt/gen_training.qtpl:103
+			qw422016.N().S(`] `)
 //line llm/prompt/gen_training.qtpl:103
 			qw422016.E().S(fact.Content)
 //line llm/prompt/gen_training.qtpl:103
-			qw422016.N().S(` (ref: `)
-//line llm/prompt/gen_training.qtpl:103
-			qw422016.E().S(fact.Reference)
-//line llm/prompt/gen_training.qtpl:103
-			qw422016.N().S(`)
+			qw422016.N().S(`
 `)
 //line llm/prompt/gen_training.qtpl:104
 		}

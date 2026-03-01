@@ -120,6 +120,12 @@ type TrainingFeedback struct {
 	Message       string `json:"message"`       // user free-text comments
 }
 
+// TrainingReference holds a resolved fact excerpt with its source URL.
+type TrainingReference struct {
+	Excerpt string `json:"excerpt"`
+	URL     string `json:"url"`
+}
+
 // Training represents the entire training session with a UUID ID
 type Training struct {
 	ID uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
@@ -136,7 +142,8 @@ type Training struct {
 	Goals       pq.StringArray `gorm:"type:text[]" json:"goals" prompt:"-"`
 	Muscles     pq.StringArray `gorm:"type:text[]" json:"muscles" prompt:"-"`
 	Request     string         `json:"request" prompt:"-"`
-	References  pq.StringArray `gorm:"type:text[]" json:"references" prompt:"DOI URLs from facts used (empty if none)"`
+	References  datatypes.JSONType[[]TrainingReference] `gorm:"type:jsonb" json:"references" prompt:"-"`
+	FactIndices []int          `gorm:"-" json:"fact_indices" prompt:"Indices of [FACTS] used (e.g. [0,2]), empty if none"`
 	Routines    []Routine      `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"routines" prompt:"Training routines"`
 	Prompt   datatypes.JSONType[TrainingPrompt]    `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
 	Feedback datatypes.JSONType[TrainingFeedback] `gorm:"type:jsonb" json:"feedback" prompt:"-"`

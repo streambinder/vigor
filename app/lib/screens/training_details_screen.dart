@@ -728,19 +728,20 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         childrenPadding: const EdgeInsets.symmetric(vertical: VigorSpacing.xs),
         leading: const Icon(Icons.menu_book, size: 18, color: VigorColors.stone),
         title: Text(l10n.literature, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
-        children: training.references.map((url) => GestureDetector(
-          onTap: () => _launchUrl(url),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: VigorSpacing.xs),
-            child: Row(
-              children: [
-                Icon(Icons.link, size: 14, color: linkColor),
-                const SizedBox(width: VigorSpacing.sm),
-                Expanded(
-                  child: Text(url, style: VigorTypography.caption.copyWith(color: linkColor, decoration: TextDecoration.underline), overflow: TextOverflow.ellipsis),
-                ),
-              ],
-            ),
+        children: training.references.map((ref) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: VigorSpacing.xs),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(ref.excerpt, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context)), maxLines: 3, overflow: TextOverflow.ellipsis),
+              ),
+              const SizedBox(width: VigorSpacing.sm),
+              GestureDetector(
+                onTap: () => _launchUrl(ref.url),
+                child: Icon(Icons.open_in_new, size: 16, color: linkColor),
+              ),
+            ],
           ),
         )).toList(),
       ),
@@ -818,6 +819,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   Widget _buildReferencesSection(AppLocalizations l10n) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final linkColor = VigorColors.indigoAdaptive(context);
     return Container(
       decoration: BoxDecoration(
         color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
@@ -829,19 +831,20 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           leading: const Icon(Icons.science, size: 20, color: VigorColors.stone),
           title: Text(l10n.references, style: VigorTypography.label.copyWith(color: VigorColors.textSecondary(context))),
           childrenPadding: const EdgeInsets.only(left: VigorSpacing.md, right: VigorSpacing.md, bottom: VigorSpacing.md),
-          children: training.references.map((url) => GestureDetector(
-            onTap: () => _launchUrl(url),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: VigorSpacing.xs),
-              child: Row(
-                children: [
-                  const Icon(Icons.link, size: 14, color: VigorColors.indigo),
-                  const SizedBox(width: VigorSpacing.sm),
-                  Expanded(
-                    child: Text(url, style: VigorTypography.caption.copyWith(color: VigorColors.indigo, decoration: TextDecoration.underline), overflow: TextOverflow.ellipsis),
-                  ),
-                ],
-              ),
+          children: training.references.map((ref) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: VigorSpacing.xs),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(ref.excerpt, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context)), maxLines: 3, overflow: TextOverflow.ellipsis),
+                ),
+                const SizedBox(width: VigorSpacing.sm),
+                GestureDetector(
+                  onTap: () => _launchUrl(ref.url),
+                  child: Icon(Icons.open_in_new, size: 16, color: linkColor),
+                ),
+              ],
             ),
           )).toList(),
         ),

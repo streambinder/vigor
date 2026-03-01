@@ -417,6 +417,20 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 
 	training.Description = training.BuildDescription()
 	training.UserID = requestorProfile.UserID
+
+	// resolve fact indices to structured references
+	var refs []model.TrainingReference
+	for _, idx := range training.FactIndices {
+		if idx >= 0 && idx < len(facts) {
+			refs = append(refs, model.TrainingReference{
+				Excerpt: facts[idx].Content,
+				URL:     facts[idx].Reference,
+			})
+		}
+	}
+	training.References = datatypes.NewJSONType(refs)
+	training.FactIndices = nil // clear after resolution
+
 	training.Prompt = datatypes.NewJSONType(model.TrainingPrompt{
 		Query: llmPrompt,
 		Model: llmModel,

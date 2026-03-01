@@ -100,7 +100,7 @@ The platform is still calibrating this user's fitness level. Prioritize exercise
 {% if len(facts) > 0 %}
 [FACTS]
 Apply when relevant to selected exercises:
-{% for _, fact := range facts %}- {%s fact.Content %} (ref: {%s fact.Reference %})
+{% for i, fact := range facts %}- [F{%d i %}] {%s fact.Content %}
 {% endfor %}
 {% endif %}
 Output language: {% if len(profiles) > 0 && len(profiles[0].Language) > 0 %}{%s profiles[0].Language %}{% else %}English{% endif %}
