@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 
 /// Audio service for playing interval whistle sounds
@@ -8,12 +9,19 @@ class AudioService {
   AudioService._internal();
 
   final AudioPlayer _player = AudioPlayer();
+  final _source = AssetSource('audio/whistle.mp3');
   bool _initialized = false;
+  StreamSubscription? _completeSubscription;
 
   Future<void> initialize() async {
     if (_initialized) return;
-    await _player.setSource(AssetSource('audio/whistle.mp3'));
+    await _player.setSource(_source);
     await _player.setVolume(1.0);
+    // re-prepare source after playback completes so next play works reliably —
+    // without this, seek+resume silently fails on completed players
+    _completeSubscription = _player.onPlayerComplete.listen((_) {
+      _player.setSource(_source);
+    });
     _initialized = true;
   }
 
@@ -47,13 +55,21 @@ class AudioService {
 
   Future<void> playWhistle() async {
     if (!_initialized) await initialize();
-    // seek instead of stop — stop() leaves Android's MediaPlayer in a state
-    // where resume() won't replay without re-preparing the source
-    await _player.seek(Duration.zero);
-    await _player.resume();
+    // stop + play from scratch — seek+resume is unreliable after the player
+    // enters completed state or after iOS audio session interruptions
+    await _player.stop();
+    await _player.play(_source);
+  }
+
+  /// re-prepare audio after app returns from background — iOS deactivates the
+  /// audio session on backgrounding, so the player needs a fresh source
+  Future<void> reactivate() async {
+    if (!_initialized) return;
+    await _player.setSource(_source);
   }
 
   void dispose() {
+    _completeSubscription?.cancel();
     _player.dispose();
   }
 }

@@ -40,7 +40,8 @@ class WorkoutTimerScreen extends StatefulWidget {
   State<WorkoutTimerScreen> createState() => _WorkoutTimerScreenState();
 }
 
-class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
+class _WorkoutTimerScreenState extends State<WorkoutTimerScreen>
+    with WidgetsBindingObserver {
   late final List<RoutineSegment> _segments;
   int _currentSegmentIndex = 0;
   TimerController? _controller;
@@ -57,6 +58,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WakelockPlus.enable();
     _segments = RoutineSegment.buildSegments(
       widget.training.routines,
@@ -68,6 +70,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     WakelockPlus.disable();
     _controller?.removeListener(_onControllerUpdate);
     _controller?.dispose();
@@ -200,6 +203,15 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
     await _audioService.initialize();
     final prefs = context.read<PreferencesService>();
     await _audioService.setDuckOtherAudio(prefs.duckOtherAudio);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // re-prepare audio after returning from background — iOS invalidates
+      // the audio session, making subsequent plays silently fail
+      _audioService.reactivate();
+    }
   }
 
   void _playWhistleIfEnabled() {
