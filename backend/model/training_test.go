@@ -173,6 +173,26 @@ func TestCalculateDuration_EMOM(t *testing.T) {
 	}
 }
 
+func TestCalculateDuration_EMOM_WithBlockRest(t *testing.T) {
+	tr := makeTraining("emom", []Routine{
+		routine("work", 0, []Block{
+			block(6, 120, []Activity{act(0, 10, 0)}), // 6×60 = 360s + 120s rest
+			block(6, 120, []Activity{act(0, 10, 0)}), // 6×60 = 360s + 120s rest
+			block(5, 120, []Activity{act(0, 10, 0)}), // 5×60 = 300s (last block, no rest)
+		}),
+	})
+
+	got := tr.CalculateDuration()
+
+	// work: (6+6+5)×60 = 1020s
+	// inter-block rest: 120 + 120 = 240s (last block excluded)
+	// total = 1260s
+
+	if got != 1260 {
+		t.Errorf("emom with block rest CalculateDuration() = %d, want 1260", got)
+	}
+}
+
 func TestCalculateDuration_ForTime(t *testing.T) {
 	tr := makeTraining("for_time", []Routine{
 		routine("warmup", 0, []Block{

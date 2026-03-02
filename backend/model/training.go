@@ -510,8 +510,12 @@ func (t *Training) CalculateDuration() int {
 		work := 0
 		for _, r := range t.Routines {
 			if r.Type == "work" {
-				for _, b := range r.Blocks {
+				for i, b := range r.Blocks {
 					work += b.Repeats * 60
+					// add inter-block rest (skip last block)
+					if i < len(r.Blocks)-1 && b.Rest > 0 {
+						work += b.Rest
+					}
 				}
 			}
 		}
