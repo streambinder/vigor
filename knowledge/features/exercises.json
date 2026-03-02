@@ -29708,9 +29708,7 @@
   {
     "id": "reverse-dip",
     "name": "Reverse Dip",
-    "equipment": [
-      "dip station"
-    ],
+    "equipment": [],
     "muscles": [
       "arms",
       "chest",
