@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import '../models/gym.dart';
+import '../models/progress.dart';
 import '../models/training.dart';
+import '../models/weekly_target.dart';
 import 'training_service.dart';
 import 'gym_service.dart';
 import 'progress_service.dart';
@@ -21,6 +23,11 @@ class ServiceLocator extends ChangeNotifier {
   // shared observable state for cross-screen sync
   final ValueNotifier<List<Gym>?> gymsNotifier = ValueNotifier(null);
   final ValueNotifier<List<Training>?> trainingsNotifier = ValueNotifier(null);
+
+  // pre-loaded homepage data so splash can stay until ready
+  Progress? initialProgress;
+  WeeklyTarget? initialWeeklyTarget;
+  bool initialDataLoaded = false;
 
   // concurrency guards to prevent duplicate refresh requests
   bool _isRefreshingGyms = false;
@@ -70,6 +77,17 @@ class ServiceLocator extends ChangeNotifier {
     }
   }
 
+  /// Pre-load homepage data so splash stays until everything is ready
+  Future<void> loadInitialData() async {
+    final results = await Future.wait([
+      progressService.getProgress(),
+      progressService.getWeeklyTarget(),
+    ]);
+    if (results[0].isSuccess) initialProgress = results[0].data as Progress?;
+    if (results[1].isSuccess) initialWeeklyTarget = results[1].data as WeeklyTarget?;
+    initialDataLoaded = true;
+  }
+
   /// Clear cached services (e.g., on logout)
   void clearServices() {
     _trainingService = null;
@@ -78,6 +96,9 @@ class ServiceLocator extends ChangeNotifier {
     _userService = null;
     gymsNotifier.value = null;
     trainingsNotifier.value = null;
+    initialProgress = null;
+    initialWeeklyTarget = null;
+    initialDataLoaded = false;
   }
 
   @override

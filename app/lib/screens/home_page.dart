@@ -33,6 +33,20 @@ class _HomePageState extends State<HomePage> {
   WeeklyTarget? _weeklyTarget;
   bool _isLoading = false;
   bool _hasLoadedOnce = false;
+  bool _consumedInitialData = false;
+
+  void _consumePreloadedData() {
+    if (_consumedInitialData) return;
+    _consumedInitialData = true;
+    final serviceLocator = context.read<ServiceLocator>();
+    if (serviceLocator.initialDataLoaded) {
+      _progress = serviceLocator.initialProgress;
+      _weeklyTarget = serviceLocator.initialWeeklyTarget;
+      _hasLoadedOnce = true;
+      serviceLocator.initialProgress = null;
+      serviceLocator.initialWeeklyTarget = null;
+    }
+  }
 
   Future<void> _loadProgress({int retryCount = 0}) async {
     if (_isLoading) return;
@@ -97,6 +111,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    _consumePreloadedData();
     // watch auth state to trigger load when authenticated
     final authState = context.watch<AuthProvider>().state;
     if (authState == AuthState.authenticated && !_hasLoadedOnce && !_isLoading) {

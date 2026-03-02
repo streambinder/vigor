@@ -166,6 +166,7 @@ class AuthenticationWrapper extends StatefulWidget {
 class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
   late final AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
+  bool _loadingInitialData = false;
 
   @override
   void initState() {
@@ -217,15 +218,25 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
               context.read<LocaleProvider>().setFromProfileLanguage(user.profile.language);
             });
           }
+
+          // pre-load homepage data before leaving splash
+          final serviceLocator = context.read<ServiceLocator>();
+          if (!serviceLocator.initialDataLoaded && !_loadingInitialData) {
+            _loadingInitialData = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              await serviceLocator.loadInitialData();
+              if (mounted) setState(() => _loadingInitialData = false);
+            });
+            return const SplashScreen();
+          }
+          if (_loadingInitialData) return const SplashScreen();
+
+          return const HomeScreen();
         }
 
         if (authProvider.state == AuthState.initial ||
             authProvider.state == AuthState.loading) {
           return const SplashScreen();
-        }
-
-        if (authProvider.state == AuthState.authenticated) {
-          return const HomeScreen();
         }
 
         return const GoogleAuthScreen();
