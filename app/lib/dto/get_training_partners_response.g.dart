@@ -11,7 +11,7 @@ GetTrainingPartnersResponse _$GetTrainingPartnersResponseFromJson(
 ) => GetTrainingPartnersResponse(
   partners:
       (json['partners'] as List<dynamic>?)
-          ?.map((e) => Partner.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => PartnerInfo.fromJson(e as Map<String, dynamic>))
           .toList() ??
       [],
 );
