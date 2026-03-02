@@ -784,9 +784,18 @@ func modifierMatchesAnyExercise(mod model.Modifier, exercises []model.Exercise) 
 			continue
 		}
 		for _, ex := range exercises {
-			if re.MatchString(ex.ID) {
+			if re.MatchString(ex.ID) && !modifierAntipatternMatch(mod, ex.ID) {
 				return true
 			}
+		}
+	}
+	return false
+}
+
+func modifierAntipatternMatch(mod model.Modifier, exerciseID string) bool {
+	for _, anti := range mod.Antipatterns {
+		if re, err := regexp.Compile(anti); err == nil && re.MatchString(exerciseID) {
+			return true
 		}
 	}
 	return false

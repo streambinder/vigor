@@ -61,7 +61,7 @@ Age:{%d profile.Age() %} Height:{%f.0 profile.Height %}cm Weight:{%f.0 profile.W
 {% endif %}
 {% if len(modifiers) > 0 %}
 [MODIFIERS]
-{% for _, mod := range modifiers %}{%s mod.ID %}: [{%s strings.Join(mod.Patterns, ",") %}]
+{% for _, mod := range modifiers %}{%s mod.ID %}: [{%s strings.Join(mod.Patterns, ",") %}]{% if len(mod.Antipatterns) > 0 %} (exclude: [{%s strings.Join(mod.Antipatterns, ",") %}]){% endif %}
 {% endfor %}
 {% endif %}
 {% if len(favoriteExercises) > 0 || len(favoriteEquipment) > 0 %}

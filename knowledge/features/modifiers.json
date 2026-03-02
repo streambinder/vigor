@@ -18,6 +18,7 @@
   {
     "id": "parallettes",
     "patterns": ["push-up", "dip", "l-sit", "planche", "handstand"],
+    "antipatterns": ["lower-arm", "forearm"],
     "aliases": [
       "parallettes",
       "parallele basse",
@@ -72,6 +73,7 @@
   {
     "id": "push up bars",
     "patterns": ["push-up"],
+    "antipatterns": ["lower-arm", "forearm"],
     "aliases": [
       "push up bars",
       "push-up bars",

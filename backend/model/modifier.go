@@ -12,8 +12,9 @@ import (
 // Aliases are multilingual names used for semantic matching.
 type Modifier struct {
 	ID       string         `gorm:"type:varchar(255);primaryKey" json:"id"`
-	Patterns pq.StringArray `gorm:"type:text[]" json:"patterns"`
-	Aliases  pq.StringArray `gorm:"type:text[]" json:"aliases,omitempty"`
+	Patterns     pq.StringArray `gorm:"type:text[]" json:"patterns"`
+	Antipatterns pq.StringArray `gorm:"type:text[]" json:"antipatterns,omitempty"`
+	Aliases      pq.StringArray `gorm:"type:text[]" json:"aliases,omitempty"`
 
 	// ProgressionImpact defines how this modifier shifts exercise difficulty.
 	// For weighted modifiers (IsWeighted=true): impact per kg (e.g., 1.5 means +15 at 10kg)
