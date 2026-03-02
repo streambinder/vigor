@@ -63,7 +63,7 @@
   },
   {
     "id": "45-side-bend",
-    "name": "45\u00b0 Side Bend",
+    "name": "45° Side Bend",
     "equipment": [],
     "muscles": [
       "core"
@@ -169,7 +169,7 @@
       "core": 60
     },
     "cues": [
-      "Keep core braced \u2014 don't let back sag",
+      "Keep core braced — don't let back sag",
       "Roll out as far as you can control",
       "Squeeze abs to pull back"
     ]
@@ -236,6 +236,30 @@
     ],
     "progressions": {
       "squat": 25
+    },
+    "cues": []
+  },
+  {
+    "id": "advanced-tuck-front-lever",
+    "name": "Advanced Tuck Front Lever",
+    "equipment": [
+      "pull-up bar"
+    ],
+    "muscles": [
+      "back",
+      "core",
+      "shoulders"
+    ],
+    "reference": "",
+    "instructions": [
+      "Hang from a bar and pull into an inverted position",
+      "Tuck knees to chest with thighs at 90 degrees to torso",
+      "Keep back parallel to the ground",
+      "Hold for the prescribed time"
+    ],
+    "progressions": {
+      "front_lever": 35,
+      "back": 60
     },
     "cues": []
   },
@@ -366,6 +390,28 @@
     ],
     "progressions": {
       "squat": 45
+    },
+    "cues": []
+  },
+  {
+    "id": "arch-body-circle",
+    "name": "Arch-Body Circle",
+    "equipment": [],
+    "muscles": [
+      "back",
+      "core",
+      "glutes"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie face down in an arch hold (superman position)",
+      "Rotate body in a circle while maintaining the arch",
+      "Use arms and legs to drive the circular motion",
+      "Complete circles in both directions"
+    ],
+    "progressions": {
+      "back": 55,
+      "core": 50
     },
     "cues": []
   },
@@ -798,6 +844,31 @@
     "cues": []
   },
   {
+    "id": "assisted-pull-up-machine",
+    "name": "Assisted Pull Up Machine",
+    "equipment": [
+      "leverage machine"
+    ],
+    "muscles": [
+      "back"
+    ],
+    "reference": null,
+    "instructions": [
+      "Kneel on platform and grip handles overhead",
+      "Pull body up with assistance from platform",
+      "Lower with control",
+      "Reduce assistance as strength improves"
+    ],
+    "progressions": {
+      "vertical_pull": 35
+    },
+    "cues": [
+      "Start from a dead hang",
+      "Pull elbows down and back",
+      "Control the descent"
+    ]
+  },
+  {
     "id": "assisted-pull-up",
     "name": "Assisted Pull-Up",
     "equipment": [
@@ -824,31 +895,6 @@
       "Start from a dead hang with shoulders engaged",
       "Pull elbows down and back",
       "Control the descent fully"
-    ]
-  },
-  {
-    "id": "assisted-pull-up-machine",
-    "name": "Assisted Pull Up Machine",
-    "equipment": [
-      "leverage machine"
-    ],
-    "muscles": [
-      "back"
-    ],
-    "reference": null,
-    "instructions": [
-      "Kneel on platform and grip handles overhead",
-      "Pull body up with assistance from platform",
-      "Lower with control",
-      "Reduce assistance as strength improves"
-    ],
-    "progressions": {
-      "vertical_pull": 35
-    },
-    "cues": [
-      "Start from a dead hang",
-      "Pull elbows down and back",
-      "Control the descent"
     ]
   },
   {
@@ -1153,6 +1199,106 @@
     "cues": []
   },
   {
+    "id": "back-lever-half-lay",
+    "name": "Back Lever Half Lay",
+    "equipment": [
+      "pull-up bar",
+      "rings"
+    ],
+    "muscles": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Hang from bar or rings and rotate into back lever",
+      "Extend legs with knees bent at 90 degrees",
+      "Keep torso parallel to the ground",
+      "Hold for the prescribed time"
+    ],
+    "progressions": {
+      "back_lever": 80,
+      "back": 80
+    },
+    "cues": []
+  },
+  {
+    "id": "back-lever-one-leg",
+    "name": "Back Lever One Leg",
+    "equipment": [
+      "pull-up bar",
+      "rings"
+    ],
+    "muscles": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Hang from bar or rings and rotate into back lever",
+      "Extend one leg fully while keeping other tucked",
+      "Keep torso parallel to the ground",
+      "Hold for the prescribed time"
+    ],
+    "progressions": {
+      "back_lever": 55,
+      "back": 65
+    },
+    "cues": []
+  },
+  {
+    "id": "back-lever-one-leg-advanced",
+    "name": "Back Lever One Leg Advanced",
+    "equipment": [
+      "pull-up bar",
+      "rings"
+    ],
+    "muscles": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Hang from bar or rings and rotate into back lever",
+      "Extend one leg fully, bend other at 90 degrees",
+      "Keep torso parallel to the ground",
+      "Hold for the prescribed time"
+    ],
+    "progressions": {
+      "back_lever": 65,
+      "back": 70
+    },
+    "cues": []
+  },
+  {
+    "id": "back-lever-straddle",
+    "name": "Back Lever Straddle",
+    "equipment": [
+      "pull-up bar",
+      "rings"
+    ],
+    "muscles": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Hang from bar or rings and rotate into back lever",
+      "Extend both legs wide apart in straddle position",
+      "Keep torso parallel to the ground",
+      "Hold for the prescribed time"
+    ],
+    "progressions": {
+      "back_lever": 75,
+      "back": 75
+    },
+    "cues": []
+  },
+  {
     "id": "back-pec-stretch",
     "name": "Back Pec Stretch",
     "equipment": [],
@@ -1344,31 +1490,6 @@
     ]
   },
   {
-    "id": "band-bent-over-hip-extension",
-    "name": "Band Bent-Over Hip Extension",
-    "equipment": [
-      "band"
-    ],
-    "muscles": [
-      "glutes",
-      "legs"
-    ],
-    "reference": "https://static.exercisedb.dev/media/wSScovH.gif",
-    "instructions": [
-      "Attach the band to a sturdy anchor point at ankle height",
-      "Stand facing away from the anchor point with your feet shoulder-width apart",
-      "Step back to create tension in the band, keeping your knees slightly bent",
-      "Hinge at the hips and lean forward, maintaining a neutral spine",
-      "Extend your right leg straight back, squeezing your glutes at the top",
-      "Lower your right leg back down and repeat with the left leg",
-      "Continue alternating legs for the desired number of repetitions"
-    ],
-    "progressions": {
-      "hinge": 45
-    },
-    "cues": []
-  },
-  {
     "id": "band-bent-over-row",
     "name": "Band Bent Over Row",
     "equipment": [
@@ -1392,6 +1513,31 @@
       "Pull toward your belly",
       "Squeeze shoulder blades together"
     ]
+  },
+  {
+    "id": "band-bent-over-hip-extension",
+    "name": "Band Bent-Over Hip Extension",
+    "equipment": [
+      "band"
+    ],
+    "muscles": [
+      "glutes",
+      "legs"
+    ],
+    "reference": "https://static.exercisedb.dev/media/wSScovH.gif",
+    "instructions": [
+      "Attach the band to a sturdy anchor point at ankle height",
+      "Stand facing away from the anchor point with your feet shoulder-width apart",
+      "Step back to create tension in the band, keeping your knees slightly bent",
+      "Hinge at the hips and lean forward, maintaining a neutral spine",
+      "Extend your right leg straight back, squeezing your glutes at the top",
+      "Lower your right leg back down and repeat with the left leg",
+      "Continue alternating legs for the desired number of repetitions"
+    ],
+    "progressions": {
+      "hinge": 45
+    },
+    "cues": []
   },
   {
     "id": "band-bicycle-crunch",
@@ -3727,7 +3873,7 @@
     },
     "cues": [
       "Keep elbows pinned at your sides",
-      "Don't swing the weight \u2014 control the rep",
+      "Don't swing the weight — control the rep",
       "Squeeze biceps at the top"
     ]
   },
@@ -4239,7 +4385,7 @@
     "cues": [
       "Drive through heels",
       "Squeeze glutes hard at the top",
-      "Keep core tight \u2014 don't arch lower back"
+      "Keep core tight — don't arch lower back"
     ]
   },
   {
@@ -4480,7 +4626,7 @@
     },
     "cues": [
       "Drive through heels and squeeze glutes at the top",
-      "Keep chin tucked \u2014 don't hyperextend neck",
+      "Keep chin tucked — don't hyperextend neck",
       "Pause at the top for a full glute squeeze"
     ]
   },
@@ -6540,6 +6686,34 @@
     "cues": []
   },
   {
+    "id": "barbell-squat-on-knees",
+    "name": "Barbell Squat (On Knees)",
+    "equipment": [
+      "barbell"
+    ],
+    "muscles": [
+      "legs",
+      "glutes"
+    ],
+    "reference": "https://static.exercisedb.dev/media/oR7O9LW.gif",
+    "instructions": [
+      "Start by kneeling on the ground with your knees hip-width apart and your toes pointing forward",
+      "Place a barbell across your shoulders, gripping it with an overhand grip and your hands slightly wider than shoulder-width apart",
+      "Engage your core and keep your chest lifted as you slowly lower your body down by bending your knees, keeping your back straight",
+      "Continue lowering until your thighs are parallel to the ground, or as low as you can comfortably go",
+      "Pause for a moment at the bottom, then push through your heels to return to the starting position",
+      "Repeat for the desired number of repetitions"
+    ],
+    "progressions": {
+      "squat": 30
+    },
+    "cues": [
+      "Push knees out over toes",
+      "Keep chest up and core braced",
+      "Drive through the whole foot"
+    ]
+  },
+  {
     "id": "barbell-squat-jump-step-rear-lunge",
     "name": "Barbell Squat Jump Step Rear Lunge",
     "equipment": [
@@ -6562,34 +6736,6 @@
     ],
     "progressions": {
       "squat": 45
-    },
-    "cues": [
-      "Push knees out over toes",
-      "Keep chest up and core braced",
-      "Drive through the whole foot"
-    ]
-  },
-  {
-    "id": "barbell-squat-on-knees",
-    "name": "Barbell Squat (On Knees)",
-    "equipment": [
-      "barbell"
-    ],
-    "muscles": [
-      "legs",
-      "glutes"
-    ],
-    "reference": "https://static.exercisedb.dev/media/oR7O9LW.gif",
-    "instructions": [
-      "Start by kneeling on the ground with your knees hip-width apart and your toes pointing forward",
-      "Place a barbell across your shoulders, gripping it with an overhand grip and your hands slightly wider than shoulder-width apart",
-      "Engage your core and keep your chest lifted as you slowly lower your body down by bending your knees, keeping your back straight",
-      "Continue lowering until your thighs are parallel to the ground, or as low as you can comfortably go",
-      "Pause for a moment at the bottom, then push through your heels to return to the starting position",
-      "Repeat for the desired number of repetitions"
-    ],
-    "progressions": {
-      "squat": 30
     },
     "cues": [
       "Push knees out over toes",
@@ -6777,6 +6923,27 @@
     ]
   },
   {
+    "id": "barbell-standing-overhead-press",
+    "name": "Barbell Standing Overhead Press",
+    "equipment": [
+      "barbell"
+    ],
+    "muscles": [
+      "shoulders"
+    ],
+    "reference": "",
+    "instructions": [
+      "Stand with feet shoulder-width apart, barbell at shoulder height",
+      "Grip bar slightly wider than shoulder-width",
+      "Press bar straight overhead until arms are fully extended",
+      "Lower back to shoulders with control"
+    ],
+    "progressions": {
+      "shoulders": 60
+    },
+    "cues": []
+  },
+  {
     "id": "barbell-standing-overhead-triceps-extension",
     "name": "Barbell Standing Overhead Triceps Extension",
     "equipment": [
@@ -6882,6 +7049,32 @@
     ]
   },
   {
+    "id": "barbell-standing-wide-military-press",
+    "name": "Barbell Standing Wide Military Press",
+    "equipment": [
+      "barbell"
+    ],
+    "muscles": [
+      "shoulders",
+      "arms"
+    ],
+    "reference": "https://static.exercisedb.dev/media/Kyd9Rz5.gif",
+    "instructions": [
+      "Stand with your feet shoulder-width apart and hold the barbell with an overhand grip, slightly wider than shoulder-width",
+      "Lift the barbell to shoulder height, keeping your elbows slightly in front of the bar",
+      "Press the barbell overhead, extending your arms fully",
+      "Lower the barbell back to shoulder height and repeat for the desired number of repetitions"
+    ],
+    "progressions": {
+      "vertical_push": 50
+    },
+    "cues": [
+      "Brace core and squeeze glutes",
+      "Press straight up",
+      "Control the descent"
+    ]
+  },
+  {
     "id": "barbell-standing-wide-grip-curl",
     "name": "Barbell Standing Wide-Grip Curl",
     "equipment": [
@@ -6908,32 +7101,6 @@
       "Keep elbows pinned at your sides",
       "Don't swing the weight",
       "Squeeze at the top"
-    ]
-  },
-  {
-    "id": "barbell-standing-wide-military-press",
-    "name": "Barbell Standing Wide Military Press",
-    "equipment": [
-      "barbell"
-    ],
-    "muscles": [
-      "shoulders",
-      "arms"
-    ],
-    "reference": "https://static.exercisedb.dev/media/Kyd9Rz5.gif",
-    "instructions": [
-      "Stand with your feet shoulder-width apart and hold the barbell with an overhand grip, slightly wider than shoulder-width",
-      "Lift the barbell to shoulder height, keeping your elbows slightly in front of the bar",
-      "Press the barbell overhead, extending your arms fully",
-      "Lower the barbell back to shoulder height and repeat for the desired number of repetitions"
-    ],
-    "progressions": {
-      "vertical_push": 50
-    },
-    "cues": [
-      "Brace core and squeeze glutes",
-      "Press straight up",
-      "Control the descent"
     ]
   },
   {
@@ -7190,34 +7357,6 @@
     ]
   },
   {
-    "id": "barbell-wide-grip-upright-row",
-    "name": "Barbell Wide-Grip Upright Row",
-    "equipment": [
-      "barbell"
-    ],
-    "muscles": [
-      "back",
-      "arms"
-    ],
-    "reference": "https://static.exercisedb.dev/media/RgJDRR1.gif",
-    "instructions": [
-      "Stand with your feet shoulder-width apart and hold a barbell with an overhand grip, hands wider than shoulder-width apart",
-      "Let the barbell hang in front of your thighs, arms fully extended",
-      "Keeping your back straight, exhale and lift the barbell straight up towards your chin, leading with your elbows",
-      "Pause for a moment at the top, then inhale and slowly lower the barbell back down to the starting position",
-      "Repeat for the desired number of repetitions"
-    ],
-    "progressions": {
-      "horizontal_pull": 50,
-      "vertical_push": 50
-    },
-    "cues": [
-      "Keep chest tall",
-      "Squeeze shoulder blades together",
-      "Control the return"
-    ]
-  },
-  {
     "id": "barbell-wide-reverse-grip-bench-press",
     "name": "Barbell Wide Reverse Grip Bench Press",
     "equipment": [
@@ -7272,6 +7411,34 @@
       "Push knees out over toes",
       "Keep chest up and core braced",
       "Drive through the whole foot"
+    ]
+  },
+  {
+    "id": "barbell-wide-grip-upright-row",
+    "name": "Barbell Wide-Grip Upright Row",
+    "equipment": [
+      "barbell"
+    ],
+    "muscles": [
+      "back",
+      "arms"
+    ],
+    "reference": "https://static.exercisedb.dev/media/RgJDRR1.gif",
+    "instructions": [
+      "Stand with your feet shoulder-width apart and hold a barbell with an overhand grip, hands wider than shoulder-width apart",
+      "Let the barbell hang in front of your thighs, arms fully extended",
+      "Keeping your back straight, exhale and lift the barbell straight up towards your chin, leading with your elbows",
+      "Pause for a moment at the top, then inhale and slowly lower the barbell back down to the starting position",
+      "Repeat for the desired number of repetitions"
+    ],
+    "progressions": {
+      "horizontal_pull": 50,
+      "vertical_push": 50
+    },
+    "cues": [
+      "Keep chest tall",
+      "Squeeze shoulder blades together",
+      "Control the return"
     ]
   },
   {
@@ -7648,6 +7815,29 @@
     ]
   },
   {
+    "id": "bent-arm-planche",
+    "name": "Bent Arm Planche",
+    "equipment": [],
+    "muscles": [
+      "shoulders",
+      "chest",
+      "triceps",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Support body horizontally on hands with arms bent",
+      "Keep body parallel to the ground",
+      "Lean forward with elbows tucked at roughly 90 degrees",
+      "Hold for the prescribed time"
+    ],
+    "progressions": {
+      "planche": 55,
+      "shoulders": 75
+    },
+    "cues": []
+  },
+  {
     "id": "bent-knee-lying-twist",
     "name": "Bent Knee Lying Twist",
     "equipment": [],
@@ -7749,6 +7939,25 @@
     ]
   },
   {
+    "id": "bicycle-crunch",
+    "name": "Bicycle Crunch",
+    "equipment": [],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie on your back with hands behind your head",
+      "Lift shoulders off the ground",
+      "Bring one knee toward chest while rotating opposite elbow toward it",
+      "Alternate sides in a cycling motion"
+    ],
+    "progressions": {
+      "core": 40
+    },
+    "cues": []
+  },
+  {
     "id": "bird-dog",
     "name": "Bird Dog",
     "equipment": [],
@@ -7771,7 +7980,7 @@
       "core": 25
     },
     "cues": [
-      "Keep hips and shoulders level \u2014 don't rotate",
+      "Keep hips and shoulders level — don't rotate",
       "Extend opposite arm and leg",
       "Brace core throughout"
     ]
@@ -10315,7 +10524,7 @@
     "cues": [
       "Keep elbows pinned at your sides",
       "Squeeze triceps at full extension",
-      "Control the return \u2014 don't let it snap back"
+      "Control the return — don't let it snap back"
     ]
   },
   {
@@ -10535,30 +10744,6 @@
     ]
   },
   {
-    "id": "cable-reverse-grip-pushdown",
-    "name": "Cable Reverse-Grip Pushdown",
-    "equipment": [
-      "cable"
-    ],
-    "muscles": [
-      "arms"
-    ],
-    "reference": "https://static.exercisedb.dev/media/VjYliFZ.gif",
-    "instructions": [
-      "Attach a straight bar to a high pulley cable machine",
-      "Stand facing the machine with your feet shoulder-width apart",
-      "Grasp the bar with an underhand grip, palms facing up, and your hands shoulder-width apart",
-      "Keep your elbows close to your sides and your upper arms stationary throughout the exercise",
-      "Using your triceps, push the bar down until your arms are fully extended and your triceps are contracted",
-      "Pause for a moment, then slowly return the bar to the starting position",
-      "Repeat for the desired number of repetitions"
-    ],
-    "progressions": {
-      "core": 45
-    },
-    "cues": []
-  },
-  {
     "id": "cable-reverse-lunge",
     "name": "Cable Reverse Lunge",
     "equipment": [
@@ -10610,6 +10795,30 @@
       "Control the movement in both directions",
       "Keep wrist neutral"
     ]
+  },
+  {
+    "id": "cable-reverse-grip-pushdown",
+    "name": "Cable Reverse-Grip Pushdown",
+    "equipment": [
+      "cable"
+    ],
+    "muscles": [
+      "arms"
+    ],
+    "reference": "https://static.exercisedb.dev/media/VjYliFZ.gif",
+    "instructions": [
+      "Attach a straight bar to a high pulley cable machine",
+      "Stand facing the machine with your feet shoulder-width apart",
+      "Grasp the bar with an underhand grip, palms facing up, and your hands shoulder-width apart",
+      "Keep your elbows close to your sides and your upper arms stationary throughout the exercise",
+      "Using your triceps, push the bar down until your arms are fully extended and your triceps are contracted",
+      "Pause for a moment, then slowly return the bar to the starting position",
+      "Repeat for the desired number of repetitions"
+    ],
+    "progressions": {
+      "core": 45
+    },
+    "cues": []
   },
   {
     "id": "cable-romanian-deadlift",
@@ -12533,6 +12742,26 @@
     "cues": []
   },
   {
+    "id": "cat-stretch",
+    "name": "Cat Stretch",
+    "equipment": [],
+    "muscles": [
+      "back"
+    ],
+    "reference": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cat_Stretch/0.jpg",
+    "instructions": [
+      "Start on all fours with hands under shoulders and knees under hips",
+      "Exhale as you round your spine toward the ceiling like an arching cat",
+      "Tuck your chin toward your chest and draw your belly button toward your spine",
+      "Hold the rounded position for a breath, feeling the stretch through your back",
+      "Return to neutral and repeat for desired reps"
+    ],
+    "progressions": {
+      "mobility": 20
+    },
+    "cues": []
+  },
+  {
     "id": "cat-cow-stretch",
     "name": "Cat-Cow Stretch",
     "equipment": [],
@@ -12550,26 +12779,6 @@
     ],
     "progressions": {
       "mobility": 15
-    },
-    "cues": []
-  },
-  {
-    "id": "cat-stretch",
-    "name": "Cat Stretch",
-    "equipment": [],
-    "muscles": [
-      "back"
-    ],
-    "reference": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cat_Stretch/0.jpg",
-    "instructions": [
-      "Start on all fours with hands under shoulders and knees under hips",
-      "Exhale as you round your spine toward the ceiling like an arching cat",
-      "Tuck your chin toward your chest and draw your belly button toward your spine",
-      "Hold the rounded position for a breath, feeling the stretch through your back",
-      "Return to neutral and repeat for desired reps"
-    ],
-    "progressions": {
-      "mobility": 20
     },
     "cues": []
   },
@@ -13219,30 +13428,6 @@
     "cues": []
   },
   {
-    "id": "crunch-floor",
-    "name": "Crunch Floor",
-    "equipment": [],
-    "muscles": [
-      "core"
-    ],
-    "reference": "https://static.exercisedb.dev/media/TFqbd8t.gif",
-    "instructions": [
-      "Lie flat on your back with your knees bent and feet flat on the ground",
-      "Place your hands behind your head with your elbows pointing outwards",
-      "Engage your abs and lift your shoulders off the ground, curling forward towards your knees",
-      "Pause for a moment at the top, then slowly lower your shoulders back down to the starting position",
-      "Repeat for the desired number of repetitions"
-    ],
-    "progressions": {
-      "core": 45
-    },
-    "cues": [
-      "Curl shoulders off the floor",
-      "Keep lower back on the floor",
-      "Exhale as you crunch up"
-    ]
-  },
-  {
     "id": "crunch-hands-overhead",
     "name": "Crunch (Hands Overhead)",
     "equipment": [],
@@ -13255,6 +13440,49 @@
       "Extend your arms straight above your head",
       "Engaging your abs, lift your upper body off the ground, curling forward towards your knees",
       "Pause for a moment at the top, then slowly lower your upper body back down to the starting position",
+      "Repeat for the desired number of repetitions"
+    ],
+    "progressions": {
+      "core": 45
+    },
+    "cues": [
+      "Curl shoulders off the floor",
+      "Keep lower back on the floor",
+      "Exhale as you crunch up"
+    ]
+  },
+  {
+    "id": "crunch-knee-raises",
+    "name": "Crunch + Knee Raises",
+    "equipment": [],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie on your back with legs extended",
+      "Simultaneously crunch upper body and bring knees toward chest",
+      "Meet in the middle, contracting abs fully",
+      "Extend back out to starting position"
+    ],
+    "progressions": {
+      "core": 45
+    },
+    "cues": []
+  },
+  {
+    "id": "crunch-floor",
+    "name": "Crunch Floor",
+    "equipment": [],
+    "muscles": [
+      "core"
+    ],
+    "reference": "https://static.exercisedb.dev/media/TFqbd8t.gif",
+    "instructions": [
+      "Lie flat on your back with your knees bent and feet flat on the ground",
+      "Place your hands behind your head with your elbows pointing outwards",
+      "Engage your abs and lift your shoulders off the ground, curling forward towards your knees",
+      "Pause for a moment at the top, then slowly lower your shoulders back down to the starting position",
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
@@ -13513,6 +13741,28 @@
     "cues": []
   },
   {
+    "id": "detach-hands-push-up",
+    "name": "Detach Hands Push-Up",
+    "equipment": [],
+    "muscles": [
+      "chest",
+      "shoulders",
+      "triceps"
+    ],
+    "reference": "",
+    "instructions": [
+      "Start in standard push-up position",
+      "Lower body all the way to the ground",
+      "Briefly lift both hands off the floor",
+      "Place hands back down and push back up"
+    ],
+    "progressions": {
+      "push_up": 55,
+      "chest": 55
+    },
+    "cues": []
+  },
+  {
     "id": "diamond-push-up",
     "name": "Diamond Push-Up",
     "equipment": [],
@@ -13536,6 +13786,91 @@
       "Keep elbows tight to your body",
       "Keep body in a straight line"
     ]
+  },
+  {
+    "id": "diamond-raised-leg-push-up",
+    "name": "Diamond Raised Leg Push-Up",
+    "equipment": [],
+    "muscles": [
+      "chest",
+      "triceps",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Form a diamond shape with hands under chest",
+      "Raise one leg off the ground",
+      "Lower chest toward hands while maintaining raised leg",
+      "Push back up and switch legs each rep"
+    ],
+    "progressions": {
+      "push_up": 70,
+      "triceps": 65
+    },
+    "cues": []
+  },
+  {
+    "id": "dip-crunches",
+    "name": "Dip Crunches",
+    "equipment": [
+      "dip bars"
+    ],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Support your body on dip bars with arms extended",
+      "Bend knees and crunch them toward your chest",
+      "Squeeze abs at the top",
+      "Lower legs back down with control"
+    ],
+    "progressions": {
+      "core": 50
+    },
+    "cues": []
+  },
+  {
+    "id": "dip-knee-raises",
+    "name": "Dip Knee Raises",
+    "equipment": [
+      "dip bars"
+    ],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Support your body on dip bars with arms extended",
+      "Raise bent knees toward chest",
+      "Lower legs back down with control",
+      "Keep upper body stable throughout"
+    ],
+    "progressions": {
+      "core": 45
+    },
+    "cues": []
+  },
+  {
+    "id": "dip-oblique-knee-raises",
+    "name": "Dip Oblique Knee Raises",
+    "equipment": [
+      "dip bars"
+    ],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Support your body on dip bars with arms extended",
+      "Raise bent knees toward one side of your chest",
+      "Lower with control",
+      "Alternate sides each rep"
+    ],
+    "progressions": {
+      "core": 55
+    },
+    "cues": []
   },
   {
     "id": "donkey-kick",
@@ -13624,7 +13959,7 @@
     },
     "cues": [
       "Keep body rigid as a board",
-      "Lower with control \u2014 don't collapse",
+      "Lower with control — don't collapse",
       "Brace core and grip the bench hard"
     ]
   },
@@ -13911,7 +14246,7 @@
     },
     "cues": [
       "Keep elbows pinned at your sides",
-      "Don't swing \u2014 control the weight",
+      "Don't swing — control the weight",
       "Squeeze biceps at the top"
     ]
   },
@@ -14472,6 +14807,29 @@
     "cues": []
   },
   {
+    "id": "dumbbell-diagonal-raise",
+    "name": "Dumbbell Diagonal Raise",
+    "equipment": [
+      "dumbbells"
+    ],
+    "muscles": [
+      "chest",
+      "shoulders"
+    ],
+    "reference": "",
+    "instructions": [
+      "Stand holding dumbbells at hip level on one side",
+      "Raise dumbbells diagonally across body to opposite shoulder height",
+      "Lower with control along the same diagonal path",
+      "Complete reps on one side, then switch"
+    ],
+    "progressions": {
+      "shoulders": 45,
+      "chest": 40
+    },
+    "cues": []
+  },
+  {
     "id": "dumbbell-drag-curl",
     "name": "Dumbbell Drag Curl",
     "equipment": [
@@ -14495,6 +14853,27 @@
       "Don't swing the weight",
       "Squeeze at the top"
     ]
+  },
+  {
+    "id": "dumbbell-elbow-out-lateral-raise",
+    "name": "Dumbbell Elbow-Out Lateral Raise",
+    "equipment": [
+      "dumbbells"
+    ],
+    "muscles": [
+      "shoulders"
+    ],
+    "reference": "",
+    "instructions": [
+      "Stand holding dumbbells with elbows bent at 90 degrees",
+      "Raise elbows out to the sides to shoulder height",
+      "Keep the 90-degree bend in elbows throughout",
+      "Lower with control"
+    ],
+    "progressions": {
+      "shoulders": 45
+    },
+    "cues": []
   },
   {
     "id": "dumbbell-finger-curls",
@@ -15553,7 +15932,7 @@
     "cues": [
       "Lead with your elbows, not your hands",
       "Raise to shoulder height, no higher",
-      "Control the descent \u2014 don't drop"
+      "Control the descent — don't drop"
     ]
   },
   {
@@ -18586,6 +18965,27 @@
     ]
   },
   {
+    "id": "dumbbell-squat-on-toes",
+    "name": "Dumbbell Squat On Toes",
+    "equipment": [
+      "dumbbells"
+    ],
+    "muscles": [
+      "legs"
+    ],
+    "reference": "",
+    "instructions": [
+      "Stand holding dumbbells with heels elevated on a plate or block",
+      "Squat down keeping torso upright",
+      "Push through the balls of your feet to stand",
+      "Maintain heel elevation throughout"
+    ],
+    "progressions": {
+      "squat": 55
+    },
+    "cues": []
+  },
+  {
     "id": "dumbbell-squeeze-press",
     "name": "Dumbbell Squeeze Press",
     "equipment": [
@@ -19825,6 +20225,73 @@
     "cues": []
   },
   {
+    "id": "elevated-pike-push-up",
+    "name": "Elevated Pike Push-Up",
+    "equipment": [],
+    "muscles": [
+      "shoulders",
+      "triceps",
+      "chest"
+    ],
+    "reference": "",
+    "instructions": [
+      "Place feet on an elevated surface (bench or box)",
+      "Walk hands back to form an inverted V with hips high",
+      "Bend elbows and lower head toward the floor",
+      "Push back up to starting position"
+    ],
+    "progressions": {
+      "shoulders": 60,
+      "handstand": 50
+    },
+    "cues": []
+  },
+  {
+    "id": "elevated-pike-to-planche",
+    "name": "Elevated Pike To Planche",
+    "equipment": [],
+    "muscles": [
+      "shoulders",
+      "chest",
+      "triceps",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Start in elevated pike position with feet on a box",
+      "Lean forward shifting weight over hands",
+      "Transition toward a planche-like horizontal position",
+      "Return to pike position and repeat"
+    ],
+    "progressions": {
+      "shoulders": 70,
+      "planche": 50
+    },
+    "cues": []
+  },
+  {
+    "id": "elevated-wide-push-up",
+    "name": "Elevated Wide Push-Up",
+    "equipment": [],
+    "muscles": [
+      "chest",
+      "shoulders",
+      "triceps"
+    ],
+    "reference": "",
+    "instructions": [
+      "Place feet on an elevated surface (bench or box)",
+      "Position hands wider than shoulder-width apart on the floor",
+      "Lower chest toward the floor, keeping body straight",
+      "Push back up to starting position"
+    ],
+    "progressions": {
+      "push_up": 65,
+      "chest": 60
+    },
+    "cues": []
+  },
+  {
     "id": "elevator",
     "name": "Elevator",
     "equipment": [],
@@ -19928,36 +20395,6 @@
       "Keep body in a straight line",
       "Elbows at 45 degrees",
       "Touch chest to the floor"
-    ]
-  },
-  {
-    "id": "ez-bar-close-grip-bench-press",
-    "name": "Ez-Bar Close-Grip Bench Press",
-    "equipment": [
-      "bench",
-      "ez barbell"
-    ],
-    "muscles": [
-      "chest",
-      "shoulders"
-    ],
-    "reference": "https://static.exercisedb.dev/media/da4cXST.gif",
-    "instructions": [
-      "Lie flat on a bench with your feet flat on the ground and your back pressed against the bench",
-      "Grasp the ez barbell with a close grip, hands shoulder-width apart, palms facing forward",
-      "Lift the barbell off the rack and hold it directly above your chest with your arms fully extended",
-      "Slowly lower the barbell towards your chest, keeping your elbows close to your body",
-      "Pause for a moment when the barbell touches your chest",
-      "Push the barbell back up to the starting position, fully extending your arms",
-      "Repeat for the desired number of repetitions"
-    ],
-    "progressions": {
-      "horizontal_push": 50
-    },
-    "cues": [
-      "Retract shoulder blades",
-      "Lower with elbows at 45 degrees",
-      "Drive through the chest"
     ]
   },
   {
@@ -20085,32 +20522,6 @@
     "cues": []
   },
   {
-    "id": "ez-barbell-close-grip-curl",
-    "name": "Ez Barbell Close-Grip Curl",
-    "equipment": [
-      "ez barbell"
-    ],
-    "muscles": [
-      "arms"
-    ],
-    "reference": "https://static.exercisedb.dev/media/V4ryaZa.gif",
-    "instructions": [
-      "Stand up straight with your feet shoulder-width apart and hold the ez barbell with an underhand grip, hands shoulder-width apart",
-      "Keep your elbows close to your torso and your upper arms stationary throughout the movement",
-      "Curl the barbell up towards your shoulders, contracting your biceps",
-      "Pause for a moment at the top, then slowly lower the barbell back down to the starting position",
-      "Repeat for the desired number of repetitions"
-    ],
-    "progressions": {
-      "vertical_pull": 40
-    },
-    "cues": [
-      "Keep elbows pinned at your sides",
-      "Don't swing the weight",
-      "Squeeze at the top"
-    ]
-  },
-  {
     "id": "ez-barbell-close-grip-preacher-curl",
     "name": "Ez Barbell Close Grip Preacher Curl",
     "equipment": [
@@ -20126,6 +20537,32 @@
       "Slowly curl the barbell towards your shoulders, contracting your biceps",
       "Pause for a moment at the top, squeezing your biceps",
       "Lower the barbell back to the starting position, fully extending your arms",
+      "Repeat for the desired number of repetitions"
+    ],
+    "progressions": {
+      "vertical_pull": 40
+    },
+    "cues": [
+      "Keep elbows pinned at your sides",
+      "Don't swing the weight",
+      "Squeeze at the top"
+    ]
+  },
+  {
+    "id": "ez-barbell-close-grip-curl",
+    "name": "Ez Barbell Close-Grip Curl",
+    "equipment": [
+      "ez barbell"
+    ],
+    "muscles": [
+      "arms"
+    ],
+    "reference": "https://static.exercisedb.dev/media/V4ryaZa.gif",
+    "instructions": [
+      "Stand up straight with your feet shoulder-width apart and hold the ez barbell with an underhand grip, hands shoulder-width apart",
+      "Keep your elbows close to your torso and your upper arms stationary throughout the movement",
+      "Curl the barbell up towards your shoulders, contracting your biceps",
+      "Pause for a moment at the top, then slowly lower the barbell back down to the starting position",
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
@@ -20404,6 +20841,36 @@
       "Keep elbows pinned at your sides",
       "Don't swing the weight",
       "Squeeze at the top"
+    ]
+  },
+  {
+    "id": "ez-bar-close-grip-bench-press",
+    "name": "Ez-Bar Close-Grip Bench Press",
+    "equipment": [
+      "bench",
+      "ez barbell"
+    ],
+    "muscles": [
+      "chest",
+      "shoulders"
+    ],
+    "reference": "https://static.exercisedb.dev/media/da4cXST.gif",
+    "instructions": [
+      "Lie flat on a bench with your feet flat on the ground and your back pressed against the bench",
+      "Grasp the ez barbell with a close grip, hands shoulder-width apart, palms facing forward",
+      "Lift the barbell off the rack and hold it directly above your chest with your arms fully extended",
+      "Slowly lower the barbell towards your chest, keeping your elbows close to your body",
+      "Pause for a moment when the barbell touches your chest",
+      "Push the barbell back up to the starting position, fully extending your arms",
+      "Repeat for the desired number of repetitions"
+    ],
+    "progressions": {
+      "horizontal_push": 50
+    },
+    "cues": [
+      "Retract shoulder blades",
+      "Lower with elbows at 45 degrees",
+      "Drive through the chest"
     ]
   },
   {
@@ -20809,6 +21276,26 @@
     "cues": []
   },
   {
+    "id": "frog-swim",
+    "name": "Frog Swim",
+    "equipment": [],
+    "muscles": [
+      "back",
+      "glutes"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie face down with arms extended forward",
+      "Lift chest and legs off the ground",
+      "Sweep arms back in a breaststroke motion while bending knees outward",
+      "Extend arms forward again and repeat"
+    ],
+    "progressions": {
+      "back": 40
+    },
+    "cues": []
+  },
+  {
     "id": "front-lever",
     "name": "Front Lever",
     "equipment": [
@@ -21103,6 +21590,28 @@
     "cues": []
   },
   {
+    "id": "grinder",
+    "name": "Grinder",
+    "equipment": [],
+    "muscles": [
+      "shoulders",
+      "chest",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Start in push-up position",
+      "Move body in a circular scooping motion close to the ground",
+      "Shift weight forward and dip down, then scoop up and back",
+      "Reverse direction after prescribed reps"
+    ],
+    "progressions": {
+      "shoulders": 55,
+      "chest": 50
+    },
+    "cues": []
+  },
+  {
     "id": "groin-crunch",
     "name": "Groin Crunch",
     "equipment": [],
@@ -21199,6 +21708,53 @@
     ],
     "progressions": {
       "squat": 30
+    },
+    "cues": []
+  },
+  {
+    "id": "half-lay-front-lever",
+    "name": "Half Lay Front Lever",
+    "equipment": [
+      "pull-up bar"
+    ],
+    "muscles": [
+      "back",
+      "core",
+      "shoulders"
+    ],
+    "reference": "",
+    "instructions": [
+      "Hang from a bar in front lever position",
+      "Extend legs with knees bent at 90 degrees downward",
+      "Keep back and thighs parallel to the ground",
+      "Hold for the prescribed time"
+    ],
+    "progressions": {
+      "front_lever": 75,
+      "back": 80
+    },
+    "cues": []
+  },
+  {
+    "id": "half-lay-planche",
+    "name": "Half Lay Planche",
+    "equipment": [],
+    "muscles": [
+      "shoulders",
+      "chest",
+      "triceps",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Support body on hands with arms straight",
+      "Extend legs with knees bent at 90 degrees",
+      "Keep body horizontal at hand height",
+      "Hold for the prescribed time"
+    ],
+    "progressions": {
+      "planche": 75,
+      "shoulders": 85
     },
     "cues": []
   },
@@ -21381,7 +21937,7 @@
     "cues": [
       "Keep legs straight or slightly bent",
       "Curl pelvis up at the top",
-      "Control the descent \u2014 don't swing"
+      "Control the descent — don't swing"
     ]
   },
   {
@@ -21540,6 +22096,27 @@
     "cues": []
   },
   {
+    "id": "high-side-plank-raises",
+    "name": "High-Side Plank Raises",
+    "equipment": [],
+    "muscles": [
+      "shoulders",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Get into side plank position on hand (not forearm)",
+      "Lower hip toward the ground",
+      "Raise hip back to aligned or above-aligned position",
+      "Repeat for prescribed reps, then switch sides"
+    ],
+    "progressions": {
+      "core": 50,
+      "shoulders": 45
+    },
+    "cues": []
+  },
+  {
     "id": "hill-sprints",
     "name": "Hill Sprints",
     "equipment": [],
@@ -21600,6 +22177,29 @@
     "progressions": {
       "squat": 30,
       "core": 25
+    },
+    "cues": []
+  },
+  {
+    "id": "hold-push-up",
+    "name": "Hold Push-Up",
+    "equipment": [],
+    "muscles": [
+      "chest",
+      "shoulders",
+      "triceps",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Start in standard push-up position",
+      "Lower body to the bottom of the push-up",
+      "Hold the bottom position for the prescribed time",
+      "Push back up to starting position"
+    ],
+    "progressions": {
+      "push_up": 45,
+      "chest": 45
     },
     "cues": []
   },
@@ -21868,33 +22468,6 @@
     "cues": []
   },
   {
-    "id": "incline-push-up",
-    "name": "Incline Push-Up",
-    "equipment": [
-      "bench"
-    ],
-    "muscles": [
-      "shoulders",
-      "chest"
-    ],
-    "reference": "https://static.exercisedb.dev/media/B1EVP9F.gif",
-    "instructions": [
-      "Place your hands on an elevated surface, such as a bench or step, slightly wider than shoulder-width apart",
-      "Extend your legs behind you, resting on the balls of your feet, creating a straight line from your head to your heels",
-      "Lower your chest towards the elevated surface by bending your elbows, keeping your body in a straight line",
-      "Pause for a moment at the bottom, then push yourself back up to the starting position by straightening your arms",
-      "Repeat for the desired number of repetitions"
-    ],
-    "progressions": {
-      "horizontal_push": 40
-    },
-    "cues": [
-      "Keep body in a straight line",
-      "Elbows at 45 degrees",
-      "Lower chest to the surface"
-    ]
-  },
-  {
     "id": "incline-push-up-depth-jump",
     "name": "Incline Push Up Depth Jump",
     "equipment": [
@@ -21920,6 +22493,33 @@
       "Keep body in a straight line",
       "Elbows at 45 degrees",
       "Touch chest to the floor"
+    ]
+  },
+  {
+    "id": "incline-push-up",
+    "name": "Incline Push-Up",
+    "equipment": [
+      "bench"
+    ],
+    "muscles": [
+      "shoulders",
+      "chest"
+    ],
+    "reference": "https://static.exercisedb.dev/media/B1EVP9F.gif",
+    "instructions": [
+      "Place your hands on an elevated surface, such as a bench or step, slightly wider than shoulder-width apart",
+      "Extend your legs behind you, resting on the balls of your feet, creating a straight line from your head to your heels",
+      "Lower your chest towards the elevated surface by bending your elbows, keeping your body in a straight line",
+      "Pause for a moment at the bottom, then push yourself back up to the starting position by straightening your arms",
+      "Repeat for the desired number of repetitions"
+    ],
+    "progressions": {
+      "horizontal_push": 40
+    },
+    "cues": [
+      "Keep body in a straight line",
+      "Elbows at 45 degrees",
+      "Lower chest to the surface"
     ]
   },
   {
@@ -22213,6 +22813,27 @@
     ],
     "progressions": {
       "mobility": 75
+    },
+    "cues": []
+  },
+  {
+    "id": "iron-man",
+    "name": "Iron Man",
+    "equipment": [],
+    "muscles": [
+      "back",
+      "glutes",
+      "shoulders"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie face down with arms extended forward",
+      "Simultaneously lift chest, arms, and legs off the ground",
+      "Pull arms back to sides (like flying)",
+      "Extend arms forward and lower back down"
+    ],
+    "progressions": {
+      "back": 45
     },
     "cues": []
   },
@@ -22639,7 +23260,7 @@
       "hinge": 55
     },
     "cues": [
-      "Hinge at hips \u2014 not a squat",
+      "Hinge at hips — not a squat",
       "Snap hips forward explosively",
       "Keep arms relaxed"
     ]
@@ -23663,7 +24284,7 @@
       "hinge": 55
     },
     "cues": [
-      "Hinge at hips \u2014 not a squat",
+      "Hinge at hips — not a squat",
       "Snap hips forward explosively",
       "Keep arms relaxed"
     ]
@@ -23714,7 +24335,7 @@
     "cues": [
       "Keep bell close on the pull",
       "Punch through at the top",
-      "Control the drop \u2014 guide it back between legs"
+      "Control the drop — guide it back between legs"
     ]
   },
   {
@@ -23793,9 +24414,9 @@
       "cardio": 40
     },
     "cues": [
-      "Hinge at hips \u2014 it's a hip drive, not a squat",
+      "Hinge at hips — it's a hip drive, not a squat",
       "Snap hips forward explosively",
-      "Keep arms relaxed \u2014 power comes from the hips"
+      "Keep arms relaxed — power comes from the hips"
     ]
   },
   {
@@ -25159,7 +25780,7 @@
     "cues": [
       "Keep shoulder blades retracted",
       "Press forward and squeeze chest",
-      "Control the return \u2014 don't let it slam"
+      "Control the return — don't let it slam"
     ]
   },
   {
@@ -26150,7 +26771,7 @@
     "cues": [
       "Push knees out against the pads",
       "Squeeze glutes at the widest point",
-      "Control the return \u2014 don't let it snap back"
+      "Control the return — don't let it snap back"
     ]
   },
   {
@@ -26454,34 +27075,6 @@
     ]
   },
   {
-    "id": "lever-t-bar-reverse-grip-row",
-    "name": "Lever T-Bar Reverse Grip Row",
-    "equipment": [
-      "leverage machine"
-    ],
-    "muscles": [
-      "back",
-      "arms"
-    ],
-    "reference": "https://static.exercisedb.dev/media/FVM1AUZ.gif",
-    "instructions": [
-      "Adjust the seat height and position yourself on the machine with your chest against the pad and your feet flat on the floor",
-      "Grasp the handles with an overhand grip, slightly wider than shoulder-width apart",
-      "Keep your back straight and engage your core",
-      "Pull the handles towards your chest, squeezing your shoulder blades together",
-      "Pause for a moment at the top of the movement, then slowly release and extend your arms back to the starting position",
-      "Repeat for the desired number of repetitions"
-    ],
-    "progressions": {
-      "horizontal_pull": 35
-    },
-    "cues": [
-      "Keep chest tall",
-      "Squeeze shoulder blades together",
-      "Control the return"
-    ]
-  },
-  {
     "id": "lever-t-bar-row",
     "name": "Lever T Bar Row",
     "equipment": [
@@ -26508,6 +27101,34 @@
       "Keep chest against the pad",
       "Pull elbows straight back",
       "Squeeze shoulder blades at the top"
+    ]
+  },
+  {
+    "id": "lever-t-bar-reverse-grip-row",
+    "name": "Lever T-Bar Reverse Grip Row",
+    "equipment": [
+      "leverage machine"
+    ],
+    "muscles": [
+      "back",
+      "arms"
+    ],
+    "reference": "https://static.exercisedb.dev/media/FVM1AUZ.gif",
+    "instructions": [
+      "Adjust the seat height and position yourself on the machine with your chest against the pad and your feet flat on the floor",
+      "Grasp the handles with an overhand grip, slightly wider than shoulder-width apart",
+      "Keep your back straight and engage your core",
+      "Pull the handles towards your chest, squeezing your shoulder blades together",
+      "Pause for a moment at the top of the movement, then slowly release and extend your arms back to the starting position",
+      "Repeat for the desired number of repetitions"
+    ],
+    "progressions": {
+      "horizontal_pull": 35
+    },
+    "cues": [
+      "Keep chest tall",
+      "Squeeze shoulder blades together",
+      "Control the return"
     ]
   },
   {
@@ -26585,6 +27206,26 @@
     ],
     "progressions": {
       "vertical_push": 45
+    },
+    "cues": []
+  },
+  {
+    "id": "long-plank-hold",
+    "name": "Long Plank Hold",
+    "equipment": [],
+    "muscles": [
+      "core",
+      "shoulders"
+    ],
+    "reference": "",
+    "instructions": [
+      "Get into standard plank position on forearms or hands",
+      "Maintain a straight line from head to heels",
+      "Engage core and glutes throughout",
+      "Hold for the prescribed time"
+    ],
+    "progressions": {
+      "core": 35
     },
     "cues": []
   },
@@ -26715,6 +27356,26 @@
     ]
   },
   {
+    "id": "lying-side-quads-stretch",
+    "name": "Lying (Side) Quads Stretch",
+    "equipment": [],
+    "muscles": [
+      "legs"
+    ],
+    "reference": "https://static.exercisedb.dev/media/BWnJR72.gif",
+    "instructions": [
+      "Lie on your side with your legs straight",
+      "Bend your top leg and grab your ankle or foot with your hand",
+      "Gently pull your ankle or foot towards your glutes until you feel a stretch in your quads",
+      "Hold the stretch for 20-30 seconds",
+      "Release the stretch and repeat on the other side"
+    ],
+    "progressions": {
+      "mobility": 25
+    },
+    "cues": []
+  },
+  {
     "id": "lying-elbow-to-knee",
     "name": "Lying Elbow To Knee",
     "equipment": [],
@@ -26758,6 +27419,25 @@
     "cues": []
   },
   {
+    "id": "lying-knee-raises",
+    "name": "Lying Knee Raises",
+    "equipment": [],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie flat on your back with legs extended",
+      "Bend knees and raise them toward your chest",
+      "Lower legs back down without feet touching the floor",
+      "Repeat in a controlled manner"
+    ],
+    "progressions": {
+      "core": 30
+    },
+    "cues": []
+  },
+  {
     "id": "lying-leg-curl",
     "name": "Lying Leg Curl",
     "equipment": [
@@ -26783,26 +27463,6 @@
     ]
   },
   {
-    "id": "lying-leg-hip-raise",
-    "name": "Lying Leg-Hip Raise",
-    "equipment": [],
-    "muscles": [
-      "core"
-    ],
-    "reference": "https://static.exercisedb.dev/media/9IxJdtC.gif",
-    "instructions": [
-      "Lie flat on your back with your legs extended and your arms by your sides",
-      "Place your hands under your glutes for support",
-      "Engage your core and lift your legs off the ground, raising them towards the ceiling",
-      "Pause for a moment at the top, then slowly lower your legs back down to the starting position",
-      "Repeat for the desired number of repetitions"
-    ],
-    "progressions": {
-      "core": 35
-    },
-    "cues": []
-  },
-  {
     "id": "lying-leg-raise-flat-bench",
     "name": "Lying Leg Raise Flat Bench",
     "equipment": [
@@ -26825,6 +27485,45 @@
     "cues": []
   },
   {
+    "id": "lying-leg-raises",
+    "name": "Lying Leg Raises",
+    "equipment": [],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie flat on your back with legs extended",
+      "Place hands under your hips for support",
+      "Raise both legs together to vertical, keeping them straight",
+      "Lower legs back down without touching the floor"
+    ],
+    "progressions": {
+      "core": 40
+    },
+    "cues": []
+  },
+  {
+    "id": "lying-leg-hip-raise",
+    "name": "Lying Leg-Hip Raise",
+    "equipment": [],
+    "muscles": [
+      "core"
+    ],
+    "reference": "https://static.exercisedb.dev/media/9IxJdtC.gif",
+    "instructions": [
+      "Lie flat on your back with your legs extended and your arms by your sides",
+      "Place your hands under your glutes for support",
+      "Engage your core and lift your legs off the ground, raising them towards the ceiling",
+      "Pause for a moment at the top, then slowly lower your legs back down to the starting position",
+      "Repeat for the desired number of repetitions"
+    ],
+    "progressions": {
+      "core": 35
+    },
+    "cues": []
+  },
+  {
     "id": "lying-quad-stretch",
     "name": "Lying Quad Stretch",
     "equipment": [],
@@ -26841,26 +27540,6 @@
     ],
     "progressions": {
       "mobility": 20
-    },
-    "cues": []
-  },
-  {
-    "id": "lying-side-quads-stretch",
-    "name": "Lying (Side) Quads Stretch",
-    "equipment": [],
-    "muscles": [
-      "legs"
-    ],
-    "reference": "https://static.exercisedb.dev/media/BWnJR72.gif",
-    "instructions": [
-      "Lie on your side with your legs straight",
-      "Bend your top leg and grab your ankle or foot with your hand",
-      "Gently pull your ankle or foot towards your glutes until you feel a stretch in your quads",
-      "Hold the stretch for 20-30 seconds",
-      "Release the stretch and repeat on the other side"
-    ],
-    "progressions": {
-      "mobility": 25
     },
     "cues": []
   },
@@ -27755,7 +28434,7 @@
       "cardio": 35
     },
     "cues": [
-      "Keep hips level \u2014 don't bounce",
+      "Keep hips level — don't bounce",
       "Drive knees toward chest",
       "Keep core tight throughout"
     ]
@@ -27899,6 +28578,28 @@
     ]
   },
   {
+    "id": "negative-push-up",
+    "name": "Negative Push-Up",
+    "equipment": [],
+    "muscles": [
+      "chest",
+      "shoulders",
+      "triceps"
+    ],
+    "reference": "",
+    "instructions": [
+      "Start in standard push-up position",
+      "Lower body as slowly as possible (5-10 seconds)",
+      "Let chest rest on the ground",
+      "Reset to starting position and repeat"
+    ],
+    "progressions": {
+      "push_up": 40,
+      "chest": 40
+    },
+    "cues": []
+  },
+  {
     "id": "nordic-curl",
     "name": "Nordic Curl",
     "equipment": [],
@@ -27994,6 +28695,27 @@
       "Keep lower back on the floor",
       "Exhale as you crunch up"
     ]
+  },
+  {
+    "id": "oblique-toes-to-bar",
+    "name": "Oblique Toes To Bar",
+    "equipment": [
+      "pull-up bar"
+    ],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Hang from a pull-up bar with arms fully extended",
+      "Raise legs with a rotational twist",
+      "Touch toes to bar on one side",
+      "Lower and alternate sides"
+    ],
+    "progressions": {
+      "core": 75
+    },
+    "cues": []
   },
   {
     "id": "olympic-barbell-hammer-curl",
@@ -28183,6 +28905,30 @@
     ]
   },
   {
+    "id": "one-leg-advanced-front-lever",
+    "name": "One Leg Advanced Front Lever",
+    "equipment": [
+      "pull-up bar"
+    ],
+    "muscles": [
+      "back",
+      "core",
+      "shoulders"
+    ],
+    "reference": "",
+    "instructions": [
+      "Hang from a bar in front lever position",
+      "Extend one leg fully, bend other at 90 degrees",
+      "Keep back parallel to the ground",
+      "Hold for the prescribed time"
+    ],
+    "progressions": {
+      "front_lever": 65,
+      "back": 75
+    },
+    "cues": []
+  },
+  {
     "id": "one-leg-donkey-calf-raise",
     "name": "One Leg Donkey Calf Raise",
     "equipment": [],
@@ -28232,6 +28978,53 @@
     ]
   },
   {
+    "id": "one-leg-front-lever",
+    "name": "One Leg Front Lever",
+    "equipment": [
+      "pull-up bar"
+    ],
+    "muscles": [
+      "back",
+      "core",
+      "shoulders"
+    ],
+    "reference": "",
+    "instructions": [
+      "Hang from a bar and pull into front lever position",
+      "Extend one leg fully while keeping the other tucked to chest",
+      "Keep back parallel to the ground",
+      "Hold for the prescribed time"
+    ],
+    "progressions": {
+      "front_lever": 55,
+      "back": 70
+    },
+    "cues": []
+  },
+  {
+    "id": "one-leg-planche",
+    "name": "One Leg Planche",
+    "equipment": [],
+    "muscles": [
+      "shoulders",
+      "chest",
+      "triceps",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Support body on hands with arms straight",
+      "Extend one leg fully behind you",
+      "Keep other knee tucked to chest",
+      "Hold horizontal position for the prescribed time"
+    ],
+    "progressions": {
+      "planche": 65,
+      "shoulders": 80
+    },
+    "cues": []
+  },
+  {
     "id": "one-leg-squat",
     "name": "One Leg Squat",
     "equipment": [],
@@ -28256,6 +29049,29 @@
       "Keep chest up and core braced",
       "Drive through the whole foot"
     ]
+  },
+  {
+    "id": "one-arm-fingertip-push-up",
+    "name": "One-Arm Fingertip Push-Up",
+    "equipment": [],
+    "muscles": [
+      "chest",
+      "shoulders",
+      "triceps",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Assume a wide-stance push-up position",
+      "Place one hand behind your back",
+      "Support on fingertips of the working hand",
+      "Lower chest toward the floor and push back up"
+    ],
+    "progressions": {
+      "push_up": 95,
+      "chest": 90
+    },
+    "cues": []
   },
   {
     "id": "open-book-stretch",
@@ -28393,6 +29209,25 @@
     "cues": []
   },
   {
+    "id": "pause-crunch",
+    "name": "Pause Crunch",
+    "equipment": [],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie on your back with knees bent, feet flat",
+      "Crunch upper body off the floor",
+      "Pause and hold at the top for 1-2 seconds",
+      "Lower back down slowly and repeat"
+    ],
+    "progressions": {
+      "core": 35
+    },
+    "cues": []
+  },
+  {
     "id": "pec-deck-machine",
     "name": "Pec Deck Machine",
     "equipment": [
@@ -28456,6 +29291,25 @@
     ],
     "progressions": {
       "hinge": 45,
+      "core": 40
+    },
+    "cues": []
+  },
+  {
+    "id": "pendulum",
+    "name": "Pendulum",
+    "equipment": [],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie on your back with legs raised and knees bent at 90 degrees",
+      "Keep shoulders flat on the ground",
+      "Lower both knees to one side in a controlled arc",
+      "Return to center and lower to the other side"
+    ],
+    "progressions": {
       "core": 40
     },
     "cues": []
@@ -28529,6 +29383,28 @@
     ],
     "progressions": {
       "mobility": 40
+    },
+    "cues": []
+  },
+  {
+    "id": "pike-hold",
+    "name": "Pike Hold",
+    "equipment": [],
+    "muscles": [
+      "shoulders",
+      "core",
+      "triceps"
+    ],
+    "reference": "",
+    "instructions": [
+      "Start in push-up position",
+      "Walk feet toward hands, raising hips into inverted V",
+      "Keep arms and legs straight",
+      "Hold the position for the prescribed time"
+    ],
+    "progressions": {
+      "shoulders": 40,
+      "handstand": 30
     },
     "cues": []
   },
@@ -28851,6 +29727,26 @@
     "cues": []
   },
   {
+    "id": "prone-back-fly",
+    "name": "Prone Back Fly",
+    "equipment": [],
+    "muscles": [
+      "back",
+      "shoulders"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie face down with arms extended to the sides",
+      "Lift chest and arms off the ground",
+      "Squeeze shoulder blades together at the top",
+      "Lower back down with control"
+    ],
+    "progressions": {
+      "back": 35
+    },
+    "cues": []
+  },
+  {
     "id": "prone-dumbbell-upright-shoulder-external-rotation",
     "name": "Prone Dumbbell Upright Shoulder External Rotation",
     "equipment": [
@@ -28945,6 +29841,34 @@
     ]
   },
   {
+    "id": "pull-up-neutral-grip",
+    "name": "Pull Up (Neutral Grip)",
+    "equipment": [
+      "pull-up bar"
+    ],
+    "muscles": [
+      "back",
+      "arms"
+    ],
+    "reference": "https://static.exercisedb.dev/media/0V2YQjW.gif",
+    "instructions": [
+      "Hang from a pull-up bar with a neutral grip (palms facing each other) and your arms fully extended",
+      "Engage your core and squeeze your shoulder blades together",
+      "Pull your body up towards the bar by bending your elbows and driving your elbows down towards your hips",
+      "Continue pulling until your chin is above the bar",
+      "Pause for a moment at the top, then slowly lower your body back down to the starting position with control",
+      "Repeat for the desired number of repetitions"
+    ],
+    "progressions": {
+      "vertical_pull": 45
+    },
+    "cues": [
+      "Start from a dead hang",
+      "Pull elbows down and back",
+      "Control the descent"
+    ]
+  },
+  {
     "id": "pull-up",
     "name": "Pull-Up",
     "equipment": [
@@ -28972,32 +29896,26 @@
     ]
   },
   {
-    "id": "pull-up-neutral-grip",
-    "name": "Pull Up (Neutral Grip)",
-    "equipment": [
-      "pull-up bar"
-    ],
+    "id": "pump-push-up",
+    "name": "Pump Push-Up",
+    "equipment": [],
     "muscles": [
-      "back",
-      "arms"
+      "chest",
+      "shoulders",
+      "triceps"
     ],
-    "reference": "https://static.exercisedb.dev/media/0V2YQjW.gif",
+    "reference": "",
     "instructions": [
-      "Hang from a pull-up bar with a neutral grip (palms facing each other) and your arms fully extended",
-      "Engage your core and squeeze your shoulder blades together",
-      "Pull your body up towards the bar by bending your elbows and driving your elbows down towards your hips",
-      "Continue pulling until your chin is above the bar",
-      "Pause for a moment at the top, then slowly lower your body back down to the starting position with control",
-      "Repeat for the desired number of repetitions"
+      "Start in standard push-up position",
+      "Lower halfway down",
+      "Perform rapid small-range bouncing reps",
+      "Maintain constant tension without full lockout"
     ],
     "progressions": {
-      "vertical_pull": 45
+      "push_up": 55,
+      "chest": 50
     },
-    "cues": [
-      "Start from a dead hang",
-      "Pull elbows down and back",
-      "Control the descent"
-    ]
+    "cues": []
   },
   {
     "id": "pure-chin-up",
@@ -29092,6 +30010,32 @@
       "Keep body in a straight line from head to heels",
       "Elbows at 45 degrees, not flared out",
       "Touch chest to the floor each rep"
+    ]
+  },
+  {
+    "id": "push-up-wall",
+    "name": "Push-Up (Wall)",
+    "equipment": [],
+    "muscles": [
+      "shoulders",
+      "chest"
+    ],
+    "reference": "https://static.exercisedb.dev/media/LEH9jxP.gif",
+    "instructions": [
+      "Stand facing a wall, about arm's length away",
+      "Place your hands on the wall at shoulder height, slightly wider than shoulder-width apart",
+      "Step back a few feet, keeping your body straight and your feet hip-width apart",
+      "Bend your elbows and lower your chest towards the wall, keeping your body in a straight line",
+      "Push back up to the starting position, straightening your arms",
+      "Repeat for the desired number of repetitions"
+    ],
+    "progressions": {
+      "horizontal_push": 35
+    },
+    "cues": [
+      "Keep body in a straight line",
+      "Elbows at 45 degrees",
+      "Touch chest to the floor"
     ]
   },
   {
@@ -29245,32 +30189,6 @@
     "progressions": {
       "horizontal_push": 45,
       "core": 45
-    },
-    "cues": [
-      "Keep body in a straight line",
-      "Elbows at 45 degrees",
-      "Touch chest to the floor"
-    ]
-  },
-  {
-    "id": "push-up-wall",
-    "name": "Push-Up (Wall)",
-    "equipment": [],
-    "muscles": [
-      "shoulders",
-      "chest"
-    ],
-    "reference": "https://static.exercisedb.dev/media/LEH9jxP.gif",
-    "instructions": [
-      "Stand facing a wall, about arm's length away",
-      "Place your hands on the wall at shoulder height, slightly wider than shoulder-width apart",
-      "Step back a few feet, keeping your body straight and your feet hip-width apart",
-      "Bend your elbows and lower your chest towards the wall, keeping your body in a straight line",
-      "Push back up to the starting position, straightening your arms",
-      "Repeat for the desired number of repetitions"
-    ],
-    "progressions": {
-      "horizontal_push": 35
     },
     "cues": [
       "Keep body in a straight line",
@@ -29682,6 +30600,27 @@
     ]
   },
   {
+    "id": "reverse-angel",
+    "name": "Reverse Angel",
+    "equipment": [],
+    "muscles": [
+      "back",
+      "shoulders"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie face down with arms at your sides",
+      "Lift chest off the ground",
+      "Sweep arms outward and overhead in an arc (reverse snow angel)",
+      "Reverse the arc back to sides and repeat"
+    ],
+    "progressions": {
+      "back": 45,
+      "shoulders": 40
+    },
+    "cues": []
+  },
+  {
     "id": "reverse-crunch",
     "name": "Reverse Crunch",
     "equipment": [],
@@ -29701,7 +30640,7 @@
     },
     "cues": [
       "Curl hips up off the floor",
-      "Control the descent \u2014 don't swing",
+      "Control the descent — don't swing",
       "Keep upper back on the floor"
     ]
   },
@@ -30007,7 +30946,7 @@
     "cues": [
       "Turn rings out at the top for full lockout",
       "Keep elbows close to your body",
-      "Control the descent \u2014 don't dive bomb"
+      "Control the descent — don't dive bomb"
     ]
   },
   {
@@ -30610,7 +31549,7 @@
     "cues": [
       "Use your feet to grip and push",
       "Pull with arms, lock with legs",
-      "Control the descent \u2014 don't slide"
+      "Control the descent — don't slide"
     ]
   },
   {
@@ -30703,6 +31642,29 @@
     ],
     "progressions": {
       "mobility": 30
+    },
+    "cues": []
+  },
+  {
+    "id": "russian-push-up",
+    "name": "Russian Push-Up",
+    "equipment": [],
+    "muscles": [
+      "chest",
+      "triceps",
+      "shoulders",
+      "forearms"
+    ],
+    "reference": "",
+    "instructions": [
+      "Start in standard push-up position",
+      "Lower body to the ground",
+      "Drop to forearms (like forearm plank)",
+      "Push back up to hands and return to start"
+    ],
+    "progressions": {
+      "push_up": 60,
+      "chest": 55
     },
     "cues": []
   },
@@ -30829,6 +31791,25 @@
     ],
     "progressions": {
       "squat": 45
+    },
+    "cues": []
+  },
+  {
+    "id": "scissors",
+    "name": "Scissors",
+    "equipment": [],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie on your back with legs slightly off the ground",
+      "Alternate crossing one leg over the other in a scissor motion",
+      "Keep lower back pressed into the floor",
+      "Maintain constant movement without legs touching the ground"
+    ],
+    "progressions": {
+      "core": 35
     },
     "cues": []
   },
@@ -31440,6 +32421,47 @@
     "cues": []
   },
   {
+    "id": "side-crunch",
+    "name": "Side Crunch",
+    "equipment": [],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie on your side with knees slightly bent",
+      "Place top hand behind your head",
+      "Crunch sideways, lifting shoulder toward hip",
+      "Lower with control and repeat, then switch sides"
+    ],
+    "progressions": {
+      "core": 35
+    },
+    "cues": []
+  },
+  {
+    "id": "side-hip-on-parallel-bars",
+    "name": "Side Hip (On Parallel Bars)",
+    "equipment": [
+      "dip station"
+    ],
+    "muscles": [
+      "core"
+    ],
+    "reference": "https://static.exercisedb.dev/media/jTkSc6o.gif",
+    "instructions": [
+      "Stand between two parallel bars with your feet shoulder-width apart",
+      "Place your hands on the bars and lift your body off the ground, supporting your weight on your arms",
+      "Engage your abs and slowly lift your legs to the side, keeping them straight",
+      "Pause for a moment at the top, then slowly lower your legs back down to the starting position",
+      "Repeat for the desired number of repetitions"
+    ],
+    "progressions": {
+      "core": 40
+    },
+    "cues": []
+  },
+  {
     "id": "side-hip-abduction",
     "name": "Side Hip Abduction",
     "equipment": [],
@@ -31463,28 +32485,6 @@
       "Squeeze at the widest point",
       "Control the return"
     ]
-  },
-  {
-    "id": "side-hip-on-parallel-bars",
-    "name": "Side Hip (On Parallel Bars)",
-    "equipment": [
-      "dip station"
-    ],
-    "muscles": [
-      "core"
-    ],
-    "reference": "https://static.exercisedb.dev/media/jTkSc6o.gif",
-    "instructions": [
-      "Stand between two parallel bars with your feet shoulder-width apart",
-      "Place your hands on the bars and lift your body off the ground, supporting your weight on your arms",
-      "Engage your abs and slowly lift your legs to the side, keeping them straight",
-      "Pause for a moment at the top, then slowly lower your legs back down to the starting position",
-      "Repeat for the desired number of repetitions"
-    ],
-    "progressions": {
-      "core": 40
-    },
-    "cues": []
   },
   {
     "id": "side-lying-floor-stretch",
@@ -31608,6 +32608,48 @@
     ]
   },
   {
+    "id": "side-to-side-push-up",
+    "name": "Side To Side Push-Up",
+    "equipment": [],
+    "muscles": [
+      "chest",
+      "shoulders",
+      "triceps"
+    ],
+    "reference": "",
+    "instructions": [
+      "Start in a wide push-up position",
+      "Lower body toward one hand, shifting weight to that side",
+      "Push back up to center",
+      "Lower toward the other hand and repeat"
+    ],
+    "progressions": {
+      "push_up": 65,
+      "chest": 60
+    },
+    "cues": []
+  },
+  {
+    "id": "side-wrist-pull-stretch",
+    "name": "Side Wrist Pull Stretch",
+    "equipment": [],
+    "muscles": [
+      "arms"
+    ],
+    "reference": "https://static.exercisedb.dev/media/UtmIqcI.gif",
+    "instructions": [
+      "Stand with your feet shoulder-width apart and your arms extended in front of you",
+      "Extend your right arm out to the side, parallel to the ground, with your palm facing down",
+      "With your left hand, grab your right hand and gently pull it towards your body, feeling a stretch in your right forearm",
+      "Hold the stretch for 15-30 seconds, then release",
+      "Repeat on the other side"
+    ],
+    "progressions": {
+      "mobility": 30
+    },
+    "cues": []
+  },
+  {
     "id": "side-to-side-chin",
     "name": "Side-To-Side Chin",
     "equipment": [
@@ -31647,26 +32689,6 @@
     ],
     "progressions": {
       "core": 40
-    },
-    "cues": []
-  },
-  {
-    "id": "side-wrist-pull-stretch",
-    "name": "Side Wrist Pull Stretch",
-    "equipment": [],
-    "muscles": [
-      "arms"
-    ],
-    "reference": "https://static.exercisedb.dev/media/UtmIqcI.gif",
-    "instructions": [
-      "Stand with your feet shoulder-width apart and your arms extended in front of you",
-      "Extend your right arm out to the side, parallel to the ground, with your palm facing down",
-      "With your left hand, grab your right hand and gently pull it towards your body, feeling a stretch in your right forearm",
-      "Hold the stretch for 15-30 seconds, then release",
-      "Repeat on the other side"
-    ],
-    "progressions": {
-      "mobility": 30
     },
     "cues": []
   },
@@ -31761,7 +32783,7 @@
     },
     "cues": [
       "Drive through the planted heel",
-      "Keep hips level \u2014 don't let them drop",
+      "Keep hips level — don't let them drop",
       "Squeeze glutes at the top"
     ]
   },
@@ -31832,6 +32854,25 @@
       "Keep chest up and core braced",
       "Drive through the whole foot"
     ]
+  },
+  {
+    "id": "single-leg-raises",
+    "name": "Single-Leg Raises",
+    "equipment": [],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie flat on your back with legs extended",
+      "Keep one leg on the ground",
+      "Raise the other leg to vertical, keeping it straight",
+      "Lower with control without touching the floor and repeat"
+    ],
+    "progressions": {
+      "core": 30
+    },
+    "cues": []
   },
   {
     "id": "sissy-squat",
@@ -32017,7 +33058,7 @@
   },
   {
     "id": "sled-45-leg-press-side-pov",
-    "name": "Sled 45\u00b0 Leg Press (Side Pov)",
+    "name": "Sled 45° Leg Press (Side Pov)",
     "equipment": [
       "sled machine"
     ],
@@ -32225,6 +33266,47 @@
     ],
     "progressions": {
       "mobility": 25
+    },
+    "cues": []
+  },
+  {
+    "id": "slide-crunch",
+    "name": "Slide Crunch",
+    "equipment": [],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie on your back with knees bent",
+      "Slide hands along the floor toward your feet as you crunch up",
+      "Reach as far as possible along your thighs or past your knees",
+      "Slide back down to starting position"
+    ],
+    "progressions": {
+      "core": 30
+    },
+    "cues": []
+  },
+  {
+    "id": "slow-push-up",
+    "name": "Slow Push-Up",
+    "equipment": [],
+    "muscles": [
+      "chest",
+      "shoulders",
+      "triceps"
+    ],
+    "reference": "",
+    "instructions": [
+      "Start in standard push-up position",
+      "Lower body over 3-5 seconds",
+      "Pause briefly at the bottom",
+      "Push up over 3-5 seconds"
+    ],
+    "progressions": {
+      "push_up": 50,
+      "chest": 50
     },
     "cues": []
   },
@@ -33612,6 +34694,29 @@
     ]
   },
   {
+    "id": "spartan-push-up",
+    "name": "Spartan Push-Up",
+    "equipment": [],
+    "muscles": [
+      "chest",
+      "shoulders",
+      "triceps",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Start with one hand forward and one hand back (staggered)",
+      "Lower body to the floor",
+      "Push up explosively and switch hand positions mid-air",
+      "Land with opposite hand staggering and repeat"
+    ],
+    "progressions": {
+      "push_up": 75,
+      "chest": 70
+    },
+    "cues": []
+  },
+  {
     "id": "speed-ladder-drills",
     "name": "Speed Ladder Drills",
     "equipment": [],
@@ -34034,7 +35139,7 @@
     "cues": [
       "Full stretch at the bottom",
       "Drive up onto toes and squeeze",
-      "Control the descent \u2014 don't bounce"
+      "Control the descent — don't bounce"
     ]
   },
   {
@@ -34366,6 +35471,27 @@
     "cues": []
   },
   {
+    "id": "super-flies",
+    "name": "Super-Flies",
+    "equipment": [],
+    "muscles": [
+      "back",
+      "shoulders",
+      "glutes"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie face down with arms extended to the sides",
+      "Simultaneously lift chest, arms, and legs off the ground",
+      "Perform a flying motion, squeezing shoulder blades",
+      "Lower with control and repeat"
+    ],
+    "progressions": {
+      "back": 50
+    },
+    "cues": []
+  },
+  {
     "id": "superman-hold",
     "name": "Superman Hold",
     "equipment": [],
@@ -34600,10 +35726,32 @@
       "hinge": 45
     },
     "cues": [
-      "Hinge at hips \u2014 not a squat",
+      "Hinge at hips — not a squat",
       "Snap hips forward explosively",
       "Keep arms relaxed"
     ]
+  },
+  {
+    "id": "tap-all",
+    "name": "Tap All",
+    "equipment": [],
+    "muscles": [
+      "shoulders",
+      "core",
+      "chest"
+    ],
+    "reference": "",
+    "instructions": [
+      "Start in plank position",
+      "Tap opposite shoulder with one hand",
+      "Tap hip, then tap the floor in front",
+      "Alternate hands and repeat the full sequence"
+    ],
+    "progressions": {
+      "core": 50,
+      "shoulders": 45
+    },
+    "cues": []
   },
   {
     "id": "thoracic-extension-over-roller",
@@ -34675,6 +35823,25 @@
     ]
   },
   {
+    "id": "toe-crunch",
+    "name": "Toe Crunch",
+    "equipment": [],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Lie on your back with legs extended toward the ceiling",
+      "Reach hands up toward your toes",
+      "Crunch upper body off the floor, trying to touch toes",
+      "Lower back down with control"
+    ],
+    "progressions": {
+      "core": 40
+    },
+    "cues": []
+  },
+  {
     "id": "toe-touch-progression",
     "name": "Toe Touch Progression",
     "equipment": [],
@@ -34691,6 +35858,27 @@
     ],
     "progressions": {
       "mobility": 25
+    },
+    "cues": []
+  },
+  {
+    "id": "toes-to-bar",
+    "name": "Toes To Bar",
+    "equipment": [
+      "pull-up bar"
+    ],
+    "muscles": [
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Hang from a pull-up bar with arms fully extended",
+      "Engage core and raise straight legs",
+      "Touch toes to the bar",
+      "Lower legs with control to starting position"
+    ],
+    "progressions": {
+      "core": 70
     },
     "cues": []
   },
@@ -35776,6 +36964,31 @@
     ]
   },
   {
+    "id": "tuck-back-lever-advanced",
+    "name": "Tuck Back Lever Advanced",
+    "equipment": [
+      "pull-up bar",
+      "rings"
+    ],
+    "muscles": [
+      "back",
+      "shoulders",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Hang from bar or rings",
+      "Rotate body backward into inverted hang",
+      "Lower into back lever with knees tucked at 90 degrees to torso",
+      "Hold with back parallel to the ground"
+    ],
+    "progressions": {
+      "back_lever": 35,
+      "back": 55
+    },
+    "cues": []
+  },
+  {
     "id": "tuck-crunch",
     "name": "Tuck Crunch",
     "equipment": [],
@@ -35837,6 +37050,29 @@
     ],
     "progressions": {
       "horizontal_push": 75
+    },
+    "cues": []
+  },
+  {
+    "id": "tuck-planche-advanced",
+    "name": "Tuck Planche Advanced",
+    "equipment": [],
+    "muscles": [
+      "shoulders",
+      "chest",
+      "triceps",
+      "core"
+    ],
+    "reference": "",
+    "instructions": [
+      "Support body on hands with arms straight",
+      "Tuck knees with thighs at 90 degrees to torso (less tucked than basic)",
+      "Lean forward keeping hips at hand height",
+      "Hold for the prescribed time"
+    ],
+    "progressions": {
+      "planche": 45,
+      "shoulders": 70
     },
     "cues": []
   },
