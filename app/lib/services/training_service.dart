@@ -1,7 +1,7 @@
 import 'dart:ui';
 import '../models/api_response.dart';
 import '../models/activity.dart';
-import '../models/partner.dart';
+import '../dto/partner_info.dart';
 import '../models/training.dart';
 import '../models/training_feedback.dart';
 import 'app_logger.dart';
@@ -290,7 +290,7 @@ class TrainingService {
     }
   }
 
-  Future<ApiResponse<List<Partner>>> getPartners(String trainingId) async {
+  Future<ApiResponse<List<PartnerInfo>>> getPartners(String trainingId) async {
     AppLogger.debug('[TrainingService] Fetching partners for training: $trainingId');
 
     final response = await _apiService.get('/training/partners/$trainingId');
@@ -298,7 +298,7 @@ class TrainingService {
     if (response.isSuccess && response.data != null) {
       try {
         final partnersJson = response.data!['partners'] as List;
-        final partners = partnersJson.map((json) => Partner.fromJson(json)).toList();
+        final partners = partnersJson.map((json) => PartnerInfo.fromJson(json)).toList();
         AppLogger.info('[TrainingService] Fetched ${partners.length} partners');
         return ApiResponse.success(partners, response.statusCode);
       } catch (e) {

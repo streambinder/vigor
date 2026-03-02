@@ -11,7 +11,7 @@ import '../models/block.dart';
 import '../models/activity.dart';
 import '../models/exercise.dart';
 import '../models/exercise_selection.dart';
-import '../models/partner.dart';
+import '../dto/partner_info.dart';
 import '../models/progression_adjustment.dart';
 import '../models/training_feedback.dart';
 import '../providers/auth_provider.dart';
@@ -36,7 +36,7 @@ class TrainingDetailsScreen extends StatefulWidget {
 
 class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   late Training _training;
-  List<Partner> _partners = [];
+  List<PartnerInfo> _partners = [];
   TrainingFeedback? _userFeedback;
 
   Training get training => _training;
@@ -788,7 +788,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         _buildMethodologyBadge(training.methodology),
         _buildMetaChip(Icons.schedule, _formatDuration(training.completedIn ?? training.duration)),
         _buildMetaChip(Icons.calendar_today, _formatDate(training.completedAt ?? training.createdAt)),
-        if (_partners.isNotEmpty) ..._partners.map((p) => _buildMetaChip(Icons.person, p.displayName)),
+        if (_partners.isNotEmpty) ..._partners.map((p) => _buildMetaChip(Icons.person, '${p.firstName} ${p.lastName}'.trim())),
         if (training.gym != null) _buildMetaChip(Icons.location_on, training.gym!.name),
         if (training.parentId != null) _buildMetaChip(Icons.copy, l10n.copied),
       ],

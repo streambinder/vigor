@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
-import '../models/partner.dart';
+import '../dto/partner_info.dart';
 import '../providers/auth_provider.dart';
 import '../services/secure_storage_service.dart';
 import '../widgets/adaptive/adaptive.dart';
@@ -24,7 +24,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   bool _isLoading = false;
   bool _hasLoadedOnce = false;
   bool _isDeleting = false;
-  final Map<String, List<Partner>> _partnerData = {};
+  final Map<String, List<PartnerInfo>> _partnerData = {};
   final Set<String> _selectedIds = {};
   bool get _isSelecting => _selectedIds.isNotEmpty;
 
@@ -97,7 +97,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     if (trainings == null) return;
     final trainingService = context.read<ServiceLocator>().trainingService;
     // batch all partner data and update state once to avoid multiple rebuilds
-    final Map<String, List<Partner>> newData = {};
+    final Map<String, List<PartnerInfo>> newData = {};
     for (final training in trainings) {
       final response = await trainingService.getPartners(training.id);
       if (response.isSuccess) {

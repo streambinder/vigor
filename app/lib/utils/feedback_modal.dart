@@ -114,7 +114,7 @@ class FeedbackModal {
     final activities = _getWorkActivities(training);
     if (activities.isEmpty) {
       return FeedbackResult(
-        feedback: TrainingFeedback(qualityReason: '', message: messagePrefix ?? '', createdAt: DateTime.now()),
+        feedback: TrainingFeedback(id: '', trainingId: '', userId: '', qualityReason: '', message: messagePrefix ?? '', activityFeedback: {}, createdAt: DateTime.now()),
         activityFeedback: {},
         activityReports: [],
       );
@@ -137,7 +137,7 @@ class FeedbackModal {
     final activities = _getWorkActivities(training);
     if (activities.isEmpty) {
       return FeedbackResult(
-        feedback: TrainingFeedback(qualityReason: '', message: '', createdAt: DateTime.now()),
+        feedback: TrainingFeedback(id: '', trainingId: '', userId: '', qualityReason: '', message: '', activityFeedback: {}, createdAt: DateTime.now()),
         activityFeedback: {},
         activityReports: [],
       );
@@ -256,9 +256,13 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
 
     Navigator.of(context).pop(FeedbackResult(
       feedback: TrainingFeedback(
+        id: '',
+        trainingId: '',
+        userId: '',
         quality: _trainingQuality,
         qualityReason: _trainingQuality == false ? _qualityReasonController.text.trim() : '',
         message: message,
+        activityFeedback: activityFeedback,
         createdAt: DateTime.now(),
       ),
       activityFeedback: activityFeedback,
