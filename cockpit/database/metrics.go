@@ -134,6 +134,20 @@ type ActiveUsersPoint struct {
 	Count int64
 }
 
+type ActiveUserPoint struct {
+	Day    string
+	UserID string
+	Count  int64
+}
+
+// UserActivityRank represents a user's activity consistency ranking
+type UserActivityRank struct {
+	UserID     string
+	ActiveDays int64
+	TotalDays  int64
+	Percentage float64
+}
+
 // GetActiveUsersPerDay returns daily count of distinct active users
 func GetActiveUsersPerDay(days int) ([]ActiveUsersPoint, error) {
 	if Metrics == nil {
@@ -213,4 +227,54 @@ func GetAvgTrainingGenerationsPerDay() (float64, error) {
 	`, stmt.Table)).Scan(&result).Error
 
 	return result.Avg, err
+}
+
+// GetActiveUsersPerDayPerUser returns which users were active on each day (1 = active)
+func GetActiveUsersPerDayPerUser(days int) ([]ActiveUserPoint, error) {
+	if Metrics == nil {
+		return nil, nil
+	}
+
+	stmt := &gorm.Statement{DB: Metrics}
+	_ = stmt.Parse(&event.HandlerRequestEvent{})
+
+	var results []ActiveUserPoint
+	err := Metrics.Raw(fmt.Sprintf(`
+		SELECT
+			date(time) as day,
+			user_id,
+			1 as count
+		FROM %s
+		WHERE time > datetime('now', '-%d days') AND user_id != ''
+		GROUP BY day, user_id
+		ORDER BY day
+	`, stmt.Table, days)).Scan(&results).Error
+
+	return results, err
+}
+
+// GetTopActiveUsers returns the top N users ranked by percentage of active days since their first event
+func GetTopActiveUsers(limit int) ([]UserActivityRank, error) {
+	if Metrics == nil {
+		return nil, nil
+	}
+
+	stmt := &gorm.Statement{DB: Metrics}
+	_ = stmt.Parse(&event.HandlerRequestEvent{})
+
+	var results []UserActivityRank
+	err := Metrics.Raw(fmt.Sprintf(`
+		SELECT
+			user_id,
+			COUNT(DISTINCT date(time)) as active_days,
+			CAST(julianday('now') - julianday(MIN(time)) + 1 AS INTEGER) as total_days,
+			ROUND(100.0 * COUNT(DISTINCT date(time)) / (julianday('now') - julianday(MIN(time)) + 1), 1) as percentage
+		FROM %s
+		WHERE user_id != ''
+		GROUP BY user_id
+		ORDER BY percentage DESC
+		LIMIT %d
+	`, stmt.Table, limit)).Scan(&results).Error
+
+	return results, err
 }

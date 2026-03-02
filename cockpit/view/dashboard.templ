@@ -33,6 +33,40 @@ templ Dashboard(data DashboardData) {
 		</div>
 		@templ.JSONScript("active-users-chart-data", multiSeriesChartData(data.ActiveUsersPerDay))
 		<div class="chart-container">
+			<div class="chart-title">Active Users <span class="muted">(per user, 7 days)</span></div>
+			<div id="active-users-per-user-chart"></div>
+		</div>
+		@templ.JSONScript("active-users-per-user-chart-data", multiSeriesChartData(data.ActiveUsersPerDayPerUser))
+		if len(data.TopActiveUsers) > 0 {
+			<div class="table-container">
+				<div class="table-title">Most Active Users</div>
+				<div class="table-scroll">
+					<table>
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>User</th>
+								<th>Active Days</th>
+								<th>Total Days</th>
+								<th>Activity</th>
+							</tr>
+						</thead>
+						<tbody>
+							for i, u := range data.TopActiveUsers {
+								<tr>
+									<td>{ fmt.Sprintf("%d", i+1) }</td>
+									<td>{ u.Name }</td>
+									<td>{ fmt.Sprintf("%d", u.ActiveDays) }</td>
+									<td>{ fmt.Sprintf("%d", u.TotalDays) }</td>
+									<td>{ fmt.Sprintf("%.1f%%", u.Percentage) }</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		}
+		<div class="chart-container">
 			<div class="chart-title">Training Generation Latency <span class="muted">(p95 ms)</span></div>
 			<div id="training-latency-chart"></div>
 		</div>
@@ -313,6 +347,61 @@ templ latencyChartScript() {
 				};
 				new ApexCharts(document.querySelector(chartId), options).render();
 			}
+			function renderBinaryChart(dataId, chartId) {
+				var chartData = JSON.parse(document.getElementById(dataId).textContent);
+				if (!chartData.series || chartData.series.length === 0) return;
+				var series = chartData.series.map(function(s) {
+					return { name: s.name, data: s.data };
+				});
+				var options = {
+					series: series,
+					chart: {
+						type: 'area',
+						height: 300,
+						background: 'transparent',
+						toolbar: { show: false },
+						zoom: { enabled: false },
+						animations: { enabled: false }
+					},
+					dataLabels: { enabled: false },
+					stroke: { curve: 'stepline', width: 2 },
+					fill: {
+						type: 'gradient',
+						gradient: {
+							shadeIntensity: 1,
+							opacityFrom: 0.4,
+							opacityTo: 0.1
+						}
+					},
+					xaxis: {
+						categories: chartData.labels,
+						labels: { style: { colors: '#8b949e' } },
+						axisBorder: { color: '#30363d' },
+						axisTicks: { color: '#30363d' }
+					},
+					yaxis: {
+						min: 0,
+						max: 1,
+						tickAmount: 1,
+						labels: {
+							style: { colors: '#8b949e' },
+							formatter: function(val) { return val === 1 ? 'active' : ''; }
+						}
+					},
+					grid: {
+						borderColor: '#30363d',
+						strokeDashArray: 4
+					},
+					tooltip: {
+						theme: 'dark',
+						y: { formatter: function(val) { return val === 1 ? 'active' : 'inactive'; } }
+					},
+					legend: {
+						labels: { colors: '#8b949e' }
+					}
+				};
+				new ApexCharts(document.querySelector(chartId), options).render();
+			}
 			function renderBarChart(dataId, chartId) {
 				var chartData = JSON.parse(document.getElementById(dataId).textContent);
 				if (!chartData.series || chartData.series.length === 0) return;
@@ -354,6 +443,7 @@ templ latencyChartScript() {
 				new ApexCharts(document.querySelector(chartId), options).render();
 			}
 			renderChart('active-users-chart-data', '#active-users-chart', '');
+			renderBinaryChart('active-users-per-user-chart-data', '#active-users-per-user-chart');
 			renderChart('training-chart-data', '#training-latency-chart', ' ms');
 			renderChart('handler-chart-data', '#handler-latency-chart', ' ms');
 			renderChart('training-failures-chart-data', '#training-failures-chart', '');

@@ -23,6 +23,8 @@ func Dashboard(c *fiber.Ctx) error {
 	completedTrainingCount, _ := database.GetCompletedTrainingCount()
 	avgCompletedTrainingsPerDay, _ := database.GetAvgCompletedTrainingsPerDay()
 	activeUsersStats, _ := database.GetActiveUsersPerDay(14)
+	activeUsersPerUserStats, _ := database.GetActiveUsersPerDayPerUser(7)
+	topActiveUsersStats, _ := database.GetTopActiveUsers(10)
 	trainingStats, _ := database.GetTrainingGenerationStats(14)
 	handlerStats, _ := database.GetHandlerRequestStats(14)
 	errorStats, _ := database.GetHandlerErrorStats(14)
@@ -40,6 +42,8 @@ func Dashboard(c *fiber.Ctx) error {
 		CompletedTrainingCount:       completedTrainingCount,
 		AvgCompletedTrainingsPerDay:  avgCompletedTrainingsPerDay,
 		ActiveUsersPerDay:            toActiveUsersSeries(activeUsersStats),
+		ActiveUsersPerDayPerUser:     toActiveUsersPerUserSeries(activeUsersPerUserStats),
+		TopActiveUsers:               toTopActiveUsers(topActiveUsersStats),
 		TrainingGenerationLatencies:  toLatencySeries(trainingStats),
 		HandlerRequestLatencies:      toLatencySeries(handlerStats),
 		HandlerRequestErrors:         toErrorSeries(errorStats),
@@ -172,6 +176,94 @@ func toActiveUsersSeries(stats []database.ActiveUsersPoint) []view.LatencySeries
 		})
 	}
 	return []view.LatencySeries{{Name: "Active Users", Points: points}}
+}
+
+func toActiveUsersPerUserSeries(stats []database.ActiveUserPoint) []view.LatencySeries {
+	if len(stats) == 0 {
+		return nil
+	}
+
+	// collect unique user IDs for name resolution
+	userIDSet := make(map[string]bool)
+	for _, s := range stats {
+		userIDSet[s.UserID] = true
+	}
+	var userIDs []string
+	for id := range userIDSet {
+		userIDs = append(userIDs, id)
+	}
+
+	// resolve names from postgres
+	userNames, _ := database.GetUserNames(userIDs)
+
+	// collect all days and find date range
+	daySet := make(map[string]bool)
+	for _, s := range stats {
+		daySet[s.Day] = true
+	}
+	allDays := generateDayRange(daySet)
+
+	// group points by user
+	seriesMap := make(map[string]map[string]float64)
+	var seriesOrder []string
+	for _, s := range stats {
+		if _, exists := seriesMap[s.UserID]; !exists {
+			seriesMap[s.UserID] = make(map[string]float64)
+			seriesOrder = append(seriesOrder, s.UserID)
+		}
+		seriesMap[s.UserID][s.Day] = float64(s.Count)
+	}
+
+	// build series with zero-filled gaps
+	var series []view.LatencySeries
+	for _, userID := range seriesOrder {
+		name := userNames[userID]
+		if name == "" {
+			name = userID[:8]
+		}
+		var points []view.LatencyDataPoint
+		dayValues := seriesMap[userID]
+		for _, day := range allDays {
+			label := day
+			if t, err := time.Parse("2006-01-02", day); err == nil {
+				label = t.Format("Jan 2")
+			}
+			points = append(points, view.LatencyDataPoint{
+				Label: label,
+				Value: dayValues[day],
+			})
+		}
+		series = append(series, view.LatencySeries{Name: name, Points: points})
+	}
+	return series
+}
+
+func toTopActiveUsers(stats []database.UserActivityRank) []view.TopActiveUser {
+	if len(stats) == 0 {
+		return nil
+	}
+
+	// resolve names
+	var userIDs []string
+	for _, s := range stats {
+		userIDs = append(userIDs, s.UserID)
+	}
+	userNames, _ := database.GetUserNames(userIDs)
+
+	result := make([]view.TopActiveUser, len(stats))
+	for i, s := range stats {
+		name := userNames[s.UserID]
+		if name == "" {
+			name = s.UserID[:8]
+		}
+		result[i] = view.TopActiveUser{
+			Name:       name,
+			ActiveDays: s.ActiveDays,
+			TotalDays:  s.TotalDays,
+			Percentage: s.Percentage,
+		}
+	}
+	return result
 }
 
 // generateDayRange returns all days between min date found in daySet and today

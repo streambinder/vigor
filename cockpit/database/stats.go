@@ -133,3 +133,29 @@ func DeleteReport(id string) error {
 	}
 	return DB.Delete(&model.Report{}, "id = ?", id).Error
 }
+
+// GetUserNames resolves user UUIDs to display names (first_name) from profiles
+func GetUserNames(userIDs []string) (map[string]string, error) {
+	result := make(map[string]string)
+	if DB == nil || len(userIDs) == 0 {
+		return result, nil
+	}
+
+	var profiles []struct {
+		UserID    string `gorm:"column:user_id"`
+		FirstName string `gorm:"column:first_name"`
+	}
+	err := DB.Raw(`SELECT user_id::text, first_name FROM profiles WHERE user_id::text IN ?`, userIDs).Scan(&profiles).Error
+	if err != nil {
+		return result, err
+	}
+
+	for _, p := range profiles {
+		name := p.FirstName
+		if name == "" {
+			name = p.UserID[:8]
+		}
+		result[p.UserID] = name
+	}
+	return result, nil
+}
