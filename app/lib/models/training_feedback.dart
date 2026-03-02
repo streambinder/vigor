@@ -25,13 +25,13 @@ class TrainingFeedback {
   final DateTime createdAt;
 
   TrainingFeedback({
-    this.id = '',
-    this.trainingId = '',
-    this.userId = '',
+    required this.id,
+    required this.trainingId,
+    required this.userId,
     this.quality,
     required this.qualityReason,
     required this.message,
-    this.activityFeedback = const {},
+    required this.activityFeedback,
     required this.createdAt,
   });
 
