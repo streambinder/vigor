@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
+import '../models/partner.dart';
 import '../providers/auth_provider.dart';
 import '../services/secure_storage_service.dart';
 import '../widgets/adaptive/adaptive.dart';
@@ -23,7 +24,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   bool _isLoading = false;
   bool _hasLoadedOnce = false;
   bool _isDeleting = false;
-  final Map<String, int> _partnerCounts = {};
+  final Map<String, List<Partner>> _partnerData = {};
   final Set<String> _selectedIds = {};
   bool get _isSelecting => _selectedIds.isNotEmpty;
 
@@ -95,16 +96,16 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   Future<void> _loadPartnerCounts(List<Training>? trainings) async {
     if (trainings == null) return;
     final trainingService = context.read<ServiceLocator>().trainingService;
-    // batch all partner counts and update state once to avoid multiple rebuilds
-    final Map<String, int> newCounts = {};
+    // batch all partner data and update state once to avoid multiple rebuilds
+    final Map<String, List<Partner>> newData = {};
     for (final training in trainings) {
       final response = await trainingService.getPartners(training.id);
       if (response.isSuccess) {
-        newCounts[training.id] = response.data?.length ?? 0;
+        newData[training.id] = response.data ?? [];
       }
     }
-    if (mounted && newCounts.isNotEmpty) {
-      setState(() => _partnerCounts.addAll(newCounts));
+    if (mounted && newData.isNotEmpty) {
+      setState(() => _partnerData.addAll(newData));
     }
   }
 
@@ -415,7 +416,8 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   Widget _buildTrainingCard(Training training, AppLocalizations l10n, {required bool isAvailable, Key? key}) {
     final isStale = _isStaleTraining(training);
     final isCompleted = _isCompletedTraining(training);
-    final partnerCount = _partnerCounts[training.id] ?? 0;
+    final partners = _partnerData[training.id] ?? [];
+    final partnerCount = partners.length;
     final isSelected = _selectedIds.contains(training.id);
 
     return Container(
@@ -512,7 +514,9 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                       : _formatFullDate(training.completedAt ?? training.createdAt)),
                   if (partnerCount > 0) ...[
                     const SizedBox(width: VigorSpacing.sm),
-                    _buildDataChip(Icons.people, '${1 + partnerCount}'),
+                    _buildDataChip(Icons.people, partnerCount == 1
+                        ? partners.first.firstName
+                        : '${1 + partnerCount}'),
                   ],
                   if (training.gym != null) ...[
                     const SizedBox(width: VigorSpacing.sm),

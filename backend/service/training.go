@@ -533,7 +533,7 @@ func GetTrainingPartners(userID uuid.UUID, trainingID string) ([]model.Partner, 
 	}
 
 	var partners []model.Partner
-	err := database.DB.Where("training_id = ?", trainingID).Find(&partners).Error
+	err := database.DB.Preload("User.Profile").Where("training_id = ?", trainingID).Find(&partners).Error
 	return partners, err
 }
 

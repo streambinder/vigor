@@ -11,6 +11,7 @@ import '../models/block.dart';
 import '../models/activity.dart';
 import '../models/exercise.dart';
 import '../models/exercise_selection.dart';
+import '../models/partner.dart';
 import '../models/progression_adjustment.dart';
 import '../models/training_feedback.dart';
 import '../providers/auth_provider.dart';
@@ -35,7 +36,7 @@ class TrainingDetailsScreen extends StatefulWidget {
 
 class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   late Training _training;
-  int _partnerCount = 0;
+  List<Partner> _partners = [];
   TrainingFeedback? _userFeedback;
 
   Training get training => _training;
@@ -49,9 +50,12 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   Future<void> _loadPartners() async {
+    final currentUserId = context.read<AuthProvider>().currentUser?.id;
     final response = await context.read<ServiceLocator>().trainingService.getPartners(training.id);
     if (response.isSuccess && mounted) {
-      setState(() => _partnerCount = response.data?.length ?? 0);
+      setState(() => _partners = (response.data ?? [])
+          .where((p) => p.userId != currentUserId)
+          .toList());
     }
   }
 
@@ -784,7 +788,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         _buildMethodologyBadge(training.methodology),
         _buildMetaChip(Icons.schedule, _formatDuration(training.completedIn ?? training.duration)),
         _buildMetaChip(Icons.calendar_today, _formatDate(training.completedAt ?? training.createdAt)),
-        if (_partnerCount > 0) _buildMetaChip(Icons.people, '${1 + _partnerCount}'),
+        if (_partners.isNotEmpty) ..._partners.map((p) => _buildMetaChip(Icons.person, p.displayName)),
         if (training.gym != null) _buildMetaChip(Icons.location_on, training.gym!.name),
         if (training.parentId != null) _buildMetaChip(Icons.copy, l10n.copied),
       ],

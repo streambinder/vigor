@@ -13,6 +13,10 @@ class Partner {
   final String trainingId;
   @JsonKey(name: 'user_id', defaultValue: '')
   final String userId;
+  @JsonKey(name: 'first_name', defaultValue: '')
+  final String firstName;
+  @JsonKey(name: 'last_name', defaultValue: '')
+  final String lastName;
   @JsonKey(name: 'created_at', toJson: _dateTimeToJson)
   final DateTime createdAt;
 
@@ -20,8 +24,15 @@ class Partner {
     required this.id,
     required this.trainingId,
     required this.userId,
+    this.firstName = '',
+    this.lastName = '',
     required this.createdAt,
   });
+
+  String get displayName {
+    if (firstName.isEmpty && lastName.isEmpty) return '';
+    return '$firstName $lastName'.trim();
+  }
 
   factory Partner.fromJson(Map<String, dynamic> json) => _$PartnerFromJson(json);
 

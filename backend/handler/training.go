@@ -87,7 +87,12 @@ func getTrainingPartners(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.JSON(dto.GetTrainingPartnersResponse{Partners: partners})
+	partnerInfos := make([]dto.PartnerInfo, len(partners))
+	for i, p := range partners {
+		partnerInfos[i] = dto.NewPartnerInfo(p)
+	}
+
+	return c.JSON(dto.GetTrainingPartnersResponse{Partners: partnerInfos})
 }
 
 func deleteTrainingById(c *fiber.Ctx) error {

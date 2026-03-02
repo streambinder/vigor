@@ -23,9 +23,31 @@ type GetTrainingResponse struct {
 	Trainings []model.Training `json:"trainings"`
 }
 
+// PartnerInfo represents a partner with user display info.
+type PartnerInfo struct {
+	ID         string `json:"id"`
+	TrainingID string `json:"training_id"`
+	UserID     string `json:"user_id"`
+	FirstName  string `json:"first_name"`
+	LastName   string `json:"last_name"`
+	CreatedAt  string `json:"created_at"`
+}
+
+// NewPartnerInfo creates a PartnerInfo from a model.Partner with preloaded User.Profile.
+func NewPartnerInfo(p model.Partner) PartnerInfo {
+	return PartnerInfo{
+		ID:         p.ID.String(),
+		TrainingID: p.TrainingID.String(),
+		UserID:     p.UserID.String(),
+		FirstName:  p.User.Profile.FirstName,
+		LastName:   p.User.Profile.LastName,
+		CreatedAt:  p.CreatedAt.UTC().Format("2006-01-02T15:04:05Z"),
+	}
+}
+
 // GetTrainingPartnersResponse represents the response for GET /training/partners/:id
 type GetTrainingPartnersResponse struct {
-	Partners []model.Partner `json:"partners"`
+	Partners []PartnerInfo `json:"partners"`
 }
 
 // DeleteTrainingResponse represents the response for DELETE /training/:id
