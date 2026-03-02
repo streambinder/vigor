@@ -46,6 +46,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen>
   int _currentSegmentIndex = 0;
   TimerController? _controller;
   bool _workoutCompleted = false;
+  bool _isSubmitting = false;
   String? _previousIntervalKey;
   final AudioService _audioService = AudioService();
 
@@ -258,6 +259,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen>
   }
 
   Future<void> _showFeedbackAndComplete() async {
+    if (_isSubmitting) return;
     final result = await FeedbackModal.show(
       context,
       widget.training,
@@ -265,6 +267,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen>
       elapsedSeconds: _accumulatedElapsedSeconds,
     );
     if (result == null) return;
+    setState(() => _isSubmitting = true);
     await _markTrainingComplete(result);
     if (mounted) {
       Navigator.of(context).pop(true);
@@ -329,7 +332,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen>
       body: _workoutCompleted
           ? CompletionScreen(
               trainingName: widget.training.name,
-              onDone: _showFeedbackAndComplete,
+              onDone: _isSubmitting ? null : _showFeedbackAndComplete,
             )
           : controller == null
               ? const Center(child: CircularProgressIndicator())

@@ -5,7 +5,7 @@ import '../adaptive/adaptive.dart';
 
 class CompletionScreen extends StatelessWidget {
   final String trainingName;
-  final VoidCallback onDone;
+  final VoidCallback? onDone;
 
   const CompletionScreen({
     super.key,
