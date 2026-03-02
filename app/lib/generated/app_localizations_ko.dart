@@ -929,6 +929,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calibrationInProgress => '매 세션마다 당신의 운동이 더 스마트해집니다';
 
   @override
+  String get calibrationTrainingNote =>
+      '이 운동은 목표와 완전히 일치하지 않을 수 있습니다 — 시스템이 아직 당신의 피트니스 수준을 학습 중이며, 완전한 프로필을 구축하기 위해 동작 다양성을 우선시하고 있습니다';
+
+  @override
   String calibrationFamiliesLearned(int calibrated, int total) {
     return '$calibrated/$total 동작 패턴 학습됨';
   }

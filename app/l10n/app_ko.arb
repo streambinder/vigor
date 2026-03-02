@@ -326,6 +326,7 @@
   "calibrationNeeded": "첫 번째 훈련을 완료하여 Vigor가 당신의 수준에 맞게 추천을 보정할 수 있도록 하세요",
   "calibrationDescription": "보정 기간 동안 플랫폼은 피드백 데이터를 수집하여 당신의 체력 상태와 수준에 대한 초기 평가를 합니다",
   "calibrationInProgress": "매 세션마다 당신의 운동이 더 스마트해집니다",
+  "calibrationTrainingNote": "이 운동은 목표와 완전히 일치하지 않을 수 있습니다 — 시스템이 아직 당신의 피트니스 수준을 학습 중이며, 완전한 프로필을 구축하기 위해 동작 다양성을 우선시하고 있습니다",
   "calibrationFamiliesLearned": "{calibrated}/{total} 동작 패턴 학습됨",
   "capabilities": "능력",
   "muscleHeatMap": "근육 히트맵",

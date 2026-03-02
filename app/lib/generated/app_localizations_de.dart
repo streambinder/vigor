@@ -955,6 +955,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Deine Trainings werden mit jeder Einheit intelligenter';
 
   @override
+  String get calibrationTrainingNote =>
+      'Dieses Training stimmt möglicherweise nicht vollständig mit deinen Zielen überein — das System lernt noch dein Fitnesslevel und priorisiert Bewegungsvielfalt, um ein vollständiges Profil aufzubauen';
+
+  @override
   String calibrationFamiliesLearned(int calibrated, int total) {
     return '$calibrated/$total Bewegungsmuster gelernt';
   }

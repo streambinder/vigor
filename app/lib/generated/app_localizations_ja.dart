@@ -929,6 +929,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get calibrationInProgress => 'トレーニングを重ねるごとにプランが賢くなります';
 
   @override
+  String get calibrationTrainingNote =>
+      'このトレーニングは目標と完全に一致しない場合があります — システムはまだあなたのフィットネスレベルを学習中で、完全なプロフィールを構築するために動作の多様性を優先しています';
+
+  @override
   String calibrationFamiliesLearned(int calibrated, int total) {
     return '$calibrated/$total 動作パターンを学習済み';
   }

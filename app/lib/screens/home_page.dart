@@ -166,6 +166,7 @@ class _HomePageState extends State<HomePage> {
 
     // check if any family is still under 100% calibration
     final isCalibrating = families.values.any((fp) => fp.calibration < 100.0);
+    context.read<ServiceLocator>().updateCalibrationFromProgress(families);
 
     final sections = <Widget>[
       // hero stats

@@ -66,6 +66,24 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     }
   }
 
+  /// re-sync local training from the API after timer completion.
+  /// the service's onDataChanged fires refreshTrainings() but it's not awaited,
+  /// so we fetch the list ourselves to guarantee fresh data.
+  Future<void> _refreshTraining() async {
+    final locator = context.read<ServiceLocator>();
+    final response = await locator.trainingService.getTrainings();
+    if (response.isSuccess && mounted) {
+      locator.trainingsNotifier.value = response.data;
+      final updated = response.data
+          ?.cast<Training?>()
+          .firstWhere((t) => t!.id == _training.id, orElse: () => null);
+      if (updated != null) {
+        setState(() => _training = updated);
+        _loadUserFeedback();
+      }
+    }
+  }
+
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final diff = now.difference(date).inDays;
@@ -572,33 +590,66 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             _buildMenuButton(l10n, isOwner),
           ],
         ),
-        body: ListView.builder(
-          padding: VigorSpacing.paddingLg,
-          // header + routines header + routines + footer spacing
-          itemCount: training.routines.length + 3,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
-                child: _buildHeaderWithActions(l10n, isDark, isOwner),
-              );
-            }
-            if (index == 1) {
+        body: ValueListenableBuilder<bool>(
+          valueListenable: context.read<ServiceLocator>().isCalibratingNotifier,
+          builder: (context, isCalibrating, _) => ListView.builder(
+            padding: VigorSpacing.paddingLg,
+            // calibration note + header + routines header + routines + footer spacing
+            itemCount: training.routines.length + 3 + (isCalibrating ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (isCalibrating && index == 0) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: VigorSpacing.md),
+                  child: _buildCalibrationNote(l10n),
+                );
+              }
+              final adjusted = isCalibrating ? index - 1 : index;
+              if (adjusted == 0) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
+                  child: _buildHeaderWithActions(l10n, isDark, isOwner),
+                );
+              }
+              if (adjusted == 1) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: VigorSpacing.md),
+                  child: _buildRoutinesHeader(l10n),
+                );
+              }
+              if (adjusted == training.routines.length + 2) {
+                return const SizedBox(height: VigorSpacing.lg);
+              }
+              final routineIndex = adjusted - 2;
               return Padding(
                 padding: const EdgeInsets.only(bottom: VigorSpacing.md),
-                child: _buildRoutinesHeader(l10n),
+                child: _buildRoutineCard(training.routines[routineIndex], isDark),
               );
-            }
-            if (index == training.routines.length + 2) {
-              return const SizedBox(height: VigorSpacing.lg);
-            }
-            final routineIndex = index - 2;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: VigorSpacing.md),
-              child: _buildRoutineCard(training.routines[routineIndex], isDark),
-            );
-          },
+            },
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCalibrationNote(AppLocalizations l10n) {
+    return AdaptiveCard(
+      glassColor: VigorColors.indigoAdaptive(context).withValues(alpha: 0.08),
+      padding: VigorSpacing.paddingMd,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.tune, color: VigorColors.indigoAdaptive(context), size: 20),
+          const SizedBox(width: VigorSpacing.sm),
+          Expanded(
+            child: Text(
+              l10n.calibrationTrainingNote,
+              style: VigorTypography.caption.copyWith(
+                color: VigorColors.textSecondary(context),
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -877,9 +928,12 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           icon: Icons.timer,
           label: l10n.startTraining,
           color: indigoColor,
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => WorkoutTimerScreen(training: training)),
-          ),
+          onPressed: () async {
+            final completed = await Navigator.of(context).push<bool>(
+              MaterialPageRoute(builder: (context) => WorkoutTimerScreen(training: training)),
+            );
+            if (completed == true && mounted) _refreshTraining();
+          },
         )),
         if (!isCompleted)
           // mark as complete = primary CTA (persimmon), any participant can complete

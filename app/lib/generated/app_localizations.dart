@@ -1842,6 +1842,12 @@ abstract class AppLocalizations {
   /// **'Your trainings are getting smarter with each session'**
   String get calibrationInProgress;
 
+  /// No description provided for @calibrationTrainingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This training may not fully match your goals — the system is still learning your fitness level and prioritizing movement variety to build a complete profile'**
+  String get calibrationTrainingNote;
+
   /// No description provided for @calibrationFamiliesLearned.
   ///
   /// In en, this message translates to:

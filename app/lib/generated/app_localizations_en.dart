@@ -945,6 +945,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your trainings are getting smarter with each session';
 
   @override
+  String get calibrationTrainingNote =>
+      'This training may not fully match your goals — the system is still learning your fitness level and prioritizing movement variety to build a complete profile';
+
+  @override
   String calibrationFamiliesLearned(int calibrated, int total) {
     return '$calibrated/$total movement patterns learned';
   }

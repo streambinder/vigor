@@ -83,7 +83,8 @@ func averageProficiencies(allProficiencies []map[string]float64) map[string]floa
 	return result
 }
 
-// GetProficiencyCalibration returns calibration count per movement family (number of records).
+// GetProficiencyCalibration returns calibration count per movement family
+// as distinct completed trainings that produced proficiency records for each family.
 func GetProficiencyCalibration(userID uuid.UUID) (map[string]int, error) {
 	var counts []struct {
 		MovementFamily string
@@ -91,7 +92,7 @@ func GetProficiencyCalibration(userID uuid.UUID) (map[string]int, error) {
 	}
 
 	err := database.DB.Raw(`
-		SELECT movement_family, COUNT(*) as count
+		SELECT movement_family, COUNT(DISTINCT training_id) as count
 		FROM proficiencies
 		WHERE user_id = ?
 		GROUP BY movement_family

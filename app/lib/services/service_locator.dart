@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../models/family_progress.dart';
 import '../models/gym.dart';
 import '../models/progress.dart';
 import '../models/training.dart';
@@ -23,6 +24,7 @@ class ServiceLocator extends ChangeNotifier {
   // shared observable state for cross-screen sync
   final ValueNotifier<List<Gym>?> gymsNotifier = ValueNotifier(null);
   final ValueNotifier<List<Training>?> trainingsNotifier = ValueNotifier(null);
+  final ValueNotifier<bool> isCalibratingNotifier = ValueNotifier(false);
 
   // pre-loaded homepage data so splash can stay until ready
   Progress? initialProgress;
@@ -83,9 +85,23 @@ class ServiceLocator extends ChangeNotifier {
       progressService.getProgress(),
       progressService.getWeeklyTarget(),
     ]);
-    if (results[0].isSuccess) initialProgress = results[0].data as Progress?;
+    if (results[0].isSuccess) {
+      initialProgress = results[0].data as Progress?;
+      _updateCalibrationState();
+    }
     if (results[1].isSuccess) initialWeeklyTarget = results[1].data as WeeklyTarget?;
     initialDataLoaded = true;
+  }
+
+  void _updateCalibrationState() {
+    if (initialProgress == null) return;
+    final families = ProgressService.parseFamilies(initialProgress!.families);
+    isCalibratingNotifier.value = families.values.any((fp) => fp.calibration < 100.0);
+  }
+
+  /// Update calibration state from fresh progress data
+  void updateCalibrationFromProgress(Map<String, FamilyProgress> families) {
+    isCalibratingNotifier.value = families.values.any((fp) => fp.calibration < 100.0);
   }
 
   /// Clear cached services (e.g., on logout)
@@ -96,6 +112,7 @@ class ServiceLocator extends ChangeNotifier {
     _userService = null;
     gymsNotifier.value = null;
     trainingsNotifier.value = null;
+    isCalibratingNotifier.value = false;
     initialProgress = null;
     initialWeeklyTarget = null;
     initialDataLoaded = false;
@@ -105,6 +122,7 @@ class ServiceLocator extends ChangeNotifier {
   void dispose() {
     gymsNotifier.dispose();
     trainingsNotifier.dispose();
+    isCalibratingNotifier.dispose();
     super.dispose();
   }
 }

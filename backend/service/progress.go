@@ -13,7 +13,7 @@ import (
 const (
 	MuscleImpactDays     = 14  // 14 days for muscle heat
 	MuscleImpactHalfLife = 3.0 // days after which impact decays to 50%
-	CalibrationThreshold = 5   // proficiency records needed for full calibration
+	CalibrationThreshold = 5   // distinct completed trainings needed for full calibration
 )
 
 // GetProgress computes the complete progress for a user.

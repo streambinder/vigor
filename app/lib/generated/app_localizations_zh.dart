@@ -927,6 +927,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get calibrationInProgress => '每次训练都让你的计划更智能';
 
   @override
+  String get calibrationTrainingNote =>
+      '此训练可能与您的目标不完全一致——系统仍在了解您的健身水平，优先考虑运动多样性以建立完整的用户画像';
+
+  @override
   String calibrationFamiliesLearned(int calibrated, int total) {
     return '$calibrated/$total 运动模式已学习';
   }

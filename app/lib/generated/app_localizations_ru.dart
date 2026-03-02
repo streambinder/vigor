@@ -943,6 +943,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Ваши тренировки становятся умнее с каждым занятием';
 
   @override
+  String get calibrationTrainingNote =>
+      'Эта тренировка может не полностью соответствовать вашим целям — система ещё изучает ваш уровень и отдаёт приоритет разнообразию движений для построения полного профиля';
+
+  @override
   String calibrationFamiliesLearned(int calibrated, int total) {
     return '$calibrated/$total двигательных паттернов изучено';
   }

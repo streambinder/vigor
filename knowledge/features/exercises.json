@@ -14,8 +14,8 @@
       "Immediately jump and rotate back"
     ],
     "progressions": {
-      "squat": 45,
-      "cardio": 50
+      "cardio": 50,
+      "squat": 45
     },
     "cues": []
   },
@@ -56,8 +56,8 @@
       "Immediately continue"
     ],
     "progressions": {
-      "squat": 55,
-      "cardio": 55
+      "cardio": 55,
+      "squat": 55
     },
     "cues": []
   },
@@ -258,8 +258,7 @@
       "Hold for the prescribed time"
     ],
     "progressions": {
-      "front_lever": 35,
-      "back": 60
+      "vertical_pull": 60
     },
     "cues": []
   },
@@ -369,8 +368,8 @@
       "(alternating variation) Continue for the desired distance or time"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -410,8 +409,8 @@
       "Complete circles in both directions"
     ],
     "progressions": {
-      "back": 55,
-      "core": 50
+      "core": 50,
+      "horizontal_pull": 55
     },
     "cues": []
   },
@@ -506,8 +505,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 30,
-      "core": 25
+      "core": 25,
+      "horizontal_pull": 30
     },
     "cues": []
   },
@@ -529,8 +528,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 45
     },
     "cues": []
   },
@@ -1193,8 +1192,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_push": 85,
-      "core": 75
+      "core": 75,
+      "horizontal_push": 85
     },
     "cues": []
   },
@@ -1218,8 +1217,7 @@
       "Hold for the prescribed time"
     ],
     "progressions": {
-      "back_lever": 80,
-      "back": 80
+      "horizontal_pull": 80
     },
     "cues": []
   },
@@ -1243,8 +1241,7 @@
       "Hold for the prescribed time"
     ],
     "progressions": {
-      "back_lever": 55,
-      "back": 65
+      "horizontal_pull": 65
     },
     "cues": []
   },
@@ -1268,8 +1265,7 @@
       "Hold for the prescribed time"
     ],
     "progressions": {
-      "back_lever": 65,
-      "back": 70
+      "horizontal_pull": 70
     },
     "cues": []
   },
@@ -1293,8 +1289,7 @@
       "Hold for the prescribed time"
     ],
     "progressions": {
-      "back_lever": 75,
-      "back": 75
+      "horizontal_pull": 75
     },
     "cues": []
   },
@@ -1457,8 +1452,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 5,
-      "core": 5
+      "core": 5,
+      "horizontal_pull": 5
     },
     "cues": []
   },
@@ -3660,8 +3655,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_push": 45,
-      "horizontal_pull": 45
+      "horizontal_pull": 45,
+      "horizontal_push": 45
     },
     "cues": []
   },
@@ -3763,8 +3758,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "squat": 45,
-      "hinge": 45
+      "hinge": 45,
+      "squat": 45
     },
     "cues": [
       "Push knees out over toes",
@@ -3819,8 +3814,8 @@
       "Return to center and alternate"
     ],
     "progressions": {
-      "squat": 55,
-      "mobility": 50
+      "mobility": 50,
+      "squat": 55
     },
     "cues": [
       "Push knees out over toes",
@@ -3845,8 +3840,8 @@
       "Reverse movement to return"
     ],
     "progressions": {
-      "vertical_push": 35,
-      "mobility": 30
+      "mobility": 30,
+      "vertical_push": 35
     },
     "cues": []
   },
@@ -3953,8 +3948,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_push": 55,
-      "horizontal_pull": 55
+      "horizontal_pull": 55,
+      "horizontal_push": 55
     },
     "cues": []
   },
@@ -4050,8 +4045,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_push": 60,
-      "horizontal_pull": 60
+      "horizontal_pull": 60,
+      "horizontal_push": 60
     },
     "cues": []
   },
@@ -5648,8 +5643,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_push": 45,
-      "horizontal_pull": 45
+      "horizontal_pull": 45,
+      "horizontal_push": 45
     },
     "cues": []
   },
@@ -6080,8 +6075,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 45
     },
     "cues": []
   },
@@ -6105,8 +6100,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -6414,8 +6409,8 @@
       "Continue alternating sides for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 40,
-      "core": 35
+      "core": 35,
+      "horizontal_pull": 40
     },
     "cues": []
   },
@@ -6466,8 +6461,8 @@
       "Continue alternating sides for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 45
     },
     "cues": []
   },
@@ -6575,8 +6570,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -6939,7 +6934,7 @@
       "Lower back to shoulders with control"
     ],
     "progressions": {
-      "shoulders": 60
+      "vertical_push": 60
     },
     "cues": []
   },
@@ -7016,8 +7011,8 @@
       "Continue alternating twists for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 45
     },
     "cues": []
   },
@@ -7208,8 +7203,8 @@
       "Lower with control"
     ],
     "progressions": {
-      "hinge": 50,
-      "core": 45
+      "core": 45,
+      "hinge": 50
     },
     "cues": [
       "Push hips back with a flat back",
@@ -7266,8 +7261,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -7556,8 +7551,8 @@
       "Continue for the desired duration or number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -7648,8 +7643,8 @@
       "Continue for the desired distance or time"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": [
       "Keep knees close to the ground",
@@ -7832,8 +7827,8 @@
       "Hold for the prescribed time"
     ],
     "progressions": {
-      "planche": 55,
-      "shoulders": 75
+      "horizontal_push": 55,
+      "vertical_push": 75
     },
     "cues": []
   },
@@ -7855,8 +7850,8 @@
       "Continue alternating sides for the desired number of repetitions"
     ],
     "progressions": {
-      "squat": 25,
-      "core": 20
+      "core": 20,
+      "squat": 25
     },
     "cues": []
   },
@@ -8300,8 +8295,8 @@
       "Repeat the exercise with the other leg"
     ],
     "progressions": {
-      "core": 55,
-      "cardio": 55
+      "cardio": 55,
+      "core": 55
     },
     "cues": []
   },
@@ -8435,8 +8430,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 45
     },
     "cues": []
   },
@@ -8511,8 +8506,8 @@
       "Alternate between arms for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 45
+      "core": 45,
+      "vertical_push": 45
     },
     "cues": [
       "Brace core and squeeze glutes",
@@ -8597,8 +8592,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_pull": 45,
-      "core": 45
+      "core": 45,
+      "vertical_pull": 45
     },
     "cues": [
       "Pull to upper chest",
@@ -8653,8 +8648,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_push": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_push": 45
     },
     "cues": [
       "Retract shoulder blades",
@@ -8785,8 +8780,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_pull": 45,
-      "core": 45
+      "core": 45,
+      "vertical_pull": 45
     },
     "cues": [
       "Pull to upper chest",
@@ -8920,8 +8915,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "hinge": 45,
-      "core": 45
+      "core": 45,
+      "hinge": 45
     },
     "cues": [
       "Push hips back with a flat back",
@@ -9027,8 +9022,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 55,
-      "core": 55
+      "core": 55,
+      "horizontal_pull": 55
     },
     "cues": [
       "Keep chest tall",
@@ -9134,8 +9129,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_pull": 45
     },
     "cues": [
       "Keep chest tall",
@@ -9186,8 +9181,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 45
+      "core": 45,
+      "vertical_push": 45
     },
     "cues": [
       "Keep arms slightly bent",
@@ -9319,8 +9314,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 20,
-      "core": 20
+      "core": 20,
+      "horizontal_pull": 20
     },
     "cues": [
       "Keep chest tall",
@@ -9402,8 +9397,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_push": 40,
-      "core": 40
+      "core": 40,
+      "horizontal_push": 40
     },
     "cues": [
       "Retract shoulder blades",
@@ -9432,8 +9427,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 40,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 40
     },
     "cues": [
       "Keep chest tall",
@@ -9640,8 +9635,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 20,
-      "core": 20
+      "core": 20,
+      "horizontal_pull": 20
     },
     "cues": [
       "Keep chest tall",
@@ -9696,8 +9691,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_pull": 45,
-      "core": 45
+      "core": 45,
+      "vertical_pull": 45
     },
     "cues": [
       "Pull to upper chest",
@@ -9727,8 +9722,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_pull": 45,
-      "core": 45
+      "core": 45,
+      "vertical_pull": 45
     },
     "cues": [
       "Pull to upper chest",
@@ -9756,8 +9751,8 @@
       "Slowly return the v-bar to the starting position and repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_pull": 45,
-      "core": 45
+      "core": 45,
+      "vertical_pull": 45
     },
     "cues": [
       "Pull to upper chest",
@@ -9783,8 +9778,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 45
+      "core": 45,
+      "vertical_push": 45
     },
     "cues": [
       "Lead with your elbow, not your hand",
@@ -9841,8 +9836,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 40,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 40
     },
     "cues": [
       "Keep chest tall",
@@ -10060,8 +10055,8 @@
       "Repeat for the desired number of repetitions, then switch sides"
     ],
     "progressions": {
-      "horizontal_pull": 70,
-      "core": 70
+      "core": 70,
+      "horizontal_pull": 70
     },
     "cues": [
       "Hinge forward with a flat back",
@@ -10115,8 +10110,8 @@
       "Repeat for the desired number of repetitions, then switch to your left arm and repeat the exercise"
     ],
     "progressions": {
-      "horizontal_push": 80,
-      "core": 80
+      "core": 80,
+      "horizontal_push": 80
     },
     "cues": [
       "Keep a slight bend in elbows",
@@ -10191,8 +10186,8 @@
       "Repeat for the desired number of repetitions, then switch sides"
     ],
     "progressions": {
-      "vertical_push": 70,
-      "core": 70
+      "core": 70,
+      "vertical_push": 70
     },
     "cues": [
       "Lead with elbows, not hands",
@@ -10223,8 +10218,8 @@
       "Switch sides and repeat the exercise with the other arm"
     ],
     "progressions": {
-      "vertical_pull": 70,
-      "core": 70
+      "core": 70,
+      "vertical_pull": 70
     },
     "cues": [
       "Pull to upper chest",
@@ -10383,8 +10378,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_pull": 45
     },
     "cues": [
       "Keep chest tall",
@@ -10433,8 +10428,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_pull": 45
     },
     "cues": []
   },
@@ -10459,9 +10454,9 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
+      "core": 45,
       "horizontal_pull": 45,
-      "vertical_pull": 45,
-      "core": 45
+      "vertical_pull": 45
     },
     "cues": [
       "Pull to upper chest",
@@ -10489,9 +10484,9 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
+      "core": 45,
       "horizontal_pull": 45,
-      "vertical_pull": 45,
-      "core": 45
+      "vertical_pull": 45
     },
     "cues": [
       "Pull to upper chest",
@@ -10596,8 +10591,8 @@
       "Switch sides and repeat the exercise with your right arm"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_pull": 45
     },
     "cues": [
       "Keep chest tall",
@@ -10626,8 +10621,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_pull": 45
     },
     "cues": [
       "Keep chest tall",
@@ -10678,8 +10673,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_pull": 45,
-      "core": 45
+      "core": 45,
+      "vertical_pull": 45
     },
     "cues": [
       "Pull to upper chest",
@@ -10867,8 +10862,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 40,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 40
     },
     "cues": [
       "Keep chest tall",
@@ -10897,8 +10892,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_pull": 45
     },
     "cues": [
       "Keep chest tall",
@@ -10927,8 +10922,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 40,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 40
     },
     "cues": [
       "Keep chest tall",
@@ -11039,8 +11034,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 40,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 40
     },
     "cues": [
       "Keep chest tall",
@@ -11068,8 +11063,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_push": 40,
-      "core": 40
+      "core": 40,
+      "horizontal_push": 40
     },
     "cues": [
       "Keep shoulder blades retracted",
@@ -11150,8 +11145,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 40,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 40
     },
     "cues": [
       "Keep chest tall",
@@ -11205,8 +11200,8 @@
       "Alternate between arms for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 65,
-      "core": 65
+      "core": 65,
+      "horizontal_pull": 65
     },
     "cues": [
       "Keep chest tall",
@@ -11288,8 +11283,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 40,
-      "core": 40
+      "core": 40,
+      "vertical_push": 40
     },
     "cues": [
       "Lead with elbows, not hands",
@@ -11316,8 +11311,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 40,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 40
     },
     "cues": [
       "Keep chest tall, don't lean back excessively",
@@ -11393,8 +11388,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_pull": 45
     },
     "cues": [
       "Keep chest tall",
@@ -11422,8 +11417,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 45
+      "core": 45,
+      "vertical_push": 45
     },
     "cues": [
       "Brace core and squeeze glutes",
@@ -11605,8 +11600,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_pull": 45
     },
     "cues": [
       "Keep a slight bend in elbows",
@@ -11720,8 +11715,8 @@
       "Switch sides and repeat with the other leg"
     ],
     "progressions": {
-      "hinge": 45,
-      "core": 45
+      "core": 45,
+      "hinge": 45
     },
     "cues": []
   },
@@ -11852,8 +11847,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_pull": 45,
-      "core": 45
+      "core": 45,
+      "vertical_pull": 45
     },
     "cues": [
       "Pull to upper chest",
@@ -11881,8 +11876,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_pull": 45
     },
     "cues": [
       "Keep chest tall",
@@ -11935,8 +11930,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_pull": 45
     },
     "cues": [
       "Keep chest tall",
@@ -11992,8 +11987,8 @@
       "Repeat the movement for the desired number of repetitions, alternating the twisting direction with each rep"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_pull": 45
     },
     "cues": [
       "Keep chest tall",
@@ -12048,8 +12043,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_pull": 45,
-      "core": 45
+      "core": 45,
+      "vertical_pull": 45
     },
     "cues": [
       "Keep arms nearly straight throughout",
@@ -12078,8 +12073,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_pull": 45,
-      "core": 45
+      "core": 45,
+      "vertical_pull": 45
     },
     "cues": [
       "Pull to upper chest",
@@ -12107,8 +12102,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 40,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 40
     },
     "cues": [
       "Keep chest tall",
@@ -12135,8 +12130,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_pull": 45
     },
     "cues": [
       "Keep a slight bend in elbows",
@@ -12164,8 +12159,8 @@
       "Repeat for the desired number of repetitions, then switch sides and perform with your left arm"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_pull": 45
     },
     "cues": [
       "Keep chest tall",
@@ -12376,8 +12371,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_pull": 45,
-      "core": 45
+      "core": 45,
+      "vertical_pull": 45
     },
     "cues": [
       "Pull to upper chest",
@@ -12433,8 +12428,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_pull": 45
     },
     "cues": [
       "Keep chest tall",
@@ -12462,9 +12457,9 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
+      "core": 45,
       "horizontal_pull": 45,
-      "vertical_push": 45,
-      "core": 45
+      "vertical_push": 45
     },
     "cues": [
       "Keep chest tall",
@@ -12492,8 +12487,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_pull": 50,
-      "core": 50
+      "core": 50,
+      "vertical_pull": 50
     },
     "cues": [
       "Pull to upper chest",
@@ -12673,8 +12668,8 @@
       "Stand fully and repeat, then alternate legs for balanced training"
     ],
     "progressions": {
-      "squat": 65,
-      "core": 50
+      "core": 50,
+      "squat": 65
     },
     "cues": []
   },
@@ -13249,8 +13244,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 45
     },
     "cues": []
   },
@@ -13757,8 +13752,7 @@
       "Place hands back down and push back up"
     ],
     "progressions": {
-      "push_up": 55,
-      "chest": 55
+      "horizontal_push": 55
     },
     "cues": []
   },
@@ -13804,8 +13798,7 @@
       "Push back up and switch legs each rep"
     ],
     "progressions": {
-      "push_up": 70,
-      "triceps": 65
+      "horizontal_push": 70
     },
     "cues": []
   },
@@ -14061,8 +14054,8 @@
       "Continue alternating sides for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -14112,8 +14105,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_push": 45,
-      "horizontal_pull": 45
+      "horizontal_pull": 45,
+      "horizontal_push": 45
     },
     "cues": []
   },
@@ -14800,9 +14793,9 @@
       "Jump and swing dumbbells overhead"
     ],
     "progressions": {
+      "cardio": 65,
       "hinge": 55,
-      "vertical_push": 50,
-      "cardio": 65
+      "vertical_push": 50
     },
     "cues": []
   },
@@ -14824,8 +14817,8 @@
       "Complete reps on one side, then switch"
     ],
     "progressions": {
-      "shoulders": 45,
-      "chest": 40
+      "horizontal_push": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -14871,7 +14864,7 @@
       "Lower with control"
     ],
     "progressions": {
-      "shoulders": 45
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -16594,10 +16587,10 @@
       "Stand and press overhead"
     ],
     "progressions": {
-      "horizontal_push": 55,
+      "cardio": 60,
       "horizontal_pull": 45,
-      "squat": 45,
-      "cardio": 60
+      "horizontal_push": 55,
+      "squat": 45
     },
     "cues": []
   },
@@ -17467,8 +17460,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_push": 45,
-      "horizontal_pull": 45
+      "horizontal_pull": 45,
+      "horizontal_push": 45
     },
     "cues": []
   },
@@ -19239,8 +19232,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 45
+      "core": 45,
+      "vertical_push": 45
     },
     "cues": [
       "Keep arms slightly bent",
@@ -19369,8 +19362,8 @@
       "Repeat for the desired number of repetitions, then switch to the other arm"
     ],
     "progressions": {
-      "vertical_push": 70,
-      "core": 65
+      "core": 65,
+      "vertical_push": 70
     },
     "cues": []
   },
@@ -19631,8 +19624,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_push": 45,
-      "horizontal_pull": 45
+      "horizontal_pull": 45,
+      "horizontal_push": 45
     },
     "cues": []
   },
@@ -19712,8 +19705,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "squat": 45,
-      "core": 40
+      "core": 40,
+      "squat": 45
     },
     "cues": []
   },
@@ -20241,8 +20234,7 @@
       "Push back up to starting position"
     ],
     "progressions": {
-      "shoulders": 60,
-      "handstand": 50
+      "vertical_push": 60
     },
     "cues": []
   },
@@ -20264,8 +20256,8 @@
       "Return to pike position and repeat"
     ],
     "progressions": {
-      "shoulders": 70,
-      "planche": 50
+      "horizontal_push": 50,
+      "vertical_push": 70
     },
     "cues": []
   },
@@ -20286,8 +20278,7 @@
       "Push back up to starting position"
     ],
     "progressions": {
-      "push_up": 65,
-      "chest": 60
+      "horizontal_push": 65
     },
     "cues": []
   },
@@ -20417,8 +20408,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_push": 40,
-      "horizontal_pull": 40
+      "horizontal_pull": 40,
+      "horizontal_push": 40
     },
     "cues": []
   },
@@ -21229,8 +21220,8 @@
       "Immediately jump again"
     ],
     "progressions": {
-      "squat": 50,
-      "cardio": 55
+      "cardio": 55,
+      "squat": 50
     },
     "cues": []
   },
@@ -21291,7 +21282,7 @@
       "Extend arms forward again and repeat"
     ],
     "progressions": {
-      "back": 40
+      "horizontal_pull": 40
     },
     "cues": []
   },
@@ -21316,8 +21307,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 90,
-      "core": 80
+      "core": 80,
+      "horizontal_pull": 90
     },
     "cues": []
   },
@@ -21606,8 +21597,8 @@
       "Reverse direction after prescribed reps"
     ],
     "progressions": {
-      "shoulders": 55,
-      "chest": 50
+      "horizontal_push": 50,
+      "vertical_push": 55
     },
     "cues": []
   },
@@ -21730,8 +21721,7 @@
       "Hold for the prescribed time"
     ],
     "progressions": {
-      "front_lever": 75,
-      "back": 80
+      "vertical_pull": 80
     },
     "cues": []
   },
@@ -21753,8 +21743,8 @@
       "Hold for the prescribed time"
     ],
     "progressions": {
-      "planche": 75,
-      "shoulders": 85
+      "horizontal_push": 75,
+      "vertical_push": 85
     },
     "cues": []
   },
@@ -21909,8 +21899,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 45
     },
     "cues": []
   },
@@ -21981,8 +21971,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -22112,7 +22102,7 @@
     ],
     "progressions": {
       "core": 50,
-      "shoulders": 45
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -22175,8 +22165,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "squat": 30,
-      "core": 25
+      "core": 25,
+      "squat": 30
     },
     "cues": []
   },
@@ -22198,8 +22188,7 @@
       "Push back up to starting position"
     ],
     "progressions": {
-      "push_up": 45,
-      "chest": 45
+      "horizontal_push": 45
     },
     "cues": []
   },
@@ -22389,8 +22378,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -22833,7 +22822,7 @@
       "Extend arms forward and lower back down"
     ],
     "progressions": {
-      "back": 45
+      "horizontal_pull": 45
     },
     "cues": []
   },
@@ -22878,8 +22867,8 @@
       "Continue alternating sides for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 40,
-      "core": 35
+      "core": 35,
+      "vertical_push": 40
     },
     "cues": []
   },
@@ -23030,8 +23019,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "squat": 55,
-      "cardio": 40
+      "cardio": 40,
+      "squat": 55
     },
     "cues": [
       "Land softly with bent knees",
@@ -23156,8 +23145,8 @@
       "Continue alternating arms for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -23331,8 +23320,8 @@
       "Repeat for the desired number of repetitions, then switch sides"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -23399,8 +23388,8 @@
       "Lower and repeat"
     ],
     "progressions": {
-      "vertical_pull": 55,
-      "hinge": 50
+      "hinge": 50,
+      "vertical_pull": 55
     },
     "cues": [
       "Keep bell close to your body",
@@ -23427,8 +23416,8 @@
       "Lower to rack and repeat"
     ],
     "progressions": {
-      "vertical_push": 60,
-      "hinge": 50
+      "hinge": 50,
+      "vertical_push": 60
     },
     "cues": [
       "Keep the bar close to your body",
@@ -23455,8 +23444,8 @@
       "Repeat for reps"
     ],
     "progressions": {
-      "vertical_push": 55,
-      "hinge": 50
+      "hinge": 50,
+      "vertical_push": 55
     },
     "cues": [
       "Keep the bar close to your body",
@@ -23482,8 +23471,8 @@
       "Maintain good hip hinge mechanics"
     ],
     "progressions": {
-      "vertical_pull": 50,
-      "hinge": 45
+      "hinge": 45,
+      "vertical_pull": 50
     },
     "cues": [
       "Keep the bar close to your body",
@@ -23510,8 +23499,8 @@
       "Immediately squat down and repeat"
     ],
     "progressions": {
-      "squat": 55,
-      "mobility": 50
+      "mobility": 50,
+      "squat": 55
     },
     "cues": [
       "Push knees out over toes",
@@ -23695,8 +23684,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -23794,8 +23783,8 @@
       "Reverse direction after reps"
     ],
     "progressions": {
-      "vertical_push": 25,
-      "mobility": 35
+      "mobility": 35,
+      "vertical_push": 25
     },
     "cues": []
   },
@@ -23896,8 +23885,8 @@
       "Lower the kettlebell back down to the starting position and repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 70,
-      "hinge": 70
+      "hinge": 70,
+      "vertical_push": 70
     },
     "cues": [
       "Keep the bar close to your body",
@@ -24051,8 +24040,8 @@
       "Stand up keeping bell overhead"
     ],
     "progressions": {
-      "squat": 60,
-      "mobility": 50
+      "mobility": 50,
+      "squat": 60
     },
     "cues": [
       "Push knees out over toes",
@@ -24178,8 +24167,8 @@
       "Keep hips level throughout"
     ],
     "progressions": {
-      "horizontal_pull": 55,
-      "core": 50
+      "core": 50,
+      "horizontal_pull": 55
     },
     "cues": [
       "Keep chest tall",
@@ -24206,8 +24195,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 40,
-      "core": 35
+      "core": 35,
+      "vertical_push": 40
     },
     "cues": []
   },
@@ -24257,8 +24246,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -24329,8 +24318,8 @@
       "Lower with control and repeat"
     ],
     "progressions": {
-      "vertical_pull": 65,
-      "hinge": 60
+      "hinge": 60,
+      "vertical_pull": 65
     },
     "cues": [
       "Keep bell close on the pull",
@@ -24385,8 +24374,8 @@
       "Lower the kettlebell back down to the starting position and repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "squat": 45
+      "squat": 45,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -24410,8 +24399,8 @@
       "Allow the kettlebell to swing back down between your legs and repeat the movement for the desired number of repetitions"
     ],
     "progressions": {
-      "hinge": 50,
-      "cardio": 40
+      "cardio": 40,
+      "hinge": 50
     },
     "cues": [
       "Hinge at hips — it's a hip drive, not a squat",
@@ -24467,8 +24456,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -24939,8 +24928,8 @@
       "Continue this twisting motion, alternating sides, for the desired number of repetitions"
     ],
     "progressions": {
-      "squat": 45,
-      "core": 40
+      "core": 40,
+      "squat": 45
     },
     "cues": []
   },
@@ -24962,8 +24951,8 @@
       "Push back to center and alternate"
     ],
     "progressions": {
-      "squat": 55,
-      "mobility": 50
+      "mobility": 50,
+      "squat": 55
     },
     "cues": [
       "Push knees out over toes",
@@ -25415,8 +25404,8 @@
       "Shuffle back in opposite direction"
     ],
     "progressions": {
-      "squat": 30,
-      "cardio": 45
+      "cardio": 45,
+      "squat": 30
     },
     "cues": []
   },
@@ -25507,8 +25496,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 45
     },
     "cues": []
   },
@@ -26055,8 +26044,8 @@
       "Continue alternating sides for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 10,
-      "core": 5
+      "core": 5,
+      "horizontal_pull": 10
     },
     "cues": []
   },
@@ -27394,8 +27383,8 @@
       "Continue alternating sides for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 25,
-      "core": 20
+      "core": 20,
+      "horizontal_pull": 25
     },
     "cues": []
   },
@@ -27631,8 +27620,8 @@
       "Jump feet forward, pick up ball, and jump up"
     ],
     "progressions": {
-      "core": 55,
-      "cardio": 60
+      "cardio": 60,
+      "core": 55
     },
     "cues": []
   },
@@ -27656,8 +27645,8 @@
       "Lower your body back into the squat position and repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": [
       "Keep chest tall",
@@ -27822,8 +27811,8 @@
       "Alternate legs with each rep, rotating toward the forward leg each time"
     ],
     "progressions": {
-      "squat": 35,
-      "core": 35
+      "core": 35,
+      "squat": 35
     },
     "cues": [
       "Keep front knee over ankle",
@@ -27850,8 +27839,8 @@
       "Catch the ball on the bounce and repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -28145,8 +28134,8 @@
       "Return to standing and repeat"
     ],
     "progressions": {
-      "core": 50,
-      "cardio": 55
+      "cardio": 55,
+      "core": 50
     },
     "cues": []
   },
@@ -28168,8 +28157,8 @@
       "Walk back to the starting position and repeat for desired reps"
     ],
     "progressions": {
-      "core": 50,
-      "cardio": 65
+      "cardio": 65,
+      "core": 50
     },
     "cues": []
   },
@@ -28287,9 +28276,9 @@
       "Catch ball and immediately squat"
     ],
     "progressions": {
+      "cardio": 55,
       "squat": 50,
-      "vertical_push": 45,
-      "cardio": 55
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -28430,8 +28419,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "core": 40,
-      "cardio": 35
+      "cardio": 35,
+      "core": 40
     },
     "cues": [
       "Keep hips level — don't bounce",
@@ -28460,8 +28449,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_pull": 80,
-      "horizontal_push": 60
+      "horizontal_push": 60,
+      "vertical_pull": 80
     },
     "cues": [
       "Pull explosively from a dead hang",
@@ -28594,8 +28583,7 @@
       "Reset to starting position and repeat"
     ],
     "progressions": {
-      "push_up": 40,
-      "chest": 40
+      "horizontal_push": 40
     },
     "cues": []
   },
@@ -28873,8 +28861,8 @@
       "Catch the medicine ball on the bounce and repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 70,
-      "core": 65
+      "core": 65,
+      "horizontal_pull": 70
     },
     "cues": []
   },
@@ -28923,8 +28911,7 @@
       "Hold for the prescribed time"
     ],
     "progressions": {
-      "front_lever": 65,
-      "back": 75
+      "vertical_pull": 75
     },
     "cues": []
   },
@@ -28996,8 +28983,7 @@
       "Hold for the prescribed time"
     ],
     "progressions": {
-      "front_lever": 55,
-      "back": 70
+      "vertical_pull": 70
     },
     "cues": []
   },
@@ -29019,8 +29005,8 @@
       "Hold horizontal position for the prescribed time"
     ],
     "progressions": {
-      "planche": 65,
-      "shoulders": 80
+      "horizontal_push": 65,
+      "vertical_push": 80
     },
     "cues": []
   },
@@ -29068,8 +29054,7 @@
       "Lower chest toward the floor and push back up"
     ],
     "progressions": {
-      "push_up": 95,
-      "chest": 90
+      "horizontal_push": 95
     },
     "cues": []
   },
@@ -29110,8 +29095,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 45
     },
     "cues": []
   },
@@ -29266,8 +29251,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 45
     },
     "cues": []
   },
@@ -29290,8 +29275,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "hinge": 45,
-      "core": 40
+      "core": 40,
+      "hinge": 45
     },
     "cues": []
   },
@@ -29403,8 +29388,7 @@
       "Hold the position for the prescribed time"
     ],
     "progressions": {
-      "shoulders": 40,
-      "handstand": 30
+      "vertical_push": 40
     },
     "cues": []
   },
@@ -29500,8 +29484,8 @@
       "Focus on quick ground contact"
     ],
     "progressions": {
-      "squat": 30,
-      "cardio": 40
+      "cardio": 40,
+      "squat": 30
     },
     "cues": []
   },
@@ -29524,8 +29508,8 @@
       "Continue alternating sides for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -29676,8 +29660,8 @@
       "Pump arms powerfully"
     ],
     "progressions": {
-      "squat": 45,
-      "cardio": 50
+      "cardio": 50,
+      "squat": 45
     },
     "cues": []
   },
@@ -29742,7 +29726,7 @@
       "Lower back down with control"
     ],
     "progressions": {
-      "back": 35
+      "horizontal_pull": 35
     },
     "cues": []
   },
@@ -29912,8 +29896,7 @@
       "Maintain constant tension without full lockout"
     ],
     "progressions": {
-      "push_up": 55,
-      "chest": 50
+      "horizontal_push": 55
     },
     "cues": []
   },
@@ -30003,8 +29986,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_push": 45,
-      "core": 25
+      "core": 25,
+      "horizontal_push": 45
     },
     "cues": [
       "Keep body in a straight line from head to heels",
@@ -30187,8 +30170,8 @@
       "Continue alternating sides for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_push": 45,
-      "core": 45
+      "core": 45,
+      "horizontal_push": 45
     },
     "cues": [
       "Keep body in a straight line",
@@ -30615,8 +30598,8 @@
       "Reverse the arc back to sides and repeat"
     ],
     "progressions": {
-      "back": 45,
-      "shoulders": 40
+      "horizontal_pull": 45,
+      "vertical_push": 40
     },
     "cues": []
   },
@@ -31090,8 +31073,8 @@
       "Press to support hold at top"
     ],
     "progressions": {
-      "vertical_pull": 85,
-      "horizontal_push": 70
+      "horizontal_push": 70,
+      "vertical_pull": 85
     },
     "cues": []
   },
@@ -31396,8 +31379,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -31663,8 +31646,7 @@
       "Push back up to hands and return to start"
     ],
     "progressions": {
-      "push_up": 60,
-      "chest": 55
+      "horizontal_push": 60
     },
     "cues": []
   },
@@ -32296,8 +32278,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -32415,8 +32397,8 @@
       "Repeat on the other side"
     ],
     "progressions": {
-      "hinge": 45,
-      "core": 40
+      "core": 40,
+      "hinge": 45
     },
     "cues": []
   },
@@ -32624,8 +32606,7 @@
       "Lower toward the other hand and repeat"
     ],
     "progressions": {
-      "push_up": 65,
-      "chest": 60
+      "horizontal_push": 65
     },
     "cues": []
   },
@@ -33004,8 +32985,8 @@
       "Immediately leap to other side"
     ],
     "progressions": {
-      "squat": 45,
-      "cardio": 50
+      "cardio": 50,
+      "squat": 45
     },
     "cues": []
   },
@@ -33051,8 +33032,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -33245,8 +33226,8 @@
       "Rest and repeat for the desired number of sets"
     ],
     "progressions": {
-      "squat": 55,
-      "cardio": 60
+      "cardio": 60,
+      "squat": 55
     },
     "cues": []
   },
@@ -33305,8 +33286,7 @@
       "Push up over 3-5 seconds"
     ],
     "progressions": {
-      "push_up": 50,
-      "chest": 50
+      "horizontal_push": 50
     },
     "cues": []
   },
@@ -33615,8 +33595,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "squat": 45,
-      "hinge": 45
+      "hinge": 45,
+      "squat": 45
     },
     "cues": [
       "Push knees out over toes",
@@ -33707,8 +33687,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "squat": 45,
-      "core": 40
+      "core": 40,
+      "squat": 45
     },
     "cues": []
   },
@@ -34420,8 +34400,8 @@
       "Continue alternating sides for the desired number of repetitions"
     ],
     "progressions": {
-      "squat": 35,
-      "cardio": 35
+      "cardio": 35,
+      "squat": 35
     },
     "cues": [
       "Keep front knee over ankle",
@@ -34711,8 +34691,7 @@
       "Land with opposite hand staggering and repeat"
     ],
     "progressions": {
-      "push_up": 75,
-      "chest": 70
+      "horizontal_push": 75
     },
     "cues": []
   },
@@ -34754,8 +34733,8 @@
       "Continue alternating sides for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 45
     },
     "cues": []
   },
@@ -34870,8 +34849,8 @@
       "Continue alternating sides for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 45
     },
     "cues": []
   },
@@ -34891,8 +34870,8 @@
       "Land in lunge with opposite leg forward"
     ],
     "progressions": {
-      "squat": 55,
-      "cardio": 50
+      "cardio": 50,
+      "squat": 55
     },
     "cues": [
       "Push knees out over toes",
@@ -34967,8 +34946,8 @@
       "Lower the barbell back to your shoulders and repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "squat": 45
+      "squat": 45,
+      "vertical_push": 45
     },
     "cues": [
       "Push knees out over toes",
@@ -35067,8 +35046,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -35358,8 +35337,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "vertical_push": 45,
-      "core": 40
+      "core": 40,
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -35487,7 +35466,7 @@
       "Lower with control and repeat"
     ],
     "progressions": {
-      "back": 50
+      "horizontal_pull": 50
     },
     "cues": []
   },
@@ -35749,7 +35728,7 @@
     ],
     "progressions": {
       "core": 50,
-      "shoulders": 45
+      "vertical_push": 45
     },
     "cues": []
   },
@@ -36143,8 +36122,8 @@
       "Repeat the sequence of pushup followed by knee tuck for desired reps"
     ],
     "progressions": {
-      "horizontal_push": 55,
-      "core": 50
+      "core": 50,
+      "horizontal_push": 55
     },
     "cues": [
       "Keep body in a straight line",
@@ -36517,8 +36496,8 @@
       "Maintain stable core throughout"
     ],
     "progressions": {
-      "core": 45,
-      "cardio": 50
+      "cardio": 50,
+      "core": 45
     },
     "cues": []
   },
@@ -36566,8 +36545,8 @@
       "Return to standing while keeping arms extended"
     ],
     "progressions": {
-      "squat": 45,
-      "mobility": 40
+      "mobility": 40,
+      "squat": 45
     },
     "cues": [
       "Push knees out over toes",
@@ -36756,8 +36735,8 @@
       "Return to lunge and repeat"
     ],
     "progressions": {
-      "squat": 45,
-      "cardio": 40
+      "cardio": 40,
+      "squat": 45
     },
     "cues": []
   },
@@ -36805,8 +36784,8 @@
       "Land softly and immediately descend into next rep"
     ],
     "progressions": {
-      "squat": 40,
-      "cardio": 45
+      "cardio": 45,
+      "squat": 40
     },
     "cues": [
       "Push knees out over toes",
@@ -36983,8 +36962,7 @@
       "Hold with back parallel to the ground"
     ],
     "progressions": {
-      "back_lever": 35,
-      "back": 55
+      "horizontal_pull": 55
     },
     "cues": []
   },
@@ -37028,8 +37006,8 @@
       "Immediately jump again"
     ],
     "progressions": {
-      "squat": 55,
-      "cardio": 60
+      "cardio": 60,
+      "squat": 55
     },
     "cues": []
   },
@@ -37071,8 +37049,8 @@
       "Hold for the prescribed time"
     ],
     "progressions": {
-      "planche": 45,
-      "shoulders": 70
+      "horizontal_push": 45,
+      "vertical_push": 70
     },
     "cues": []
   },
@@ -37300,8 +37278,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "squat": 30,
-      "cardio": 30
+      "cardio": 30,
+      "squat": 30
     },
     "cues": [
       "Keep front knee over ankle",
@@ -37433,8 +37411,8 @@
       "Walk back down with control"
     ],
     "progressions": {
-      "vertical_push": 55,
-      "core": 45
+      "core": 45,
+      "vertical_push": 55
     },
     "cues": []
   },
@@ -37458,8 +37436,8 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45,
-      "core": 40
+      "core": 40,
+      "horizontal_pull": 45
     },
     "cues": []
   },

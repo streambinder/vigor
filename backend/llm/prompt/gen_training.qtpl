@@ -77,10 +77,11 @@ Age:{%d profile.Age() %} Height:{%f.0 profile.Height %}cm Weight:{%f.0 profile.W
 
 {% endif %}
 {% if len(calibrationGaps) > 0 %}
-[CALIBRATION]
-The platform is still calibrating this user's fitness level. Prioritize exercises from these under-sampled movement families:
+[CALIBRATION — OVERRIDES GOALS]
+The platform is calibrating this user's fitness level. Until calibration is complete, FAMILY COVERAGE IS THE TOP PRIORITY — override goal-driven exercise selection.
+You MUST select exercises covering as many of these under-sampled movement families as possible:
 {% for family, count := range calibrationGaps %}- {%s family %} ({%s fmt.Sprintf("%d/5", count) %})
-{% endfor %}Choose a methodology that covers as many of these families as possible.
+{% endfor %}Choose a methodology that maximizes coverage of the listed families. Goals are secondary during calibration: use them only to break ties between exercises in the same family.
 
 {% endif %}
 [WORK] {%d len(workExercises) %} options
