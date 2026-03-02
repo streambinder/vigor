@@ -69,6 +69,9 @@ class EmomController extends TimerController {
   /// Whether user completed all activities and is resting until minute ends
   bool get isResting => _isResting || _isBlockRest;
 
+  /// Whether resting between blocks (inter-block rest)
+  bool get isBlockRest => _isBlockRest;
+
   /// Current activity index within block (0-based)
   int get activityIndex => _currentActivityIndex;
 

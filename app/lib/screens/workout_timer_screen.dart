@@ -394,6 +394,7 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen> {
           activityIndex: emomController.activityIndex,
           totalActivities: emomController.totalActivities,
           isResting: emomController.isResting,
+          isBlockRest: emomController.isBlockRest,
           currentBlock: emomController.currentBlockIndex + 1,
           totalBlocks: emomController.totalBlocks,
         );

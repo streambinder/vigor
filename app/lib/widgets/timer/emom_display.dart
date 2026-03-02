@@ -18,6 +18,7 @@ class EmomDisplay extends StatelessWidget {
   final int activityIndex;
   final int totalActivities;
   final bool isResting;
+  final bool isBlockRest;
   final int currentBlock;
   final int totalBlocks;
 
@@ -30,6 +31,7 @@ class EmomDisplay extends StatelessWidget {
     required this.activityIndex,
     required this.totalActivities,
     required this.isResting,
+    required this.isBlockRest,
     required this.currentBlock,
     required this.totalBlocks,
   });
@@ -66,7 +68,7 @@ class EmomDisplay extends StatelessWidget {
           ),
           const SizedBox(height: VigorSpacing.sm),
         ],
-        Row(
+        if (!isBlockRest) Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
