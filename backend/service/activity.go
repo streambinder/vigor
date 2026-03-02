@@ -104,7 +104,7 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 	if err != nil {
 		return model.Activity{}, err
 	}
-	margin := ProgressiveMargin(trainingsComplete)
+	margin := ProgressiveMargin(trainingsComplete) * 1.5 // wider margin for shuffle: user explicitly wants alternatives
 
 	// calculate max allowed score based on lowest proficiency
 	profForFamily := proficiencies[primaryFamily]
@@ -135,18 +135,12 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		}
 	}
 
-	// build base query matching by family with proficiency-based upper bound,
-	// ensuring the replacement shares the same dominant family as the original
+	// build base query matching by family with proficiency-based upper bound
 	baseQuery := func() *gorm.DB {
 		q := database.Knowledge.
 			Model(&model.Exercise{}).
 			Where(fmt.Sprintf("exercises.progressions ? '%s'", primaryFamily)).
-			Where(fmt.Sprintf("(exercises.progressions->>'%s')::float <= ?", primaryFamily), maxAllowed).
-			// replacement must have the same dominant family: no other family scores higher
-			Where(fmt.Sprintf(`NOT EXISTS (
-				SELECT 1 FROM jsonb_each_text(exercises.progressions) AS kv
-				WHERE kv.key != '%s' AND kv.value::float > (exercises.progressions->>'%s')::float
-			)`, primaryFamily, primaryFamily))
+			Where(fmt.Sprintf("(exercises.progressions->>'%s')::float <= ?", primaryFamily), maxAllowed)
 		if len(excludeIDs) > 0 {
 			q = q.Where("id NOT IN ?", excludeIDs)
 		}
