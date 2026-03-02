@@ -11,6 +11,8 @@ class Modifier {
   final String id;
   @JsonKey(name: 'patterns', defaultValue: [])
   final List<String> patterns;
+  @JsonKey(name: 'antipatterns')
+  final List<String>? antipatterns;
   @JsonKey(name: 'aliases')
   final List<String>? aliases;
   @JsonKey(name: 'progression_impact')
@@ -21,6 +23,7 @@ class Modifier {
   Modifier({
     required this.id,
     required this.patterns,
+    this.antipatterns,
     this.aliases,
     required this.progressionImpact,
     required this.isWeighted,
