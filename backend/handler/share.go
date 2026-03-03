@@ -2,6 +2,8 @@ package handler
 
 import (
 	"errors"
+	"fmt"
+	"html"
 	"net/http"
 	"os"
 
@@ -10,12 +12,63 @@ import (
 	"github.com/streambinder/vigor/handler/dto"
 	"github.com/streambinder/vigor/handler/middleware"
 	"github.com/streambinder/vigor/service"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 func initShare(app *fiber.App) {
+	app.Get("/t/:token", getSharedTrainingOG)
 	app.Post("/training/share/:id", middleware.Authorized(), postShareTraining)
 	app.Get("/training/shared/:token", getSharedTraining)
 	app.Post("/training/shared/:token/claim", middleware.Authorized(), postClaimSharedTraining)
+}
+
+// serves minimal HTML with OG meta tags for social crawlers (WhatsApp, etc.)
+// real browsers get meta-refreshed to the SPA
+func getSharedTrainingOG(c *fiber.Ctx) error {
+	token := c.Params("token")
+	frontendURL := os.Getenv("FRONTEND_URL")
+	pageURL := frontendURL + "/t/" + token
+
+	training, _, err := service.GetSharedTraining(token)
+	if err != nil {
+		// on error, redirect to SPA and let it handle the error state
+		return c.Redirect(pageURL, http.StatusFound)
+	}
+
+	duration := training.Duration / 60
+	var durationStr string
+	if duration < 60 {
+		durationStr = fmt.Sprintf("%dm", duration)
+	} else if duration%60 == 0 {
+		durationStr = fmt.Sprintf("%dh", duration/60)
+	} else {
+		durationStr = fmt.Sprintf("%dh %dm", duration/60, duration%60)
+	}
+
+	title := html.EscapeString(training.Name)
+	description := html.EscapeString(durationStr + " · " + cases.Title(language.English).String(training.Methodology))
+	imageURL := frontendURL + "/icons/Icon-512.png"
+
+	page := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta property="og:type" content="website">
+<meta property="og:title" content="%s">
+<meta property="og:description" content="%s">
+<meta property="og:image" content="%s">
+<meta property="og:url" content="%s">
+<meta http-equiv="refresh" content="0;url=%s">
+<title>%s</title>
+</head>
+<body>
+<noscript><a href="%s">Open in Vigor</a></noscript>
+</body>
+</html>`, title, description, imageURL, pageURL, pageURL, title, pageURL)
+
+	c.Set("Content-Type", "text/html; charset=utf-8")
+	return c.SendString(page)
 }
 
 func postShareTraining(c *fiber.Ctx) error {
