@@ -1300,6 +1300,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addToMyTrainings => 'Add to My Trainings';
 
   @override
+  String get goToTraining => 'Go to Training';
+
+  @override
   String sharedBy(String name) {
     return 'Shared by $name';
   }

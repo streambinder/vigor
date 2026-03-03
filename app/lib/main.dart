@@ -15,6 +15,7 @@ import 'screens/splash_screen.dart';
 import 'screens/google_auth_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/shared_training_screen.dart';
+import 'screens/training_details_screen.dart';
 import 'services/secure_storage_service.dart';
 import 'services/preferences_service.dart';
 import 'services/service_locator.dart';
@@ -140,11 +141,10 @@ class VigorApp extends StatelessWidget {
           themeMode: themeProvider.themeMode,
           onGenerateRoute: (settings) {
             final uri = Uri.parse(settings.name ?? '/');
-            // /t/<token> → shared training screen
+            // /t/<token> → store token for post-auth processing
             if (uri.pathSegments.length == 2 && uri.pathSegments[0] == 't') {
-              return MaterialPageRoute(
-                builder: (_) => SharedTrainingScreen(token: uri.pathSegments[1]),
-              );
+              final serviceLocator = context.read<ServiceLocator>();
+              serviceLocator.pendingShareToken = uri.pathSegments[1];
             }
             return MaterialPageRoute(builder: (_) => const AuthenticationWrapper());
           },
@@ -167,6 +167,7 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
   late final AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
   bool _loadingInitialData = false;
+  bool _processingPendingToken = false;
 
   @override
   void initState() {
@@ -198,10 +199,21 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
   void _handleDeepLink(Uri uri) {
     if (uri.pathSegments.length == 2 && uri.pathSegments[0] == 't') {
       final token = uri.pathSegments[1];
-      if (mounted) {
+      if (!mounted) return;
+
+      final serviceLocator = context.read<ServiceLocator>();
+      // skip if already queued (e.g. onGenerateRoute already stored it)
+      if (serviceLocator.pendingShareToken == token) return;
+
+      final authState = context.read<AuthProvider>().state;
+      if (authState == AuthState.authenticated) {
         Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => SharedTrainingScreen(token: token)),
         );
+      } else {
+        // store for post-login processing — avoids pushing onto a navigator
+        // that gets rebuilt during auth state transitions
+        serviceLocator.pendingShareToken = token;
       }
     }
   }
@@ -230,6 +242,38 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
             return const SplashScreen();
           }
           if (_loadingInitialData) return const SplashScreen();
+
+          // process pending share token after auth + initial data
+          if (!_processingPendingToken && serviceLocator.pendingShareToken != null) {
+            _processingPendingToken = true;
+            final token = serviceLocator.pendingShareToken!;
+            final autoClaim = serviceLocator.pendingShareAutoClaim;
+            serviceLocator.pendingShareToken = null;
+            serviceLocator.pendingShareAutoClaim = false;
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              if (autoClaim) {
+                // user explicitly tapped "login to add" — claim directly
+                final response = await serviceLocator.trainingService.claimSharedTraining(token);
+                if (!mounted) return;
+                if (response.isSuccess && response.data != null) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => TrainingDetailsScreen(training: response.data!)),
+                  );
+                } else {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => SharedTrainingScreen(token: token)),
+                  );
+                }
+              } else {
+                // came from a link — just show the shared training screen
+                if (!mounted) return;
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => SharedTrainingScreen(token: token)),
+                );
+              }
+              _processingPendingToken = false;
+            });
+          }
 
           return const HomeScreen();
         }

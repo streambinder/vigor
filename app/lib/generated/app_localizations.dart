@@ -2478,6 +2478,12 @@ abstract class AppLocalizations {
   /// **'Add to My Trainings'**
   String get addToMyTrainings;
 
+  /// No description provided for @goToTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Training'**
+  String get goToTraining;
+
   /// No description provided for @sharedBy.
   ///
   /// In en, this message translates to:

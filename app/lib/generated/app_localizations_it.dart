@@ -1299,6 +1299,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get addToMyTrainings => 'Aggiungi ai Miei Allenamenti';
 
   @override
+  String get goToTraining => 'Vai all\'Allenamento';
+
+  @override
   String sharedBy(String name) {
     return 'Condiviso da $name';
   }

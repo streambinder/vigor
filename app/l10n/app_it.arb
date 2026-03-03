@@ -446,6 +446,7 @@
 
   "shareByLink": "Condividi Link",
   "addToMyTrainings": "Aggiungi ai Miei Allenamenti",
+  "goToTraining": "Vai all'Allenamento",
   "sharedBy": "Condiviso da {name}",
   "@sharedBy": {
     "placeholders": {

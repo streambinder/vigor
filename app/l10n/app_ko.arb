@@ -446,6 +446,7 @@
 
   "shareByLink": "Share Link",
   "addToMyTrainings": "Add to My Trainings",
+  "goToTraining": "Go to Training",
   "sharedBy": "Shared by {name}",
   "@sharedBy": {
     "placeholders": {

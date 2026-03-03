@@ -26,6 +26,10 @@ class ServiceLocator extends ChangeNotifier {
   final ValueNotifier<List<Training>?> trainingsNotifier = ValueNotifier(null);
   final ValueNotifier<bool> isCalibratingNotifier = ValueNotifier(false);
 
+  // pending share token to process after login completes
+  String? pendingShareToken;
+  bool pendingShareAutoClaim = false;
+
   // pre-loaded homepage data so splash can stay until ready
   Progress? initialProgress;
   WeeklyTarget? initialWeeklyTarget;
@@ -113,6 +117,8 @@ class ServiceLocator extends ChangeNotifier {
     gymsNotifier.value = null;
     trainingsNotifier.value = null;
     isCalibratingNotifier.value = false;
+    pendingShareToken = null;
+    pendingShareAutoClaim = false;
     initialProgress = null;
     initialWeeklyTarget = null;
     initialDataLoaded = false;
