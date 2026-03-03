@@ -635,21 +635,12 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     return AdaptiveCard(
       glassColor: VigorColors.indigoAdaptive(context).withValues(alpha: 0.08),
       padding: VigorSpacing.paddingMd,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.tune, color: VigorColors.indigoAdaptive(context), size: 20),
-          const SizedBox(width: VigorSpacing.sm),
-          Expanded(
-            child: Text(
-              l10n.calibrationTrainingNote,
-              style: VigorTypography.caption.copyWith(
-                color: VigorColors.textSecondary(context),
-                height: 1.4,
-              ),
-            ),
-          ),
-        ],
+      child: Text(
+        l10n.calibrationTrainingNote,
+        style: VigorTypography.caption.copyWith(
+          color: VigorColors.textSecondary(context),
+          height: 1.4,
+        ),
       ),
     );
   }
