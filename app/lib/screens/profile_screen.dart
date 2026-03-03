@@ -13,6 +13,7 @@ import '../models/user.dart';
 import '../services/service_locator.dart';
 import '../services/preferences_service.dart';
 import '../widgets/gym_form_dialog.dart';
+import '../utils/knowledge_labels.dart';
 import 'profile_edit_screen.dart';
 import 'settings_screen.dart';
 
@@ -363,7 +364,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildCollapsibleSection(
             icon: Icons.flag,
             title: l10n.goals,
-            children: [_buildChipWrap(goals)],
+            children: goals.map((g) {
+              final desc = KnowledgeLabels.goalDescription(g, l10n);
+              return _buildListItem(KnowledgeLabels.goalLabel(g, l10n), subtitle: desc.isNotEmpty ? desc : null);
+            }).toList(),
           ),
         if (injuries.isNotEmpty) ...[
           const SizedBox(height: VigorSpacing.md),
@@ -484,6 +488,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           child: Text(item, style: VigorTypography.caption.copyWith(color: VigorColors.stone)),
         )).toList(),
+      ),
+    );
+  }
+
+  Widget _buildGoalChips(List<String> goals, AppLocalizations l10n) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Wrap(
+        spacing: VigorSpacing.xs,
+        runSpacing: VigorSpacing.xs,
+        children: goals.map((goal) {
+          final description = KnowledgeLabels.goalDescription(goal, l10n);
+          return Tooltip(
+            message: description.isNotEmpty ? description : '',
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
+              decoration: BoxDecoration(
+                color: VigorColors.stone.withValues(alpha: 0.1),
+                borderRadius: VigorRadius.radiusFull,
+              ),
+              child: Text(KnowledgeLabels.goalLabel(goal, l10n), style: VigorTypography.caption.copyWith(color: VigorColors.stone)),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

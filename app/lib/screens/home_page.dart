@@ -706,7 +706,7 @@ class _HomePageState extends State<HomePage> {
                                   borderRadius: VigorRadius.radiusFull,
                                 ),
                                 child: Text(
-                                  _formatGoalName(g),
+                                  KnowledgeLabels.goalLabel(g, l10n),
                                   style: VigorTypography.caption.copyWith(
                                     color: VigorColors.textSecondary(context),
                                     fontSize: 12,
@@ -778,13 +778,6 @@ class _HomePageState extends State<HomePage> {
         );
       }),
     );
-  }
-
-  String _formatGoalName(String id) {
-    return id
-        .split(' ')
-        .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : w)
-        .join(' ');
   }
 
   void _showWeeklyTargetModal(BuildContext context, AppLocalizations l10n, WeeklyTarget weeklyTarget) {
@@ -1193,7 +1186,7 @@ class _WeeklyTargetModal extends StatelessWidget {
                       borderRadius: VigorRadius.radiusFull,
                     ),
                     child: Text(
-                      _formatGoalName(g),
+                      KnowledgeLabels.goalLabel(g, l10n),
                       style: VigorTypography.caption.copyWith(
                         color: VigorColors.textSecondary(context),
                         fontSize: 12,
@@ -1358,7 +1351,7 @@ class _WeeklyTargetModal extends StatelessWidget {
               SizedBox(
                 width: 80,
                 child: Text(
-                  _formatMethodology(entry.key),
+                  KnowledgeLabels.methodologyLabel(entry.key, l10n),
                   style: VigorTypography.caption.copyWith(
                     color: VigorColors.textSecondary(context),
                   ),
@@ -1519,20 +1512,6 @@ class _WeeklyTargetModal extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _formatGoalName(String id) {
-    return id
-        .split(' ')
-        .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : w)
-        .join(' ');
-  }
-
-  String _formatMethodology(String id) {
-    return id
-        .split('_')
-        .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : w)
-        .join(' ');
   }
 
   String _formatTimeRange(List<int> hours) {
