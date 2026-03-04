@@ -212,6 +212,12 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen>
       // re-prepare audio after returning from background — iOS invalidates
       // the audio session, making subsequent plays silently fail
       _audioService.reactivate();
+      // fast-forward timers by wall-clock time elapsed while backgrounded
+      _controller?.compensateBackgroundDrift();
+      if (_controller?.shouldPlayCountdownJingle == true) {
+        _playWhistleIfEnabled();
+        _controller?.shouldPlayCountdownJingle = false;
+      }
     }
   }
 

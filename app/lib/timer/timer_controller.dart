@@ -15,14 +15,20 @@ abstract class TimerController extends ChangeNotifier {
   bool _elapsedRunning = false;
   int get elapsedSeconds => _totalElapsedSeconds;
 
+  /// wall-clock timestamp of last tick — used to compensate timer drift
+  /// when the app returns from background
+  DateTime? _lastTickTime;
+
   /// Start the elapsed clock (call once when training begins)
   @protected
   void startElapsedTimer() {
     if (_elapsedRunning) return;
     _elapsedRunning = true;
+    _lastTickTime = DateTime.now();
     _elapsedTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!isPaused) {
         _totalElapsedSeconds++;
+        _lastTickTime = DateTime.now();
         notifyListeners();
       }
     });
@@ -35,6 +41,26 @@ abstract class TimerController extends ChangeNotifier {
     _elapsedTimer = null;
     _elapsedRunning = false;
   }
+
+  /// Compensate for time elapsed while the app was backgrounded.
+  /// Returns the number of seconds that passed in background.
+  /// Subclasses override [onBackgroundDrift] to fast-forward their timers.
+  int compensateBackgroundDrift() {
+    if (_lastTickTime == null || isPaused || !_elapsedRunning) return 0;
+    final now = DateTime.now();
+    final drift = now.difference(_lastTickTime!).inSeconds;
+    // only compensate if >1s drift (normal tick jitter is ~0)
+    if (drift <= 1) return 0;
+    _totalElapsedSeconds += drift;
+    _lastTickTime = now;
+    onBackgroundDrift(drift);
+    return drift;
+  }
+
+  /// Override to fast-forward mode-specific timers by [driftSeconds].
+  /// Called when the app returns from background with accumulated drift.
+  @protected
+  void onBackgroundDrift(int driftSeconds) {}
 
   /// Set to true when countdown reaches 3, 2, or 1 seconds
   /// Screens should play countdown jingle when this is true

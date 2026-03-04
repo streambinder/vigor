@@ -288,6 +288,60 @@ class EmomController extends TimerController {
     super.dispose();
   }
 
+  @override
+  void onBackgroundDrift(int driftSeconds) {
+    if (!_hasStarted || _isCompleted || _isPaused) return;
+    int remaining = driftSeconds;
+    while (remaining > 0 && !_isCompleted) {
+      if (_secondsInMinute > remaining) {
+        _secondsInMinute -= remaining;
+        remaining = 0;
+      } else {
+        remaining -= _secondsInMinute;
+        _secondsInMinute = 0;
+        _timer?.cancel();
+        if (_isBlockRest) {
+          _currentBlockIndex++;
+          if (_currentBlockIndex >= blocks.length) {
+            _completeTraining();
+            return;
+          }
+          _currentMinuteInBlock = 1;
+          _isBlockRest = false;
+          _isResting = false;
+          _currentActivityIndex = 0;
+          _secondsInMinute = 60;
+        } else {
+          _currentMinuteInBlock++;
+          if (_currentMinuteInBlock > _currentBlockRepeats) {
+            if (_currentBlockIndex < blocks.length - 1 && _currentBlock.rest > 0) {
+              _isBlockRest = true;
+              _isResting = false;
+              _secondsInMinute = _currentBlock.rest;
+            } else if (_currentBlockIndex < blocks.length - 1) {
+              _currentBlockIndex++;
+              _currentMinuteInBlock = 1;
+              _isBlockRest = false;
+              _isResting = false;
+              _currentActivityIndex = 0;
+              _secondsInMinute = 60;
+            } else {
+              _completeTraining();
+              return;
+            }
+          } else {
+            _isResting = false;
+            _currentActivityIndex = 0;
+            _secondsInMinute = 60;
+          }
+        }
+      }
+    }
+    shouldPlayCountdownJingle = _secondsInMinute == 3;
+    _startTimer();
+    notifyListeners();
+  }
+
   void _advanceActivity() {
     if (_isResting) return;  // can't advance during rest, wait for minute boundary
 

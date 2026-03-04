@@ -173,6 +173,20 @@ class AmrapController extends TimerController {
     super.dispose();
   }
 
+  @override
+  void onBackgroundDrift(int driftSeconds) {
+    if (!_hasStarted || _isCompleted || _isPaused) return;
+    _globalSecondsRemaining = (_globalSecondsRemaining - driftSeconds).clamp(0, totalSeconds);
+    if (_globalSecondsRemaining <= 0) {
+      _completeTraining();
+      return;
+    }
+    shouldPlayCountdownJingle = _globalSecondsRemaining == 3;
+    _timer?.cancel();
+    _startTimer(isCountdown: false);
+    notifyListeners();
+  }
+
   void _startTimer({required bool isCountdown}) {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {

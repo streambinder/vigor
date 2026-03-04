@@ -188,6 +188,14 @@ class ForTimeController extends TimerController {
     super.dispose();
   }
 
+  @override
+  void onBackgroundDrift(int driftSeconds) {
+    if (!_hasStarted || _isCompleted || _isPaused) return;
+    // ForTime counts up — just add the missed seconds
+    _elapsedSeconds += driftSeconds;
+    notifyListeners();
+  }
+
   void _startCountdownTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {

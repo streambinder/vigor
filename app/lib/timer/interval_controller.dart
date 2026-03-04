@@ -107,6 +107,37 @@ class IntervalController extends TimerController {
     super.dispose();
   }
 
+  @override
+  void onBackgroundDrift(int driftSeconds) {
+    if (!_hasStarted || _isCompleted || _isPaused) return;
+    // fast-forward through intervals consuming drift seconds
+    int remaining = driftSeconds;
+    while (remaining > 0 && !_isCompleted) {
+      if (_remainingSeconds > remaining) {
+        _remainingSeconds -= remaining;
+        remaining = 0;
+      } else {
+        remaining -= _remainingSeconds;
+        _remainingSeconds = 0;
+        _timer?.cancel();
+        _history.add(_currentIntervalIndex);
+        _currentIntervalIndex++;
+        if (_currentIntervalIndex >= _intervals.length) {
+          _completeTraining();
+          return;
+        }
+        _remainingSeconds = _intervals[_currentIntervalIndex].duration;
+        // skip rep-based intervals instantly
+        final isRepBased = _intervals[_currentIntervalIndex].isRepBased;
+        if (isRepBased) _remainingSeconds = 0;
+      }
+    }
+    // fire whistle if we landed at exactly 3s
+    shouldPlayCountdownJingle = _remainingSeconds == 3;
+    _startTimer();
+    notifyListeners();
+  }
+
   void _startTimer() {
     _timer?.cancel();
     // rep-based work intervals don't auto-advance — elapsed is tracked by base class
