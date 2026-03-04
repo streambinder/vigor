@@ -222,7 +222,7 @@ func (t Training) DaysSince() int {
 }
 
 // Validate checks that the training has valid structure.
-func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, requireWarmupCooldown bool, userRequestedMinutes int, targetMuscles []string, actualMuscles []string) error {
+func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, requireWarmupCooldown bool, targetMuscles []string, actualMuscles []string) error {
 	if t.Name == "" {
 		return &ValidationError{"empty_name", "training name is empty"}
 	}
@@ -312,22 +312,13 @@ func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineType
 		}
 	}
 
-	// validate methodology before duration check (CalculateDuration switches on it)
+	// validate methodology (CalculateDuration and SetDuration switch on it)
 	validMethodologies := map[string]bool{
 		"strength": true, "supersets": true, "circuit": true, "emom": true, "amrap": true,
 		"hiit": true, "for_time": true, "endurance": true, "mobility": true,
 	}
 	if !validMethodologies[t.Methodology] {
 		return &ValidationError{"invalid_methodology", "invalid methodology: " + t.Methodology}
-	}
-
-	// check generated duration is within tolerance of what the user asked for
-	if userRequestedMinutes > 0 {
-		requestedSecs := float64(userRequestedMinutes * 60)
-		actualSecs := float64(t.CalculateDuration())
-		if actualSecs < requestedSecs*(1-durationTolerancePct) || actualSecs > requestedSecs*(1+durationTolerancePct) {
-			return &ValidationError{"duration_mismatch", "generated duration " + strconv.Itoa(int(actualSecs)/60) + "m deviates too much from requested " + strconv.Itoa(userRequestedMinutes) + "m"}
-		}
 	}
 
 	// validate target muscles coverage
@@ -343,6 +334,19 @@ func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineType
 		}
 	}
 
+	return nil
+}
+
+// ValidateDuration checks that the generated duration is within tolerance of
+// the user's request. Must be called after SetDuration has scaled block repeats.
+func (t *Training) ValidateDuration(userRequestedMinutes int) error {
+	if userRequestedMinutes > 0 {
+		requestedSecs := float64(userRequestedMinutes * 60)
+		actualSecs := float64(t.CalculateDuration())
+		if actualSecs < requestedSecs*(1-durationTolerancePct) || actualSecs > requestedSecs*(1+durationTolerancePct) {
+			return &ValidationError{"duration_mismatch", "generated duration " + strconv.Itoa(int(actualSecs)/60) + "m deviates too much from requested " + strconv.Itoa(userRequestedMinutes) + "m"}
+		}
+	}
 	return nil
 }
 

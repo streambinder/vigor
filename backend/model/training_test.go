@@ -724,7 +724,7 @@ func TestValidate_WeightModifierConsistency(t *testing.T) {
 					}},
 				}},
 			}
-			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, 0, nil, nil)
+			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, nil, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -781,10 +781,13 @@ func TestValidate_DurationTolerance(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tr := makeTestTraining()
+			if err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, nil, nil); err != nil {
+				t.Fatalf("Validate() unexpected structural error: %v", err)
+			}
 			tr.SetDuration(tt.requestedMinutes)
-			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, tt.requestedMinutes, nil, nil)
+			err := tr.ValidateDuration(tt.requestedMinutes)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Validate() with requested=%dm, actual=%ds: error = %v, wantErr %v",
+				t.Errorf("ValidateDuration() with requested=%dm, actual=%ds: error = %v, wantErr %v",
 					tt.requestedMinutes, actualDuration, err, tt.wantErr)
 			}
 		})
@@ -828,7 +831,7 @@ func TestValidate_TargetMuscles(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tr := base()
-			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, 0, tt.target, tt.actual)
+			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, tt.target, tt.actual)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -930,7 +933,7 @@ func TestValidate_NewChecks(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tr := base()
 			tt.mutate(&tr)
-			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, 0, nil, nil)
+			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, false, nil, nil)
 			if tt.wantCode == "" {
 				if err != nil {
 					t.Errorf("Validate() unexpected error: %v", err)

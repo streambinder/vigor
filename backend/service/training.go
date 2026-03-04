@@ -387,7 +387,6 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		}
 
 		training.Routines = reorderRoutines(training.Routines)
-		training.SetDuration(duration)
 
 		muscleSet := make(map[string]bool)
 		for _, activity := range training.Activities() {
@@ -400,7 +399,15 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			actualMuscles = append(actualMuscles, muscle)
 		}
 
-		validationErr := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, weightedModifierIDs, !skipWarmupCooldown, duration, targetMuscles, actualMuscles)
+		// structural validation before scaling — fail fast on invalid LLM output
+		validationErr := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, weightedModifierIDs, !skipWarmupCooldown, targetMuscles, actualMuscles)
+
+		if validationErr == nil {
+			// only scale repeats on structurally valid trainings
+			training.SetDuration(duration)
+			validationErr = training.ValidateDuration(duration)
+		}
+
 		if validationErr == nil {
 			break
 		}
