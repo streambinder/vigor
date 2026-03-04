@@ -67,6 +67,89 @@ class KnowledgeLabels {
     };
   }
 
+  // -- equipment --
+
+  static String equipmentLabel(String id, AppLocalizations l10n) {
+    return switch (id) {
+      'partner' => l10n.equipmentPartner,
+      'balance board' => l10n.equipmentBalanceBoard,
+      'band' => l10n.equipmentBand,
+      'barbell' => l10n.equipmentBarbell,
+      'bench' => l10n.equipmentBench,
+      'box' => l10n.equipmentBox,
+      'bosu ball' => l10n.equipmentBosuBall,
+      'cable' => l10n.equipmentCable,
+      'dip station' => l10n.equipmentDipStation,
+      'dumbbell' => l10n.equipmentDumbbell,
+      'elliptical machine' => l10n.equipmentEllipticalMachine,
+      'ez barbell' => l10n.equipmentEzBarbell,
+      'hammer' => l10n.equipmentHammer,
+      'kettlebell' => l10n.equipmentKettlebell,
+      'leverage machine' => l10n.equipmentLeverageMachine,
+      'medicine ball' => l10n.equipmentMedicineBall,
+      'olympic barbell' => l10n.equipmentOlympicBarbell,
+      'pull-up bar' => l10n.equipmentPullUpBar,
+      'resistance band' => l10n.equipmentResistanceBand,
+      'rings' => l10n.equipmentRings,
+      'roller' => l10n.equipmentRoller,
+      'rope' => l10n.equipmentRope,
+      'rowing machine' => l10n.equipmentRowingMachine,
+      'skierg machine' => l10n.equipmentSkiergMachine,
+      'sled machine' => l10n.equipmentSledMachine,
+      'smith machine' => l10n.equipmentSmithMachine,
+      'stability ball' => l10n.equipmentStabilityBall,
+      'stationary bike' => l10n.equipmentStationaryBike,
+      'stepmill machine' => l10n.equipmentStepmillMachine,
+      'tire' => l10n.equipmentTire,
+      'treadmill' => l10n.equipmentTreadmill,
+      'trap bar' => l10n.equipmentTrapBar,
+      'trx' => l10n.equipmentTrx,
+      'upper body ergometer' => l10n.equipmentUpperBodyErgometer,
+      'wheel roller' => l10n.equipmentWheelRoller,
+      // modifiers are mixed with equipment in gym/favorites lists
+      'weighted vest' => l10n.modifierWeightedVest,
+      'parallettes' => l10n.modifierParallettes,
+      'ankle weights' => l10n.modifierAnkleWeights,
+      'dip belt' => l10n.modifierDipBelt,
+      'push up bars' => l10n.modifierPushUpBars,
+      'resistance bands' => l10n.modifierResistanceBands,
+      'weight' => l10n.modifierWeight,
+      'wrist weights' => l10n.modifierWristWeights,
+      _ => _titleCase(id, ' '),
+    };
+  }
+
+  // -- muscles --
+
+  static String muscleLabel(String id, AppLocalizations l10n) {
+    return switch (id) {
+      'chest' => l10n.muscleChest,
+      'back' => l10n.muscleBack,
+      'shoulders' => l10n.muscleShoulders,
+      'arms' => l10n.muscleArms,
+      'core' => l10n.muscleCore,
+      'glutes' => l10n.muscleGlutes,
+      'legs' => l10n.muscleLegs,
+      _ => _titleCase(id, '_'),
+    };
+  }
+
+  // -- modifiers --
+
+  static String modifierLabel(String id, AppLocalizations l10n) {
+    return switch (id) {
+      'weighted vest' => l10n.modifierWeightedVest,
+      'parallettes' => l10n.modifierParallettes,
+      'ankle weights' => l10n.modifierAnkleWeights,
+      'dip belt' => l10n.modifierDipBelt,
+      'push up bars' => l10n.modifierPushUpBars,
+      'resistance bands' => l10n.modifierResistanceBands,
+      'weight' => l10n.modifierWeight,
+      'wrist weights' => l10n.modifierWristWeights,
+      _ => _titleCase(id, ' '),
+    };
+  }
+
   // -- movement families --
 
   static String familyLabel(String id, AppLocalizations l10n) {

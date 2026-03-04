@@ -4,6 +4,7 @@ import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/gym.dart';
 import '../theme/liquid_glass_theme.dart';
+import '../utils/knowledge_labels.dart';
 import '../utils/platform_helper.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/equipment_selector.dart';
@@ -78,7 +79,7 @@ class _GymFormDialogState extends State<GymFormDialog> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('$modifierId — add weight (kg)'),
+        title: Text('${KnowledgeLabels.modifierLabel(modifierId, AppLocalizations.of(context))} — add weight (kg)'),
         content: TextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -225,7 +226,7 @@ class _GymFormDialogState extends State<GymFormDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(modId, style: VigorTypography.body.copyWith(color: textColor)),
+                        Text(KnowledgeLabels.modifierLabel(modId, l10n), style: VigorTypography.body.copyWith(color: textColor)),
                         const SizedBox(height: VigorSpacing.xs),
                         Wrap(
                           spacing: VigorSpacing.xs,

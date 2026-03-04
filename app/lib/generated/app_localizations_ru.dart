@@ -444,6 +444,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get yesterday => 'Вчера';
 
   @override
+  String daysAgo(int count) {
+    return '$countд назад';
+  }
+
+  @override
   String get available => 'Доступно';
 
   @override
@@ -1321,4 +1326,154 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get pendingFeedbacksDescription =>
       'Некоторые ваши тренировки отмечены как завершённые, но не имеют вашего отзыва. Отзывы помогают улучшить рекомендации для будущих тренировок.';
+
+  @override
+  String get equipmentPartner => 'Партнёр';
+
+  @override
+  String get equipmentBalanceBoard => 'Балансборд';
+
+  @override
+  String get equipmentBand => 'Резинка';
+
+  @override
+  String get equipmentBarbell => 'Штанга';
+
+  @override
+  String get equipmentBench => 'Скамья';
+
+  @override
+  String get equipmentBox => 'Тумба';
+
+  @override
+  String get equipmentBosuBall => 'Босу';
+
+  @override
+  String get equipmentCable => 'Блочный тренажёр';
+
+  @override
+  String get equipmentDipStation => 'Брусья';
+
+  @override
+  String get equipmentDumbbell => 'Гантель';
+
+  @override
+  String get equipmentEllipticalMachine => 'Эллиптический тренажёр';
+
+  @override
+  String get equipmentEzBarbell => 'EZ-гриф';
+
+  @override
+  String get equipmentHammer => 'Кувалда';
+
+  @override
+  String get equipmentKettlebell => 'Гиря';
+
+  @override
+  String get equipmentLeverageMachine => 'Рычажный тренажёр';
+
+  @override
+  String get equipmentMedicineBall => 'Медицинский мяч';
+
+  @override
+  String get equipmentOlympicBarbell => 'Олимпийский гриф';
+
+  @override
+  String get equipmentPullUpBar => 'Турник';
+
+  @override
+  String get equipmentResistanceBand => 'Резинка для фитнеса';
+
+  @override
+  String get equipmentRings => 'Гимнастические кольца';
+
+  @override
+  String get equipmentRoller => 'Массажный ролик';
+
+  @override
+  String get equipmentRope => 'Скакалка';
+
+  @override
+  String get equipmentRowingMachine => 'Гребной тренажёр';
+
+  @override
+  String get equipmentSkiergMachine => 'Скиэрг';
+
+  @override
+  String get equipmentSledMachine => 'Сани';
+
+  @override
+  String get equipmentSmithMachine => 'Тренажёр Смита';
+
+  @override
+  String get equipmentStabilityBall => 'Фитбол';
+
+  @override
+  String get equipmentStationaryBike => 'Велотренажёр';
+
+  @override
+  String get equipmentStepmillMachine => 'Степпер';
+
+  @override
+  String get equipmentTire => 'Покрышка';
+
+  @override
+  String get equipmentTreadmill => 'Беговая дорожка';
+
+  @override
+  String get equipmentTrapBar => 'Трэп-гриф';
+
+  @override
+  String get equipmentTrx => 'TRX';
+
+  @override
+  String get equipmentUpperBodyErgometer => 'Ручной эргометр';
+
+  @override
+  String get equipmentWheelRoller => 'Ролик для пресса';
+
+  @override
+  String get muscleChest => 'Грудь';
+
+  @override
+  String get muscleBack => 'Спина';
+
+  @override
+  String get muscleShoulders => 'Плечи';
+
+  @override
+  String get muscleArms => 'Руки';
+
+  @override
+  String get muscleCore => 'Корпус';
+
+  @override
+  String get muscleGlutes => 'Ягодицы';
+
+  @override
+  String get muscleLegs => 'Ноги';
+
+  @override
+  String get modifierWeightedVest => 'Утяжелённый жилет';
+
+  @override
+  String get modifierParallettes => 'Паралетсы';
+
+  @override
+  String get modifierAnkleWeights => 'Утяжелители для ног';
+
+  @override
+  String get modifierDipBelt => 'Пояс для отягощений';
+
+  @override
+  String get modifierPushUpBars => 'Упоры для отжиманий';
+
+  @override
+  String get modifierResistanceBands => 'Резинки для фитнеса';
+
+  @override
+  String get modifierWeight => 'Вес';
+
+  @override
+  String get modifierWristWeights => 'Утяжелители для рук';
 }

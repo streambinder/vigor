@@ -431,6 +431,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get yesterday => '어제';
 
   @override
+  String daysAgo(int count) {
+    return '$count일 전';
+  }
+
+  @override
   String get available => '이용 가능';
 
   @override
@@ -1296,4 +1301,154 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get pendingFeedbacksDescription =>
       '완료된 훈련 중 피드백이 없는 항목이 있습니다. 피드백은 향후 훈련 추천을 개선하는 데 도움이 됩니다.';
+
+  @override
+  String get equipmentPartner => '파트너';
+
+  @override
+  String get equipmentBalanceBoard => '밸런스 보드';
+
+  @override
+  String get equipmentBand => '밴드';
+
+  @override
+  String get equipmentBarbell => '바벨';
+
+  @override
+  String get equipmentBench => '벤치';
+
+  @override
+  String get equipmentBox => '박스';
+
+  @override
+  String get equipmentBosuBall => '보수볼';
+
+  @override
+  String get equipmentCable => '케이블 머신';
+
+  @override
+  String get equipmentDipStation => '딥 스테이션';
+
+  @override
+  String get equipmentDumbbell => '덤벨';
+
+  @override
+  String get equipmentEllipticalMachine => '일립티컬 머신';
+
+  @override
+  String get equipmentEzBarbell => 'EZ바';
+
+  @override
+  String get equipmentHammer => '해머';
+
+  @override
+  String get equipmentKettlebell => '케틀벨';
+
+  @override
+  String get equipmentLeverageMachine => '레버리지 머신';
+
+  @override
+  String get equipmentMedicineBall => '메디신볼';
+
+  @override
+  String get equipmentOlympicBarbell => '올림픽 바벨';
+
+  @override
+  String get equipmentPullUpBar => '턱걸이 바';
+
+  @override
+  String get equipmentResistanceBand => '저항 밴드';
+
+  @override
+  String get equipmentRings => '링';
+
+  @override
+  String get equipmentRoller => '폼롤러';
+
+  @override
+  String get equipmentRope => '줄';
+
+  @override
+  String get equipmentRowingMachine => '로잉 머신';
+
+  @override
+  String get equipmentSkiergMachine => '스키에르그';
+
+  @override
+  String get equipmentSledMachine => '슬레드 머신';
+
+  @override
+  String get equipmentSmithMachine => '스미스 머신';
+
+  @override
+  String get equipmentStabilityBall => '짐볼';
+
+  @override
+  String get equipmentStationaryBike => '실내 자전거';
+
+  @override
+  String get equipmentStepmillMachine => '스텝밀';
+
+  @override
+  String get equipmentTire => '타이어';
+
+  @override
+  String get equipmentTreadmill => '트레드밀';
+
+  @override
+  String get equipmentTrapBar => '트랩바';
+
+  @override
+  String get equipmentTrx => 'TRX';
+
+  @override
+  String get equipmentUpperBodyErgometer => '상체 에르고미터';
+
+  @override
+  String get equipmentWheelRoller => '복근 롤러';
+
+  @override
+  String get muscleChest => '가슴';
+
+  @override
+  String get muscleBack => '등';
+
+  @override
+  String get muscleShoulders => '어깨';
+
+  @override
+  String get muscleArms => '팔';
+
+  @override
+  String get muscleCore => '코어';
+
+  @override
+  String get muscleGlutes => '둔근';
+
+  @override
+  String get muscleLegs => '다리';
+
+  @override
+  String get modifierWeightedVest => '웨이트 조끼';
+
+  @override
+  String get modifierParallettes => '파랄렛';
+
+  @override
+  String get modifierAnkleWeights => '발목 중량';
+
+  @override
+  String get modifierDipBelt => '딥 벨트';
+
+  @override
+  String get modifierPushUpBars => '푸시업 바';
+
+  @override
+  String get modifierResistanceBands => '저항 밴드';
+
+  @override
+  String get modifierWeight => '중량';
+
+  @override
+  String get modifierWristWeights => '손목 중량';
 }

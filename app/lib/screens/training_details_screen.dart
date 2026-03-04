@@ -17,6 +17,7 @@ import '../models/progression_adjustment.dart';
 import '../models/training_feedback.dart';
 import '../providers/auth_provider.dart';
 import '../services/service_locator.dart';
+import '../utils/knowledge_labels.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/cached_exercise_image.dart';
 import '../widgets/marquee_text.dart';
@@ -86,11 +87,11 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final diff = now.difference(date).inDays;
-    if (diff == 0) return AppLocalizations.of(context).today;
-    if (diff == 1) return AppLocalizations.of(context).yesterday;
-    if (diff < 7) return '${diff}d ago';
+    final l10n = AppLocalizations.of(context);
+    final diff = DateTime.now().difference(date).inDays;
+    if (diff == 0) return l10n.today;
+    if (diff == 1) return l10n.yesterday;
+    if (diff < 7) return l10n.daysAgo(diff);
     return '${date.day}/${date.month}';
   }
 
@@ -677,7 +678,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                   Wrap(
                     spacing: VigorSpacing.xs,
                     runSpacing: VigorSpacing.xs,
-                    children: training.equipment.map((eq) => _buildChip(Icons.fitness_center, eq)).toList(),
+                    children: training.equipment.map((eq) => _buildChip(Icons.fitness_center, KnowledgeLabels.equipmentLabel(eq, l10n))).toList(),
                   ),
                 ],
                 if (training.goals.isNotEmpty) ...[
@@ -685,7 +686,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                   Wrap(
                     spacing: VigorSpacing.xs,
                     runSpacing: VigorSpacing.xs,
-                    children: training.goals.map((goal) => _buildChip(Icons.track_changes, goal)).toList(),
+                    children: training.goals.map((goal) => _buildChip(Icons.track_changes, KnowledgeLabels.goalLabel(goal, l10n))).toList(),
                   ),
                 ],
                 if (training.muscles.isNotEmpty) ...[
@@ -693,7 +694,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                   Wrap(
                     spacing: VigorSpacing.xs,
                     runSpacing: VigorSpacing.xs,
-                    children: training.muscles.map((muscle) => _buildChip(Icons.accessibility_new, muscle)).toList(),
+                    children: training.muscles.map((muscle) => _buildChip(Icons.accessibility_new, KnowledgeLabels.muscleLabel(muscle, l10n))).toList(),
                   ),
                 ],
               ],
@@ -731,7 +732,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             Wrap(
               spacing: VigorSpacing.xs,
               runSpacing: VigorSpacing.xs,
-              children: training.equipment.map((eq) => _buildChip(Icons.fitness_center, eq)).toList(),
+              children: training.equipment.map((eq) => _buildChip(Icons.fitness_center, KnowledgeLabels.equipmentLabel(eq, l10n))).toList(),
             ),
           ],
           if (training.goals.isNotEmpty) ...[
@@ -739,7 +740,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             Wrap(
               spacing: VigorSpacing.xs,
               runSpacing: VigorSpacing.xs,
-              children: training.goals.map((goal) => _buildChip(Icons.track_changes, goal)).toList(),
+              children: training.goals.map((goal) => _buildChip(Icons.track_changes, KnowledgeLabels.goalLabel(goal, l10n))).toList(),
             ),
           ],
           if (training.muscles.isNotEmpty) ...[
@@ -747,7 +748,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             Wrap(
               spacing: VigorSpacing.xs,
               runSpacing: VigorSpacing.xs,
-              children: training.muscles.map((muscle) => _buildChip(Icons.accessibility_new, muscle)).toList(),
+              children: training.muscles.map((muscle) => _buildChip(Icons.accessibility_new, KnowledgeLabels.muscleLabel(muscle, l10n))).toList(),
             ),
           ],
         ],
@@ -828,7 +829,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       spacing: VigorSpacing.sm,
       runSpacing: VigorSpacing.sm,
       children: [
-        _buildMethodologyBadge(training.methodology),
+        _buildMethodologyBadge(KnowledgeLabels.methodologyLabel(training.methodology, l10n)),
         _buildMetaChip(Icons.schedule, _formatDuration(training.completedIn ?? training.duration)),
         _buildMetaChip(Icons.calendar_today, _formatDate(training.completedAt ?? training.createdAt)),
         if (_partners.isNotEmpty) ..._partners.map((p) => _buildMetaChip(Icons.person, '${p.firstName} ${p.lastName}'.trim())),
@@ -1281,13 +1282,14 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   }
 
   Widget _buildExerciseDetails(Exercise exercise, List<String> modifiers) {
+    final l10n = AppLocalizations.of(context);
     return Wrap(
       spacing: VigorSpacing.sm,
       runSpacing: VigorSpacing.xs,
       children: [
-        if (exercise.muscles.isNotEmpty) _buildDetailChip(Icons.accessibility_new, exercise.muscles.take(2).join(' · ')),
-        if (exercise.equipment.isNotEmpty) _buildDetailChip(Icons.fitness_center, exercise.equipment.join(' · ')),
-        if (modifiers.isNotEmpty) _buildDetailChip(Icons.tune, modifiers.join(' · ')),
+        if (exercise.muscles.isNotEmpty) _buildDetailChip(Icons.accessibility_new, exercise.muscles.take(2).map((m) => KnowledgeLabels.muscleLabel(m, l10n)).join(' · ')),
+        if (exercise.equipment.isNotEmpty) _buildDetailChip(Icons.fitness_center, exercise.equipment.map((e) => KnowledgeLabels.equipmentLabel(e, l10n)).join(' · ')),
+        if (modifiers.isNotEmpty) _buildDetailChip(Icons.tune, modifiers.map((m) => KnowledgeLabels.modifierLabel(m, l10n)).join(' · ')),
       ],
     );
   }

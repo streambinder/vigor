@@ -431,6 +431,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get yesterday => '昨天';
 
   @override
+  String daysAgo(int count) {
+    return '$count天前';
+  }
+
+  @override
   String get available => '可用';
 
   @override
@@ -1293,4 +1298,154 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pendingFeedbacksDescription => '部分训练已完成但尚未提交反馈。反馈有助于改善未来的训练推荐。';
+
+  @override
+  String get equipmentPartner => '训练伙伴';
+
+  @override
+  String get equipmentBalanceBoard => '平衡板';
+
+  @override
+  String get equipmentBand => '弹力带';
+
+  @override
+  String get equipmentBarbell => '杠铃';
+
+  @override
+  String get equipmentBench => '卧推凳';
+
+  @override
+  String get equipmentBox => '跳箱';
+
+  @override
+  String get equipmentBosuBall => '波速球';
+
+  @override
+  String get equipmentCable => '绳索器械';
+
+  @override
+  String get equipmentDipStation => '双杠';
+
+  @override
+  String get equipmentDumbbell => '哑铃';
+
+  @override
+  String get equipmentEllipticalMachine => '椭圆机';
+
+  @override
+  String get equipmentEzBarbell => '曲杆杠铃';
+
+  @override
+  String get equipmentHammer => '大锤';
+
+  @override
+  String get equipmentKettlebell => '壶铃';
+
+  @override
+  String get equipmentLeverageMachine => '杠杆器械';
+
+  @override
+  String get equipmentMedicineBall => '药球';
+
+  @override
+  String get equipmentOlympicBarbell => '奥林匹克杠铃';
+
+  @override
+  String get equipmentPullUpBar => '引体向上杆';
+
+  @override
+  String get equipmentResistanceBand => '阻力带';
+
+  @override
+  String get equipmentRings => '吊环';
+
+  @override
+  String get equipmentRoller => '泡沫轴';
+
+  @override
+  String get equipmentRope => '绳索';
+
+  @override
+  String get equipmentRowingMachine => '划船机';
+
+  @override
+  String get equipmentSkiergMachine => '滑雪机';
+
+  @override
+  String get equipmentSledMachine => '雪橇机';
+
+  @override
+  String get equipmentSmithMachine => '史密斯机';
+
+  @override
+  String get equipmentStabilityBall => '瑞士球';
+
+  @override
+  String get equipmentStationaryBike => '健身车';
+
+  @override
+  String get equipmentStepmillMachine => '阶梯机';
+
+  @override
+  String get equipmentTire => '轮胎';
+
+  @override
+  String get equipmentTreadmill => '跑步机';
+
+  @override
+  String get equipmentTrapBar => '六角杠铃';
+
+  @override
+  String get equipmentTrx => 'TRX';
+
+  @override
+  String get equipmentUpperBodyErgometer => '上肢测功计';
+
+  @override
+  String get equipmentWheelRoller => '健腹轮';
+
+  @override
+  String get muscleChest => '胸部';
+
+  @override
+  String get muscleBack => '背部';
+
+  @override
+  String get muscleShoulders => '肩部';
+
+  @override
+  String get muscleArms => '手臂';
+
+  @override
+  String get muscleCore => '核心';
+
+  @override
+  String get muscleGlutes => '臀部';
+
+  @override
+  String get muscleLegs => '腿部';
+
+  @override
+  String get modifierWeightedVest => '负重背心';
+
+  @override
+  String get modifierParallettes => '俯卧撑架';
+
+  @override
+  String get modifierAnkleWeights => '脚踝负重';
+
+  @override
+  String get modifierDipBelt => '负重腰带';
+
+  @override
+  String get modifierPushUpBars => '俯卧撑支架';
+
+  @override
+  String get modifierResistanceBands => '阻力带';
+
+  @override
+  String get modifierWeight => '负重';
+
+  @override
+  String get modifierWristWeights => '手腕负重';
 }

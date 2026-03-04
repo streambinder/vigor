@@ -3,6 +3,7 @@ import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/equipment_info.dart';
 import '../services/gym_service.dart';
+import '../utils/knowledge_labels.dart';
 import 'adaptive/adaptive.dart';
 
 /// searchable multi-select equipment picker that fetches from /equipment
@@ -65,7 +66,11 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
     if (_allEquipment == null) return [];
     if (_searchQuery.isEmpty) return _allEquipment!;
     final query = _searchQuery.toLowerCase();
-    return _allEquipment!.where((e) => e.id.toLowerCase().contains(query)).toList();
+    final l10n = AppLocalizations.of(context);
+    return _allEquipment!.where((e) =>
+      e.id.toLowerCase().contains(query) ||
+      KnowledgeLabels.equipmentLabel(e.id, l10n).toLowerCase().contains(query),
+    ).toList();
   }
 
   void _toggle(String equipment) {
@@ -188,9 +193,10 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
                 runSpacing: VigorSpacing.xs,
                 children: filtered.map((item) {
                   final isSelected = selectedSet.contains(item.id);
+                  final label = KnowledgeLabels.equipmentLabel(item.id, l10n);
                   return FilterChip(
                     label: Text(
-                      item.id,
+                      label,
                       style: VigorTypography.caption.copyWith(
                         color: isSelected ? Colors.white : VigorColors.textPrimary(context),
                       ),

@@ -930,6 +930,12 @@ abstract class AppLocalizations {
   /// **'Yesterday'**
   String get yesterday;
 
+  /// No description provided for @daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}d ago'**
+  String daysAgo(int count);
+
   /// No description provided for @available.
   ///
   /// In en, this message translates to:
@@ -2543,6 +2549,306 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Some of your trainings are marked as complete but have no feedback from you. Feedback helps improve your future training recommendations.'**
   String get pendingFeedbacksDescription;
+
+  /// No description provided for @equipmentPartner.
+  ///
+  /// In en, this message translates to:
+  /// **'Partner'**
+  String get equipmentPartner;
+
+  /// No description provided for @equipmentBalanceBoard.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance Board'**
+  String get equipmentBalanceBoard;
+
+  /// No description provided for @equipmentBand.
+  ///
+  /// In en, this message translates to:
+  /// **'Band'**
+  String get equipmentBand;
+
+  /// No description provided for @equipmentBarbell.
+  ///
+  /// In en, this message translates to:
+  /// **'Barbell'**
+  String get equipmentBarbell;
+
+  /// No description provided for @equipmentBench.
+  ///
+  /// In en, this message translates to:
+  /// **'Bench'**
+  String get equipmentBench;
+
+  /// No description provided for @equipmentBox.
+  ///
+  /// In en, this message translates to:
+  /// **'Box'**
+  String get equipmentBox;
+
+  /// No description provided for @equipmentBosuBall.
+  ///
+  /// In en, this message translates to:
+  /// **'Bosu Ball'**
+  String get equipmentBosuBall;
+
+  /// No description provided for @equipmentCable.
+  ///
+  /// In en, this message translates to:
+  /// **'Cable'**
+  String get equipmentCable;
+
+  /// No description provided for @equipmentDipStation.
+  ///
+  /// In en, this message translates to:
+  /// **'Dip Station'**
+  String get equipmentDipStation;
+
+  /// No description provided for @equipmentDumbbell.
+  ///
+  /// In en, this message translates to:
+  /// **'Dumbbell'**
+  String get equipmentDumbbell;
+
+  /// No description provided for @equipmentEllipticalMachine.
+  ///
+  /// In en, this message translates to:
+  /// **'Elliptical Machine'**
+  String get equipmentEllipticalMachine;
+
+  /// No description provided for @equipmentEzBarbell.
+  ///
+  /// In en, this message translates to:
+  /// **'EZ Barbell'**
+  String get equipmentEzBarbell;
+
+  /// No description provided for @equipmentHammer.
+  ///
+  /// In en, this message translates to:
+  /// **'Hammer'**
+  String get equipmentHammer;
+
+  /// No description provided for @equipmentKettlebell.
+  ///
+  /// In en, this message translates to:
+  /// **'Kettlebell'**
+  String get equipmentKettlebell;
+
+  /// No description provided for @equipmentLeverageMachine.
+  ///
+  /// In en, this message translates to:
+  /// **'Leverage Machine'**
+  String get equipmentLeverageMachine;
+
+  /// No description provided for @equipmentMedicineBall.
+  ///
+  /// In en, this message translates to:
+  /// **'Medicine Ball'**
+  String get equipmentMedicineBall;
+
+  /// No description provided for @equipmentOlympicBarbell.
+  ///
+  /// In en, this message translates to:
+  /// **'Olympic Barbell'**
+  String get equipmentOlympicBarbell;
+
+  /// No description provided for @equipmentPullUpBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull-up Bar'**
+  String get equipmentPullUpBar;
+
+  /// No description provided for @equipmentResistanceBand.
+  ///
+  /// In en, this message translates to:
+  /// **'Resistance Band'**
+  String get equipmentResistanceBand;
+
+  /// No description provided for @equipmentRings.
+  ///
+  /// In en, this message translates to:
+  /// **'Rings'**
+  String get equipmentRings;
+
+  /// No description provided for @equipmentRoller.
+  ///
+  /// In en, this message translates to:
+  /// **'Roller'**
+  String get equipmentRoller;
+
+  /// No description provided for @equipmentRope.
+  ///
+  /// In en, this message translates to:
+  /// **'Rope'**
+  String get equipmentRope;
+
+  /// No description provided for @equipmentRowingMachine.
+  ///
+  /// In en, this message translates to:
+  /// **'Rowing Machine'**
+  String get equipmentRowingMachine;
+
+  /// No description provided for @equipmentSkiergMachine.
+  ///
+  /// In en, this message translates to:
+  /// **'SkiErg Machine'**
+  String get equipmentSkiergMachine;
+
+  /// No description provided for @equipmentSledMachine.
+  ///
+  /// In en, this message translates to:
+  /// **'Sled Machine'**
+  String get equipmentSledMachine;
+
+  /// No description provided for @equipmentSmithMachine.
+  ///
+  /// In en, this message translates to:
+  /// **'Smith Machine'**
+  String get equipmentSmithMachine;
+
+  /// No description provided for @equipmentStabilityBall.
+  ///
+  /// In en, this message translates to:
+  /// **'Stability Ball'**
+  String get equipmentStabilityBall;
+
+  /// No description provided for @equipmentStationaryBike.
+  ///
+  /// In en, this message translates to:
+  /// **'Stationary Bike'**
+  String get equipmentStationaryBike;
+
+  /// No description provided for @equipmentStepmillMachine.
+  ///
+  /// In en, this message translates to:
+  /// **'Stepmill Machine'**
+  String get equipmentStepmillMachine;
+
+  /// No description provided for @equipmentTire.
+  ///
+  /// In en, this message translates to:
+  /// **'Tire'**
+  String get equipmentTire;
+
+  /// No description provided for @equipmentTreadmill.
+  ///
+  /// In en, this message translates to:
+  /// **'Treadmill'**
+  String get equipmentTreadmill;
+
+  /// No description provided for @equipmentTrapBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Trap Bar'**
+  String get equipmentTrapBar;
+
+  /// No description provided for @equipmentTrx.
+  ///
+  /// In en, this message translates to:
+  /// **'TRX'**
+  String get equipmentTrx;
+
+  /// No description provided for @equipmentUpperBodyErgometer.
+  ///
+  /// In en, this message translates to:
+  /// **'Upper Body Ergometer'**
+  String get equipmentUpperBodyErgometer;
+
+  /// No description provided for @equipmentWheelRoller.
+  ///
+  /// In en, this message translates to:
+  /// **'Ab Wheel'**
+  String get equipmentWheelRoller;
+
+  /// No description provided for @muscleChest.
+  ///
+  /// In en, this message translates to:
+  /// **'Chest'**
+  String get muscleChest;
+
+  /// No description provided for @muscleBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get muscleBack;
+
+  /// No description provided for @muscleShoulders.
+  ///
+  /// In en, this message translates to:
+  /// **'Shoulders'**
+  String get muscleShoulders;
+
+  /// No description provided for @muscleArms.
+  ///
+  /// In en, this message translates to:
+  /// **'Arms'**
+  String get muscleArms;
+
+  /// No description provided for @muscleCore.
+  ///
+  /// In en, this message translates to:
+  /// **'Core'**
+  String get muscleCore;
+
+  /// No description provided for @muscleGlutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Glutes'**
+  String get muscleGlutes;
+
+  /// No description provided for @muscleLegs.
+  ///
+  /// In en, this message translates to:
+  /// **'Legs'**
+  String get muscleLegs;
+
+  /// No description provided for @modifierWeightedVest.
+  ///
+  /// In en, this message translates to:
+  /// **'Weighted Vest'**
+  String get modifierWeightedVest;
+
+  /// No description provided for @modifierParallettes.
+  ///
+  /// In en, this message translates to:
+  /// **'Parallettes'**
+  String get modifierParallettes;
+
+  /// No description provided for @modifierAnkleWeights.
+  ///
+  /// In en, this message translates to:
+  /// **'Ankle Weights'**
+  String get modifierAnkleWeights;
+
+  /// No description provided for @modifierDipBelt.
+  ///
+  /// In en, this message translates to:
+  /// **'Dip Belt'**
+  String get modifierDipBelt;
+
+  /// No description provided for @modifierPushUpBars.
+  ///
+  /// In en, this message translates to:
+  /// **'Push-up Bars'**
+  String get modifierPushUpBars;
+
+  /// No description provided for @modifierResistanceBands.
+  ///
+  /// In en, this message translates to:
+  /// **'Resistance Bands'**
+  String get modifierResistanceBands;
+
+  /// No description provided for @modifierWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get modifierWeight;
+
+  /// No description provided for @modifierWristWeights.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrist Weights'**
+  String get modifierWristWeights;
 }
 
 class _AppLocalizationsDelegate

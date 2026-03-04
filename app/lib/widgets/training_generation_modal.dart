@@ -602,11 +602,6 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     );
   }
 
-  String _muscleLabel(String muscle) {
-    // format muscle id to human-readable: chest -> Chest
-    return muscle.split('_').map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}').join(' ');
-  }
-
   Widget _buildMusclesSection() {
     final l10n = AppLocalizations.of(context);
     if (_availableMuscles.isEmpty) {
@@ -645,7 +640,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               final isSelected = _selectedMuscles.contains(muscle);
               return FilterChip(
                 label: Text(
-                  _muscleLabel(muscle),
+                  KnowledgeLabels.muscleLabel(muscle, l10n),
                   style: VigorTypography.caption.copyWith(
                     color: isSelected ? Colors.white : VigorColors.textPrimary(context),
                   ),

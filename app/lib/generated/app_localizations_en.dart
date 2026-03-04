@@ -445,6 +445,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yesterday => 'Yesterday';
 
   @override
+  String daysAgo(int count) {
+    return '${count}d ago';
+  }
+
+  @override
   String get available => 'Available';
 
   @override
@@ -1322,4 +1327,154 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pendingFeedbacksDescription =>
       'Some of your trainings are marked as complete but have no feedback from you. Feedback helps improve your future training recommendations.';
+
+  @override
+  String get equipmentPartner => 'Partner';
+
+  @override
+  String get equipmentBalanceBoard => 'Balance Board';
+
+  @override
+  String get equipmentBand => 'Band';
+
+  @override
+  String get equipmentBarbell => 'Barbell';
+
+  @override
+  String get equipmentBench => 'Bench';
+
+  @override
+  String get equipmentBox => 'Box';
+
+  @override
+  String get equipmentBosuBall => 'Bosu Ball';
+
+  @override
+  String get equipmentCable => 'Cable';
+
+  @override
+  String get equipmentDipStation => 'Dip Station';
+
+  @override
+  String get equipmentDumbbell => 'Dumbbell';
+
+  @override
+  String get equipmentEllipticalMachine => 'Elliptical Machine';
+
+  @override
+  String get equipmentEzBarbell => 'EZ Barbell';
+
+  @override
+  String get equipmentHammer => 'Hammer';
+
+  @override
+  String get equipmentKettlebell => 'Kettlebell';
+
+  @override
+  String get equipmentLeverageMachine => 'Leverage Machine';
+
+  @override
+  String get equipmentMedicineBall => 'Medicine Ball';
+
+  @override
+  String get equipmentOlympicBarbell => 'Olympic Barbell';
+
+  @override
+  String get equipmentPullUpBar => 'Pull-up Bar';
+
+  @override
+  String get equipmentResistanceBand => 'Resistance Band';
+
+  @override
+  String get equipmentRings => 'Rings';
+
+  @override
+  String get equipmentRoller => 'Roller';
+
+  @override
+  String get equipmentRope => 'Rope';
+
+  @override
+  String get equipmentRowingMachine => 'Rowing Machine';
+
+  @override
+  String get equipmentSkiergMachine => 'SkiErg Machine';
+
+  @override
+  String get equipmentSledMachine => 'Sled Machine';
+
+  @override
+  String get equipmentSmithMachine => 'Smith Machine';
+
+  @override
+  String get equipmentStabilityBall => 'Stability Ball';
+
+  @override
+  String get equipmentStationaryBike => 'Stationary Bike';
+
+  @override
+  String get equipmentStepmillMachine => 'Stepmill Machine';
+
+  @override
+  String get equipmentTire => 'Tire';
+
+  @override
+  String get equipmentTreadmill => 'Treadmill';
+
+  @override
+  String get equipmentTrapBar => 'Trap Bar';
+
+  @override
+  String get equipmentTrx => 'TRX';
+
+  @override
+  String get equipmentUpperBodyErgometer => 'Upper Body Ergometer';
+
+  @override
+  String get equipmentWheelRoller => 'Ab Wheel';
+
+  @override
+  String get muscleChest => 'Chest';
+
+  @override
+  String get muscleBack => 'Back';
+
+  @override
+  String get muscleShoulders => 'Shoulders';
+
+  @override
+  String get muscleArms => 'Arms';
+
+  @override
+  String get muscleCore => 'Core';
+
+  @override
+  String get muscleGlutes => 'Glutes';
+
+  @override
+  String get muscleLegs => 'Legs';
+
+  @override
+  String get modifierWeightedVest => 'Weighted Vest';
+
+  @override
+  String get modifierParallettes => 'Parallettes';
+
+  @override
+  String get modifierAnkleWeights => 'Ankle Weights';
+
+  @override
+  String get modifierDipBelt => 'Dip Belt';
+
+  @override
+  String get modifierPushUpBars => 'Push-up Bars';
+
+  @override
+  String get modifierResistanceBands => 'Resistance Bands';
+
+  @override
+  String get modifierWeight => 'Weight';
+
+  @override
+  String get modifierWristWeights => 'Wrist Weights';
 }

@@ -6,6 +6,7 @@ import '../dto/partner_info.dart';
 import '../providers/auth_provider.dart';
 import '../services/secure_storage_service.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../utils/knowledge_labels.dart';
 import '../widgets/training_generation_modal.dart';
 import '../services/service_locator.dart';
 import '../models/training.dart';
@@ -149,11 +150,11 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   }
 
   String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final diff = now.difference(date).inDays;
-    if (diff == 0) return AppLocalizations.of(context).today;
-    if (diff == 1) return AppLocalizations.of(context).yesterday;
-    if (diff < 7) return '${diff}d ago';
+    final l10n = AppLocalizations.of(context);
+    final diff = DateTime.now().difference(date).inDays;
+    if (diff == 0) return l10n.today;
+    if (diff == 1) return l10n.yesterday;
+    if (diff < 7) return l10n.daysAgo(diff);
     return '${date.day}/${date.month}';
   }
 
@@ -464,7 +465,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                       borderRadius: VigorRadius.radiusXs,
                     ),
                     child: Text(
-                      training.methodology.toUpperCase(),
+                      KnowledgeLabels.methodologyLabel(training.methodology, l10n).toUpperCase(),
                       style: VigorTypography.caption.copyWith(
                         color: VigorColors.stone,
                         fontWeight: FontWeight.w600,
