@@ -145,7 +145,7 @@ STRUCTURE:
 	qw422016.N().S(`
 
 ACTIVITY RULES:
-- Every activity: reps > 0 OR duration > 0 (never both 0)
+- Every activity: EXACTLY ONE of reps or duration must be > 0 (never both, never neither)
 - duration: seconds for cardio/stretches/holds
 - reps: count for strength exercises
 - weight_kg: 0 for bodyweight exercises, >0 for exercises using weighted equipment (barbell, dumbbell, kettlebell, etc.)`)

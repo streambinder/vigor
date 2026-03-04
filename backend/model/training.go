@@ -202,8 +202,8 @@ type Activity struct {
 	Position   int            `gorm:"not null;default:0" json:"-" prompt:"-"`
 	ExerciseID string         `gorm:"not null" json:"exercise_id" prompt:"Exercise ID from list"`
 	Name       string         `gorm:"not null" json:"name" prompt:"-"`
-	Duration   int            `gorm:"not null" json:"duration" prompt:"Seconds (0 if using reps)"`
-	Reps       int            `gorm:"not null" json:"reps" prompt:"Rep count (0 if using duration)"`
+	Duration   int            `gorm:"not null" json:"duration" prompt:"Seconds (0 if using reps, mutually exclusive with reps)"`
+	Reps       int            `gorm:"not null" json:"reps" prompt:"Rep count (0 if using duration, mutually exclusive with duration)"`
 	WeightKg   float64        `gorm:"not null" json:"weight_kg" prompt:"kg (0=bodyweight, >0 for weighted equipment/modifiers)"`
 	Modifiers  pq.StringArray `gorm:"type:text[]" json:"modifiers" prompt:"Modifier IDs (empty if none)"`
 	Rest       int            `gorm:"not null" json:"rest" prompt:"Rest after (s)"`
@@ -423,6 +423,30 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 	}
 
 	return clone
+}
+
+// durationBasedMethodologies lists methodologies where duration takes precedence over reps
+var durationBasedMethodologies = map[string]bool{
+	"hiit": true, "circuit": true, "amrap": true, "for_time": true, "endurance": true, "mobility": true,
+}
+
+// PurgeRepsDuration enforces mutual exclusivity between reps and duration on activities.
+// when both are set, methodology determines which one to zero out.
+func (t *Training) PurgeRepsDuration() {
+	for i := range t.Routines {
+		for j := range t.Routines[i].Blocks {
+			for k := range t.Routines[i].Blocks[j].Activities {
+				a := &t.Routines[i].Blocks[j].Activities[k]
+				if a.Reps > 0 && a.Duration > 0 {
+					if durationBasedMethodologies[t.Methodology] {
+						a.Reps = 0
+					} else {
+						a.Duration = 0
+					}
+				}
+			}
+		}
+	}
 }
 
 // activityWorkDuration returns the effective work duration for an activity,

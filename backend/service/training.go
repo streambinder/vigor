@@ -397,6 +397,9 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			}
 		}
 
+		// enforce reps/duration mutual exclusivity: methodology determines which one to keep
+		training.PurgeRepsDuration()
+
 		// strip warmup/cooldown routines the LLM may have generated despite being told not to
 		if skipWarmupCooldown {
 			workOnly := training.Routines[:0]
