@@ -8,31 +8,37 @@ import (
 // WeightModifier is auto-attached to activities with weight_kg > 0 and should not be user-facing
 const WeightModifier = "weight"
 
-// GetEquipment returns all available equipment and modifier IDs.
-func GetEquipment() ([]string, error) {
+// EquipmentItem holds an equipment/modifier ID and whether it supports weight configuration.
+type EquipmentItem struct {
+	ID         string
+	IsWeighted bool
+}
+
+// GetEquipment returns all available equipment and modifier items with metadata.
+func GetEquipment() ([]EquipmentItem, error) {
 	var equipment []model.Equipment
 	if err := database.Knowledge.Select("id").Find(&equipment).Error; err != nil {
 		return nil, err
 	}
 
 	var modifiers []model.Modifier
-	if err := database.Knowledge.Select("id").Find(&modifiers).Error; err != nil {
+	if err := database.Knowledge.Select("id", "is_weighted").Find(&modifiers).Error; err != nil {
 		return nil, err
 	}
 
-	ids := make([]string, 0, len(equipment)+len(modifiers))
+	items := make([]EquipmentItem, 0, len(equipment)+len(modifiers))
 	for _, e := range equipment {
 		if e.ID == PartnerEquipment {
 			continue
 		}
-		ids = append(ids, e.ID)
+		items = append(items, EquipmentItem{ID: e.ID, IsWeighted: false})
 	}
 	for _, m := range modifiers {
 		if m.ID == WeightModifier {
 			continue
 		}
-		ids = append(ids, m.ID)
+		items = append(items, EquipmentItem{ID: m.ID, IsWeighted: m.IsWeighted})
 	}
 
-	return ids, nil
+	return items, nil
 }

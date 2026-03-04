@@ -11,10 +11,13 @@ class PutGymRequest {
   final String? name;
   @JsonKey(name: 'equipment')
   final List<String>? equipment;
+  @JsonKey(name: 'modifier_variants')
+  final Map<String, dynamic>? modifierVariants;
 
   PutGymRequest({
     this.name,
     this.equipment,
+    this.modifierVariants,
   });
 
   factory PutGymRequest.fromJson(Map<String, dynamic> json) => _$PutGymRequestFromJson(json);

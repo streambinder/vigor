@@ -21,7 +21,7 @@ var (
 )
 
 //line llm/prompt/system.qtpl:5
-func StreamSystem(qw422016 *qt422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool) {
+func StreamSystem(qw422016 *qt422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool) {
 //line llm/prompt/system.qtpl:5
 	qw422016.N().S(`You are an expert personal trainer AI creating individualized training programs.
 
@@ -157,29 +157,39 @@ ACTIVITY RULES:
 	}
 //line llm/prompt/system.qtpl:61
 	qw422016.N().S(`
+`)
+//line llm/prompt/system.qtpl:62
+	if hasModifierVariants {
+//line llm/prompt/system.qtpl:62
+		qw422016.N().S(`- For weighted modifiers with available weights listed in [MODIFIERS], use ONLY values from that list for weight_kg.
+`)
+//line llm/prompt/system.qtpl:63
+	}
+//line llm/prompt/system.qtpl:63
+	qw422016.N().S(`
 
 - rest: compounds 2-3min (hypertrophy) or 3-5min (strength), isolation 60-90s, circuits/HIIT 10-20s, supersets 60-90s between pairs
 
 `)
-//line llm/prompt/system.qtpl:65
+//line llm/prompt/system.qtpl:67
 	if hasModifiers {
-//line llm/prompt/system.qtpl:65
+//line llm/prompt/system.qtpl:67
 		qw422016.N().S(`
 MODIFIERS: When feedback shows "too_easy", add modifier IDs from [MODIFIERS] section to activity.modifiers array. Never invent modifier IDs.
 `)
-//line llm/prompt/system.qtpl:67
+//line llm/prompt/system.qtpl:69
 	}
-//line llm/prompt/system.qtpl:67
+//line llm/prompt/system.qtpl:69
 	qw422016.N().S(`
 
 PROGRESSION: Analyze feedback from [HISTORY]. For "too_easy": increase reps`)
-//line llm/prompt/system.qtpl:69
+//line llm/prompt/system.qtpl:71
 	if hasModifiers {
-//line llm/prompt/system.qtpl:69
+//line llm/prompt/system.qtpl:71
 		qw422016.N().S(` or add weighted modifiers`)
-//line llm/prompt/system.qtpl:69
+//line llm/prompt/system.qtpl:71
 	}
-//line llm/prompt/system.qtpl:69
+//line llm/prompt/system.qtpl:71
 	qw422016.N().S(`. For "too_hard": decrease reps. For "impossible": REPLACE the exercise with a suitable alternative targeting the same muscle group.
 
 NAME: Generate a memorable 3-4 word title that:
@@ -190,31 +200,31 @@ NAME: Generate a memorable 3-4 word title that:
 - NEVER reuse names from [HISTORY]
 Examples: Power Surge, Iron Hour, Circuit Breaker, Flow State, Burn Notice, Strength Stack, Rapid Fire, Full Throttle
 `)
-//line llm/prompt/system.qtpl:78
+//line llm/prompt/system.qtpl:80
 }
 
-//line llm/prompt/system.qtpl:78
-func WriteSystem(qq422016 qtio422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool) {
-//line llm/prompt/system.qtpl:78
+//line llm/prompt/system.qtpl:80
+func WriteSystem(qq422016 qtio422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool) {
+//line llm/prompt/system.qtpl:80
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:78
-	StreamSystem(qw422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers)
-//line llm/prompt/system.qtpl:78
+//line llm/prompt/system.qtpl:80
+	StreamSystem(qw422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers, hasModifierVariants)
+//line llm/prompt/system.qtpl:80
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:78
+//line llm/prompt/system.qtpl:80
 }
 
-//line llm/prompt/system.qtpl:78
-func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool) string {
-//line llm/prompt/system.qtpl:78
+//line llm/prompt/system.qtpl:80
+func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool) string {
+//line llm/prompt/system.qtpl:80
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:78
-	WriteSystem(qb422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers)
-//line llm/prompt/system.qtpl:78
+//line llm/prompt/system.qtpl:80
+	WriteSystem(qb422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers, hasModifierVariants)
+//line llm/prompt/system.qtpl:80
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:78
+//line llm/prompt/system.qtpl:80
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:78
+//line llm/prompt/system.qtpl:80
 	return qs422016
-//line llm/prompt/system.qtpl:78
+//line llm/prompt/system.qtpl:80
 }

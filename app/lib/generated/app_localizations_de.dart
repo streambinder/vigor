@@ -809,6 +809,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get gymNamePlaceholder => 'z.B. Home Gym, McFit';
 
   @override
+  String get availableWeights => 'Verfügbare Gewichte';
+
+  @override
+  String get availableWeightsHint =>
+      'Gewichtsoptionen für gewichtete Modifikatoren in diesem Fitnessstudio konfigurieren.';
+
+  @override
   String get noEquipmentAddedYet => 'Noch keine Ausrüstung hinzugefügt';
 
   @override

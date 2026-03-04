@@ -14,6 +14,7 @@
     cooldownExercises []model.Exercise,
     equipment []string,
     modifiers []model.Modifier,
+    modifierVariants map[string][]float64,
     favoriteExercises []model.Exercise,
     favoriteEquipment []string,
     methodology *model.Methodology,
@@ -61,7 +62,7 @@ Age:{%d profile.Age() %} Height:{%f.0 profile.Height %}cm Weight:{%f.0 profile.W
 {% endif %}
 {% if len(modifiers) > 0 %}
 [MODIFIERS]
-{% for _, mod := range modifiers %}{%s mod.ID %}: [{%s strings.Join(mod.Patterns, ",") %}]{% if len(mod.Antipatterns) > 0 %} (exclude: [{%s strings.Join(mod.Antipatterns, ",") %}]){% endif %}
+{% for _, mod := range modifiers %}{%s mod.ID %}: [{%s strings.Join(mod.Patterns, ",") %}]{% if len(mod.Antipatterns) > 0 %} (exclude: [{%s strings.Join(mod.Antipatterns, ",") %}]){% endif %}{% code variants := modifierVariants[mod.ID] %}{% if len(variants) > 0 %} (available: {% for i, w := range variants %}{%s formatWeight(w) %}{% if i < len(variants)-1 %}, {% endif %}{% endfor %}){% endif %}
 {% endfor %}
 {% endif %}
 {% if len(favoriteExercises) > 0 || len(favoriteEquipment) > 0 %}

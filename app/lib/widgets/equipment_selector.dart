@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
+import '../models/equipment_info.dart';
 import '../services/gym_service.dart';
 import 'adaptive/adaptive.dart';
 
@@ -8,11 +9,14 @@ import 'adaptive/adaptive.dart';
 class EquipmentSelector extends StatefulWidget {
   final List<String> selected;
   final ValueChanged<List<String>> onChanged;
+  /// called when equipment data loads, exposing which items are weighted
+  final ValueChanged<Set<String>>? onWeightedModifiersLoaded;
 
   const EquipmentSelector({
     super.key,
     required this.selected,
     required this.onChanged,
+    this.onWeightedModifiersLoaded,
   });
 
   @override
@@ -23,7 +27,7 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
   final GymService _gymService = GymService();
   final TextEditingController _searchController = TextEditingController();
 
-  List<String>? _allEquipment;
+  List<EquipmentInfo>? _allEquipment;
   String? _error;
   bool _loading = true;
   String _searchQuery = '';
@@ -47,18 +51,21 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
     setState(() {
       _loading = false;
       if (response.isSuccess && response.data != null) {
-        _allEquipment = response.data!..sort();
+        _allEquipment = response.data!..sort((a, b) => a.id.compareTo(b.id));
+        // notify parent about weighted modifiers
+        final weighted = _allEquipment!.where((e) => e.isWeighted).map((e) => e.id).toSet();
+        widget.onWeightedModifiersLoaded?.call(weighted);
       } else {
         _error = response.error ?? 'Failed to load equipment';
       }
     });
   }
 
-  List<String> get _filteredEquipment {
+  List<EquipmentInfo> get _filteredEquipment {
     if (_allEquipment == null) return [];
     if (_searchQuery.isEmpty) return _allEquipment!;
     final query = _searchQuery.toLowerCase();
-    return _allEquipment!.where((e) => e.toLowerCase().contains(query)).toList();
+    return _allEquipment!.where((e) => e.id.toLowerCase().contains(query)).toList();
   }
 
   void _toggle(String equipment) {
@@ -75,7 +82,7 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
     final visible = _filteredEquipment;
     final updated = List<String>.from(widget.selected);
     for (final e in visible) {
-      if (!updated.contains(e)) updated.add(e);
+      if (!updated.contains(e.id)) updated.add(e.id);
     }
     widget.onChanged(updated);
   }
@@ -128,7 +135,7 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
 
     final filtered = _filteredEquipment;
     final selectedSet = Set<String>.from(widget.selected);
-    final allVisibleSelected = filtered.isNotEmpty && filtered.every(selectedSet.contains);
+    final allVisibleSelected = filtered.isNotEmpty && filtered.every((e) => selectedSet.contains(e.id));
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -179,17 +186,17 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
               child: Wrap(
                 spacing: VigorSpacing.xs,
                 runSpacing: VigorSpacing.xs,
-                children: filtered.map((equipment) {
-                  final isSelected = selectedSet.contains(equipment);
+                children: filtered.map((item) {
+                  final isSelected = selectedSet.contains(item.id);
                   return FilterChip(
                     label: Text(
-                      equipment,
+                      item.id,
                       style: VigorTypography.caption.copyWith(
                         color: isSelected ? Colors.white : VigorColors.textPrimary(context),
                       ),
                     ),
                     selected: isSelected,
-                    onSelected: (_) => _toggle(equipment),
+                    onSelected: (_) => _toggle(item.id),
                     selectedColor: VigorColors.indigo,
                     checkmarkColor: Colors.white,
                     visualDensity: VisualDensity.compact,

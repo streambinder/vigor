@@ -19,7 +19,7 @@ func act(duration, reps, rest int) Activity {
 	return Activity{Duration: duration, Reps: reps, Rest: rest}
 }
 
-func actWeighted(exerciseID string, weightKg int, modifiers []string) Activity {
+func actWeighted(exerciseID string, weightKg float64, modifiers []string) Activity {
 	return Activity{ExerciseID: exerciseID, Reps: 10, WeightKg: weightKg, Modifiers: modifiers}
 }
 

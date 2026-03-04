@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../design/tokens.dart';
 import '../../generated/app_localizations.dart';
+import '../../models/activity_ext.dart';
 import '../../models/exercise.dart';
 import '../../timer/timer_mode.dart';
 import '../../timer/training_interval.dart';
@@ -245,7 +246,7 @@ class _ExerciseItem extends StatelessWidget {
                 if (activity != null && (activity.reps > 0 || activity.modifiers.isNotEmpty))
                   Text(
                     [
-                      if (activity.reps > 0) '${activity.reps} reps${activity.weightKg > 0 ? ' • ${activity.weightKg} kg' : ''}',
+                      if (activity.reps > 0) '${activity.reps} reps${activity.weightKg > 0 ? ' • ${activity.weightKgDisplay} kg' : ''}',
                       if (activity.modifiers.isNotEmpty) activity.modifiers.join(' · '),
                     ].join(' • '),
                     style: VigorTypography.caption.copyWith(color: VigorColors.textMuted(context)),

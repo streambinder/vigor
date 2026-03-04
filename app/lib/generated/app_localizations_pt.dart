@@ -803,6 +803,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get gymNamePlaceholder => 'ex. Ginásio Casa, Holmes Place';
 
   @override
+  String get availableWeights => 'Pesos Disponíveis';
+
+  @override
+  String get availableWeightsHint =>
+      'Configura as opções de peso para os modificadores com peso neste ginásio.';
+
+  @override
   String get noEquipmentAddedYet => 'Nenhum equipamento adicionado';
 
   @override

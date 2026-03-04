@@ -273,6 +273,8 @@
   "editGym": "헬스장 수정",
   "gymName": "헬스장 이름",
   "gymNamePlaceholder": "예: 홈짐, 스포애니",
+  "availableWeights": "사용 가능한 중량",
+  "availableWeightsHint": "이 헬스장의 중량 모디파이어에 사용할 중량 옵션을 설정하세요.",
   "noEquipmentAddedYet": "아직 추가된 장비가 없습니다",
   "pleaseEnterGymName": "헬스장 이름을 입력해 주세요",
   "addAllEquipment": "모두 추가",

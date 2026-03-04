@@ -1,5 +1,6 @@
 import 'dart:ui';
 import '../models/api_response.dart';
+import '../models/equipment_info.dart';
 import '../models/gym.dart';
 import 'app_logger.dart';
 import 'authenticated_api_service.dart';
@@ -20,12 +21,14 @@ class GymService {
             AuthenticatedApiService(storageService: storageService),
         _publicApiService = publicApiService ?? ApiService();
 
-  Future<ApiResponse<List<String>>> getAvailableEquipment() async {
+  Future<ApiResponse<List<EquipmentInfo>>> getAvailableEquipment() async {
     AppLogger.debug('[GymService] Fetching available equipment');
     final response = await _publicApiService.get('/equipment');
     if (response.isSuccess && response.data != null) {
       try {
-        final equipment = (response.data!['equipment'] as List).cast<String>();
+        final equipment = (response.data!['equipment'] as List)
+            .map((e) => EquipmentInfo.fromJson(e as Map<String, dynamic>))
+            .toList();
         AppLogger.info('[GymService] Fetched ${equipment.length} equipment');
         return ApiResponse.success(equipment, response.statusCode);
       } catch (e) {
@@ -170,16 +173,19 @@ class GymService {
   Future<ApiResponse<Gym>> createGym({
     required String name,
     required List<String> equipment,
+    Map<String, List<double>>? modifierVariants,
   }) async {
     AppLogger.debug('[GymService] Creating gym: $name');
 
-    final response = await _apiService.post(
-      '/gym',
-      body: {
-        'name': name,
-        'equipment': equipment,
-      },
-    );
+    final body = <String, dynamic>{
+      'name': name,
+      'equipment': equipment,
+    };
+    if (modifierVariants != null && modifierVariants.isNotEmpty) {
+      body['modifier_variants'] = modifierVariants;
+    }
+
+    final response = await _apiService.post('/gym', body: body);
 
     if (response.isSuccess && response.data != null) {
       try {
@@ -204,12 +210,14 @@ class GymService {
     required String id,
     String? name,
     List<String>? equipment,
+    Map<String, List<double>>? modifierVariants,
   }) async {
     AppLogger.debug('[GymService] Updating gym: $id');
 
     final body = <String, dynamic>{};
     if (name != null) body['name'] = name;
     if (equipment != null) body['equipment'] = equipment;
+    if (modifierVariants != null) body['modifier_variants'] = modifierVariants;
 
     final response = await _apiService.put('/gym/$id', body: body);
 

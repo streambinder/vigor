@@ -273,6 +273,8 @@
   "editGym": "Editar Ginásio",
   "gymName": "Nome do Ginásio",
   "gymNamePlaceholder": "ex. Ginásio Casa, Holmes Place",
+  "availableWeights": "Pesos Disponíveis",
+  "availableWeightsHint": "Configura as opções de peso para os modificadores com peso neste ginásio.",
   "noEquipmentAddedYet": "Nenhum equipamento adicionado",
   "pleaseEnterGymName": "Por favor, insere o nome do ginásio",
   "addAllEquipment": "Adicionar Tudo",

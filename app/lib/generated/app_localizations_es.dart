@@ -807,6 +807,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get gymNamePlaceholder => 'ej. Gimnasio Casa, McFit';
 
   @override
+  String get availableWeights => 'Pesos Disponibles';
+
+  @override
+  String get availableWeightsHint =>
+      'Configura las opciones de peso para los modificadores con peso en este gimnasio.';
+
+  @override
   String get noEquipmentAddedYet => 'No se ha agregado equipamiento';
 
   @override

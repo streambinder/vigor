@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../design/tokens.dart';
 import '../../models/activity.dart';
+import '../../models/activity_ext.dart';
 import '../../theme/liquid_glass_theme.dart';
 import '../../timer/training_interval.dart';
 import '../../utils/exercise_modal.dart';
@@ -124,7 +125,7 @@ class AmrapDisplay extends StatelessWidget {
             if (activity.reps > 0) const SizedBox(width: VigorSpacing.md),
             const Icon(Icons.scale, size: 20, color: VigorColors.stone),
             const SizedBox(width: 4),
-            Text('${activity.weightKg} kg', style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context))),
+            Text('${activity.weightKgDisplay} kg', style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context))),
           ],
           if (activity.modifiers.isNotEmpty) ...[
             if (activity.reps > 0 || activity.weightKg > 0) const SizedBox(width: VigorSpacing.md),

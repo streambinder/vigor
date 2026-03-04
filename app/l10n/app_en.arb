@@ -405,6 +405,8 @@
   "editGym": "Edit Gym",
   "gymName": "Gym Name",
   "gymNamePlaceholder": "e.g., Home Gym, LA Fitness",
+  "availableWeights": "Available Weights",
+  "availableWeightsHint": "Configure weight options for weighted modifiers at this gym.",
   "noEquipmentAddedYet": "No equipment added yet",
   "pleaseEnterGymName": "Please enter a gym name",
   "addAllEquipment": "Add All",

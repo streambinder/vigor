@@ -808,6 +808,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get gymNamePlaceholder => 'ex. Salle Maison, Basic Fit';
 
   @override
+  String get availableWeights => 'Poids Disponibles';
+
+  @override
+  String get availableWeightsHint =>
+      'Configurez les options de poids pour les modificateurs lestés dans cette salle.';
+
+  @override
   String get noEquipmentAddedYet => 'Aucun équipement ajouté';
 
   @override

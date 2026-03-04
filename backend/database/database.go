@@ -53,5 +53,9 @@ func Init() error {
 		return fmt.Errorf("failed to migrate database: %w", err)
 	}
 
+	// manual migration: GORM AutoMigrate won't alter existing column types.
+	// safe to run repeatedly — postgres handles type-to-same-type as a no-op.
+	DB.Exec("ALTER TABLE activities ALTER COLUMN weight_kg TYPE double precision USING weight_kg::double precision")
+
 	return nil
 }

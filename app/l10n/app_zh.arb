@@ -273,6 +273,8 @@
   "editGym": "编辑健身房",
   "gymName": "健身房名称",
   "gymNamePlaceholder": "例如：家庭健身房、威尔士",
+  "availableWeights": "可用重量",
+  "availableWeightsHint": "配置此健身房负重修饰器的重量选项。",
   "noEquipmentAddedYet": "尚未添加设备",
   "pleaseEnterGymName": "请输入健身房名称",
   "addAllEquipment": "全部添加",

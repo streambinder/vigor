@@ -9,6 +9,7 @@ import '../models/training.dart';
 import '../models/routine.dart';
 import '../models/block.dart';
 import '../models/activity.dart';
+import '../models/activity_ext.dart';
 import '../models/exercise.dart';
 import '../models/exercise_selection.dart';
 import '../dto/partner_info.dart';
@@ -1308,7 +1309,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       runSpacing: VigorSpacing.xs,
       children: [
         if (activity.reps > 0) _buildTag(Icons.repeat, '${activity.reps}'),
-        if (activity.weightKg > 0) _buildTag(Icons.fitness_center, '${activity.weightKg}kg'),
+        if (activity.weightKg > 0) _buildTag(Icons.fitness_center, '${activity.weightKgDisplay}kg'),
         if (activity.duration > 0) _buildTag(Icons.timer, _formatTime(activity.duration)),
         if (activity.rest > 0) _buildTag(Icons.hourglass_bottom, '${activity.rest}s'),
       ],

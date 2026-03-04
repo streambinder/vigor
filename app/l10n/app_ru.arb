@@ -273,6 +273,8 @@
   "editGym": "Редактировать Зал",
   "gymName": "Название Зала",
   "gymNamePlaceholder": "напр. Домашний Зал, World Class",
+  "availableWeights": "Доступные Веса",
+  "availableWeightsHint": "Настройте варианты веса для модификаторов с отягощением в этом зале.",
   "noEquipmentAddedYet": "Оборудование ещё не добавлено",
   "pleaseEnterGymName": "Пожалуйста, введите название зала",
   "addAllEquipment": "Добавить Все",

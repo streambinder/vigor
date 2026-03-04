@@ -807,6 +807,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get gymNamePlaceholder => 'es. Palestra Casa, Virgin Active';
 
   @override
+  String get availableWeights => 'Pesi Disponibili';
+
+  @override
+  String get availableWeightsHint =>
+      'Configura le opzioni di peso per i modificatori con peso in questa palestra.';
+
+  @override
   String get noEquipmentAddedYet => 'Nessuna attrezzatura aggiunta';
 
   @override

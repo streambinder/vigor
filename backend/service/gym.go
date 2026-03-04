@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/model"
+	"gorm.io/datatypes"
 )
 
 var (
@@ -28,7 +29,7 @@ func stripPartnerEquipment(equipment []string) []string {
 }
 
 // CreateGym creates a new gym for a user.
-func CreateGym(userID uuid.UUID, name string, equipment []string) (model.Gym, error) {
+func CreateGym(userID uuid.UUID, name string, equipment []string, modifierVariants map[string][]float64) (model.Gym, error) {
 	if err := database.DB.First(&model.Gym{}, "user_id = ? AND name = ?", userID, name).Error; err == nil {
 		return model.Gym{}, ErrGymAlreadyExists
 	}
@@ -37,6 +38,9 @@ func CreateGym(userID uuid.UUID, name string, equipment []string) (model.Gym, er
 		Name:      name,
 		Equipment: stripPartnerEquipment(equipment),
 		UserID:    userID,
+	}
+	if modifierVariants != nil {
+		gym.ModifierVariants = datatypes.NewJSONType(modifierVariants)
 	}
 	if err := database.DB.Create(&gym).Error; err != nil {
 		return model.Gym{}, err
@@ -62,8 +66,9 @@ func GetGym(userID, gymID uuid.UUID) (model.Gym, error) {
 
 // UpdateGymParams contains fields that can be updated on a gym.
 type UpdateGymParams struct {
-	Name      *string
-	Equipment *[]string
+	Name             *string
+	Equipment        *[]string
+	ModifierVariants *map[string][]float64
 }
 
 // UpdateGym updates a gym's details.
@@ -84,6 +89,9 @@ func UpdateGym(userID, gymID uuid.UUID, params UpdateGymParams) (model.Gym, erro
 	}
 	if params.Equipment != nil {
 		gym.Equipment = stripPartnerEquipment(*params.Equipment)
+	}
+	if params.ModifierVariants != nil {
+		gym.ModifierVariants = datatypes.NewJSONType(*params.ModifierVariants)
 	}
 
 	if err := database.DB.Save(&gym).Error; err != nil {

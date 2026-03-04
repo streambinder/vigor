@@ -785,6 +785,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get gymNamePlaceholder => '例：ホームジム、エニタイム';
 
   @override
+  String get availableWeights => '利用可能なウェイト';
+
+  @override
+  String get availableWeightsHint => 'このジムの加重モディファイアで使用するウェイトオプションを設定します。';
+
+  @override
   String get noEquipmentAddedYet => 'まだ器具が追加されていません';
 
   @override

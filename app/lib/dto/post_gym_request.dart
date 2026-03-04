@@ -11,10 +11,13 @@ class PostGymRequest {
   final String name;
   @JsonKey(name: 'equipment', defaultValue: [])
   final List<String> equipment;
+  @JsonKey(name: 'modifier_variants')
+  final Map<String, dynamic>? modifierVariants;
 
   PostGymRequest({
     required this.name,
     required this.equipment,
+    this.modifierVariants,
   });
 
   factory PostGymRequest.fromJson(Map<String, dynamic> json) => _$PostGymRequestFromJson(json);

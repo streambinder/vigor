@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../design/tokens.dart';
 import '../../models/activity.dart';
+import '../../models/activity_ext.dart';
 import '../../models/exercise.dart';
 import '../../theme/liquid_glass_theme.dart';
 import '../../timer/training_interval.dart';
@@ -125,7 +126,7 @@ class ExerciseDisplay extends StatelessWidget {
             const Icon(Icons.scale, size: 20, color: VigorColors.stone),
             const SizedBox(width: 4),
             Text(
-              '${activity.weightKg} kg',
+              '${activity.weightKgDisplay} kg',
               style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context)),
             ),
           ],

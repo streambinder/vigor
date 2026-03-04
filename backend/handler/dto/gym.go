@@ -4,8 +4,9 @@ import "github.com/streambinder/vigor/model"
 
 // PostGymRequest represents the request for POST /gym
 type PostGymRequest struct {
-	Name      string   `json:"name"`
-	Equipment []string `json:"equipment"`
+	Name             string              `json:"name"`
+	Equipment        []string            `json:"equipment"`
+	ModifierVariants map[string][]float64 `json:"modifier_variants,omitempty"`
 }
 
 // PostGymResponse represents the response for POST /gym
@@ -24,8 +25,9 @@ type GetGymResponse model.Gym
 
 // PutGymRequest represents the request for PUT /gym/:id
 type PutGymRequest struct {
-	Name      *string   `json:"name"`
-	Equipment *[]string `json:"equipment"`
+	Name             *string               `json:"name"`
+	Equipment        *[]string             `json:"equipment"`
+	ModifierVariants *map[string][]float64  `json:"modifier_variants,omitempty"`
 }
 
 // PutGymResponse represents the response for PUT /gym/:id

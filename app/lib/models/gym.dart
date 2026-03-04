@@ -13,11 +13,14 @@ class Gym {
   final String name;
   @JsonKey(name: 'equipment', defaultValue: [])
   final List<String> equipment;
+  @JsonKey(name: 'modifier_variants')
+  final Map<String, dynamic>? modifierVariants;
 
   Gym({
     required this.id,
     required this.name,
     required this.equipment,
+    this.modifierVariants,
   });
 
   factory Gym.fromJson(Map<String, dynamic> json) => _$GymFromJson(json);

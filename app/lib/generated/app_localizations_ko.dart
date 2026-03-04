@@ -785,6 +785,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gymNamePlaceholder => '예: 홈짐, 스포애니';
 
   @override
+  String get availableWeights => '사용 가능한 중량';
+
+  @override
+  String get availableWeightsHint => '이 헬스장의 중량 모디파이어에 사용할 중량 옵션을 설정하세요.';
+
+  @override
   String get noEquipmentAddedYet => '아직 추가된 장비가 없습니다';
 
   @override

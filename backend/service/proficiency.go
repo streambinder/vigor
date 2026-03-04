@@ -236,7 +236,7 @@ func RecordProficiencies(userID, trainingID uuid.UUID, activities []*model.Activ
 			continue
 		}
 
-		impact := ModifierImpact(activity.Modifiers, float64(activity.WeightKg), modifierMap)
+		impact := ModifierImpact(activity.Modifiers, activity.WeightKg, modifierMap)
 		for family, baseOrder := range progressions {
 			effective := baseOrder + impact
 			if effective >= currentMax[family] {

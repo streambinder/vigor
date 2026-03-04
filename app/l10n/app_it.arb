@@ -273,6 +273,8 @@
   "editGym": "Modifica Palestra",
   "gymName": "Nome Palestra",
   "gymNamePlaceholder": "es. Palestra Casa, Virgin Active",
+  "availableWeights": "Pesi Disponibili",
+  "availableWeightsHint": "Configura le opzioni di peso per i modificatori con peso in questa palestra.",
   "noEquipmentAddedYet": "Nessuna attrezzatura aggiunta",
   "pleaseEnterGymName": "Per favore inserisci il nome della palestra",
   "addAllEquipment": "Aggiungi Tutto",

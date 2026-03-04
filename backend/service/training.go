@@ -299,6 +299,12 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		exerciseMuscles[ex.ID] = ex.Muscles
 	}
 
+	// extract modifier variants from gym (if present) for LLM prompt
+	var modifierVariants map[string][]float64
+	if gym != nil {
+		modifierVariants = gym.ModifierVariants.Data()
+	}
+
 	llmStart := time.Now()
 	var training *model.Training
 	var llmPrompt model.LLMPrompt
@@ -316,6 +322,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			cooldownExercises,
 			equipmentIDs,
 			llmModifiers,
+			modifierVariants,
 			favoriteExercises,
 			favoriteEquipmentIDs,
 			methodologyData,

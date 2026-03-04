@@ -273,6 +273,8 @@
   "editGym": "ジムを編集",
   "gymName": "ジム名",
   "gymNamePlaceholder": "例：ホームジム、エニタイム",
+  "availableWeights": "利用可能なウェイト",
+  "availableWeightsHint": "このジムの加重モディファイアで使用するウェイトオプションを設定します。",
   "noEquipmentAddedYet": "まだ器具が追加されていません",
   "pleaseEnterGymName": "ジム名を入力してください",
   "addAllEquipment": "すべて追加",

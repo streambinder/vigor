@@ -25,7 +25,7 @@ func postGym(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot parse JSON"})
 	}
 
-	gym, err := service.CreateGym(c.Locals("userID").(uuid.UUID), req.Name, req.Equipment)
+	gym, err := service.CreateGym(c.Locals("userID").(uuid.UUID), req.Name, req.Equipment, req.ModifierVariants)
 	if err != nil {
 		if errors.Is(err, service.ErrGymAlreadyExists) {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "gym already exists"})
@@ -72,8 +72,9 @@ func putGym(c *fiber.Ctx) error {
 	}
 
 	gym, err := service.UpdateGym(c.Locals("userID").(uuid.UUID), gymID, service.UpdateGymParams{
-		Name:      req.Name,
-		Equipment: req.Equipment,
+		Name:             req.Name,
+		Equipment:        req.Equipment,
+		ModifierVariants: req.ModifierVariants,
 	})
 	if err != nil {
 		if errors.Is(err, service.ErrGymNotFound) {

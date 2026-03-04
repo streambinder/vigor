@@ -785,6 +785,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gymNamePlaceholder => '例如：家庭健身房、威尔士';
 
   @override
+  String get availableWeights => '可用重量';
+
+  @override
+  String get availableWeightsHint => '配置此健身房负重修饰器的重量选项。';
+
+  @override
   String get noEquipmentAddedYet => '尚未添加设备';
 
   @override

@@ -108,8 +108,8 @@
       "\u0440\u0435\u0437\u0438\u043d\u043a\u0438 \u0434\u043b\u044f \u0444\u0438\u0442\u043d\u0435\u0441\u0430",
       "\u044d\u0441\u043f\u0430\u043d\u0434\u0435\u0440\u044b"
     ],
-    "progression_impact": -15,
-    "is_weighted": false
+    "progression_impact": -0.6,
+    "is_weighted": true
   },
   {
     "id": "weight",

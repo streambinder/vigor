@@ -20,7 +20,7 @@ class Activity {
   @JsonKey(name: 'reps')
   final int reps;
   @JsonKey(name: 'weight_kg')
-  final int weightKg;
+  final double weightKg;
   @JsonKey(name: 'modifiers', defaultValue: [])
   final List<String> modifiers;
   @JsonKey(name: 'rest')

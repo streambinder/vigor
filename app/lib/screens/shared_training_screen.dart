@@ -8,6 +8,7 @@ import '../models/training.dart';
 import '../models/routine.dart';
 import '../models/block.dart';
 import '../models/activity.dart';
+import '../models/activity_ext.dart';
 import '../models/exercise.dart';
 import '../providers/auth_provider.dart';
 import '../services/service_locator.dart';
@@ -524,7 +525,7 @@ class _SharedTrainingScreenState extends State<SharedTrainingScreen> {
       runSpacing: VigorSpacing.xs,
       children: [
         if (activity.reps > 0) _buildTag(Icons.repeat, '${activity.reps}'),
-        if (activity.weightKg > 0) _buildTag(Icons.fitness_center, '${activity.weightKg}kg'),
+        if (activity.weightKg > 0) _buildTag(Icons.fitness_center, '${activity.weightKgDisplay}kg'),
         if (activity.duration > 0) _buildTag(Icons.timer, _formatTime(activity.duration)),
         if (activity.rest > 0) _buildTag(Icons.hourglass_bottom, '${activity.rest}s'),
       ],

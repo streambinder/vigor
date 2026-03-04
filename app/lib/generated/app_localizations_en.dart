@@ -800,6 +800,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gymNamePlaceholder => 'e.g., Home Gym, LA Fitness';
 
   @override
+  String get availableWeights => 'Available Weights';
+
+  @override
+  String get availableWeightsHint =>
+      'Configure weight options for weighted modifiers at this gym.';
+
+  @override
   String get noEquipmentAddedYet => 'No equipment added yet';
 
   @override

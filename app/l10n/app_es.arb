@@ -273,6 +273,8 @@
   "editGym": "Editar Gimnasio",
   "gymName": "Nombre del Gimnasio",
   "gymNamePlaceholder": "ej. Gimnasio Casa, McFit",
+  "availableWeights": "Pesos Disponibles",
+  "availableWeightsHint": "Configura las opciones de peso para los modificadores con peso en este gimnasio.",
   "noEquipmentAddedYet": "No se ha agregado equipamiento",
   "pleaseEnterGymName": "Por favor ingresa el nombre del gimnasio",
   "addAllEquipment": "Agregar Todo",

@@ -11,9 +11,13 @@ func initEquipment(app *fiber.App) {
 }
 
 func getEquipment(c *fiber.Ctx) error {
-	ids, err := service.GetEquipment()
+	items, err := service.GetEquipment()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch equipment"})
 	}
-	return c.JSON(dto.GetEquipmentResponse{Equipment: ids})
+	dtoItems := make([]dto.EquipmentItem, len(items))
+	for i, item := range items {
+		dtoItems[i] = dto.EquipmentItem{ID: item.ID, IsWeighted: item.IsWeighted}
+	}
+	return c.JSON(dto.GetEquipmentResponse{Equipment: dtoItems})
 }

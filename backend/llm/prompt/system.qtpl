@@ -2,7 +2,7 @@
 
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool) -%}
+{% func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool) -%}
 You are an expert personal trainer AI creating individualized training programs.
 
 CONSTRAINTS:
@@ -59,6 +59,8 @@ ACTIVITY RULES:
 - duration: seconds for cardio/stretches/holds
 - reps: count for strength exercises
 - weight_kg: 0 for bodyweight exercises, >0 for exercises using weighted equipment (barbell, dumbbell, kettlebell, etc.){% if hasModifiers %} or when using weighted modifiers{% endif %}
+{% if hasModifierVariants %}- For weighted modifiers with available weights listed in [MODIFIERS], use ONLY values from that list for weight_kg.
+{% endif %}
 
 - rest: compounds 2-3min (hypertrophy) or 3-5min (strength), isolation 60-90s, circuits/HIIT 10-20s, supersets 60-90s between pairs
 

@@ -61,17 +61,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (result != null) {
+      final modifierVariants = result['modifier_variants'] as Map<String, List<double>>?;
       if (gym == null) {
-        await _addGym(result['name'], result['equipment']);
+        await _addGym(result['name'], result['equipment'], modifierVariants);
       } else {
-        await _updateGym(gym.id, result['name'], result['equipment']);
+        await _updateGym(gym.id, result['name'], result['equipment'], modifierVariants);
       }
     }
   }
 
-  Future<void> _addGym(String name, List<String> equipment) async {
+  Future<void> _addGym(String name, List<String> equipment, Map<String, List<double>>? modifierVariants) async {
     final l10n = AppLocalizations.of(context);
-    final response = await context.read<ServiceLocator>().gymService.createGym(name: name, equipment: equipment);
+    final response = await context.read<ServiceLocator>().gymService.createGym(name: name, equipment: equipment, modifierVariants: modifierVariants);
     if (mounted) {
       if (response.isSuccess) {
         AdaptiveNotification.show(context: context, message: l10n.gymAddedSuccessfully);
@@ -81,9 +82,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _updateGym(String id, String name, List<String> equipment) async {
+  Future<void> _updateGym(String id, String name, List<String> equipment, Map<String, List<double>>? modifierVariants) async {
     final l10n = AppLocalizations.of(context);
-    final response = await context.read<ServiceLocator>().gymService.updateGym(id: id, name: name, equipment: equipment);
+    final response = await context.read<ServiceLocator>().gymService.updateGym(id: id, name: name, equipment: equipment, modifierVariants: modifierVariants);
     if (mounted) {
       if (response.isSuccess) {
         AdaptiveNotification.show(context: context, message: l10n.gymUpdatedSuccessfully);

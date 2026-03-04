@@ -52,6 +52,7 @@ func GenTraining(
 	cooldownExercises []model.Exercise,
 	equipment []string,
 	modifiers []model.Modifier,
+	modifierVariants map[string][]float64,
 	favoriteExercises []model.Exercise,
 	favoriteEquipment []string,
 	methodology *model.Methodology,
@@ -78,6 +79,7 @@ func GenTraining(
 		cooldownExercises,
 		equipment,
 		modifiers,
+		modifierVariants,
 		favoriteExercises,
 		favoriteEquipment,
 		methodology,
@@ -93,7 +95,7 @@ func GenTraining(
 		userMessage += "\n\nCORRECTION (previous attempt failed server-side validation): " + correctionHint + ". Fix this issue and regenerate."
 	}
 	request := model.LLMPrompt{
-		System: prompt.System(goals, methodology, methodologies, skipWarmupCooldown, len(modifiers) > 0),
+		System: prompt.System(goals, methodology, methodologies, skipWarmupCooldown, len(modifiers) > 0, len(modifierVariants) > 0),
 		User:   userMessage,
 	}
 	response, llmModel, err := getLLM(lastModel).query(

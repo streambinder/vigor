@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../design/tokens.dart';
 import '../../generated/app_localizations.dart';
 import '../../models/activity.dart';
+import '../../models/activity_ext.dart';
 import '../../models/exercise.dart';
 import '../../timer/training_interval.dart';
 import '../../utils/exercise_modal.dart';
@@ -97,7 +98,7 @@ class _UpcomingItem extends StatelessWidget {
       runSpacing: VigorSpacing.xs,
       children: [
         if (activity.reps > 0) _buildTag(Icons.repeat, '${activity.reps}'),
-        if (activity.weightKg > 0) _buildTag(Icons.fitness_center, '${activity.weightKg}kg'),
+        if (activity.weightKg > 0) _buildTag(Icons.fitness_center, '${activity.weightKgDisplay}kg'),
         if (activity.duration > 0) _buildTag(Icons.timer, '${activity.duration}s'),
         if (activity.modifiers.isNotEmpty) _buildTag(Icons.tune, activity.modifiers.join(' · ')),
       ],

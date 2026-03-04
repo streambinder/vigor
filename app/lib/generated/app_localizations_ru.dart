@@ -798,6 +798,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get gymNamePlaceholder => 'напр. Домашний Зал, World Class';
 
   @override
+  String get availableWeights => 'Доступные Веса';
+
+  @override
+  String get availableWeightsHint =>
+      'Настройте варианты веса для модификаторов с отягощением в этом зале.';
+
+  @override
   String get noEquipmentAddedYet => 'Оборудование ещё не добавлено';
 
   @override

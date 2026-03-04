@@ -273,6 +273,8 @@
   "editGym": "Modifier la Salle",
   "gymName": "Nom de la Salle",
   "gymNamePlaceholder": "ex. Salle Maison, Basic Fit",
+  "availableWeights": "Poids Disponibles",
+  "availableWeightsHint": "Configurez les options de poids pour les modificateurs lestés dans cette salle.",
   "noEquipmentAddedYet": "Aucun équipement ajouté",
   "pleaseEnterGymName": "Merci d'entrer le nom de la salle",
   "addAllEquipment": "Tout Ajouter",

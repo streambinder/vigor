@@ -1566,6 +1566,18 @@ abstract class AppLocalizations {
   /// **'e.g., Home Gym, LA Fitness'**
   String get gymNamePlaceholder;
 
+  /// No description provided for @availableWeights.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Weights'**
+  String get availableWeights;
+
+  /// No description provided for @availableWeightsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure weight options for weighted modifiers at this gym.'**
+  String get availableWeightsHint;
+
   /// No description provided for @noEquipmentAddedYet.
   ///
   /// In en, this message translates to:
