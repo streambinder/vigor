@@ -220,7 +220,7 @@ class EmomController extends TimerController {
 
   @override
   void startCountdown() {
-    _secondsInMinute = 5;
+    _secondsInMinute = 3;
     _startTimer();
   }
 

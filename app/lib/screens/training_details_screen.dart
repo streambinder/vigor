@@ -16,7 +16,9 @@ import '../dto/partner_info.dart';
 import '../models/progression_adjustment.dart';
 import '../models/training_feedback.dart';
 import '../providers/auth_provider.dart';
+import '../services/preferences_service.dart';
 import '../services/service_locator.dart';
+import '../timer/workout_timer_notifier.dart';
 import '../utils/knowledge_labels.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/cached_exercise_image.dart';
@@ -24,8 +26,8 @@ import '../widgets/marquee_text.dart';
 import '../widgets/user_select_dialog.dart';
 import '../utils/exercise_modal.dart';
 import '../utils/feedback_modal.dart';
+import '../widgets/timer/inline_timer_section.dart';
 import 'main_navigation.dart';
-import 'workout_timer_screen.dart';
 
 class TrainingDetailsScreen extends StatefulWidget {
   final Training training;
@@ -41,6 +43,11 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   List<PartnerInfo> _partners = [];
   TrainingFeedback? _userFeedback;
 
+  // inline timer state
+  WorkoutTimerNotifier? _timerNotifier;
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _timerKey = GlobalKey();
+
   Training get training => _training;
 
   @override
@@ -49,6 +56,14 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     _training = widget.training;
     _loadPartners();
     if (_training.completedAt != null) _loadUserFeedback();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _timerNotifier?.removeListener(_onTimerUpdate);
+    _timerNotifier?.dispose();
+    super.dispose();
   }
 
   Future<void> _loadPartners() async {
@@ -84,6 +99,119 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         _loadUserFeedback();
       }
     }
+  }
+
+  // --- inline timer lifecycle ---
+
+  void _startTimer() {
+    if (_timerNotifier != null) return;
+    setState(() {
+      _timerNotifier = WorkoutTimerNotifier(
+        training: _training,
+        prefs: context.read<PreferencesService>(),
+        serviceLocator: context.read<ServiceLocator>(),
+      )..initialize();
+      _timerNotifier!.addListener(_onTimerUpdate);
+    });
+    // scroll to center the timer section after it's inserted
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final keyContext = _timerKey.currentContext;
+      if (keyContext != null) {
+        Scrollable.ensureVisible(keyContext, duration: VigorAnimation.medium, curve: VigorAnimation.defaultCurve, alignment: 0.3);
+      }
+    });
+  }
+
+  void _stopTimer() {
+    _timerNotifier?.removeListener(_onTimerUpdate);
+    _timerNotifier?.dispose();
+    setState(() => _timerNotifier = null);
+  }
+
+  void _onTimerUpdate() {
+    if (!mounted) return;
+    // only rebuild when discrete state changes (completion), not every tick.
+    // the compact bar uses its own ListenableBuilder for per-tick updates.
+    if (_timerNotifier?.workoutCompleted == true) {
+      setState(() {});
+    }
+  }
+
+  // --- completion + exit flows ---
+
+  Future<void> _showFeedbackAndComplete() async {
+    if (_timerNotifier == null || _timerNotifier!.isSubmitting) return;
+    final result = await FeedbackModal.show(
+      context,
+      _training,
+      messagePrefix: _timerNotifier!.methodologyStats,
+      elapsedSeconds: _timerNotifier!.accumulatedElapsedSeconds,
+    );
+    if (result == null || _timerNotifier == null || !mounted) return;
+    _timerNotifier!.isSubmitting = true;
+    await _markTrainingComplete(result);
+    if (!mounted) return;
+    _stopTimer();
+    _refreshTraining();
+  }
+
+  Future<void> _markTrainingComplete(FeedbackResult result) async {
+    final response = await context.read<ServiceLocator>().trainingService.completeTraining(
+      _training.id,
+      feedback: result.feedback,
+      activityFeedback: result.activityFeedback,
+      completedIn: result.completedIn,
+    );
+    if (!response.isSuccess && mounted) {
+      AdaptiveNotification.showError(
+        context: context,
+        message: AppLocalizations.of(context).failedToMarkComplete,
+        rawError: response.error,
+      );
+    }
+  }
+
+  void _showTimerExitDialog() {
+    final l10n = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.exitTraining),
+        content: Text(l10n.whatWouldYouLikeToDo),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              _stopTimer();
+            },
+            child: Text(l10n.exit),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.continueTraining),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              _timerNotifier?.captureEarlyExitStats();
+              final result = await FeedbackModal.show(
+                context,
+                _training,
+                messagePrefix: _timerNotifier?.methodologyStats,
+                elapsedSeconds: _timerNotifier?.accumulatedElapsedSeconds,
+              );
+              if (result == null) return;
+              await _markTrainingComplete(result);
+              if (!mounted) return;
+              _stopTimer();
+              _refreshTraining();
+            },
+            child: Text(l10n.markAsComplete),
+          ),
+        ],
+      ),
+    );
   }
 
   String _formatDate(DateTime date) {
@@ -574,11 +702,17 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     final currentUserId = context.read<AuthProvider>().currentUser?.id ?? '';
     final isOwner = training.userId == currentUserId;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final timerActive = _timerNotifier != null;
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) _navigateToActivityScreen(context);
+        if (didPop) return;
+        if (_timerNotifier != null) {
+          _showTimerExitDialog();
+        } else {
+          _navigateToActivityScreen(context);
+        }
       },
       child: AdaptiveScaffold(
         appBar: AdaptiveAppBar(
@@ -586,7 +720,13 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           automaticallyImplyLeading: false,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: VigorColors.stone),
-            onPressed: () => _navigateToActivityScreen(context),
+            onPressed: () {
+              if (_timerNotifier != null) {
+                _showTimerExitDialog();
+              } else {
+                _navigateToActivityScreen(context);
+              }
+            },
           ),
           actions: [
             _buildMenuButton(l10n, isOwner),
@@ -594,40 +734,57 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         ),
         body: ValueListenableBuilder<bool>(
           valueListenable: context.read<ServiceLocator>().isCalibratingNotifier,
-          builder: (context, isCalibrating, _) => ListView.builder(
-            padding: VigorSpacing.paddingLg,
-            // calibration note + header + routines header + routines + footer spacing
-            itemCount: training.routines.length + 3 + (isCalibrating ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (isCalibrating && index == 0) {
+          builder: (context, isCalibrating, _) {
+            final timerOffset = timerActive ? 1 : 0;
+            return ListView.builder(
+              padding: VigorSpacing.paddingLg,
+              itemCount: training.routines.length + 3 + (isCalibrating ? 1 : 0) + timerOffset,
+              itemBuilder: (context, index) {
+                if (isCalibrating && index == 0) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: VigorSpacing.md),
+                    child: _buildCalibrationNote(l10n),
+                  );
+                }
+                final adjusted = isCalibrating ? index - 1 : index;
+                if (adjusted == 0) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
+                    child: _buildHeaderWithActions(l10n, isDark, isOwner),
+                  );
+                }
+                // timer section inserted at adjusted == 1 when active
+                if (timerActive && adjusted == 1) {
+                  return AnimatedSize(
+                    duration: VigorAnimation.medium,
+                    curve: VigorAnimation.defaultCurve,
+                    child: Padding(
+                      key: _timerKey,
+                      padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
+                      child: InlineTimerSection(
+                        notifier: _timerNotifier!,
+                        onDone: _showFeedbackAndComplete,
+                      ),
+                    ),
+                  );
+                }
+                final shifted = timerActive ? adjusted - 1 : adjusted;
+                if (shifted == 1) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: VigorSpacing.md),
+                    child: _buildRoutinesHeader(l10n),
+                  );
+                }
+                if (shifted == training.routines.length + 2) {
+                  return const SizedBox(height: VigorSpacing.lg);
+                }
                 return Padding(
                   padding: const EdgeInsets.only(bottom: VigorSpacing.md),
-                  child: _buildCalibrationNote(l10n),
+                  child: _buildRoutineCard(training.routines[shifted - 2], isDark),
                 );
-              }
-              final adjusted = isCalibrating ? index - 1 : index;
-              if (adjusted == 0) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
-                  child: _buildHeaderWithActions(l10n, isDark, isOwner),
-                );
-              }
-              if (adjusted == 1) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: VigorSpacing.md),
-                  child: _buildRoutinesHeader(l10n),
-                );
-              }
-              if (adjusted == training.routines.length + 2) {
-                return const SizedBox(height: VigorSpacing.lg);
-              }
-              final routineIndex = adjusted - 2;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: VigorSpacing.md),
-                child: _buildRoutineCard(training.routines[routineIndex], isDark),
-              );
-            },
-          ),
+              },
+            );
+          },
         ),
       ),
     );
@@ -916,18 +1073,21 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
     return Row(
       children: [
-        // start training = secondary action (indigo)
-        Expanded(child: _buildActionButton(
-          icon: Icons.timer,
-          label: l10n.startTraining,
-          color: indigoColor,
-          onPressed: () async {
-            final completed = await Navigator.of(context).push<bool>(
-              MaterialPageRoute(builder: (context) => WorkoutTimerScreen(training: training)),
-            );
-            if (completed == true && mounted) _refreshTraining();
-          },
-        )),
+        // start/stop training toggle
+        Expanded(child: _timerNotifier != null
+          ? _buildActionButton(
+              icon: Icons.stop,
+              label: l10n.exitTraining.replaceAll('?', '').replaceAll('？', '').trim(),
+              color: indigoColor,
+              onPressed: _showTimerExitDialog,
+            )
+          : _buildActionButton(
+              icon: Icons.timer,
+              label: l10n.startTraining,
+              color: indigoColor,
+              onPressed: _startTimer,
+            ),
+        ),
         if (!isCompleted)
           // mark as complete = primary CTA (persimmon), any participant can complete
           Expanded(child: _buildActionButton(

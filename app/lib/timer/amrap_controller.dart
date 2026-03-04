@@ -110,7 +110,7 @@ class AmrapController extends TimerController {
 
   @override
   void startCountdown() {
-    _globalSecondsRemaining = 5;  // initial countdown
+    _globalSecondsRemaining = 3;  // initial countdown
     _startTimer(isCountdown: true);
   }
 

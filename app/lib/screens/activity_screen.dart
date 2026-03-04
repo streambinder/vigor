@@ -14,7 +14,6 @@ import '../services/service_locator.dart';
 import '../models/training.dart';
 import '../models/gym.dart';
 import 'training_details_screen.dart';
-import 'workout_timer_screen.dart';
 
 class ActivityScreen extends StatefulWidget {
   const ActivityScreen({super.key});
@@ -562,40 +561,6 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                   ],
                 ],
               ),
-              // start button - indigo for secondary action
-              if (isAvailable) ...[
-                const SizedBox(height: VigorSpacing.md),
-                SizedBox(
-                  width: double.infinity,
-                  child: Material(
-                    color: VigorColors.indigo,
-                    borderRadius: VigorRadius.radiusSm,
-                    child: InkWell(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => WorkoutTimerScreen(training: training)),
-                      ),
-                      borderRadius: VigorRadius.radiusSm,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: VigorSpacing.sm),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.play_arrow, color: Colors.white, size: 20),
-                            const SizedBox(width: 6),
-                            Text(
-                              l10n.startTraining,
-                              style: VigorTypography.label.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ],
           ),
         ),

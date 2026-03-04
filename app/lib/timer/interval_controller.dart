@@ -50,7 +50,7 @@ class IntervalController extends TimerController {
 
   @override
   void startCountdown() {
-    _remainingSeconds = 5;
+    _remainingSeconds = 3;
     _startTimer();
   }
 

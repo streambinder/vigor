@@ -121,7 +121,7 @@ class ForTimeController extends TimerController {
 
   @override
   void startCountdown() {
-    _countdownSeconds = 5;
+    _countdownSeconds = 3;
     _startCountdownTimer();
   }
 
