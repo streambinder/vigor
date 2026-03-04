@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../dto/partner_info.dart';
@@ -25,6 +27,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   bool _isLoading = false;
   bool _hasLoadedOnce = false;
   bool _isDeleting = false;
+  bool _isSharing = false;
   final Map<String, List<PartnerInfo>> _partnerData = {};
   final Set<String> _selectedIds = {};
   bool get _isSelecting => _selectedIds.isNotEmpty;
@@ -149,6 +152,29 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     }
   }
 
+  Future<void> _shareSelected() async {
+    final l10n = AppLocalizations.of(context);
+    final trainingId = _selectedIds.first;
+    setState(() => _isSharing = true);
+
+    final response = await context.read<ServiceLocator>().trainingService.shareTraining(trainingId);
+
+    if (!mounted) return;
+    setState(() => _isSharing = false);
+
+    if (response.isSuccess && response.data != null) {
+      final url = response.data!['url']!;
+      try {
+        await Share.share(url);
+      } catch (_) {
+        await Clipboard.setData(ClipboardData(text: url));
+        if (mounted) AdaptiveNotification.show(context: context, message: l10n.linkCopied);
+      }
+    } else {
+      AdaptiveNotification.showError(context: context, message: l10n.failedToShareTraining, rawError: response.error);
+    }
+  }
+
   String _formatDate(DateTime date) {
     final l10n = AppLocalizations.of(context);
     final diff = DateTime.now().difference(date).inDays;
@@ -219,6 +245,17 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                     ),
                     title: Text(l10n.nSelected(_selectedIds.length)),
                     actions: [
+                      if (_selectedIds.length == 1)
+                        _isSharing
+                            ? const Padding(
+                                padding: EdgeInsets.all(12),
+                                child: SizedBox(width: 20, height: 20, child: AdaptiveLoadingIndicator()),
+                              )
+                            : AdaptiveIconButton(
+                                icon: const Icon(Icons.share),
+                                tooltip: l10n.share,
+                                onPressed: _shareSelected,
+                              ),
                       if (_isDeleting)
                         const Padding(
                           padding: EdgeInsets.all(12),
