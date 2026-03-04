@@ -37442,28 +37442,6 @@
     "cues": []
   },
   {
-    "id": "wheel-run",
-    "name": "Wheel Run",
-    "equipment": [
-      "wheel roller"
-    ],
-    "muscles": [
-      "legs"
-    ],
-    "reference": "https://static.exercisedb.dev/media/km2Ljzj.gif",
-    "instructions": [
-      "Start in a plank position with your hands on the wheel and your body straight",
-      "Engage your core and start rolling the wheel forward by extending your arms",
-      "Continue rolling until your body is fully extended and your arms are overhead",
-      "Reverse the movement by pulling the wheel back towards your body, using your core and arms",
-      "Repeat for the desired number of repetitions"
-    ],
-    "progressions": {
-      "cardio": 35
-    },
-    "cues": []
-  },
-  {
     "id": "wide-grip-pull-up",
     "name": "Wide Grip Pull-Up",
     "equipment": [
