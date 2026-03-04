@@ -14,6 +14,7 @@ import (
 
 var (
 	ErrLLMQuery     = errors.New("llm query failed")
+	ErrLLMTruncated = errors.New("llm response truncated")
 	ErrLLMUnmarshal = errors.New("llm unmarshal failed")
 )
 
@@ -104,6 +105,9 @@ func GenTraining(
 		16000,
 	)
 	if err != nil {
+		if errors.Is(err, ErrLLMTruncated) {
+			return nil, request, llmModel, err
+		}
 		return nil, request, llmModel, fmt.Errorf("%w: %s", ErrLLMQuery, err)
 	}
 

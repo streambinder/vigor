@@ -64,6 +64,9 @@ func (llm *OpenAI) query(prompt model.LLMPrompt, temperature float64, maxTokens 
 	}
 
 	completionChoice := completion.Choices[0]
+	if completionChoice.FinishReason == "length" {
+		return nil, llm.model, fmt.Errorf("%w: finish_reason=length from %s", ErrLLMTruncated, llm.provider)
+	}
 	if completionChoice.FinishReason != "stop" {
 		return nil, llm.model, fmt.Errorf("incomplete response from %s: finish_reason=%s", llm.provider, completionChoice.FinishReason)
 	}

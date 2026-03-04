@@ -342,6 +342,17 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			if errors.Is(err, llm.ErrLLMUnmarshal) {
 				reason = "unmarshal_error"
 			}
+			if errors.Is(err, llm.ErrLLMTruncated) {
+				reason = "truncated_error"
+				if attempt < maxGenerationRetries {
+					log.Warn().
+						Int("attempt", attempt+1).
+						Int("max_attempts", maxGenerationRetries+1).
+						Err(err).Msg("LLM response truncated, retrying with conciseness hint")
+					correctionHint = "response was truncated (too long). Be much more concise in reasoning: use 3-5 word rationales, fewer exercises, shorter strategy"
+					continue
+				}
+			}
 			log.Error().
 				Interface("event", event.TrainingGenerationFailureEvent{
 					Event:   event.Event{Time: time.Now()},
@@ -384,6 +395,17 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 					}
 				}
 			}
+		}
+
+		// strip warmup/cooldown routines the LLM may have generated despite being told not to
+		if skipWarmupCooldown {
+			workOnly := training.Routines[:0]
+			for _, r := range training.Routines {
+				if r.Type == "work" {
+					workOnly = append(workOnly, r)
+				}
+			}
+			training.Routines = workOnly
 		}
 
 		training.Routines = reorderRoutines(training.Routines)
