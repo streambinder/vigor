@@ -32094,32 +32094,6 @@
     "cues": []
   },
   {
-    "id": "self-assisted-inverse-leg-curl",
-    "name": "Self Assisted Inverse Leg Curl",
-    "equipment": [],
-    "muscles": [
-      "legs",
-      "glutes"
-    ],
-    "reference": "https://static.exercisedb.dev/media/E4PwJqI.gif",
-    "instructions": [
-      "Lie face down on a leg curl machine with your legs extended and your ankles hooked under the padded lever",
-      "Place your hands on the side handles of the machine for support",
-      "Keeping your upper body stationary, exhale and curl your legs upward as far as possible",
-      "Hold the contracted position for a brief pause as you squeeze your hamstrings",
-      "Slowly lower your legs back to the starting position while inhaling",
-      "Repeat for the desired number of repetitions"
-    ],
-    "progressions": {
-      "squat": 25
-    },
-    "cues": [
-      "Keep elbows pinned at your sides",
-      "Don't swing the weight",
-      "Squeeze at the top"
-    ]
-  },
-  {
     "id": "self-assisted-inverse-leg-curl-on-floor",
     "name": "Self Assisted Inverse Leg Curl (On Floor)",
     "equipment": [],
