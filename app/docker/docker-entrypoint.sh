@@ -29,5 +29,13 @@ fi
 chown nginx:nginx /usr/share/nginx/html/config.js
 chown nginx:nginx /usr/share/nginx/html/index.html 2>/dev/null || true
 
+# extract dns resolver from /etc/resolv.conf for nginx upstream resolution
+DNS_RESOLVER=$(awk '/^nameserver/{print $2; exit}' /etc/resolv.conf)
+export DNS_RESOLVER
+
+# substitute env vars in nginx config (only these, to preserve nginx's own $variables)
+envsubst '${API_INTERNAL_URL} ${DNS_RESOLVER}' < /etc/nginx/conf.d/default.conf > /etc/nginx/conf.d/default.conf.tmp
+mv /etc/nginx/conf.d/default.conf.tmp /etc/nginx/conf.d/default.conf
+
 # start nginx as root (it will drop privileges to nginx user automatically)
 exec nginx -g "daemon off;"
