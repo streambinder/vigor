@@ -61,6 +61,10 @@ class AudioService {
     await _player.play(_source);
   }
 
+  Future<void> stopWhistle() async {
+    await _player.stop();
+  }
+
   /// re-prepare audio after app returns from background — iOS deactivates the
   /// audio session on backgrounding, so the player needs a fresh source
   Future<void> reactivate() async {

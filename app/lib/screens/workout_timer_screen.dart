@@ -246,6 +246,8 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen>
     final controller = _controller;
     if (controller == null) return;
 
+    _audioService.stopWhistle();
+
     final segment = _currentSegmentIndex < _segments.length
         ? _segments[_currentSegmentIndex]
         : null;
@@ -514,8 +516,14 @@ class _WorkoutTimerScreenState extends State<WorkoutTimerScreen>
       canGoBack: controller.canGoBack,
       phaseColor: _phaseColor,
       onPauseToggle: controller.togglePause,
-      onSkipForward: controller.skipForward,
-      onSkipBackward: controller.skipBackward,
+      onSkipForward: () {
+        _audioService.stopWhistle();
+        controller.skipForward();
+      },
+      onSkipBackward: () {
+        _audioService.stopWhistle();
+        controller.skipBackward();
+      },
     );
   }
 
