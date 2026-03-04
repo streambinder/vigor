@@ -285,6 +285,7 @@
   "searchByName": "名前で検索",
   "noUsersAvailable": "利用可能なユーザーがいません",
   "noMatchingUsers": "一致するユーザーがいません",
+  "noMatchingEquipment": "一致する器具がありません",
 
   "instructions": "手順",
   "cues": "ポイント",

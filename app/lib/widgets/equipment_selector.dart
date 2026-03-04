@@ -69,7 +69,8 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
     final l10n = AppLocalizations.of(context);
     return _allEquipment!.where((e) =>
       e.id.toLowerCase().contains(query) ||
-      KnowledgeLabels.equipmentLabel(e.id, l10n).toLowerCase().contains(query),
+      KnowledgeLabels.equipmentLabel(e.id, l10n).toLowerCase().contains(query) ||
+      e.aliases.any((a) => a.toLowerCase().contains(query)),
     ).toList();
   }
 
@@ -154,8 +155,9 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
                 child: AdaptiveTextField(
                   controller: _searchController,
                   labelText: l10n.searchByName,
+                  style: VigorTypography.caption,
                   onChanged: (value) => setState(() => _searchQuery = value),
-                  prefix: const Icon(Icons.search, size: 20),
+                  prefix: const Icon(Icons.search, size: 16),
                 ),
               ),
               const SizedBox(width: VigorSpacing.sm),
@@ -177,10 +179,9 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
           Padding(
             padding: VigorSpacing.paddingMd,
             child: Text(
-              l10n.noMatchingUsers,
-              style: VigorTypography.body.copyWith(
+              l10n.noMatchingEquipment,
+              style: VigorTypography.caption.copyWith(
                 color: VigorColors.textMuted(context),
-                fontStyle: FontStyle.italic,
               ),
             ),
           )
@@ -195,32 +196,30 @@ class _EquipmentSelectorState extends State<EquipmentSelector> {
                   final isSelected = selectedSet.contains(item.id);
                   final label = KnowledgeLabels.equipmentLabel(item.id, l10n);
                   return FilterChip(
-                    label: Text(
-                      label,
-                      style: VigorTypography.caption.copyWith(
-                        color: isSelected ? Colors.white : VigorColors.textPrimary(context),
-                      ),
+                    label: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isSelected) ...[
+                          const Icon(Icons.check, size: 12, color: Colors.white),
+                          const SizedBox(width: 4),
+                        ],
+                        Text(
+                          label,
+                          style: VigorTypography.caption.copyWith(
+                            color: isSelected ? Colors.white : VigorColors.textPrimary(context),
+                          ),
+                        ),
+                      ],
                     ),
                     selected: isSelected,
+                    showCheckmark: false,
                     onSelected: (_) => _toggle(item.id),
                     selectedColor: VigorColors.indigo,
-                    checkmarkColor: Colors.white,
                     visualDensity: VisualDensity.compact,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.xs),
                   );
                 }).toList(),
-              ),
-            ),
-          ),
-        // selected count
-        if (widget.selected.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: VigorSpacing.sm),
-            child: Text(
-              '${widget.selected.length} selected',
-              style: VigorTypography.caption.copyWith(
-                color: VigorColors.textSecondary(context),
               ),
             ),
           ),

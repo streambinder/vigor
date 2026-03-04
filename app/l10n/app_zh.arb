@@ -285,6 +285,7 @@
   "searchByName": "按名称搜索",
   "noUsersAvailable": "没有可用的用户",
   "noMatchingUsers": "没有匹配的用户",
+  "noMatchingEquipment": "没有匹配的器材",
 
   "instructions": "说明",
   "cues": "提示",

@@ -285,6 +285,7 @@
   "searchByName": "Поиск по имени",
   "noUsersAvailable": "Пользователи недоступны",
   "noMatchingUsers": "Подходящих пользователей нет",
+  "noMatchingEquipment": "Подходящего оборудования нет",
 
   "instructions": "Инструкции",
   "cues": "Подсказки",

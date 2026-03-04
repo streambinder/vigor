@@ -820,6 +820,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noMatchingUsers => '一致するユーザーがいません';
 
   @override
+  String get noMatchingEquipment => '一致する器具がありません';
+
+  @override
   String get instructions => '手順';
 
   @override

@@ -25,6 +25,7 @@ class AdaptiveTextField extends StatelessWidget {
   final bool readOnly;
   final VoidCallback? onTap;
   final FocusNode? focusNode;
+  final TextStyle? style;
 
   const AdaptiveTextField({
     super.key,
@@ -45,6 +46,7 @@ class AdaptiveTextField extends StatelessWidget {
     this.readOnly = false,
     this.onTap,
     this.focusNode,
+    this.style,
   });
 
   @override
@@ -60,6 +62,7 @@ class AdaptiveTextField extends StatelessWidget {
     final textColor = VigorColors.textPrimary(context);
     final hintColor = VigorColors.textMuted(context);
     final labelColor = VigorColors.textSecondary(context);
+    final baseStyle = style ?? VigorTypography.body;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,11 +105,11 @@ class AdaptiveTextField extends StatelessWidget {
                   readOnly: readOnly,
                   onTap: onTap,
                   focusNode: focusNode,
-                  style: VigorTypography.body.copyWith(color: textColor),
+                  style: baseStyle.copyWith(color: textColor),
                   cursorColor: VigorColors.indigo,
                   decoration: InputDecoration(
                     hintText: placeholder ?? labelText,
-                    hintStyle: VigorTypography.body.copyWith(color: hintColor),
+                    hintStyle: baseStyle.copyWith(color: hintColor),
                     prefixIcon: prefix,
                     suffixIcon: suffix,
                     border: InputBorder.none,
@@ -138,6 +141,7 @@ class AdaptiveTextField extends StatelessWidget {
         prefixIcon: prefix,
         suffixIcon: suffix,
       ),
+      style: style,
       keyboardType: keyboardType,
       obscureText: obscureText,
       onChanged: onChanged,

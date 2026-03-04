@@ -834,6 +834,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noMatchingUsers => 'Подходящих пользователей нет';
 
   @override
+  String get noMatchingEquipment => 'Подходящего оборудования нет';
+
+  @override
   String get instructions => 'Инструкции';
 
   @override

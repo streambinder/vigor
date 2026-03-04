@@ -820,6 +820,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noMatchingUsers => '没有匹配的用户';
 
   @override
+  String get noMatchingEquipment => '没有匹配的器材';
+
+  @override
   String get instructions => '说明';
 
   @override

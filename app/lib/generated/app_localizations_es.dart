@@ -843,6 +843,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noMatchingUsers => 'No hay usuarios coincidentes';
 
   @override
+  String get noMatchingEquipment => 'No hay equipamiento coincidente';
+
+  @override
   String get instructions => 'Instrucciones';
 
   @override

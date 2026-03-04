@@ -836,6 +836,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noMatchingUsers => 'No matching users';
 
   @override
+  String get noMatchingEquipment => 'No matching equipment';
+
+  @override
   String get instructions => 'Instructions';
 
   @override

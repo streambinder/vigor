@@ -10,7 +10,14 @@ EquipmentItem _$EquipmentItemFromJson(Map<String, dynamic> json) =>
     EquipmentItem(
       id: json['id'] as String? ?? '',
       isWeighted: json['is_weighted'] as bool,
+      aliases: (json['aliases'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
     );
 
 Map<String, dynamic> _$EquipmentItemToJson(EquipmentItem instance) =>
-    <String, dynamic>{'id': instance.id, 'is_weighted': instance.isWeighted};
+    <String, dynamic>{
+      'id': instance.id,
+      'is_weighted': instance.isWeighted,
+      'aliases': instance.aliases,
+    };

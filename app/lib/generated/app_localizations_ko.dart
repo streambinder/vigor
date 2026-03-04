@@ -820,6 +820,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get noMatchingUsers => '일치하는 사용자가 없습니다';
 
   @override
+  String get noMatchingEquipment => '일치하는 장비가 없습니다';
+
+  @override
   String get instructions => '지침';
 
   @override

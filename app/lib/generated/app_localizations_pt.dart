@@ -839,6 +839,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noMatchingUsers => 'Nenhum utilizador correspondente';
 
   @override
+  String get noMatchingEquipment => 'Nenhum equipamento correspondente';
+
+  @override
   String get instructions => 'Instruções';
 
   @override

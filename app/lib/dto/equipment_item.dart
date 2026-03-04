@@ -11,10 +11,13 @@ class EquipmentItem {
   final String id;
   @JsonKey(name: 'is_weighted')
   final bool isWeighted;
+  @JsonKey(name: 'aliases')
+  final List<String>? aliases;
 
   EquipmentItem({
     required this.id,
     required this.isWeighted,
+    this.aliases,
   });
 
   factory EquipmentItem.fromJson(Map<String, dynamic> json) => _$EquipmentItemFromJson(json);

@@ -1632,6 +1632,12 @@ abstract class AppLocalizations {
   /// **'No matching users'**
   String get noMatchingUsers;
 
+  /// No description provided for @noMatchingEquipment.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching equipment'**
+  String get noMatchingEquipment;
+
   /// No description provided for @instructions.
   ///
   /// In en, this message translates to:

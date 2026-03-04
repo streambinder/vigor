@@ -285,6 +285,7 @@
   "searchByName": "Rechercher par nom",
   "noUsersAvailable": "Aucun utilisateur disponible",
   "noMatchingUsers": "Aucun utilisateur correspondant",
+  "noMatchingEquipment": "Aucun équipement correspondant",
 
   "instructions": "Instructions",
   "cues": "Conseils",

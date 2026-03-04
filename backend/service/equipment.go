@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/lib/pq"
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/model"
 )
@@ -12,17 +13,18 @@ const WeightModifier = "weight"
 type EquipmentItem struct {
 	ID         string
 	IsWeighted bool
+	Aliases    pq.StringArray
 }
 
 // GetEquipment returns all available equipment and modifier items with metadata.
 func GetEquipment() ([]EquipmentItem, error) {
 	var equipment []model.Equipment
-	if err := database.Knowledge.Select("id").Find(&equipment).Error; err != nil {
+	if err := database.Knowledge.Select("id", "aliases").Find(&equipment).Error; err != nil {
 		return nil, err
 	}
 
 	var modifiers []model.Modifier
-	if err := database.Knowledge.Select("id", "is_weighted").Find(&modifiers).Error; err != nil {
+	if err := database.Knowledge.Select("id", "is_weighted", "aliases").Find(&modifiers).Error; err != nil {
 		return nil, err
 	}
 
@@ -31,13 +33,13 @@ func GetEquipment() ([]EquipmentItem, error) {
 		if e.ID == PartnerEquipment {
 			continue
 		}
-		items = append(items, EquipmentItem{ID: e.ID, IsWeighted: false})
+		items = append(items, EquipmentItem{ID: e.ID, IsWeighted: false, Aliases: e.Aliases})
 	}
 	for _, m := range modifiers {
 		if m.ID == WeightModifier {
 			continue
 		}
-		items = append(items, EquipmentItem{ID: m.ID, IsWeighted: m.IsWeighted})
+		items = append(items, EquipmentItem{ID: m.ID, IsWeighted: m.IsWeighted, Aliases: m.Aliases})
 	}
 
 	return items, nil

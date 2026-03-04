@@ -422,6 +422,7 @@
   "searchByName": "Search by name",
   "noUsersAvailable": "No users available",
   "noMatchingUsers": "No matching users",
+  "noMatchingEquipment": "No matching equipment",
 
   "instructions": "Instructions",
   "cues": "Cues",

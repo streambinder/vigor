@@ -844,6 +844,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noMatchingUsers => 'Aucun utilisateur correspondant';
 
   @override
+  String get noMatchingEquipment => 'Aucun équipement correspondant';
+
+  @override
   String get instructions => 'Instructions';
 
   @override
