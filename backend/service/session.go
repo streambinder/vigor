@@ -99,6 +99,12 @@ func Unregister(userID uuid.UUID) error {
 	deletions := []struct {
 		model any
 	}{
+		{&model.TrainingFeedback{}},
+		{&model.Proficiency{}},
+		{&model.Report{}},
+		{&model.Avatar{}},
+		{&model.HealthMetric{}},
+		{&model.HealthExerciseSession{}},
 		{&model.Partner{}},
 		{&model.Training{}},
 		{&model.Gym{}},

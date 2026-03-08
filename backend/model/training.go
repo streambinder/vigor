@@ -107,10 +107,11 @@ type ExerciseSelection struct {
 // TrainingReasoning captures the model's thought process before generating training structure.
 // Simplified to reduce token usage while preserving essential planning information.
 type TrainingReasoning struct {
-	Constraints []string              `json:"constraints" prompt:"Active constraints (injuries, equipment, time)"`
-	Strategy    string                `json:"strategy" prompt:"1-2 sentence approach: methodology choice + how it serves goals"`
-	Adjustments []ProgressionAdjustment `json:"adjustments" prompt:"Feedback-driven changes (empty array if none)"`
-	Exercises   []ExerciseSelection   `json:"exercises" prompt:"Selected exercises with rationale"`
+	Constraints      []string              `json:"constraints" prompt:"Active constraints (injuries, equipment, time)"`
+	Strategy         string                `json:"strategy" prompt:"1-2 sentence approach: methodology choice + how it serves goals"`
+	Adjustments      []ProgressionAdjustment `json:"adjustments" prompt:"Feedback-driven changes (empty array if none)"`
+	Exercises        []ExerciseSelection   `json:"exercises" prompt:"Selected exercises with rationale"`
+	HealthAdjustment string                `json:"health_adjustment" prompt:"Brief explanation if health data influenced training design; empty if not"`
 }
 
 // TrainingFeedback captures per-user structured feedback for a completed training.
@@ -155,6 +156,8 @@ type Training struct {
 
 	CompletedAt *time.Time `json:"completed_at" prompt:"-"`
 	CompletedIn *int       `json:"completed_in" prompt:"-"`
+	HealthInfluenced bool  `json:"health_influenced" prompt:"-"`
+	HasHealthSession bool  `gorm:"-" json:"has_health_session" prompt:"-"`
 	CreatedAt   time.Time  `json:"created_at" prompt:"-"`
 	UpdatedAt   time.Time  `json:"-"`
 

@@ -1,6 +1,8 @@
 import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
@@ -10,6 +12,7 @@ import '../models/weekly_target.dart';
 import '../models/week_progress.dart';
 import '../models/week_summary.dart';
 import '../providers/auth_provider.dart';
+import '../services/preferences_service.dart';
 import '../services/secure_storage_service.dart';
 import '../utils/knowledge_labels.dart';
 import '../widgets/adaptive/adaptive.dart';
@@ -19,6 +22,7 @@ import '../models/training.dart';
 import '../services/progress_service.dart';
 import '../services/service_locator.dart';
 import '../widgets/vigor_logo.dart';
+import 'health_permissions_screen.dart';
 import 'training_details_screen.dart';
 
 class HomePage extends StatefulWidget {
@@ -31,6 +35,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   Progress? _progress;
   WeeklyTarget? _weeklyTarget;
+  Map<String, dynamic>? _healthDaily;
   bool _isLoading = false;
   bool _hasLoadedOnce = false;
   bool _consumedInitialData = false;
@@ -42,6 +47,7 @@ class _HomePageState extends State<HomePage> {
     if (serviceLocator.initialDataLoaded) {
       _progress = serviceLocator.initialProgress;
       _weeklyTarget = serviceLocator.initialWeeklyTarget;
+      _healthDaily = serviceLocator.healthDailyNotifier.value;
       _hasLoadedOnce = true;
       serviceLocator.initialProgress = null;
       serviceLocator.initialWeeklyTarget = null;
@@ -69,10 +75,17 @@ class _HomePageState extends State<HomePage> {
     }
 
     try {
-      final results = await Future.wait([
+      final prefs = context.read<PreferencesService>();
+      final locator = context.read<ServiceLocator>();
+      final futures = <Future>[
         progressService.getProgress(),
         progressService.getWeeklyTarget(),
-      ]);
+      ];
+      if (prefs.hcConnected) {
+        futures.add(locator.trainingService.getHealthDaily());
+      }
+
+      final results = await Future.wait(futures);
 
       if (mounted) {
         final progressResponse = results[0];
@@ -84,6 +97,10 @@ class _HomePageState extends State<HomePage> {
           }
           if (weeklyTargetResponse.isSuccess) {
             _weeklyTarget = weeklyTargetResponse.data as WeeklyTarget?;
+          }
+          if (prefs.hcConnected && results.length > 2 && results[2].isSuccess) {
+            _healthDaily = results[2].data as Map<String, dynamic>?;
+            locator.healthDailyNotifier.value = _healthDaily;
           }
           _isLoading = false;
         });
@@ -186,11 +203,23 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
           child: _buildCalibrationCard(l10n, families),
         ),
+      // health onboarding card — post-first-training, non-blocking
+      if (_shouldShowHealthOnboarding())
+        Padding(
+          padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+          child: _buildHealthOnboardingCard(l10n),
+        ),
       // weekly target card
       if (_weeklyTarget != null && _weeklyTarget!.goals.isNotEmpty)
         Padding(
           padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
           child: _buildWeeklyTargetCard(context, l10n, _weeklyTarget!),
+        ),
+      // health metrics card — only when HC connected and data exists
+      if (_healthDaily != null && _hasHealthMetrics())
+        Padding(
+          padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+          child: _buildHealthMetricsCard(l10n),
         ),
       // muscle map section
       Padding(
@@ -209,6 +238,284 @@ class _HomePageState extends State<HomePage> {
       itemCount: sections.length,
       itemBuilder: (context, index) => sections[index],
     );
+  }
+
+  bool _shouldShowHealthOnboarding() {
+    final locator = context.read<ServiceLocator>();
+    final prefs = context.read<PreferencesService>();
+    // don't show if no health service (web), already connected, or recently dismissed
+    if (locator.healthDataService == null) return false;
+    if (prefs.hcConnected) return false;
+    if (prefs.hcOnboardingRecentlyDismissed) return false;
+    return true;
+  }
+
+  Widget _buildHealthOnboardingCard(AppLocalizations l10n) {
+    final accentColor = VigorColors.indigoAdaptive(context);
+    return AdaptiveCard(
+      padding: VigorSpacing.paddingLg,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.monitor_heart_outlined, size: 22, color: accentColor),
+              const SizedBox(width: VigorSpacing.sm),
+              Expanded(
+                child: Text(
+                  l10n.healthOnboardingTitle,
+                  style: VigorTypography.headline.copyWith(fontSize: 16, color: VigorColors.textPrimary(context)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: VigorSpacing.sm),
+          Text(
+            l10n.healthOnboardingDescription,
+            style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context), fontSize: 13),
+          ),
+          const SizedBox(height: VigorSpacing.md),
+          Row(
+            children: [
+              Material(
+                color: accentColor,
+                borderRadius: VigorRadius.radiusSm,
+                child: InkWell(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const HealthPermissionsScreen()),
+                  ),
+                  borderRadius: VigorRadius.radiusSm,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
+                    child: Text(
+                      l10n.healthOnboardingConnect,
+                      style: VigorTypography.label.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: VigorSpacing.sm),
+              TextButton(
+                onPressed: () async {
+                  final prefs = context.read<PreferencesService>();
+                  await prefs.setHcOnboardingDismissedMs(DateTime.now().millisecondsSinceEpoch);
+                  if (mounted) setState(() {});
+                },
+                child: Text(l10n.healthOnboardingDismiss, style: TextStyle(color: VigorColors.stone)),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _hasHealthMetrics() {
+    final metrics = _healthDaily?['metrics'] as List?;
+    if (metrics == null || metrics.isEmpty) return false;
+    final today = metrics.first as Map<String, dynamic>;
+    return (today['sleep_hours'] as num? ?? 0) > 0 ||
+        (today['resting_hr'] as num? ?? 0) > 0 ||
+        (today['hrv_rmssd'] as num? ?? 0) > 0 ||
+        (today['steps'] as num? ?? 0) > 0 ||
+        (today['active_calories'] as num? ?? 0) > 0;
+  }
+
+  Widget _buildHealthMetricsCard(AppLocalizations l10n) {
+    final metrics = _healthDaily!['metrics'] as List;
+    final today = metrics.first as Map<String, dynamic>;
+
+    final sleepHours = (today['sleep_hours'] as num?)?.toDouble() ?? 0;
+    final sleepDeep = (today['sleep_deep_hours'] as num?)?.toDouble() ?? 0;
+    final sleepLight = (today['sleep_light_hours'] as num?)?.toDouble() ?? 0;
+    final sleepREM = (today['sleep_rem_hours'] as num?)?.toDouble() ?? 0;
+    final restingHR = (today['resting_hr'] as num?)?.toInt() ?? 0;
+    final hrv = (today['hrv_rmssd'] as num?)?.toDouble() ?? 0;
+    final steps = (today['steps'] as num?)?.toInt() ?? 0;
+    final calories = (today['active_calories'] as num?)?.toDouble() ?? 0;
+
+    // build tiles, omitting zero values
+    final tiles = <Widget>[];
+    if (sleepHours > 0) {
+      tiles.add(_buildSleepTile(l10n, sleepHours, sleepDeep, sleepLight, sleepREM));
+    }
+    if (restingHR > 0) tiles.add(_buildMetricTile(l10n.healthDailyRestingHr, '$restingHR', 'bpm'));
+    if (hrv > 0) tiles.add(_buildMetricTile(l10n.healthDailyHrv, '${hrv.toInt()}', 'ms'));
+    if (steps > 0) tiles.add(_buildMetricTile(l10n.healthDailySteps, _formatSteps(steps), ''));
+    if (calories > 0) tiles.add(_buildMetricTile(l10n.healthDailyCalories, '${calories.toInt()}', 'kcal'));
+
+    // collect steps from last 7 days for sparkline
+    final stepsHistory = <int>[];
+    for (final m in metrics) {
+      stepsHistory.add(((m as Map<String, dynamic>)['steps'] as num?)?.toInt() ?? 0);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.monitor_heart, size: 24, color: VigorColors.stone),
+            const SizedBox(width: VigorSpacing.sm),
+            Text(
+              l10n.healthMetrics,
+              style: VigorTypography.headline.copyWith(
+                fontSize: 18,
+                color: VigorColors.textPrimary(context),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: VigorSpacing.sm),
+        AdaptiveCard(
+          padding: VigorSpacing.paddingMd,
+          child: Column(
+            children: [
+              Wrap(
+                spacing: VigorSpacing.md,
+                runSpacing: VigorSpacing.md,
+                children: tiles,
+              ),
+              // 7-day steps sparkline
+              if (stepsHistory.any((s) => s > 0)) ...[
+                const SizedBox(height: VigorSpacing.md),
+                SizedBox(
+                  height: 48,
+                  child: _buildStepsSparkline(stepsHistory.reversed.toList()),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetricTile(String label, String value, String unit) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(value, style: VigorTypography.data.copyWith(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: VigorColors.textPrimary(context),
+            )),
+            if (unit.isNotEmpty) ...[
+              const SizedBox(width: 2),
+              Text(unit, style: VigorTypography.caption.copyWith(
+                color: VigorColors.textSecondary(context),
+                fontSize: 10,
+              )),
+            ],
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(label, style: VigorTypography.caption.copyWith(
+          color: VigorColors.textSecondary(context),
+        )),
+      ],
+    );
+  }
+
+  Widget _buildSleepTile(AppLocalizations l10n, double hours, double deep, double light, double rem) {
+    final total = deep + light + rem;
+    // only show breakdown bar if stages sum to something meaningful
+    final hasBreakdown = total > 0;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(hours.toStringAsFixed(1), style: VigorTypography.data.copyWith(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: VigorColors.textPrimary(context),
+            )),
+            const SizedBox(width: 2),
+            Text('h', style: VigorTypography.caption.copyWith(
+              color: VigorColors.textSecondary(context),
+              fontSize: 10,
+            )),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(l10n.healthDailySleep, style: VigorTypography.caption.copyWith(
+          color: VigorColors.textSecondary(context),
+        )),
+        if (hasBreakdown) ...[
+          const SizedBox(height: 4),
+          SizedBox(
+            width: 48,
+            height: 4,
+            child: ClipRRect(
+              borderRadius: VigorRadius.radiusFull,
+              child: Row(
+                children: [
+                  Expanded(flex: (deep / total * 100).round().clamp(1, 100), child: Container(color: VigorColors.indigo)),
+                  Expanded(flex: (light / total * 100).round().clamp(1, 100), child: Container(color: VigorColors.indigoLight)),
+                  Expanded(flex: (rem / total * 100).round().clamp(1, 100), child: Container(color: VigorColors.persimmon)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildStepsSparkline(List<int> steps) {
+    final maxVal = steps.reduce((a, b) => a > b ? a : b);
+    if (maxVal == 0) return const SizedBox.shrink();
+    final locale = Localizations.localeOf(context).toString();
+    final now = DateTime.now();
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: List.generate(steps.length, (i) {
+        final fraction = steps[i] / maxVal;
+        final day = now.subtract(Duration(days: steps.length - 1 - i));
+        final dayLetter = DateFormat.E(locale).format(day)[0].toUpperCase();
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 1.5),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: FractionallySizedBox(
+                    heightFactor: fraction.clamp(0.05, 1.0),
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: VigorColors.persimmon.withValues(alpha: 0.3 + 0.7 * fraction),
+                        borderRadius: VigorRadius.radiusXs,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(dayLetter, style: VigorTypography.caption.copyWith(
+                  fontSize: 9,
+                  color: VigorColors.stone,
+                )),
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  String _formatSteps(int steps) {
+    if (steps >= 1000) return '${(steps / 1000).toStringAsFixed(1)}k';
+    return '$steps';
   }
 
   Widget _buildPendingFeedbackCard(AppLocalizations l10n) {
@@ -738,7 +1045,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildWeekDays(BuildContext context, List<int> completedDays) {
-    const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    final locale = Localizations.localeOf(context).toString();
+    // generate localized single-letter weekday labels starting from Monday
+    final dayLetters = List.generate(7, (i) {
+      // DateTime weekday: 1=Mon...7=Sun; find a known Monday and offset
+      final monday = DateTime(2024, 1, 1); // 2024-01-01 is a Monday
+      return DateFormat.E(locale).format(monday.add(Duration(days: i)))[0].toUpperCase();
+    });
     final today = (DateTime.now().weekday - 1) % 7;
 
     return Row(
@@ -749,25 +1062,26 @@ class _HomePageState extends State<HomePage> {
         final isPast = i < today;
 
         return Container(
-          width: 32,
-          height: 32,
+          width: 24,
+          height: 24,
           decoration: BoxDecoration(
             color: isCompleted
                 ? VigorColors.persimmon
                 : isToday
                     ? VigorColors.surface(context)
                     : Colors.transparent,
-            borderRadius: VigorRadius.radiusSm,
+            shape: BoxShape.circle,
             border: isToday && !isCompleted
                 ? Border.all(color: VigorColors.stone)
                 : null,
           ),
           child: Center(
             child: isCompleted
-                ? const Icon(Icons.check, size: 16, color: Colors.white)
+                ? const Icon(Icons.check, size: 12, color: Colors.white)
                 : Text(
-                    days[i],
+                    dayLetters[i],
                     style: VigorTypography.caption.copyWith(
+                      fontSize: 10,
                       color: isPast && !isCompleted
                           ? VigorColors.stone.withValues(alpha: 0.5)
                           : VigorColors.textSecondary(context),
@@ -1401,7 +1715,9 @@ class _WeeklyTargetModal extends StatelessWidget {
   }
 
   Widget _buildWeekCalendar(BuildContext context, WeekProgress week) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final locale = Localizations.localeOf(context).toString();
+    final monday = DateTime(2024, 1, 1);
+    final days = List.generate(7, (i) => DateFormat.E(locale).format(monday.add(Duration(days: i))));
     final today = (DateTime.now().weekday - 1) % 7;
 
     return Row(

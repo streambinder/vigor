@@ -1,17 +1,13 @@
 {
   "@@locale": "ru",
-
   "appName": "Vigor",
   "appTagline": "Ex Sapientia Vis",
-
   "navHome": "Главная",
   "navActivity": "Активность",
   "navProfile": "Профиль",
-
   "storageErrorTitle": "Vigor - Ошибка хранилища",
   "storageUnavailable": "Хранилище недоступно",
   "storageErrorMessage": "Требуется безопасное хранилище. Проверьте настройки.",
-
   "signInWithGoogle": "Войти через Google",
   "signingIn": "Вход...",
   "failedToInitializeGoogleSignIn": "Не удалось инициализировать Google Sign In",
@@ -20,18 +16,15 @@
   "failedToGetAuthToken": "Не удалось получить токен аутентификации",
   "errorProcessingSignIn": "Ошибка обработки входа: {message}",
   "googleSignInInitializing": "Google Sign In всё ещё инициализируется...",
-
   "readyToTrain": "Готовы тренироваться?",
   "generateTrainingDescription": "Создайте тренировку под ваши цели",
   "generateTraining": "Создать Тренировку",
-
   "refresh": "Обновить",
   "logout": "Выйти",
   "userDataRefreshed": "Данные пользователя обновлены",
   "editProfile": "Редактировать Профиль",
   "settings": "Настройки",
   "other": "Прочее",
-
   "deleteGym": "Удалить Зал",
   "deleteGymConfirmation": "Удалить \"{name}\"?",
   "cancel": "Отмена",
@@ -41,7 +34,6 @@
   "deleteAccountConfirmation": "Удалить аккаунт? Это необратимо.",
   "accountDeletedSuccessfully": "Аккаунт успешно удалён",
   "failedToDeleteAccount": "Не удалось удалить аккаунт",
-
   "failedToLoadGyms": "Не удалось загрузить залы",
   "gymAddedSuccessfully": "Зал успешно добавлен",
   "failedToAddGym": "Не удалось добавить зал",
@@ -49,7 +41,6 @@
   "failedToUpdateGym": "Не удалось обновить зал",
   "gymDeletedSuccessfully": "Зал успешно удалён",
   "failedToDeleteGym": "Не удалось удалить зал",
-
   "birthdate": "Дата рождения",
   "gender": "Пол",
   "language": "Язык",
@@ -59,7 +50,6 @@
   "weightUnit": "кг",
   "heightWithUnit": "{value} см",
   "weightWithUnit": "{value} кг",
-
   "goals": "Цели",
   "injuries": "Травмы",
   "limitations": "Ограничения",
@@ -71,7 +61,6 @@
   "equipment": "Оборудование",
   "startedDate": "Начало: {date}",
   "yearLabel": "Год: {year}",
-
   "myGyms": "Залы",
   "addGym": "Добавить Зал",
   "noGymsAddedYet": "Залы ещё не добавлены",
@@ -79,10 +68,8 @@
   "removeDefault": "Убрать по Умолчанию",
   "setAsDefault": "Установить по Умолчанию",
   "edit": "Редактировать",
-
   "quickActions": "Быстрые Действия",
   "dangerZone": "Опасная Зона",
-
   "completeYourProfile": "Заполните Свой Профиль",
   "updateYourProfileInfo": "Обновите свой профиль ниже.",
   "pleaseCompleteProfile": "Заполните профиль. * = обязательно.",
@@ -94,13 +81,11 @@
   "selectLanguage": "Выберите язык",
   "heightCm": "Рост (см)",
   "weightKg": "Вес (кг)",
-
   "required": "Обязательно",
   "invalid": "Недействительно",
   "pleaseSelectBirthDate": "Пожалуйста, выберите дату рождения",
   "pleaseAddAtLeastOneGoal": "Пожалуйста, добавьте хотя бы одну цель",
   "pleaseSelectLanguage": "Пожалуйста, выберите язык",
-
   "addAGoal": "Добавить цель",
   "injuryDescription": "Описание травмы",
   "year": "Год",
@@ -108,10 +93,8 @@
   "addACondition": "Добавить состояние",
   "favoriteExercisesHint": "напр. приседания, подтягивания, бег",
   "favoriteEquipmentHint": "напр. гантели, штанга, гиря",
-
   "saveChanges": "Сохранить Изменения",
   "saveProfile": "Сохранить Профиль",
-
   "optionalLeaveEmpty": "(Необязательно)",
   "optionalExercisesPrefer": "(Необязательно)",
   "optionalEquipmentPrefer": "(Необязательно)",
@@ -137,16 +120,13 @@
   "workoutTypeEnduranceDescription": "Продолжительная нагрузка умеренной интенсивности для аэробной способности",
   "workoutTypeMobility": "Мобильность",
   "workoutTypeMobilityDescription": "Улучшите диапазон движений и здоровье суставов",
-
   "methodologyOptional": "Методология (необязательно)",
   "methodologyAuto": "Авто",
   "goalsOptional": "Цели (необязательно)",
   "musclesOptional": "Мышцы (необязательно)",
   "musclesAuto": "Все",
   "advancedSettings": "Дополнительно",
-
   "failedToUpdateProfile": "Не удалось обновить профиль",
-
   "activity": "Активность",
   "noTrainingsYet": "Тренировок пока нет",
   "generateFirstTraining": "Создайте первую тренировку из Главной",
@@ -167,7 +147,6 @@
   "durationHrMin": "{hours} ч {minutes} мин",
   "failedToLoadTrainings": "Не удалось загрузить тренировки",
   "startTraining": "Начать Тренировку",
-
   "cloneTraining": "Клонировать Тренировку",
   "addPartner": "Добавить Партнёра",
   "shareWithUser": "Поделиться с Пользователем",
@@ -175,13 +154,11 @@
   "leaveTraining": "Покинуть Тренировку",
   "showAiReasoning": "Показать рассуждения ИИ",
   "reportIssue": "Сообщить о проблеме",
-
   "deleteTrainingConfirmation": "Удалить \"{name}\"? Это необратимо.",
   "leaveTrainingConfirmation": "Покинуть \"{name}\"? Вы больше не увидите её.",
   "addPartnerConfirmation": "Добавить {userName} как партнёра к \"{trainingName}\"?",
   "cloneTrainingConfirmation": "Клонировать \"{name}\" в ваши тренировки?",
   "shareTrainingConfirmation": "Поделиться \"{trainingName}\" с {userName}?",
-
   "trainingDeletedSuccessfully": "Тренировка успешно удалена",
   "failedToDeleteTraining": "Не удалось удалить тренировку",
   "leftTrainingSuccessfully": "Тренировка успешно покинута",
@@ -201,7 +178,6 @@
   "shuffleExercise": "Сменить упражнение",
   "exerciseShuffled": "Упражнение изменено",
   "failedToShuffleExercise": "Не удалось сменить упражнение",
-
   "reasoning": "Рассуждение",
   "strategy": "Стратегия",
   "typeSelection": "Выбор Типа",
@@ -210,7 +186,6 @@
   "researchApplied": "Применённые Исследования",
   "targetMuscles": "Целевые Мышцы",
   "naming": "Наименование",
-
   "trainingRoutines": "Тренировка",
   "noEquipment": "Без оборудования",
   "blockNumber": "Блок {number}",
@@ -232,7 +207,6 @@
   "clone": "Клонировать",
   "share": "Поделиться",
   "leave": "Покинуть",
-
   "tapToStart": "Нажмите, чтобы начать",
   "tapWhenDone": "Нажмите, когда закончите",
   "trainingCompleted": "Тренировка Завершена!",
@@ -241,14 +215,11 @@
   "complete": "Завершить",
   "routineCounter": "Программа {current}/{total}",
   "blockCounter": "Блок {current}/{total}",
-
   "exitTraining": "Выйти из Тренировки?",
   "whatWouldYouLikeToDo": "Что делать?",
   "exit": "Выйти",
   "continueTraining": "Продолжить",
-
   "failedToMarkComplete": "Не удалось завершить тренировку",
-
   "durationMinutes": "Продолжительность (минуты)",
   "bodyweight": "С собственным весом",
   "gym": "Зал",
@@ -263,14 +234,12 @@
   "customPromptOptional": "Пользовательский Запрос (необязательно)",
   "focusOnUpperBody": "напр. Сосредоточиться на верхней части тела",
   "trainingPartnersOptional": "Партнёр",
-
   "generatingTraining": "Создаём вашу тренировку...",
   "thisMayTakeAMoment": "Это может занять некоторое время",
   "generationFailedRetrying": "Генерация не удалась, попытка #{attempt}...",
   "trainingGeneratedSuccessfully": "Тренировка успешно создана!",
   "failedToGenerateTraining": "Не удалось создать тренировку",
   "generate": "Создать",
-
   "editGym": "Редактировать Зал",
   "gymName": "Название Зала",
   "gymNamePlaceholder": "напр. Домашний Зал, World Class",
@@ -280,16 +249,13 @@
   "pleaseEnterGymName": "Пожалуйста, введите название зала",
   "addAllEquipment": "Добавить Все",
   "failedToLoadEquipment": "Не удалось загрузить оборудование",
-
   "selectUser": "Выбрать Пользователя",
   "searchByName": "Поиск по имени",
   "noUsersAvailable": "Пользователи недоступны",
   "noMatchingUsers": "Подходящих пользователей нет",
   "noMatchingEquipment": "Подходящего оборудования нет",
-
   "instructions": "Инструкции",
   "cues": "Подсказки",
-
   "howWasYourTraining": "Как прошла тренировка?",
   "anyAdditionalComments": "Дополнительные комментарии?",
   "actualDuration": "Фактическая длительность (мин)",
@@ -299,9 +265,7 @@
   "easy": "Легко",
   "tooEasy": "Слишком легко",
   "flag": "Отметить",
-
   "profile": "Профиль",
-
   "languageEnglish": "English",
   "languageItaliano": "Italiano",
   "languageEspanol": "Español",
@@ -312,11 +276,9 @@
   "languageChinese": "中文",
   "languageJapanese": "日本語",
   "languageKorean": "한국어",
-
   "nextExercise": "Далее: {name}",
   "rest": "Отдых",
   "upcoming": "Предстоящие",
-
   "yourProgress": "Ваш прогресс",
   "trainingsCompleted": "{count} тренировок завершено",
   "completedTrainings": "завершённых тренировок",
@@ -340,23 +302,19 @@
   "heatWarm": "Тёплый",
   "heatHot": "Горячий",
   "noTrainingsCompletedYet": "Начни тренироваться, чтобы увидеть что-то здесь",
-
   "theme": "Тема",
   "themeAuto": "Авто",
   "themeLight": "Светлая",
   "themeDark": "Тёмная",
   "themeAutoDescription": "Следовать настройкам системы",
   "appearance": "Внешний вид",
-
   "trainingDefaults": "По умолчанию",
   "defaultDuration": "Длительность тренировки",
   "warmupCooldown": "Разминка и заминка",
-
   "timer": "Таймер",
   "intervalJingle": "Свисток при смене интервала",
   "duckOtherAudio": "Приглушить другое аудио",
   "duckOtherAudioDescription": "Уменьшает громкость музыки и других приложений во время свистка",
-
   "goalHypertrophy": "Набор массы",
   "goalHypertrophyDescription": "Наращивайте мышечную массу с силовыми тренировками",
   "goalFatLoss": "Сжигание жира",
@@ -373,7 +331,6 @@
   "goalFlexibilityDescription": "Улучшите подвижность с растяжкой и мобильностью",
   "goalSports": "Спортивные результаты",
   "goalSportsDescription": "Улучшите атлетические способности с силой и ловкостью",
-
   "thisWeek": "Эта неделя",
   "trainingPlan": "План тренировок",
   "sessionsPerWeek": "Тренировок в неделю",
@@ -386,7 +343,6 @@
   "daysLeft": "{count} дней осталось",
   "recommended": "Рекомендуется",
   "duration": "Продолжительность",
-
   "familyHorizontalPush": "Жим",
   "familyHorizontalPull": "Тяга",
   "familyVerticalPush": "Жим вверх",
@@ -398,13 +354,11 @@
   "familyCardio": "Кардио",
   "familyMobility": "Мобильность",
   "familyBalance": "Баланс",
-
   "trainingQuality": "Как вам эта тренировка?",
   "trainingQualityHint": "Помогает нам оценить качество сгенерированной тренировки",
   "qualityReasonHint": "Что можно улучшить?",
   "good": "Хорошо",
   "bad": "Плохо",
-
   "loadingMsg1": "Анализ вашего профиля...",
   "loadingMsg2": "Подбор упражнений...",
   "loadingMsg3": "Построение программы...",
@@ -425,7 +379,6 @@
   "loadingMsg18": "Оценка распределения нагрузки...",
   "loadingMsg19": "Персонализация тренировки...",
   "loadingMsg20": "Почти готово...",
-
   "loadingMsgGoal": "Оптимизация для {goal}...",
   "loadingMsgInjuries": "Адаптация с учётом травм...",
   "loadingMsgFavorites": "Приоритет любимым упражнениям...",
@@ -434,27 +387,38 @@
   "loadingMsgPartners": "Координация парной тренировки...",
   "loadingMsgGym": "Загрузка оборудования {gym}...",
   "loadingMsgHistory": "Анализ последних тренировок...",
-
   "loadingRetryMsg1": "хмм, не получилось — пробую снова",
   "loadingRetryMsg2": "попробую ещё раз...",
   "loadingRetryMsg3": "не совсем — ещё одна попытка",
   "loadingRetryMsg4": "ещё одна попытка, подождите",
   "loadingRetryMsg5": "ой, перекалибровка...",
   "loadingRetryMsg6": "почти получилось — пробую снова",
-
   "nSelected": "{count} выбрано",
-  "@nSelected": { "placeholders": { "count": { "type": "int" } } },
+  "@nSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "deleteSelectedTrainings": "Удалить {count} тренировок?",
-  "@deleteSelectedTrainings": { "placeholders": { "count": { "type": "int" } } },
+  "@deleteSelectedTrainings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "trainingsDeletedSuccessfully": "Тренировки успешно удалены",
-
   "shareByLink": "Share Link",
   "addToMyTrainings": "Add to My Trainings",
   "goToTraining": "Go to Training",
   "sharedBy": "Shared by {name}",
   "@sharedBy": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "linkCopied": "Link copied to clipboard",
@@ -464,7 +428,6 @@
   "loginToAdd": "Log in to add this training",
   "pendingFeedbacks": "Ожидающие отзывы",
   "pendingFeedbacksDescription": "Некоторые ваши тренировки отмечены как завершённые, но не имеют вашего отзыва. Отзывы помогают улучшить рекомендации для будущих тренировок.",
-
   "equipmentPartner": "Партнёр",
   "equipmentBalanceBoard": "Балансборд",
   "equipmentBand": "Резинка",
@@ -500,7 +463,6 @@
   "equipmentTrx": "TRX",
   "equipmentUpperBodyErgometer": "Ручной эргометр",
   "equipmentWheelRoller": "Ролик для пресса",
-
   "muscleChest": "Грудь",
   "muscleBack": "Спина",
   "muscleShoulders": "Плечи",
@@ -508,7 +470,6 @@
   "muscleCore": "Корпус",
   "muscleGlutes": "Ягодицы",
   "muscleLegs": "Ноги",
-
   "modifierWeightedVest": "Утяжелённый жилет",
   "modifierParallettes": "Паралетсы",
   "modifierAnkleWeights": "Утяжелители для ног",
@@ -516,5 +477,63 @@
   "modifierPushUpBars": "Упоры для отжиманий",
   "modifierResistanceBands": "Резинки для фитнеса",
   "modifierWeight": "Вес",
-  "modifierWristWeights": "Утяжелители для рук"
+  "modifierWristWeights": "Утяжелители на запястья",
+  "avgHr": "Ср. пульс",
+  "bpm": "уд/мин",
+  "failedToDisconnectHealth": "Не удалось отключить данные о здоровье",
+  "healthAdjustment": "Корректировка по здоровью",
+  "healthMetrics": "Данные здоровья",
+  "healthBuildingBaselines": "Создание ваших личных показателей ({days}/14 дней)",
+  "@healthBuildingBaselines": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "healthConnect": "Подключить",
+  "healthConnected": "Подключено",
+  "healthData": "Данные о здоровье",
+  "healthDisconnect": "Отключить и удалить данные",
+  "healthDisconnectConfirmation": "Отключить данные о здоровье? Все синхронизированные данные будут удалены. Это действие необратимо.",
+  "healthDisconnectedSuccessfully": "Данные о здоровье отключены",
+  "healthInstallHc": "Установить Health Connect",
+  "healthInstallHcDescription": "Health Connect необходим для синхронизации данных с носимого устройства. Установите его из Play Store.",
+  "healthInstallHcTitle": "Требуется Health Connect",
+  "healthNotConnected": "Не подключено",
+  "healthOnboardingConnect": "Подключить",
+  "healthOnboardingDescription": "Подключите данные о здоровье, и Vigor адаптирует тренировки к вашему сну, восстановлению и активности.",
+  "healthOnboardingDismiss": "Может быть позже",
+  "healthOnboardingTitle": "Подключите устройство",
+  "healthPermissionsDenied": "Разрешения не были предоставлены",
+  "healthPermissionsDescription": "Vigor читает ваши данные о здоровье для персонализации тренировок. Лучшие данные о сне, восстановлении и активности — более умные рекомендации.",
+  "healthPermissionsGrant": "Подключить данные о здоровье",
+  "healthPermissionsGranted": "Данные о здоровье подключены",
+  "healthPermissionsHrv": "Вариабельность сердечного ритма (ВСР)",
+  "healthPermissionsReadOnly": "Только чтение",
+  "healthPermissionsRhr": "Пульс в покое",
+  "healthPermissionsSkip": "Не сейчас",
+  "healthPermissionsSleep": "Продолжительность и фазы сна",
+  "healthPermissionsSteps": "Ежедневные шаги",
+  "healthPermissionsTitle": "Подключите носимое устройство",
+  "healthPermissionsWorkouts": "Тренировки и пульс",
+  "heartRate": "Пульс",
+  "hrZone1": "Зона 1",
+  "hrZone2": "Зона 2",
+  "hrZone3": "Зона 3",
+  "hrZone4": "Зона 4",
+  "hrZone5": "Зона 5",
+  "hrZones": "Пульсовые зоны",
+  "maxHr": "Макс. пульс",
+  "healthSynchronizing": "Синхронизация...",
+  "healthSynchronized": "Синхронизировано",
+  "healthSynchronize": "Синхронизировать сейчас",
+
+  "healthDailySleep": "Сон",
+  "healthDailyRestingHr": "Пульс покоя",
+  "healthDailyHrv": "ВСР",
+  "healthDailySteps": "Шаги",
+  "healthDailyCalories": "Калории",
+  "healthDailyNoData": "Нет данных о здоровье",
+  "externalWorkout": "Внешняя тренировка"
 }

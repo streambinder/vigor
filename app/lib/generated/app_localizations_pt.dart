@@ -1483,5 +1483,163 @@ class AppLocalizationsPt extends AppLocalizations {
   String get modifierWeight => 'Peso';
 
   @override
-  String get modifierWristWeights => 'Pesos de Pulso';
+  String get modifierWristWeights => 'Pesos de pulso';
+
+  @override
+  String get healthData => 'Dados de saúde';
+
+  @override
+  String get healthConnected => 'Conectado';
+
+  @override
+  String get healthSynchronizing => 'Sincronizando...';
+
+  @override
+  String get healthSynchronized => 'Sincronizado';
+
+  @override
+  String get healthSynchronize => 'Sincronizar agora';
+
+  @override
+  String get healthNotConnected => 'Não conectado';
+
+  @override
+  String healthBuildingBaselines(int days) {
+    return 'Criando suas referências pessoais ($days/14 dias)';
+  }
+
+  @override
+  String get healthDisconnect => 'Desconectar e excluir dados';
+
+  @override
+  String get healthDisconnectConfirmation =>
+      'Desconectar dados de saúde? Todos os dados sincronizados serão excluídos. Esta ação não pode ser desfeita.';
+
+  @override
+  String get healthDisconnectedSuccessfully => 'Dados de saúde desconectados';
+
+  @override
+  String get failedToDisconnectHealth => 'Falha ao desconectar dados de saúde';
+
+  @override
+  String get healthConnect => 'Conectar';
+
+  @override
+  String get healthMetrics => 'Dados de Saúde';
+
+  @override
+  String get healthAdjustment => 'Ajuste de saúde';
+
+  @override
+  String get healthPermissionsTitle => 'Conecte seu wearable';
+
+  @override
+  String get healthPermissionsDescription =>
+      'O Vigor lê seus dados de saúde para personalizar seus treinos. Melhores dados de sono, recuperação e atividade significam recomendações mais inteligentes.';
+
+  @override
+  String get healthPermissionsReadOnly => 'Acesso somente leitura';
+
+  @override
+  String get healthPermissionsSleep => 'Duração e fases do sono';
+
+  @override
+  String get healthPermissionsHrv =>
+      'Variabilidade da frequência cardíaca (VFC)';
+
+  @override
+  String get healthPermissionsRhr => 'Frequência cardíaca em repouso';
+
+  @override
+  String get healthPermissionsSteps => 'Passos diários';
+
+  @override
+  String get healthPermissionsWorkouts =>
+      'Sessões de treino e frequência cardíaca';
+
+  @override
+  String get healthPermissionsGrant => 'Conectar dados de saúde';
+
+  @override
+  String get healthPermissionsSkip => 'Agora não';
+
+  @override
+  String get healthPermissionsGranted => 'Dados de saúde conectados';
+
+  @override
+  String get healthPermissionsDenied => 'As permissões não foram concedidas';
+
+  @override
+  String get healthOnboardingTitle => 'Conecte seu wearable';
+
+  @override
+  String get healthOnboardingDescription =>
+      'Conecte seus dados de saúde e o Vigor adaptará seu treino ao seu sono, recuperação e atividade.';
+
+  @override
+  String get healthOnboardingConnect => 'Conectar';
+
+  @override
+  String get healthOnboardingDismiss => 'Talvez depois';
+
+  @override
+  String get healthInstallHcTitle => 'Health Connect necessário';
+
+  @override
+  String get healthInstallHcDescription =>
+      'O Health Connect é necessário para sincronizar os dados do seu wearable. Instale-o pela Play Store.';
+
+  @override
+  String get healthInstallHc => 'Instalar Health Connect';
+
+  @override
+  String get heartRate => 'Frequência cardíaca';
+
+  @override
+  String get avgHr => 'FC méd';
+
+  @override
+  String get maxHr => 'FC máx';
+
+  @override
+  String get bpm => 'bpm';
+
+  @override
+  String get hrZones => 'Zonas FC';
+
+  @override
+  String get hrZone1 => 'Zona 1';
+
+  @override
+  String get hrZone2 => 'Zona 2';
+
+  @override
+  String get hrZone3 => 'Zona 3';
+
+  @override
+  String get hrZone4 => 'Zona 4';
+
+  @override
+  String get hrZone5 => 'Zona 5';
+
+  @override
+  String get healthDailySleep => 'Sono';
+
+  @override
+  String get healthDailyRestingHr => 'FC em repouso';
+
+  @override
+  String get healthDailyHrv => 'VFC';
+
+  @override
+  String get healthDailySteps => 'Passos';
+
+  @override
+  String get healthDailyCalories => 'Calorias';
+
+  @override
+  String get healthDailyNoData => 'Sem dados de saúde';
+
+  @override
+  String get externalWorkout => 'Treino externo';
 }

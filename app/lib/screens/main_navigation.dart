@@ -68,10 +68,11 @@ class MainNavigationState extends State<MainNavigation> {
   }
 
   /// builds a small circular avatar for the profile tab icon,
-  /// falls back to person icon if user has no avatar
+  /// falls back to person icon if user has no avatar.
+  /// wraps with a sync spinner when health data is syncing.
   Widget _buildProfileTabAvatar(String userId, bool isSelected) {
     final borderColor = isSelected ? VigorColors.indigo : VigorColors.stone;
-    return CachedNetworkImage(
+    final avatar = CachedNetworkImage(
       imageUrl: ApiConfig.avatarUrl(userId),
       imageBuilder: (context, imageProvider) => Container(
         width: 24,
@@ -91,6 +92,32 @@ class MainNavigationState extends State<MainNavigation> {
         Icons.person_rounded,
         color: isSelected ? VigorColors.indigo : VigorColors.stone,
         size: 24,
+      ),
+    );
+
+    final healthService = context.read<ServiceLocator>().healthDataService;
+    if (healthService == null) return avatar;
+
+    return ValueListenableBuilder<bool>(
+      valueListenable: healthService.syncing,
+      builder: (context, isSyncing, _) => SizedBox(
+        width: 28,
+        height: 28,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            avatar,
+            if (isSyncing)
+              SizedBox(
+                width: 28,
+                height: 28,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: VigorColors.indigoAdaptive(context),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

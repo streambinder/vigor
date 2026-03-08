@@ -1,17 +1,13 @@
 {
   "@@locale": "ja",
-
   "appName": "Vigor",
   "appTagline": "Ex Sapientia Vis",
-
   "navHome": "ホーム",
   "navActivity": "アクティビティ",
   "navProfile": "プロフィール",
-
   "storageErrorTitle": "Vigor - ストレージエラー",
   "storageUnavailable": "ストレージが利用できません",
   "storageErrorMessage": "安全なストレージが必要です。設定を確認してください。",
-
   "signInWithGoogle": "Googleでサインイン",
   "signingIn": "サインイン中...",
   "failedToInitializeGoogleSignIn": "Google サインインの初期化に失敗しました",
@@ -20,18 +16,15 @@
   "failedToGetAuthToken": "認証トークンを取得できませんでした",
   "errorProcessingSignIn": "サインイン処理エラー：{message}",
   "googleSignInInitializing": "Google サインインはまだ初期化中です...",
-
   "readyToTrain": "トレーニングの準備はできましたか？",
   "generateTrainingDescription": "目標に合わせたトレーニングを作成",
   "generateTraining": "トレーニングを生成",
-
   "refresh": "更新",
   "logout": "ログアウト",
   "userDataRefreshed": "ユーザーデータを更新しました",
   "editProfile": "プロフィールを編集",
   "settings": "設定",
   "other": "その他",
-
   "deleteGym": "ジムを削除",
   "deleteGymConfirmation": "「{name}」を削除しますか？",
   "cancel": "キャンセル",
@@ -41,7 +34,6 @@
   "deleteAccountConfirmation": "アカウントを削除しますか？元に戻せません。",
   "accountDeletedSuccessfully": "アカウントが正常に削除されました",
   "failedToDeleteAccount": "アカウントの削除に失敗しました",
-
   "failedToLoadGyms": "ジムの読み込みに失敗しました",
   "gymAddedSuccessfully": "ジムが正常に追加されました",
   "failedToAddGym": "ジムの追加に失敗しました",
@@ -49,7 +41,6 @@
   "failedToUpdateGym": "ジムの更新に失敗しました",
   "gymDeletedSuccessfully": "ジムが正常に削除されました",
   "failedToDeleteGym": "ジムの削除に失敗しました",
-
   "birthdate": "生年月日",
   "gender": "性別",
   "language": "言語",
@@ -59,7 +50,6 @@
   "weightUnit": "kg",
   "heightWithUnit": "{value} cm",
   "weightWithUnit": "{value} kg",
-
   "goals": "目標",
   "injuries": "怪我",
   "limitations": "制限",
@@ -71,7 +61,6 @@
   "equipment": "器具",
   "startedDate": "開始：{date}",
   "yearLabel": "年：{year}",
-
   "myGyms": "ジム",
   "addGym": "ジムを追加",
   "noGymsAddedYet": "まだジムが追加されていません",
@@ -79,10 +68,8 @@
   "removeDefault": "デフォルトを解除",
   "setAsDefault": "デフォルトに設定",
   "edit": "編集",
-
   "quickActions": "クイックアクション",
   "dangerZone": "危険ゾーン",
-
   "completeYourProfile": "プロフィールを完成させてください",
   "updateYourProfileInfo": "以下でプロフィールを更新。",
   "pleaseCompleteProfile": "プロフィールを完成させてください。* = 必須。",
@@ -94,13 +81,11 @@
   "selectLanguage": "言語を選択",
   "heightCm": "身長（cm）",
   "weightKg": "体重（kg）",
-
   "required": "必須",
   "invalid": "無効",
   "pleaseSelectBirthDate": "生年月日を選択してください",
   "pleaseAddAtLeastOneGoal": "少なくとも1つの目標を追加してください",
   "pleaseSelectLanguage": "言語を選択してください",
-
   "addAGoal": "目標を追加",
   "injuryDescription": "怪我の説明",
   "year": "年",
@@ -108,10 +93,8 @@
   "addACondition": "体調を追加",
   "favoriteExercisesHint": "例：スクワット、懸垂、ランニング",
   "favoriteEquipmentHint": "例：ダンベル、バーベル、ケトルベル",
-
   "saveChanges": "変更を保存",
   "saveProfile": "プロフィールを保存",
-
   "optionalLeaveEmpty": "（任意）",
   "optionalExercisesPrefer": "（任意）",
   "optionalEquipmentPrefer": "（任意）",
@@ -137,16 +120,13 @@
   "workoutTypeEnduranceDescription": "中程度の強度で持続的な運動により有酸素能力を向上",
   "workoutTypeMobility": "モビリティ",
   "workoutTypeMobilityDescription": "可動域と関節の健康を改善",
-
   "methodologyOptional": "メソッド（任意）",
   "methodologyAuto": "自動",
   "goalsOptional": "目標（任意）",
   "musclesOptional": "筋肉（任意）",
   "musclesAuto": "すべて",
   "advancedSettings": "詳細設定",
-
   "failedToUpdateProfile": "プロフィールの更新に失敗しました",
-
   "activity": "アクティビティ",
   "noTrainingsYet": "まだトレーニングがありません",
   "generateFirstTraining": "ホームから最初のトレーニングを作成",
@@ -167,7 +147,6 @@
   "durationHrMin": "{hours}時間{minutes}分",
   "failedToLoadTrainings": "トレーニングの読み込みに失敗しました",
   "startTraining": "トレーニングを開始",
-
   "cloneTraining": "トレーニングを複製",
   "addPartner": "パートナーを追加",
   "shareWithUser": "ユーザーと共有",
@@ -175,13 +154,11 @@
   "leaveTraining": "トレーニングから退出",
   "showAiReasoning": "AI推論を表示",
   "reportIssue": "問題を報告",
-
   "deleteTrainingConfirmation": "「{name}」を削除しますか？元に戻せません。",
   "leaveTrainingConfirmation": "「{name}」から退出しますか？表示されなくなります。",
   "addPartnerConfirmation": "{userName}を「{trainingName}」のパートナーとして追加しますか？",
   "cloneTrainingConfirmation": "「{name}」をトレーニングに複製しますか？",
   "shareTrainingConfirmation": "「{trainingName}」を{userName}と共有しますか？",
-
   "trainingDeletedSuccessfully": "トレーニングが正常に削除されました",
   "failedToDeleteTraining": "トレーニングの削除に失敗しました",
   "leftTrainingSuccessfully": "トレーニングから正常に退出しました",
@@ -201,7 +178,6 @@
   "shuffleExercise": "エクササイズを変更",
   "exerciseShuffled": "エクササイズを変更しました",
   "failedToShuffleExercise": "エクササイズの変更に失敗しました",
-
   "reasoning": "推論",
   "strategy": "戦略",
   "typeSelection": "タイプ選択",
@@ -210,7 +186,6 @@
   "researchApplied": "適用された研究",
   "targetMuscles": "ターゲット筋肉",
   "naming": "命名",
-
   "trainingRoutines": "トレーニング",
   "noEquipment": "器具なし",
   "blockNumber": "ブロック {number}",
@@ -232,7 +207,6 @@
   "clone": "複製",
   "share": "共有",
   "leave": "退出",
-
   "tapToStart": "タップして開始",
   "tapWhenDone": "完了したらタップ",
   "trainingCompleted": "トレーニング完了！",
@@ -241,14 +215,11 @@
   "complete": "完了",
   "routineCounter": "ルーティン {current}/{total}",
   "blockCounter": "ブロック {current}/{total}",
-
   "exitTraining": "トレーニングを終了しますか？",
   "whatWouldYouLikeToDo": "次は？",
   "exit": "終了",
   "continueTraining": "続行",
-
   "failedToMarkComplete": "トレーニングの完了に失敗しました",
-
   "durationMinutes": "時間（分）",
   "bodyweight": "自重",
   "gym": "ジム",
@@ -263,14 +234,12 @@
   "customPromptOptional": "カスタムプロンプト（任意）",
   "focusOnUpperBody": "例：上半身に集中",
   "trainingPartnersOptional": "パートナー",
-
   "generatingTraining": "トレーニングを生成中...",
   "thisMayTakeAMoment": "少々お待ちください",
   "generationFailedRetrying": "生成に失敗しました、リトライ #{attempt}...",
   "trainingGeneratedSuccessfully": "トレーニングが正常に生成されました！",
   "failedToGenerateTraining": "トレーニングの生成に失敗しました",
   "generate": "生成",
-
   "editGym": "ジムを編集",
   "gymName": "ジム名",
   "gymNamePlaceholder": "例：ホームジム、エニタイム",
@@ -280,16 +249,13 @@
   "pleaseEnterGymName": "ジム名を入力してください",
   "addAllEquipment": "すべて追加",
   "failedToLoadEquipment": "器具の読み込みに失敗しました",
-
   "selectUser": "ユーザーを選択",
   "searchByName": "名前で検索",
   "noUsersAvailable": "利用可能なユーザーがいません",
   "noMatchingUsers": "一致するユーザーがいません",
   "noMatchingEquipment": "一致する器具がありません",
-
   "instructions": "手順",
   "cues": "ポイント",
-
   "howWasYourTraining": "トレーニングはいかがでしたか？",
   "anyAdditionalComments": "追加のコメントはありますか？",
   "actualDuration": "実際の所要時間（分）",
@@ -299,9 +265,7 @@
   "easy": "簡単",
   "tooEasy": "簡単すぎる",
   "flag": "フラグ",
-
   "profile": "プロフィール",
-
   "languageEnglish": "English",
   "languageItaliano": "Italiano",
   "languageEspanol": "Español",
@@ -312,11 +276,9 @@
   "languageChinese": "中文",
   "languageJapanese": "日本語",
   "languageKorean": "한국어",
-
   "nextExercise": "次: {name}",
   "rest": "休憩",
   "upcoming": "今後",
-
   "yourProgress": "進捗状況",
   "trainingsCompleted": "{count}回のトレーニング完了",
   "completedTrainings": "完了したトレーニング",
@@ -340,23 +302,19 @@
   "heatWarm": "ウォーム",
   "heatHot": "高強度",
   "noTrainingsCompletedYet": "トレーニングを始めて何か表示しよう",
-
   "theme": "テーマ",
   "themeAuto": "自動",
   "themeLight": "ライト",
   "themeDark": "ダーク",
   "themeAutoDescription": "システム設定に従う",
   "appearance": "外観",
-
   "trainingDefaults": "デフォルト",
   "defaultDuration": "トレーニング時間",
   "warmupCooldown": "ウォームアップとクールダウン",
-
   "timer": "タイマー",
   "intervalJingle": "インターバル切替時にホイッスル",
   "duckOtherAudio": "他のオーディオを下げる",
   "duckOtherAudioDescription": "ホイッスル中に音楽や他のアプリの音量を下げます",
-
   "goalHypertrophy": "筋肥大",
   "goalHypertrophyDescription": "ターゲットを絞った筋トレで筋肉量を増やす",
   "goalFatLoss": "脂肪燃焼",
@@ -373,7 +331,6 @@
   "goalFlexibilityDescription": "ストレッチとモビリティで可動域を改善",
   "goalSports": "スポーツパフォーマンス",
   "goalSportsDescription": "パワーと俊敏性のトレーニングで運動能力を向上",
-
   "thisWeek": "今週",
   "trainingPlan": "トレーニングプラン",
   "sessionsPerWeek": "週あたりのセッション数",
@@ -386,7 +343,6 @@
   "daysLeft": "残り{count}日",
   "recommended": "おすすめ",
   "duration": "時間",
-
   "familyHorizontalPush": "プッシュ",
   "familyHorizontalPull": "プル",
   "familyVerticalPush": "オーバーヘッド",
@@ -398,13 +354,11 @@
   "familyCardio": "カーディオ",
   "familyMobility": "モビリティ",
   "familyBalance": "バランス",
-
   "trainingQuality": "このトレーニングはいかがでしたか？",
   "trainingQualityHint": "AIトレーニングの品質評価に役立ちます",
   "qualityReasonHint": "改善できる点は？",
   "good": "良い",
   "bad": "悪い",
-
   "loadingMsg1": "プロフィールを分析中...",
   "loadingMsg2": "エクササイズを選択中...",
   "loadingMsg3": "ルーティンを構築中...",
@@ -425,7 +379,6 @@
   "loadingMsg18": "負荷分配を評価中...",
   "loadingMsg19": "セッションをパーソナライズ中...",
   "loadingMsg20": "もうすぐ完了...",
-
   "loadingMsgGoal": "{goal}を最適化中...",
   "loadingMsgInjuries": "怪我に合わせて調整中...",
   "loadingMsgFavorites": "お気に入りの種目を優先中...",
@@ -434,27 +387,38 @@
   "loadingMsgPartners": "パートナートレーニングを調整中...",
   "loadingMsgGym": "{gym}の器具を読み込み中...",
   "loadingMsgHistory": "最近のセッションを分析中...",
-
   "loadingRetryMsg1": "うーん、うまくいかなかった — リトライ中",
   "loadingRetryMsg2": "もう一度やってみます...",
   "loadingRetryMsg3": "もう少し — もう一度",
   "loadingRetryMsg4": "もう一回、お待ちください",
   "loadingRetryMsg5": "おっと、再調整中...",
   "loadingRetryMsg6": "あと少しだった — もう一度",
-
   "nSelected": "{count}件選択中",
-  "@nSelected": { "placeholders": { "count": { "type": "int" } } },
+  "@nSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "deleteSelectedTrainings": "{count}件のトレーニングを削除しますか？",
-  "@deleteSelectedTrainings": { "placeholders": { "count": { "type": "int" } } },
+  "@deleteSelectedTrainings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "trainingsDeletedSuccessfully": "トレーニングを削除しました",
-
   "shareByLink": "Share Link",
   "addToMyTrainings": "Add to My Trainings",
   "goToTraining": "Go to Training",
   "sharedBy": "Shared by {name}",
   "@sharedBy": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "linkCopied": "Link copied to clipboard",
@@ -464,7 +428,6 @@
   "loginToAdd": "Log in to add this training",
   "pendingFeedbacks": "未提出のフィードバック",
   "pendingFeedbacksDescription": "完了済みのトレーニングにフィードバックが未提出です。フィードバックは今後のトレーニング提案の改善に役立ちます。",
-
   "equipmentPartner": "パートナー",
   "equipmentBalanceBoard": "バランスボード",
   "equipmentBand": "バンド",
@@ -500,7 +463,6 @@
   "equipmentTrx": "TRX",
   "equipmentUpperBodyErgometer": "上半身エルゴメーター",
   "equipmentWheelRoller": "腹筋ローラー",
-
   "muscleChest": "胸",
   "muscleBack": "背中",
   "muscleShoulders": "肩",
@@ -508,7 +470,6 @@
   "muscleCore": "体幹",
   "muscleGlutes": "臀部",
   "muscleLegs": "脚",
-
   "modifierWeightedVest": "ウエイトベスト",
   "modifierParallettes": "パラレット",
   "modifierAnkleWeights": "アンクルウエイト",
@@ -516,5 +477,63 @@
   "modifierPushUpBars": "プッシュアップバー",
   "modifierResistanceBands": "レジスタンスバンド",
   "modifierWeight": "ウエイト",
-  "modifierWristWeights": "リストウエイト"
+  "modifierWristWeights": "リストウェイト",
+  "avgHr": "平均心拍",
+  "bpm": "bpm",
+  "failedToDisconnectHealth": "ヘルスデータの切断に失敗しました",
+  "healthAdjustment": "健康状態に基づく調整",
+  "healthMetrics": "健康データ",
+  "healthBuildingBaselines": "パーソナル基準値を作成中（{days}/14日）",
+  "@healthBuildingBaselines": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "healthConnect": "接続",
+  "healthConnected": "接続済み",
+  "healthData": "ヘルスデータ",
+  "healthDisconnect": "切断してデータを削除",
+  "healthDisconnectConfirmation": "ヘルスデータを切断しますか？同期されたすべてのデータが削除されます。この操作は取り消せません。",
+  "healthDisconnectedSuccessfully": "ヘルスデータが切断されました",
+  "healthInstallHc": "Health Connectをインストール",
+  "healthInstallHcDescription": "ウェアラブルデータの同期にはHealth Connectが必要です。Play Storeからインストールしてください。",
+  "healthInstallHcTitle": "Health Connectが必要です",
+  "healthNotConnected": "未接続",
+  "healthOnboardingConnect": "接続",
+  "healthOnboardingDescription": "ヘルスデータを接続すると、Vigorが睡眠・回復・活動に合わせてトレーニングを調整します。",
+  "healthOnboardingDismiss": "あとで",
+  "healthOnboardingTitle": "ウェアラブルを接続",
+  "healthPermissionsDenied": "権限が許可されませんでした",
+  "healthPermissionsDescription": "Vigorはヘルスデータを読み取り、ワークアウトをパーソナライズします。睡眠・回復・活動データが充実するほど、より的確なトレーニング提案が可能になります。",
+  "healthPermissionsGrant": "ヘルスデータを接続",
+  "healthPermissionsGranted": "ヘルスデータが接続されました",
+  "healthPermissionsHrv": "心拍変動（HRV）",
+  "healthPermissionsReadOnly": "読み取り専用",
+  "healthPermissionsRhr": "安静時心拍数",
+  "healthPermissionsSkip": "今はしない",
+  "healthPermissionsSleep": "睡眠時間とステージ",
+  "healthPermissionsSteps": "1日の歩数",
+  "healthPermissionsTitle": "ウェアラブルを接続",
+  "healthPermissionsWorkouts": "ワークアウトと心拍数",
+  "heartRate": "心拍数",
+  "hrZone1": "ゾーン1",
+  "hrZone2": "ゾーン2",
+  "hrZone3": "ゾーン3",
+  "hrZone4": "ゾーン4",
+  "hrZone5": "ゾーン5",
+  "hrZones": "心拍ゾーン",
+  "maxHr": "最大心拍",
+  "healthSynchronizing": "同期中...",
+  "healthSynchronized": "同期済み",
+  "healthSynchronize": "今すぐ同期",
+
+  "healthDailySleep": "睡眠",
+  "healthDailyRestingHr": "安静時心拍",
+  "healthDailyHrv": "HRV",
+  "healthDailySteps": "歩数",
+  "healthDailyCalories": "カロリー",
+  "healthDailyNoData": "健康データなし",
+  "externalWorkout": "外部ワークアウト"
 }

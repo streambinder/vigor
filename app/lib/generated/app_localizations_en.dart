@@ -1480,4 +1480,160 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get modifierWristWeights => 'Wrist Weights';
+
+  @override
+  String get healthData => 'Health Data';
+
+  @override
+  String get healthConnected => 'Connected';
+
+  @override
+  String get healthSynchronizing => 'Synchronizing...';
+
+  @override
+  String get healthSynchronized => 'Synchronized';
+
+  @override
+  String get healthSynchronize => 'Synchronize now';
+
+  @override
+  String get healthNotConnected => 'Not connected';
+
+  @override
+  String healthBuildingBaselines(int days) {
+    return 'Building your personal baselines ($days/14 days)';
+  }
+
+  @override
+  String get healthDisconnect => 'Disconnect & Delete Data';
+
+  @override
+  String get healthDisconnectConfirmation =>
+      'Disconnect health data? All synced health data will be deleted. This cannot be undone.';
+
+  @override
+  String get healthDisconnectedSuccessfully => 'Health data disconnected';
+
+  @override
+  String get failedToDisconnectHealth => 'Failed to disconnect health data';
+
+  @override
+  String get healthConnect => 'Connect';
+
+  @override
+  String get healthMetrics => 'Health Metrics';
+
+  @override
+  String get healthAdjustment => 'Health Adjustment';
+
+  @override
+  String get healthPermissionsTitle => 'Connect Your Wearable';
+
+  @override
+  String get healthPermissionsDescription =>
+      'Vigor reads your health data to personalize your workouts. Better sleep data, recovery metrics, and activity history mean smarter training recommendations.';
+
+  @override
+  String get healthPermissionsReadOnly => 'Read-only access';
+
+  @override
+  String get healthPermissionsSleep => 'Sleep duration and stages';
+
+  @override
+  String get healthPermissionsHrv => 'Heart rate variability (HRV)';
+
+  @override
+  String get healthPermissionsRhr => 'Resting heart rate';
+
+  @override
+  String get healthPermissionsSteps => 'Daily steps';
+
+  @override
+  String get healthPermissionsWorkouts => 'Workout sessions and heart rate';
+
+  @override
+  String get healthPermissionsGrant => 'Connect Health Data';
+
+  @override
+  String get healthPermissionsSkip => 'Not now';
+
+  @override
+  String get healthPermissionsGranted => 'Health data connected';
+
+  @override
+  String get healthPermissionsDenied => 'Permissions were not granted';
+
+  @override
+  String get healthOnboardingTitle => 'Connect your wearable';
+
+  @override
+  String get healthOnboardingDescription =>
+      'Connect your health data and Vigor will adapt your training to how you sleep, recover, and move.';
+
+  @override
+  String get healthOnboardingConnect => 'Connect';
+
+  @override
+  String get healthOnboardingDismiss => 'Maybe later';
+
+  @override
+  String get healthInstallHcTitle => 'Health Connect Required';
+
+  @override
+  String get healthInstallHcDescription =>
+      'Health Connect is needed to sync your wearable data. Install it from the Play Store to continue.';
+
+  @override
+  String get healthInstallHc => 'Install Health Connect';
+
+  @override
+  String get heartRate => 'Heart Rate';
+
+  @override
+  String get avgHr => 'Avg HR';
+
+  @override
+  String get maxHr => 'Max HR';
+
+  @override
+  String get bpm => 'bpm';
+
+  @override
+  String get hrZones => 'HR Zones';
+
+  @override
+  String get hrZone1 => 'Zone 1';
+
+  @override
+  String get hrZone2 => 'Zone 2';
+
+  @override
+  String get hrZone3 => 'Zone 3';
+
+  @override
+  String get hrZone4 => 'Zone 4';
+
+  @override
+  String get hrZone5 => 'Zone 5';
+
+  @override
+  String get healthDailySleep => 'Sleep';
+
+  @override
+  String get healthDailyRestingHr => 'Resting HR';
+
+  @override
+  String get healthDailyHrv => 'HRV';
+
+  @override
+  String get healthDailySteps => 'Steps';
+
+  @override
+  String get healthDailyCalories => 'Calories';
+
+  @override
+  String get healthDailyNoData => 'No health data yet';
+
+  @override
+  String get externalWorkout => 'External Workout';
 }

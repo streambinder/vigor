@@ -1,17 +1,13 @@
 {
   "@@locale": "ko",
-
   "appName": "Vigor",
   "appTagline": "Ex Sapientia Vis",
-
   "navHome": "홈",
   "navActivity": "활동",
   "navProfile": "프로필",
-
   "storageErrorTitle": "Vigor - 저장소 오류",
   "storageUnavailable": "저장소를 사용할 수 없습니다",
   "storageErrorMessage": "보안 저장소가 필요합니다. 설정을 확인하세요.",
-
   "signInWithGoogle": "Google로 로그인",
   "signingIn": "로그인 중...",
   "failedToInitializeGoogleSignIn": "Google 로그인 초기화 실패",
@@ -20,18 +16,15 @@
   "failedToGetAuthToken": "인증 토큰을 가져올 수 없습니다",
   "errorProcessingSignIn": "로그인 처리 오류: {message}",
   "googleSignInInitializing": "Google 로그인이 아직 초기화 중입니다...",
-
   "readyToTrain": "운동할 준비가 되셨나요?",
   "generateTrainingDescription": "목표에 맞는 트레이닝 생성",
   "generateTraining": "트레이닝 생성",
-
   "refresh": "새로고침",
   "logout": "로그아웃",
   "userDataRefreshed": "사용자 데이터가 새로고침되었습니다",
   "editProfile": "프로필 수정",
   "settings": "설정",
   "other": "기타",
-
   "deleteGym": "헬스장 삭제",
   "deleteGymConfirmation": "\"{name}\"을(를) 삭제하시겠습니까?",
   "cancel": "취소",
@@ -41,7 +34,6 @@
   "deleteAccountConfirmation": "계정을 삭제하시겠습니까? 취소 불가.",
   "accountDeletedSuccessfully": "계정이 성공적으로 삭제되었습니다",
   "failedToDeleteAccount": "계정 삭제 실패",
-
   "failedToLoadGyms": "헬스장 로드 실패",
   "gymAddedSuccessfully": "헬스장이 성공적으로 추가되었습니다",
   "failedToAddGym": "헬스장 추가 실패",
@@ -49,7 +41,6 @@
   "failedToUpdateGym": "헬스장 업데이트 실패",
   "gymDeletedSuccessfully": "헬스장이 성공적으로 삭제되었습니다",
   "failedToDeleteGym": "헬스장 삭제 실패",
-
   "birthdate": "생년월일",
   "gender": "성별",
   "language": "언어",
@@ -59,7 +50,6 @@
   "weightUnit": "kg",
   "heightWithUnit": "{value} cm",
   "weightWithUnit": "{value} kg",
-
   "goals": "목표",
   "injuries": "부상",
   "limitations": "제한사항",
@@ -71,7 +61,6 @@
   "equipment": "장비",
   "startedDate": "시작: {date}",
   "yearLabel": "연도: {year}",
-
   "myGyms": "헬스장",
   "addGym": "헬스장 추가",
   "noGymsAddedYet": "아직 추가된 헬스장이 없습니다",
@@ -79,10 +68,8 @@
   "removeDefault": "기본값 제거",
   "setAsDefault": "기본값으로 설정",
   "edit": "수정",
-
   "quickActions": "빠른 작업",
   "dangerZone": "위험 구역",
-
   "completeYourProfile": "프로필을 완성하세요",
   "updateYourProfileInfo": "아래에서 프로필을 업데이트하세요.",
   "pleaseCompleteProfile": "프로필을 완성하세요. * = 필수.",
@@ -94,13 +81,11 @@
   "selectLanguage": "언어 선택",
   "heightCm": "키 (cm)",
   "weightKg": "체중 (kg)",
-
   "required": "필수",
   "invalid": "유효하지 않음",
   "pleaseSelectBirthDate": "생년월일을 선택해 주세요",
   "pleaseAddAtLeastOneGoal": "최소 하나의 목표를 추가해 주세요",
   "pleaseSelectLanguage": "언어를 선택해 주세요",
-
   "addAGoal": "목표 추가",
   "injuryDescription": "부상 설명",
   "year": "연도",
@@ -108,10 +93,8 @@
   "addACondition": "상태 추가",
   "favoriteExercisesHint": "예: 스쿼트, 턱걸이, 달리기",
   "favoriteEquipmentHint": "예: 덤벨, 바벨, 케틀벨",
-
   "saveChanges": "변경사항 저장",
   "saveProfile": "프로필 저장",
-
   "optionalLeaveEmpty": "(선택사항)",
   "optionalExercisesPrefer": "(선택사항)",
   "optionalEquipmentPrefer": "(선택사항)",
@@ -137,16 +120,13 @@
   "workoutTypeEnduranceDescription": "중간 강도의 지속적인 운동으로 유산소 능력 향상",
   "workoutTypeMobility": "유연성",
   "workoutTypeMobilityDescription": "가동 범위와 관절 건강 개선",
-
   "methodologyOptional": "방법론 (선택사항)",
   "methodologyAuto": "자동",
   "goalsOptional": "목표 (선택사항)",
   "musclesOptional": "근육 (선택사항)",
   "musclesAuto": "전체",
   "advancedSettings": "고급",
-
   "failedToUpdateProfile": "프로필 업데이트 실패",
-
   "activity": "활동",
   "noTrainingsYet": "아직 트레이닝이 없습니다",
   "generateFirstTraining": "홈에서 첫 트레이닝 생성",
@@ -167,7 +147,6 @@
   "durationHrMin": "{hours}시간 {minutes}분",
   "failedToLoadTrainings": "트레이닝 로드 실패",
   "startTraining": "트레이닝 시작",
-
   "cloneTraining": "트레이닝 복제",
   "addPartner": "파트너 추가",
   "shareWithUser": "사용자와 공유",
@@ -175,13 +154,11 @@
   "leaveTraining": "트레이닝 나가기",
   "showAiReasoning": "AI 추론 표시",
   "reportIssue": "문제 보고",
-
   "deleteTrainingConfirmation": "\"{name}\" 삭제? 취소 불가.",
   "leaveTrainingConfirmation": "\"{name}\"에서 나가기? 더 이상 표시 안 됨.",
   "addPartnerConfirmation": "{userName}을(를) \"{trainingName}\"의 파트너로 추가하시겠습니까?",
   "cloneTrainingConfirmation": "\"{name}\"을(를) 트레이닝에 복제하시겠습니까?",
   "shareTrainingConfirmation": "\"{trainingName}\"을(를) {userName}과(와) 공유하시겠습니까?",
-
   "trainingDeletedSuccessfully": "트레이닝이 성공적으로 삭제되었습니다",
   "failedToDeleteTraining": "트레이닝 삭제 실패",
   "leftTrainingSuccessfully": "트레이닝에서 성공적으로 나갔습니다",
@@ -201,7 +178,6 @@
   "shuffleExercise": "운동 바꾸기",
   "exerciseShuffled": "운동이 변경됨",
   "failedToShuffleExercise": "운동 변경 실패",
-
   "reasoning": "추론",
   "strategy": "전략",
   "typeSelection": "유형 선택",
@@ -210,7 +186,6 @@
   "researchApplied": "적용된 연구",
   "targetMuscles": "타겟 근육",
   "naming": "명명",
-
   "trainingRoutines": "트레이닝",
   "noEquipment": "장비 없음",
   "blockNumber": "블록 {number}",
@@ -232,7 +207,6 @@
   "clone": "복제",
   "share": "공유",
   "leave": "나가기",
-
   "tapToStart": "탭하여 시작",
   "tapWhenDone": "완료하면 탭",
   "trainingCompleted": "트레이닝 완료!",
@@ -241,14 +215,11 @@
   "complete": "완료",
   "routineCounter": "루틴 {current}/{total}",
   "blockCounter": "블록 {current}/{total}",
-
   "exitTraining": "트레이닝을 종료하시겠습니까?",
   "whatWouldYouLikeToDo": "다음은?",
   "exit": "종료",
   "continueTraining": "계속",
-
   "failedToMarkComplete": "트레이닝 완료 실패",
-
   "durationMinutes": "시간 (분)",
   "bodyweight": "맨몸",
   "gym": "헬스장",
@@ -263,14 +234,12 @@
   "customPromptOptional": "사용자 정의 프롬프트 (선택사항)",
   "focusOnUpperBody": "예: 상체에 집중",
   "trainingPartnersOptional": "파트너",
-
   "generatingTraining": "트레이닝을 생성하는 중...",
   "thisMayTakeAMoment": "잠시 시간이 걸릴 수 있습니다",
   "generationFailedRetrying": "생성 실패, 재시도 #{attempt}...",
   "trainingGeneratedSuccessfully": "트레이닝이 성공적으로 생성되었습니다!",
   "failedToGenerateTraining": "트레이닝 생성 실패",
   "generate": "생성",
-
   "editGym": "헬스장 수정",
   "gymName": "헬스장 이름",
   "gymNamePlaceholder": "예: 홈짐, 스포애니",
@@ -280,16 +249,13 @@
   "pleaseEnterGymName": "헬스장 이름을 입력해 주세요",
   "addAllEquipment": "모두 추가",
   "failedToLoadEquipment": "장비를 불러오지 못했습니다",
-
   "selectUser": "사용자 선택",
   "searchByName": "이름으로 검색",
   "noUsersAvailable": "사용 가능한 사용자가 없습니다",
   "noMatchingUsers": "일치하는 사용자가 없습니다",
   "noMatchingEquipment": "일치하는 장비가 없습니다",
-
   "instructions": "지침",
   "cues": "포인트",
-
   "howWasYourTraining": "트레이닝은 어떠셨나요?",
   "anyAdditionalComments": "추가 의견이 있으신가요?",
   "actualDuration": "실제 소요 시간 (분)",
@@ -299,9 +265,7 @@
   "easy": "쉬움",
   "tooEasy": "너무 쉬움",
   "flag": "표시",
-
   "profile": "프로필",
-
   "languageEnglish": "English",
   "languageItaliano": "Italiano",
   "languageEspanol": "Español",
@@ -312,11 +276,9 @@
   "languageChinese": "中文",
   "languageJapanese": "日本語",
   "languageKorean": "한국어",
-
   "nextExercise": "다음: {name}",
   "rest": "휴식",
   "upcoming": "다음 예정",
-
   "yourProgress": "나의 진행 상황",
   "trainingsCompleted": "{count}회 훈련 완료",
   "completedTrainings": "완료한 훈련",
@@ -340,23 +302,19 @@
   "heatWarm": "따뜻함",
   "heatHot": "고강도",
   "noTrainingsCompletedYet": "훈련을 시작해서 여기에 뭔가 보여주세요",
-
   "theme": "테마",
   "themeAuto": "자동",
   "themeLight": "라이트",
   "themeDark": "다크",
   "themeAutoDescription": "시스템 설정 따르기",
   "appearance": "외관",
-
   "trainingDefaults": "기본값",
   "defaultDuration": "훈련 시간",
   "warmupCooldown": "워밍업 및 쿨다운",
-
   "timer": "타이머",
   "intervalJingle": "인터벌 전환 시 호루라기",
   "duckOtherAudio": "다른 오디오 줄이기",
   "duckOtherAudioDescription": "호루라기 중 음악 및 다른 앱의 볼륨을 줄입니다",
-
   "goalHypertrophy": "근육 증가",
   "goalHypertrophyDescription": "타겟 저항 훈련으로 근육량 증가",
   "goalFatLoss": "체지방 감소",
@@ -373,7 +331,6 @@
   "goalFlexibilityDescription": "스트레칭과 이동성으로 가동 범위 개선",
   "goalSports": "스포츠 퍼포먼스",
   "goalSportsDescription": "파워와 민첩성 훈련으로 운동 능력 향상",
-
   "thisWeek": "이번 주",
   "trainingPlan": "트레이닝 플랜",
   "sessionsPerWeek": "주당 세션",
@@ -386,7 +343,6 @@
   "daysLeft": "{count}일 남음",
   "recommended": "추천",
   "duration": "시간",
-
   "familyHorizontalPush": "푸시",
   "familyHorizontalPull": "풀",
   "familyVerticalPush": "오버헤드",
@@ -398,13 +354,11 @@
   "familyCardio": "유산소",
   "familyMobility": "이동성",
   "familyBalance": "균형",
-
   "trainingQuality": "이 트레이닝은 어떠셨나요?",
   "trainingQualityHint": "AI 트레이닝 품질 평가에 도움이 됩니다",
   "qualityReasonHint": "개선할 점이 있나요?",
   "good": "좋음",
   "bad": "나쁨",
-
   "loadingMsg1": "프로필 분석 중...",
   "loadingMsg2": "운동 선택 중...",
   "loadingMsg3": "루틴 구성 중...",
@@ -425,7 +379,6 @@
   "loadingMsg18": "부하 분배 평가 중...",
   "loadingMsg19": "세션 개인화 중...",
   "loadingMsg20": "거의 완료...",
-
   "loadingMsgGoal": "{goal} 최적화 중...",
   "loadingMsgInjuries": "부상에 맞춰 조정 중...",
   "loadingMsgFavorites": "선호 운동 우선 배치 중...",
@@ -434,27 +387,38 @@
   "loadingMsgPartners": "파트너 운동 조정 중...",
   "loadingMsgGym": "{gym} 장비 로딩 중...",
   "loadingMsgHistory": "최근 세션 분석 중...",
-
   "loadingRetryMsg1": "음, 잘 안 됐어요 — 다시 시도 중",
   "loadingRetryMsg2": "다시 해볼게요...",
   "loadingRetryMsg3": "아쉽네요 — 한 번 더",
   "loadingRetryMsg4": "한 번 더, 잠시만요",
   "loadingRetryMsg5": "이런, 재조정 중...",
   "loadingRetryMsg6": "거의 됐어요 — 다시 시도",
-
   "nSelected": "{count}개 선택됨",
-  "@nSelected": { "placeholders": { "count": { "type": "int" } } },
+  "@nSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "deleteSelectedTrainings": "{count}개 훈련을 삭제하시겠습니까?",
-  "@deleteSelectedTrainings": { "placeholders": { "count": { "type": "int" } } },
+  "@deleteSelectedTrainings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "trainingsDeletedSuccessfully": "훈련이 삭제되었습니다",
-
   "shareByLink": "Share Link",
   "addToMyTrainings": "Add to My Trainings",
   "goToTraining": "Go to Training",
   "sharedBy": "Shared by {name}",
   "@sharedBy": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "linkCopied": "Link copied to clipboard",
@@ -464,7 +428,6 @@
   "loginToAdd": "Log in to add this training",
   "pendingFeedbacks": "대기 중인 피드백",
   "pendingFeedbacksDescription": "완료된 훈련 중 피드백이 없는 항목이 있습니다. 피드백은 향후 훈련 추천을 개선하는 데 도움이 됩니다.",
-
   "equipmentPartner": "파트너",
   "equipmentBalanceBoard": "밸런스 보드",
   "equipmentBand": "밴드",
@@ -500,7 +463,6 @@
   "equipmentTrx": "TRX",
   "equipmentUpperBodyErgometer": "상체 에르고미터",
   "equipmentWheelRoller": "복근 롤러",
-
   "muscleChest": "가슴",
   "muscleBack": "등",
   "muscleShoulders": "어깨",
@@ -508,7 +470,6 @@
   "muscleCore": "코어",
   "muscleGlutes": "둔근",
   "muscleLegs": "다리",
-
   "modifierWeightedVest": "웨이트 조끼",
   "modifierParallettes": "파랄렛",
   "modifierAnkleWeights": "발목 중량",
@@ -516,5 +477,63 @@
   "modifierPushUpBars": "푸시업 바",
   "modifierResistanceBands": "저항 밴드",
   "modifierWeight": "중량",
-  "modifierWristWeights": "손목 중량"
+  "modifierWristWeights": "손목 웨이트",
+  "avgHr": "평균 심박",
+  "bpm": "bpm",
+  "failedToDisconnectHealth": "건강 데이터 연결 해제 실패",
+  "healthAdjustment": "건강 상태 조정",
+  "healthMetrics": "건강 데이터",
+  "healthBuildingBaselines": "개인 기준값 생성 중 ({days}/14일)",
+  "@healthBuildingBaselines": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "healthConnect": "연결",
+  "healthConnected": "연결됨",
+  "healthData": "건강 데이터",
+  "healthDisconnect": "연결 해제 및 데이터 삭제",
+  "healthDisconnectConfirmation": "건강 데이터를 연결 해제하시겠습니까? 동기화된 모든 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.",
+  "healthDisconnectedSuccessfully": "건강 데이터 연결이 해제되었습니다",
+  "healthInstallHc": "Health Connect 설치",
+  "healthInstallHcDescription": "웨어러블 데이터 동기화를 위해 Health Connect가 필요합니다. Play 스토어에서 설치해주세요.",
+  "healthInstallHcTitle": "Health Connect 필요",
+  "healthNotConnected": "연결 안 됨",
+  "healthOnboardingConnect": "연결",
+  "healthOnboardingDescription": "건강 데이터를 연결하면 Vigor가 수면, 회복, 활동에 맞춰 트레이닝을 조정합니다.",
+  "healthOnboardingDismiss": "나중에 하기",
+  "healthOnboardingTitle": "웨어러블 연결",
+  "healthPermissionsDenied": "권한이 부여되지 않았습니다",
+  "healthPermissionsDescription": "Vigor가 건강 데이터를 읽어 운동을 맞춤화합니다. 수면, 회복, 활동 데이터가 많을수록 더 스마트한 트레이닝 추천이 가능합니다.",
+  "healthPermissionsGrant": "건강 데이터 연결",
+  "healthPermissionsGranted": "건강 데이터가 연결되었습니다",
+  "healthPermissionsHrv": "심박변이도 (HRV)",
+  "healthPermissionsReadOnly": "읽기 전용",
+  "healthPermissionsRhr": "안정시 심박수",
+  "healthPermissionsSkip": "나중에",
+  "healthPermissionsSleep": "수면 시간 및 단계",
+  "healthPermissionsSteps": "일일 걸음 수",
+  "healthPermissionsTitle": "웨어러블 연결",
+  "healthPermissionsWorkouts": "운동 세션 및 심박수",
+  "heartRate": "심박수",
+  "hrZone1": "존 1",
+  "hrZone2": "존 2",
+  "hrZone3": "존 3",
+  "hrZone4": "존 4",
+  "hrZone5": "존 5",
+  "hrZones": "심박 존",
+  "maxHr": "최대 심박",
+  "healthSynchronizing": "동기화 중...",
+  "healthSynchronized": "동기화 완료",
+  "healthSynchronize": "지금 동기화",
+
+  "healthDailySleep": "수면",
+  "healthDailyRestingHr": "안정시 심박",
+  "healthDailyHrv": "HRV",
+  "healthDailySteps": "걸음 수",
+  "healthDailyCalories": "칼로리",
+  "healthDailyNoData": "건강 데이터 없음",
+  "externalWorkout": "외부 운동"
 }

@@ -3,8 +3,12 @@ import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../providers/theme_provider.dart';
+import '../services/authenticated_api_service.dart';
 import '../services/preferences_service.dart';
+import '../services/secure_storage_service.dart';
+import '../services/service_locator.dart';
 import '../widgets/adaptive/adaptive.dart';
+import 'health_permissions_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -40,7 +44,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AdaptiveAppBar(title: Text(l10n.settings)),
       body: ListView.builder(
         padding: VigorSpacing.paddingLg,
-        itemCount: 4,
+        itemCount: 5,
         itemBuilder: (context, index) {
           switch (index) {
             case 0:
@@ -57,6 +61,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               return Padding(
                 padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
                 child: _buildTrainingSection(context, l10n, isDark),
+              );
+            case 3:
+              return Padding(
+                padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+                child: _buildHealthSection(context, l10n, isDark),
               );
             default:
               return const SizedBox.shrink();
@@ -286,6 +295,161 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ],
     );
+  }
+
+  Widget _buildHealthSection(BuildContext context, AppLocalizations l10n, bool isDark) {
+    final prefs = context.read<PreferencesService>();
+    final healthService = context.read<ServiceLocator>().healthDataService;
+    final isConnected = prefs.hcConnected;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: VigorSpacing.paddingSm,
+              decoration: BoxDecoration(
+                color: VigorColors.indigoAdaptive(context).withValues(alpha: 0.15),
+                borderRadius: VigorRadius.radiusSm,
+              ),
+              child: Icon(Icons.monitor_heart, color: VigorColors.indigoAdaptive(context), size: 20),
+            ),
+            const SizedBox(width: VigorSpacing.sm),
+            Text(l10n.healthData, style: VigorTypography.headline.copyWith(fontSize: 18, color: VigorColors.textPrimary(context))),
+          ],
+        ),
+        const SizedBox(height: VigorSpacing.md),
+        Container(
+          decoration: BoxDecoration(
+            color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+            borderRadius: VigorRadius.radiusMd,
+          ),
+          child: Column(
+            children: [
+              if (isConnected && healthService != null)
+                ValueListenableBuilder<bool>(
+                  valueListenable: healthService.syncing,
+                  builder: (context, isSyncing, _) => Column(
+                    children: [
+                      ListTile(
+                        leading: isSyncing
+                            ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: VigorColors.indigoAdaptive(context)))
+                            : Icon(Icons.check_circle, color: VigorColors.indigoAdaptive(context), size: 22),
+                        title: Text(
+                          isSyncing ? l10n.healthSynchronizing : l10n.healthSynchronized,
+                          style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)),
+                        ),
+                      ),
+                      Divider(height: 1, color: VigorColors.border(context)),
+                      ListTile(
+                        leading: Icon(Icons.sync, color: isSyncing ? VigorColors.stone : VigorColors.indigoAdaptive(context), size: 22),
+                        title: Text(l10n.healthSynchronize, style: VigorTypography.body.copyWith(color: isSyncing ? VigorColors.stone : VigorColors.textPrimary(context))),
+                        onTap: isSyncing ? null : () async {
+                          final healthService = context.read<ServiceLocator>().healthDataService;
+                          if (healthService == null) return;
+                          // read data without sending to backend so we can show it
+                          final payload = await healthService.readAllData();
+                          final debugLines = StringBuffer();
+                          debugLines.writeln('=== HEALTH SYNC DEBUG ===');
+                          debugLines.writeln('timezone: ${payload.timezone}');
+                          debugLines.writeln('metrics: ${payload.metrics.length} days');
+                          for (final m in payload.metrics) {
+                            debugLines.writeln('  ${m['date']}: sleep=${m['sleep_hours']?.toStringAsFixed(2)}h '
+                                '(deep=${m['sleep_deep_hours']?.toStringAsFixed(2)} '
+                                'light=${m['sleep_light_hours']?.toStringAsFixed(2)} '
+                                'rem=${m['sleep_rem_hours']?.toStringAsFixed(2)}) '
+                                'rhr=${m['resting_hr']} hrv=${m['hrv_rmssd']} '
+                                'steps=${m['steps']} cal=${m['active_calories']?.toStringAsFixed(1)}');
+                          }
+                          debugLines.writeln('sessions: ${payload.sessions.length}');
+                          for (final s in payload.sessions) {
+                            final start = DateTime.fromMillisecondsSinceEpoch(s['started_at'] as int);
+                            final end = DateTime.fromMillisecondsSinceEpoch(s['ended_at'] as int);
+                            debugLines.writeln('  ${s['exercise_type']} ${start.toIso8601String()} -> ${end.toIso8601String()} src=${s['source_app']}');
+                          }
+                          debugLines.writeln('hr_samples: ${payload.hrSamples.length}');
+                          // now actually sync
+                          healthService.syncToBackend(force: true);
+                          if (!context.mounted) return;
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Sync Debug'),
+                              content: SingleChildScrollView(
+                                child: SelectableText(
+                                  debugLines.toString(),
+                                  style: VigorTypography.data.copyWith(fontSize: 10, color: VigorColors.textPrimary(ctx)),
+                                ),
+                              ),
+                              actions: [
+                                TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Close')),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                      Divider(height: 1, color: VigorColors.border(context)),
+                      ListTile(
+                        leading: const Icon(Icons.delete_outline, color: VigorColors.crimson, size: 22),
+                        title: Text(l10n.healthDisconnect, style: VigorTypography.body.copyWith(color: VigorColors.crimson)),
+                        onTap: () => _showDisconnectDialog(context, l10n),
+                      ),
+                    ],
+                  ),
+                )
+              else if (!isConnected)
+                ListTile(
+                  leading: Icon(Icons.link_off, color: VigorColors.stone, size: 22),
+                  title: Text(l10n.healthNotConnected, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+                  trailing: healthService != null
+                      ? TextButton(
+                          onPressed: () async {
+                            await Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const HealthPermissionsScreen()),
+                            );
+                            if (context.mounted) setState(() {});
+                          },
+                          child: Text(l10n.healthConnect, style: TextStyle(color: VigorColors.indigoAdaptive(context))),
+                        )
+                      : null,
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showDisconnectDialog(BuildContext context, AppLocalizations l10n) async {
+    final confirmed = await AdaptiveAlertDialog.show<bool>(
+      context: context,
+      title: l10n.healthDisconnect,
+      content: l10n.healthDisconnectConfirmation,
+      actions: [
+        AdaptiveDialogAction(label: l10n.cancel, onPressed: () => Navigator.of(context).pop(false)),
+        AdaptiveDialogAction(label: l10n.delete, isDestructive: true, onPressed: () => Navigator.of(context).pop(true)),
+      ],
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    final response = await AuthenticatedApiService(
+      storageService: context.read<SecureStorageService>(),
+    ).post('/health/disconnect');
+    if (!context.mounted) return;
+
+    if (response.isSuccess) {
+      final prefs = context.read<PreferencesService>();
+      await prefs.clearHealthData();
+      await prefs.setHcConnected(false);
+      if (context.mounted) {
+        setState(() {});
+        AdaptiveNotification.show(context: context, message: l10n.healthDisconnectedSuccessfully);
+      }
+    } else {
+      AdaptiveNotification.showError(context: context, message: l10n.failedToDisconnectHealth, rawError: response.error);
+    }
   }
 
   Widget _buildThemeOption({

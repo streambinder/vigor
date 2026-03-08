@@ -25,6 +25,8 @@
     facts []model.Fact,
     skipWarmupCooldown bool,
     calibrationGaps map[string]int,
+    healthSnapshot *model.HealthSnapshot,
+    recentHR map[uuid.UUID]*model.HealthExerciseSession,
 ) -%}
 Generate a {%d duration %}-minute training.
 {% if skipWarmupCooldown %}
@@ -50,6 +52,20 @@ Age:{%d profile.Age() %} Height:{%f.0 profile.Height %}cm Weight:{%f.0 profile.W
 {% endif %}
 {% endfor %}
 
+{% if healthSnapshot != nil %}
+[HEALTH SNAPSHOT]
+Sleep: {%f.1 healthSnapshot.SleepHours %}h (baseline: {%f.1 healthSnapshot.SleepBaseline %}h, deviation: {%s formatDeviation(healthSnapshot.SleepDeviation) %})
+  Deep: {%f.1 healthSnapshot.SleepDeepHours %}h, Light: {%f.1 healthSnapshot.SleepLightHours %}h, REM: {%f.1 healthSnapshot.SleepREMHours %}h
+HRV: {%f.0 healthSnapshot.HRVRMSSD %}ms RMSSD (baseline: {%f.0 healthSnapshot.HRVBaseline %}ms, deviation: {%s formatDeviation(healthSnapshot.HRVDeviation) %})
+RHR: {%d healthSnapshot.RestingHR %}bpm (baseline: {%f.0 healthSnapshot.RHRBaseline %}bpm, deviation: {%s formatDeviation(healthSnapshot.RHRDeviation) %})
+Steps yesterday: {%s formatNumber(healthSnapshot.Steps) %} (baseline: {%s formatNumber(int(healthSnapshot.StepsBaseline)) %}, deviation: {%s formatDeviation(healthSnapshot.StepsDeviation) %})
+{% if len(healthSnapshot.ExternalWorkouts) > 0 %}External workouts (last 3 days):
+{% for _, w := range healthSnapshot.ExternalWorkouts %}  - {%d w.DaysAgo %} day{% if w.DaysAgo != 1 %}s{% endif %} ago: {%s w.ExerciseType %}, {%d w.DurationMins %}min
+{% endfor %}{% endif %}
+{% if healthSnapshot.BaselineDays >= 7 %}NOTE: baselines computed from {%d healthSnapshot.BaselineDays %}-day rolling averages.
+{% else %}NOTE: baselines not yet established ({%d healthSnapshot.BaselineDays %}/7 days) — extreme-value rules only.
+{% endif %}
+{% endif %}
 {% if len(userPrompt) > 0 %}
 [USER REQUEST]
 {%s userPrompt %}
@@ -97,7 +113,7 @@ You MUST select exercises covering as many of these under-sampled movement famil
 [HISTORY]
 {% for _, training := range recentTrainings %}
 {% code fb, hasFb := recentFeedback[training.ID] %}
-- "{%s training.Name %}" | {%d training.DaysSince() %}d ago | {%s training.Methodology %}{% if training.CompletedIn != nil %} | {%d *training.CompletedIn / 60 %}min actual{% endif %}{% if hasFb && fb.Quality != nil %}{% if *fb.Quality %} | Quality: good{% else %} | Quality: bad{% if fb.QualityReason != "" %} ({%s fb.QualityReason %}){% endif %}{% endif %}{% endif %}{% if hasFb && fb.Message != "" %} | Feedback: "{%s fb.Message %}"{% endif %}
+- "{%s training.Name %}" | {%d training.DaysSince() %}d ago | {%s training.Methodology %}{% if training.CompletedIn != nil %} | {%d *training.CompletedIn / 60 %}min actual{% endif %}{% if hasFb && fb.Quality != nil %}{% if *fb.Quality %} | Quality: good{% else %} | Quality: bad{% if fb.QualityReason != "" %} ({%s fb.QualityReason %}){% endif %}{% endif %}{% endif %}{% if hasFb && fb.Message != "" %} | Feedback: "{%s fb.Message %}"{% endif %}{% code hr := recentHR[training.ID] %}{% if hr != nil && hr.AvgHR != nil %} | HR: avg {%d *hr.AvgHR %}{% if hr.MaxHR != nil %}, max {%d *hr.MaxHR %}{% endif %}bpm{% endif %}
 {% if hasFb %}{% code var afb map[string]string; json.Unmarshal(fb.ActivityFeedback, &afb) %}{% for exID, exFb := range afb %}{% if len(exFb) > 0 %}  {%s exID %}: {%s exFb %}
 {% endif %}{% endfor %}{% endif %}
 {% endfor %}

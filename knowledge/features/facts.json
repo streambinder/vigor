@@ -814,5 +814,41 @@
     "area": "performance",
     "tags": ["morning-training", "evening-training", "metabolic"],
     "content": "Morning exercise produces greater improvements in fat oxidation and insulin sensitivity. Evening exercise favors strength and power output due to higher core temperature and circadian hormone peaks. Choose training time based on primary goal."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-016-0508-7",
+    "area": "recovery",
+    "tags": ["HRV", "RMSSD", "recovery", "autonomic"],
+    "content": "HRV RMSSD below 15ms in adults represents a significant recovery concern regardless of age. Values in this range indicate suppressed parasympathetic activity and warrant reduced training intensity."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-017-0729-6",
+    "area": "recovery",
+    "tags": ["sleep", "recovery", "motor-learning", "strength"],
+    "content": "Sleep under 5 hours impairs motor learning and strength recovery. Sleep restriction reduces next-day voluntary force output by 5-20% and degrades neuromuscular coordination."
+  },
+  {
+    "reference": "https://doi.org/10.1249/MSS.0000000000001764",
+    "area": "recovery",
+    "tags": ["resting-heart-rate", "recovery", "overtraining"],
+    "content": "Elevated resting heart rate above personal baseline indicates incomplete parasympathetic recovery. A sustained rise of 5+ bpm over baseline is a reliable marker of accumulated training stress."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-018-0867-7",
+    "area": "recovery",
+    "tags": ["DOMS", "fatigue", "external-load"],
+    "content": "Residual muscular fatigue from external exercise peaks at 24-48 hours post-session. Overlapping muscle groups within this window compounds recovery demand and increases injury risk."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-017-0688-y",
+    "area": "recovery",
+    "tags": ["deep-sleep", "recovery", "growth-hormone"],
+    "content": "Deep sleep duration correlates more strongly with physical recovery than total sleep time. Growth hormone release concentrates in deep sleep phases, directly supporting tissue repair and adaptation."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-014-0271-5",
+    "area": "recovery",
+    "tags": ["HRV", "training-load", "monitoring"],
+    "content": "HRV-guided training adjustments outperform fixed programming for endurance and strength outcomes. Reducing load when HRV trends downward prevents overreaching and accelerates adaptation."
   }
 ]

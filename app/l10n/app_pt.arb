@@ -1,17 +1,13 @@
 {
   "@@locale": "pt",
-
   "appName": "Vigor",
   "appTagline": "Ex Sapientia Vis",
-
   "navHome": "Início",
   "navActivity": "Atividade",
   "navProfile": "Perfil",
-
   "storageErrorTitle": "Vigor - Erro de Armazenamento",
   "storageUnavailable": "Armazenamento Indisponível",
   "storageErrorMessage": "Requer armazenamento seguro. Verifica as configurações.",
-
   "signInWithGoogle": "Entrar com Google",
   "signingIn": "A entrar...",
   "failedToInitializeGoogleSignIn": "Falha ao inicializar o Google Sign In",
@@ -20,18 +16,15 @@
   "failedToGetAuthToken": "Não foi possível obter o token de autenticação",
   "errorProcessingSignIn": "Erro ao processar o login: {message}",
   "googleSignInInitializing": "O Google Sign In ainda está a inicializar...",
-
   "readyToTrain": "Pronto para treinar?",
   "generateTrainingDescription": "Cria um treino adaptado aos teus objetivos",
   "generateTraining": "Gerar Treino",
-
   "refresh": "Atualizar",
   "logout": "Sair",
   "userDataRefreshed": "Dados do utilizador atualizados",
   "editProfile": "Editar Perfil",
   "settings": "Configurações",
   "other": "Outros",
-
   "deleteGym": "Eliminar Ginásio",
   "deleteGymConfirmation": "Eliminar \"{name}\"?",
   "cancel": "Cancelar",
@@ -41,7 +34,6 @@
   "deleteAccountConfirmation": "Eliminar a conta? Não pode ser desfeito.",
   "accountDeletedSuccessfully": "Conta eliminada com sucesso",
   "failedToDeleteAccount": "Falha ao eliminar a conta",
-
   "failedToLoadGyms": "Falha ao carregar ginásios",
   "gymAddedSuccessfully": "Ginásio adicionado com sucesso",
   "failedToAddGym": "Falha ao adicionar ginásio",
@@ -49,7 +41,6 @@
   "failedToUpdateGym": "Falha ao atualizar ginásio",
   "gymDeletedSuccessfully": "Ginásio eliminado com sucesso",
   "failedToDeleteGym": "Falha ao eliminar ginásio",
-
   "birthdate": "Data de nascimento",
   "gender": "Género",
   "language": "Idioma",
@@ -59,7 +50,6 @@
   "weightUnit": "kg",
   "heightWithUnit": "{value} cm",
   "weightWithUnit": "{value} kg",
-
   "goals": "Objetivos",
   "injuries": "Lesões",
   "limitations": "Limitações",
@@ -71,7 +61,6 @@
   "equipment": "Equipamento",
   "startedDate": "Início: {date}",
   "yearLabel": "Ano: {year}",
-
   "myGyms": "Ginásios",
   "addGym": "Adicionar Ginásio",
   "noGymsAddedYet": "Nenhum ginásio adicionado",
@@ -79,10 +68,8 @@
   "removeDefault": "Remover Padrão",
   "setAsDefault": "Definir como Padrão",
   "edit": "Editar",
-
   "quickActions": "Ações Rápidas",
   "dangerZone": "Zona de Perigo",
-
   "completeYourProfile": "Completa o Teu Perfil",
   "updateYourProfileInfo": "Atualiza o teu perfil abaixo.",
   "pleaseCompleteProfile": "Completa o perfil. * = obrigatório.",
@@ -94,13 +81,11 @@
   "selectLanguage": "Selecionar idioma",
   "heightCm": "Altura (cm)",
   "weightKg": "Peso (kg)",
-
   "required": "Obrigatório",
   "invalid": "Inválido",
   "pleaseSelectBirthDate": "Por favor, seleciona a tua data de nascimento",
   "pleaseAddAtLeastOneGoal": "Por favor, adiciona pelo menos um objetivo",
   "pleaseSelectLanguage": "Por favor, seleciona o teu idioma",
-
   "addAGoal": "Adicionar um objetivo",
   "injuryDescription": "Descrição da lesão",
   "year": "Ano",
@@ -108,10 +93,8 @@
   "addACondition": "Adicionar uma condição",
   "favoriteExercisesHint": "ex. agachamentos, elevações, corrida",
   "favoriteEquipmentHint": "ex. halteres, barra, kettlebell",
-
   "saveChanges": "Guardar Alterações",
   "saveProfile": "Guardar Perfil",
-
   "optionalLeaveEmpty": "(Opcional)",
   "optionalExercisesPrefer": "(Opcional)",
   "optionalEquipmentPrefer": "(Opcional)",
@@ -137,16 +120,13 @@
   "workoutTypeEnduranceDescription": "Esforço sustentado em intensidade moderada para capacidade aeróbica",
   "workoutTypeMobility": "Mobilidade",
   "workoutTypeMobilityDescription": "Melhore a amplitude de movimento e a saúde articular",
-
   "methodologyOptional": "Metodologia (opcional)",
   "methodologyAuto": "Auto",
   "goalsOptional": "Objetivos (opcional)",
   "musclesOptional": "Músculos (opcional)",
   "musclesAuto": "Todos",
   "advancedSettings": "Avançado",
-
   "failedToUpdateProfile": "Falha ao atualizar o perfil",
-
   "activity": "Atividade",
   "noTrainingsYet": "Nenhum treino ainda",
   "generateFirstTraining": "Cria o primeiro treino a partir de Início",
@@ -167,7 +147,6 @@
   "durationHrMin": "{hours} h {minutes} min",
   "failedToLoadTrainings": "Falha ao carregar treinos",
   "startTraining": "Iniciar Treino",
-
   "cloneTraining": "Clonar Treino",
   "addPartner": "Adicionar Parceiro",
   "shareWithUser": "Partilhar com Utilizador",
@@ -175,13 +154,11 @@
   "leaveTraining": "Abandonar Treino",
   "showAiReasoning": "Mostrar raciocínio da IA",
   "reportIssue": "Reportar problema",
-
   "deleteTrainingConfirmation": "Eliminar \"{name}\"? Não pode ser desfeito.",
   "leaveTrainingConfirmation": "Abandonar \"{name}\"? Não o verás mais.",
   "addPartnerConfirmation": "Adicionar {userName} como parceiro a \"{trainingName}\"?",
   "cloneTrainingConfirmation": "Clonar \"{name}\" para os teus treinos?",
   "shareTrainingConfirmation": "Partilhar \"{trainingName}\" com {userName}?",
-
   "trainingDeletedSuccessfully": "Treino eliminado com sucesso",
   "failedToDeleteTraining": "Falha ao eliminar o treino",
   "leftTrainingSuccessfully": "Treino abandonado com sucesso",
@@ -201,7 +178,6 @@
   "shuffleExercise": "Trocar exercício",
   "exerciseShuffled": "Exercício trocado",
   "failedToShuffleExercise": "Falha ao trocar exercício",
-
   "reasoning": "Raciocínio",
   "strategy": "Estratégia",
   "typeSelection": "Seleção de Tipo",
@@ -210,7 +186,6 @@
   "researchApplied": "Pesquisa Aplicada",
   "targetMuscles": "Músculos Alvo",
   "naming": "Denominação",
-
   "trainingRoutines": "Treino",
   "noEquipment": "Sem equipamento",
   "blockNumber": "Bloco {number}",
@@ -232,7 +207,6 @@
   "clone": "Clonar",
   "share": "Partilhar",
   "leave": "Abandonar",
-
   "tapToStart": "Toca para começar",
   "tapWhenDone": "Toca quando terminar",
   "trainingCompleted": "Treino Concluído!",
@@ -241,14 +215,11 @@
   "complete": "Concluir",
   "routineCounter": "Rotina {current}/{total}",
   "blockCounter": "Bloco {current}/{total}",
-
   "exitTraining": "Sair do Treino?",
   "whatWouldYouLikeToDo": "O que fazer?",
   "exit": "Sair",
   "continueTraining": "Continuar",
-
   "failedToMarkComplete": "Falha ao concluir o treino",
-
   "durationMinutes": "Duração (minutos)",
   "bodyweight": "Peso corporal",
   "gym": "Ginásio",
@@ -263,14 +234,12 @@
   "customPromptOptional": "Prompt Personalizado (opcional)",
   "focusOnUpperBody": "ex. Focar na parte superior do corpo",
   "trainingPartnersOptional": "Partner",
-
   "generatingTraining": "A gerar o teu treino...",
   "thisMayTakeAMoment": "Isto pode demorar um momento",
   "generationFailedRetrying": "Geração falhou, tentativa #{attempt}...",
   "trainingGeneratedSuccessfully": "Treino gerado com sucesso!",
   "failedToGenerateTraining": "Falha ao gerar o treino",
   "generate": "Gerar",
-
   "editGym": "Editar Ginásio",
   "gymName": "Nome do Ginásio",
   "gymNamePlaceholder": "ex. Ginásio Casa, Holmes Place",
@@ -280,16 +249,13 @@
   "pleaseEnterGymName": "Por favor, insere o nome do ginásio",
   "addAllEquipment": "Adicionar Tudo",
   "failedToLoadEquipment": "Falha ao carregar equipamentos",
-
   "selectUser": "Selecionar Utilizador",
   "searchByName": "Pesquisar por nome",
   "noUsersAvailable": "Nenhum utilizador disponível",
   "noMatchingUsers": "Nenhum utilizador correspondente",
   "noMatchingEquipment": "Nenhum equipamento correspondente",
-
   "instructions": "Instruções",
   "cues": "Dicas",
-
   "howWasYourTraining": "Como foi o teu treino?",
   "anyAdditionalComments": "Algum comentário adicional?",
   "actualDuration": "Duração real (min)",
@@ -299,9 +265,7 @@
   "easy": "Fácil",
   "tooEasy": "Muito fácil",
   "flag": "Sinalizar",
-
   "profile": "Perfil",
-
   "languageEnglish": "English",
   "languageItaliano": "Italiano",
   "languageEspanol": "Español",
@@ -312,11 +276,9 @@
   "languageChinese": "中文",
   "languageJapanese": "日本語",
   "languageKorean": "한국어",
-
   "nextExercise": "Próximo: {name}",
   "rest": "Descanso",
   "upcoming": "Próximos",
-
   "yourProgress": "Seu progresso",
   "trainingsCompleted": "{count} treinos concluídos",
   "completedTrainings": "treinos concluídos",
@@ -340,23 +302,19 @@
   "heatWarm": "Quente",
   "heatHot": "Intenso",
   "noTrainingsCompletedYet": "Comece a treinar para ver algo aqui",
-
   "theme": "Tema",
   "themeAuto": "Auto",
   "themeLight": "Claro",
   "themeDark": "Escuro",
   "themeAutoDescription": "Seguir configurações do sistema",
   "appearance": "Aparência",
-
   "trainingDefaults": "Padrões",
   "defaultDuration": "Duração do Treino",
   "warmupCooldown": "Aquecimento e arrefecimento",
-
   "timer": "Temporizador",
   "intervalJingle": "Apito na troca de intervalo",
   "duckOtherAudio": "Baixar outro áudio",
   "duckOtherAudioDescription": "Reduz o volume de música e outros apps durante o apito",
-
   "goalHypertrophy": "Hipertrofia",
   "goalHypertrophyDescription": "Aumente a massa muscular com treino de resistência",
   "goalFatLoss": "Perda de Gordura",
@@ -373,7 +331,6 @@
   "goalFlexibilityDescription": "Melhore a amplitude de movimento com alongamentos e mobilidade",
   "goalSports": "Desempenho Desportivo",
   "goalSportsDescription": "Melhore a capacidade atlética com treino de potência e agilidade",
-
   "thisWeek": "Esta Semana",
   "trainingPlan": "Plano de Treino",
   "sessionsPerWeek": "Sessões por semana",
@@ -386,7 +343,6 @@
   "daysLeft": "{count} dias restantes",
   "recommended": "Recomendado",
   "duration": "Duração",
-
   "familyHorizontalPush": "Empurrar",
   "familyHorizontalPull": "Puxar",
   "familyVerticalPush": "Press vertical",
@@ -398,13 +354,11 @@
   "familyCardio": "Cardio",
   "familyMobility": "Mobilidade",
   "familyBalance": "Equilíbrio",
-
   "trainingQuality": "O que achou deste treino?",
   "trainingQualityHint": "Nos ajuda a avaliar a qualidade do treino gerado",
   "qualityReasonHint": "O que poderia ser melhorado?",
   "good": "Bom",
   "bad": "Ruim",
-
   "loadingMsg1": "Analisando seu perfil...",
   "loadingMsg2": "Selecionando exercícios...",
   "loadingMsg3": "Montando sua rotina...",
@@ -425,7 +379,6 @@
   "loadingMsg18": "Avaliando distribuição de carga...",
   "loadingMsg19": "Personalizando sua sessão...",
   "loadingMsg20": "Quase pronto...",
-
   "loadingMsgGoal": "Otimizando para {goal}...",
   "loadingMsgInjuries": "Adaptando às suas lesões...",
   "loadingMsgFavorites": "Priorizando seus exercícios favoritos...",
@@ -434,27 +387,38 @@
   "loadingMsgPartners": "Coordenando treino em dupla...",
   "loadingMsgGym": "Carregando equipamentos de {gym}...",
   "loadingMsgHistory": "Analisando suas sessões recentes...",
-
   "loadingRetryMsg1": "hmm, não saiu bem — tentando de novo",
   "loadingRetryMsg2": "deixa eu tentar de novo...",
   "loadingRetryMsg3": "não rolou — mais uma tentativa",
   "loadingRetryMsg4": "mais uma tentativa, um momento",
   "loadingRetryMsg5": "oops, recalibrando...",
   "loadingRetryMsg6": "quase lá — tentando de novo",
-
   "nSelected": "{count} selecionados",
-  "@nSelected": { "placeholders": { "count": { "type": "int" } } },
+  "@nSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "deleteSelectedTrainings": "Excluir {count} treinos?",
-  "@deleteSelectedTrainings": { "placeholders": { "count": { "type": "int" } } },
+  "@deleteSelectedTrainings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "trainingsDeletedSuccessfully": "Treinos excluídos com sucesso",
-
   "shareByLink": "Share Link",
   "addToMyTrainings": "Add to My Trainings",
   "goToTraining": "Go to Training",
   "sharedBy": "Shared by {name}",
   "@sharedBy": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "linkCopied": "Link copied to clipboard",
@@ -464,7 +428,6 @@
   "loginToAdd": "Log in to add this training",
   "pendingFeedbacks": "Feedbacks pendentes",
   "pendingFeedbacksDescription": "Alguns dos seus treinos estão marcados como concluídos mas não têm o seu feedback. O feedback ajuda a melhorar as recomendações para os seus futuros treinos.",
-
   "equipmentPartner": "Parceiro",
   "equipmentBalanceBoard": "Prancha de Equilíbrio",
   "equipmentBand": "Banda",
@@ -500,7 +463,6 @@
   "equipmentTrx": "TRX",
   "equipmentUpperBodyErgometer": "Ergômetro de Braço",
   "equipmentWheelRoller": "Roda Abdominal",
-
   "muscleChest": "Peito",
   "muscleBack": "Costas",
   "muscleShoulders": "Ombros",
@@ -508,7 +470,6 @@
   "muscleCore": "Core",
   "muscleGlutes": "Glúteos",
   "muscleLegs": "Pernas",
-
   "modifierWeightedVest": "Colete com Peso",
   "modifierParallettes": "Paralelas Baixas",
   "modifierAnkleWeights": "Pesos de Tornozelo",
@@ -516,5 +477,63 @@
   "modifierPushUpBars": "Barras para Flexões",
   "modifierResistanceBands": "Bandas de Resistência",
   "modifierWeight": "Peso",
-  "modifierWristWeights": "Pesos de Pulso"
+  "modifierWristWeights": "Pesos de pulso",
+  "avgHr": "FC méd",
+  "bpm": "bpm",
+  "failedToDisconnectHealth": "Falha ao desconectar dados de saúde",
+  "healthAdjustment": "Ajuste de saúde",
+  "healthMetrics": "Dados de Saúde",
+  "healthBuildingBaselines": "Criando suas referências pessoais ({days}/14 dias)",
+  "@healthBuildingBaselines": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "healthConnect": "Conectar",
+  "healthConnected": "Conectado",
+  "healthData": "Dados de saúde",
+  "healthDisconnect": "Desconectar e excluir dados",
+  "healthDisconnectConfirmation": "Desconectar dados de saúde? Todos os dados sincronizados serão excluídos. Esta ação não pode ser desfeita.",
+  "healthDisconnectedSuccessfully": "Dados de saúde desconectados",
+  "healthInstallHc": "Instalar Health Connect",
+  "healthInstallHcDescription": "O Health Connect é necessário para sincronizar os dados do seu wearable. Instale-o pela Play Store.",
+  "healthInstallHcTitle": "Health Connect necessário",
+  "healthNotConnected": "Não conectado",
+  "healthOnboardingConnect": "Conectar",
+  "healthOnboardingDescription": "Conecte seus dados de saúde e o Vigor adaptará seu treino ao seu sono, recuperação e atividade.",
+  "healthOnboardingDismiss": "Talvez depois",
+  "healthOnboardingTitle": "Conecte seu wearable",
+  "healthPermissionsDenied": "As permissões não foram concedidas",
+  "healthPermissionsDescription": "O Vigor lê seus dados de saúde para personalizar seus treinos. Melhores dados de sono, recuperação e atividade significam recomendações mais inteligentes.",
+  "healthPermissionsGrant": "Conectar dados de saúde",
+  "healthPermissionsGranted": "Dados de saúde conectados",
+  "healthPermissionsHrv": "Variabilidade da frequência cardíaca (VFC)",
+  "healthPermissionsReadOnly": "Acesso somente leitura",
+  "healthPermissionsRhr": "Frequência cardíaca em repouso",
+  "healthPermissionsSkip": "Agora não",
+  "healthPermissionsSleep": "Duração e fases do sono",
+  "healthPermissionsSteps": "Passos diários",
+  "healthPermissionsTitle": "Conecte seu wearable",
+  "healthPermissionsWorkouts": "Sessões de treino e frequência cardíaca",
+  "heartRate": "Frequência cardíaca",
+  "hrZone1": "Zona 1",
+  "hrZone2": "Zona 2",
+  "hrZone3": "Zona 3",
+  "hrZone4": "Zona 4",
+  "hrZone5": "Zona 5",
+  "hrZones": "Zonas FC",
+  "maxHr": "FC máx",
+  "healthSynchronizing": "Sincronizando...",
+  "healthSynchronized": "Sincronizado",
+  "healthSynchronize": "Sincronizar agora",
+
+  "healthDailySleep": "Sono",
+  "healthDailyRestingHr": "FC em repouso",
+  "healthDailyHrv": "VFC",
+  "healthDailySteps": "Passos",
+  "healthDailyCalories": "Calorias",
+  "healthDailyNoData": "Sem dados de saúde",
+  "externalWorkout": "Treino externo"
 }

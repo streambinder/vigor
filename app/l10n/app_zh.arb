@@ -1,17 +1,13 @@
 {
   "@@locale": "zh",
-
   "appName": "Vigor",
   "appTagline": "Ex Sapientia Vis",
-
   "navHome": "主页",
   "navActivity": "活动",
   "navProfile": "个人资料",
-
   "storageErrorTitle": "Vigor - 存储错误",
   "storageUnavailable": "存储不可用",
   "storageErrorMessage": "需要安全存储。请检查设置。",
-
   "signInWithGoogle": "使用 Google 登录",
   "signingIn": "正在登录...",
   "failedToInitializeGoogleSignIn": "无法初始化 Google 登录",
@@ -20,18 +16,15 @@
   "failedToGetAuthToken": "无法获取身份验证令牌",
   "errorProcessingSignIn": "处理登录时出错：{message}",
   "googleSignInInitializing": "Google 登录仍在初始化中...",
-
   "readyToTrain": "准备好训练了吗？",
   "generateTrainingDescription": "创建符合您目标的训练",
   "generateTraining": "生成训练",
-
   "refresh": "刷新",
   "logout": "退出登录",
   "userDataRefreshed": "用户数据已刷新",
   "editProfile": "编辑个人资料",
   "settings": "设置",
   "other": "其他",
-
   "deleteGym": "删除健身房",
   "deleteGymConfirmation": "删除「{name}」？",
   "cancel": "取消",
@@ -41,7 +34,6 @@
   "deleteAccountConfirmation": "删除账户？不可撤销。",
   "accountDeletedSuccessfully": "账户已成功删除",
   "failedToDeleteAccount": "删除账户失败",
-
   "failedToLoadGyms": "加载健身房失败",
   "gymAddedSuccessfully": "健身房添加成功",
   "failedToAddGym": "添加健身房失败",
@@ -49,7 +41,6 @@
   "failedToUpdateGym": "更新健身房失败",
   "gymDeletedSuccessfully": "健身房删除成功",
   "failedToDeleteGym": "删除健身房失败",
-
   "birthdate": "出生日期",
   "gender": "性别",
   "language": "语言",
@@ -59,7 +50,6 @@
   "weightUnit": "公斤",
   "heightWithUnit": "{value} 厘米",
   "weightWithUnit": "{value} 公斤",
-
   "goals": "目标",
   "injuries": "伤病",
   "limitations": "限制",
@@ -71,7 +61,6 @@
   "equipment": "设备",
   "startedDate": "开始：{date}",
   "yearLabel": "年份：{year}",
-
   "myGyms": "健身房",
   "addGym": "添加健身房",
   "noGymsAddedYet": "尚未添加健身房",
@@ -79,10 +68,8 @@
   "removeDefault": "移除默认",
   "setAsDefault": "设为默认",
   "edit": "编辑",
-
   "quickActions": "快速操作",
   "dangerZone": "危险区域",
-
   "completeYourProfile": "完善您的个人资料",
   "updateYourProfileInfo": "在下方更新您的资料。",
   "pleaseCompleteProfile": "完善资料。* = 必填。",
@@ -94,13 +81,11 @@
   "selectLanguage": "选择语言",
   "heightCm": "身高（厘米）",
   "weightKg": "体重（公斤）",
-
   "required": "必填",
   "invalid": "无效",
   "pleaseSelectBirthDate": "请选择您的出生日期",
   "pleaseAddAtLeastOneGoal": "请至少添加一个目标",
   "pleaseSelectLanguage": "请选择您的语言",
-
   "addAGoal": "添加目标",
   "injuryDescription": "伤病描述",
   "year": "年份",
@@ -108,10 +93,8 @@
   "addACondition": "添加身体状况",
   "favoriteExercisesHint": "例如：深蹲、引体向上、跑步",
   "favoriteEquipmentHint": "例如：哑铃、杠铃、壶铃",
-
   "saveChanges": "保存更改",
   "saveProfile": "保存个人资料",
-
   "optionalLeaveEmpty": "（可选）",
   "optionalExercisesPrefer": "（可选）",
   "optionalEquipmentPrefer": "（可选）",
@@ -137,16 +120,13 @@
   "workoutTypeEnduranceDescription": "中等强度的持续运动以提高有氧能力",
   "workoutTypeMobility": "灵活性",
   "workoutTypeMobilityDescription": "改善活动范围和关节健康",
-
   "methodologyOptional": "方法（可选）",
   "methodologyAuto": "自动",
   "goalsOptional": "目标（可选）",
   "musclesOptional": "肌肉（可选）",
   "musclesAuto": "全部",
   "advancedSettings": "高级",
-
   "failedToUpdateProfile": "更新个人资料失败",
-
   "activity": "活动",
   "noTrainingsYet": "暂无训练",
   "generateFirstTraining": "从主页创建首个训练",
@@ -167,7 +147,6 @@
   "durationHrMin": "{hours} 小时 {minutes} 分钟",
   "failedToLoadTrainings": "加载训练失败",
   "startTraining": "开始训练",
-
   "cloneTraining": "克隆训练",
   "addPartner": "添加伙伴",
   "shareWithUser": "与用户分享",
@@ -175,13 +154,11 @@
   "leaveTraining": "离开训练",
   "showAiReasoning": "显示 AI 推理",
   "reportIssue": "报告问题",
-
   "deleteTrainingConfirmation": "删除「{name}」？不可撤销。",
   "leaveTrainingConfirmation": "离开「{name}」？将不再显示。",
   "addPartnerConfirmation": "将 {userName} 添加为「{trainingName}」的伙伴？",
   "cloneTrainingConfirmation": "将「{name}」克隆到您的训练中？",
   "shareTrainingConfirmation": "与 {userName} 分享「{trainingName}」？",
-
   "trainingDeletedSuccessfully": "训练删除成功",
   "failedToDeleteTraining": "删除训练失败",
   "leftTrainingSuccessfully": "成功离开训练",
@@ -201,7 +178,6 @@
   "shuffleExercise": "更换动作",
   "exerciseShuffled": "动作已更换",
   "failedToShuffleExercise": "更换动作失败",
-
   "reasoning": "推理",
   "strategy": "策略",
   "typeSelection": "类型选择",
@@ -210,7 +186,6 @@
   "researchApplied": "应用研究",
   "targetMuscles": "目标肌肉",
   "naming": "命名",
-
   "trainingRoutines": "训练",
   "noEquipment": "无设备",
   "blockNumber": "区块 {number}",
@@ -232,7 +207,6 @@
   "clone": "克隆",
   "share": "分享",
   "leave": "离开",
-
   "tapToStart": "点击开始",
   "tapWhenDone": "完成后点击",
   "trainingCompleted": "训练完成！",
@@ -241,14 +215,11 @@
   "complete": "完成",
   "routineCounter": "程序 {current}/{total}",
   "blockCounter": "区块 {current}/{total}",
-
   "exitTraining": "退出训练？",
   "whatWouldYouLikeToDo": "下一步？",
   "exit": "退出",
   "continueTraining": "继续",
-
   "failedToMarkComplete": "完成训练失败",
-
   "durationMinutes": "时长（分钟）",
   "bodyweight": "自重",
   "gym": "健身房",
@@ -263,14 +234,12 @@
   "customPromptOptional": "自定义提示（可选）",
   "focusOnUpperBody": "例如：专注于上半身",
   "trainingPartnersOptional": "伙伴",
-
   "generatingTraining": "正在生成您的训练...",
   "thisMayTakeAMoment": "这可能需要一点时间",
   "generationFailedRetrying": "生成失败，重试 #{attempt}...",
   "trainingGeneratedSuccessfully": "训练生成成功！",
   "failedToGenerateTraining": "生成训练失败",
   "generate": "生成",
-
   "editGym": "编辑健身房",
   "gymName": "健身房名称",
   "gymNamePlaceholder": "例如：家庭健身房、威尔士",
@@ -280,16 +249,13 @@
   "pleaseEnterGymName": "请输入健身房名称",
   "addAllEquipment": "全部添加",
   "failedToLoadEquipment": "加载设备失败",
-
   "selectUser": "选择用户",
   "searchByName": "按名称搜索",
   "noUsersAvailable": "没有可用的用户",
   "noMatchingUsers": "没有匹配的用户",
   "noMatchingEquipment": "没有匹配的器材",
-
   "instructions": "说明",
   "cues": "提示",
-
   "howWasYourTraining": "您的训练感觉如何？",
   "anyAdditionalComments": "有其他评论吗？",
   "actualDuration": "实际时长（分钟）",
@@ -299,9 +265,7 @@
   "easy": "简单",
   "tooEasy": "太简单",
   "flag": "标记",
-
   "profile": "个人资料",
-
   "languageEnglish": "English",
   "languageItaliano": "Italiano",
   "languageEspanol": "Español",
@@ -312,11 +276,9 @@
   "languageChinese": "中文",
   "languageJapanese": "日本語",
   "languageKorean": "한국어",
-
   "nextExercise": "下一个: {name}",
   "rest": "休息",
   "upcoming": "即将进行",
-
   "yourProgress": "您的进度",
   "trainingsCompleted": "已完成 {count} 次训练",
   "completedTrainings": "已完成训练",
@@ -340,23 +302,19 @@
   "heatWarm": "温热",
   "heatHot": "高强度",
   "noTrainingsCompletedYet": "开始训练来看点什么吧",
-
   "theme": "主题",
   "themeAuto": "自动",
   "themeLight": "浅色",
   "themeDark": "深色",
   "themeAutoDescription": "跟随系统设置",
   "appearance": "外观",
-
   "trainingDefaults": "默认值",
   "defaultDuration": "训练时长",
   "warmupCooldown": "热身和放松",
-
   "timer": "计时器",
   "intervalJingle": "间隔切换时吹哨",
   "duckOtherAudio": "降低其他音频",
   "duckOtherAudioDescription": "吹哨时降低音乐和其他应用的音量",
-
   "goalHypertrophy": "增肌",
   "goalHypertrophyDescription": "通过针对性力量训练增加肌肉量",
   "goalFatLoss": "减脂",
@@ -373,7 +331,6 @@
   "goalFlexibilityDescription": "通过拉伸和灵活性训练提高活动范围",
   "goalSports": "运动表现",
   "goalSportsDescription": "通过力量和敏捷训练提升运动能力",
-
   "thisWeek": "本周",
   "trainingPlan": "训练计划",
   "sessionsPerWeek": "每周训练次数",
@@ -386,7 +343,6 @@
   "daysLeft": "还剩 {count} 天",
   "recommended": "推荐",
   "duration": "时长",
-
   "familyHorizontalPush": "推",
   "familyHorizontalPull": "拉",
   "familyVerticalPush": "过顶推",
@@ -398,13 +354,11 @@
   "familyCardio": "有氧",
   "familyMobility": "灵活性",
   "familyBalance": "平衡",
-
   "trainingQuality": "你觉得这次训练怎么样？",
   "trainingQualityHint": "帮助我们评估AI生成训练的质量",
   "qualityReasonHint": "有什么可以改进的？",
   "good": "好",
   "bad": "差",
-
   "loadingMsg1": "分析你的个人资料...",
   "loadingMsg2": "选择练习动作...",
   "loadingMsg3": "构建你的训练计划...",
@@ -425,7 +379,6 @@
   "loadingMsg18": "评估负荷分布...",
   "loadingMsg19": "个性化你的训练...",
   "loadingMsg20": "即将完成...",
-
   "loadingMsgGoal": "为{goal}优化...",
   "loadingMsgInjuries": "根据伤病情况调整...",
   "loadingMsgFavorites": "优先安排你喜欢的动作...",
@@ -434,27 +387,38 @@
   "loadingMsgPartners": "协调搭档训练...",
   "loadingMsgGym": "加载{gym}的设备...",
   "loadingMsgHistory": "分析你最近的训练...",
-
   "loadingRetryMsg1": "嗯，没出来对——重试中",
   "loadingRetryMsg2": "让我再试一次...",
   "loadingRetryMsg3": "差一点——再来一次",
   "loadingRetryMsg4": "再试一次，稍等",
   "loadingRetryMsg5": "哎呀，重新校准...",
   "loadingRetryMsg6": "差点就好了——再试",
-
   "nSelected": "已选择{count}项",
-  "@nSelected": { "placeholders": { "count": { "type": "int" } } },
+  "@nSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "deleteSelectedTrainings": "删除{count}个训练？",
-  "@deleteSelectedTrainings": { "placeholders": { "count": { "type": "int" } } },
+  "@deleteSelectedTrainings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "trainingsDeletedSuccessfully": "训练已成功删除",
-
   "shareByLink": "Share Link",
   "addToMyTrainings": "Add to My Trainings",
   "goToTraining": "Go to Training",
   "sharedBy": "Shared by {name}",
   "@sharedBy": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "linkCopied": "Link copied to clipboard",
@@ -464,7 +428,6 @@
   "loginToAdd": "Log in to add this training",
   "pendingFeedbacks": "待提交反馈",
   "pendingFeedbacksDescription": "部分训练已完成但尚未提交反馈。反馈有助于改善未来的训练推荐。",
-
   "equipmentPartner": "训练伙伴",
   "equipmentBalanceBoard": "平衡板",
   "equipmentBand": "弹力带",
@@ -500,7 +463,6 @@
   "equipmentTrx": "TRX",
   "equipmentUpperBodyErgometer": "上肢测功计",
   "equipmentWheelRoller": "健腹轮",
-
   "muscleChest": "胸部",
   "muscleBack": "背部",
   "muscleShoulders": "肩部",
@@ -508,7 +470,6 @@
   "muscleCore": "核心",
   "muscleGlutes": "臀部",
   "muscleLegs": "腿部",
-
   "modifierWeightedVest": "负重背心",
   "modifierParallettes": "俯卧撑架",
   "modifierAnkleWeights": "脚踝负重",
@@ -516,5 +477,63 @@
   "modifierPushUpBars": "俯卧撑支架",
   "modifierResistanceBands": "阻力带",
   "modifierWeight": "负重",
-  "modifierWristWeights": "手腕负重"
+  "modifierWristWeights": "腕部负重",
+  "avgHr": "平均心率",
+  "bpm": "bpm",
+  "failedToDisconnectHealth": "断开健康数据失败",
+  "healthAdjustment": "健康调整",
+  "healthMetrics": "健康数据",
+  "healthBuildingBaselines": "正在建立个人基准值（{days}/14天）",
+  "@healthBuildingBaselines": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "healthConnect": "连接",
+  "healthConnected": "已连接",
+  "healthData": "健康数据",
+  "healthDisconnect": "断开连接并删除数据",
+  "healthDisconnectConfirmation": "断开健康数据连接？所有同步的数据将被删除，此操作不可撤销。",
+  "healthDisconnectedSuccessfully": "健康数据已断开连接",
+  "healthInstallHc": "安装Health Connect",
+  "healthInstallHcDescription": "需要Health Connect来同步可穿戴设备数据。请从Play商店安装。",
+  "healthInstallHcTitle": "需要Health Connect",
+  "healthNotConnected": "未连接",
+  "healthOnboardingConnect": "连接",
+  "healthOnboardingDescription": "连接健康数据，Vigor将根据你的睡眠、恢复和活动调整训练。",
+  "healthOnboardingDismiss": "以后再说",
+  "healthOnboardingTitle": "连接可穿戴设备",
+  "healthPermissionsDenied": "未授予权限",
+  "healthPermissionsDescription": "Vigor读取你的健康数据以个性化训练。更好的睡眠、恢复和活动数据意味着更智能的训练建议。",
+  "healthPermissionsGrant": "连接健康数据",
+  "healthPermissionsGranted": "健康数据已连接",
+  "healthPermissionsHrv": "心率变异性（HRV）",
+  "healthPermissionsReadOnly": "仅读取访问",
+  "healthPermissionsRhr": "静息心率",
+  "healthPermissionsSkip": "暂时不用",
+  "healthPermissionsSleep": "睡眠时长和阶段",
+  "healthPermissionsSteps": "每日步数",
+  "healthPermissionsTitle": "连接你的可穿戴设备",
+  "healthPermissionsWorkouts": "运动记录和心率",
+  "heartRate": "心率",
+  "hrZone1": "区间1",
+  "hrZone2": "区间2",
+  "hrZone3": "区间3",
+  "hrZone4": "区间4",
+  "hrZone5": "区间5",
+  "hrZones": "心率区间",
+  "maxHr": "最大心率",
+  "healthSynchronizing": "同步中...",
+  "healthSynchronized": "已同步",
+  "healthSynchronize": "立即同步",
+
+  "healthDailySleep": "睡眠",
+  "healthDailyRestingHr": "静息心率",
+  "healthDailyHrv": "HRV",
+  "healthDailySteps": "步数",
+  "healthDailyCalories": "卡路里",
+  "healthDailyNoData": "暂无健康数据",
+  "externalWorkout": "外部锻炼"
 }

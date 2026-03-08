@@ -9,22 +9,27 @@ import 'gym_service.dart';
 import 'progress_service.dart';
 import 'user_service.dart';
 import 'secure_storage_service.dart';
+import 'preferences_service.dart';
+import 'health_data_service.dart';
 
 /// Centralized service locator that caches service instances.
 /// Avoids recreating services on every screen mount, reducing memory churn
 /// and improving initial frame times.
 class ServiceLocator extends ChangeNotifier {
   final SecureStorageService _storage;
+  final PreferencesService _prefs;
 
   TrainingService? _trainingService;
   GymService? _gymService;
   ProgressService? _progressService;
   UserService? _userService;
+  HealthDataService? _healthDataService;
 
   // shared observable state for cross-screen sync
   final ValueNotifier<List<Gym>?> gymsNotifier = ValueNotifier(null);
   final ValueNotifier<List<Training>?> trainingsNotifier = ValueNotifier(null);
   final ValueNotifier<bool> isCalibratingNotifier = ValueNotifier(false);
+  final ValueNotifier<Map<String, dynamic>?> healthDailyNotifier = ValueNotifier(null);
 
   // pending share token to process after login completes
   String? pendingShareToken;
@@ -39,7 +44,7 @@ class ServiceLocator extends ChangeNotifier {
   bool _isRefreshingGyms = false;
   bool _isRefreshingTrainings = false;
 
-  ServiceLocator(this._storage);
+  ServiceLocator(this._storage, this._prefs);
 
   TrainingService get trainingService => _trainingService ??= TrainingService(
         storageService: _storage,
@@ -56,6 +61,9 @@ class ServiceLocator extends ChangeNotifier {
 
   UserService get userService =>
       _userService ??= UserService(storageService: _storage);
+
+  HealthDataService? get healthDataService => _healthDataService ??=
+      HealthDataService.create(prefs: _prefs, storage: _storage);
 
   Future<void> refreshGyms() async {
     if (_isRefreshingGyms) return;
@@ -83,17 +91,33 @@ class ServiceLocator extends ChangeNotifier {
     }
   }
 
+  Future<void> refreshHealthDaily() async {
+    if (!_prefs.hcConnected) return;
+    final response = await trainingService.getHealthDaily();
+    if (response.isSuccess) {
+      healthDailyNotifier.value = response.data;
+    }
+  }
+
   /// Pre-load homepage data so splash stays until everything is ready
   Future<void> loadInitialData() async {
-    final results = await Future.wait([
+    final futures = <Future>[
       progressService.getProgress(),
       progressService.getWeeklyTarget(),
-    ]);
+    ];
+    if (_prefs.hcConnected) {
+      futures.add(trainingService.getHealthDaily());
+    }
+
+    final results = await Future.wait(futures);
     if (results[0].isSuccess) {
       initialProgress = results[0].data as Progress?;
       _updateCalibrationState();
     }
     if (results[1].isSuccess) initialWeeklyTarget = results[1].data as WeeklyTarget?;
+    if (_prefs.hcConnected && results.length > 2 && results[2].isSuccess) {
+      healthDailyNotifier.value = results[2].data as Map<String, dynamic>?;
+    }
     initialDataLoaded = true;
   }
 
@@ -114,14 +138,18 @@ class ServiceLocator extends ChangeNotifier {
     _gymService = null;
     _progressService = null;
     _userService = null;
+    _healthDataService = null;
     gymsNotifier.value = null;
     trainingsNotifier.value = null;
     isCalibratingNotifier.value = false;
+    healthDailyNotifier.value = null;
     pendingShareToken = null;
     pendingShareAutoClaim = false;
     initialProgress = null;
     initialWeeklyTarget = null;
     initialDataLoaded = false;
+    // clear health sync tokens on logout (H2 — multi-user scoping)
+    _prefs.clearHealthData();
   }
 
   @override
@@ -129,6 +157,7 @@ class ServiceLocator extends ChangeNotifier {
     gymsNotifier.dispose();
     trainingsNotifier.dispose();
     isCalibratingNotifier.dispose();
+    healthDailyNotifier.dispose();
     super.dispose();
   }
 }

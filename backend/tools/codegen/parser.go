@@ -88,6 +88,20 @@ func (p *Parser) ParsePackage() ([]Struct, error) {
 					continue
 				}
 
+				// skip structs with // codegen:skip directive
+				if genDecl.Doc != nil {
+					skip := false
+					for _, comment := range genDecl.Doc.List {
+						if strings.Contains(comment.Text, "codegen:skip") {
+							skip = true
+							break
+						}
+					}
+					if skip {
+						continue
+					}
+				}
+
 				for _, spec := range genDecl.Specs {
 					typeSpec, ok := spec.(*ast.TypeSpec)
 					if !ok {

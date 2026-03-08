@@ -242,6 +242,28 @@ class TrainingService {
     return ApiResponse.error(response.error ?? 'Failed to fetch feedback', response.statusCode);
   }
 
+  /// fetch linked health exercise session for a training (HR samples, avg/max, zones)
+  Future<ApiResponse<Map<String, dynamic>?>> getHealthSession(String trainingId) async {
+    final response = await _apiService.get('/health/session/$trainingId');
+    if (response.isSuccess && response.data != null) {
+      return ApiResponse.success(response.data, response.statusCode);
+    }
+    // 404 = no linked session
+    if (response.statusCode == 404) {
+      return ApiResponse.success(null, response.statusCode);
+    }
+    return ApiResponse.error(response.error ?? 'Failed to fetch health session', response.statusCode);
+  }
+
+  /// fetch last 7 days of health metrics + unlinked exercise sessions
+  Future<ApiResponse<Map<String, dynamic>>> getHealthDaily() async {
+    final response = await _apiService.get('/health/daily');
+    if (response.isSuccess && response.data != null) {
+      return ApiResponse.success(response.data!, response.statusCode);
+    }
+    return ApiResponse.error(response.error ?? 'Failed to fetch health daily', response.statusCode);
+  }
+
   Future<ApiResponse<String>> addPartner(String trainingId, String partner) async {
     AppLogger.debug('[TrainingService] Adding partner to training: $trainingId');
 

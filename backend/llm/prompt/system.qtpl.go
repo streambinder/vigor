@@ -21,7 +21,7 @@ var (
 )
 
 //line llm/prompt/system.qtpl:5
-func StreamSystem(qw422016 *qt422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool) {
+func StreamSystem(qw422016 *qt422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) {
 //line llm/prompt/system.qtpl:5
 	qw422016.N().S(`You are an expert personal trainer AI creating individualized training programs.
 
@@ -199,32 +199,61 @@ NAME: Generate a memorable 3-4 word title that:
 - NEVER use: ALL CAPS, methodology names, goal lists, generic terms ("training", "workout", "session")
 - NEVER reuse names from [HISTORY]
 Examples: Power Surge, Iron Hour, Circuit Breaker, Flow State, Burn Notice, Strength Stack, Rapid Fire, Full Throttle
+
 `)
-//line llm/prompt/system.qtpl:80
+//line llm/prompt/system.qtpl:81
+	if healthSnapshot != nil {
+//line llm/prompt/system.qtpl:81
+		qw422016.N().S(`
+HEALTH DATA RULES:
+- If recovery indicators suggest fatigue (large negative deviations from sleep or HRV baselines), reduce volume and intensity proportionally. Prefer lower-intensity methodologies, consider avoiding heavy compounds in early sets.
+- If resting heart rate is notably elevated above baseline, treat as an elevated stress signal — reduce overall intensity.
+- If step count is significantly below baseline, the user may be sedentary today — include a longer warmup.
+- External workouts in the last 48 hours: account for residual fatigue, reduce volume for overlapping muscle groups.
+- Extreme-value rules (no baseline needed): if sleep < 5h or HRV < 15ms RMSSD, treat as a recovery concern regardless of baseline status.
+- If baselines are not yet established (< 7 days of data): use only extreme-value rules, do not make nuanced adjustments.
+- If sleep or HRV deviation exceeds -15%, this is a meaningful recovery signal — reduce volume moderately. If multiple indicators show large negative deviations simultaneously, make a more substantial reduction.
+- Frame any health-driven adjustments as training design choices (e.g. "lighter session to optimize progression") rather than health disclosures. Never reference recovery data, fatigue signals, or health metrics in user-facing text.
+- If health data influenced your training design, populate `)
+//line llm/prompt/system.qtpl:81
+		qw422016.N().S("`")
+//line llm/prompt/system.qtpl:81
+		qw422016.N().S(`health_adjustment`)
+//line llm/prompt/system.qtpl:81
+		qw422016.N().S("`")
+//line llm/prompt/system.qtpl:81
+		qw422016.N().S(` in reasoning with a brief explanation; leave empty if deviations are negligible.
+`)
+//line llm/prompt/system.qtpl:92
+	}
+//line llm/prompt/system.qtpl:92
+	qw422016.N().S(`
+`)
+//line llm/prompt/system.qtpl:93
 }
 
-//line llm/prompt/system.qtpl:80
-func WriteSystem(qq422016 qtio422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool) {
-//line llm/prompt/system.qtpl:80
+//line llm/prompt/system.qtpl:93
+func WriteSystem(qq422016 qtio422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) {
+//line llm/prompt/system.qtpl:93
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/system.qtpl:80
-	StreamSystem(qw422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers, hasModifierVariants)
-//line llm/prompt/system.qtpl:80
+//line llm/prompt/system.qtpl:93
+	StreamSystem(qw422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers, hasModifierVariants, healthSnapshot)
+//line llm/prompt/system.qtpl:93
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/system.qtpl:80
+//line llm/prompt/system.qtpl:93
 }
 
-//line llm/prompt/system.qtpl:80
-func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool) string {
-//line llm/prompt/system.qtpl:80
+//line llm/prompt/system.qtpl:93
+func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) string {
+//line llm/prompt/system.qtpl:93
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/system.qtpl:80
-	WriteSystem(qb422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers, hasModifierVariants)
-//line llm/prompt/system.qtpl:80
+//line llm/prompt/system.qtpl:93
+	WriteSystem(qb422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers, hasModifierVariants, healthSnapshot)
+//line llm/prompt/system.qtpl:93
 	qs422016 := string(qb422016.B)
-//line llm/prompt/system.qtpl:80
+//line llm/prompt/system.qtpl:93
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/system.qtpl:80
+//line llm/prompt/system.qtpl:93
 	return qs422016
-//line llm/prompt/system.qtpl:80
+//line llm/prompt/system.qtpl:93
 }

@@ -10,6 +10,10 @@ class PreferencesService {
   static const String _duckOtherAudioKey = 'duck_other_audio';
   static const String _warmupCooldownKey = 'warmup_cooldown';
   static const String _useRecommendedDurationKey = 'use_recommended_duration';
+  static const String _hcChangesTokenKey = 'hc_changes_token';
+  static const String _hcLastSyncMsKey = 'hc_last_sync_ms';
+  static const String _hcConnectedKey = 'hc_connected';
+  static const String _hcOnboardingDismissedMsKey = 'hc_onboarding_dismissed_ms';
   static const int defaultDurationFallback = 60;
 
   SharedPreferences? _prefs;
@@ -86,5 +90,59 @@ class PreferencesService {
 
   Future<void> setUseRecommendedDuration(bool enabled) async {
     await _prefs?.setBool(_useRecommendedDurationKey, enabled);
+  }
+
+  // health connect sync state
+
+  String? get hcChangesToken => _prefs?.getString(_hcChangesTokenKey);
+
+  Future<void> setHcChangesToken(String? token) async {
+    if (token == null) {
+      await _prefs?.remove(_hcChangesTokenKey);
+    } else {
+      await _prefs?.setString(_hcChangesTokenKey, token);
+    }
+  }
+
+  int? get hcLastSyncMs => _prefs?.getInt(_hcLastSyncMsKey);
+
+  Future<void> setHcLastSyncMs(int? ms) async {
+    if (ms == null) {
+      await _prefs?.remove(_hcLastSyncMsKey);
+    } else {
+      await _prefs?.setInt(_hcLastSyncMsKey, ms);
+    }
+  }
+
+  /// clear all health-related keys (called on logout for multi-user scoping)
+  Future<void> clearHealthData() async {
+    await _prefs?.remove(_hcChangesTokenKey);
+    await _prefs?.remove(_hcLastSyncMsKey);
+    await _prefs?.remove(_hcConnectedKey);
+    await _prefs?.remove(_hcOnboardingDismissedMsKey);
+  }
+
+  // health connect connection state
+
+  bool get hcConnected => _prefs?.getBool(_hcConnectedKey) ?? false;
+
+  Future<void> setHcConnected(bool connected) async {
+    await _prefs?.setBool(_hcConnectedKey, connected);
+  }
+
+  // health onboarding dismissal
+
+  int? get hcOnboardingDismissedMs => _prefs?.getInt(_hcOnboardingDismissedMsKey);
+
+  Future<void> setHcOnboardingDismissedMs(int ms) async {
+    await _prefs?.setInt(_hcOnboardingDismissedMsKey, ms);
+  }
+
+  /// true if onboarding was dismissed less than 30 days ago
+  bool get hcOnboardingRecentlyDismissed {
+    final dismissedMs = hcOnboardingDismissedMs;
+    if (dismissedMs == null) return false;
+    final elapsed = DateTime.now().millisecondsSinceEpoch - dismissedMs;
+    return elapsed < const Duration(days: 30).inMilliseconds;
   }
 }

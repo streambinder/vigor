@@ -2855,6 +2855,306 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wrist Weights'**
   String get modifierWristWeights;
+
+  /// No description provided for @healthData.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Data'**
+  String get healthData;
+
+  /// No description provided for @healthConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get healthConnected;
+
+  /// No description provided for @healthSynchronizing.
+  ///
+  /// In en, this message translates to:
+  /// **'Synchronizing...'**
+  String get healthSynchronizing;
+
+  /// No description provided for @healthSynchronized.
+  ///
+  /// In en, this message translates to:
+  /// **'Synchronized'**
+  String get healthSynchronized;
+
+  /// No description provided for @healthSynchronize.
+  ///
+  /// In en, this message translates to:
+  /// **'Synchronize now'**
+  String get healthSynchronize;
+
+  /// No description provided for @healthNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected'**
+  String get healthNotConnected;
+
+  /// No description provided for @healthBuildingBaselines.
+  ///
+  /// In en, this message translates to:
+  /// **'Building your personal baselines ({days}/14 days)'**
+  String healthBuildingBaselines(int days);
+
+  /// No description provided for @healthDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect & Delete Data'**
+  String get healthDisconnect;
+
+  /// No description provided for @healthDisconnectConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect health data? All synced health data will be deleted. This cannot be undone.'**
+  String get healthDisconnectConfirmation;
+
+  /// No description provided for @healthDisconnectedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Health data disconnected'**
+  String get healthDisconnectedSuccessfully;
+
+  /// No description provided for @failedToDisconnectHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to disconnect health data'**
+  String get failedToDisconnectHealth;
+
+  /// No description provided for @healthConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get healthConnect;
+
+  /// No description provided for @healthMetrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Metrics'**
+  String get healthMetrics;
+
+  /// No description provided for @healthAdjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Adjustment'**
+  String get healthAdjustment;
+
+  /// No description provided for @healthPermissionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Your Wearable'**
+  String get healthPermissionsTitle;
+
+  /// No description provided for @healthPermissionsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Vigor reads your health data to personalize your workouts. Better sleep data, recovery metrics, and activity history mean smarter training recommendations.'**
+  String get healthPermissionsDescription;
+
+  /// No description provided for @healthPermissionsReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only access'**
+  String get healthPermissionsReadOnly;
+
+  /// No description provided for @healthPermissionsSleep.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep duration and stages'**
+  String get healthPermissionsSleep;
+
+  /// No description provided for @healthPermissionsHrv.
+  ///
+  /// In en, this message translates to:
+  /// **'Heart rate variability (HRV)'**
+  String get healthPermissionsHrv;
+
+  /// No description provided for @healthPermissionsRhr.
+  ///
+  /// In en, this message translates to:
+  /// **'Resting heart rate'**
+  String get healthPermissionsRhr;
+
+  /// No description provided for @healthPermissionsSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily steps'**
+  String get healthPermissionsSteps;
+
+  /// No description provided for @healthPermissionsWorkouts.
+  ///
+  /// In en, this message translates to:
+  /// **'Workout sessions and heart rate'**
+  String get healthPermissionsWorkouts;
+
+  /// No description provided for @healthPermissionsGrant.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Health Data'**
+  String get healthPermissionsGrant;
+
+  /// No description provided for @healthPermissionsSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get healthPermissionsSkip;
+
+  /// No description provided for @healthPermissionsGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'Health data connected'**
+  String get healthPermissionsGranted;
+
+  /// No description provided for @healthPermissionsDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Permissions were not granted'**
+  String get healthPermissionsDenied;
+
+  /// No description provided for @healthOnboardingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect your wearable'**
+  String get healthOnboardingTitle;
+
+  /// No description provided for @healthOnboardingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect your health data and Vigor will adapt your training to how you sleep, recover, and move.'**
+  String get healthOnboardingDescription;
+
+  /// No description provided for @healthOnboardingConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get healthOnboardingConnect;
+
+  /// No description provided for @healthOnboardingDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get healthOnboardingDismiss;
+
+  /// No description provided for @healthInstallHcTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Connect Required'**
+  String get healthInstallHcTitle;
+
+  /// No description provided for @healthInstallHcDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Connect is needed to sync your wearable data. Install it from the Play Store to continue.'**
+  String get healthInstallHcDescription;
+
+  /// No description provided for @healthInstallHc.
+  ///
+  /// In en, this message translates to:
+  /// **'Install Health Connect'**
+  String get healthInstallHc;
+
+  /// No description provided for @heartRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Heart Rate'**
+  String get heartRate;
+
+  /// No description provided for @avgHr.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg HR'**
+  String get avgHr;
+
+  /// No description provided for @maxHr.
+  ///
+  /// In en, this message translates to:
+  /// **'Max HR'**
+  String get maxHr;
+
+  /// No description provided for @bpm.
+  ///
+  /// In en, this message translates to:
+  /// **'bpm'**
+  String get bpm;
+
+  /// No description provided for @hrZones.
+  ///
+  /// In en, this message translates to:
+  /// **'HR Zones'**
+  String get hrZones;
+
+  /// No description provided for @hrZone1.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone 1'**
+  String get hrZone1;
+
+  /// No description provided for @hrZone2.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone 2'**
+  String get hrZone2;
+
+  /// No description provided for @hrZone3.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone 3'**
+  String get hrZone3;
+
+  /// No description provided for @hrZone4.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone 4'**
+  String get hrZone4;
+
+  /// No description provided for @hrZone5.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone 5'**
+  String get hrZone5;
+
+  /// No description provided for @healthDailySleep.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep'**
+  String get healthDailySleep;
+
+  /// No description provided for @healthDailyRestingHr.
+  ///
+  /// In en, this message translates to:
+  /// **'Resting HR'**
+  String get healthDailyRestingHr;
+
+  /// No description provided for @healthDailyHrv.
+  ///
+  /// In en, this message translates to:
+  /// **'HRV'**
+  String get healthDailyHrv;
+
+  /// No description provided for @healthDailySteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps'**
+  String get healthDailySteps;
+
+  /// No description provided for @healthDailyCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories'**
+  String get healthDailyCalories;
+
+  /// No description provided for @healthDailyNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No health data yet'**
+  String get healthDailyNoData;
+
+  /// No description provided for @externalWorkout.
+  ///
+  /// In en, this message translates to:
+  /// **'External Workout'**
+  String get externalWorkout;
 }
 
 class _AppLocalizationsDelegate

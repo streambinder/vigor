@@ -1450,5 +1450,159 @@ class AppLocalizationsZh extends AppLocalizations {
   String get modifierWeight => '负重';
 
   @override
-  String get modifierWristWeights => '手腕负重';
+  String get modifierWristWeights => '腕部负重';
+
+  @override
+  String get healthData => '健康数据';
+
+  @override
+  String get healthConnected => '已连接';
+
+  @override
+  String get healthSynchronizing => '同步中...';
+
+  @override
+  String get healthSynchronized => '已同步';
+
+  @override
+  String get healthSynchronize => '立即同步';
+
+  @override
+  String get healthNotConnected => '未连接';
+
+  @override
+  String healthBuildingBaselines(int days) {
+    return '正在建立个人基准值（$days/14天）';
+  }
+
+  @override
+  String get healthDisconnect => '断开连接并删除数据';
+
+  @override
+  String get healthDisconnectConfirmation => '断开健康数据连接？所有同步的数据将被删除，此操作不可撤销。';
+
+  @override
+  String get healthDisconnectedSuccessfully => '健康数据已断开连接';
+
+  @override
+  String get failedToDisconnectHealth => '断开健康数据失败';
+
+  @override
+  String get healthConnect => '连接';
+
+  @override
+  String get healthMetrics => '健康数据';
+
+  @override
+  String get healthAdjustment => '健康调整';
+
+  @override
+  String get healthPermissionsTitle => '连接你的可穿戴设备';
+
+  @override
+  String get healthPermissionsDescription =>
+      'Vigor读取你的健康数据以个性化训练。更好的睡眠、恢复和活动数据意味着更智能的训练建议。';
+
+  @override
+  String get healthPermissionsReadOnly => '仅读取访问';
+
+  @override
+  String get healthPermissionsSleep => '睡眠时长和阶段';
+
+  @override
+  String get healthPermissionsHrv => '心率变异性（HRV）';
+
+  @override
+  String get healthPermissionsRhr => '静息心率';
+
+  @override
+  String get healthPermissionsSteps => '每日步数';
+
+  @override
+  String get healthPermissionsWorkouts => '运动记录和心率';
+
+  @override
+  String get healthPermissionsGrant => '连接健康数据';
+
+  @override
+  String get healthPermissionsSkip => '暂时不用';
+
+  @override
+  String get healthPermissionsGranted => '健康数据已连接';
+
+  @override
+  String get healthPermissionsDenied => '未授予权限';
+
+  @override
+  String get healthOnboardingTitle => '连接可穿戴设备';
+
+  @override
+  String get healthOnboardingDescription => '连接健康数据，Vigor将根据你的睡眠、恢复和活动调整训练。';
+
+  @override
+  String get healthOnboardingConnect => '连接';
+
+  @override
+  String get healthOnboardingDismiss => '以后再说';
+
+  @override
+  String get healthInstallHcTitle => '需要Health Connect';
+
+  @override
+  String get healthInstallHcDescription =>
+      '需要Health Connect来同步可穿戴设备数据。请从Play商店安装。';
+
+  @override
+  String get healthInstallHc => '安装Health Connect';
+
+  @override
+  String get heartRate => '心率';
+
+  @override
+  String get avgHr => '平均心率';
+
+  @override
+  String get maxHr => '最大心率';
+
+  @override
+  String get bpm => 'bpm';
+
+  @override
+  String get hrZones => '心率区间';
+
+  @override
+  String get hrZone1 => '区间1';
+
+  @override
+  String get hrZone2 => '区间2';
+
+  @override
+  String get hrZone3 => '区间3';
+
+  @override
+  String get hrZone4 => '区间4';
+
+  @override
+  String get hrZone5 => '区间5';
+
+  @override
+  String get healthDailySleep => '睡眠';
+
+  @override
+  String get healthDailyRestingHr => '静息心率';
+
+  @override
+  String get healthDailyHrv => 'HRV';
+
+  @override
+  String get healthDailySteps => '步数';
+
+  @override
+  String get healthDailyCalories => '卡路里';
+
+  @override
+  String get healthDailyNoData => '暂无健康数据';
+
+  @override
+  String get externalWorkout => '外部锻炼';
 }

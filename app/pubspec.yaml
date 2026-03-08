@@ -29,6 +29,8 @@ dependencies:
   image_picker: ^1.1.2
   app_links: ^6.3.3
   share_plus: ^10.1.4
+  health: ^13.3.1
+  flutter_timezone: ^4.1.1
 
 dev_dependencies:
   flutter_test:

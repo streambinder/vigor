@@ -13,7 +13,7 @@ func Init() *fiber.App {
 	app := fiber.New()
 
 	// Register route handlers with no middleware
-	initHealth(app)
+	initStatus(app)
 
 	// Register request ID middleware
 	app.Use(requestid.New())
@@ -46,6 +46,7 @@ func Init() *fiber.App {
 	initActivity(app)
 	initProgress(app)
 	initReport(app)
+	initHealth(app)
 
 	return app
 }

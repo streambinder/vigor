@@ -19,6 +19,7 @@ import 'screens/training_details_screen.dart';
 import 'services/secure_storage_service.dart';
 import 'services/preferences_service.dart';
 import 'services/service_locator.dart';
+import 'services/health_data_service.dart';
 import 'services/app_logger.dart';
 
 void main() async {
@@ -114,7 +115,7 @@ class VigorApp extends StatelessWidget {
       providers: [
         Provider<SecureStorageService>.value(value: storage),
         Provider<PreferencesService>.value(value: prefs),
-        ChangeNotifierProvider<ServiceLocator>(create: (_) => ServiceLocator(storage)),
+        ChangeNotifierProvider<ServiceLocator>(create: (_) => ServiceLocator(storage, prefs)),
         ChangeNotifierProvider(
           create: (_) => AuthProvider(storage: storage),
         ),
@@ -185,6 +186,15 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
     super.dispose();
   }
 
+  /// fire-and-forget health sync — runs async in background, does not block UI
+  void _triggerHealthSync(ServiceLocator serviceLocator) {
+    final healthService = serviceLocator.healthDataService;
+    if (healthService == null) return;
+    healthService.syncToBackend().then((success) {
+      if (success) AppLogger.debug('[HealthSync] background sync completed');
+    });
+  }
+
   Future<void> _initDeepLinks() async {
     // cold start
     try {
@@ -237,6 +247,8 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
             _loadingInitialData = true;
             WidgetsBinding.instance.addPostFrameCallback((_) async {
               await serviceLocator.loadInitialData();
+              // trigger health sync in background after initial data loads
+              _triggerHealthSync(serviceLocator);
               if (mounted) setState(() => _loadingInitialData = false);
             });
             return const SplashScreen();

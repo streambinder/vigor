@@ -266,6 +266,30 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		}
 	}
 
+	// health snapshot: nil for partner trainings (M2), nil when no data available
+	var healthSnapshot *model.HealthSnapshot
+	if len(partnerUserIDs) == 0 {
+		healthSnapshot, _ = GetHealthSnapshot(userID)
+	}
+
+	// HR aggregates for recent trainings: batch query for [HISTORY] section enrichment
+	recentHR := make(map[uuid.UUID]*model.HealthExerciseSession)
+	if len(recentTrainings) > 0 {
+		trainingIDs := make([]uuid.UUID, len(recentTrainings))
+		for i, t := range recentTrainings {
+			trainingIDs[i] = t.ID
+		}
+		var sessions []model.HealthExerciseSession
+		database.DB.Select("training_id, avg_hr, max_hr").
+			Where("user_id = ? AND training_id IN ?", userID, trainingIDs).
+			Find(&sessions)
+		for i := range sessions {
+			if sessions[i].TrainingID != nil {
+				recentHR[*sessions[i].TrainingID] = &sessions[i]
+			}
+		}
+	}
+
 	// build validation lookup tables once before the generation loop
 	validExerciseIDs := make(map[string]bool, len(workExercises)+len(warmupExercises)+len(cooldownExercises))
 	for _, e := range workExercises {
@@ -334,6 +358,8 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			facts,
 			skipWarmupCooldown,
 			calibrationGaps,
+			healthSnapshot,
+			recentHR,
 			llmModel,
 			correctionHint,
 		)
@@ -472,6 +498,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 
 	training.Description = training.BuildDescription()
 	training.UserID = requestorProfile.UserID
+	training.HealthInfluenced = training.Reasoning.Data().HealthAdjustment != ""
 
 	// resolve fact indices to structured references
 	var refs []model.TrainingReference
@@ -561,7 +588,12 @@ func GetTrainings(userID uuid.UUID) ([]model.Training, error) {
 		Where("user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?)", userID, userID).
 		Order("(completed_at IS NOT NULL), COALESCE(completed_at, created_at) desc").
 		Find(&trainings).Error
-	return trainings, err
+	if err != nil {
+		return trainings, err
+	}
+
+	PopulateHasHealthSession(trainings)
+	return trainings, nil
 }
 
 // GetTrainingPartners returns partners for a training.
@@ -870,4 +902,17 @@ func reorderRoutines(routines []model.Routine) []model.Routine {
 	result = append(result, work...)
 	result = append(result, cooldown...)
 	return result
+}
+
+// UserCanAccessTraining checks if a user is the owner of or a partner on a training.
+func UserCanAccessTraining(userID uuid.UUID, trainingID string) bool {
+	var training model.Training
+	if err := database.DB.Select("user_id").First(&training, "id = ?", trainingID).Error; err != nil {
+		return false
+	}
+	if training.UserID == userID {
+		return true
+	}
+	var partner model.Partner
+	return database.DB.First(&partner, "training_id = ? AND user_id = ?", trainingID, userID).Error == nil
 }

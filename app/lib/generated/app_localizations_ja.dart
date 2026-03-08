@@ -1453,5 +1453,161 @@ class AppLocalizationsJa extends AppLocalizations {
   String get modifierWeight => 'ウエイト';
 
   @override
-  String get modifierWristWeights => 'リストウエイト';
+  String get modifierWristWeights => 'リストウェイト';
+
+  @override
+  String get healthData => 'ヘルスデータ';
+
+  @override
+  String get healthConnected => '接続済み';
+
+  @override
+  String get healthSynchronizing => '同期中...';
+
+  @override
+  String get healthSynchronized => '同期済み';
+
+  @override
+  String get healthSynchronize => '今すぐ同期';
+
+  @override
+  String get healthNotConnected => '未接続';
+
+  @override
+  String healthBuildingBaselines(int days) {
+    return 'パーソナル基準値を作成中（$days/14日）';
+  }
+
+  @override
+  String get healthDisconnect => '切断してデータを削除';
+
+  @override
+  String get healthDisconnectConfirmation =>
+      'ヘルスデータを切断しますか？同期されたすべてのデータが削除されます。この操作は取り消せません。';
+
+  @override
+  String get healthDisconnectedSuccessfully => 'ヘルスデータが切断されました';
+
+  @override
+  String get failedToDisconnectHealth => 'ヘルスデータの切断に失敗しました';
+
+  @override
+  String get healthConnect => '接続';
+
+  @override
+  String get healthMetrics => '健康データ';
+
+  @override
+  String get healthAdjustment => '健康状態に基づく調整';
+
+  @override
+  String get healthPermissionsTitle => 'ウェアラブルを接続';
+
+  @override
+  String get healthPermissionsDescription =>
+      'Vigorはヘルスデータを読み取り、ワークアウトをパーソナライズします。睡眠・回復・活動データが充実するほど、より的確なトレーニング提案が可能になります。';
+
+  @override
+  String get healthPermissionsReadOnly => '読み取り専用';
+
+  @override
+  String get healthPermissionsSleep => '睡眠時間とステージ';
+
+  @override
+  String get healthPermissionsHrv => '心拍変動（HRV）';
+
+  @override
+  String get healthPermissionsRhr => '安静時心拍数';
+
+  @override
+  String get healthPermissionsSteps => '1日の歩数';
+
+  @override
+  String get healthPermissionsWorkouts => 'ワークアウトと心拍数';
+
+  @override
+  String get healthPermissionsGrant => 'ヘルスデータを接続';
+
+  @override
+  String get healthPermissionsSkip => '今はしない';
+
+  @override
+  String get healthPermissionsGranted => 'ヘルスデータが接続されました';
+
+  @override
+  String get healthPermissionsDenied => '権限が許可されませんでした';
+
+  @override
+  String get healthOnboardingTitle => 'ウェアラブルを接続';
+
+  @override
+  String get healthOnboardingDescription =>
+      'ヘルスデータを接続すると、Vigorが睡眠・回復・活動に合わせてトレーニングを調整します。';
+
+  @override
+  String get healthOnboardingConnect => '接続';
+
+  @override
+  String get healthOnboardingDismiss => 'あとで';
+
+  @override
+  String get healthInstallHcTitle => 'Health Connectが必要です';
+
+  @override
+  String get healthInstallHcDescription =>
+      'ウェアラブルデータの同期にはHealth Connectが必要です。Play Storeからインストールしてください。';
+
+  @override
+  String get healthInstallHc => 'Health Connectをインストール';
+
+  @override
+  String get heartRate => '心拍数';
+
+  @override
+  String get avgHr => '平均心拍';
+
+  @override
+  String get maxHr => '最大心拍';
+
+  @override
+  String get bpm => 'bpm';
+
+  @override
+  String get hrZones => '心拍ゾーン';
+
+  @override
+  String get hrZone1 => 'ゾーン1';
+
+  @override
+  String get hrZone2 => 'ゾーン2';
+
+  @override
+  String get hrZone3 => 'ゾーン3';
+
+  @override
+  String get hrZone4 => 'ゾーン4';
+
+  @override
+  String get hrZone5 => 'ゾーン5';
+
+  @override
+  String get healthDailySleep => '睡眠';
+
+  @override
+  String get healthDailyRestingHr => '安静時心拍';
+
+  @override
+  String get healthDailyHrv => 'HRV';
+
+  @override
+  String get healthDailySteps => '歩数';
+
+  @override
+  String get healthDailyCalories => 'カロリー';
+
+  @override
+  String get healthDailyNoData => '健康データなし';
+
+  @override
+  String get externalWorkout => '外部ワークアウト';
 }

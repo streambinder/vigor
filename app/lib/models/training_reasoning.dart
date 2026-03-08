@@ -17,12 +17,15 @@ class TrainingReasoning {
   final List<ProgressionAdjustment> adjustments;
   @JsonKey(name: 'exercises', defaultValue: [])
   final List<ExerciseSelection> exercises;
+  @JsonKey(name: 'health_adjustment', defaultValue: '')
+  final String healthAdjustment;
 
   TrainingReasoning({
     required this.constraints,
     required this.strategy,
     required this.adjustments,
     required this.exercises,
+    required this.healthAdjustment,
   });
 
   factory TrainingReasoning.fromJson(Map<String, dynamic> json) => _$TrainingReasoningFromJson(json);

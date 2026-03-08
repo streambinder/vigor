@@ -31,6 +31,10 @@ class Profile {
   final double height;
   @JsonKey(name: 'weight')
   final double weight;
+  @JsonKey(name: 'timezone', defaultValue: '')
+  final String timezone;
+  @JsonKey(name: 'health_disconnected')
+  final bool healthDisconnected;
   @JsonKey(name: 'data', defaultValue: {})
   final Map<String, dynamic> data;
   @JsonKey(name: 'user_id', defaultValue: '')
@@ -44,6 +48,8 @@ class Profile {
     required this.language,
     required this.height,
     required this.weight,
+    required this.timezone,
+    required this.healthDisconnected,
     required this.data,
     required this.userId,
   });

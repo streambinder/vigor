@@ -1478,5 +1478,162 @@ class AppLocalizationsRu extends AppLocalizations {
   String get modifierWeight => 'Вес';
 
   @override
-  String get modifierWristWeights => 'Утяжелители для рук';
+  String get modifierWristWeights => 'Утяжелители на запястья';
+
+  @override
+  String get healthData => 'Данные о здоровье';
+
+  @override
+  String get healthConnected => 'Подключено';
+
+  @override
+  String get healthSynchronizing => 'Синхронизация...';
+
+  @override
+  String get healthSynchronized => 'Синхронизировано';
+
+  @override
+  String get healthSynchronize => 'Синхронизировать сейчас';
+
+  @override
+  String get healthNotConnected => 'Не подключено';
+
+  @override
+  String healthBuildingBaselines(int days) {
+    return 'Создание ваших личных показателей ($days/14 дней)';
+  }
+
+  @override
+  String get healthDisconnect => 'Отключить и удалить данные';
+
+  @override
+  String get healthDisconnectConfirmation =>
+      'Отключить данные о здоровье? Все синхронизированные данные будут удалены. Это действие необратимо.';
+
+  @override
+  String get healthDisconnectedSuccessfully => 'Данные о здоровье отключены';
+
+  @override
+  String get failedToDisconnectHealth =>
+      'Не удалось отключить данные о здоровье';
+
+  @override
+  String get healthConnect => 'Подключить';
+
+  @override
+  String get healthMetrics => 'Данные здоровья';
+
+  @override
+  String get healthAdjustment => 'Корректировка по здоровью';
+
+  @override
+  String get healthPermissionsTitle => 'Подключите носимое устройство';
+
+  @override
+  String get healthPermissionsDescription =>
+      'Vigor читает ваши данные о здоровье для персонализации тренировок. Лучшие данные о сне, восстановлении и активности — более умные рекомендации.';
+
+  @override
+  String get healthPermissionsReadOnly => 'Только чтение';
+
+  @override
+  String get healthPermissionsSleep => 'Продолжительность и фазы сна';
+
+  @override
+  String get healthPermissionsHrv => 'Вариабельность сердечного ритма (ВСР)';
+
+  @override
+  String get healthPermissionsRhr => 'Пульс в покое';
+
+  @override
+  String get healthPermissionsSteps => 'Ежедневные шаги';
+
+  @override
+  String get healthPermissionsWorkouts => 'Тренировки и пульс';
+
+  @override
+  String get healthPermissionsGrant => 'Подключить данные о здоровье';
+
+  @override
+  String get healthPermissionsSkip => 'Не сейчас';
+
+  @override
+  String get healthPermissionsGranted => 'Данные о здоровье подключены';
+
+  @override
+  String get healthPermissionsDenied => 'Разрешения не были предоставлены';
+
+  @override
+  String get healthOnboardingTitle => 'Подключите устройство';
+
+  @override
+  String get healthOnboardingDescription =>
+      'Подключите данные о здоровье, и Vigor адаптирует тренировки к вашему сну, восстановлению и активности.';
+
+  @override
+  String get healthOnboardingConnect => 'Подключить';
+
+  @override
+  String get healthOnboardingDismiss => 'Может быть позже';
+
+  @override
+  String get healthInstallHcTitle => 'Требуется Health Connect';
+
+  @override
+  String get healthInstallHcDescription =>
+      'Health Connect необходим для синхронизации данных с носимого устройства. Установите его из Play Store.';
+
+  @override
+  String get healthInstallHc => 'Установить Health Connect';
+
+  @override
+  String get heartRate => 'Пульс';
+
+  @override
+  String get avgHr => 'Ср. пульс';
+
+  @override
+  String get maxHr => 'Макс. пульс';
+
+  @override
+  String get bpm => 'уд/мин';
+
+  @override
+  String get hrZones => 'Пульсовые зоны';
+
+  @override
+  String get hrZone1 => 'Зона 1';
+
+  @override
+  String get hrZone2 => 'Зона 2';
+
+  @override
+  String get hrZone3 => 'Зона 3';
+
+  @override
+  String get hrZone4 => 'Зона 4';
+
+  @override
+  String get hrZone5 => 'Зона 5';
+
+  @override
+  String get healthDailySleep => 'Сон';
+
+  @override
+  String get healthDailyRestingHr => 'Пульс покоя';
+
+  @override
+  String get healthDailyHrv => 'ВСР';
+
+  @override
+  String get healthDailySteps => 'Шаги';
+
+  @override
+  String get healthDailyCalories => 'Калории';
+
+  @override
+  String get healthDailyNoData => 'Нет данных о здоровье';
+
+  @override
+  String get externalWorkout => 'Внешняя тренировка';
 }

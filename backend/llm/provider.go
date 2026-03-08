@@ -65,6 +65,8 @@ func GenTraining(
 	facts []model.Fact,
 	skipWarmupCooldown bool,
 	calibrationGaps map[string]int,
+	healthSnapshot *model.HealthSnapshot,
+	recentHR map[uuid.UUID]*model.HealthExerciseSession,
 	lastModel string,
 	correctionHint string,
 ) (*model.Training, model.LLMPrompt, string, error) {
@@ -91,12 +93,14 @@ func GenTraining(
 		facts,
 		skipWarmupCooldown,
 		calibrationGaps,
+		healthSnapshot,
+		recentHR,
 	)
 	if correctionHint != "" {
 		userMessage += "\n\nCORRECTION (previous attempt failed server-side validation): " + correctionHint + ". Fix this issue and regenerate."
 	}
 	request := model.LLMPrompt{
-		System: prompt.System(goals, methodology, methodologies, skipWarmupCooldown, len(modifiers) > 0, len(modifierVariants) > 0),
+		System: prompt.System(goals, methodology, methodologies, skipWarmupCooldown, len(modifiers) > 0, len(modifierVariants) > 0, healthSnapshot),
 		User:   userMessage,
 	}
 	response, llmModel, err := getLLM(lastModel).query(

@@ -42,6 +42,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   late Training _training;
   List<PartnerInfo> _partners = [];
   TrainingFeedback? _userFeedback;
+  Map<String, dynamic>? _healthSessionData;
 
   // inline timer state
   WorkoutTimerNotifier? _timerNotifier;
@@ -56,6 +57,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     _training = widget.training;
     _loadPartners();
     if (_training.completedAt != null) _loadUserFeedback();
+    if (_training.hasHealthSession) _loadHealthSession();
   }
 
   @override
@@ -80,6 +82,15 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     final response = await context.read<ServiceLocator>().trainingService.getUserFeedback(training.id);
     if (response.isSuccess && mounted) {
       setState(() => _userFeedback = response.data);
+    }
+  }
+
+  /// fetch linked health exercise session data (HR samples, avg/max HR, zones)
+  Future<void> _loadHealthSession() async {
+    final locator = context.read<ServiceLocator>();
+    final response = await locator.trainingService.getHealthSession(training.id);
+    if (response.isSuccess && response.data != null && mounted) {
+      setState(() => _healthSessionData = response.data);
     }
   }
 
@@ -464,6 +475,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (r.healthAdjustment.isNotEmpty) _buildReasoningText(title: l10n.healthAdjustment, text: r.healthAdjustment),
                 if (r.constraints.isNotEmpty) _buildReasoningSection(title: l10n.constraints, items: r.constraints),
                 if (r.strategy.isNotEmpty) _buildReasoningText(title: l10n.strategy, text: r.strategy),
                 if (r.adjustments.isNotEmpty) _buildAdjustmentsSection(l10n, r.adjustments),
@@ -736,9 +748,10 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           valueListenable: context.read<ServiceLocator>().isCalibratingNotifier,
           builder: (context, isCalibrating, _) {
             final timerOffset = timerActive ? 1 : 0;
+            final healthOffset = _healthSessionData != null ? 1 : 0;
             return ListView.builder(
               padding: VigorSpacing.paddingLg,
-              itemCount: training.routines.length + 3 + (isCalibrating ? 1 : 0) + timerOffset,
+              itemCount: training.routines.length + 3 + (isCalibrating ? 1 : 0) + timerOffset + healthOffset,
               itemBuilder: (context, index) {
                 if (isCalibrating && index == 0) {
                   return Padding(
@@ -769,18 +782,26 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                   );
                 }
                 final shifted = timerActive ? adjusted - 1 : adjusted;
-                if (shifted == 1) {
+                // health session section (HR chart + stats)
+                if (_healthSessionData != null && shifted == 1) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
+                    child: _buildHealthSessionSection(l10n, isDark),
+                  );
+                }
+                final healthShifted = _healthSessionData != null ? shifted - 1 : shifted;
+                if (healthShifted == 1) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: VigorSpacing.md),
                     child: _buildRoutinesHeader(l10n),
                   );
                 }
-                if (shifted == training.routines.length + 2) {
+                if (healthShifted == training.routines.length + 2) {
                   return const SizedBox(height: VigorSpacing.lg);
                 }
                 return Padding(
                   padding: const EdgeInsets.only(bottom: VigorSpacing.md),
-                  child: _buildRoutineCard(training.routines[shifted - 2], isDark),
+                  child: _buildRoutineCard(training.routines[healthShifted - 2], isDark),
                 );
               },
             );
@@ -987,6 +1008,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       runSpacing: VigorSpacing.sm,
       children: [
         _buildMethodologyBadge(KnowledgeLabels.methodologyLabel(training.methodology, l10n)),
+        if (training.completedAt != null && training.hasHealthSession) _buildMetaChip(Icons.monitor_heart, l10n.healthMetrics),
         _buildMetaChip(Icons.schedule, _formatDuration(training.completedIn ?? training.duration)),
         _buildMetaChip(Icons.calendar_today, _formatDate(training.completedAt ?? training.createdAt)),
         if (_partners.isNotEmpty) ..._partners.map((p) => _buildMetaChip(Icons.person, '${p.firstName} ${p.lastName}'.trim())),
@@ -1029,6 +1051,77 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           Text(text, style: VigorTypography.data.copyWith(color: VigorColors.textSecondary(context), fontSize: 11)),
         ],
       ),
+    );
+  }
+
+  /// avg/max HR, duration, and calories from linked health session
+  Widget _buildHealthSessionSection(AppLocalizations l10n, bool isDark) {
+    if (_healthSessionData == null) return const SizedBox.shrink();
+    final data = _healthSessionData!;
+    final avgHr = data['avg_hr'] as int?;
+    final maxHr = data['max_hr'] as int?;
+    final calories = data['calories'] as num?;
+    final startedAt = data['started_at'] as String?;
+    final endedAt = data['ended_at'] as String?;
+    final accentColor = VigorColors.indigoAdaptive(context);
+
+    // compute session duration
+    int? durationMins;
+    if (startedAt != null && endedAt != null) {
+      final start = DateTime.tryParse(startedAt);
+      final end = DateTime.tryParse(endedAt);
+      if (start != null && end != null) {
+        durationMins = end.difference(start).inMinutes;
+      }
+    }
+
+    final stats = <Widget>[];
+    if (avgHr != null) stats.add(Expanded(child: _buildHrStat(l10n.avgHr, '$avgHr', l10n.bpm, accentColor)));
+    if (maxHr != null) stats.add(Expanded(child: _buildHrStat(l10n.maxHr, '$maxHr', l10n.bpm, VigorColors.persimmon)));
+    if (durationMins != null && durationMins > 0) stats.add(Expanded(child: _buildHrStat(l10n.duration, '$durationMins', 'min', VigorColors.stone)));
+    if (calories != null && calories > 0) stats.add(Expanded(child: _buildHrStat(l10n.healthDailyCalories, '${calories.round()}', 'kcal', VigorColors.stone)));
+
+    if (stats.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+        borderRadius: VigorRadius.radiusLg,
+      ),
+      padding: VigorSpacing.paddingLg,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.monitor_heart, size: 20, color: accentColor),
+              const SizedBox(width: VigorSpacing.sm),
+              Text(l10n.heartRate, style: VigorTypography.headline.copyWith(fontSize: 16, color: VigorColors.textPrimary(context))),
+            ],
+          ),
+          const SizedBox(height: VigorSpacing.md),
+          Row(children: stats),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHrStat(String label, String value, String unit, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: VigorTypography.caption.copyWith(color: VigorColors.stone)),
+        const SizedBox(height: 2),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(value, style: VigorTypography.dataLarge.copyWith(color: color)),
+            const SizedBox(width: 4),
+            Text(unit, style: VigorTypography.caption.copyWith(color: VigorColors.stone)),
+          ],
+        ),
+      ],
     );
   }
 

@@ -355,10 +355,11 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   Widget _buildContent(AppLocalizations l10n, bool isDark, List<Training> trainings) {
     final available = _availableTrainings(trainings);
     final past = _pastTrainings(trainings);
+    final externalCount = _getExternalSessions().length;
 
     return Column(
       children: [
-        _buildSegmentedControl(l10n, available.length, past.length, isDark),
+        _buildSegmentedControl(l10n, available.length, past.length + externalCount, isDark),
         Expanded(
           child: TabBarView(
             controller: _tabController,
@@ -419,7 +420,9 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   }
 
   Widget _buildTrainingList(List<Training> trainings, AppLocalizations l10n, {required bool isAvailable}) {
-    if (trainings.isEmpty) {
+    final externalSessions = !isAvailable ? _getExternalSessions() : <Map<String, dynamic>>[];
+
+    if (trainings.isEmpty && externalSessions.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -439,20 +442,125 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       );
     }
 
+    // for available tab, just list trainings
+    if (isAvailable) {
+      return ListView.separated(
+        padding: VigorSpacing.paddingLg,
+        itemCount: trainings.length,
+        separatorBuilder: (_, __) => const SizedBox(height: VigorSpacing.sm),
+        itemBuilder: (context, index) {
+          final training = trainings[index];
+          return _buildTrainingCard(training, l10n, isAvailable: true, key: ValueKey(training.id));
+        },
+      );
+    }
+
+    // completed tab: merge trainings and external sessions, sort chronologically
+    final List<_CompletedItem> items = [
+      ...trainings.map((t) => _CompletedItem(
+        date: t.completedAt ?? t.createdAt,
+        training: t,
+      )),
+      ...externalSessions.map((s) => _CompletedItem(
+        date: DateTime.parse(s['started_at'] as String),
+        externalSession: s,
+      )),
+    ]..sort((a, b) => b.date.compareTo(a.date));
+
     return ListView.separated(
       padding: VigorSpacing.paddingLg,
-      itemCount: trainings.length,
+      itemCount: items.length,
       separatorBuilder: (_, __) => const SizedBox(height: VigorSpacing.sm),
       itemBuilder: (context, index) {
-        final training = trainings[index];
-        return _buildTrainingCard(training, l10n, isAvailable: isAvailable, key: ValueKey(training.id));
+        final item = items[index];
+        if (item.training != null) {
+          return _buildTrainingCard(item.training!, l10n, isAvailable: false, key: ValueKey(item.training!.id));
+        }
+        return _buildExternalSessionCard(item.externalSession!, l10n);
       },
     );
   }
 
+  List<Map<String, dynamic>> _getExternalSessions() {
+    final healthDaily = context.read<ServiceLocator>().healthDailyNotifier.value;
+    if (healthDaily == null) return [];
+    final sessions = healthDaily['sessions'] as List?;
+    if (sessions == null) return [];
+    return sessions.cast<Map<String, dynamic>>();
+  }
+
+  Widget _buildExternalSessionCard(Map<String, dynamic> session, AppLocalizations l10n) {
+    final exerciseType = (session['exercise_type'] as String? ?? 'workout');
+    final startedAt = DateTime.parse(session['started_at'] as String);
+    final endedAt = DateTime.parse(session['ended_at'] as String);
+    final durationMins = endedAt.difference(startedAt).inMinutes;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: VigorColors.surface(context),
+        borderRadius: VigorRadius.radiusMd,
+        border: Border.all(
+          color: VigorColors.border(context),
+          style: BorderStyle.solid,
+        ),
+      ),
+      child: Opacity(
+        opacity: 0.7,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  _capitalizeExerciseType(exerciseType),
+                  style: VigorTypography.body.copyWith(
+                    color: VigorColors.stone,
+                    fontSize: 13,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: VigorSpacing.sm),
+              Text(
+                _formatDuration(durationMins * 60),
+                style: VigorTypography.data.copyWith(
+                  color: VigorColors.stone,
+                  fontSize: 11,
+                ),
+              ),
+              const SizedBox(width: VigorSpacing.sm),
+              Text(
+                _formatFullDate(startedAt),
+                style: VigorTypography.data.copyWith(
+                  color: VigorColors.stone,
+                  fontSize: 11,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: VigorSpacing.xs),
+                child: ShaderMask(
+                  shaderCallback: (bounds) => const LinearGradient(
+                    colors: [VigorColors.persimmon, VigorColors.crimson],
+                  ).createShader(bounds),
+                  child: const Icon(Icons.monitor_heart, size: 16, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _capitalizeExerciseType(String type) {
+    if (type.isEmpty) return type;
+    // "strength_training" → "Strength Training"
+    return type.split('_').map((w) => w.isEmpty ? w : '${w[0].toUpperCase()}${w.substring(1)}').join(' ');
+  }
+
   Widget _buildTrainingCard(Training training, AppLocalizations l10n, {required bool isAvailable, Key? key}) {
     final isStale = _isStaleTraining(training);
-    final isCompleted = _isCompletedTraining(training);
     final partners = _partnerData[training.id] ?? [];
     final partnerCount = partners.length;
     final isSelected = _selectedIds.contains(training.id);
@@ -522,8 +630,16 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                     ),
                   ),
                   // status badges
-                  if (isCompleted)
-                    _buildStatusBadge(l10n.completed, VigorColors.gold, Icons.check_circle),
+                  if (training.hasHealthSession)
+                    Padding(
+                      padding: const EdgeInsets.only(left: VigorSpacing.xs),
+                      child: ShaderMask(
+                        shaderCallback: (bounds) => const LinearGradient(
+                          colors: [VigorColors.persimmon, VigorColors.crimson],
+                        ).createShader(bounds),
+                        child: const Icon(Icons.monitor_heart, size: 16, color: Colors.white),
+                      ),
+                    ),
                   if (isStale)
                     _buildStatusBadge(l10n.stale, VigorColors.stone, Icons.schedule),
                 ],
@@ -622,4 +738,12 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       ),
     );
   }
+}
+
+/// unified item for chronological sorting of vigor trainings and external HC sessions
+class _CompletedItem {
+  final DateTime date;
+  final Training? training;
+  final Map<String, dynamic>? externalSession;
+  const _CompletedItem({required this.date, this.training, this.externalSession});
 }

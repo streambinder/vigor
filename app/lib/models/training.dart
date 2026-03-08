@@ -44,6 +44,10 @@ class Training {
   final DateTime? completedAt;
   @JsonKey(name: 'completed_in')
   final int? completedIn;
+  @JsonKey(name: 'health_influenced')
+  final bool healthInfluenced;
+  @JsonKey(name: 'has_health_session')
+  final bool hasHealthSession;
   @JsonKey(name: 'created_at', toJson: _dateTimeToJson)
   final DateTime createdAt;
   @JsonKey(name: 'user_id', defaultValue: '')
@@ -72,6 +76,8 @@ class Training {
     required this.prompt,
     this.completedAt,
     this.completedIn,
+    required this.healthInfluenced,
+    required this.hasHealthSession,
     required this.createdAt,
     required this.userId,
     this.parentId,

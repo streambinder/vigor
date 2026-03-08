@@ -74,6 +74,7 @@ func GetSharedTraining(tokenStr string) (*model.Training, *model.Profile, error)
 	training.Request = ""
 	training.Prompt = datatypes.NewJSONType(model.TrainingPrompt{})
 	training.Reasoning = datatypes.NewJSONType(model.TrainingReasoning{})
+	training.HealthInfluenced = false
 
 	return &training, &profile, nil
 }

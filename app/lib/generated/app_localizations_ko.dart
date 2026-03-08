@@ -1453,5 +1453,161 @@ class AppLocalizationsKo extends AppLocalizations {
   String get modifierWeight => '중량';
 
   @override
-  String get modifierWristWeights => '손목 중량';
+  String get modifierWristWeights => '손목 웨이트';
+
+  @override
+  String get healthData => '건강 데이터';
+
+  @override
+  String get healthConnected => '연결됨';
+
+  @override
+  String get healthSynchronizing => '동기화 중...';
+
+  @override
+  String get healthSynchronized => '동기화 완료';
+
+  @override
+  String get healthSynchronize => '지금 동기화';
+
+  @override
+  String get healthNotConnected => '연결 안 됨';
+
+  @override
+  String healthBuildingBaselines(int days) {
+    return '개인 기준값 생성 중 ($days/14일)';
+  }
+
+  @override
+  String get healthDisconnect => '연결 해제 및 데이터 삭제';
+
+  @override
+  String get healthDisconnectConfirmation =>
+      '건강 데이터를 연결 해제하시겠습니까? 동기화된 모든 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.';
+
+  @override
+  String get healthDisconnectedSuccessfully => '건강 데이터 연결이 해제되었습니다';
+
+  @override
+  String get failedToDisconnectHealth => '건강 데이터 연결 해제 실패';
+
+  @override
+  String get healthConnect => '연결';
+
+  @override
+  String get healthMetrics => '건강 데이터';
+
+  @override
+  String get healthAdjustment => '건강 상태 조정';
+
+  @override
+  String get healthPermissionsTitle => '웨어러블 연결';
+
+  @override
+  String get healthPermissionsDescription =>
+      'Vigor가 건강 데이터를 읽어 운동을 맞춤화합니다. 수면, 회복, 활동 데이터가 많을수록 더 스마트한 트레이닝 추천이 가능합니다.';
+
+  @override
+  String get healthPermissionsReadOnly => '읽기 전용';
+
+  @override
+  String get healthPermissionsSleep => '수면 시간 및 단계';
+
+  @override
+  String get healthPermissionsHrv => '심박변이도 (HRV)';
+
+  @override
+  String get healthPermissionsRhr => '안정시 심박수';
+
+  @override
+  String get healthPermissionsSteps => '일일 걸음 수';
+
+  @override
+  String get healthPermissionsWorkouts => '운동 세션 및 심박수';
+
+  @override
+  String get healthPermissionsGrant => '건강 데이터 연결';
+
+  @override
+  String get healthPermissionsSkip => '나중에';
+
+  @override
+  String get healthPermissionsGranted => '건강 데이터가 연결되었습니다';
+
+  @override
+  String get healthPermissionsDenied => '권한이 부여되지 않았습니다';
+
+  @override
+  String get healthOnboardingTitle => '웨어러블 연결';
+
+  @override
+  String get healthOnboardingDescription =>
+      '건강 데이터를 연결하면 Vigor가 수면, 회복, 활동에 맞춰 트레이닝을 조정합니다.';
+
+  @override
+  String get healthOnboardingConnect => '연결';
+
+  @override
+  String get healthOnboardingDismiss => '나중에 하기';
+
+  @override
+  String get healthInstallHcTitle => 'Health Connect 필요';
+
+  @override
+  String get healthInstallHcDescription =>
+      '웨어러블 데이터 동기화를 위해 Health Connect가 필요합니다. Play 스토어에서 설치해주세요.';
+
+  @override
+  String get healthInstallHc => 'Health Connect 설치';
+
+  @override
+  String get heartRate => '심박수';
+
+  @override
+  String get avgHr => '평균 심박';
+
+  @override
+  String get maxHr => '최대 심박';
+
+  @override
+  String get bpm => 'bpm';
+
+  @override
+  String get hrZones => '심박 존';
+
+  @override
+  String get hrZone1 => '존 1';
+
+  @override
+  String get hrZone2 => '존 2';
+
+  @override
+  String get hrZone3 => '존 3';
+
+  @override
+  String get hrZone4 => '존 4';
+
+  @override
+  String get hrZone5 => '존 5';
+
+  @override
+  String get healthDailySleep => '수면';
+
+  @override
+  String get healthDailyRestingHr => '안정시 심박';
+
+  @override
+  String get healthDailyHrv => 'HRV';
+
+  @override
+  String get healthDailySteps => '걸음 수';
+
+  @override
+  String get healthDailyCalories => '칼로리';
+
+  @override
+  String get healthDailyNoData => '건강 데이터 없음';
+
+  @override
+  String get externalWorkout => '외부 운동';
 }

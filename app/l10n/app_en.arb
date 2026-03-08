@@ -697,5 +697,66 @@
   "modifierPushUpBars": "Push-up Bars",
   "modifierResistanceBands": "Resistance Bands",
   "modifierWeight": "Weight",
-  "modifierWristWeights": "Wrist Weights"
+  "modifierWristWeights": "Wrist Weights",
+
+  "healthData": "Health Data",
+  "healthConnected": "Connected",
+  "healthSynchronizing": "Synchronizing...",
+  "healthSynchronized": "Synchronized",
+  "healthSynchronize": "Synchronize now",
+  "healthNotConnected": "Not connected",
+  "healthBuildingBaselines": "Building your personal baselines ({days}/14 days)",
+  "@healthBuildingBaselines": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "healthDisconnect": "Disconnect & Delete Data",
+  "healthDisconnectConfirmation": "Disconnect health data? All synced health data will be deleted. This cannot be undone.",
+  "healthDisconnectedSuccessfully": "Health data disconnected",
+  "failedToDisconnectHealth": "Failed to disconnect health data",
+  "healthConnect": "Connect",
+  "healthMetrics": "Health Metrics",
+  "healthAdjustment": "Health Adjustment",
+
+  "healthPermissionsTitle": "Connect Your Wearable",
+  "healthPermissionsDescription": "Vigor reads your health data to personalize your workouts. Better sleep data, recovery metrics, and activity history mean smarter training recommendations.",
+  "healthPermissionsReadOnly": "Read-only access",
+  "healthPermissionsSleep": "Sleep duration and stages",
+  "healthPermissionsHrv": "Heart rate variability (HRV)",
+  "healthPermissionsRhr": "Resting heart rate",
+  "healthPermissionsSteps": "Daily steps",
+  "healthPermissionsWorkouts": "Workout sessions and heart rate",
+  "healthPermissionsGrant": "Connect Health Data",
+  "healthPermissionsSkip": "Not now",
+  "healthPermissionsGranted": "Health data connected",
+  "healthPermissionsDenied": "Permissions were not granted",
+
+  "healthOnboardingTitle": "Connect your wearable",
+  "healthOnboardingDescription": "Connect your health data and Vigor will adapt your training to how you sleep, recover, and move.",
+  "healthOnboardingConnect": "Connect",
+  "healthOnboardingDismiss": "Maybe later",
+
+  "healthInstallHcTitle": "Health Connect Required",
+  "healthInstallHcDescription": "Health Connect is needed to sync your wearable data. Install it from the Play Store to continue.",
+  "healthInstallHc": "Install Health Connect",
+
+  "heartRate": "Heart Rate",
+  "avgHr": "Avg HR",
+  "maxHr": "Max HR",
+  "bpm": "bpm",
+  "hrZones": "HR Zones",
+  "hrZone1": "Zone 1",
+  "hrZone2": "Zone 2",
+  "hrZone3": "Zone 3",
+  "hrZone4": "Zone 4",
+  "hrZone5": "Zone 5",
+
+  "healthDailySleep": "Sleep",
+  "healthDailyRestingHr": "Resting HR",
+  "healthDailyHrv": "HRV",
+  "healthDailySteps": "Steps",
+  "healthDailyCalories": "Calories",
+  "healthDailyNoData": "No health data yet",
+  "externalWorkout": "External Workout"
 }
