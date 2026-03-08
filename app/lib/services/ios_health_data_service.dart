@@ -14,6 +14,11 @@ class IOSHealthDataService extends HealthDataService
 
   final Health _health = Health();
 
+  // filter to iOS-supported types only
+  static final _iosTypes = healthPermissionTypes
+      .where((t) => dataTypeKeysIOS.contains(t))
+      .toList();
+
   IOSHealthDataService({required this.prefs, required this.storage});
 
   @override
@@ -32,11 +37,22 @@ class IOSHealthDataService extends HealthDataService
   Future<bool> requestPermissions() async {
     try {
       await _health.configure();
-      return await _health.requestAuthorization(healthPermissionTypes);
+      return await _health.requestAuthorization(_iosTypes);
     } catch (e) {
       AppLogger.error('[IOSHealth] permission request failed', e);
       return false;
     }
+  }
+
+  @override
+  Future<bool> checkPermissions() async {
+    // ios doesn't expose a reliable way to check read permission grants
+    return true;
+  }
+
+  @override
+  Future<void> revokePermissions() async {
+    // no-op on iOS — permissions are managed in system Settings
   }
 
   @override
@@ -47,12 +63,12 @@ class IOSHealthDataService extends HealthDataService
     final thirtyDaysAgo = now.subtract(const Duration(days: 30));
 
     final dataPoints = await _health.getHealthDataFromTypes(
-      types: healthPermissionTypes,
+      types: _iosTypes,
       startTime: thirtyDaysAgo,
       endTime: now,
     );
 
-    return buildSyncPayload(dataPoints, timezone);
+    return buildSyncPayload(Health().removeDuplicates(dataPoints), timezone);
   }
 
   @override
@@ -74,13 +90,12 @@ class IOSHealthDataService extends HealthDataService
     }
 
     final dataPoints = await _health.getHealthDataFromTypes(
-      types: healthPermissionTypes,
+      types: _iosTypes,
       startTime: startTime,
       endTime: now,
     );
 
-    // ios can't verify read grants — just use whatever data arrives
-    return buildSyncPayload(dataPoints, timezone);
+    return buildSyncPayload(Health().removeDuplicates(dataPoints), timezone);
   }
 
   @override

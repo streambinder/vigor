@@ -15,13 +15,32 @@ class AndroidHealthDataService extends HealthDataService
   final Health _health = Health();
   // hold new token in memory until backend POST succeeds (H3)
   String? _pendingChangesToken;
+  bool _configured = false;
 
   AndroidHealthDataService({required this.prefs, required this.storage});
+
+  Future<void> _ensureConfigured() async {
+    if (!_configured) {
+      await _health.configure();
+      _configured = true;
+    }
+  }
+
+  /// raw SDK status for UI checks (install/update prompts)
+  Future<HealthConnectSdkStatus?> getSdkStatus() async {
+    try {
+      await _ensureConfigured();
+      return await _health.getHealthConnectSdkStatus();
+    } catch (e) {
+      AppLogger.error('[AndroidHealth] getSdkStatus failed', e);
+      return null;
+    }
+  }
 
   @override
   Future<bool> isAvailable() async {
     try {
-      await _health.configure();
+      await _ensureConfigured();
       final status = await _health.getHealthConnectSdkStatus();
       return status == HealthConnectSdkStatus.sdkAvailable;
     } catch (e) {
@@ -33,7 +52,7 @@ class AndroidHealthDataService extends HealthDataService
   @override
   Future<bool> requestPermissions() async {
     try {
-      await _health.configure();
+      await _ensureConfigured();
       return await _health.requestAuthorization(healthPermissionTypes);
     } catch (e) {
       AppLogger.error('[AndroidHealth] permission request failed', e);
@@ -42,15 +61,37 @@ class AndroidHealthDataService extends HealthDataService
   }
 
   @override
+  Future<bool> checkPermissions() async {
+    try {
+      // hasPermissions returns null when it can't determine status (common for
+      // read-only permissions on android) — treat null as granted
+      final result = await _health.hasPermissions(healthPermissionTypes);
+      return result ?? true;
+    } catch (e) {
+      AppLogger.error('[AndroidHealth] checkPermissions failed', e);
+      return true;
+    }
+  }
+
+  @override
+  Future<void> revokePermissions() async {
+    try {
+      await _health.revokePermissions();
+    } catch (e) {
+      AppLogger.error('[AndroidHealth] revokePermissions failed', e);
+    }
+  }
+
+  @override
   Future<HealthSyncPayload> readAllData() async {
-    await _health.configure();
+    await _ensureConfigured();
     final timezone = await FlutterTimezone.getLocalTimezone();
     return _doFullRead(timezone);
   }
 
   @override
   Future<HealthSyncPayload> readNewData() async {
-    await _health.configure();
+    await _ensureConfigured();
     final timezone = await FlutterTimezone.getLocalTimezone();
     final token = prefs.hcChangesToken;
 
@@ -61,8 +102,10 @@ class AndroidHealthDataService extends HealthDataService
     }
 
     final allDataPoints = <HealthDataPoint>[];
+    final deletedRecordIds = <String>[];
     var currentToken = token;
     var hasMore = true;
+    var completedSuccessfully = true;
 
     while (hasMore) {
       final changesResponse = await _health.getChanges(
@@ -71,6 +114,7 @@ class AndroidHealthDataService extends HealthDataService
 
       if (changesResponse == null) {
         AppLogger.error('[AndroidHealth] getChanges returned null');
+        completedSuccessfully = false;
         break;
       }
 
@@ -81,25 +125,31 @@ class AndroidHealthDataService extends HealthDataService
       }
 
       allDataPoints.addAll(changesResponse.upsertedDataPoints);
+      deletedRecordIds.addAll(changesResponse.deletedRecordIds);
       currentToken = changesResponse.nextChangesToken;
       hasMore = changesResponse.hasMore;
     }
 
-    // store token in memory only — persisted after successful POST (H3)
-    _pendingChangesToken = currentToken;
-    return buildSyncPayload(Health().removeDuplicates(allDataPoints), timezone);
+    // only advance the token if the loop completed without errors
+    if (completedSuccessfully) {
+      _pendingChangesToken = currentToken;
+    }
+
+    final payload = buildSyncPayload(Health().removeDuplicates(allDataPoints), timezone);
+    if (deletedRecordIds.isEmpty) return payload;
+    return HealthSyncPayload(
+      metrics: payload.metrics,
+      sessions: payload.sessions,
+      hrSamples: payload.hrSamples,
+      deletedRecordIds: deletedRecordIds,
+      timezone: payload.timezone,
+    );
   }
 
   /// full re-read on first sync or expired token
   Future<HealthSyncPayload> _doFullRead(String timezone) async {
     final now = DateTime.now();
     final thirtyDaysAgo = now.subtract(const Duration(days: 30));
-
-    // check workout permission status
-    final hasWorkoutPerm = await _health.hasPermissions(
-      [HealthDataType.WORKOUT],
-    );
-    AppLogger.info('[AndroidHealth] WORKOUT permission check: $hasWorkoutPerm');
 
     // get a fresh token for next time
     final newToken = await _health.getChangesToken(types: healthPermissionTypes);
@@ -113,26 +163,6 @@ class AndroidHealthDataService extends HealthDataService
 
     // deduplicate overlapping data points from multiple sources (e.g. Fitbit + RingConn)
     final deduped = Health().removeDuplicates(dataPoints);
-
-    // fetch workouts separately — getHealthDataFromTypes can silently skip them
-    // if the runtime permission check is stale
-    try {
-      final workouts = await _health.getHealthDataFromTypes(
-        types: [HealthDataType.WORKOUT],
-        startTime: thirtyDaysAgo,
-        endTime: now,
-      );
-      AppLogger.info('[AndroidHealth] separate workout fetch: ${workouts.length} points');
-      if (workouts.isNotEmpty) {
-        // only add workouts not already in the main batch
-        final existingUuids = deduped.where((p) => p.type == HealthDataType.WORKOUT).map((p) => p.uuid).toSet();
-        for (final w in workouts) {
-          if (!existingUuids.contains(w.uuid)) deduped.add(w);
-        }
-      }
-    } catch (e) {
-      AppLogger.error('[AndroidHealth] separate workout fetch failed', e);
-    }
 
     return buildSyncPayload(deduped, timezone);
   }

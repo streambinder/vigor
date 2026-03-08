@@ -66,21 +66,37 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest) error {
 	now := time.Now()
 	thirtyDaysAgo := now.AddDate(0, 0, -30)
 
-	log.Info().Int("metrics", len(req.Metrics)).Int("sessions", len(req.Sessions)).Int("hr_samples", len(req.HRSamples)).Msg("health sync request received")
-
-	// update profile timezone if provided
-	if req.Timezone != "" {
-		database.DB.Model(&model.Profile{}).Where("user_id = ?", userID).Update("timezone", req.Timezone)
+	// payload size limits — silently truncate oversized payloads
+	const maxMetrics = 31
+	const maxSessions = 100
+	const maxHRSamples = 100000
+	if len(req.Metrics) > maxMetrics {
+		req.Metrics = req.Metrics[:maxMetrics]
 	}
+	if len(req.Sessions) > maxSessions {
+		req.Sessions = req.Sessions[:maxSessions]
+	}
+	if len(req.HRSamples) > maxHRSamples {
+		req.HRSamples = req.HRSamples[:maxHRSamples]
+	}
+
+	log.Info().Int("metrics", len(req.Metrics)).Int("sessions", len(req.Sessions)).Int("hr_samples", len(req.HRSamples)).Msg("health sync request received")
 
 	// fetch user's age-based estimated max HR for zone calculation
 	var profile model.Profile
 	estimatedMaxHR := 190 // fallback
 	if err := database.DB.Where("user_id = ?", userID).First(&profile).Error; err == nil {
-		estimatedMaxHR = 220 - profile.Age()
+		estimatedMaxHR = clampInt(220-profile.Age(), 100, 220)
 	}
 
 	return database.DB.Transaction(func(tx *gorm.DB) error {
+		// update profile timezone if provided and valid
+		if req.Timezone != "" {
+			if _, err := time.LoadLocation(req.Timezone); err == nil {
+				tx.Model(&model.Profile{}).Where("user_id = ?", userID).Update("timezone", req.Timezone)
+			}
+		}
+
 		// 1. upsert daily metrics
 		for _, m := range req.Metrics {
 			date, err := time.Parse("2006-01-02", m.Date)
@@ -92,19 +108,6 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest) error {
 				log.Warn().Str("date", m.Date).Msg("metric date out of bounds, skipping")
 				continue
 			}
-
-			// debug: log raw metric values received from client
-			log.Info().
-				Str("date", m.Date).
-				Float64("sleep_hours", m.SleepHours).
-				Float64("sleep_deep", m.SleepDeepHours).
-				Float64("sleep_light", m.SleepLightHours).
-				Float64("sleep_rem", m.SleepREMHours).
-				Int("resting_hr", m.RestingHR).
-				Float64("hrv_rmssd", m.HRVRMSSD).
-				Int("steps", m.Steps).
-				Float64("active_cal", m.ActiveCalories).
-				Msg("health sync: raw metric from client")
 
 			metric := model.HealthMetric{
 				UserID:          userID,
@@ -119,19 +122,6 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest) error {
 				ActiveCalories:  clampFloat(m.ActiveCalories, 0, 50000),
 				SyncedAt:        now,
 			}
-
-			// debug: log post-clamp values that will be upserted
-			log.Info().
-				Str("date", m.Date).
-				Float64("sleep_hours", metric.SleepHours).
-				Float64("sleep_deep", metric.SleepDeepHours).
-				Float64("sleep_light", metric.SleepLightHours).
-				Float64("sleep_rem", metric.SleepREMHours).
-				Int("resting_hr", metric.RestingHR).
-				Float64("hrv_rmssd", metric.HRVRMSSD).
-				Int("steps", metric.Steps).
-				Float64("active_cal", metric.ActiveCalories).
-				Msg("health sync: clamped metric to upsert")
 
 			if err := tx.Clauses(clause.OnConflict{
 				Columns:   []clause.Column{{Name: "user_id"}, {Name: "date"}},
@@ -185,7 +175,13 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest) error {
 				matchedSamples = append(matchedSamples, hr)
 			}
 
+			// sort by timestamp so truncation keeps the earliest samples
+			sort.Slice(matchedSamples, func(i, j int) bool {
+				return matchedSamples[i].Timestamp < matchedSamples[j].Timestamp
+			})
+
 			if len(matchedSamples) > maxHRSamplesPerSession {
+				log.Warn().Int("total", len(matchedSamples)).Int("kept", maxHRSamplesPerSession).Msg("HR samples truncated")
 				matchedSamples = matchedSamples[:maxHRSamplesPerSession]
 			}
 
@@ -228,7 +224,15 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest) error {
 			}
 		}
 
-		// 3. training enrichment
+		// 3. process deletions from health connect changes API
+		if len(req.DeletedRecordIDs) > 0 {
+			if err := tx.Where("user_id = ? AND hc_record_id IN ?", userID, req.DeletedRecordIDs).
+				Delete(&model.HealthExerciseSession{}).Error; err != nil {
+				return err
+			}
+		}
+
+		// 4. training enrichment
 		return enrichTrainings(tx, userID)
 	})
 }
@@ -456,9 +460,9 @@ func GetHealthSnapshot(userID uuid.UUID) (*model.HealthSnapshot, error) {
 
 // GetExerciseSessionForTraining returns the linked exercise session for a training, if any.
 // If multiple sessions are linked (multi-device), picks the one with the densest HR samples.
-func GetExerciseSessionForTraining(trainingID uuid.UUID) (*model.HealthExerciseSession, error) {
+func GetExerciseSessionForTraining(trainingID, userID uuid.UUID) (*model.HealthExerciseSession, error) {
 	var sessions []model.HealthExerciseSession
-	if err := database.DB.Where("training_id = ?", trainingID).Find(&sessions).Error; err != nil {
+	if err := database.DB.Where("training_id = ? AND user_id = ?", trainingID, userID).Find(&sessions).Error; err != nil {
 		return nil, err
 	}
 
@@ -478,10 +482,12 @@ func GetExerciseSessionForTraining(trainingID uuid.UUID) (*model.HealthExerciseS
 
 // GetHealthDaily returns the last 7 days of health metrics and unlinked exercise sessions.
 func GetHealthDaily(userID uuid.UUID) (*model.HealthDailyResponse, error) {
-	sevenDaysAgo := time.Now().AddDate(0, 0, -7)
+	now := time.Now()
+	sevenDaysAgo := now.AddDate(0, 0, -7)
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 
 	var metrics []model.HealthMetric
-	if err := database.DB.Where("user_id = ? AND date > ?", userID, sevenDaysAgo).
+	if err := database.DB.Where("user_id = ? AND date >= ?", userID, today).
 		Order("date DESC").
 		Find(&metrics).Error; err != nil {
 		return nil, err

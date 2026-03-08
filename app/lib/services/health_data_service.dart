@@ -13,41 +13,71 @@ class HealthSyncPayload {
   final List<Map<String, dynamic>> metrics;
   final List<Map<String, dynamic>> sessions;
   final List<Map<String, dynamic>> hrSamples;
+  final List<String> deletedRecordIds;
   final String timezone;
 
   const HealthSyncPayload({
     required this.metrics,
     required this.sessions,
     required this.hrSamples,
+    this.deletedRecordIds = const [],
     required this.timezone,
   });
 
-  bool get isEmpty => metrics.isEmpty && sessions.isEmpty && hrSamples.isEmpty;
+  bool get isEmpty => metrics.isEmpty && sessions.isEmpty && hrSamples.isEmpty && deletedRecordIds.isEmpty;
 
   Map<String, dynamic> toJson() => {
     'metrics': metrics,
     'sessions': sessions,
     'hr_samples': hrSamples,
+    if (deletedRecordIds.isNotEmpty) 'deleted_record_ids': deletedRecordIds,
     'timezone': timezone,
   };
 }
 
-/// phase 1 permission types for health connect / healthkit
+/// all android-supported health connect permission types
 const healthPermissionTypes = [
+  HealthDataType.ACTIVE_ENERGY_BURNED,
+  HealthDataType.BASAL_ENERGY_BURNED,
+  HealthDataType.BLOOD_GLUCOSE,
+  HealthDataType.BLOOD_OXYGEN,
+  HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
+  HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
+  HealthDataType.BODY_FAT_PERCENTAGE,
+  HealthDataType.BODY_TEMPERATURE,
+  HealthDataType.BODY_WATER_MASS,
+  HealthDataType.DISTANCE_DELTA,
+  HealthDataType.FLIGHTS_CLIMBED,
+  HealthDataType.HEART_RATE,
+  HealthDataType.HEART_RATE_VARIABILITY_RMSSD,
+  HealthDataType.HEIGHT,
+  HealthDataType.LEAN_BODY_MASS,
+  HealthDataType.MENSTRUATION_FLOW,
+  HealthDataType.NUTRITION,
+  HealthDataType.RESPIRATORY_RATE,
+  HealthDataType.RESTING_HEART_RATE,
+  HealthDataType.SLEEP_ASLEEP,
+  HealthDataType.SLEEP_AWAKE,
+  HealthDataType.SLEEP_AWAKE_IN_BED,
   HealthDataType.SLEEP_DEEP,
   HealthDataType.SLEEP_LIGHT,
+  HealthDataType.SLEEP_OUT_OF_BED,
   HealthDataType.SLEEP_REM,
-  HealthDataType.RESTING_HEART_RATE,
-  HealthDataType.HEART_RATE_VARIABILITY_RMSSD,
+  HealthDataType.SLEEP_SESSION,
+  HealthDataType.SLEEP_UNKNOWN,
+  HealthDataType.SPEED,
   HealthDataType.STEPS,
-  HealthDataType.ACTIVE_ENERGY_BURNED,
-  HealthDataType.HEART_RATE,
+  HealthDataType.TOTAL_CALORIES_BURNED,
+  HealthDataType.WATER,
+  HealthDataType.WEIGHT,
   HealthDataType.WORKOUT,
 ];
 
 abstract class HealthDataService {
   Future<bool> isAvailable();
   Future<bool> requestPermissions();
+  Future<bool> checkPermissions();
+  Future<void> revokePermissions();
   Future<HealthSyncPayload> readNewData();
   /// full 30-day read ignoring incremental tokens — used by manual sync
   Future<HealthSyncPayload> readAllData();
@@ -114,6 +144,17 @@ mixin HealthDataServiceMixin on HealthDataService {
         return false;
       }
 
+      // on force sync, re-request permissions to ensure all types are authorized
+      // (idempotent — returns immediately if already granted)
+      if (force) {
+        final granted = await requestPermissions();
+        if (!granted) {
+          AppLogger.info('[HealthDataService] permissions denied');
+          await prefs.setHcConnected(false);
+          return false;
+        }
+      }
+
       final payload = force ? await readAllData() : await readNewData();
       if (payload.isEmpty) {
         AppLogger.debug('[HealthDataService] no new data to sync');
@@ -170,13 +211,6 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints, String time
   final sessions = <Map<String, dynamic>>[];
   final hrSamples = <Map<String, dynamic>>[];
 
-  // debug: log every raw data point grouped by type
-  final typeCounts = <String, int>{};
-  for (final point in dataPoints) {
-    typeCounts[point.type.name] = (typeCounts[point.type.name] ?? 0) + 1;
-  }
-  AppLogger.info('[HealthSync] raw data points by type: $typeCounts');
-
   // collect intervals for additive metrics keyed by "date:type"
   final additiveIntervals = <String, List<_MetricInterval>>{};
 
@@ -186,9 +220,22 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints, String time
     HealthDataType.SLEEP_DEEP,
     HealthDataType.SLEEP_LIGHT,
     HealthDataType.SLEEP_REM,
+    HealthDataType.SLEEP_ASLEEP,
   };
 
-  for (final point in dataPoints) {
+  const sleepTypes = {
+    HealthDataType.SLEEP_DEEP,
+    HealthDataType.SLEEP_LIGHT,
+    HealthDataType.SLEEP_REM,
+    HealthDataType.SLEEP_ASLEEP,
+  };
+
+  // sort by dateTo so last-write-wins for non-additive metrics (RHR, HRV)
+  // picks the most recent reading deterministically
+  final sortedPoints = List<HealthDataPoint>.from(dataPoints)
+    ..sort((a, b) => a.dateTo.compareTo(b.dateTo));
+
+  for (final point in sortedPoints) {
     if (point.type == HealthDataType.WORKOUT) {
       final workoutValue = point.value is WorkoutHealthValue ? point.value as WorkoutHealthValue : null;
       sessions.add({
@@ -208,20 +255,15 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints, String time
         });
       }
     } else {
-      final dateKey = _dateKey(point.dateFrom);
+      // for sleep stages, attribute to the wake-up date (dateTo)
+      final dateKey = sleepTypes.contains(point.type)
+          ? _dateKey(point.dateTo)
+          : _dateKey(point.dateFrom);
       dailyMetrics.putIfAbsent(dateKey, () => {'date': dateKey});
 
-      AppLogger.debug('[HealthSync] raw point: type=${point.type.name} date=$dateKey '
-          'value=${_numericValue(point)} from=${point.dateFrom} to=${point.dateTo} '
-          'source=${point.sourceName} uuid=${point.uuid}');
-
       if (additiveTypes.contains(point.type)) {
-        // for sleep stages, value is duration in hours derived from interval;
-        // for steps/calories, value is the numeric reading
         double value;
-        if (point.type == HealthDataType.SLEEP_DEEP ||
-            point.type == HealthDataType.SLEEP_LIGHT ||
-            point.type == HealthDataType.SLEEP_REM) {
+        if (sleepTypes.contains(point.type)) {
           value = point.dateTo.difference(point.dateFrom).inMinutes / 60.0;
         } else {
           value = _numericValue(point);
@@ -243,14 +285,6 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints, String time
     final bucket = dailyMetrics.putIfAbsent(dateKey, () => {'date': dateKey});
     final resolved = _resolveOverlaps(intervals);
 
-    // debug: log per-source breakdown
-    final sourceBreakdown = <String, double>{};
-    for (final iv in intervals) {
-      sourceBreakdown[iv.source] = (sourceBreakdown[iv.source] ?? 0) + iv.value;
-    }
-    AppLogger.info('[HealthSync] $typeName $dateKey by source: '
-        '${sourceBreakdown.entries.map((e) => '${e.key}=${e.value.toStringAsFixed(1)}').join(', ')} → resolved=${resolved.toStringAsFixed(1)}');
-
     switch (typeName) {
       case 'STEPS':
         bucket['steps'] = resolved.round();
@@ -270,15 +304,13 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints, String time
         bucket['sleep_rem_hours'] = resolved;
         _updateSleepTotal(bucket);
         break;
+      case 'SLEEP_ASLEEP':
+        // undifferentiated sleep — stored separately, included in total
+        bucket['sleep_asleep_hours'] = resolved;
+        _updateSleepTotal(bucket);
+        break;
     }
   });
-
-  // debug: log final aggregated payload per day
-  for (final entry in dailyMetrics.entries) {
-    AppLogger.info('[HealthSync] aggregated metrics ${entry.key}: ${entry.value}');
-  }
-  AppLogger.info('[HealthSync] payload: ${dailyMetrics.length} metric days, '
-      '${sessions.length} sessions, ${hrSamples.length} HR samples');
 
   return HealthSyncPayload(
     metrics: dailyMetrics.values.toList(),
@@ -341,9 +373,12 @@ double _resolveOverlaps(List<_MetricInterval> intervals) {
 }
 
 void _updateSleepTotal(Map<String, dynamic> bucket) {
-  bucket['sleep_hours'] = ((bucket['sleep_deep_hours'] as double?) ?? 0.0) +
+  final staged = ((bucket['sleep_deep_hours'] as double?) ?? 0.0) +
       ((bucket['sleep_light_hours'] as double?) ?? 0.0) +
       ((bucket['sleep_rem_hours'] as double?) ?? 0.0);
+  final asleep = (bucket['sleep_asleep_hours'] as double?) ?? 0.0;
+  // use staged breakdown if available, otherwise fall back to undifferentiated SLEEP_ASLEEP
+  bucket['sleep_hours'] = staged > 0 ? staged : asleep;
 }
 
 String _dateKey(DateTime dt) =>

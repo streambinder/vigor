@@ -312,13 +312,7 @@ class _HomePageState extends State<HomePage> {
 
   bool _hasHealthMetrics() {
     final metrics = _healthDaily?['metrics'] as List?;
-    if (metrics == null || metrics.isEmpty) return false;
-    final today = metrics.first as Map<String, dynamic>;
-    return (today['sleep_hours'] as num? ?? 0) > 0 ||
-        (today['resting_hr'] as num? ?? 0) > 0 ||
-        (today['hrv_rmssd'] as num? ?? 0) > 0 ||
-        (today['steps'] as num? ?? 0) > 0 ||
-        (today['active_calories'] as num? ?? 0) > 0;
+    return metrics != null && metrics.isNotEmpty;
   }
 
   Widget _buildHealthMetricsCard(AppLocalizations l10n) {
@@ -326,29 +320,19 @@ class _HomePageState extends State<HomePage> {
     final today = metrics.first as Map<String, dynamic>;
 
     final sleepHours = (today['sleep_hours'] as num?)?.toDouble() ?? 0;
-    final sleepDeep = (today['sleep_deep_hours'] as num?)?.toDouble() ?? 0;
-    final sleepLight = (today['sleep_light_hours'] as num?)?.toDouble() ?? 0;
-    final sleepREM = (today['sleep_rem_hours'] as num?)?.toDouble() ?? 0;
     final restingHR = (today['resting_hr'] as num?)?.toInt() ?? 0;
     final hrv = (today['hrv_rmssd'] as num?)?.toDouble() ?? 0;
     final steps = (today['steps'] as num?)?.toInt() ?? 0;
     final calories = (today['active_calories'] as num?)?.toDouble() ?? 0;
 
-    // build tiles, omitting zero values
-    final tiles = <Widget>[];
-    if (sleepHours > 0) {
-      tiles.add(_buildSleepTile(l10n, sleepHours, sleepDeep, sleepLight, sleepREM));
-    }
-    if (restingHR > 0) tiles.add(_buildMetricTile(l10n.healthDailyRestingHr, '$restingHR', 'bpm'));
-    if (hrv > 0) tiles.add(_buildMetricTile(l10n.healthDailyHrv, '${hrv.toInt()}', 'ms'));
-    if (steps > 0) tiles.add(_buildMetricTile(l10n.healthDailySteps, _formatSteps(steps), ''));
-    if (calories > 0) tiles.add(_buildMetricTile(l10n.healthDailyCalories, '${calories.toInt()}', 'kcal'));
-
-    // collect steps from last 7 days for sparkline
-    final stepsHistory = <int>[];
-    for (final m in metrics) {
-      stepsHistory.add(((m as Map<String, dynamic>)['steps'] as num?)?.toInt() ?? 0);
-    }
+    // always show all tiles — use — for missing values
+    final tiles = <Widget>[
+      _buildMetricTile(l10n.healthDailySleep, sleepHours > 0 ? _formatSleepHours(sleepHours) : '—', 'h'),
+      _buildMetricTile(l10n.healthDailyRestingHr, restingHR > 0 ? '$restingHR' : '—', 'bpm'),
+      _buildMetricTile(l10n.healthDailyHrv, hrv > 0 ? '${hrv.toInt()}' : '—', 'ms'),
+      _buildMetricTile(l10n.healthDailySteps, steps > 0 ? _formatSteps(steps) : '—', ''),
+      _buildMetricTile(l10n.healthDailyCalories, calories > 0 ? '${calories.toInt()}' : '—', 'kcal'),
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -369,22 +353,9 @@ class _HomePageState extends State<HomePage> {
         const SizedBox(height: VigorSpacing.sm),
         AdaptiveCard(
           padding: VigorSpacing.paddingMd,
-          child: Column(
-            children: [
-              Wrap(
-                spacing: VigorSpacing.md,
-                runSpacing: VigorSpacing.md,
-                children: tiles,
-              ),
-              // 7-day steps sparkline
-              if (stepsHistory.any((s) => s > 0)) ...[
-                const SizedBox(height: VigorSpacing.md),
-                SizedBox(
-                  height: 48,
-                  child: _buildStepsSparkline(stepsHistory.reversed.toList()),
-                ),
-              ],
-            ],
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: tiles,
           ),
         ),
       ],
@@ -422,95 +393,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildSleepTile(AppLocalizations l10n, double hours, double deep, double light, double rem) {
-    final total = deep + light + rem;
-    // only show breakdown bar if stages sum to something meaningful
-    final hasBreakdown = total > 0;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Text(hours.toStringAsFixed(1), style: VigorTypography.data.copyWith(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: VigorColors.textPrimary(context),
-            )),
-            const SizedBox(width: 2),
-            Text('h', style: VigorTypography.caption.copyWith(
-              color: VigorColors.textSecondary(context),
-              fontSize: 10,
-            )),
-          ],
-        ),
-        const SizedBox(height: 2),
-        Text(l10n.healthDailySleep, style: VigorTypography.caption.copyWith(
-          color: VigorColors.textSecondary(context),
-        )),
-        if (hasBreakdown) ...[
-          const SizedBox(height: 4),
-          SizedBox(
-            width: 48,
-            height: 4,
-            child: ClipRRect(
-              borderRadius: VigorRadius.radiusFull,
-              child: Row(
-                children: [
-                  Expanded(flex: (deep / total * 100).round().clamp(1, 100), child: Container(color: VigorColors.indigo)),
-                  Expanded(flex: (light / total * 100).round().clamp(1, 100), child: Container(color: VigorColors.indigoLight)),
-                  Expanded(flex: (rem / total * 100).round().clamp(1, 100), child: Container(color: VigorColors.persimmon)),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildStepsSparkline(List<int> steps) {
-    final maxVal = steps.reduce((a, b) => a > b ? a : b);
-    if (maxVal == 0) return const SizedBox.shrink();
-    final locale = Localizations.localeOf(context).toString();
-    final now = DateTime.now();
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: List.generate(steps.length, (i) {
-        final fraction = steps[i] / maxVal;
-        final day = now.subtract(Duration(days: steps.length - 1 - i));
-        final dayLetter = DateFormat.E(locale).format(day)[0].toUpperCase();
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 1.5),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: FractionallySizedBox(
-                    heightFactor: fraction.clamp(0.05, 1.0),
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: VigorColors.persimmon.withValues(alpha: 0.3 + 0.7 * fraction),
-                        borderRadius: VigorRadius.radiusXs,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(dayLetter, style: VigorTypography.caption.copyWith(
-                  fontSize: 9,
-                  color: VigorColors.stone,
-                )),
-              ],
-            ),
-          ),
-        );
-      }),
-    );
+  String _formatSleepHours(double hours) {
+    final h = hours.toInt();
+    final m = ((hours - h) * 60).round();
+    return '$h:${m.toString().padLeft(2, '0')}';
   }
 
   String _formatSteps(int steps) {

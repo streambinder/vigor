@@ -82,7 +82,7 @@ func getHealthSession(c *fiber.Ctx) error {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})
 	}
 
-	session, err := service.GetExerciseSessionForTraining(parsedID)
+	session, err := service.GetExerciseSessionForTraining(parsedID, userID)
 	if err != nil {
 		middleware.Log(c).Error().Err(err).Msg("failed to get health session")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to get health session"})

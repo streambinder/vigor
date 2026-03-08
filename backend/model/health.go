@@ -29,8 +29,8 @@ type HealthExerciseSession struct {
 	User                 User            `gorm:"constraint:OnDelete:CASCADE;" json:"-"`
 	TrainingID           *uuid.UUID      `gorm:"type:uuid;index:idx_health_session_user_training" json:"training_id"`
 	Training             *Training       `gorm:"constraint:OnDelete:SET NULL;" json:"-"`
-	SourceApp            string          `json:"source_app"`
-	ExerciseType         string          `json:"exercise_type"`
+	SourceApp            string          `gorm:"type:varchar(255)" json:"source_app"`
+	ExerciseType         string          `gorm:"type:varchar(64)" json:"exercise_type"`
 	StartedAt            time.Time       `gorm:"not null;index:idx_health_session_user_started" json:"started_at"`
 	EndedAt              time.Time       `gorm:"not null" json:"ended_at"`
 	AvgHR                *int            `json:"avg_hr"`
@@ -38,7 +38,7 @@ type HealthExerciseSession struct {
 	Calories             *float64        `json:"calories"`
 	HRZoneDistributionJSON datatypes.JSON `gorm:"type:jsonb" json:"hr_zone_distribution_json"`
 	HRSamplesJSON        datatypes.JSON  `gorm:"type:jsonb" json:"hr_samples_json"`
-	HCRecordID           string          `gorm:"not null;uniqueIndex:idx_health_session_user_record" json:"hc_record_id"`
+	HCRecordID           string          `gorm:"type:varchar(255);not null;uniqueIndex:idx_health_session_user_record" json:"hc_record_id"`
 	SyncedAt             time.Time       `json:"synced_at"`
 }
 
@@ -84,10 +84,11 @@ type HealthDailyResponse struct {
 // HealthSyncRequest is the DTO for POST /health/sync.
 // timestamps are unix milliseconds, HR values in bpm, sleep in hours, steps as count
 type HealthSyncRequest struct {
-	Timezone string              `json:"timezone"` // IANA timezone string (e.g. "Europe/Rome")
-	Metrics  []HealthSyncMetric  `json:"metrics"`
-	Sessions []HealthSyncSession `json:"sessions"`
-	HRSamples []HealthSyncHRSample `json:"hr_samples"`
+	Timezone         string              `json:"timezone"` // IANA timezone string (e.g. "Europe/Rome")
+	Metrics          []HealthSyncMetric  `json:"metrics"`
+	Sessions         []HealthSyncSession `json:"sessions"`
+	HRSamples        []HealthSyncHRSample `json:"hr_samples"`
+	DeletedRecordIDs []string            `json:"deleted_record_ids"`
 }
 
 type HealthSyncMetric struct {

@@ -345,48 +345,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ListTile(
                         leading: Icon(Icons.sync, color: isSyncing ? VigorColors.stone : VigorColors.indigoAdaptive(context), size: 22),
                         title: Text(l10n.healthSynchronize, style: VigorTypography.body.copyWith(color: isSyncing ? VigorColors.stone : VigorColors.textPrimary(context))),
-                        onTap: isSyncing ? null : () async {
+                        onTap: isSyncing ? null : () {
                           final healthService = context.read<ServiceLocator>().healthDataService;
                           if (healthService == null) return;
-                          // read data without sending to backend so we can show it
-                          final payload = await healthService.readAllData();
-                          final debugLines = StringBuffer();
-                          debugLines.writeln('=== HEALTH SYNC DEBUG ===');
-                          debugLines.writeln('timezone: ${payload.timezone}');
-                          debugLines.writeln('metrics: ${payload.metrics.length} days');
-                          for (final m in payload.metrics) {
-                            debugLines.writeln('  ${m['date']}: sleep=${m['sleep_hours']?.toStringAsFixed(2)}h '
-                                '(deep=${m['sleep_deep_hours']?.toStringAsFixed(2)} '
-                                'light=${m['sleep_light_hours']?.toStringAsFixed(2)} '
-                                'rem=${m['sleep_rem_hours']?.toStringAsFixed(2)}) '
-                                'rhr=${m['resting_hr']} hrv=${m['hrv_rmssd']} '
-                                'steps=${m['steps']} cal=${m['active_calories']?.toStringAsFixed(1)}');
-                          }
-                          debugLines.writeln('sessions: ${payload.sessions.length}');
-                          for (final s in payload.sessions) {
-                            final start = DateTime.fromMillisecondsSinceEpoch(s['started_at'] as int);
-                            final end = DateTime.fromMillisecondsSinceEpoch(s['ended_at'] as int);
-                            debugLines.writeln('  ${s['exercise_type']} ${start.toIso8601String()} -> ${end.toIso8601String()} src=${s['source_app']}');
-                          }
-                          debugLines.writeln('hr_samples: ${payload.hrSamples.length}');
-                          // now actually sync
                           healthService.syncToBackend(force: true);
-                          if (!context.mounted) return;
-                          showDialog(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              title: const Text('Sync Debug'),
-                              content: SingleChildScrollView(
-                                child: SelectableText(
-                                  debugLines.toString(),
-                                  style: VigorTypography.data.copyWith(fontSize: 10, color: VigorColors.textPrimary(ctx)),
-                                ),
-                              ),
-                              actions: [
-                                TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Close')),
-                              ],
-                            ),
-                          );
                         },
                       ),
                       Divider(height: 1, color: VigorColors.border(context)),

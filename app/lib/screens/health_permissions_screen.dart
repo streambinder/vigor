@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:health/health.dart';
 import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
+import '../services/android_health_data_service.dart';
 import '../services/preferences_service.dart';
 import '../services/service_locator.dart';
 import '../widgets/adaptive/adaptive.dart';
@@ -102,6 +104,23 @@ class HealthPermissionsScreen extends StatelessWidget {
     final locator = context.read<ServiceLocator>();
     final healthService = locator.healthDataService;
     if (healthService == null) return;
+
+    // on android, check HC SDK availability before requesting permissions
+    if (healthService is AndroidHealthDataService) {
+      final status = await healthService.getSdkStatus();
+      if (status != HealthConnectSdkStatus.sdkAvailable) {
+        if (!context.mounted) return;
+        await AdaptiveAlertDialog.show(
+          context: context,
+          title: l10n.healthInstallHcTitle,
+          content: l10n.healthInstallHcDescription,
+          actions: [
+            AdaptiveDialogAction(label: l10n.ok, onPressed: () => Navigator.of(context).pop()),
+          ],
+        );
+        return;
+      }
+    }
 
     final granted = await healthService.requestPermissions();
 
