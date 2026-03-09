@@ -144,7 +144,7 @@ jobs:
           cd app
           flutter pub get
           flutter build apk --release --dart-define=API_URL=${{ secrets.API_URL }}
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: release-apk
           path: app/build/app/outputs/flutter-apk/app-release.apk
@@ -263,7 +263,7 @@ jobs:
 
   #         echo "All tests passed!"
   #     - name: Upload coverage artifacts
-  #       uses: actions/upload-artifact@v6
+  #       uses: actions/upload-artifact@v7
   #       with:
   #         name: coverage-reports
   #         path: backend/*.out
