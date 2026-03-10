@@ -62,7 +62,7 @@ func clampIntOrZero(v, min, max int) int {
 
 // SyncHealthData ingests raw health data from the client, aggregates metrics,
 // upserts exercise sessions, correlates HR samples, and enriches trainings.
-func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest) error {
+func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest) (*model.HealthSyncResponse, error) {
 	now := time.Now()
 	thirtyDaysAgo := now.AddDate(0, 0, -30)
 
@@ -89,7 +89,12 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest) error {
 		estimatedMaxHR = clampInt(220-profile.Age(), 100, 220)
 	}
 
-	return database.DB.Transaction(func(tx *gorm.DB) error {
+	resp := &model.HealthSyncResponse{
+		MetricsSynced:  len(req.Metrics),
+		SessionsSynced: len(req.Sessions),
+	}
+
+	if err := database.DB.Transaction(func(tx *gorm.DB) error {
 		// update profile timezone if provided and valid
 		if req.Timezone != "" {
 			if _, err := time.LoadLocation(req.Timezone); err == nil {
@@ -234,7 +239,18 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest) error {
 
 		// 4. training enrichment
 		return enrichTrainings(tx, userID)
-	})
+	}); err != nil {
+		return nil, err
+	}
+
+	// count totals stored in DB
+	var totalMetrics, totalSessions int64
+	database.DB.Model(&model.HealthMetric{}).Where("user_id = ?", userID).Count(&totalMetrics)
+	database.DB.Model(&model.HealthExerciseSession{}).Where("user_id = ?", userID).Count(&totalSessions)
+	resp.TotalMetrics = int(totalMetrics)
+	resp.TotalSessions = int(totalSessions)
+
+	return resp, nil
 }
 
 // hrZoneDistribution holds percentage distribution across 5 HR zones.

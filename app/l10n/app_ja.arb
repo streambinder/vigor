@@ -497,6 +497,21 @@
   "healthConnect": "接続",
   "healthConnected": "接続済み",
   "healthData": "ヘルスデータ",
+  "healthSyncNoData": "デバイスにヘルスデータが見つかりません",
+  "healthStoredMetrics": "{days}日間 · {sessions}セッション",
+  "@healthStoredMetrics": {
+    "placeholders": {
+      "days": {"type": "int"},
+      "sessions": {"type": "int"}
+    }
+  },
+  "healthLastSync": "前回の同期: {count}日分、{sessions}セッション送信済み",
+  "@healthLastSync": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "sessions": {"type": "int"}
+    }
+  },
   "healthDisconnect": "切断してデータを削除",
   "healthDisconnectConfirmation": "ヘルスデータを切断しますか？同期されたすべてのデータが削除されます。この操作は取り消せません。",
   "healthDisconnectedSuccessfully": "ヘルスデータが切断されました",

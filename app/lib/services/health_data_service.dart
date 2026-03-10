@@ -8,6 +8,31 @@ import 'secure_storage_service.dart';
 import 'android_health_data_service.dart';
 import 'ios_health_data_service.dart';
 
+/// result from POST /health/sync — counts of what was synced and stored
+class HealthSyncResult {
+  final int metricsSynced;
+  final int sessionsSynced;
+  final int totalMetrics;
+  final int totalSessions;
+  final DateTime syncedAt;
+
+  const HealthSyncResult({
+    required this.metricsSynced,
+    required this.sessionsSynced,
+    required this.totalMetrics,
+    required this.totalSessions,
+    required this.syncedAt,
+  });
+
+  factory HealthSyncResult.fromJson(Map<String, dynamic> json) => HealthSyncResult(
+    metricsSynced: json['metrics_synced'] ?? 0,
+    sessionsSynced: json['sessions_synced'] ?? 0,
+    totalMetrics: json['total_metrics'] ?? 0,
+    totalSessions: json['total_sessions'] ?? 0,
+    syncedAt: DateTime.now(),
+  );
+}
+
 /// sync payload sent to POST /health/sync
 class HealthSyncPayload {
   final List<Map<String, dynamic>> metrics;
@@ -82,6 +107,7 @@ abstract class HealthDataService {
   /// full 30-day read ignoring incremental tokens — used by manual sync
   Future<HealthSyncPayload> readAllData();
   ValueNotifier<bool> get syncing;
+  ValueNotifier<HealthSyncResult?> get lastSyncResult;
 
   /// trigger sync: read new data, POST to backend, persist tokens.
   /// returns true if sync completed successfully.
@@ -112,6 +138,10 @@ mixin HealthDataServiceMixin on HealthDataService {
   final ValueNotifier<bool> _syncing = ValueNotifier(false);
   @override
   ValueNotifier<bool> get syncing => _syncing;
+
+  final ValueNotifier<HealthSyncResult?> _lastSyncResult = ValueNotifier(null);
+  @override
+  ValueNotifier<HealthSyncResult?> get lastSyncResult => _lastSyncResult;
 
   static const _throttleDuration = Duration(hours: 1);
   static const _syncTimeout = Duration(seconds: 60);
@@ -158,7 +188,12 @@ mixin HealthDataServiceMixin on HealthDataService {
       final payload = force ? await readAllData() : await readNewData();
       if (payload.isEmpty) {
         AppLogger.debug('[HealthDataService] no new data to sync');
-        // still update last sync timestamp to avoid re-reading
+        final prev = _lastSyncResult.value;
+        _lastSyncResult.value = HealthSyncResult(
+          metricsSynced: 0, sessionsSynced: 0,
+          totalMetrics: prev?.totalMetrics ?? 0, totalSessions: prev?.totalSessions ?? 0,
+          syncedAt: DateTime.now(),
+        );
         await prefs.setHcLastSyncMs(DateTime.now().millisecondsSinceEpoch);
         return true;
       }
@@ -169,6 +204,9 @@ mixin HealthDataServiceMixin on HealthDataService {
 
       if (response.isSuccess) {
         AppLogger.info('[HealthDataService] sync POST succeeded');
+        if (response.data != null) {
+          _lastSyncResult.value = HealthSyncResult.fromJson(response.data!);
+        }
         // persist tokens/timestamps only after successful POST (H3)
         await onSyncSuccess();
         await prefs.setHcLastSyncMs(DateTime.now().millisecondsSinceEpoch);

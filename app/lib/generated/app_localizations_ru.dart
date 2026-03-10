@@ -1513,6 +1513,19 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get healthSyncNoData => 'На устройстве не найдены данные о здоровье';
+
+  @override
+  String healthStoredMetrics(int days, int sessions) {
+    return '$days дн. · $sessions сеансов';
+  }
+
+  @override
+  String healthLastSync(int count, int sessions) {
+    return 'Последняя синхронизация: $count дн., $sessions сеансов отправлено';
+  }
+
+  @override
   String get healthDisconnect => 'Отключить и удалить данные';
 
   @override

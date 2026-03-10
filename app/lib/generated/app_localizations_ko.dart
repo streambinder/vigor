@@ -1488,6 +1488,19 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get healthSyncNoData => '기기에서 건강 데이터를 찾을 수 없습니다';
+
+  @override
+  String healthStoredMetrics(int days, int sessions) {
+    return '$days일 · $sessions세션';
+  }
+
+  @override
+  String healthLastSync(int count, int sessions) {
+    return '마지막 동기화: $count일, $sessions세션 전송됨';
+  }
+
+  @override
   String get healthDisconnect => '연결 해제 및 데이터 삭제';
 
   @override

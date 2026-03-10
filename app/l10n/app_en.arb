@@ -714,6 +714,21 @@
       "days": {"type": "int"}
     }
   },
+  "healthSyncNoData": "No health data found on device",
+  "healthStoredMetrics": "{days} days · {sessions} sessions",
+  "@healthStoredMetrics": {
+    "placeholders": {
+      "days": {"type": "int"},
+      "sessions": {"type": "int"}
+    }
+  },
+  "healthLastSync": "Last sync: {count} days, {sessions} sessions sent",
+  "@healthLastSync": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "sessions": {"type": "int"}
+    }
+  },
   "healthDisconnect": "Disconnect & Delete Data",
   "healthDisconnectConfirmation": "Disconnect health data? All synced health data will be deleted. This cannot be undone.",
   "healthDisconnectedSuccessfully": "Health data disconnected",

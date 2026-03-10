@@ -497,6 +497,21 @@
   "healthConnect": "Подключить",
   "healthConnected": "Подключено",
   "healthData": "Данные о здоровье",
+  "healthSyncNoData": "На устройстве не найдены данные о здоровье",
+  "healthStoredMetrics": "{days} дн. · {sessions} сеансов",
+  "@healthStoredMetrics": {
+    "placeholders": {
+      "days": {"type": "int"},
+      "sessions": {"type": "int"}
+    }
+  },
+  "healthLastSync": "Последняя синхронизация: {count} дн., {sessions} сеансов отправлено",
+  "@healthLastSync": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "sessions": {"type": "int"}
+    }
+  },
   "healthDisconnect": "Отключить и удалить данные",
   "healthDisconnectConfirmation": "Отключить данные о здоровье? Все синхронизированные данные будут удалены. Это действие необратимо.",
   "healthDisconnectedSuccessfully": "Данные о здоровье отключены",

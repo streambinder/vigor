@@ -75,6 +75,15 @@ type ExternalWorkoutSummary struct {
 	DurationMins int    `json:"duration_mins"`
 }
 
+// HealthSyncResponse is the response for POST /health/sync.
+// codegen:skip
+type HealthSyncResponse struct {
+	MetricsSynced  int `json:"metrics_synced"`
+	SessionsSynced int `json:"sessions_synced"`
+	TotalMetrics   int `json:"total_metrics"`
+	TotalSessions  int `json:"total_sessions"`
+}
+
 // HealthDailyResponse is the response for GET /health/daily.
 type HealthDailyResponse struct {
 	Metrics  []HealthMetric          `json:"metrics"`

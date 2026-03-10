@@ -2916,6 +2916,24 @@ abstract class AppLocalizations {
   /// **'Building your personal baselines ({days}/14 days)'**
   String healthBuildingBaselines(int days);
 
+  /// No description provided for @healthSyncNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No health data found on device'**
+  String get healthSyncNoData;
+
+  /// No description provided for @healthStoredMetrics.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days · {sessions} sessions'**
+  String healthStoredMetrics(int days, int sessions);
+
+  /// No description provided for @healthLastSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Last sync: {count} days, {sessions} sessions sent'**
+  String healthLastSync(int count, int sessions);
+
   /// No description provided for @healthDisconnect.
   ///
   /// In en, this message translates to:

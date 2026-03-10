@@ -1526,6 +1526,20 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get healthSyncNoData =>
+      'Keine Gesundheitsdaten auf dem Gerät gefunden';
+
+  @override
+  String healthStoredMetrics(int days, int sessions) {
+    return '$days Tage · $sessions Sitzungen';
+  }
+
+  @override
+  String healthLastSync(int count, int sessions) {
+    return 'Letzte Sync: $count Tage, $sessions Sitzungen gesendet';
+  }
+
+  @override
   String get healthDisconnect => 'Trennen & Daten löschen';
 
   @override

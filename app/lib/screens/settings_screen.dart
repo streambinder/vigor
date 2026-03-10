@@ -6,6 +6,7 @@ import '../providers/theme_provider.dart';
 import '../services/authenticated_api_service.dart';
 import '../services/preferences_service.dart';
 import '../services/secure_storage_service.dart';
+import '../services/health_data_service.dart';
 import '../services/service_locator.dart';
 import '../widgets/adaptive/adaptive.dart';
 import 'health_permissions_screen.dart';
@@ -330,34 +331,63 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (isConnected && healthService != null)
                 ValueListenableBuilder<bool>(
                   valueListenable: healthService.syncing,
-                  builder: (context, isSyncing, _) => Column(
-                    children: [
-                      ListTile(
-                        leading: isSyncing
-                            ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: VigorColors.indigoAdaptive(context)))
-                            : Icon(Icons.check_circle, color: VigorColors.indigoAdaptive(context), size: 22),
-                        title: Text(
-                          isSyncing ? l10n.healthSynchronizing : l10n.healthSynchronized,
-                          style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)),
+                  builder: (context, isSyncing, _) => ValueListenableBuilder<HealthSyncResult?>(
+                    valueListenable: healthService.lastSyncResult,
+                    builder: (context, syncResult, _) => Column(
+                      children: [
+                        // status row
+                        ListTile(
+                          leading: isSyncing
+                              ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: VigorColors.indigoAdaptive(context)))
+                              : Icon(Icons.check_circle, color: VigorColors.indigoAdaptive(context), size: 22),
+                          title: Text(
+                            isSyncing ? l10n.healthSynchronizing : l10n.healthSynchronized,
+                            style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)),
+                          ),
+                          subtitle: syncResult != null && !isSyncing
+                              ? Text(
+                                  l10n.healthStoredMetrics(syncResult.totalMetrics, syncResult.totalSessions),
+                                  style: VigorTypography.caption.copyWith(color: VigorColors.stone),
+                                )
+                              : null,
                         ),
-                      ),
-                      Divider(height: 1, color: VigorColors.border(context)),
-                      ListTile(
-                        leading: Icon(Icons.sync, color: isSyncing ? VigorColors.stone : VigorColors.indigoAdaptive(context), size: 22),
-                        title: Text(l10n.healthSynchronize, style: VigorTypography.body.copyWith(color: isSyncing ? VigorColors.stone : VigorColors.textPrimary(context))),
-                        onTap: isSyncing ? null : () {
-                          final healthService = context.read<ServiceLocator>().healthDataService;
-                          if (healthService == null) return;
-                          healthService.syncToBackend(force: true);
-                        },
-                      ),
-                      Divider(height: 1, color: VigorColors.border(context)),
-                      ListTile(
-                        leading: const Icon(Icons.delete_outline, color: VigorColors.crimson, size: 22),
-                        title: Text(l10n.healthDisconnect, style: VigorTypography.body.copyWith(color: VigorColors.crimson)),
-                        onTap: () => _showDisconnectDialog(context, l10n),
-                      ),
-                    ],
+                        // last sync details
+                        if (syncResult != null && !isSyncing) ...[
+                          Divider(height: 1, color: VigorColors.border(context)),
+                          ListTile(
+                            leading: Icon(
+                              syncResult.metricsSynced == 0 && syncResult.sessionsSynced == 0
+                                  ? Icons.info_outline
+                                  : Icons.cloud_done_outlined,
+                              color: VigorColors.stone,
+                              size: 22,
+                            ),
+                            title: Text(
+                              syncResult.metricsSynced == 0 && syncResult.sessionsSynced == 0
+                                  ? l10n.healthSyncNoData
+                                  : l10n.healthLastSync(syncResult.metricsSynced, syncResult.sessionsSynced),
+                              style: VigorTypography.caption.copyWith(color: VigorColors.stone),
+                            ),
+                          ),
+                        ],
+                        Divider(height: 1, color: VigorColors.border(context)),
+                        ListTile(
+                          leading: Icon(Icons.sync, color: isSyncing ? VigorColors.stone : VigorColors.indigoAdaptive(context), size: 22),
+                          title: Text(l10n.healthSynchronize, style: VigorTypography.body.copyWith(color: isSyncing ? VigorColors.stone : VigorColors.textPrimary(context))),
+                          onTap: isSyncing ? null : () {
+                            final healthService = context.read<ServiceLocator>().healthDataService;
+                            if (healthService == null) return;
+                            healthService.syncToBackend(force: true);
+                          },
+                        ),
+                        Divider(height: 1, color: VigorColors.border(context)),
+                        ListTile(
+                          leading: const Icon(Icons.delete_outline, color: VigorColors.crimson, size: 22),
+                          title: Text(l10n.healthDisconnect, style: VigorTypography.body.copyWith(color: VigorColors.crimson)),
+                          onTap: () => _showDisconnectDialog(context, l10n),
+                        ),
+                      ],
+                    ),
                   ),
                 )
               else if (!isConnected)

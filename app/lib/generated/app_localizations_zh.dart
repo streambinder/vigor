@@ -1485,6 +1485,19 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get healthSyncNoData => '设备上未找到健康数据';
+
+  @override
+  String healthStoredMetrics(int days, int sessions) {
+    return '$days天 · $sessions个会话';
+  }
+
+  @override
+  String healthLastSync(int count, int sessions) {
+    return '上次同步：已发送$count天、$sessions个会话';
+  }
+
+  @override
   String get healthDisconnect => '断开连接并删除数据';
 
   @override

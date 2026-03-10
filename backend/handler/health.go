@@ -39,12 +39,13 @@ func postHealthSync(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
 	}
 
-	if err := service.SyncHealthData(c.Locals("userID").(uuid.UUID), req); err != nil {
+	resp, err := service.SyncHealthData(c.Locals("userID").(uuid.UUID), req)
+	if err != nil {
 		middleware.Log(c).Error().Err(err).Msg("failed to sync health data")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "sync failed"})
 	}
 
-	return c.SendStatus(http.StatusOK)
+	return c.JSON(resp)
 }
 
 func postHealthDisconnect(c *fiber.Ctx) error {

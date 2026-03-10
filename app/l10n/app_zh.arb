@@ -497,6 +497,21 @@
   "healthConnect": "连接",
   "healthConnected": "已连接",
   "healthData": "健康数据",
+  "healthSyncNoData": "设备上未找到健康数据",
+  "healthStoredMetrics": "{days}天 · {sessions}个会话",
+  "@healthStoredMetrics": {
+    "placeholders": {
+      "days": {"type": "int"},
+      "sessions": {"type": "int"}
+    }
+  },
+  "healthLastSync": "上次同步：已发送{count}天、{sessions}个会话",
+  "@healthLastSync": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "sessions": {"type": "int"}
+    }
+  },
   "healthDisconnect": "断开连接并删除数据",
   "healthDisconnectConfirmation": "断开健康数据连接？所有同步的数据将被删除，此操作不可撤销。",
   "healthDisconnectedSuccessfully": "健康数据已断开连接",

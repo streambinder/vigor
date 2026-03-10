@@ -1514,6 +1514,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get healthSyncNoData => 'No health data found on device';
+
+  @override
+  String healthStoredMetrics(int days, int sessions) {
+    return '$days days · $sessions sessions';
+  }
+
+  @override
+  String healthLastSync(int count, int sessions) {
+    return 'Last sync: $count days, $sessions sessions sent';
+  }
+
+  @override
   String get healthDisconnect => 'Disconnect & Delete Data';
 
   @override

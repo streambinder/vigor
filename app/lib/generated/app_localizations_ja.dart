@@ -1488,6 +1488,19 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get healthSyncNoData => 'デバイスにヘルスデータが見つかりません';
+
+  @override
+  String healthStoredMetrics(int days, int sessions) {
+    return '$days日間 · $sessionsセッション';
+  }
+
+  @override
+  String healthLastSync(int count, int sessions) {
+    return '前回の同期: $count日分、$sessionsセッション送信済み';
+  }
+
+  @override
   String get healthDisconnect => '切断してデータを削除';
 
   @override
