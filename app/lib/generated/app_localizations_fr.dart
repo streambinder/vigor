@@ -735,6 +735,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get continueTraining => 'Continuer';
 
   @override
+  String get stop => 'Arrêter';
+
+  @override
+  String get stopTraining => 'Arrêter l\'Entraînement ?';
+
+  @override
+  String get stopTrainingConfirm => 'La progression du minuteur sera perdue.';
+
+  @override
   String get failedToMarkComplete =>
       'Échec de la complétion de l\'entraînement';
 

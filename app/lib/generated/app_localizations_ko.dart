@@ -716,6 +716,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get continueTraining => '계속';
 
   @override
+  String get stop => '중지';
+
+  @override
+  String get stopTraining => '트레이닝을 중지하시겠습니까?';
+
+  @override
+  String get stopTrainingConfirm => '타이머 진행 상황이 손실됩니다.';
+
+  @override
   String get failedToMarkComplete => '트레이닝 완료 실패';
 
   @override

@@ -1428,6 +1428,24 @@ abstract class AppLocalizations {
   /// **'Continue'**
   String get continueTraining;
 
+  /// No description provided for @stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get stop;
+
+  /// No description provided for @stopTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Training?'**
+  String get stopTraining;
+
+  /// No description provided for @stopTrainingConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer progress will be lost.'**
+  String get stopTrainingConfirm;
+
   /// No description provided for @failedToMarkComplete.
   ///
   /// In en, this message translates to:

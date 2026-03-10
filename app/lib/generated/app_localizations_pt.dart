@@ -734,6 +734,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get continueTraining => 'Continuar';
 
   @override
+  String get stop => 'Parar';
+
+  @override
+  String get stopTraining => 'Parar o Treino?';
+
+  @override
+  String get stopTrainingConfirm => 'O progresso do temporizador será perdido.';
+
+  @override
   String get failedToMarkComplete => 'Falha ao concluir o treino';
 
   @override

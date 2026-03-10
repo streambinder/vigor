@@ -716,6 +716,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get continueTraining => '继续';
 
   @override
+  String get stop => '停止';
+
+  @override
+  String get stopTraining => '停止训练？';
+
+  @override
+  String get stopTrainingConfirm => '计时器进度将会丢失。';
+
+  @override
   String get failedToMarkComplete => '完成训练失败';
 
   @override

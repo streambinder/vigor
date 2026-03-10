@@ -753,7 +753,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         if (_timerNotifier != null) {
-          _confirmStopTimer();
+          _confirmTimerExit();
         } else {
           _navigateToActivityScreen(context);
         }
@@ -766,7 +766,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             icon: const Icon(Icons.arrow_back_ios, color: VigorColors.stone),
             onPressed: () {
               if (_timerNotifier != null) {
-                _confirmStopTimer();
+                _confirmTimerExit();
               } else {
                 _navigateToActivityScreen(context);
               }
@@ -1205,7 +1205,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             )
           : _buildActionButton(
               icon: Icons.timer,
-              label: l10n.startTraining,
+              label: l10n.timer,
               color: indigoColor,
               onPressed: _startTimer,
             ),
@@ -1221,14 +1221,14 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         else if (!isCompleted)
           Expanded(child: _buildActionButton(
             icon: Icons.check_circle_outline,
-            label: l10n.markAsComplete,
+            label: l10n.complete,
             color: VigorColors.persimmon,
             onPressed: () => _completeTraining(context),
           ))
         else
           Expanded(child: _buildActionButton(
             icon: Icons.rate_review,
-            label: _userFeedback != null ? l10n.updateFeedback : l10n.feedback,
+            label: l10n.feedback,
             color: indigoColor,
             onPressed: () => _updateFeedback(context),
           )),

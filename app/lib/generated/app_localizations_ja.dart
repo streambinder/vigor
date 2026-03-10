@@ -716,6 +716,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get continueTraining => '続行';
 
   @override
+  String get stop => '停止';
+
+  @override
+  String get stopTraining => 'トレーニングを停止しますか？';
+
+  @override
+  String get stopTrainingConfirm => 'タイマーの進行状況は失われます。';
+
+  @override
   String get failedToMarkComplete => 'トレーニングの完了に失敗しました';
 
   @override

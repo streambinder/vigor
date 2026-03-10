@@ -376,6 +376,9 @@
   "whatWouldYouLikeToDo": "What next?",
   "exit": "Exit",
   "continueTraining": "Continue",
+  "stop": "Stop",
+  "stopTraining": "Stop Training?",
+  "stopTrainingConfirm": "Timer progress will be lost.",
 
   "failedToMarkComplete": "Failed to complete training",
 

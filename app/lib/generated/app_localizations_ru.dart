@@ -729,6 +729,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get continueTraining => 'Продолжить';
 
   @override
+  String get stop => 'Стоп';
+
+  @override
+  String get stopTraining => 'Остановить Тренировку?';
+
+  @override
+  String get stopTrainingConfirm => 'Прогресс таймера будет потерян.';
+
+  @override
   String get failedToMarkComplete => 'Не удалось завершить тренировку';
 
   @override
