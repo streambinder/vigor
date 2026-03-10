@@ -507,7 +507,7 @@ class _HomePageState extends State<HomePage> {
                         style: VigorTypography.dataDisplay.copyWith(
                           fontSize: 72,
                           fontWeight: FontWeight.w700,
-                          color: VigorColors.textPrimary(context),
+                          color: VigorColors.persimmon,
                           height: 1,
                         ),
                       ),
@@ -524,12 +524,12 @@ class _HomePageState extends State<HomePage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.people, color: VigorColors.stone, size: 18),
+                          Icon(Icons.people, color: VigorColors.indigoAdaptive(context), size: 18),
                           const SizedBox(width: VigorSpacing.xs),
                           Text(
                             '$partnered',
                             style: VigorTypography.data.copyWith(
-                              color: VigorColors.textSecondary(context),
+                              color: VigorColors.indigoAdaptive(context),
                               fontSize: 18,
                             ),
                           ),
