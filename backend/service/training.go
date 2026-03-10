@@ -592,7 +592,7 @@ func GetTrainings(userID uuid.UUID) ([]model.Training, error) {
 		return trainings, err
 	}
 
-	PopulateHasHealthSession(trainings)
+	PopulateHasHealthSession(trainings, userID)
 	return trainings, nil
 }
 

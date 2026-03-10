@@ -507,8 +507,8 @@ func GetHealthDaily(userID uuid.UUID) (*model.HealthDailyResponse, error) {
 }
 
 // PopulateHasHealthSession sets HasHealthSession on each training by checking
-// for linked health_exercise_sessions.
-func PopulateHasHealthSession(trainings []model.Training) {
+// for linked health_exercise_sessions owned by the requesting user.
+func PopulateHasHealthSession(trainings []model.Training, userID uuid.UUID) {
 	if len(trainings) == 0 {
 		return
 	}
@@ -520,7 +520,7 @@ func PopulateHasHealthSession(trainings []model.Training) {
 
 	var linkedIDs []uuid.UUID
 	database.DB.Model(&model.HealthExerciseSession{}).
-		Where("training_id IN ?", trainingIDs).
+		Where("training_id IN ? AND user_id = ?", trainingIDs, userID).
 		Distinct("training_id").
 		Pluck("training_id", &linkedIDs)
 
