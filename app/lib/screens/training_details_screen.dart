@@ -48,6 +48,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   WorkoutTimerNotifier? _timerNotifier;
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _timerKey = GlobalKey();
+  double _timerHeight = 280;
 
   Training get training => _training;
 
@@ -114,6 +115,13 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   // --- inline timer lifecycle ---
 
+  void _measureTimer() {
+    final height = _timerKey.currentContext?.size?.height;
+    if (height != null && height != _timerHeight) {
+      setState(() => _timerHeight = height);
+    }
+  }
+
   void _startTimer() {
     if (_timerNotifier != null) return;
     setState(() {
@@ -124,8 +132,9 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       )..initialize();
       _timerNotifier!.addListener(_onTimerUpdate);
     });
-    // scroll to center the timer section after it's inserted
+    // measure timer height + scroll to it after insertion
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _measureTimer();
       final keyContext = _timerKey.currentContext;
       if (keyContext != null) {
         Scrollable.ensureVisible(keyContext, duration: VigorAnimation.medium, curve: VigorAnimation.defaultCurve, alignment: 0.3);
@@ -141,6 +150,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   void _onTimerUpdate() {
     if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measureTimer());
     // only rebuild when discrete state changes (completion), not every tick.
     // the compact bar uses its own ListenableBuilder for per-tick updates.
     if (_timerNotifier?.workoutCompleted == true) {
@@ -150,7 +160,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   // --- completion + exit flows ---
 
-  Future<void> _showFeedbackAndComplete() async {
+  Future<void> _showFeedbackAndComplete({bool navigateOnDone = false}) async {
     if (_timerNotifier == null || _timerNotifier!.isSubmitting) return;
     final result = await FeedbackModal.show(
       context,
@@ -163,7 +173,11 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     await _markTrainingComplete(result);
     if (!mounted) return;
     _stopTimer();
-    _refreshTraining();
+    if (navigateOnDone) {
+      _navigateToActivityScreen(context);
+    } else {
+      _refreshTraining();
+    }
   }
 
   Future<void> _markTrainingComplete(FeedbackResult result) async {
@@ -182,43 +196,61 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     }
   }
 
-  void _showTimerExitDialog() {
+  void _confirmStopTimer() {
     final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.exitTraining),
-        content: Text(l10n.whatWouldYouLikeToDo),
+        title: Text(l10n.stopTraining),
+        content: Text(l10n.stopTrainingConfirm),
         actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.cancel),
+          ),
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
               _stopTimer();
             },
-            child: Text(l10n.exit),
+            child: Text(l10n.stop),
           ),
+        ],
+      ),
+    );
+  }
+
+  void _completeFromTimer({bool navigateOnDone = false}) {
+    _timerNotifier?.captureEarlyExitStats();
+    _showFeedbackAndComplete(navigateOnDone: navigateOnDone);
+  }
+
+  /// back button / swipe-back during active timer: offer stop or complete,
+  /// both navigating to the training listing afterwards
+  void _confirmTimerExit() {
+    final l10n = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.stopTraining),
+        content: Text(l10n.stopTrainingConfirm),
+        actions: [
           TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(l10n.continueTraining),
-          ),
-          TextButton(
-            onPressed: () async {
+            onPressed: () {
               Navigator.of(dialogContext).pop();
-              _timerNotifier?.captureEarlyExitStats();
-              final result = await FeedbackModal.show(
-                context,
-                _training,
-                messagePrefix: _timerNotifier?.methodologyStats,
-                elapsedSeconds: _timerNotifier?.accumulatedElapsedSeconds,
-              );
-              if (result == null) return;
-              await _markTrainingComplete(result);
-              if (!mounted) return;
               _stopTimer();
-              _refreshTraining();
+              _navigateToActivityScreen(context);
             },
-            child: Text(l10n.markAsComplete),
+            child: Text(l10n.stop),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              _completeFromTimer(navigateOnDone: true);
+            },
+            child: Text(l10n.complete),
           ),
         ],
       ),
@@ -721,7 +753,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         if (_timerNotifier != null) {
-          _showTimerExitDialog();
+          _confirmStopTimer();
         } else {
           _navigateToActivityScreen(context);
         }
@@ -734,7 +766,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
             icon: const Icon(Icons.arrow_back_ios, color: VigorColors.stone),
             onPressed: () {
               if (_timerNotifier != null) {
-                _showTimerExitDialog();
+                _confirmStopTimer();
               } else {
                 _navigateToActivityScreen(context);
               }
@@ -747,63 +779,60 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         body: ValueListenableBuilder<bool>(
           valueListenable: context.read<ServiceLocator>().isCalibratingNotifier,
           builder: (context, isCalibrating, _) {
-            final timerOffset = timerActive ? 1 : 0;
-            final healthOffset = _healthSessionData != null ? 1 : 0;
-            return ListView.builder(
-              padding: VigorSpacing.paddingLg,
-              itemCount: training.routines.length + 3 + (isCalibrating ? 1 : 0) + timerOffset + healthOffset,
-              itemBuilder: (context, index) {
-                if (isCalibrating && index == 0) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: VigorSpacing.md),
-                    child: _buildCalibrationNote(l10n),
-                  );
-                }
-                final adjusted = isCalibrating ? index - 1 : index;
-                if (adjusted == 0) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
-                    child: _buildHeaderWithActions(l10n, isDark, isOwner),
-                  );
-                }
-                // timer section inserted at adjusted == 1 when active
-                if (timerActive && adjusted == 1) {
-                  return AnimatedSize(
-                    duration: VigorAnimation.medium,
-                    curve: VigorAnimation.defaultCurve,
-                    child: Padding(
-                      key: _timerKey,
+            return CustomScrollView(
+              slivers: [
+                // pre-timer items: calibration note (if any) + header card
+                SliverPadding(
+                  padding: const EdgeInsets.only(left: VigorSpacing.lg, right: VigorSpacing.lg, top: VigorSpacing.lg),
+                  sliver: SliverList.list(children: [
+                    if (isCalibrating)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: VigorSpacing.md),
+                        child: _buildCalibrationNote(l10n),
+                      ),
+                    Padding(
                       padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
-                      child: InlineTimerSection(
-                        notifier: _timerNotifier!,
-                        onDone: _showFeedbackAndComplete,
+                      child: _buildHeaderWithActions(l10n, isDark, isOwner),
+                    ),
+                  ]),
+                ),
+                // sticky timer when active
+                if (timerActive)
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _SliverTimerDelegate(
+                      height: _timerHeight + VigorSpacing.xl,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: VigorSpacing.lg, right: VigorSpacing.lg, bottom: VigorSpacing.xl),
+                        child: InlineTimerSection(
+                          key: _timerKey,
+                          notifier: _timerNotifier!,
+                          onDone: _showFeedbackAndComplete,
+                        ),
                       ),
                     ),
-                  );
-                }
-                final shifted = timerActive ? adjusted - 1 : adjusted;
-                // health session section (HR chart + stats)
-                if (_healthSessionData != null && shifted == 1) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
-                    child: _buildHealthSessionSection(l10n, isDark),
-                  );
-                }
-                final healthShifted = _healthSessionData != null ? shifted - 1 : shifted;
-                if (healthShifted == 1) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: VigorSpacing.md),
-                    child: _buildRoutinesHeader(l10n),
-                  );
-                }
-                if (healthShifted == training.routines.length + 2) {
-                  return const SizedBox(height: VigorSpacing.lg);
-                }
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: VigorSpacing.md),
-                  child: _buildRoutineCard(training.routines[healthShifted - 2], isDark),
-                );
-              },
+                  ),
+                // post-timer items: health section, routines header, routine cards, bottom spacer
+                SliverPadding(
+                  padding: const EdgeInsets.only(left: VigorSpacing.lg, right: VigorSpacing.lg, bottom: VigorSpacing.lg),
+                  sliver: SliverList.list(children: [
+                    if (_healthSessionData != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
+                        child: _buildHealthSessionSection(l10n, isDark),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: VigorSpacing.md),
+                      child: _buildRoutinesHeader(l10n),
+                    ),
+                    ...training.routines.map((routine) => Padding(
+                      padding: const EdgeInsets.only(bottom: VigorSpacing.md),
+                      child: _buildRoutineCard(routine, isDark),
+                    )),
+                    const SizedBox(height: VigorSpacing.lg),
+                  ]),
+                ),
+              ],
             );
           },
         ),
@@ -1166,13 +1195,13 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
     return Row(
       children: [
-        // start/stop training toggle
+        // stop / start toggle
         Expanded(child: _timerNotifier != null
           ? _buildActionButton(
               icon: Icons.stop,
-              label: l10n.exitTraining.replaceAll('?', '').replaceAll('？', '').trim(),
+              label: l10n.stop,
               color: indigoColor,
-              onPressed: _showTimerExitDialog,
+              onPressed: _confirmStopTimer,
             )
           : _buildActionButton(
               icon: Icons.timer,
@@ -1181,8 +1210,15 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
               onPressed: _startTimer,
             ),
         ),
-        if (!isCompleted)
-          // mark as complete = primary CTA (persimmon), any participant can complete
+        if (_timerNotifier != null)
+          // complete = feedback modal + complete training (with timer stats)
+          Expanded(child: _buildActionButton(
+            icon: Icons.check_circle_outline,
+            label: l10n.complete,
+            color: VigorColors.persimmon,
+            onPressed: _completeFromTimer,
+          ))
+        else if (!isCompleted)
           Expanded(child: _buildActionButton(
             icon: Icons.check_circle_outline,
             label: l10n.markAsComplete,
@@ -1588,4 +1624,56 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       ),
     );
   }
+}
+
+class _SliverTimerDelegate extends SliverPersistentHeaderDelegate {
+  final double height;
+  final Widget child;
+
+  const _SliverTimerDelegate({required this.height, required this.child});
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  double get minExtent => height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final shadowOpacity = (shrinkOffset / 40).clamp(0.0, 1.0);
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // shadow layer — only visible when pinned, sits behind content
+        if (shadowOpacity > 0)
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15 * shadowOpacity),
+                    blurRadius: 24 * shadowOpacity,
+                    offset: Offset(0, 2 * shadowOpacity),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        // let the child size itself naturally (ignoring the tight height constraint
+        // from the sliver) so _timerKey can measure intrinsic height, then clip any
+        // overflow that occurs during the first frame before measurement catches up
+        ClipRect(
+          child: OverflowBox(
+            minHeight: 0,
+            maxHeight: double.infinity,
+            alignment: Alignment.topLeft,
+            child: child,
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverTimerDelegate oldDelegate) => height != oldDelegate.height;
 }
