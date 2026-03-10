@@ -533,14 +533,9 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                   fontSize: 11,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: VigorSpacing.xs),
-                child: ShaderMask(
-                  shaderCallback: (bounds) => const LinearGradient(
-                    colors: [VigorColors.persimmon, VigorColors.crimson],
-                  ).createShader(bounds),
-                  child: const Icon(Icons.monitor_heart, size: 16, color: Colors.white),
-                ),
+              const Padding(
+                padding: EdgeInsets.only(left: VigorSpacing.xs),
+                child: Icon(Icons.monitor_heart, size: 16, color: VigorColors.stone),
               ),
             ],
           ),
