@@ -1610,4 +1610,58 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get externalWorkout => '외부 운동';
+
+  @override
+  String get exerciseTypeRunning => '달리기';
+
+  @override
+  String get exerciseTypeWalking => '걷기';
+
+  @override
+  String get exerciseTypeBiking => '자전거';
+
+  @override
+  String get exerciseTypeYoga => '요가';
+
+  @override
+  String get exerciseTypeSwimming => '수영';
+
+  @override
+  String get exerciseTypeHiking => '등산';
+
+  @override
+  String get exerciseTypeStrengthTraining => '근력 운동';
+
+  @override
+  String get exerciseTypeFunctionalStrengthTraining => '기능성 운동';
+
+  @override
+  String get exerciseTypeTraditionalStrengthTraining => '근력 운동';
+
+  @override
+  String get exerciseTypeRunningTreadmill => '트레드밀';
+
+  @override
+  String get exerciseTypeBikingStationary => '실내 자전거';
+
+  @override
+  String get exerciseTypeWalkingTreadmill => '트레드밀 걷기';
+
+  @override
+  String get exerciseTypeRowing => '조정';
+
+  @override
+  String get exerciseTypePilates => '필라테스';
+
+  @override
+  String get exerciseTypeDancing => '댄스';
+
+  @override
+  String get exerciseTypeElliptical => '일립티컬';
+
+  @override
+  String get exerciseTypeStairClimbing => '계단 오르기';
+
+  @override
+  String get exerciseTypeOther => '운동';
 }

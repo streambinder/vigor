@@ -1653,4 +1653,59 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get externalWorkout => 'Entraînement externe';
+
+  @override
+  String get exerciseTypeRunning => 'Course';
+
+  @override
+  String get exerciseTypeWalking => 'Marche';
+
+  @override
+  String get exerciseTypeBiking => 'Vélo';
+
+  @override
+  String get exerciseTypeYoga => 'Yoga';
+
+  @override
+  String get exerciseTypeSwimming => 'Natation';
+
+  @override
+  String get exerciseTypeHiking => 'Randonnée';
+
+  @override
+  String get exerciseTypeStrengthTraining => 'Musculation';
+
+  @override
+  String get exerciseTypeFunctionalStrengthTraining =>
+      'Entraînement fonctionnel';
+
+  @override
+  String get exerciseTypeTraditionalStrengthTraining => 'Musculation';
+
+  @override
+  String get exerciseTypeRunningTreadmill => 'Tapis de course';
+
+  @override
+  String get exerciseTypeBikingStationary => 'Vélo stationnaire';
+
+  @override
+  String get exerciseTypeWalkingTreadmill => 'Marche tapis roulant';
+
+  @override
+  String get exerciseTypeRowing => 'Aviron';
+
+  @override
+  String get exerciseTypePilates => 'Pilates';
+
+  @override
+  String get exerciseTypeDancing => 'Danse';
+
+  @override
+  String get exerciseTypeElliptical => 'Elliptique';
+
+  @override
+  String get exerciseTypeStairClimbing => 'Escaliers';
+
+  @override
+  String get exerciseTypeOther => 'Entraînement';
 }

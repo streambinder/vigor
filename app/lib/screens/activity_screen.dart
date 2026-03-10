@@ -499,10 +499,6 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       decoration: BoxDecoration(
         color: VigorColors.surface(context),
         borderRadius: VigorRadius.radiusMd,
-        border: Border.all(
-          color: VigorColors.border(context),
-          style: BorderStyle.solid,
-        ),
       ),
       child: Opacity(
         opacity: 0.7,
@@ -512,7 +508,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
             children: [
               Expanded(
                 child: Text(
-                  _capitalizeExerciseType(exerciseType),
+                  _localizedExerciseType(exerciseType, l10n),
                   style: VigorTypography.body.copyWith(
                     color: VigorColors.stone,
                     fontSize: 13,
@@ -551,6 +547,29 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
         ),
       ),
     );
+  }
+
+  String _localizedExerciseType(String type, AppLocalizations l10n) {
+    final labels = {
+      'running': l10n.exerciseTypeRunning,
+      'walking': l10n.exerciseTypeWalking,
+      'biking': l10n.exerciseTypeBiking,
+      'yoga': l10n.exerciseTypeYoga,
+      'swimming': l10n.exerciseTypeSwimming,
+      'hiking': l10n.exerciseTypeHiking,
+      'strength_training': l10n.exerciseTypeStrengthTraining,
+      'functional_strength_training': l10n.exerciseTypeFunctionalStrengthTraining,
+      'traditional_strength_training': l10n.exerciseTypeTraditionalStrengthTraining,
+      'running_treadmill': l10n.exerciseTypeRunningTreadmill,
+      'biking_stationary': l10n.exerciseTypeBikingStationary,
+      'walking_treadmill': l10n.exerciseTypeWalkingTreadmill,
+      'rowing': l10n.exerciseTypeRowing,
+      'pilates': l10n.exerciseTypePilates,
+      'dancing': l10n.exerciseTypeDancing,
+      'elliptical': l10n.exerciseTypeElliptical,
+      'stair_climbing': l10n.exerciseTypeStairClimbing,
+    };
+    return labels[type.toLowerCase()] ?? _capitalizeExerciseType(type);
   }
 
   String _capitalizeExerciseType(String type) {

@@ -3155,6 +3155,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'External Workout'**
   String get externalWorkout;
+
+  /// No description provided for @exerciseTypeRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get exerciseTypeRunning;
+
+  /// No description provided for @exerciseTypeWalking.
+  ///
+  /// In en, this message translates to:
+  /// **'Walking'**
+  String get exerciseTypeWalking;
+
+  /// No description provided for @exerciseTypeBiking.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycling'**
+  String get exerciseTypeBiking;
+
+  /// No description provided for @exerciseTypeYoga.
+  ///
+  /// In en, this message translates to:
+  /// **'Yoga'**
+  String get exerciseTypeYoga;
+
+  /// No description provided for @exerciseTypeSwimming.
+  ///
+  /// In en, this message translates to:
+  /// **'Swimming'**
+  String get exerciseTypeSwimming;
+
+  /// No description provided for @exerciseTypeHiking.
+  ///
+  /// In en, this message translates to:
+  /// **'Hiking'**
+  String get exerciseTypeHiking;
+
+  /// No description provided for @exerciseTypeStrengthTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength Training'**
+  String get exerciseTypeStrengthTraining;
+
+  /// No description provided for @exerciseTypeFunctionalStrengthTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Functional Training'**
+  String get exerciseTypeFunctionalStrengthTraining;
+
+  /// No description provided for @exerciseTypeTraditionalStrengthTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength Training'**
+  String get exerciseTypeTraditionalStrengthTraining;
+
+  /// No description provided for @exerciseTypeRunningTreadmill.
+  ///
+  /// In en, this message translates to:
+  /// **'Treadmill'**
+  String get exerciseTypeRunningTreadmill;
+
+  /// No description provided for @exerciseTypeBikingStationary.
+  ///
+  /// In en, this message translates to:
+  /// **'Stationary Bike'**
+  String get exerciseTypeBikingStationary;
+
+  /// No description provided for @exerciseTypeWalkingTreadmill.
+  ///
+  /// In en, this message translates to:
+  /// **'Treadmill Walk'**
+  String get exerciseTypeWalkingTreadmill;
+
+  /// No description provided for @exerciseTypeRowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Rowing'**
+  String get exerciseTypeRowing;
+
+  /// No description provided for @exerciseTypePilates.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilates'**
+  String get exerciseTypePilates;
+
+  /// No description provided for @exerciseTypeDancing.
+  ///
+  /// In en, this message translates to:
+  /// **'Dancing'**
+  String get exerciseTypeDancing;
+
+  /// No description provided for @exerciseTypeElliptical.
+  ///
+  /// In en, this message translates to:
+  /// **'Elliptical'**
+  String get exerciseTypeElliptical;
+
+  /// No description provided for @exerciseTypeStairClimbing.
+  ///
+  /// In en, this message translates to:
+  /// **'Stair Climbing'**
+  String get exerciseTypeStairClimbing;
+
+  /// No description provided for @exerciseTypeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Workout'**
+  String get exerciseTypeOther;
 }
 
 class _AppLocalizationsDelegate

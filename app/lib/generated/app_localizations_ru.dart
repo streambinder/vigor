@@ -1636,4 +1636,59 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get externalWorkout => 'Внешняя тренировка';
+
+  @override
+  String get exerciseTypeRunning => 'Бег';
+
+  @override
+  String get exerciseTypeWalking => 'Ходьба';
+
+  @override
+  String get exerciseTypeBiking => 'Велосипед';
+
+  @override
+  String get exerciseTypeYoga => 'Йога';
+
+  @override
+  String get exerciseTypeSwimming => 'Плавание';
+
+  @override
+  String get exerciseTypeHiking => 'Пеший поход';
+
+  @override
+  String get exerciseTypeStrengthTraining => 'Силовая тренировка';
+
+  @override
+  String get exerciseTypeFunctionalStrengthTraining =>
+      'Функциональная тренировка';
+
+  @override
+  String get exerciseTypeTraditionalStrengthTraining => 'Силовая тренировка';
+
+  @override
+  String get exerciseTypeRunningTreadmill => 'Беговая дорожка';
+
+  @override
+  String get exerciseTypeBikingStationary => 'Велотренажёр';
+
+  @override
+  String get exerciseTypeWalkingTreadmill => 'Ходьба на дорожке';
+
+  @override
+  String get exerciseTypeRowing => 'Гребля';
+
+  @override
+  String get exerciseTypePilates => 'Пилатес';
+
+  @override
+  String get exerciseTypeDancing => 'Танцы';
+
+  @override
+  String get exerciseTypeElliptical => 'Эллиптический';
+
+  @override
+  String get exerciseTypeStairClimbing => 'Подъём по лестнице';
+
+  @override
+  String get exerciseTypeOther => 'Тренировка';
 }

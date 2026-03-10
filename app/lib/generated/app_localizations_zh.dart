@@ -1605,4 +1605,58 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get externalWorkout => '外部锻炼';
+
+  @override
+  String get exerciseTypeRunning => '跑步';
+
+  @override
+  String get exerciseTypeWalking => '步行';
+
+  @override
+  String get exerciseTypeBiking => '骑行';
+
+  @override
+  String get exerciseTypeYoga => '瑜伽';
+
+  @override
+  String get exerciseTypeSwimming => '游泳';
+
+  @override
+  String get exerciseTypeHiking => '徒步';
+
+  @override
+  String get exerciseTypeStrengthTraining => '力量训练';
+
+  @override
+  String get exerciseTypeFunctionalStrengthTraining => '功能性训练';
+
+  @override
+  String get exerciseTypeTraditionalStrengthTraining => '力量训练';
+
+  @override
+  String get exerciseTypeRunningTreadmill => '跑步机';
+
+  @override
+  String get exerciseTypeBikingStationary => '动感单车';
+
+  @override
+  String get exerciseTypeWalkingTreadmill => '跑步机步行';
+
+  @override
+  String get exerciseTypeRowing => '划船';
+
+  @override
+  String get exerciseTypePilates => '普拉提';
+
+  @override
+  String get exerciseTypeDancing => '舞蹈';
+
+  @override
+  String get exerciseTypeElliptical => '椭圆机';
+
+  @override
+  String get exerciseTypeStairClimbing => '爬楼梯';
+
+  @override
+  String get exerciseTypeOther => '锻炼';
 }
