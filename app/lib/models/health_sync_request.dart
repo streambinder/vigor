@@ -18,12 +18,15 @@ class HealthSyncRequest {
   final List<HealthSyncSession> sessions;
   @JsonKey(name: 'hr_samples', defaultValue: [])
   final List<HealthSyncHRSample> hRSamples;
+  @JsonKey(name: 'deleted_record_ids', defaultValue: [])
+  final List<String> deletedRecordIDs;
 
   HealthSyncRequest({
     required this.timezone,
     required this.metrics,
     required this.sessions,
     required this.hRSamples,
+    required this.deletedRecordIDs,
   });
 
   factory HealthSyncRequest.fromJson(Map<String, dynamic> json) => _$HealthSyncRequestFromJson(json);
