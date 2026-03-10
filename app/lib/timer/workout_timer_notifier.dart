@@ -46,8 +46,9 @@ class WorkoutTimerNotifier extends ChangeNotifier with WidgetsBindingObserver {
   String? get methodologyStats => _methodologyStats;
   int get accumulatedElapsedSeconds => _accumulatedElapsedSeconds;
 
-  int get totalElapsedSeconds =>
-      _accumulatedElapsedSeconds + (_controller?.elapsedSeconds ?? 0);
+  int get totalElapsedSeconds => _workoutCompleted
+      ? _accumulatedElapsedSeconds
+      : _accumulatedElapsedSeconds + (_controller?.elapsedSeconds ?? 0);
 
   TimerMode? get currentMode =>
       _currentSegmentIndex < _segments.length
