@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
@@ -74,6 +75,45 @@ func GenTraining(
 	for i, g := range goals {
 		goalIDs[i] = g.ID
 	}
+
+	// build recency-bias reminders for critical signals that might get
+	// lost in the middle of the prompt on small models
+	var reminders []string
+	for _, p := range profiles {
+		for _, inj := range p.Injuries() {
+			reminders = append(reminders, fmt.Sprintf("Injury: %s", inj.Description))
+		}
+	}
+	for _, fb := range recentFeedback {
+		if fb.Quality != nil && !*fb.Quality {
+			reason := fb.QualityReason
+			if fb.Message != "" {
+				reason = strings.TrimSpace(reason + " — " + fb.Message)
+			}
+			reminders = append(reminders, fmt.Sprintf("Last training rated bad: %s", reason))
+			break // one reminder is enough
+		}
+	}
+	if len(calibrationGaps) > 0 {
+		families := make([]string, 0, len(calibrationGaps))
+		for f := range calibrationGaps {
+			families = append(families, f)
+		}
+		reminders = append(reminders, fmt.Sprintf("Calibrating: prioritize %s", strings.Join(families, ", ")))
+	}
+	if healthSnapshot != nil {
+		const deviationThreshold = 20.0 // flag deviations >= 20%
+		if healthSnapshot.SleepDeviation <= -deviationThreshold {
+			reminders = append(reminders, fmt.Sprintf("Recovery concern: sleep %.0f%% below baseline", -healthSnapshot.SleepDeviation))
+		}
+		if healthSnapshot.HRVDeviation <= -deviationThreshold {
+			reminders = append(reminders, fmt.Sprintf("Recovery concern: HRV %.0f%% below baseline", -healthSnapshot.HRVDeviation))
+		}
+		if healthSnapshot.RHRDeviation >= deviationThreshold {
+			reminders = append(reminders, fmt.Sprintf("Recovery concern: resting HR %.0f%% above baseline", healthSnapshot.RHRDeviation))
+		}
+	}
+
 	userMessage := prompt.GenTraining(
 		profiles,
 		goalIDs,
@@ -95,6 +135,7 @@ func GenTraining(
 		calibrationGaps,
 		healthSnapshot,
 		recentHR,
+		reminders,
 	)
 	if correctionHint != "" {
 		userMessage += "\n\nCORRECTION (previous attempt failed server-side validation): " + correctionHint + ". Fix this issue and regenerate."
