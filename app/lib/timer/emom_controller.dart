@@ -87,6 +87,23 @@ class EmomController extends TimerController {
   /// Total number of blocks
   int get totalBlocks => blocks.length;
 
+  @override
+  int get completedActivities {
+    int count = 0;
+    for (int i = 0; i < _currentBlockIndex; i++) {
+      count += blocks[i].activities.length * (blocks[i].repeats > 0 ? blocks[i].repeats : 1);
+    }
+    // during block rest _currentMinuteInBlock is already past the last round,
+    // so the formula below covers all activities in the block — skip adding
+    // the stale _currentActivityIndex on top
+    final completedMinutes = _isBlockRest
+        ? _currentBlockRepeats
+        : _currentMinuteInBlock - 1;
+    count += completedMinutes * _currentBlock.activities.length;
+    if (!_isBlockRest) count += _currentActivityIndex;
+    return count;
+  }
+
   Activity? get _currentActivity =>
       _currentActivityIndex < _currentBlock.activities.length
           ? _currentBlock.activities[_currentActivityIndex]

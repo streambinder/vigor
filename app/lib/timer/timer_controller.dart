@@ -96,6 +96,10 @@ abstract class TimerController extends ChangeNotifier {
   /// Total/global time remaining or elapsed (for AMRAP/ForTime)
   int get globalSeconds => 0;
 
+  /// Global count of activities completed so far (for progress calculation).
+  /// Default uses activityNumber from currentInterval (works for IntervalController).
+  int get completedActivities => (currentInterval?.activityNumber ?? 1) - 1;
+
   /// Start the initial countdown before training
   void startCountdown();
 

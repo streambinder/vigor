@@ -64,6 +64,10 @@ class AmrapController extends TimerController {
   int get activitiesPerRound => block.activities.length;
 
   @override
+  int get completedActivities =>
+      (_roundCount - 1) * block.activities.length + _currentActivityIndex;
+
+  @override
   TrainingInterval? get currentInterval {
     if (_currentActivityIndex >= block.activities.length) return null;
     final activity = block.activities[_currentActivityIndex];

@@ -66,9 +66,7 @@ class WorkoutTimerNotifier extends ChangeNotifier with WidgetsBindingObserver {
     if (_workoutCompleted) return 1.0;
     final total = _totalActivities;
     if (total <= 0) return 0.0;
-    final current = _controller?.currentInterval?.activityNumber ?? 0;
-    // activityNumber is 1-based; (current - 1) = completed, current = in progress
-    return ((current - 1) / total).clamp(0.0, 1.0);
+    return ((_controller?.completedActivities ?? 0) / total).clamp(0.0, 1.0);
   }
 
   int get _totalActivities {

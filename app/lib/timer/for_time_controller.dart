@@ -67,6 +67,10 @@ class ForTimeController extends TimerController {
   int? get completionTime => _completionTime;
 
   @override
+  int get completedActivities =>
+      (_currentRound - 1) * block.activities.length + _currentActivityIndex;
+
+  @override
   TrainingInterval? get currentInterval {
     if (_currentActivityIndex >= block.activities.length) return null;
     final activity = block.activities[_currentActivityIndex];
