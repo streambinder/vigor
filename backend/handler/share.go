@@ -48,7 +48,7 @@ func getSharedTrainingOG(c *fiber.Ctx) error {
 
 	title := html.EscapeString(training.Name)
 	description := html.EscapeString(durationStr + " · " + cases.Title(language.English).String(training.Methodology))
-	imageURL := frontendURL + "/icons/Icon-512.png"
+	imageURL := frontendURL + "/icons/Icon-192.png"
 
 	page := fmt.Sprintf(`<!DOCTYPE html>
 <html>
@@ -58,6 +58,8 @@ func getSharedTrainingOG(c *fiber.Ctx) error {
 <meta property="og:title" content="%s">
 <meta property="og:description" content="%s">
 <meta property="og:image" content="%s">
+<meta property="og:image:width" content="192">
+<meta property="og:image:height" content="192">
 <meta property="og:url" content="%s">
 <meta http-equiv="refresh" content="0;url=%s">
 <title>%s</title>
