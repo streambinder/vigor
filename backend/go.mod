@@ -1,6 +1,6 @@
 module github.com/streambinder/vigor
 
-go 1.24.7
+go 1.26.1
 
 require (
 	github.com/glebarez/sqlite v1.11.0
