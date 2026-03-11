@@ -128,12 +128,22 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest) (*model.Healt
 				SyncedAt:        now,
 			}
 
+			// use GREATEST to preserve existing non-zero values when the incoming
+			// payload has zeros (happens on incremental syncs that only capture a
+			// subset of metric types for the day)
 			if err := tx.Clauses(clause.OnConflict{
-				Columns:   []clause.Column{{Name: "user_id"}, {Name: "date"}},
-				DoUpdates: clause.AssignmentColumns([]string{
-					"sleep_hours", "sleep_deep_hours", "sleep_light_hours", "sleep_rem_hours",
-					"resting_hr", "hrv_rmssd", "steps", "active_calories", "synced_at",
-				}),
+				Columns: []clause.Column{{Name: "user_id"}, {Name: "date"}},
+				DoUpdates: clause.Set{
+					{Column: clause.Column{Name: "sleep_hours"}, Value: gorm.Expr("GREATEST(EXCLUDED.sleep_hours, health_metrics.sleep_hours)")},
+					{Column: clause.Column{Name: "sleep_deep_hours"}, Value: gorm.Expr("GREATEST(EXCLUDED.sleep_deep_hours, health_metrics.sleep_deep_hours)")},
+					{Column: clause.Column{Name: "sleep_light_hours"}, Value: gorm.Expr("GREATEST(EXCLUDED.sleep_light_hours, health_metrics.sleep_light_hours)")},
+					{Column: clause.Column{Name: "sleep_rem_hours"}, Value: gorm.Expr("GREATEST(EXCLUDED.sleep_rem_hours, health_metrics.sleep_rem_hours)")},
+					{Column: clause.Column{Name: "resting_hr"}, Value: gorm.Expr("GREATEST(EXCLUDED.resting_hr, health_metrics.resting_hr)")},
+					{Column: clause.Column{Name: "hrv_rmssd"}, Value: gorm.Expr("GREATEST(EXCLUDED.hrv_rmssd, health_metrics.hrv_rmssd)")},
+					{Column: clause.Column{Name: "steps"}, Value: gorm.Expr("GREATEST(EXCLUDED.steps, health_metrics.steps)")},
+					{Column: clause.Column{Name: "active_calories"}, Value: gorm.Expr("GREATEST(EXCLUDED.active_calories, health_metrics.active_calories)")},
+					{Column: clause.Column{Name: "synced_at"}, Value: gorm.Expr("EXCLUDED.synced_at")},
+				},
 			}).Create(&metric).Error; err != nil {
 				return err
 			}
