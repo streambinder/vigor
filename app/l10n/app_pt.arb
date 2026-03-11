@@ -511,6 +511,7 @@
   "healthInstallHcDescription": "O Health Connect é necessário para sincronizar os dados do seu wearable. Instale-o pela Play Store.",
   "healthInstallHcTitle": "Health Connect necessário",
   "healthNotConnected": "Não conectado",
+  "healthNativeOnly": "Disponível no iOS e Android",
   "healthOnboardingConnect": "Conectar",
   "healthOnboardingDescription": "Conecte seus dados de saúde e o Vigor adaptará seu treino ao seu sono, recuperação e atividade.",
   "healthOnboardingDismiss": "Talvez depois",

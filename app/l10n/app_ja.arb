@@ -511,6 +511,7 @@
   "healthInstallHcDescription": "ウェアラブルデータの同期にはHealth Connectが必要です。Play Storeからインストールしてください。",
   "healthInstallHcTitle": "Health Connectが必要です",
   "healthNotConnected": "未接続",
+  "healthNativeOnly": "iOSとAndroidで利用可能",
   "healthOnboardingConnect": "接続",
   "healthOnboardingDescription": "ヘルスデータを接続すると、Vigorが睡眠・回復・活動に合わせてトレーニングを調整します。",
   "healthOnboardingDismiss": "あとで",

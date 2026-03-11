@@ -1483,6 +1483,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get healthNotConnected => '연결 안 됨';
 
   @override
+  String get healthNativeOnly => 'iOS 및 Android에서 사용 가능';
+
+  @override
   String healthBuildingBaselines(int days) {
     return '개인 기준값 생성 중 ($days/14일)';
   }

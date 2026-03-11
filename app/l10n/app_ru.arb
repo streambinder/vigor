@@ -511,6 +511,7 @@
   "healthInstallHcDescription": "Health Connect необходим для синхронизации данных с носимого устройства. Установите его из Play Store.",
   "healthInstallHcTitle": "Требуется Health Connect",
   "healthNotConnected": "Не подключено",
+  "healthNativeOnly": "Доступно на iOS и Android",
   "healthOnboardingConnect": "Подключить",
   "healthOnboardingDescription": "Подключите данные о здоровье, и Vigor адаптирует тренировки к вашему сну, восстановлению и активности.",
   "healthOnboardingDismiss": "Может быть позже",

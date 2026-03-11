@@ -75,15 +75,12 @@ class _HomePageState extends State<HomePage> {
     }
 
     try {
-      final prefs = context.read<PreferencesService>();
       final locator = context.read<ServiceLocator>();
       final futures = <Future>[
         progressService.getProgress(),
         progressService.getWeeklyTarget(),
+        locator.trainingService.getHealthDaily(),
       ];
-      if (prefs.hcConnected) {
-        futures.add(locator.trainingService.getHealthDaily());
-      }
 
       final results = await Future.wait(futures);
 
@@ -98,7 +95,7 @@ class _HomePageState extends State<HomePage> {
           if (weeklyTargetResponse.isSuccess) {
             _weeklyTarget = weeklyTargetResponse.data as WeeklyTarget?;
           }
-          if (prefs.hcConnected && results.length > 2 && results[2].isSuccess) {
+          if (results[2].isSuccess) {
             _healthDaily = results[2].data as Map<String, dynamic>?;
             locator.healthDailyNotifier.value = _healthDaily;
           }

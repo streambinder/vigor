@@ -2910,6 +2910,12 @@ abstract class AppLocalizations {
   /// **'Not connected'**
   String get healthNotConnected;
 
+  /// No description provided for @healthNativeOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Available on iOS and Android'**
+  String get healthNativeOnly;
+
   /// No description provided for @healthBuildingBaselines.
   ///
   /// In en, this message translates to:

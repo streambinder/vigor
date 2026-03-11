@@ -1483,6 +1483,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get healthNotConnected => '未接続';
 
   @override
+  String get healthNativeOnly => 'iOSとAndroidで利用可能';
+
+  @override
   String healthBuildingBaselines(int days) {
     return 'パーソナル基準値を作成中（$days/14日）';
   }

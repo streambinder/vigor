@@ -1509,6 +1509,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get healthNotConnected => 'Not connected';
 
   @override
+  String get healthNativeOnly => 'Available on iOS and Android';
+
+  @override
   String healthBuildingBaselines(int days) {
     return 'Building your personal baselines ($days/14 days)';
   }

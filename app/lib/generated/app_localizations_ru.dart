@@ -1508,6 +1508,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get healthNotConnected => 'Не подключено';
 
   @override
+  String get healthNativeOnly => 'Доступно на iOS и Android';
+
+  @override
   String healthBuildingBaselines(int days) {
     return 'Создание ваших личных показателей ($days/14 дней)';
   }

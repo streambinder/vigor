@@ -511,6 +511,7 @@
   "healthInstallHcDescription": "需要Health Connect来同步可穿戴设备数据。请从Play商店安装。",
   "healthInstallHcTitle": "需要Health Connect",
   "healthNotConnected": "未连接",
+  "healthNativeOnly": "可在 iOS 和 Android 上使用",
   "healthOnboardingConnect": "连接",
   "healthOnboardingDescription": "连接健康数据，Vigor将根据你的睡眠、恢复和活动调整训练。",
   "healthOnboardingDismiss": "以后再说",

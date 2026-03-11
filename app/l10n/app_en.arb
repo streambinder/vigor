@@ -708,6 +708,7 @@
   "healthSynchronized": "Synchronized",
   "healthSynchronize": "Synchronize now",
   "healthNotConnected": "Not connected",
+  "healthNativeOnly": "Available on iOS and Android",
   "healthBuildingBaselines": "Building your personal baselines ({days}/14 days)",
   "@healthBuildingBaselines": {
     "placeholders": {

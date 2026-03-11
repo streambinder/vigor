@@ -1480,6 +1480,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get healthNotConnected => '未连接';
 
   @override
+  String get healthNativeOnly => '可在 iOS 和 Android 上使用';
+
+  @override
   String healthBuildingBaselines(int days) {
     return '正在建立个人基准值（$days/14天）';
   }

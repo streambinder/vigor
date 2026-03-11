@@ -92,7 +92,6 @@ class ServiceLocator extends ChangeNotifier {
   }
 
   Future<void> refreshHealthDaily() async {
-    if (!_prefs.hcConnected) return;
     final response = await trainingService.getHealthDaily();
     if (response.isSuccess) {
       healthDailyNotifier.value = response.data;
@@ -101,21 +100,17 @@ class ServiceLocator extends ChangeNotifier {
 
   /// Pre-load homepage data so splash stays until everything is ready
   Future<void> loadInitialData() async {
-    final futures = <Future>[
+    final results = await Future.wait([
       progressService.getProgress(),
       progressService.getWeeklyTarget(),
-    ];
-    if (_prefs.hcConnected) {
-      futures.add(trainingService.getHealthDaily());
-    }
-
-    final results = await Future.wait(futures);
+      trainingService.getHealthDaily(),
+    ]);
     if (results[0].isSuccess) {
       initialProgress = results[0].data as Progress?;
       _updateCalibrationState();
     }
     if (results[1].isSuccess) initialWeeklyTarget = results[1].data as WeeklyTarget?;
-    if (_prefs.hcConnected && results.length > 2 && results[2].isSuccess) {
+    if (results[2].isSuccess) {
       healthDailyNotifier.value = results[2].data as Map<String, dynamic>?;
     }
     initialDataLoaded = true;

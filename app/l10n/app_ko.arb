@@ -511,6 +511,7 @@
   "healthInstallHcDescription": "웨어러블 데이터 동기화를 위해 Health Connect가 필요합니다. Play 스토어에서 설치해주세요.",
   "healthInstallHcTitle": "Health Connect 필요",
   "healthNotConnected": "연결 안 됨",
+  "healthNativeOnly": "iOS 및 Android에서 사용 가능",
   "healthOnboardingConnect": "연결",
   "healthOnboardingDescription": "건강 데이터를 연결하면 Vigor가 수면, 회복, 활동에 맞춰 트레이닝을 조정합니다.",
   "healthOnboardingDismiss": "나중에 하기",

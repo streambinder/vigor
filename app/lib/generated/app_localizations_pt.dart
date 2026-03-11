@@ -1513,6 +1513,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get healthNotConnected => 'Não conectado';
 
   @override
+  String get healthNativeOnly => 'Disponível no iOS e Android';
+
+  @override
   String healthBuildingBaselines(int days) {
     return 'Criando suas referências pessoais ($days/14 dias)';
   }
