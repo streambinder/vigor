@@ -355,11 +355,10 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   Widget _buildContent(AppLocalizations l10n, bool isDark, List<Training> trainings) {
     final available = _availableTrainings(trainings);
     final past = _pastTrainings(trainings);
-    final externalCount = _getExternalSessions().length;
 
     return Column(
       children: [
-        _buildSegmentedControl(l10n, available.length, past.length + externalCount, isDark),
+        _buildSegmentedControl(l10n, available.length, past.length, isDark),
         Expanded(
           child: TabBarView(
             controller: _tabController,
@@ -455,16 +454,29 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       );
     }
 
-    // completed tab: merge trainings and external sessions, sort chronologically
+    // completed tab: merge trainings and day-grouped external sessions, sort chronologically
+    // group external sessions by day into a single item per date
+    final Map<String, List<Map<String, dynamic>>> sessionsByDay = {};
+    for (final s in externalSessions) {
+      final date = DateTime.parse(s['started_at'] as String);
+      final key = '${date.year}-${date.month}-${date.day}';
+      (sessionsByDay[key] ??= []).add(s);
+    }
+
     final List<_CompletedItem> items = [
       ...trainings.map((t) => _CompletedItem(
         date: t.completedAt ?? t.createdAt,
         training: t,
       )),
-      ...externalSessions.map((s) => _CompletedItem(
-        date: DateTime.parse(s['started_at'] as String),
-        externalSession: s,
-      )),
+      ...sessionsByDay.entries.map((e) {
+        // use the latest session's start time as the group date
+        final sorted = e.value..sort((a, b) =>
+          DateTime.parse(b['started_at'] as String).compareTo(DateTime.parse(a['started_at'] as String)));
+        return _CompletedItem(
+          date: DateTime.parse(sorted.first['started_at'] as String),
+          externalSessions: sorted,
+        );
+      }),
     ]..sort((a, b) => b.date.compareTo(a.date));
 
     return ListView.separated(
@@ -476,7 +488,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
         if (item.training != null) {
           return _buildTrainingCard(item.training!, l10n, isAvailable: false, key: ValueKey(item.training!.id));
         }
-        return _buildExternalSessionCard(item.externalSession!, l10n);
+        return _buildExternalSessionsCard(item.externalSessions!, l10n);
       },
     );
   }
@@ -489,11 +501,20 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     return sessions.cast<Map<String, dynamic>>();
   }
 
-  Widget _buildExternalSessionCard(Map<String, dynamic> session, AppLocalizations l10n) {
-    final exerciseType = (session['exercise_type'] as String? ?? 'workout');
-    final startedAt = DateTime.parse(session['started_at'] as String);
-    final endedAt = DateTime.parse(session['ended_at'] as String);
-    final durationMins = endedAt.difference(startedAt).inMinutes;
+  /// day-grouped external sessions card — merges all sessions for the same day
+  Widget _buildExternalSessionsCard(List<Map<String, dynamic>> sessions, AppLocalizations l10n) {
+    final date = DateTime.parse(sessions.first['started_at'] as String);
+    final totalMins = sessions.fold<int>(0, (sum, s) {
+      final start = DateTime.parse(s['started_at'] as String);
+      final end = DateTime.parse(s['ended_at'] as String);
+      return sum + end.difference(start).inMinutes;
+    });
+
+    // collect unique exercise types for the summary
+    final types = sessions
+        .map((s) => _localizedExerciseType(s['exercise_type'] as String? ?? 'workout', l10n))
+        .toSet()
+        .toList();
 
     return Container(
       decoration: BoxDecoration(
@@ -508,7 +529,9 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
             children: [
               Expanded(
                 child: Text(
-                  _localizedExerciseType(exerciseType, l10n),
+                  sessions.length == 1
+                      ? types.first
+                      : '${sessions.length}x — ${types.join(', ')}',
                   style: VigorTypography.body.copyWith(
                     color: VigorColors.stone,
                     fontSize: 13,
@@ -519,7 +542,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
               ),
               const SizedBox(width: VigorSpacing.sm),
               Text(
-                _formatDuration(durationMins * 60),
+                _formatDuration(totalMins * 60),
                 style: VigorTypography.data.copyWith(
                   color: VigorColors.stone,
                   fontSize: 11,
@@ -527,7 +550,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
               ),
               const SizedBox(width: VigorSpacing.sm),
               Text(
-                _formatFullDate(startedAt),
+                _formatFullDate(date),
                 style: VigorTypography.data.copyWith(
                   color: VigorColors.stone,
                   fontSize: 11,
@@ -754,10 +777,10 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   }
 }
 
-/// unified item for chronological sorting of vigor trainings and external HC sessions
+/// unified item for chronological sorting of vigor trainings and day-grouped external HC sessions
 class _CompletedItem {
   final DateTime date;
   final Training? training;
-  final Map<String, dynamic>? externalSession;
-  const _CompletedItem({required this.date, this.training, this.externalSession});
+  final List<Map<String, dynamic>>? externalSessions;
+  const _CompletedItem({required this.date, this.training, this.externalSessions});
 }
