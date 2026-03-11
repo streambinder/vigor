@@ -826,32 +826,35 @@ Output language: `)
 //line llm/prompt/gen_training.qtpl:128
 	qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:129
+//line llm/prompt/gen_training.qtpl:133
+	qw422016.N().S(`
+`)
+//line llm/prompt/gen_training.qtpl:134
 	if len(reminders) > 0 {
-//line llm/prompt/gen_training.qtpl:129
+//line llm/prompt/gen_training.qtpl:134
 		qw422016.N().S(`
 [REMINDERS]
 `)
-//line llm/prompt/gen_training.qtpl:131
+//line llm/prompt/gen_training.qtpl:136
 		for _, r := range reminders {
-//line llm/prompt/gen_training.qtpl:131
+//line llm/prompt/gen_training.qtpl:136
 			qw422016.N().S(`- `)
-//line llm/prompt/gen_training.qtpl:131
+//line llm/prompt/gen_training.qtpl:136
 			qw422016.E().S(r)
-//line llm/prompt/gen_training.qtpl:131
+//line llm/prompt/gen_training.qtpl:136
 			qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:132
+//line llm/prompt/gen_training.qtpl:137
 		}
-//line llm/prompt/gen_training.qtpl:132
+//line llm/prompt/gen_training.qtpl:137
 	}
-//line llm/prompt/gen_training.qtpl:132
+//line llm/prompt/gen_training.qtpl:137
 	qw422016.N().S(`
 `)
-//line llm/prompt/gen_training.qtpl:133
+//line llm/prompt/gen_training.qtpl:138
 }
 
-//line llm/prompt/gen_training.qtpl:133
+//line llm/prompt/gen_training.qtpl:138
 func WriteGenTraining(qq422016 qtio422016.Writer,
 	profiles []model.Profile,
 	goals []string,
@@ -875,16 +878,16 @@ func WriteGenTraining(qq422016 qtio422016.Writer,
 	recentHR map[uuid.UUID]*model.HealthExerciseSession,
 	reminders []string,
 ) {
-//line llm/prompt/gen_training.qtpl:133
+//line llm/prompt/gen_training.qtpl:138
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line llm/prompt/gen_training.qtpl:133
+//line llm/prompt/gen_training.qtpl:138
 	StreamGenTraining(qw422016, profiles, goals, workExercises, warmupExercises, cooldownExercises, equipment, modifiers, modifierVariants, favoriteExercises, favoriteEquipment, methodology, userPrompt, duration, recentTrainings, recentFeedback, facts, skipWarmupCooldown, calibrationGaps, healthSnapshot, recentHR, reminders)
-//line llm/prompt/gen_training.qtpl:133
+//line llm/prompt/gen_training.qtpl:138
 	qt422016.ReleaseWriter(qw422016)
-//line llm/prompt/gen_training.qtpl:133
+//line llm/prompt/gen_training.qtpl:138
 }
 
-//line llm/prompt/gen_training.qtpl:133
+//line llm/prompt/gen_training.qtpl:138
 func GenTraining(
 	profiles []model.Profile,
 	goals []string,
@@ -908,15 +911,15 @@ func GenTraining(
 	recentHR map[uuid.UUID]*model.HealthExerciseSession,
 	reminders []string,
 ) string {
-//line llm/prompt/gen_training.qtpl:133
+//line llm/prompt/gen_training.qtpl:138
 	qb422016 := qt422016.AcquireByteBuffer()
-//line llm/prompt/gen_training.qtpl:133
+//line llm/prompt/gen_training.qtpl:138
 	WriteGenTraining(qb422016, profiles, goals, workExercises, warmupExercises, cooldownExercises, equipment, modifiers, modifierVariants, favoriteExercises, favoriteEquipment, methodology, userPrompt, duration, recentTrainings, recentFeedback, facts, skipWarmupCooldown, calibrationGaps, healthSnapshot, recentHR, reminders)
-//line llm/prompt/gen_training.qtpl:133
+//line llm/prompt/gen_training.qtpl:138
 	qs422016 := string(qb422016.B)
-//line llm/prompt/gen_training.qtpl:133
+//line llm/prompt/gen_training.qtpl:138
 	qt422016.ReleaseByteBuffer(qb422016)
-//line llm/prompt/gen_training.qtpl:133
+//line llm/prompt/gen_training.qtpl:138
 	return qs422016
-//line llm/prompt/gen_training.qtpl:133
+//line llm/prompt/gen_training.qtpl:138
 }
