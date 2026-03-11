@@ -1491,13 +1491,29 @@ class AppLocalizationsKo extends AppLocalizations {
   String get healthSyncNoData => '기기에서 건강 데이터를 찾을 수 없습니다';
 
   @override
-  String healthStoredMetrics(int days, int sessions) {
-    return '$days일 · $sessions세션';
+  String healthLastSyncAt(String date, String type) {
+    return '마지막 동기화: $date · $type';
   }
 
   @override
-  String healthLastSync(int count, int sessions) {
-    return '마지막 동기화: $count일, $sessions세션 전송됨';
+  String get healthSyncTypeFull => '전체';
+
+  @override
+  String get healthSyncTypeIncremental => '증분';
+
+  @override
+  String healthDeviceData(int days, int sessions) {
+    return '기기: $days일, $sessions세션';
+  }
+
+  @override
+  String healthBackendData(int days, int sessions) {
+    return '백엔드: $days일, $sessions세션';
+  }
+
+  @override
+  String healthDateRange(String from, String to) {
+    return '$from – $to';
   }
 
   @override

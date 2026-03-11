@@ -16,6 +16,13 @@ class PreferencesService {
   static const String _hcOnboardingDismissedMsKey = 'hc_onboarding_dismissed_ms';
   static const String _hcTotalMetricsKey = 'hc_total_metrics';
   static const String _hcTotalSessionsKey = 'hc_total_sessions';
+  static const String _hcDeviceMetricsKey = 'hc_device_metrics';
+  static const String _hcDeviceSessionsKey = 'hc_device_sessions';
+  static const String _hcWasForcedKey = 'hc_was_forced';
+  static const String _hcMetricsFromKey = 'hc_metrics_from';
+  static const String _hcMetricsToKey = 'hc_metrics_to';
+  static const String _hcSessionsFromKey = 'hc_sessions_from';
+  static const String _hcSessionsToKey = 'hc_sessions_to';
   static const int defaultDurationFallback = 60;
 
   SharedPreferences? _prefs;
@@ -119,9 +126,23 @@ class PreferencesService {
   // persisted sync stats — survive app restarts
   int get hcTotalMetrics => _prefs?.getInt(_hcTotalMetricsKey) ?? 0;
   int get hcTotalSessions => _prefs?.getInt(_hcTotalSessionsKey) ?? 0;
+  int get hcDeviceMetrics => _prefs?.getInt(_hcDeviceMetricsKey) ?? 0;
+  int get hcDeviceSessions => _prefs?.getInt(_hcDeviceSessionsKey) ?? 0;
+  bool get hcWasForced => _prefs?.getBool(_hcWasForcedKey) ?? false;
+  String? get hcMetricsFrom => _prefs?.getString(_hcMetricsFromKey);
+  String? get hcMetricsTo => _prefs?.getString(_hcMetricsToKey);
+  String? get hcSessionsFrom => _prefs?.getString(_hcSessionsFromKey);
+  String? get hcSessionsTo => _prefs?.getString(_hcSessionsToKey);
 
   Future<void> setHcTotalMetrics(int count) async => _prefs?.setInt(_hcTotalMetricsKey, count);
   Future<void> setHcTotalSessions(int count) async => _prefs?.setInt(_hcTotalSessionsKey, count);
+  Future<void> setHcDeviceMetrics(int count) async => _prefs?.setInt(_hcDeviceMetricsKey, count);
+  Future<void> setHcDeviceSessions(int count) async => _prefs?.setInt(_hcDeviceSessionsKey, count);
+  Future<void> setHcWasForced(bool forced) async => _prefs?.setBool(_hcWasForcedKey, forced);
+  Future<void> setHcMetricsFrom(String? v) async { if (v == null) { await _prefs?.remove(_hcMetricsFromKey); } else { await _prefs?.setString(_hcMetricsFromKey, v); } }
+  Future<void> setHcMetricsTo(String? v) async { if (v == null) { await _prefs?.remove(_hcMetricsToKey); } else { await _prefs?.setString(_hcMetricsToKey, v); } }
+  Future<void> setHcSessionsFrom(String? v) async { if (v == null) { await _prefs?.remove(_hcSessionsFromKey); } else { await _prefs?.setString(_hcSessionsFromKey, v); } }
+  Future<void> setHcSessionsTo(String? v) async { if (v == null) { await _prefs?.remove(_hcSessionsToKey); } else { await _prefs?.setString(_hcSessionsToKey, v); } }
 
   /// clear all health-related keys (called on logout for multi-user scoping)
   Future<void> clearHealthData() async {
@@ -131,6 +152,13 @@ class PreferencesService {
     await _prefs?.remove(_hcOnboardingDismissedMsKey);
     await _prefs?.remove(_hcTotalMetricsKey);
     await _prefs?.remove(_hcTotalSessionsKey);
+    await _prefs?.remove(_hcDeviceMetricsKey);
+    await _prefs?.remove(_hcDeviceSessionsKey);
+    await _prefs?.remove(_hcWasForcedKey);
+    await _prefs?.remove(_hcMetricsFromKey);
+    await _prefs?.remove(_hcMetricsToKey);
+    await _prefs?.remove(_hcSessionsFromKey);
+    await _prefs?.remove(_hcSessionsToKey);
   }
 
   // health connect connection state

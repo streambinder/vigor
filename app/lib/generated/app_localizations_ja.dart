@@ -1491,13 +1491,29 @@ class AppLocalizationsJa extends AppLocalizations {
   String get healthSyncNoData => 'デバイスにヘルスデータが見つかりません';
 
   @override
-  String healthStoredMetrics(int days, int sessions) {
-    return '$days日間 · $sessionsセッション';
+  String healthLastSyncAt(String date, String type) {
+    return '前回の同期: $date · $type';
   }
 
   @override
-  String healthLastSync(int count, int sessions) {
-    return '前回の同期: $count日分、$sessionsセッション送信済み';
+  String get healthSyncTypeFull => 'フル';
+
+  @override
+  String get healthSyncTypeIncremental => '増分';
+
+  @override
+  String healthDeviceData(int days, int sessions) {
+    return 'デバイス: $days日間、$sessionsセッション';
+  }
+
+  @override
+  String healthBackendData(int days, int sessions) {
+    return 'バックエンド: $days日間、$sessionsセッション';
+  }
+
+  @override
+  String healthDateRange(String from, String to) {
+    return '$from – $to';
   }
 
   @override

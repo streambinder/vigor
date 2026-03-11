@@ -1527,13 +1527,29 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se encontraron datos de salud en el dispositivo';
 
   @override
-  String healthStoredMetrics(int days, int sessions) {
-    return '$days días · $sessions sesiones';
+  String healthLastSyncAt(String date, String type) {
+    return 'Última sync: $date · $type';
   }
 
   @override
-  String healthLastSync(int count, int sessions) {
-    return 'Última sincronización: $count días, $sessions sesiones enviadas';
+  String get healthSyncTypeFull => 'completa';
+
+  @override
+  String get healthSyncTypeIncremental => 'incremental';
+
+  @override
+  String healthDeviceData(int days, int sessions) {
+    return 'Dispositivo: $days días, $sessions sesiones';
+  }
+
+  @override
+  String healthBackendData(int days, int sessions) {
+    return 'Backend: $days días, $sessions sesiones';
+  }
+
+  @override
+  String healthDateRange(String from, String to) {
+    return '$from – $to';
   }
 
   @override

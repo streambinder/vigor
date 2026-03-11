@@ -498,20 +498,12 @@
   "healthConnected": "Conectado",
   "healthData": "Dados de saúde",
   "healthSyncNoData": "Nenhum dado de saúde encontrado no dispositivo",
-  "healthStoredMetrics": "{days} dias · {sessions} sessões",
-  "@healthStoredMetrics": {
-    "placeholders": {
-      "days": {"type": "int"},
-      "sessions": {"type": "int"}
-    }
-  },
-  "healthLastSync": "Última sincronização: {count} dias, {sessions} sessões enviadas",
-  "@healthLastSync": {
-    "placeholders": {
-      "count": {"type": "int"},
-      "sessions": {"type": "int"}
-    }
-  },
+  "healthLastSyncAt": "Última sync: {date} · {type}",
+  "healthSyncTypeFull": "completa",
+  "healthSyncTypeIncremental": "incremental",
+  "healthDeviceData": "Dispositivo: {days} dias, {sessions} sessões",
+  "healthBackendData": "Backend: {days} dias, {sessions} sessões",
+  "healthDateRange": "{from} – {to}",
   "healthDisconnect": "Desconectar e excluir dados",
   "healthDisconnectConfirmation": "Desconectar dados de saúde? Todos os dados sincronizados serão excluídos. Esta ação não pode ser desfeita.",
   "healthDisconnectedSuccessfully": "Dados de saúde desconectados",

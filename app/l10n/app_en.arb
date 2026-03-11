@@ -715,18 +715,34 @@
     }
   },
   "healthSyncNoData": "No health data found on device",
-  "healthStoredMetrics": "{days} days · {sessions} sessions",
-  "@healthStoredMetrics": {
+  "healthLastSyncAt": "Last sync: {date} · {type}",
+  "@healthLastSyncAt": {
+    "placeholders": {
+      "date": {"type": "String"},
+      "type": {"type": "String"}
+    }
+  },
+  "healthSyncTypeFull": "full",
+  "healthSyncTypeIncremental": "incremental",
+  "healthDeviceData": "Device: {days} days, {sessions} sessions",
+  "@healthDeviceData": {
     "placeholders": {
       "days": {"type": "int"},
       "sessions": {"type": "int"}
     }
   },
-  "healthLastSync": "Last sync: {count} days, {sessions} sessions sent",
-  "@healthLastSync": {
+  "healthBackendData": "Backend: {days} days, {sessions} sessions",
+  "@healthBackendData": {
     "placeholders": {
-      "count": {"type": "int"},
+      "days": {"type": "int"},
       "sessions": {"type": "int"}
+    }
+  },
+  "healthDateRange": "{from} – {to}",
+  "@healthDateRange": {
+    "placeholders": {
+      "from": {"type": "String"},
+      "to": {"type": "String"}
     }
   },
   "healthDisconnect": "Disconnect & Delete Data",

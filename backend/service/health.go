@@ -253,12 +253,14 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest) (*model.Healt
 		return nil, err
 	}
 
-	// count totals stored in DB
+	// count totals and date ranges stored in DB
 	var totalMetrics, totalSessions int64
 	database.DB.Model(&model.HealthMetric{}).Where("user_id = ?", userID).Count(&totalMetrics)
 	database.DB.Model(&model.HealthExerciseSession{}).Where("user_id = ?", userID).Count(&totalSessions)
 	resp.TotalMetrics = int(totalMetrics)
 	resp.TotalSessions = int(totalSessions)
+
+	populateDateRanges(userID, &resp.MetricsFrom, &resp.MetricsTo, &resp.SessionsFrom, &resp.SessionsTo)
 
 	return resp, nil
 }
@@ -268,10 +270,35 @@ func GetHealthStats(userID uuid.UUID) (*model.HealthStatsResponse, error) {
 	var totalMetrics, totalSessions int64
 	database.DB.Model(&model.HealthMetric{}).Where("user_id = ?", userID).Count(&totalMetrics)
 	database.DB.Model(&model.HealthExerciseSession{}).Where("user_id = ?", userID).Count(&totalSessions)
-	return &model.HealthStatsResponse{
+	resp := &model.HealthStatsResponse{
 		TotalMetrics:  int(totalMetrics),
 		TotalSessions: int(totalSessions),
-	}, nil
+	}
+	populateDateRanges(userID, &resp.MetricsFrom, &resp.MetricsTo, &resp.SessionsFrom, &resp.SessionsTo)
+	return resp, nil
+}
+
+// populateDateRanges queries min/max dates for metrics and sessions
+func populateDateRanges(userID uuid.UUID, metricsFrom, metricsTo, sessionsFrom, sessionsTo *string) {
+	var mRange struct{ MinDate, MaxDate *time.Time }
+	database.DB.Model(&model.HealthMetric{}).
+		Where("user_id = ?", userID).
+		Select("MIN(date) as min_date, MAX(date) as max_date").
+		Scan(&mRange)
+	if mRange.MinDate != nil {
+		*metricsFrom = mRange.MinDate.Format("2006-01-02")
+		*metricsTo = mRange.MaxDate.Format("2006-01-02")
+	}
+
+	var sRange struct{ MinDate, MaxDate *time.Time }
+	database.DB.Model(&model.HealthExerciseSession{}).
+		Where("user_id = ?", userID).
+		Select("MIN(started_at) as min_date, MAX(started_at) as max_date").
+		Scan(&sRange)
+	if sRange.MinDate != nil {
+		*sessionsFrom = sRange.MinDate.Format(time.RFC3339)
+		*sessionsTo = sRange.MaxDate.Format(time.RFC3339)
+	}
 }
 
 // hrZoneDistribution holds percentage distribution across 5 HR zones.

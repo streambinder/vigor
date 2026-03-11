@@ -8,13 +8,20 @@ import 'secure_storage_service.dart';
 import 'android_health_data_service.dart';
 import 'ios_health_data_service.dart';
 
-/// result from POST /health/sync — counts of what was synced and stored
+/// result from POST /health/sync or GET /health/stats
 class HealthSyncResult {
   final int metricsSynced;
   final int sessionsSynced;
   final int totalMetrics;
   final int totalSessions;
   final DateTime syncedAt;
+  final bool wasForced;
+  final int deviceMetrics;
+  final int deviceSessions;
+  final DateTime? metricsFrom;
+  final DateTime? metricsTo;
+  final DateTime? sessionsFrom;
+  final DateTime? sessionsTo;
 
   const HealthSyncResult({
     required this.metricsSynced,
@@ -22,15 +29,34 @@ class HealthSyncResult {
     required this.totalMetrics,
     required this.totalSessions,
     required this.syncedAt,
+    this.wasForced = false,
+    this.deviceMetrics = 0,
+    this.deviceSessions = 0,
+    this.metricsFrom,
+    this.metricsTo,
+    this.sessionsFrom,
+    this.sessionsTo,
   });
 
-  factory HealthSyncResult.fromJson(Map<String, dynamic> json) => HealthSyncResult(
+  factory HealthSyncResult.fromJson(Map<String, dynamic> json, {bool wasForced = false, int deviceMetrics = 0, int deviceSessions = 0}) => HealthSyncResult(
     metricsSynced: json['metrics_synced'] ?? 0,
     sessionsSynced: json['sessions_synced'] ?? 0,
     totalMetrics: json['total_metrics'] ?? 0,
     totalSessions: json['total_sessions'] ?? 0,
     syncedAt: DateTime.now(),
+    wasForced: wasForced,
+    deviceMetrics: deviceMetrics,
+    deviceSessions: deviceSessions,
+    metricsFrom: _parseDate(json['metrics_from']),
+    metricsTo: _parseDate(json['metrics_to']),
+    sessionsFrom: _parseDate(json['sessions_from']),
+    sessionsTo: _parseDate(json['sessions_to']),
   );
+
+  static DateTime? _parseDate(dynamic value) {
+    if (value == null || value is! String || value.isEmpty) return null;
+    return DateTime.tryParse(value);
+  }
 }
 
 /// sync payload sent to POST /health/sync
@@ -169,6 +195,13 @@ mixin HealthDataServiceMixin on HealthDataService {
         metricsSynced: 0, sessionsSynced: 0,
         totalMetrics: totalMetrics, totalSessions: totalSessions,
         syncedAt: DateTime.fromMillisecondsSinceEpoch(prefs.hcLastSyncMs ?? 0),
+        wasForced: prefs.hcWasForced,
+        deviceMetrics: prefs.hcDeviceMetrics,
+        deviceSessions: prefs.hcDeviceSessions,
+        metricsFrom: HealthSyncResult._parseDate(prefs.hcMetricsFrom),
+        metricsTo: HealthSyncResult._parseDate(prefs.hcMetricsTo),
+        sessionsFrom: HealthSyncResult._parseDate(prefs.hcSessionsFrom),
+        sessionsTo: HealthSyncResult._parseDate(prefs.hcSessionsTo),
       );
     }
   }
@@ -177,6 +210,13 @@ mixin HealthDataServiceMixin on HealthDataService {
   Future<void> _persistStats(HealthSyncResult result) async {
     await prefs.setHcTotalMetrics(result.totalMetrics);
     await prefs.setHcTotalSessions(result.totalSessions);
+    await prefs.setHcDeviceMetrics(result.deviceMetrics);
+    await prefs.setHcDeviceSessions(result.deviceSessions);
+    await prefs.setHcWasForced(result.wasForced);
+    await prefs.setHcMetricsFrom(result.metricsFrom?.toIso8601String());
+    await prefs.setHcMetricsTo(result.metricsTo?.toIso8601String());
+    await prefs.setHcSessionsFrom(result.sessionsFrom?.toIso8601String());
+    await prefs.setHcSessionsTo(result.sessionsTo?.toIso8601String());
   }
 
   /// fetch stats from backend without syncing data — used when throttled
@@ -184,11 +224,20 @@ mixin HealthDataServiceMixin on HealthDataService {
     try {
       final response = await apiService.get('/health/stats').timeout(_syncTimeout);
       if (response.isSuccess && response.data != null) {
+        // stats-only: no device read happened, preserve previous device counts
+        final prev = _lastSyncResult.value;
         final result = HealthSyncResult(
           metricsSynced: 0, sessionsSynced: 0,
           totalMetrics: response.data!['total_metrics'] ?? 0,
           totalSessions: response.data!['total_sessions'] ?? 0,
           syncedAt: DateTime.now(),
+          wasForced: prev?.wasForced ?? false,
+          deviceMetrics: prev?.deviceMetrics ?? 0,
+          deviceSessions: prev?.deviceSessions ?? 0,
+          metricsFrom: HealthSyncResult._parseDate(response.data!['metrics_from']),
+          metricsTo: HealthSyncResult._parseDate(response.data!['metrics_to']),
+          sessionsFrom: HealthSyncResult._parseDate(response.data!['sessions_from']),
+          sessionsTo: HealthSyncResult._parseDate(response.data!['sessions_to']),
         );
         _lastSyncResult.value = result;
         await _persistStats(result);
@@ -232,6 +281,9 @@ mixin HealthDataServiceMixin on HealthDataService {
       }
 
       final payload = force ? await readAllData() : await readNewData();
+      final payloadMetrics = payload.metrics.length;
+      final payloadSessions = payload.sessions.length;
+
       if (payload.isEmpty) {
         AppLogger.debug('[HealthDataService] no new data to sync');
         // still fetch backend stats so totals stay current
@@ -247,7 +299,12 @@ mixin HealthDataServiceMixin on HealthDataService {
       if (response.isSuccess) {
         AppLogger.info('[HealthDataService] sync POST succeeded');
         if (response.data != null) {
-          final result = HealthSyncResult.fromJson(response.data!);
+          final result = HealthSyncResult.fromJson(
+            response.data!,
+            wasForced: force,
+            deviceMetrics: payloadMetrics,
+            deviceSessions: payloadSessions,
+          );
           _lastSyncResult.value = result;
           await _persistStats(result);
         }

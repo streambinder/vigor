@@ -498,20 +498,12 @@
   "healthConnected": "Verbunden",
   "healthData": "Gesundheitsdaten",
   "healthSyncNoData": "Keine Gesundheitsdaten auf dem Gerät gefunden",
-  "healthStoredMetrics": "{days} Tage · {sessions} Sitzungen",
-  "@healthStoredMetrics": {
-    "placeholders": {
-      "days": {"type": "int"},
-      "sessions": {"type": "int"}
-    }
-  },
-  "healthLastSync": "Letzte Sync: {count} Tage, {sessions} Sitzungen gesendet",
-  "@healthLastSync": {
-    "placeholders": {
-      "count": {"type": "int"},
-      "sessions": {"type": "int"}
-    }
-  },
+  "healthLastSyncAt": "Letzte Sync: {date} · {type}",
+  "healthSyncTypeFull": "vollständig",
+  "healthSyncTypeIncremental": "inkrementell",
+  "healthDeviceData": "Gerät: {days} Tage, {sessions} Sitzungen",
+  "healthBackendData": "Backend: {days} Tage, {sessions} Sitzungen",
+  "healthDateRange": "{from} – {to}",
   "healthDisconnect": "Trennen & Daten löschen",
   "healthDisconnectConfirmation": "Gesundheitsdaten trennen? Alle synchronisierten Daten werden gelöscht. Dies kann nicht rückgängig gemacht werden.",
   "healthDisconnectedSuccessfully": "Gesundheitsdaten getrennt",

@@ -498,20 +498,12 @@
   "healthConnected": "연결됨",
   "healthData": "건강 데이터",
   "healthSyncNoData": "기기에서 건강 데이터를 찾을 수 없습니다",
-  "healthStoredMetrics": "{days}일 · {sessions}세션",
-  "@healthStoredMetrics": {
-    "placeholders": {
-      "days": {"type": "int"},
-      "sessions": {"type": "int"}
-    }
-  },
-  "healthLastSync": "마지막 동기화: {count}일, {sessions}세션 전송됨",
-  "@healthLastSync": {
-    "placeholders": {
-      "count": {"type": "int"},
-      "sessions": {"type": "int"}
-    }
-  },
+  "healthLastSyncAt": "마지막 동기화: {date} · {type}",
+  "healthSyncTypeFull": "전체",
+  "healthSyncTypeIncremental": "증분",
+  "healthDeviceData": "기기: {days}일, {sessions}세션",
+  "healthBackendData": "백엔드: {days}일, {sessions}세션",
+  "healthDateRange": "{from} – {to}",
   "healthDisconnect": "연결 해제 및 데이터 삭제",
   "healthDisconnectConfirmation": "건강 데이터를 연결 해제하시겠습니까? 동기화된 모든 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.",
   "healthDisconnectedSuccessfully": "건강 데이터 연결이 해제되었습니다",

@@ -1516,13 +1516,29 @@ class AppLocalizationsRu extends AppLocalizations {
   String get healthSyncNoData => 'На устройстве не найдены данные о здоровье';
 
   @override
-  String healthStoredMetrics(int days, int sessions) {
-    return '$days дн. · $sessions сеансов';
+  String healthLastSyncAt(String date, String type) {
+    return 'Последняя синхронизация: $date · $type';
   }
 
   @override
-  String healthLastSync(int count, int sessions) {
-    return 'Последняя синхронизация: $count дн., $sessions сеансов отправлено';
+  String get healthSyncTypeFull => 'полная';
+
+  @override
+  String get healthSyncTypeIncremental => 'инкрементальная';
+
+  @override
+  String healthDeviceData(int days, int sessions) {
+    return 'Устройство: $days дн., $sessions сеансов';
+  }
+
+  @override
+  String healthBackendData(int days, int sessions) {
+    return 'Сервер: $days дн., $sessions сеансов';
+  }
+
+  @override
+  String healthDateRange(String from, String to) {
+    return '$from – $to';
   }
 
   @override

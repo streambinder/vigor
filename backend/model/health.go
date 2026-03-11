@@ -78,17 +78,25 @@ type ExternalWorkoutSummary struct {
 // HealthSyncResponse is the response for POST /health/sync.
 // codegen:skip
 type HealthSyncResponse struct {
-	MetricsSynced  int `json:"metrics_synced"`
-	SessionsSynced int `json:"sessions_synced"`
-	TotalMetrics   int `json:"total_metrics"`
-	TotalSessions  int `json:"total_sessions"`
+	MetricsSynced  int    `json:"metrics_synced"`
+	SessionsSynced int    `json:"sessions_synced"`
+	TotalMetrics   int    `json:"total_metrics"`
+	TotalSessions  int    `json:"total_sessions"`
+	MetricsFrom    string `json:"metrics_from,omitempty"`
+	MetricsTo      string `json:"metrics_to,omitempty"`
+	SessionsFrom   string `json:"sessions_from,omitempty"`
+	SessionsTo     string `json:"sessions_to,omitempty"`
 }
 
 // HealthStatsResponse is the response for GET /health/stats.
 // codegen:skip
 type HealthStatsResponse struct {
-	TotalMetrics  int `json:"total_metrics"`
-	TotalSessions int `json:"total_sessions"`
+	TotalMetrics  int    `json:"total_metrics"`
+	TotalSessions int    `json:"total_sessions"`
+	MetricsFrom   string `json:"metrics_from,omitempty"`
+	MetricsTo     string `json:"metrics_to,omitempty"`
+	SessionsFrom  string `json:"sessions_from,omitempty"`
+	SessionsTo    string `json:"sessions_to,omitempty"`
 }
 
 // HealthDailyResponse is the response for GET /health/daily.

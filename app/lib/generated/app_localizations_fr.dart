@@ -1531,13 +1531,29 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucune donnée de santé trouvée sur l\'appareil';
 
   @override
-  String healthStoredMetrics(int days, int sessions) {
-    return '$days jours · $sessions sessions';
+  String healthLastSyncAt(String date, String type) {
+    return 'Dernière sync : $date · $type';
   }
 
   @override
-  String healthLastSync(int count, int sessions) {
-    return 'Dernière sync : $count jours, $sessions sessions envoyées';
+  String get healthSyncTypeFull => 'complète';
+
+  @override
+  String get healthSyncTypeIncremental => 'incrémentale';
+
+  @override
+  String healthDeviceData(int days, int sessions) {
+    return 'Appareil : $days jours, $sessions sessions';
+  }
+
+  @override
+  String healthBackendData(int days, int sessions) {
+    return 'Backend : $days jours, $sessions sessions';
+  }
+
+  @override
+  String healthDateRange(String from, String to) {
+    return '$from – $to';
   }
 
   @override

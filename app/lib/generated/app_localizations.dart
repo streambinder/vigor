@@ -2922,17 +2922,41 @@ abstract class AppLocalizations {
   /// **'No health data found on device'**
   String get healthSyncNoData;
 
-  /// No description provided for @healthStoredMetrics.
+  /// No description provided for @healthLastSyncAt.
   ///
   /// In en, this message translates to:
-  /// **'{days} days · {sessions} sessions'**
-  String healthStoredMetrics(int days, int sessions);
+  /// **'Last sync: {date} · {type}'**
+  String healthLastSyncAt(String date, String type);
 
-  /// No description provided for @healthLastSync.
+  /// No description provided for @healthSyncTypeFull.
   ///
   /// In en, this message translates to:
-  /// **'Last sync: {count} days, {sessions} sessions sent'**
-  String healthLastSync(int count, int sessions);
+  /// **'full'**
+  String get healthSyncTypeFull;
+
+  /// No description provided for @healthSyncTypeIncremental.
+  ///
+  /// In en, this message translates to:
+  /// **'incremental'**
+  String get healthSyncTypeIncremental;
+
+  /// No description provided for @healthDeviceData.
+  ///
+  /// In en, this message translates to:
+  /// **'Device: {days} days, {sessions} sessions'**
+  String healthDeviceData(int days, int sessions);
+
+  /// No description provided for @healthBackendData.
+  ///
+  /// In en, this message translates to:
+  /// **'Backend: {days} days, {sessions} sessions'**
+  String healthBackendData(int days, int sessions);
+
+  /// No description provided for @healthDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{from} – {to}'**
+  String healthDateRange(String from, String to);
 
   /// No description provided for @healthDisconnect.
   ///

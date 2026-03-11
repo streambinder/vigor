@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
@@ -298,6 +299,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  String _formatShortDate(DateTime dt) => DateFormat.MMMd().format(dt);
+
+  String _formatSyncTime(DateTime dt) => '${DateFormat.MMMd().format(dt)}, ${DateFormat.Hm().format(dt)}';
+
   Widget _buildHealthSection(BuildContext context, AppLocalizations l10n, bool isDark) {
     final prefs = context.read<PreferencesService>();
     final healthService = context.read<ServiceLocator>().healthDataService;
@@ -333,9 +338,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   valueListenable: healthService.syncing,
                   builder: (context, isSyncing, _) => ValueListenableBuilder<HealthSyncResult?>(
                     valueListenable: healthService.lastSyncResult,
-                    builder: (context, syncResult, _) => Column(
-                      children: [
-                        // status row
+                    builder: (context, syncResult, _) {
+                      // row 1: status + last sync info
+                      final statusSubtitle = syncResult != null && !isSyncing
+                          ? l10n.healthLastSyncAt(
+                              _formatSyncTime(syncResult.syncedAt),
+                              syncResult.wasForced ? l10n.healthSyncTypeFull : l10n.healthSyncTypeIncremental,
+                            )
+                          : null;
+
+                      // row 2: device data — only show when a real sync happened (not stats-only)
+                      final hasDeviceData = syncResult != null && (syncResult.deviceMetrics > 0 || syncResult.deviceSessions > 0);
+                      // show "no data" warning only when sync happened but found nothing
+                      final showNoDataWarning = syncResult != null && !hasDeviceData && syncResult.wasForced;
+
+                      // row 3: backend data
+                      final hasBackendData = syncResult != null && (syncResult.totalMetrics > 0 || syncResult.totalSessions > 0);
+
+                      // backend date range subtitle — compute overall min/max across metrics and sessions
+                      String? backendDateRange;
+                      if (hasBackendData) {
+                        final dates = [syncResult!.metricsFrom, syncResult.sessionsFrom].whereType<DateTime>();
+                        final endDates = [syncResult.metricsTo, syncResult.sessionsTo].whereType<DateTime>();
+                        if (dates.isNotEmpty && endDates.isNotEmpty) {
+                          final from = dates.reduce((a, b) => a.isBefore(b) ? a : b);
+                          final to = endDates.reduce((a, b) => a.isAfter(b) ? a : b);
+                          backendDateRange = l10n.healthDateRange(_formatShortDate(from), _formatShortDate(to));
+                        }
+                      }
+
+                      return Column(children: [
+                        // row 1: status
                         ListTile(
                           leading: isSyncing
                               ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: VigorColors.indigoAdaptive(context)))
@@ -344,32 +377,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             isSyncing ? l10n.healthSynchronizing : l10n.healthSynchronized,
                             style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)),
                           ),
-                          subtitle: syncResult != null && !isSyncing
-                              ? Text(
-                                  l10n.healthStoredMetrics(syncResult.totalMetrics, syncResult.totalSessions),
-                                  style: VigorTypography.caption.copyWith(color: VigorColors.stone),
-                                )
+                          subtitle: statusSubtitle != null
+                              ? Text(statusSubtitle, style: VigorTypography.caption.copyWith(color: VigorColors.stone))
                               : null,
                         ),
-                        // last sync details
-                        if (syncResult != null && !isSyncing) ...[
+                        // row 2: device data
+                        if (!isSyncing && hasDeviceData) ...[
                           Divider(height: 1, color: VigorColors.border(context)),
                           ListTile(
-                            leading: Icon(
-                              syncResult.metricsSynced == 0 && syncResult.sessionsSynced == 0
-                                  ? Icons.info_outline
-                                  : Icons.cloud_done_outlined,
-                              color: VigorColors.stone,
-                              size: 22,
-                            ),
+                            leading: Icon(Icons.smartphone, color: VigorColors.stone, size: 22),
                             title: Text(
-                              syncResult.metricsSynced == 0 && syncResult.sessionsSynced == 0
-                                  ? l10n.healthSyncNoData
-                                  : l10n.healthLastSync(syncResult.metricsSynced, syncResult.sessionsSynced),
+                              l10n.healthDeviceData(syncResult!.deviceMetrics, syncResult.deviceSessions),
+                              style: VigorTypography.caption.copyWith(color: VigorColors.stone),
+                            ),
+                          ),
+                        ] else if (!isSyncing && showNoDataWarning) ...[
+                          Divider(height: 1, color: VigorColors.border(context)),
+                          ListTile(
+                            leading: Icon(Icons.warning_amber_rounded, color: VigorColors.warning, size: 22),
+                            title: Text(
+                              l10n.healthSyncNoData,
                               style: VigorTypography.caption.copyWith(color: VigorColors.stone),
                             ),
                           ),
                         ],
+                        // row 3: backend data
+                        if (!isSyncing && hasBackendData) ...[
+                          Divider(height: 1, color: VigorColors.border(context)),
+                          ListTile(
+                            leading: Icon(Icons.cloud_done_outlined, color: VigorColors.stone, size: 22),
+                            title: Text(
+                              l10n.healthBackendData(syncResult!.totalMetrics, syncResult.totalSessions),
+                              style: VigorTypography.caption.copyWith(color: VigorColors.stone),
+                            ),
+                            subtitle: backendDateRange != null
+                                ? Text(backendDateRange, style: VigorTypography.caption.copyWith(color: VigorColors.stone))
+                                : null,
+                          ),
+                        ],
+                        // row 4: sync now
                         Divider(height: 1, color: VigorColors.border(context)),
                         ListTile(
                           leading: Icon(Icons.sync, color: isSyncing ? VigorColors.stone : VigorColors.indigoAdaptive(context), size: 22),
@@ -380,14 +426,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             healthService.syncToBackend(force: true);
                           },
                         ),
+                        // row 5: disconnect
                         Divider(height: 1, color: VigorColors.border(context)),
                         ListTile(
                           leading: const Icon(Icons.delete_outline, color: VigorColors.crimson, size: 22),
                           title: Text(l10n.healthDisconnect, style: VigorTypography.body.copyWith(color: VigorColors.crimson)),
                           onTap: () => _showDisconnectDialog(context, l10n),
                         ),
-                      ],
-                    ),
+                      ]);
+                    },
                   ),
                 )
               else if (!isConnected)
