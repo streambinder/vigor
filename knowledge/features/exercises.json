@@ -35658,33 +35658,6 @@
     "cues": []
   },
   {
-    "id": "swing-360",
-    "name": "Swing 360",
-    "equipment": [
-      "pull-up bar"
-    ],
-    "muscles": [
-      "core",
-      "shoulders"
-    ],
-    "reference": "https://static.exercisedb.dev/media/tnaj0mT.gif",
-    "instructions": [
-      "Stand with your feet shoulder-width apart and knees slightly bent",
-      "Hold your arms straight out in front of you, parallel to the ground",
-      "Engage your core and swing your arms in a circular motion, rotating your torso as you do so",
-      "Continue the circular motion, swinging your arms and rotating your torso for the desired number of repetitions",
-      "Remember to breathe throughout the exercise"
-    ],
-    "progressions": {
-      "hinge": 45
-    },
-    "cues": [
-      "Hinge at hips — not a squat",
-      "Snap hips forward explosively",
-      "Keep arms relaxed"
-    ]
-  },
-  {
     "id": "tap-all",
     "name": "Tap All",
     "equipment": [],
