@@ -126,6 +126,11 @@ Apply when relevant to selected exercises:
 {% endfor %}
 {% endif %}
 Output language: {% if len(profiles) > 0 && len(profiles[0].Language) > 0 %}{%s profiles[0].Language %}{% else %}English{% endif %}
+{%comment%}
+  reminders block: critical signals echoed at the end of the prompt to exploit
+  recency bias — LLMs attend strongest at beginning/end, weakest in the middle.
+  see: https://arxiv.org/html/2511.12869v1
+{%endcomment%}
 {% if len(reminders) > 0 %}
 [REMINDERS]
 {% for _, r := range reminders %}- {%s r %}

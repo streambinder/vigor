@@ -76,8 +76,11 @@ func GenTraining(
 		goalIDs[i] = g.ID
 	}
 
-	// build recency-bias reminders for critical signals that might get
-	// lost in the middle of the prompt on small models
+	// build recency-bias reminders: critical signals echoed at the end of the prompt
+	// to exploit recency bias. LLMs exhibit a U-shaped attention curve (strong at
+	// beginning/end, weak in the middle) due to left-skewed training distributions,
+	// positional encoding saturation, and softmax attention dynamics — amplified in
+	// smaller models. see: https://arxiv.org/html/2511.12869v1
 	var reminders []string
 	for _, p := range profiles {
 		for _, inj := range p.Injuries() {
