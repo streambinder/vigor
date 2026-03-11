@@ -355,10 +355,12 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   Widget _buildContent(AppLocalizations l10n, bool isDark, List<Training> trainings) {
     final available = _availableTrainings(trainings);
     final past = _pastTrainings(trainings);
+    final currentUserId = context.read<AuthProvider>().currentUser?.id ?? '';
+    final internalPastCount = past.where((t) => t.userId == currentUserId).length;
 
     return Column(
       children: [
-        _buildSegmentedControl(l10n, available.length, past.length, isDark),
+        _buildSegmentedControl(l10n, available.length, internalPastCount, isDark),
         Expanded(
           child: TabBarView(
             controller: _tabController,

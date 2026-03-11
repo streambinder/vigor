@@ -108,22 +108,17 @@ func GetProficiencyCalibration(userID uuid.UUID) (map[string]int, error) {
 	return result, nil
 }
 
-// GetTrainingsCompleteCount returns the number of completed trainings for a user,
-// including trainings they own and trainings where they participated as a partner.
+// GetTrainingsCompleteCount returns the number of completed internal (owned) trainings for a user.
+// Partnered trainings are intentionally excluded: the caller uses this for proficiency calibration
+// and the home hero counter, both of which should reflect only the user's own training history.
 func GetTrainingsCompleteCount(userID uuid.UUID) (int, error) {
-	var ownedCount, partneredCount int64
+	var count int64
 	if err := database.DB.Model(&model.Training{}).
 		Where("user_id = ? AND completed_at IS NOT NULL", userID).
-		Count(&ownedCount).Error; err != nil {
+		Count(&count).Error; err != nil {
 		return 0, err
 	}
-	if err := database.DB.Model(&model.Partner{}).
-		Joins("JOIN trainings ON trainings.id = partners.training_id").
-		Where("partners.user_id = ? AND trainings.completed_at IS NOT NULL", userID).
-		Count(&partneredCount).Error; err != nil {
-		return 0, err
-	}
-	return int(ownedCount + partneredCount), nil
+	return int(count), nil
 }
 
 // GetPartneredTrainingsCount returns the number of completed partnered trainings,
