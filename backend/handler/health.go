@@ -29,6 +29,7 @@ func initHealth(app *fiber.App) {
 
 	app.Post("/health/sync", middleware.Authorized(), syncLimiter, postHealthSync)
 	app.Post("/health/disconnect", middleware.Authorized(), postHealthDisconnect)
+	app.Get("/health/stats", middleware.Authorized(), getHealthStats)
 	app.Get("/health/daily", middleware.Authorized(), getHealthDaily)
 	app.Get("/health/session/:id", middleware.Authorized(), getHealthSession)
 }
@@ -45,6 +46,15 @@ func postHealthSync(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "sync failed"})
 	}
 
+	return c.JSON(resp)
+}
+
+func getHealthStats(c *fiber.Ctx) error {
+	resp, err := service.GetHealthStats(c.Locals("userID").(uuid.UUID))
+	if err != nil {
+		middleware.Log(c).Error().Err(err).Msg("failed to get health stats")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to get health stats"})
+	}
 	return c.JSON(resp)
 }
 

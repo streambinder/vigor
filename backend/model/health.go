@@ -84,6 +84,13 @@ type HealthSyncResponse struct {
 	TotalSessions  int `json:"total_sessions"`
 }
 
+// HealthStatsResponse is the response for GET /health/stats.
+// codegen:skip
+type HealthStatsResponse struct {
+	TotalMetrics  int `json:"total_metrics"`
+	TotalSessions int `json:"total_sessions"`
+}
+
 // HealthDailyResponse is the response for GET /health/daily.
 type HealthDailyResponse struct {
 	Metrics  []HealthMetric          `json:"metrics"`

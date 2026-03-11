@@ -158,12 +158,58 @@ mixin HealthDataServiceMixin on HealthDataService {
     return elapsed < _throttleDuration.inMilliseconds;
   }
 
+  /// restore persisted stats into the in-memory notifier so settings
+  /// screen always has something to show, even before the first sync
+  void _restorePersistedStats() {
+    if (_lastSyncResult.value != null) return;
+    final totalMetrics = prefs.hcTotalMetrics;
+    final totalSessions = prefs.hcTotalSessions;
+    if (totalMetrics > 0 || totalSessions > 0) {
+      _lastSyncResult.value = HealthSyncResult(
+        metricsSynced: 0, sessionsSynced: 0,
+        totalMetrics: totalMetrics, totalSessions: totalSessions,
+        syncedAt: DateTime.fromMillisecondsSinceEpoch(prefs.hcLastSyncMs ?? 0),
+      );
+    }
+  }
+
+  /// persist sync stats so they survive app restarts
+  Future<void> _persistStats(HealthSyncResult result) async {
+    await prefs.setHcTotalMetrics(result.totalMetrics);
+    await prefs.setHcTotalSessions(result.totalSessions);
+  }
+
+  /// fetch stats from backend without syncing data — used when throttled
+  Future<void> _fetchStatsOnly() async {
+    try {
+      final response = await apiService.get('/health/stats').timeout(_syncTimeout);
+      if (response.isSuccess && response.data != null) {
+        final result = HealthSyncResult(
+          metricsSynced: 0, sessionsSynced: 0,
+          totalMetrics: response.data!['total_metrics'] ?? 0,
+          totalSessions: response.data!['total_sessions'] ?? 0,
+          syncedAt: DateTime.now(),
+        );
+        _lastSyncResult.value = result;
+        await _persistStats(result);
+      }
+    } catch (e) {
+      AppLogger.debug('[HealthDataService] stats fetch failed: $e');
+    }
+  }
+
   @override
   Future<bool> syncToBackend({bool force = false}) async {
     if (_syncing.value) return false;
+
+    // always restore persisted stats so the UI has data immediately
+    _restorePersistedStats();
+
     if (!force && _shouldThrottle) {
-      AppLogger.debug('[HealthDataService] throttled — last sync < 1 hour ago');
-      return false;
+      AppLogger.debug('[HealthDataService] throttled — fetching stats only');
+      // still fetch fresh stats from backend so settings always shows current totals
+      await _fetchStatsOnly();
+      return true;
     }
 
     _syncing.value = true;
@@ -188,12 +234,8 @@ mixin HealthDataServiceMixin on HealthDataService {
       final payload = force ? await readAllData() : await readNewData();
       if (payload.isEmpty) {
         AppLogger.debug('[HealthDataService] no new data to sync');
-        final prev = _lastSyncResult.value;
-        _lastSyncResult.value = HealthSyncResult(
-          metricsSynced: 0, sessionsSynced: 0,
-          totalMetrics: prev?.totalMetrics ?? 0, totalSessions: prev?.totalSessions ?? 0,
-          syncedAt: DateTime.now(),
-        );
+        // still fetch backend stats so totals stay current
+        await _fetchStatsOnly();
         await prefs.setHcLastSyncMs(DateTime.now().millisecondsSinceEpoch);
         return true;
       }
@@ -205,7 +247,9 @@ mixin HealthDataServiceMixin on HealthDataService {
       if (response.isSuccess) {
         AppLogger.info('[HealthDataService] sync POST succeeded');
         if (response.data != null) {
-          _lastSyncResult.value = HealthSyncResult.fromJson(response.data!);
+          final result = HealthSyncResult.fromJson(response.data!);
+          _lastSyncResult.value = result;
+          await _persistStats(result);
         }
         // persist tokens/timestamps only after successful POST (H3)
         await onSyncSuccess();

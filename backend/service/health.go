@@ -253,6 +253,17 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest) (*model.Healt
 	return resp, nil
 }
 
+// GetHealthStats returns total counts of stored metrics and sessions for a user.
+func GetHealthStats(userID uuid.UUID) (*model.HealthStatsResponse, error) {
+	var totalMetrics, totalSessions int64
+	database.DB.Model(&model.HealthMetric{}).Where("user_id = ?", userID).Count(&totalMetrics)
+	database.DB.Model(&model.HealthExerciseSession{}).Where("user_id = ?", userID).Count(&totalSessions)
+	return &model.HealthStatsResponse{
+		TotalMetrics:  int(totalMetrics),
+		TotalSessions: int(totalSessions),
+	}, nil
+}
+
 // hrZoneDistribution holds percentage distribution across 5 HR zones.
 type hrZoneDistribution struct {
 	Zone1Pct float64 `json:"zone1_pct"`

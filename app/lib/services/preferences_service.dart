@@ -14,6 +14,8 @@ class PreferencesService {
   static const String _hcLastSyncMsKey = 'hc_last_sync_ms';
   static const String _hcConnectedKey = 'hc_connected';
   static const String _hcOnboardingDismissedMsKey = 'hc_onboarding_dismissed_ms';
+  static const String _hcTotalMetricsKey = 'hc_total_metrics';
+  static const String _hcTotalSessionsKey = 'hc_total_sessions';
   static const int defaultDurationFallback = 60;
 
   SharedPreferences? _prefs;
@@ -114,12 +116,21 @@ class PreferencesService {
     }
   }
 
+  // persisted sync stats — survive app restarts
+  int get hcTotalMetrics => _prefs?.getInt(_hcTotalMetricsKey) ?? 0;
+  int get hcTotalSessions => _prefs?.getInt(_hcTotalSessionsKey) ?? 0;
+
+  Future<void> setHcTotalMetrics(int count) async => _prefs?.setInt(_hcTotalMetricsKey, count);
+  Future<void> setHcTotalSessions(int count) async => _prefs?.setInt(_hcTotalSessionsKey, count);
+
   /// clear all health-related keys (called on logout for multi-user scoping)
   Future<void> clearHealthData() async {
     await _prefs?.remove(_hcChangesTokenKey);
     await _prefs?.remove(_hcLastSyncMsKey);
     await _prefs?.remove(_hcConnectedKey);
     await _prefs?.remove(_hcOnboardingDismissedMsKey);
+    await _prefs?.remove(_hcTotalMetricsKey);
+    await _prefs?.remove(_hcTotalSessionsKey);
   }
 
   // health connect connection state
