@@ -212,8 +212,8 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
           child: _buildWeeklyTargetCard(context, l10n, _weeklyTarget!),
         ),
-      // health metrics card — only when HC connected and data exists
-      if (_healthDaily != null && _hasHealthMetrics())
+      // health metrics card — always visible when health is connected
+      if (context.read<PreferencesService>().hcConnected)
         Padding(
           padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
           child: _buildHealthMetricsCard(l10n),
@@ -307,20 +307,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  bool _hasHealthMetrics() {
-    final metrics = _healthDaily?['metrics'] as List?;
-    return metrics != null && metrics.isNotEmpty;
-  }
-
   Widget _buildHealthMetricsCard(AppLocalizations l10n) {
-    final metrics = _healthDaily!['metrics'] as List;
-    final today = metrics.first as Map<String, dynamic>;
+    final metrics = _healthDaily?['metrics'] as List?;
+    final today = (metrics != null && metrics.isNotEmpty) ? metrics.first as Map<String, dynamic> : null;
 
-    final sleepHours = (today['sleep_hours'] as num?)?.toDouble() ?? 0;
-    final restingHR = (today['resting_hr'] as num?)?.toInt() ?? 0;
-    final hrv = (today['hrv_rmssd'] as num?)?.toDouble() ?? 0;
-    final steps = (today['steps'] as num?)?.toInt() ?? 0;
-    final calories = (today['active_calories'] as num?)?.toDouble() ?? 0;
+    final sleepHours = (today?['sleep_hours'] as num?)?.toDouble() ?? 0;
+    final restingHR = (today?['resting_hr'] as num?)?.toInt() ?? 0;
+    final hrv = (today?['hrv_rmssd'] as num?)?.toDouble() ?? 0;
+    final steps = (today?['steps'] as num?)?.toInt() ?? 0;
+    final calories = (today?['active_calories'] as num?)?.toDouble() ?? 0;
 
     // always show all tiles — use — for missing values
     final tiles = <Widget>[
