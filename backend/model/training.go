@@ -409,16 +409,19 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 	for i := range clone.Routines {
 		clone.Routines[i].ID = ""
 		clone.Routines[i].TrainingID = ""
+		clone.Routines[i].Position = t.Routines[i].Position
 		clone.Routines[i].CreatedAt = time.Time{}
 		clone.Routines[i].UpdatedAt = time.Time{}
 		for j := range clone.Routines[i].Blocks {
 			clone.Routines[i].Blocks[j].ID = ""
 			clone.Routines[i].Blocks[j].RoutineID = ""
+			clone.Routines[i].Blocks[j].Position = t.Routines[i].Blocks[j].Position
 			clone.Routines[i].Blocks[j].CreatedAt = time.Time{}
 			clone.Routines[i].Blocks[j].UpdatedAt = time.Time{}
 			for k := range clone.Routines[i].Blocks[j].Activities {
 				clone.Routines[i].Blocks[j].Activities[k].ID = ""
 				clone.Routines[i].Blocks[j].Activities[k].BlockID = ""
+				clone.Routines[i].Blocks[j].Activities[k].Position = t.Routines[i].Blocks[j].Activities[k].Position
 				clone.Routines[i].Blocks[j].Activities[k].CreatedAt = time.Time{}
 				clone.Routines[i].Blocks[j].Activities[k].UpdatedAt = time.Time{}
 			}
