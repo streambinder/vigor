@@ -310,44 +310,98 @@ mixin HealthDataServiceMixin on HealthDataService {
         return true;
       }
 
-      final response = await apiService
-          .post('/health/sync', body: payload.toJson())
-          .timeout(_syncTimeout);
+      // split into per-date batches to stay under the 4MB body limit
+      final batches = _splitByDate(payload);
+      AppLogger.info('[HealthDataService] split into ${batches.length} batches');
 
-      if (response.isSuccess) {
-        AppLogger.info('[HealthDataService] sync POST succeeded (${response.data?['metrics_synced'] ?? 0} new metrics, ${response.data?['sessions_synced'] ?? 0} new sessions)');
-        if (response.data != null) {
-          final result = HealthSyncResult.fromJson(
-            response.data!,
+      int totalMetricsSynced = 0;
+      int totalSessionsSynced = 0;
+      Map<String, dynamic>? lastResponseData;
+
+      for (int i = 0; i < batches.length; i++) {
+        if (i > 0) await Future.delayed(const Duration(milliseconds: 200));
+        final response = await apiService
+            .post('/health/sync', body: batches[i].toJson())
+            .timeout(_syncTimeout);
+
+        if (!response.isSuccess) {
+          AppLogger.error('[HealthDataService] sync POST failed for batch ${i + 1}/${batches.length}: ${response.error} (status=${response.statusCode})');
+          _lastSyncResult.value = HealthSyncResult(
+            metricsSynced: 0, sessionsSynced: 0,
+            totalMetrics: _lastSyncResult.value?.totalMetrics ?? 0,
+            totalSessions: _lastSyncResult.value?.totalSessions ?? 0,
+            syncedAt: DateTime.now(),
             wasForced: force,
             deviceSources: payload.sourceApps,
+            syncError: response.error ?? 'Upload failed',
           );
-          _lastSyncResult.value = result;
-          await _persistStats(result);
+          return false;
         }
-        // persist tokens/timestamps only after successful POST (H3)
-        await onSyncSuccess();
-        await prefs.setHcLastSyncMs(DateTime.now().millisecondsSinceEpoch);
-        return true;
-      } else {
-        AppLogger.error('[HealthDataService] sync POST failed: ${response.error} (status=${response.statusCode})');
-        _lastSyncResult.value = HealthSyncResult(
-          metricsSynced: 0, sessionsSynced: 0,
-          totalMetrics: _lastSyncResult.value?.totalMetrics ?? 0,
-          totalSessions: _lastSyncResult.value?.totalSessions ?? 0,
-          syncedAt: DateTime.now(),
+
+        totalMetricsSynced += (response.data?['metrics_synced'] as int?) ?? 0;
+        totalSessionsSynced += (response.data?['sessions_synced'] as int?) ?? 0;
+        lastResponseData = response.data;
+      }
+
+      AppLogger.info('[HealthDataService] all batches synced ($totalMetricsSynced metrics, $totalSessionsSynced sessions)');
+      if (lastResponseData != null) {
+        final result = HealthSyncResult.fromJson(
+          {...lastResponseData, 'metrics_synced': totalMetricsSynced, 'sessions_synced': totalSessionsSynced},
           wasForced: force,
           deviceSources: payload.sourceApps,
-          syncError: response.error ?? 'Upload failed',
         );
-        return false;
+        _lastSyncResult.value = result;
+        await _persistStats(result);
       }
+      // persist tokens/timestamps only after successful POST (H3)
+      await onSyncSuccess();
+      await prefs.setHcLastSyncMs(DateTime.now().millisecondsSinceEpoch);
+      return true;
     } catch (e) {
       AppLogger.error('[HealthDataService] sync failed', e);
       return false;
     } finally {
       _syncing.value = false;
     }
+  }
+
+  /// split payload into one batch per date so each POST stays under the
+  /// server body limit. with the rate limit at 60 req/hour this is safe
+  /// for up to ~30 days of data.
+  List<HealthSyncPayload> _splitByDate(HealthSyncPayload payload) {
+    final metricsByDate = <String, List<Map<String, dynamic>>>{};
+    for (final m in payload.metrics) {
+      metricsByDate.putIfAbsent(m['date'] as String, () => []).add(m);
+    }
+
+    final sessionsByDate = <String, List<Map<String, dynamic>>>{};
+    for (final s in payload.sessions) {
+      sessionsByDate.putIfAbsent(_dateKeyFromMs(s['started_at'] as int), () => []).add(s);
+    }
+
+    final hrByDate = <String, List<Map<String, dynamic>>>{};
+    for (final hr in payload.hrSamples) {
+      hrByDate.putIfAbsent(_dateKeyFromMs(hr['timestamp'] as int), () => []).add(hr);
+    }
+
+    final sortedDates = {...metricsByDate.keys, ...sessionsByDate.keys, ...hrByDate.keys}.toList()..sort();
+    if (sortedDates.length <= 1) return [payload];
+
+    return [
+      for (int i = 0; i < sortedDates.length; i++)
+        HealthSyncPayload(
+          metrics: metricsByDate[sortedDates[i]] ?? [],
+          sessions: sessionsByDate[sortedDates[i]] ?? [],
+          hrSamples: hrByDate[sortedDates[i]] ?? [],
+          deletedRecordIds: i == 0 ? payload.deletedRecordIds : const [],
+          timezone: payload.timezone,
+        ),
+    ];
+  }
+
+  String _dateKeyFromMs(int ms) {
+    final dt = DateTime.fromMillisecondsSinceEpoch(ms);
+    return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
   }
 
   /// called after successful backend POST — persist platform-specific tokens
