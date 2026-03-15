@@ -43,7 +43,7 @@ class AudioService {
     } else {
       await _player.setAudioContext(AudioContext(
         android: AudioContextAndroid(
-          audioFocus: AndroidAudioFocus.gain,
+          audioFocus: AndroidAudioFocus.none,
         ),
         iOS: AudioContextIOS(
           category: AVAudioSessionCategory.playback,
