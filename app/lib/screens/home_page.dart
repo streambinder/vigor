@@ -84,6 +84,9 @@ class _HomePageState extends State<HomePage> {
 
       final results = await Future.wait(futures);
 
+      // trigger incremental health metrics sync (throttled, fire-and-forget)
+      locator.healthDataService?.syncToBackend();
+
       if (mounted) {
         final progressResponse = results[0];
         final weeklyTargetResponse = results[1];
