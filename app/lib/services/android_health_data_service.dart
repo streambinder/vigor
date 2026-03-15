@@ -124,7 +124,7 @@ class AndroidHealthDataService extends HealthDataService
     await _ensureConfigured();
     final timezone = await FlutterTimezone.getLocalTimezone();
     final token = prefs.hcChangesToken;
-    AppLogger.debug('[AndroidHealth] readNewData: existing token=${token != null ? '${token.substring(0, 8)}...' : 'null'}');
+    AppLogger.debug('[AndroidHealth] readNewData: existing token=$token');
 
     // first sync — no existing token, do full 30-day read
     if (token == null) {
@@ -214,7 +214,7 @@ class AndroidHealthDataService extends HealthDataService
     // get a fresh token for next time
     final newToken = await _health.getChangesToken(types: healthPermissionTypes);
     _pendingChangesToken = newToken;
-    AppLogger.debug('[AndroidHealth] acquired new changes token: ${newToken?.substring(0, 8) ?? 'null'}...');
+    AppLogger.debug('[AndroidHealth] acquired new changes token: $newToken');
 
     AppLogger.debug('[AndroidHealth] full read: ${thirtyDaysAgo.toIso8601String()} to ${now.toIso8601String()}');
     final dataPoints = await _health.getHealthDataFromTypes(
