@@ -535,7 +535,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ListTile(
                 leading: Icon(Icons.visibility_outlined, color: VigorColors.indigoAdaptive(context), size: 22),
                 title: Text(l10n.viewLogs, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
-                subtitle: Text(l10n.logEntries(AppLogger.logs.length), style: VigorTypography.caption.copyWith(color: VigorColors.stone)),
                 onTap: () => _showLogsModal(context, l10n),
               ),
             ],
