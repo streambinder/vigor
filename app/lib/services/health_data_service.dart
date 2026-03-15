@@ -16,8 +16,8 @@ class HealthSyncResult {
   final int totalSessions;
   final DateTime syncedAt;
   final bool wasForced;
-  final int deviceMetrics;
-  final int deviceSessions;
+  /// per-source-app breakdown of device data: source name -> (metrics, sessions)
+  final Map<String, ({int metrics, int sessions})> deviceSources;
   final DateTime? metricsFrom;
   final DateTime? metricsTo;
   final DateTime? sessionsFrom;
@@ -30,23 +30,24 @@ class HealthSyncResult {
     required this.totalSessions,
     required this.syncedAt,
     this.wasForced = false,
-    this.deviceMetrics = 0,
-    this.deviceSessions = 0,
+    this.deviceSources = const {},
     this.metricsFrom,
     this.metricsTo,
     this.sessionsFrom,
     this.sessionsTo,
   });
 
-  factory HealthSyncResult.fromJson(Map<String, dynamic> json, {bool wasForced = false, int deviceMetrics = 0, int deviceSessions = 0}) => HealthSyncResult(
+  int get deviceMetrics => deviceSources.values.fold(0, (sum, s) => sum + s.metrics);
+  int get deviceSessions => deviceSources.values.fold(0, (sum, s) => sum + s.sessions);
+
+  factory HealthSyncResult.fromJson(Map<String, dynamic> json, {bool wasForced = false, Map<String, ({int metrics, int sessions})> deviceSources = const {}}) => HealthSyncResult(
     metricsSynced: json['metrics_synced'] ?? 0,
     sessionsSynced: json['sessions_synced'] ?? 0,
     totalMetrics: json['total_metrics'] ?? 0,
     totalSessions: json['total_sessions'] ?? 0,
     syncedAt: DateTime.now(),
     wasForced: wasForced,
-    deviceMetrics: deviceMetrics,
-    deviceSessions: deviceSessions,
+    deviceSources: deviceSources,
     metricsFrom: _parseDate(json['metrics_from']),
     metricsTo: _parseDate(json['metrics_to']),
     sessionsFrom: _parseDate(json['sessions_from']),
@@ -66,6 +67,8 @@ class HealthSyncPayload {
   final List<Map<String, dynamic>> hrSamples;
   final List<String> deletedRecordIds;
   final String timezone;
+  /// per-source-app breakdown: source name -> (metrics, sessions) counts
+  final Map<String, ({int metrics, int sessions})> sourceApps;
 
   const HealthSyncPayload({
     required this.metrics,
@@ -73,6 +76,7 @@ class HealthSyncPayload {
     required this.hrSamples,
     this.deletedRecordIds = const [],
     required this.timezone,
+    this.sourceApps = const {},
   });
 
   bool get isEmpty => metrics.isEmpty && sessions.isEmpty && hrSamples.isEmpty && deletedRecordIds.isEmpty;
@@ -196,8 +200,7 @@ mixin HealthDataServiceMixin on HealthDataService {
         totalMetrics: totalMetrics, totalSessions: totalSessions,
         syncedAt: DateTime.fromMillisecondsSinceEpoch(prefs.hcLastSyncMs ?? 0),
         wasForced: prefs.hcWasForced,
-        deviceMetrics: prefs.hcDeviceMetrics,
-        deviceSessions: prefs.hcDeviceSessions,
+        deviceSources: prefs.hcDeviceSources,
         metricsFrom: HealthSyncResult._parseDate(prefs.hcMetricsFrom),
         metricsTo: HealthSyncResult._parseDate(prefs.hcMetricsTo),
         sessionsFrom: HealthSyncResult._parseDate(prefs.hcSessionsFrom),
@@ -210,8 +213,7 @@ mixin HealthDataServiceMixin on HealthDataService {
   Future<void> _persistStats(HealthSyncResult result) async {
     await prefs.setHcTotalMetrics(result.totalMetrics);
     await prefs.setHcTotalSessions(result.totalSessions);
-    await prefs.setHcDeviceMetrics(result.deviceMetrics);
-    await prefs.setHcDeviceSessions(result.deviceSessions);
+    await prefs.setHcDeviceSources(result.deviceSources);
     await prefs.setHcWasForced(result.wasForced);
     await prefs.setHcMetricsFrom(result.metricsFrom?.toIso8601String());
     await prefs.setHcMetricsTo(result.metricsTo?.toIso8601String());
@@ -232,8 +234,7 @@ mixin HealthDataServiceMixin on HealthDataService {
           totalSessions: response.data!['total_sessions'] ?? 0,
           syncedAt: DateTime.now(),
           wasForced: prev?.wasForced ?? false,
-          deviceMetrics: prev?.deviceMetrics ?? 0,
-          deviceSessions: prev?.deviceSessions ?? 0,
+          deviceSources: prev?.deviceSources ?? const {},
           metricsFrom: HealthSyncResult._parseDate(response.data!['metrics_from']),
           metricsTo: HealthSyncResult._parseDate(response.data!['metrics_to']),
           sessionsFrom: HealthSyncResult._parseDate(response.data!['sessions_from']),
@@ -281,8 +282,6 @@ mixin HealthDataServiceMixin on HealthDataService {
       }
 
       final payload = force ? await readAllData() : await readNewData();
-      final payloadMetrics = payload.metrics.length;
-      final payloadSessions = payload.sessions.length;
 
       if (payload.isEmpty) {
         AppLogger.debug('[HealthDataService] no new data to sync');
@@ -302,8 +301,7 @@ mixin HealthDataServiceMixin on HealthDataService {
           final result = HealthSyncResult.fromJson(
             response.data!,
             wasForced: force,
-            deviceMetrics: payloadMetrics,
-            deviceSessions: payloadSessions,
+            deviceSources: payload.sourceApps,
           );
           _lastSyncResult.value = result;
           await _persistStats(result);
@@ -349,6 +347,9 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints, String time
   final dailyMetrics = <String, Map<String, dynamic>>{};
   final sessions = <Map<String, dynamic>>[];
   final hrSamples = <Map<String, dynamic>>[];
+  // track per-source-app data point counts (metrics vs sessions)
+  final sourceMetricCounts = <String, int>{};
+  final sourceSessionCounts = <String, int>{};
 
   // collect intervals for additive metrics keyed by "date:type"
   final additiveIntervals = <String, List<_MetricInterval>>{};
@@ -385,6 +386,7 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints, String time
         'ended_at': point.dateTo.millisecondsSinceEpoch,
         if (workoutValue?.totalEnergyBurned != null) 'calories': workoutValue!.totalEnergyBurned!.toDouble(),
       });
+      sourceSessionCounts[point.sourceName] = (sourceSessionCounts[point.sourceName] ?? 0) + 1;
     } else if (point.type == HealthDataType.HEART_RATE) {
       final bpm = _numericValue(point);
       if (bpm > 0) {
@@ -399,6 +401,7 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints, String time
           ? _dateKey(point.dateTo)
           : _dateKey(point.dateFrom);
       dailyMetrics.putIfAbsent(dateKey, () => {'date': dateKey});
+      sourceMetricCounts[point.sourceName] = (sourceMetricCounts[point.sourceName] ?? 0) + 1;
 
       if (additiveTypes.contains(point.type)) {
         double value;
@@ -451,11 +454,19 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints, String time
     }
   });
 
+  // merge source counts into a single map
+  final allSourceNames = {...sourceMetricCounts.keys, ...sourceSessionCounts.keys};
+  final sourceApps = {
+    for (final name in allSourceNames)
+      name: (metrics: sourceMetricCounts[name] ?? 0, sessions: sourceSessionCounts[name] ?? 0),
+  };
+
   return HealthSyncPayload(
     metrics: dailyMetrics.values.toList(),
     sessions: sessions,
     hrSamples: hrSamples,
     timezone: timezone,
+    sourceApps: sourceApps,
   );
 }
 

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,8 +17,7 @@ class PreferencesService {
   static const String _hcOnboardingDismissedMsKey = 'hc_onboarding_dismissed_ms';
   static const String _hcTotalMetricsKey = 'hc_total_metrics';
   static const String _hcTotalSessionsKey = 'hc_total_sessions';
-  static const String _hcDeviceMetricsKey = 'hc_device_metrics';
-  static const String _hcDeviceSessionsKey = 'hc_device_sessions';
+  static const String _hcDeviceSourcesKey = 'hc_device_sources';
   static const String _hcWasForcedKey = 'hc_was_forced';
   static const String _hcMetricsFromKey = 'hc_metrics_from';
   static const String _hcMetricsToKey = 'hc_metrics_to';
@@ -126,8 +126,12 @@ class PreferencesService {
   // persisted sync stats — survive app restarts
   int get hcTotalMetrics => _prefs?.getInt(_hcTotalMetricsKey) ?? 0;
   int get hcTotalSessions => _prefs?.getInt(_hcTotalSessionsKey) ?? 0;
-  int get hcDeviceMetrics => _prefs?.getInt(_hcDeviceMetricsKey) ?? 0;
-  int get hcDeviceSessions => _prefs?.getInt(_hcDeviceSessionsKey) ?? 0;
+  Map<String, ({int metrics, int sessions})> get hcDeviceSources {
+    final raw = _prefs?.getString(_hcDeviceSourcesKey);
+    if (raw == null || raw.isEmpty) return const {};
+    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    return decoded.map((k, v) => MapEntry(k, (metrics: (v as Map<String, dynamic>)['m'] as int, sessions: v['s'] as int)));
+  }
   bool get hcWasForced => _prefs?.getBool(_hcWasForcedKey) ?? false;
   String? get hcMetricsFrom => _prefs?.getString(_hcMetricsFromKey);
   String? get hcMetricsTo => _prefs?.getString(_hcMetricsToKey);
@@ -136,8 +140,10 @@ class PreferencesService {
 
   Future<void> setHcTotalMetrics(int count) async => _prefs?.setInt(_hcTotalMetricsKey, count);
   Future<void> setHcTotalSessions(int count) async => _prefs?.setInt(_hcTotalSessionsKey, count);
-  Future<void> setHcDeviceMetrics(int count) async => _prefs?.setInt(_hcDeviceMetricsKey, count);
-  Future<void> setHcDeviceSessions(int count) async => _prefs?.setInt(_hcDeviceSessionsKey, count);
+  Future<void> setHcDeviceSources(Map<String, ({int metrics, int sessions})> sources) async {
+    final encoded = jsonEncode(sources.map((k, v) => MapEntry(k, {'m': v.metrics, 's': v.sessions})));
+    await _prefs?.setString(_hcDeviceSourcesKey, encoded);
+  }
   Future<void> setHcWasForced(bool forced) async => _prefs?.setBool(_hcWasForcedKey, forced);
   Future<void> setHcMetricsFrom(String? v) async { if (v == null) { await _prefs?.remove(_hcMetricsFromKey); } else { await _prefs?.setString(_hcMetricsFromKey, v); } }
   Future<void> setHcMetricsTo(String? v) async { if (v == null) { await _prefs?.remove(_hcMetricsToKey); } else { await _prefs?.setString(_hcMetricsToKey, v); } }
@@ -152,8 +158,7 @@ class PreferencesService {
     await _prefs?.remove(_hcOnboardingDismissedMsKey);
     await _prefs?.remove(_hcTotalMetricsKey);
     await _prefs?.remove(_hcTotalSessionsKey);
-    await _prefs?.remove(_hcDeviceMetricsKey);
-    await _prefs?.remove(_hcDeviceSessionsKey);
+    await _prefs?.remove(_hcDeviceSourcesKey);
     await _prefs?.remove(_hcWasForcedKey);
     await _prefs?.remove(_hcMetricsFromKey);
     await _prefs?.remove(_hcMetricsToKey);

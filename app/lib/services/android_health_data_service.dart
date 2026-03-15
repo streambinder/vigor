@@ -186,6 +186,7 @@ class AndroidHealthDataService extends HealthDataService
       hrSamples: payload.hrSamples,
       deletedRecordIds: deletedRecordIds,
       timezone: payload.timezone,
+      sourceApps: payload.sourceApps,
     );
   }
 
