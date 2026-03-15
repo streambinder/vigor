@@ -801,9 +801,9 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
                   SliverPersistentHeader(
                     pinned: true,
                     delegate: _SliverTimerDelegate(
-                      height: _timerHeight + VigorSpacing.xl,
+                      height: _timerHeight + VigorSpacing.md + VigorSpacing.xl,
                       child: Padding(
-                        padding: const EdgeInsets.only(left: VigorSpacing.lg, right: VigorSpacing.lg, bottom: VigorSpacing.xl),
+                        padding: const EdgeInsets.only(left: VigorSpacing.lg, right: VigorSpacing.lg, top: VigorSpacing.md, bottom: VigorSpacing.xl),
                         child: InlineTimerSection(
                           key: _timerKey,
                           notifier: _timerNotifier!,
@@ -1647,6 +1647,7 @@ class _SliverTimerDelegate extends SliverPersistentHeaderDelegate {
         // shadow layer — only visible when pinned, sits behind content
         if (shadowOpacity > 0)
           Positioned.fill(
+            top: VigorSpacing.lg,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 boxShadow: [
