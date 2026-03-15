@@ -183,6 +183,21 @@ class MainNavigationState extends State<MainNavigation> {
     final fab = _buildFAB(l10n);
     final userId = context.watch<AuthProvider>().currentUser?.id;
 
+    return PopScope(
+      canPop: _currentIndex == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _onTabTapped(0);
+      },
+      child: _buildScaffold(context, l10n, fab, userId),
+    );
+  }
+
+  Widget _buildScaffold(
+    BuildContext context,
+    AppLocalizations l10n,
+    Widget fab,
+    String? userId,
+  ) {
     if (PlatformHelper.useLiquidGlass) {
       // iOS-style with Liquid Glass navigation
       return Scaffold(
