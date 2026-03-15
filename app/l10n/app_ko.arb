@@ -498,6 +498,8 @@
   "healthConnected": "연결됨",
   "healthData": "건강 데이터",
   "healthSyncNoData": "기기에서 건강 데이터를 찾을 수 없습니다",
+  "healthSyncFailed": "Sync failed",
+  "healthSyncFailedDetail": "Data read from device but upload failed: {error}",
   "healthSyncTypeFull": "전체",
   "healthSyncTypeIncremental": "증분",
   "healthSourceData": "{metrics}지표 · {sessions}세션",

@@ -498,6 +498,8 @@
   "healthConnected": "已连接",
   "healthData": "健康数据",
   "healthSyncNoData": "设备上未找到健康数据",
+  "healthSyncFailed": "Sync failed",
+  "healthSyncFailedDetail": "Data read from device but upload failed: {error}",
   "healthSyncTypeFull": "完整",
   "healthSyncTypeIncremental": "增量",
   "healthSourceData": "{metrics}个指标 · {sessions}个会话",

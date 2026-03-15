@@ -354,6 +354,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           final hasDeviceData = syncResult != null && (syncResult.deviceMetrics > 0 || syncResult.deviceSessions > 0);
                           final showNoDataWarning = syncResult != null && !hasDeviceData && syncResult.wasForced;
                           final hasBackendData = syncResult != null && (syncResult.totalMetrics > 0 || syncResult.totalSessions > 0);
+                          final hasSyncError = syncResult?.syncError != null;
 
                           String? backendDateRange;
                           if (hasBackendData) {
@@ -371,14 +372,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ListTile(
                               leading: isSyncing
                                   ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: VigorColors.indigoAdaptive(context)))
-                                  : Icon(Icons.check_circle, color: VigorColors.indigoAdaptive(context), size: 22),
+                                  : hasSyncError
+                                      ? Icon(Icons.error_outline, color: VigorColors.warning, size: 22)
+                                      : Icon(Icons.check_circle, color: VigorColors.indigoAdaptive(context), size: 22),
                               title: Text(
-                                isSyncing ? l10n.healthSynchronizing : l10n.healthSynchronized,
-                                style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)),
+                                isSyncing ? l10n.healthSynchronizing : hasSyncError ? l10n.healthSyncFailed : l10n.healthSynchronized,
+                                style: VigorTypography.body.copyWith(color: isSyncing ? VigorColors.textPrimary(context) : hasSyncError ? VigorColors.warning : VigorColors.textPrimary(context)),
                               ),
                               subtitle: !isSyncing && syncResult != null
                                   ? Text(
-                                      syncResult.wasForced ? l10n.healthSyncTypeFull : l10n.healthSyncTypeIncremental,
+                                      hasSyncError
+                                          ? l10n.healthSyncFailedDetail(syncResult.syncError!)
+                                          : syncResult.wasForced ? l10n.healthSyncTypeFull : l10n.healthSyncTypeIncremental,
                                       style: VigorTypography.caption.copyWith(color: VigorColors.stone),
                                     )
                                   : null,

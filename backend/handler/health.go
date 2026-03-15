@@ -14,7 +14,7 @@ import (
 
 func initHealth(app *fiber.App) {
 	syncLimiter := limiter.New(limiter.Config{
-		Max:        10,
+		Max:        60,
 		Expiration: 1 * time.Hour,
 		KeyGenerator: func(c *fiber.Ctx) string {
 			if uid, ok := c.Locals("userID").(uuid.UUID); ok {

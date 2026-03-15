@@ -498,6 +498,8 @@
   "healthConnected": "Подключено",
   "healthData": "Данные о здоровье",
   "healthSyncNoData": "На устройстве не найдены данные о здоровье",
+  "healthSyncFailed": "Sync failed",
+  "healthSyncFailedDetail": "Data read from device but upload failed: {error}",
   "healthSyncTypeFull": "Полная",
   "healthSyncTypeIncremental": "Инкрементальная",
   "healthSourceData": "{metrics} метр. · {sessions} сеансов",

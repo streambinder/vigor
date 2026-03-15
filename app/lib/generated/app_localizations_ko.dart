@@ -1494,6 +1494,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get healthSyncNoData => '기기에서 건강 데이터를 찾을 수 없습니다';
 
   @override
+  String get healthSyncFailed => 'Sync failed';
+
+  @override
+  String healthSyncFailedDetail(String error) {
+    return 'Data read from device but upload failed: $error';
+  }
+
+  @override
   String get healthSyncTypeFull => '전체';
 
   @override

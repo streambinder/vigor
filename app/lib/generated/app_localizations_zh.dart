@@ -1491,6 +1491,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get healthSyncNoData => '设备上未找到健康数据';
 
   @override
+  String get healthSyncFailed => 'Sync failed';
+
+  @override
+  String healthSyncFailedDetail(String error) {
+    return 'Data read from device but upload failed: $error';
+  }
+
+  @override
   String get healthSyncTypeFull => '完整';
 
   @override

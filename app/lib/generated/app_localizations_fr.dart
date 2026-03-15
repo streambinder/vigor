@@ -1534,6 +1534,14 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucune donnée de santé trouvée sur l\'appareil';
 
   @override
+  String get healthSyncFailed => 'Sync failed';
+
+  @override
+  String healthSyncFailedDetail(String error) {
+    return 'Data read from device but upload failed: $error';
+  }
+
+  @override
   String get healthSyncTypeFull => 'Complète';
 
   @override

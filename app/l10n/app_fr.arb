@@ -498,6 +498,8 @@
   "healthConnected": "Connecté",
   "healthData": "Données de santé",
   "healthSyncNoData": "Aucune donnée de santé trouvée sur l'appareil",
+  "healthSyncFailed": "Sync failed",
+  "healthSyncFailedDetail": "Data read from device but upload failed: {error}",
   "healthSyncTypeFull": "Complète",
   "healthSyncTypeIncremental": "Incrémentale",
   "healthSourceData": "{metrics} métriques · {sessions} sessions",

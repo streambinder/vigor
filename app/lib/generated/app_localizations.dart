@@ -2928,6 +2928,18 @@ abstract class AppLocalizations {
   /// **'No health data found on device'**
   String get healthSyncNoData;
 
+  /// No description provided for @healthSyncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed'**
+  String get healthSyncFailed;
+
+  /// No description provided for @healthSyncFailedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Data read from device but upload failed: {error}'**
+  String healthSyncFailedDetail(String error);
+
   /// No description provided for @healthSyncTypeFull.
   ///
   /// In en, this message translates to:

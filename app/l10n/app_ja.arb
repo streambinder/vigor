@@ -498,6 +498,8 @@
   "healthConnected": "接続済み",
   "healthData": "ヘルスデータ",
   "healthSyncNoData": "デバイスにヘルスデータが見つかりません",
+  "healthSyncFailed": "Sync failed",
+  "healthSyncFailedDetail": "Data read from device but upload failed: {error}",
   "healthSyncTypeFull": "フル",
   "healthSyncTypeIncremental": "増分",
   "healthSourceData": "{metrics}指標 · {sessions}セッション",

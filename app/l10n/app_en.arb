@@ -716,6 +716,13 @@
     }
   },
   "healthSyncNoData": "No health data found on device",
+  "healthSyncFailed": "Sync failed",
+  "healthSyncFailedDetail": "Data read from device but upload failed: {error}",
+  "@healthSyncFailedDetail": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
   "healthSyncTypeFull": "Full",
   "healthSyncTypeIncremental": "Incremental",
   "healthSourceData": "{metrics} metrics · {sessions} sessions",
