@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../providers/theme_provider.dart';
@@ -533,29 +533,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 subtitle: Text(l10n.logEntries(AppLogger.logs.length), style: VigorTypography.caption.copyWith(color: VigorColors.stone)),
                 onTap: () => _showLogsModal(context, l10n),
               ),
-              Divider(height: 1, color: VigorColors.border(context)),
-              ListTile(
-                leading: Icon(Icons.share_outlined, color: VigorColors.indigoAdaptive(context), size: 22),
-                title: Text(l10n.exportLogs, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
-                onTap: () {
-                  final logs = AppLogger.logs;
-                  if (logs.isEmpty) {
-                    AdaptiveNotification.show(context: context, message: l10n.noLogsYet);
-                    return;
-                  }
-                  Share.share(logs.join('\n'));
-                },
-              ),
-              Divider(height: 1, color: VigorColors.border(context)),
-              ListTile(
-                leading: const Icon(Icons.delete_outline, color: VigorColors.crimson, size: 22),
-                title: Text(l10n.clearLogs, style: VigorTypography.body.copyWith(color: VigorColors.crimson)),
-                onTap: () {
-                  AppLogger.clearLogs();
-                  setState(() {});
-                  AdaptiveNotification.show(context: context, message: l10n.logsCleared);
-                },
-              ),
             ],
           ),
         ),
@@ -584,7 +561,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(l10n.appLogs, style: VigorTypography.headline.copyWith(fontSize: 18, color: VigorColors.textPrimary(context))),
-                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.copy, size: 20, color: VigorColors.textSecondary(context)),
+                        onPressed: () {
+                          if (logs.isEmpty) return;
+                          Clipboard.setData(ClipboardData(text: logs.join('\n')));
+                          AdaptiveNotification.show(context: context, message: l10n.copied);
+                        },
+                      ),
+                      IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -602,7 +591,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           logs[index],
                           style: VigorTypography.caption.copyWith(
                             fontFamily: 'monospace',
-                            fontSize: 11,
+                            fontSize: 9,
                             color: VigorColors.textSecondary(context),
                           ),
                         ),
