@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
-import 'console_logger_stub.dart'
-    if (dart.library.js_interop) 'console_logger_web.dart' as console;
 
 /// in-memory ring buffer that also forwards to console
 class _MemoryOutput extends LogOutput {
@@ -38,16 +36,8 @@ class AppLogger {
   static final _memoryOutput = _MemoryOutput();
 
   static final _logger = Logger(
-    // DevelopmentFilter (default) swallows all logs in release mode via assert() trick
     filter: ProductionFilter(),
-    printer: PrettyPrinter(
-      methodCount: 0,
-      errorMethodCount: 5,
-      lineLength: 80,
-      colors: true,
-      printEmojis: false,
-      dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
-    ),
+    printer: SimplePrinter(printTime: true, colors: false),
     output: _memoryOutput,
     level: Level.debug,
   );
@@ -64,24 +54,15 @@ class AppLogger {
     };
   }
 
-  static void _logWeb(String level, String message, dynamic error, StackTrace? stackTrace) {
-    final entry = '[$level] ${DateTime.now().toIso8601String()}: $message'
-        '${error != null ? '\n  error: $error' : ''}'
-        '${stackTrace != null ? '\n  stack: $stackTrace' : ''}';
-    console.consoleLog(entry);
-    if (_memoryOutput._buffer.length >= _MemoryOutput.maxEntries) _memoryOutput._buffer.removeAt(0);
-    _memoryOutput._buffer.add(entry);
-  }
-
   static void debug(String message, [dynamic error, StackTrace? stackTrace]) =>
-      kIsWeb ? _logWeb('DEBUG', message, error, stackTrace) : _logger.d(message, error: error, stackTrace: stackTrace);
+      _logger.d(message, error: error, stackTrace: stackTrace);
 
   static void info(String message, [dynamic error, StackTrace? stackTrace]) =>
-      kIsWeb ? _logWeb('INFO', message, error, stackTrace) : _logger.i(message, error: error, stackTrace: stackTrace);
+      _logger.i(message, error: error, stackTrace: stackTrace);
 
   static void warning(String message, [dynamic error, StackTrace? stackTrace]) =>
-      kIsWeb ? _logWeb('WARN', message, error, stackTrace) : _logger.w(message, error: error, stackTrace: stackTrace);
+      _logger.w(message, error: error, stackTrace: stackTrace);
 
   static void error(String message, [dynamic error, StackTrace? stackTrace]) =>
-      kIsWeb ? _logWeb('ERROR', message, error, stackTrace) : _logger.e(message, error: error, stackTrace: stackTrace);
+      _logger.e(message, error: error, stackTrace: stackTrace);
 }
