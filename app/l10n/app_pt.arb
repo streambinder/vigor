@@ -498,11 +498,11 @@
   "healthConnected": "Conectado",
   "healthData": "Dados de saúde",
   "healthSyncNoData": "Nenhum dado de saúde encontrado no dispositivo",
-  "healthLastSyncAt": "Última sync: {date} · {type}",
-  "healthSyncTypeFull": "completa",
-  "healthSyncTypeIncremental": "incremental",
-  "healthDeviceData": "Dispositivo: {days} dias, {sessions} sessões",
-  "healthBackendData": "Backend: {days} dias, {sessions} sessões",
+  "healthSyncTypeFull": "Completa",
+  "healthSyncTypeIncremental": "Incremental",
+  "healthSourceData": "{metrics} métricas · {sessions} sessões",
+  "healthBackend": "Backend",
+  "healthBackendData": "{days} dias · {sessions} sessões",
   "healthDateRange": "{from} – {to}",
   "healthDisconnect": "Desconectar e excluir dados",
   "healthDisconnectConfirmation": "Desconectar dados de saúde? Todos os dados sincronizados serão excluídos. Esta ação não pode ser desfeita.",
@@ -564,5 +564,18 @@
   "exerciseTypeDancing": "Dança",
   "exerciseTypeElliptical": "Elíptico",
   "exerciseTypeStairClimbing": "Escada",
-  "exerciseTypeOther": "Treino"
+  "exerciseTypeOther": "Treino",
+
+  "appLogs": "Logs do app",
+  "viewLogs": "Ver logs",
+  "exportLogs": "Exportar logs",
+  "clearLogs": "Limpar logs",
+  "noLogsYet": "Nenhum log registrado",
+  "logsCleared": "Logs limpos",
+  "logEntries": "{count} entradas de log",
+  "@logEntries": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  }
 }

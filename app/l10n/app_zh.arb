@@ -498,11 +498,11 @@
   "healthConnected": "已连接",
   "healthData": "健康数据",
   "healthSyncNoData": "设备上未找到健康数据",
-  "healthLastSyncAt": "上次同步：{date} · {type}",
   "healthSyncTypeFull": "完整",
   "healthSyncTypeIncremental": "增量",
-  "healthDeviceData": "设备：{days}天、{sessions}个会话",
-  "healthBackendData": "后端：{days}天、{sessions}个会话",
+  "healthSourceData": "{metrics}个指标 · {sessions}个会话",
+  "healthBackend": "后端",
+  "healthBackendData": "{days}天 · {sessions}个会话",
   "healthDateRange": "{from} – {to}",
   "healthDisconnect": "断开连接并删除数据",
   "healthDisconnectConfirmation": "断开健康数据连接？所有同步的数据将被删除，此操作不可撤销。",
@@ -564,5 +564,18 @@
   "exerciseTypeDancing": "舞蹈",
   "exerciseTypeElliptical": "椭圆机",
   "exerciseTypeStairClimbing": "爬楼梯",
-  "exerciseTypeOther": "锻炼"
+  "exerciseTypeOther": "锻炼",
+
+  "appLogs": "应用日志",
+  "viewLogs": "查看日志",
+  "exportLogs": "导出日志",
+  "clearLogs": "清除日志",
+  "noLogsYet": "暂无日志",
+  "logsCleared": "日志已清除",
+  "logEntries": "{count} 条日志",
+  "@logEntries": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  }
 }

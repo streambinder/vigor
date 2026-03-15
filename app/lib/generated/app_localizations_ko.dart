@@ -1494,24 +1494,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get healthSyncNoData => '기기에서 건강 데이터를 찾을 수 없습니다';
 
   @override
-  String healthLastSyncAt(String date, String type) {
-    return '마지막 동기화: $date · $type';
-  }
-
-  @override
   String get healthSyncTypeFull => '전체';
 
   @override
   String get healthSyncTypeIncremental => '증분';
 
   @override
-  String healthDeviceData(int days, int sessions) {
-    return '기기: $days일, $sessions세션';
+  String healthSourceData(int metrics, int sessions) {
+    return '$metrics지표 · $sessions세션';
   }
 
   @override
+  String get healthBackend => '백엔드';
+
+  @override
   String healthBackendData(int days, int sessions) {
-    return '백엔드: $days일, $sessions세션';
+    return '$days일 · $sessions세션';
   }
 
   @override
@@ -1705,4 +1703,27 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get exerciseTypeOther => '운동';
+
+  @override
+  String get appLogs => '앱 로그';
+
+  @override
+  String get viewLogs => '로그 보기';
+
+  @override
+  String get exportLogs => '로그 내보내기';
+
+  @override
+  String get clearLogs => '로그 삭제';
+
+  @override
+  String get noLogsYet => '기록된 로그 없음';
+
+  @override
+  String get logsCleared => '로그가 삭제되었습니다';
+
+  @override
+  String logEntries(int count) {
+    return '$count개 로그 항목';
+  }
 }

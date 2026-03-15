@@ -1525,24 +1525,22 @@ class AppLocalizationsPt extends AppLocalizations {
       'Nenhum dado de saúde encontrado no dispositivo';
 
   @override
-  String healthLastSyncAt(String date, String type) {
-    return 'Última sync: $date · $type';
+  String get healthSyncTypeFull => 'Completa';
+
+  @override
+  String get healthSyncTypeIncremental => 'Incremental';
+
+  @override
+  String healthSourceData(int metrics, int sessions) {
+    return '$metrics métricas · $sessions sessões';
   }
 
   @override
-  String get healthSyncTypeFull => 'completa';
-
-  @override
-  String get healthSyncTypeIncremental => 'incremental';
-
-  @override
-  String healthDeviceData(int days, int sessions) {
-    return 'Dispositivo: $days dias, $sessions sessões';
-  }
+  String get healthBackend => 'Backend';
 
   @override
   String healthBackendData(int days, int sessions) {
-    return 'Backend: $days dias, $sessions sessões';
+    return '$days dias · $sessions sessões';
   }
 
   @override
@@ -1738,4 +1736,27 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get exerciseTypeOther => 'Treino';
+
+  @override
+  String get appLogs => 'Logs do app';
+
+  @override
+  String get viewLogs => 'Ver logs';
+
+  @override
+  String get exportLogs => 'Exportar logs';
+
+  @override
+  String get clearLogs => 'Limpar logs';
+
+  @override
+  String get noLogsYet => 'Nenhum log registrado';
+
+  @override
+  String get logsCleared => 'Logs limpos';
+
+  @override
+  String logEntries(int count) {
+    return '$count entradas de log';
+  }
 }

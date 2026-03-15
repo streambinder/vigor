@@ -716,23 +716,17 @@
     }
   },
   "healthSyncNoData": "No health data found on device",
-  "healthLastSyncAt": "Last sync: {date} · {type}",
-  "@healthLastSyncAt": {
+  "healthSyncTypeFull": "Full",
+  "healthSyncTypeIncremental": "Incremental",
+  "healthSourceData": "{metrics} metrics · {sessions} sessions",
+  "@healthSourceData": {
     "placeholders": {
-      "date": {"type": "String"},
-      "type": {"type": "String"}
-    }
-  },
-  "healthSyncTypeFull": "full",
-  "healthSyncTypeIncremental": "incremental",
-  "healthDeviceData": "Device: {days} days, {sessions} sessions",
-  "@healthDeviceData": {
-    "placeholders": {
-      "days": {"type": "int"},
+      "metrics": {"type": "int"},
       "sessions": {"type": "int"}
     }
   },
-  "healthBackendData": "Backend: {days} days, {sessions} sessions",
+  "healthBackend": "Backend",
+  "healthBackendData": "{days} days · {sessions} sessions",
   "@healthBackendData": {
     "placeholders": {
       "days": {"type": "int"},
@@ -811,5 +805,18 @@
   "exerciseTypeDancing": "Dancing",
   "exerciseTypeElliptical": "Elliptical",
   "exerciseTypeStairClimbing": "Stair Climbing",
-  "exerciseTypeOther": "Workout"
+  "exerciseTypeOther": "Workout",
+
+  "appLogs": "App Logs",
+  "viewLogs": "View Logs",
+  "exportLogs": "Export Logs",
+  "clearLogs": "Clear Logs",
+  "noLogsYet": "No logs recorded yet",
+  "logsCleared": "Logs cleared",
+  "logEntries": "{count} log entries",
+  "@logEntries": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  }
 }

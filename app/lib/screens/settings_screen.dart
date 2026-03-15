@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../providers/theme_provider.dart';
+import '../services/app_logger.dart';
 import '../services/authenticated_api_service.dart';
 import '../services/preferences_service.dart';
 import '../services/secure_storage_service.dart';
@@ -69,6 +71,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               return Padding(
                 padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
                 child: _buildHealthSection(context, l10n, isDark),
+              );
+            case 4:
+              return Padding(
+                padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+                child: _buildLogsSection(context, l10n, isDark),
               );
             default:
               return const SizedBox.shrink();
@@ -499,6 +506,120 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } else {
       AdaptiveNotification.showError(context: context, message: l10n.failedToDisconnectHealth, rawError: response.error);
     }
+  }
+
+  Widget _buildLogsSection(BuildContext context, AppLocalizations l10n, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: VigorSpacing.paddingSm,
+              decoration: BoxDecoration(
+                color: VigorColors.indigoAdaptive(context).withValues(alpha: 0.15),
+                borderRadius: VigorRadius.radiusSm,
+              ),
+              child: Icon(Icons.article_outlined, color: VigorColors.indigoAdaptive(context), size: 20),
+            ),
+            const SizedBox(width: VigorSpacing.sm),
+            Text(l10n.appLogs, style: VigorTypography.headline.copyWith(fontSize: 18, color: VigorColors.textPrimary(context))),
+          ],
+        ),
+        const SizedBox(height: VigorSpacing.md),
+        Container(
+          decoration: BoxDecoration(
+            color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+            borderRadius: VigorRadius.radiusMd,
+          ),
+          child: Column(
+            children: [
+              ListTile(
+                leading: Icon(Icons.visibility_outlined, color: VigorColors.indigoAdaptive(context), size: 22),
+                title: Text(l10n.viewLogs, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+                subtitle: Text(l10n.logEntries(AppLogger.logs.length), style: VigorTypography.caption.copyWith(color: VigorColors.stone)),
+                onTap: () => _showLogsModal(context, l10n),
+              ),
+              Divider(height: 1, color: VigorColors.border(context)),
+              ListTile(
+                leading: Icon(Icons.share_outlined, color: VigorColors.indigoAdaptive(context), size: 22),
+                title: Text(l10n.exportLogs, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+                onTap: () {
+                  final logs = AppLogger.logs;
+                  if (logs.isEmpty) {
+                    AdaptiveNotification.show(context: context, message: l10n.noLogsYet);
+                    return;
+                  }
+                  Share.share(logs.join('\n'));
+                },
+              ),
+              Divider(height: 1, color: VigorColors.border(context)),
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: VigorColors.crimson, size: 22),
+                title: Text(l10n.clearLogs, style: VigorTypography.body.copyWith(color: VigorColors.crimson)),
+                onTap: () {
+                  AppLogger.clearLogs();
+                  setState(() {});
+                  AdaptiveNotification.show(context: context, message: l10n.logsCleared);
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showLogsModal(BuildContext context, AppLocalizations l10n) {
+    final logs = AppLogger.logs;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(VigorSpacing.md))),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 1.0,
+        expand: false,
+        builder: (context, scrollController) => Column(
+          children: [
+            Padding(
+              padding: VigorSpacing.paddingMd,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(l10n.appLogs, style: VigorTypography.headline.copyWith(fontSize: 18, color: VigorColors.textPrimary(context))),
+                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
+                ],
+              ),
+            ),
+            Divider(height: 1, color: VigorColors.border(context)),
+            Expanded(
+              child: logs.isEmpty
+                  ? Center(child: Text(l10n.noLogsYet, style: VigorTypography.body.copyWith(color: VigorColors.stone)))
+                  : ListView.builder(
+                      controller: scrollController,
+                      padding: VigorSpacing.paddingSm,
+                      itemCount: logs.length,
+                      itemBuilder: (context, index) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 1),
+                        child: Text(
+                          logs[index],
+                          style: VigorTypography.caption.copyWith(
+                            fontFamily: 'monospace',
+                            fontSize: 11,
+                            color: VigorColors.textSecondary(context),
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildThemeOption({

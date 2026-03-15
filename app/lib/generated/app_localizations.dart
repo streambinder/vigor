@@ -2928,34 +2928,34 @@ abstract class AppLocalizations {
   /// **'No health data found on device'**
   String get healthSyncNoData;
 
-  /// No description provided for @healthLastSyncAt.
-  ///
-  /// In en, this message translates to:
-  /// **'Last sync: {date} · {type}'**
-  String healthLastSyncAt(String date, String type);
-
   /// No description provided for @healthSyncTypeFull.
   ///
   /// In en, this message translates to:
-  /// **'full'**
+  /// **'Full'**
   String get healthSyncTypeFull;
 
   /// No description provided for @healthSyncTypeIncremental.
   ///
   /// In en, this message translates to:
-  /// **'incremental'**
+  /// **'Incremental'**
   String get healthSyncTypeIncremental;
 
-  /// No description provided for @healthDeviceData.
+  /// No description provided for @healthSourceData.
   ///
   /// In en, this message translates to:
-  /// **'Device: {days} days, {sessions} sessions'**
-  String healthDeviceData(int days, int sessions);
+  /// **'{metrics} metrics · {sessions} sessions'**
+  String healthSourceData(int metrics, int sessions);
+
+  /// No description provided for @healthBackend.
+  ///
+  /// In en, this message translates to:
+  /// **'Backend'**
+  String get healthBackend;
 
   /// No description provided for @healthBackendData.
   ///
   /// In en, this message translates to:
-  /// **'Backend: {days} days, {sessions} sessions'**
+  /// **'{days} days · {sessions} sessions'**
   String healthBackendData(int days, int sessions);
 
   /// No description provided for @healthDateRange.
@@ -3329,6 +3329,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Workout'**
   String get exerciseTypeOther;
+
+  /// No description provided for @appLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'App Logs'**
+  String get appLogs;
+
+  /// No description provided for @viewLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'View Logs'**
+  String get viewLogs;
+
+  /// No description provided for @exportLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Logs'**
+  String get exportLogs;
+
+  /// No description provided for @clearLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Logs'**
+  String get clearLogs;
+
+  /// No description provided for @noLogsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No logs recorded yet'**
+  String get noLogsYet;
+
+  /// No description provided for @logsCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Logs cleared'**
+  String get logsCleared;
+
+  /// No description provided for @logEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} log entries'**
+  String logEntries(int count);
 }
 
 class _AppLocalizationsDelegate

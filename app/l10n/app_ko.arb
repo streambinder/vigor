@@ -498,11 +498,11 @@
   "healthConnected": "연결됨",
   "healthData": "건강 데이터",
   "healthSyncNoData": "기기에서 건강 데이터를 찾을 수 없습니다",
-  "healthLastSyncAt": "마지막 동기화: {date} · {type}",
   "healthSyncTypeFull": "전체",
   "healthSyncTypeIncremental": "증분",
-  "healthDeviceData": "기기: {days}일, {sessions}세션",
-  "healthBackendData": "백엔드: {days}일, {sessions}세션",
+  "healthSourceData": "{metrics}지표 · {sessions}세션",
+  "healthBackend": "백엔드",
+  "healthBackendData": "{days}일 · {sessions}세션",
   "healthDateRange": "{from} – {to}",
   "healthDisconnect": "연결 해제 및 데이터 삭제",
   "healthDisconnectConfirmation": "건강 데이터를 연결 해제하시겠습니까? 동기화된 모든 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.",
@@ -564,5 +564,18 @@
   "exerciseTypeDancing": "댄스",
   "exerciseTypeElliptical": "일립티컬",
   "exerciseTypeStairClimbing": "계단 오르기",
-  "exerciseTypeOther": "운동"
+  "exerciseTypeOther": "운동",
+
+  "appLogs": "앱 로그",
+  "viewLogs": "로그 보기",
+  "exportLogs": "로그 내보내기",
+  "clearLogs": "로그 삭제",
+  "noLogsYet": "기록된 로그 없음",
+  "logsCleared": "로그가 삭제되었습니다",
+  "logEntries": "{count}개 로그 항목",
+  "@logEntries": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  }
 }

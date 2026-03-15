@@ -25,6 +25,7 @@ import 'services/app_logger.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
+  AppLogger.captureAllLogs();
   AppLogger.info('vigor app starting');
 
   // Initialize secure storage and fail fast if not available

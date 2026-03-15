@@ -1491,24 +1491,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get healthSyncNoData => '设备上未找到健康数据';
 
   @override
-  String healthLastSyncAt(String date, String type) {
-    return '上次同步：$date · $type';
-  }
-
-  @override
   String get healthSyncTypeFull => '完整';
 
   @override
   String get healthSyncTypeIncremental => '增量';
 
   @override
-  String healthDeviceData(int days, int sessions) {
-    return '设备：$days天、$sessions个会话';
+  String healthSourceData(int metrics, int sessions) {
+    return '$metrics个指标 · $sessions个会话';
   }
 
   @override
+  String get healthBackend => '后端';
+
+  @override
   String healthBackendData(int days, int sessions) {
-    return '后端：$days天、$sessions个会话';
+    return '$days天 · $sessions个会话';
   }
 
   @override
@@ -1700,4 +1698,27 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get exerciseTypeOther => '锻炼';
+
+  @override
+  String get appLogs => '应用日志';
+
+  @override
+  String get viewLogs => '查看日志';
+
+  @override
+  String get exportLogs => '导出日志';
+
+  @override
+  String get clearLogs => '清除日志';
+
+  @override
+  String get noLogsYet => '暂无日志';
+
+  @override
+  String get logsCleared => '日志已清除';
+
+  @override
+  String logEntries(int count) {
+    return '$count 条日志';
+  }
 }

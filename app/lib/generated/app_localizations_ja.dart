@@ -1494,24 +1494,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get healthSyncNoData => 'デバイスにヘルスデータが見つかりません';
 
   @override
-  String healthLastSyncAt(String date, String type) {
-    return '前回の同期: $date · $type';
-  }
-
-  @override
   String get healthSyncTypeFull => 'フル';
 
   @override
   String get healthSyncTypeIncremental => '増分';
 
   @override
-  String healthDeviceData(int days, int sessions) {
-    return 'デバイス: $days日間、$sessionsセッション';
+  String healthSourceData(int metrics, int sessions) {
+    return '$metrics指標 · $sessionsセッション';
   }
 
   @override
+  String get healthBackend => 'バックエンド';
+
+  @override
   String healthBackendData(int days, int sessions) {
-    return 'バックエンド: $days日間、$sessionsセッション';
+    return '$days日間 · $sessionsセッション';
   }
 
   @override
@@ -1705,4 +1703,27 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get exerciseTypeOther => 'ワークアウト';
+
+  @override
+  String get appLogs => 'アプリログ';
+
+  @override
+  String get viewLogs => 'ログを表示';
+
+  @override
+  String get exportLogs => 'ログをエクスポート';
+
+  @override
+  String get clearLogs => 'ログを消去';
+
+  @override
+  String get noLogsYet => 'ログはまだありません';
+
+  @override
+  String get logsCleared => 'ログを消去しました';
+
+  @override
+  String logEntries(int count) {
+    return '$count 件のログ';
+  }
 }

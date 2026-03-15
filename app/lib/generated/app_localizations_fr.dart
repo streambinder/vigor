@@ -1534,24 +1534,22 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucune donnée de santé trouvée sur l\'appareil';
 
   @override
-  String healthLastSyncAt(String date, String type) {
-    return 'Dernière sync : $date · $type';
+  String get healthSyncTypeFull => 'Complète';
+
+  @override
+  String get healthSyncTypeIncremental => 'Incrémentale';
+
+  @override
+  String healthSourceData(int metrics, int sessions) {
+    return '$metrics métriques · $sessions sessions';
   }
 
   @override
-  String get healthSyncTypeFull => 'complète';
-
-  @override
-  String get healthSyncTypeIncremental => 'incrémentale';
-
-  @override
-  String healthDeviceData(int days, int sessions) {
-    return 'Appareil : $days jours, $sessions sessions';
-  }
+  String get healthBackend => 'Backend';
 
   @override
   String healthBackendData(int days, int sessions) {
-    return 'Backend : $days jours, $sessions sessions';
+    return '$days jours · $sessions sessions';
   }
 
   @override
@@ -1750,4 +1748,27 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get exerciseTypeOther => 'Entraînement';
+
+  @override
+  String get appLogs => 'Journaux de l\'app';
+
+  @override
+  String get viewLogs => 'Voir les journaux';
+
+  @override
+  String get exportLogs => 'Exporter les journaux';
+
+  @override
+  String get clearLogs => 'Effacer les journaux';
+
+  @override
+  String get noLogsYet => 'Aucun journal enregistré';
+
+  @override
+  String get logsCleared => 'Journaux effacés';
+
+  @override
+  String logEntries(int count) {
+    return '$count entrées de journal';
+  }
 }

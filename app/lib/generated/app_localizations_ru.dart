@@ -1519,24 +1519,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String get healthSyncNoData => 'На устройстве не найдены данные о здоровье';
 
   @override
-  String healthLastSyncAt(String date, String type) {
-    return 'Последняя синхронизация: $date · $type';
+  String get healthSyncTypeFull => 'Полная';
+
+  @override
+  String get healthSyncTypeIncremental => 'Инкрементальная';
+
+  @override
+  String healthSourceData(int metrics, int sessions) {
+    return '$metrics метр. · $sessions сеансов';
   }
 
   @override
-  String get healthSyncTypeFull => 'полная';
-
-  @override
-  String get healthSyncTypeIncremental => 'инкрементальная';
-
-  @override
-  String healthDeviceData(int days, int sessions) {
-    return 'Устройство: $days дн., $sessions сеансов';
-  }
+  String get healthBackend => 'Сервер';
 
   @override
   String healthBackendData(int days, int sessions) {
-    return 'Сервер: $days дн., $sessions сеансов';
+    return '$days дн. · $sessions сеансов';
   }
 
   @override
@@ -1732,4 +1730,27 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get exerciseTypeOther => 'Тренировка';
+
+  @override
+  String get appLogs => 'Журналы приложения';
+
+  @override
+  String get viewLogs => 'Просмотр журналов';
+
+  @override
+  String get exportLogs => 'Экспорт журналов';
+
+  @override
+  String get clearLogs => 'Очистить журналы';
+
+  @override
+  String get noLogsYet => 'Журналы пока пусты';
+
+  @override
+  String get logsCleared => 'Журналы очищены';
+
+  @override
+  String logEntries(int count) {
+    return '$count записей';
+  }
 }

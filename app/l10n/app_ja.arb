@@ -498,11 +498,11 @@
   "healthConnected": "接続済み",
   "healthData": "ヘルスデータ",
   "healthSyncNoData": "デバイスにヘルスデータが見つかりません",
-  "healthLastSyncAt": "前回の同期: {date} · {type}",
   "healthSyncTypeFull": "フル",
   "healthSyncTypeIncremental": "増分",
-  "healthDeviceData": "デバイス: {days}日間、{sessions}セッション",
-  "healthBackendData": "バックエンド: {days}日間、{sessions}セッション",
+  "healthSourceData": "{metrics}指標 · {sessions}セッション",
+  "healthBackend": "バックエンド",
+  "healthBackendData": "{days}日間 · {sessions}セッション",
   "healthDateRange": "{from} – {to}",
   "healthDisconnect": "切断してデータを削除",
   "healthDisconnectConfirmation": "ヘルスデータを切断しますか？同期されたすべてのデータが削除されます。この操作は取り消せません。",
@@ -564,5 +564,18 @@
   "exerciseTypeDancing": "ダンス",
   "exerciseTypeElliptical": "エリプティカル",
   "exerciseTypeStairClimbing": "階段昇降",
-  "exerciseTypeOther": "ワークアウト"
+  "exerciseTypeOther": "ワークアウト",
+
+  "appLogs": "アプリログ",
+  "viewLogs": "ログを表示",
+  "exportLogs": "ログをエクスポート",
+  "clearLogs": "ログを消去",
+  "noLogsYet": "ログはまだありません",
+  "logsCleared": "ログを消去しました",
+  "logEntries": "{count} 件のログ",
+  "@logEntries": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  }
 }

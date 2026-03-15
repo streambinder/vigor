@@ -498,11 +498,11 @@
   "healthConnected": "Connecté",
   "healthData": "Données de santé",
   "healthSyncNoData": "Aucune donnée de santé trouvée sur l'appareil",
-  "healthLastSyncAt": "Dernière sync : {date} · {type}",
-  "healthSyncTypeFull": "complète",
-  "healthSyncTypeIncremental": "incrémentale",
-  "healthDeviceData": "Appareil : {days} jours, {sessions} sessions",
-  "healthBackendData": "Backend : {days} jours, {sessions} sessions",
+  "healthSyncTypeFull": "Complète",
+  "healthSyncTypeIncremental": "Incrémentale",
+  "healthSourceData": "{metrics} métriques · {sessions} sessions",
+  "healthBackend": "Backend",
+  "healthBackendData": "{days} jours · {sessions} sessions",
   "healthDateRange": "{from} – {to}",
   "healthDisconnect": "Déconnecter et supprimer les données",
   "healthDisconnectConfirmation": "Déconnecter les données de santé ? Toutes les données synchronisées seront supprimées. Cette action est irréversible.",
@@ -564,5 +564,18 @@
   "exerciseTypeDancing": "Danse",
   "exerciseTypeElliptical": "Elliptique",
   "exerciseTypeStairClimbing": "Escaliers",
-  "exerciseTypeOther": "Entraînement"
+  "exerciseTypeOther": "Entraînement",
+
+  "appLogs": "Journaux de l'app",
+  "viewLogs": "Voir les journaux",
+  "exportLogs": "Exporter les journaux",
+  "clearLogs": "Effacer les journaux",
+  "noLogsYet": "Aucun journal enregistré",
+  "logsCleared": "Journaux effacés",
+  "logEntries": "{count} entrées de journal",
+  "@logEntries": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  }
 }
