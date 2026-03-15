@@ -24,7 +24,9 @@ class IOSHealthDataService extends HealthDataService
   @override
   Future<bool> isAvailable() async {
     try {
+      AppLogger.debug('[IOSHealth] configuring HealthKit');
       await _health.configure();
+      AppLogger.debug('[IOSHealth] HealthKit configured, available=true');
       // healthkit is available on all iOS devices
       return true;
     } catch (e) {
@@ -36,8 +38,11 @@ class IOSHealthDataService extends HealthDataService
   @override
   Future<bool> requestPermissions() async {
     try {
+      AppLogger.info('[IOSHealth] requesting permissions for ${_iosTypes.length} types');
       await _health.configure();
-      return await _health.requestAuthorization(_iosTypes);
+      final granted = await _health.requestAuthorization(_iosTypes);
+      AppLogger.info('[IOSHealth] permissions ${granted ? 'granted' : 'denied'}');
+      return granted;
     } catch (e) {
       AppLogger.error('[IOSHealth] permission request failed', e);
       return false;
@@ -57,18 +62,23 @@ class IOSHealthDataService extends HealthDataService
 
   @override
   Future<HealthSyncPayload> readAllData() async {
+    AppLogger.info('[IOSHealth] readAllData — full 30-day read');
     await _health.configure();
     final timezone = await FlutterTimezone.getLocalTimezone();
     final now = DateTime.now();
     final thirtyDaysAgo = now.subtract(const Duration(days: 30));
 
+    AppLogger.debug('[IOSHealth] reading ${thirtyDaysAgo.toIso8601String()} to ${now.toIso8601String()}');
     final dataPoints = await _health.getHealthDataFromTypes(
       types: _iosTypes,
       startTime: thirtyDaysAgo,
       endTime: now,
     );
+    AppLogger.info('[IOSHealth] full read returned ${dataPoints.length} data points');
 
-    return buildSyncPayload(Health().removeDuplicates(dataPoints), timezone);
+    final deduped = Health().removeDuplicates(dataPoints);
+    AppLogger.debug('[IOSHealth] after dedup: ${deduped.length} data points (removed ${dataPoints.length - deduped.length})');
+    return buildSyncPayload(deduped, timezone);
   }
 
   @override
@@ -89,13 +99,17 @@ class IOSHealthDataService extends HealthDataService
       startTime = maxLookback;
     }
 
+    AppLogger.debug('[IOSHealth] readNewData: ${startTime.toIso8601String()} to ${now.toIso8601String()} (lastSyncMs=$lastSyncMs)');
     final dataPoints = await _health.getHealthDataFromTypes(
       types: _iosTypes,
       startTime: startTime,
       endTime: now,
     );
+    AppLogger.info('[IOSHealth] incremental read returned ${dataPoints.length} data points');
 
-    return buildSyncPayload(Health().removeDuplicates(dataPoints), timezone);
+    final deduped = Health().removeDuplicates(dataPoints);
+    AppLogger.debug('[IOSHealth] after dedup: ${deduped.length} data points (removed ${dataPoints.length - deduped.length})');
+    return buildSyncPayload(deduped, timezone);
   }
 
   @override

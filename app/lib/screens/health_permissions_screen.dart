@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../services/android_health_data_service.dart';
+import '../services/app_logger.dart';
 import '../services/preferences_service.dart';
 import '../services/service_locator.dart';
 import '../widgets/adaptive/adaptive.dart';
@@ -101,14 +102,20 @@ class HealthPermissionsScreen extends StatelessWidget {
   }
 
   Future<void> _requestPermissions(BuildContext context, AppLocalizations l10n) async {
+    AppLogger.info('[HealthPermissions] user tapped connect');
     final locator = context.read<ServiceLocator>();
     final healthService = locator.healthDataService;
-    if (healthService == null) return;
+    if (healthService == null) {
+      AppLogger.warning('[HealthPermissions] no health service available');
+      return;
+    }
 
     // on android, check HC SDK availability before requesting permissions
     if (healthService is AndroidHealthDataService) {
+      AppLogger.debug('[HealthPermissions] checking Android Health Connect SDK status');
       final status = await healthService.getSdkStatus();
       if (status != HealthConnectSdkStatus.sdkAvailable) {
+        AppLogger.warning('[HealthPermissions] Health Connect SDK not available: $status');
         if (!context.mounted) return;
         await AdaptiveAlertDialog.show(
           context: context,
@@ -120,6 +127,7 @@ class HealthPermissionsScreen extends StatelessWidget {
         );
         return;
       }
+      AppLogger.debug('[HealthPermissions] Health Connect SDK available');
     }
 
     final granted = await healthService.requestPermissions();
@@ -127,6 +135,7 @@ class HealthPermissionsScreen extends StatelessWidget {
     if (!context.mounted) return;
 
     if (granted) {
+      AppLogger.info('[HealthPermissions] connected — setting hcConnected=true, triggering initial sync');
       final prefs = context.read<PreferencesService>();
       await prefs.setHcConnected(true);
       // trigger initial sync immediately
@@ -137,6 +146,7 @@ class HealthPermissionsScreen extends StatelessWidget {
         Navigator.of(context).pop(true);
       }
     } else {
+      AppLogger.info('[HealthPermissions] user denied permissions');
       AdaptiveNotification.showError(context: context, message: l10n.healthPermissionsDenied);
     }
   }

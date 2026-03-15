@@ -149,13 +149,19 @@ abstract class HealthDataService {
     required PreferencesService prefs,
     required SecureStorageService storage,
   }) {
-    if (PlatformHelper.isWeb) return null;
+    if (PlatformHelper.isWeb) {
+      AppLogger.debug('[HealthDataService] skipping creation on web');
+      return null;
+    }
     if (PlatformHelper.isAndroid) {
+      AppLogger.info('[HealthDataService] creating AndroidHealthDataService');
       return AndroidHealthDataService(prefs: prefs, storage: storage);
     }
     if (PlatformHelper.isIOS) {
+      AppLogger.info('[HealthDataService] creating IOSHealthDataService');
       return IOSHealthDataService(prefs: prefs, storage: storage);
     }
+    AppLogger.warning('[HealthDataService] unsupported platform, returning null');
     return null;
   }
 }
@@ -195,6 +201,7 @@ mixin HealthDataServiceMixin on HealthDataService {
     final totalMetrics = prefs.hcTotalMetrics;
     final totalSessions = prefs.hcTotalSessions;
     if (totalMetrics > 0 || totalSessions > 0) {
+      AppLogger.debug('[HealthDataService] restored persisted stats: $totalMetrics metrics, $totalSessions sessions');
       _lastSyncResult.value = HealthSyncResult(
         metricsSynced: 0, sessionsSynced: 0,
         totalMetrics: totalMetrics, totalSessions: totalSessions,
@@ -226,6 +233,7 @@ mixin HealthDataServiceMixin on HealthDataService {
     try {
       final response = await apiService.get('/health/stats').timeout(_syncTimeout);
       if (response.isSuccess && response.data != null) {
+        AppLogger.debug('[HealthDataService] stats fetched: ${response.data!['total_metrics']} metrics, ${response.data!['total_sessions']} sessions');
         // stats-only: no device read happened, preserve previous device counts
         final prev = _lastSyncResult.value;
         final result = HealthSyncResult(
@@ -250,7 +258,11 @@ mixin HealthDataServiceMixin on HealthDataService {
 
   @override
   Future<bool> syncToBackend({bool force = false}) async {
-    if (_syncing.value) return false;
+    if (_syncing.value) {
+      AppLogger.debug('[HealthDataService] sync skipped — already in progress');
+      return false;
+    }
+    AppLogger.info('[HealthDataService] syncToBackend started (force=$force)');
 
     // always restore persisted stats so the UI has data immediately
     _restorePersistedStats();
@@ -273,15 +285,19 @@ mixin HealthDataServiceMixin on HealthDataService {
       // on force sync, re-request permissions to ensure all types are authorized
       // (idempotent — returns immediately if already granted)
       if (force) {
+        AppLogger.debug('[HealthDataService] force sync — re-requesting permissions');
         final granted = await requestPermissions();
         if (!granted) {
-          AppLogger.info('[HealthDataService] permissions denied');
+          AppLogger.info('[HealthDataService] permissions denied during force sync');
           await prefs.setHcConnected(false);
           return false;
         }
+        AppLogger.debug('[HealthDataService] permissions confirmed');
       }
 
+      AppLogger.debug('[HealthDataService] reading health data (${force ? 'full' : 'incremental'})');
       final payload = force ? await readAllData() : await readNewData();
+      AppLogger.info('[HealthDataService] read complete: ${payload.metrics.length} metrics, ${payload.sessions.length} sessions, ${payload.hrSamples.length} HR samples, ${payload.deletedRecordIds.length} deletions');
 
       if (payload.isEmpty) {
         AppLogger.debug('[HealthDataService] no new data to sync');
@@ -296,7 +312,7 @@ mixin HealthDataServiceMixin on HealthDataService {
           .timeout(_syncTimeout);
 
       if (response.isSuccess) {
-        AppLogger.info('[HealthDataService] sync POST succeeded');
+        AppLogger.info('[HealthDataService] sync POST succeeded (${response.data?['metrics_synced'] ?? 0} new metrics, ${response.data?['sessions_synced'] ?? 0} new sessions)');
         if (response.data != null) {
           final result = HealthSyncResult.fromJson(
             response.data!,
@@ -344,6 +360,7 @@ class _MetricInterval {
 /// so non-overlapping intervals from different sources sum correctly while overlapping
 /// intervals keep only the higher-rate source.
 HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints, String timezone) {
+  AppLogger.debug('[HealthDataService] buildSyncPayload: ${dataPoints.length} data points, tz=$timezone');
   final dailyMetrics = <String, Map<String, dynamic>>{};
   final sessions = <Map<String, dynamic>>[];
   final hrSamples = <Map<String, dynamic>>[];
@@ -461,6 +478,7 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints, String time
       name: (metrics: sourceMetricCounts[name] ?? 0, sessions: sourceSessionCounts[name] ?? 0),
   };
 
+  AppLogger.debug('[HealthDataService] payload built: ${dailyMetrics.length} daily buckets, ${sessions.length} sessions, ${hrSamples.length} HR samples, sources=${sourceApps.keys.join(', ')}');
   return HealthSyncPayload(
     metrics: dailyMetrics.values.toList(),
     sessions: sessions,

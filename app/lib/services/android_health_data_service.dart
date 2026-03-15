@@ -21,8 +21,10 @@ class AndroidHealthDataService extends HealthDataService
 
   Future<void> _ensureConfigured() async {
     if (!_configured) {
+      AppLogger.debug('[AndroidHealth] configuring Health Connect SDK');
       await _health.configure();
       _configured = true;
+      AppLogger.info('[AndroidHealth] Health Connect SDK configured');
     }
   }
 
@@ -30,7 +32,9 @@ class AndroidHealthDataService extends HealthDataService
   Future<HealthConnectSdkStatus?> getSdkStatus() async {
     try {
       await _ensureConfigured();
-      return await _health.getHealthConnectSdkStatus();
+      final status = await _health.getHealthConnectSdkStatus();
+      AppLogger.debug('[AndroidHealth] SDK status: $status');
+      return status;
     } catch (e) {
       AppLogger.error('[AndroidHealth] getSdkStatus failed', e);
       return null;
@@ -42,6 +46,7 @@ class AndroidHealthDataService extends HealthDataService
     try {
       await _ensureConfigured();
       final status = await _health.getHealthConnectSdkStatus();
+      AppLogger.debug('[AndroidHealth] isAvailable check: status=$status');
       return status == HealthConnectSdkStatus.sdkAvailable;
     } catch (e) {
       AppLogger.error('[AndroidHealth] availability check failed', e);
@@ -52,8 +57,11 @@ class AndroidHealthDataService extends HealthDataService
   @override
   Future<bool> requestPermissions() async {
     try {
+      AppLogger.info('[AndroidHealth] requesting permissions for ${healthPermissionTypes.length} types');
       await _ensureConfigured();
-      return await _health.requestAuthorization(healthPermissionTypes);
+      final granted = await _health.requestAuthorization(healthPermissionTypes);
+      AppLogger.info('[AndroidHealth] permissions ${granted ? 'granted' : 'denied'}');
+      return granted;
     } catch (e) {
       AppLogger.error('[AndroidHealth] permission request failed', e);
       return false;
@@ -66,6 +74,7 @@ class AndroidHealthDataService extends HealthDataService
       // hasPermissions returns null when it can't determine status (common for
       // read-only permissions on android) — treat null as granted
       final result = await _health.hasPermissions(healthPermissionTypes);
+      AppLogger.debug('[AndroidHealth] checkPermissions: raw=$result, effective=${result ?? true}');
       return result ?? true;
     } catch (e) {
       AppLogger.error('[AndroidHealth] checkPermissions failed', e);
@@ -76,7 +85,9 @@ class AndroidHealthDataService extends HealthDataService
   @override
   Future<void> revokePermissions() async {
     try {
+      AppLogger.info('[AndroidHealth] revoking permissions');
       await _health.revokePermissions();
+      AppLogger.info('[AndroidHealth] permissions revoked');
     } catch (e) {
       AppLogger.error('[AndroidHealth] revokePermissions failed', e);
     }
@@ -84,6 +95,7 @@ class AndroidHealthDataService extends HealthDataService
 
   @override
   Future<HealthSyncPayload> readAllData() async {
+    AppLogger.info('[AndroidHealth] readAllData — full 30-day read');
     await _ensureConfigured();
     final timezone = await FlutterTimezone.getLocalTimezone();
     return _doFullRead(timezone);
@@ -112,6 +124,7 @@ class AndroidHealthDataService extends HealthDataService
     await _ensureConfigured();
     final timezone = await FlutterTimezone.getLocalTimezone();
     final token = prefs.hcChangesToken;
+    AppLogger.debug('[AndroidHealth] readNewData: existing token=${token != null ? '${token.substring(0, 8)}...' : 'null'}');
 
     // first sync — no existing token, do full 30-day read
     if (token == null) {
@@ -142,12 +155,14 @@ class AndroidHealthDataService extends HealthDataService
         return _doFullRead(timezone);
       }
 
+      AppLogger.debug('[AndroidHealth] changes page: ${changesResponse.upsertedDataPoints.length} upserted, ${changesResponse.deletedRecordIds.length} deleted, hasMore=${changesResponse.hasMore}');
       allDataPoints.addAll(changesResponse.upsertedDataPoints);
       deletedRecordIds.addAll(changesResponse.deletedRecordIds);
       currentToken = changesResponse.nextChangesToken;
       hasMore = changesResponse.hasMore;
     }
 
+    AppLogger.info('[AndroidHealth] changes loop done: ${allDataPoints.length} total upserted, ${deletedRecordIds.length} total deleted');
     // only advance the token if the loop completed without errors
     if (completedSuccessfully) {
       _pendingChangesToken = currentToken;
@@ -174,6 +189,7 @@ class AndroidHealthDataService extends HealthDataService
           startTime: sleepStart,
           endTime: sleepEnd,
         );
+        AppLogger.debug('[AndroidHealth] fetched ${stagePoints.length} sleep stage records (${sleepStart.toIso8601String()} to ${sleepEnd.toIso8601String()})');
         allDataPoints.addAll(stagePoints);
       }
     }
@@ -198,15 +214,19 @@ class AndroidHealthDataService extends HealthDataService
     // get a fresh token for next time
     final newToken = await _health.getChangesToken(types: healthPermissionTypes);
     _pendingChangesToken = newToken;
+    AppLogger.debug('[AndroidHealth] acquired new changes token: ${newToken?.substring(0, 8) ?? 'null'}...');
 
+    AppLogger.debug('[AndroidHealth] full read: ${thirtyDaysAgo.toIso8601String()} to ${now.toIso8601String()}');
     final dataPoints = await _health.getHealthDataFromTypes(
       types: healthPermissionTypes,
       startTime: thirtyDaysAgo,
       endTime: now,
     );
+    AppLogger.info('[AndroidHealth] full read returned ${dataPoints.length} data points');
 
     // deduplicate overlapping data points from multiple sources (e.g. Fitbit + RingConn)
     final deduped = Health().removeDuplicates(dataPoints);
+    AppLogger.debug('[AndroidHealth] after dedup: ${deduped.length} data points (removed ${dataPoints.length - deduped.length})');
 
     return buildSyncPayload(deduped, timezone);
   }
@@ -214,6 +234,7 @@ class AndroidHealthDataService extends HealthDataService
   @override
   Future<void> onSyncSuccess() async {
     if (_pendingChangesToken != null) {
+      AppLogger.debug('[AndroidHealth] persisting changes token after successful sync');
       await prefs.setHcChangesToken(_pendingChangesToken);
       _pendingChangesToken = null;
     }

@@ -10,6 +10,7 @@ import 'progress_service.dart';
 import 'user_service.dart';
 import 'secure_storage_service.dart';
 import 'preferences_service.dart';
+import 'app_logger.dart';
 import 'health_data_service.dart';
 
 /// Centralized service locator that caches service instances.
@@ -144,6 +145,7 @@ class ServiceLocator extends ChangeNotifier {
     initialWeeklyTarget = null;
     initialDataLoaded = false;
     // clear health sync tokens on logout (H2 — multi-user scoping)
+    AppLogger.info('[ServiceLocator] logout — clearing health data and tokens');
     _prefs.clearHealthData();
   }
 

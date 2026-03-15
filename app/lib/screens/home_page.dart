@@ -12,6 +12,7 @@ import '../models/weekly_target.dart';
 import '../models/week_progress.dart';
 import '../models/week_summary.dart';
 import '../providers/auth_provider.dart';
+import '../services/app_logger.dart';
 import '../services/preferences_service.dart';
 import '../services/secure_storage_service.dart';
 import '../utils/knowledge_labels.dart';
@@ -85,6 +86,9 @@ class _HomePageState extends State<HomePage> {
       final results = await Future.wait(futures);
 
       // trigger incremental health metrics sync (throttled, fire-and-forget)
+      if (locator.healthDataService != null) {
+        AppLogger.debug('[HomePage] triggering health sync on refresh');
+      }
       locator.healthDataService?.syncToBackend();
 
       if (mounted) {

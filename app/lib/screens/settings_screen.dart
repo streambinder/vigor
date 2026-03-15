@@ -424,6 +424,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               leading: Icon(Icons.sync, color: isSyncing ? VigorColors.stone : VigorColors.indigoAdaptive(context), size: 22),
                               title: Text(l10n.healthSynchronize, style: VigorTypography.body.copyWith(color: isSyncing ? VigorColors.stone : VigorColors.textPrimary(context))),
                               onTap: isSyncing ? null : () {
+                                AppLogger.info('[Settings] manual sync triggered');
                                 final healthService = context.read<ServiceLocator>().healthDataService;
                                 if (healthService == null) return;
                                 healthService.syncToBackend(force: true);
@@ -479,12 +480,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (confirmed != true || !context.mounted) return;
 
+    AppLogger.info('[Settings] disconnecting health — calling POST /health/disconnect');
     final response = await AuthenticatedApiService(
       storageService: context.read<SecureStorageService>(),
     ).post('/health/disconnect');
     if (!context.mounted) return;
 
     if (response.isSuccess) {
+      AppLogger.info('[Settings] health disconnected — clearing local data');
       final prefs = context.read<PreferencesService>();
       await prefs.clearHealthData();
       await prefs.setHcConnected(false);
@@ -493,6 +496,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         AdaptiveNotification.show(context: context, message: l10n.healthDisconnectedSuccessfully);
       }
     } else {
+      AppLogger.error('[Settings] health disconnect failed: ${response.error}');
       AdaptiveNotification.showError(context: context, message: l10n.failedToDisconnectHealth, rawError: response.error);
     }
   }
