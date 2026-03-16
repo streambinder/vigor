@@ -475,10 +475,8 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
         });
       }
     } else {
-      // for sleep stages, attribute to the wake-up date (dateTo)
-      final dateKey = sleepTypes.contains(point.type)
-          ? _dateKey(point.dateTo)
-          : _dateKey(point.dateFrom);
+      // for sleep stages, attribute to sleep onset date (dateFrom) to match industry standards
+      final dateKey = _dateKey(point.dateFrom);
       dailyMetrics.putIfAbsent(dateKey, () => {'date': dateKey});
       sourceMetricCounts[point.sourceName] = (sourceMetricCounts[point.sourceName] ?? 0) + 1;
 

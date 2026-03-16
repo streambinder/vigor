@@ -32,6 +32,17 @@ func ParseTimezone(tz string) *time.Location {
 	return time.UTC
 }
 
+// estimateMaxHR uses modern formulas: Tanaka (2001) for general population,
+// Gulati (2010) for women. more accurate than the outdated 220-age formula.
+func estimateMaxHR(age int, gender string) int {
+	if gender == "female" {
+		// gulati formula: 206 - (0.88 × age)
+		return clampInt(206-int(0.88*float64(age)), 100, 220)
+	}
+	// tanaka formula: 208 - (0.7 × age)
+	return clampInt(208-int(0.7*float64(age)), 100, 220)
+}
+
 func clampFloat(v, min, max float64) float64 {
 	if v < min {
 		return min
@@ -90,11 +101,20 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Loc
 
 	log.Info().Int("metrics", len(req.Metrics)).Int("sessions", len(req.Sessions)).Int("hr_samples", len(req.HRSamples)).Msg("health sync request received")
 
-	// fetch user's age-based estimated max HR for zone calculation
+	// fetch user's profile for max HR calculation (uses modern Tanaka/Gulati formulas)
 	var profile model.Profile
 	estimatedMaxHR := 190 // fallback
+	var restingHR *int
 	if err := database.DB.Where("user_id = ?", userID).First(&profile).Error; err == nil {
-		estimatedMaxHR = clampInt(220-profile.Age(), 100, 220)
+		estimatedMaxHR = estimateMaxHR(profile.Age(), profile.Gender)
+
+		// fetch recent resting HR for HRR method
+		var recentMetric model.HealthMetric
+		if err := database.DB.Where("user_id = ? AND resting_hr > 0", userID).
+			Order("date DESC").
+			First(&recentMetric).Error; err == nil {
+			restingHR = &recentMetric.RestingHR
+		}
 	}
 
 	resp := &model.HealthSyncResponse{
@@ -213,7 +233,7 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Loc
 				session.AvgHR = &avgHR
 				session.MaxHR = &maxHR
 
-				zones := computeHRZones(matchedSamples, estimatedMaxHR)
+				zones := computeHRZones(matchedSamples, estimatedMaxHR, restingHR)
 				if zonesJSON, err := json.Marshal(zones); err == nil {
 					session.HRZoneDistributionJSON = zonesJSON
 				}
@@ -311,26 +331,58 @@ type hrZoneDistribution struct {
 	Zone5Pct float64 `json:"zone5_pct"`
 }
 
-func computeHRZones(samples []model.HealthSyncHRSample, maxHR int) hrZoneDistribution {
+// computeHRZones calculates zone distribution using Heart Rate Reserve (HRR) method when
+// resting HR is available, falling back to %MaxHR if not. HRR is more accurate as it
+// personalizes zones based on fitness level: (MaxHR - RestingHR) × intensity% + RestingHR
+func computeHRZones(samples []model.HealthSyncHRSample, maxHR int, restingHR *int) hrZoneDistribution {
 	if maxHR == 0 || len(samples) == 0 {
 		return hrZoneDistribution{}
 	}
+
 	var counts [5]int
-	for _, hr := range samples {
-		pct := float64(hr.BPM) / float64(maxHR) * 100
-		switch {
-		case pct < 60:
-			counts[0]++
-		case pct < 70:
-			counts[1]++
-		case pct < 80:
-			counts[2]++
-		case pct < 90:
-			counts[3]++
-		default:
-			counts[4]++
+	if restingHR != nil && *restingHR > 0 && *restingHR < maxHR {
+		// use HRR method: zones at 50-60%, 60-70%, 70-80%, 80-90%, 90-100% of reserve
+		hrr := float64(maxHR - *restingHR)
+		rhr := float64(*restingHR)
+		zone1Max := rhr + hrr*0.60
+		zone2Max := rhr + hrr*0.70
+		zone3Max := rhr + hrr*0.80
+		zone4Max := rhr + hrr*0.90
+
+		for _, hr := range samples {
+			bpm := float64(hr.BPM)
+			switch {
+			case bpm < zone1Max:
+				counts[0]++
+			case bpm < zone2Max:
+				counts[1]++
+			case bpm < zone3Max:
+				counts[2]++
+			case bpm < zone4Max:
+				counts[3]++
+			default:
+				counts[4]++
+			}
+		}
+	} else {
+		// fallback to %MaxHR method (less accurate but works without resting HR)
+		for _, hr := range samples {
+			pct := float64(hr.BPM) / float64(maxHR) * 100
+			switch {
+			case pct < 60:
+				counts[0]++
+			case pct < 70:
+				counts[1]++
+			case pct < 80:
+				counts[2]++
+			case pct < 90:
+				counts[3]++
+			default:
+				counts[4]++
+			}
 		}
 	}
+
 	total := float64(len(samples))
 	return hrZoneDistribution{
 		Zone1Pct: math.Round(float64(counts[0])/total*100*10) / 10,
