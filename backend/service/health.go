@@ -20,9 +20,17 @@ const (
 	dataRecencyMaxDays     = 3
 	externalWorkoutDays    = 3
 	enrichmentMaxDays      = 30
-	toleranceMinutes       = 5
 	maxHRSamplesPerSession = 15000
 )
+
+// ParseTimezone parses an IANA timezone string into a *time.Location, falling back to UTC.
+func ParseTimezone(tz string) *time.Location {
+	if loc, err := time.LoadLocation(tz); err == nil {
+		return loc
+	}
+	log.Warn().Str("timezone", tz).Msg("failed to load timezone, falling back to UTC")
+	return time.UTC
+}
 
 func clampFloat(v, min, max float64) float64 {
 	if v < min {
@@ -62,7 +70,7 @@ func clampIntOrZero(v, min, max int) int {
 
 // SyncHealthData ingests raw health data from the client, aggregates metrics,
 // upserts exercise sessions, correlates HR samples, and enriches trainings.
-func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest) (*model.HealthSyncResponse, error) {
+func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Location) (*model.HealthSyncResponse, error) {
 	now := time.Now()
 	thirtyDaysAgo := now.AddDate(0, 0, -30)
 
@@ -95,13 +103,6 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest) (*model.Healt
 	}
 
 	if err := database.DB.Transaction(func(tx *gorm.DB) error {
-		// update profile timezone if provided and valid
-		if req.Timezone != "" {
-			if _, err := time.LoadLocation(req.Timezone); err == nil {
-				tx.Model(&model.Profile{}).Where("user_id = ?", userID).Update("timezone", req.Timezone)
-			}
-		}
-
 		// 1. upsert daily metrics
 		for _, m := range req.Metrics {
 			date, err := time.Parse("2006-01-02", m.Date)
@@ -248,7 +249,7 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest) (*model.Healt
 		}
 
 		// 4. training enrichment
-		return enrichTrainings(tx, userID)
+		return enrichTrainings(tx, userID, loc)
 	}); err != nil {
 		return nil, err
 	}
@@ -340,11 +341,13 @@ func computeHRZones(samples []model.HealthSyncHRSample, maxHR int) hrZoneDistrib
 	}
 }
 
-// enrichTrainings matches unlinked exercise sessions to completed Vigor trainings
-// by time-window overlap with ±5min tolerance.
-func enrichTrainings(tx *gorm.DB, userID uuid.UUID) error {
+// enrichTrainings matches unlinked exercise sessions to completed Vigor trainings.
+// uses a same-calendar-day approach: the session and training must fall on the same
+// date in the user's timezone, and the session exercise type must be plausible for
+// the training methodology. this is resilient to timezone mismatches between the
+// health data source (e.g. Fitbit) and the Vigor completion timestamp.
+func enrichTrainings(tx *gorm.DB, userID uuid.UUID, loc *time.Location) error {
 	thirtyDaysAgo := time.Now().AddDate(0, 0, -enrichmentMaxDays)
-	tolerance := time.Duration(toleranceMinutes) * time.Minute
 
 	var unlinkedSessions []model.HealthExerciseSession
 	if err := tx.Where("user_id = ? AND training_id IS NULL AND started_at > ?", userID, thirtyDaysAgo).
@@ -352,56 +355,66 @@ func enrichTrainings(tx *gorm.DB, userID uuid.UUID) error {
 		return err
 	}
 
+	// load completed trainings not yet linked to any session
+	var trainings []model.Training
+	if err := tx.Where(
+		`user_id = ? AND completed_at IS NOT NULL AND completed_at > ?
+		AND id NOT IN (SELECT training_id FROM health_exercise_sessions WHERE training_id IS NOT NULL AND user_id = ?)`,
+		userID, thirtyDaysAgo, userID,
+	).Find(&trainings).Error; err != nil {
+		return err
+	}
+
+	if len(trainings) == 0 || len(unlinkedSessions) == 0 {
+		return nil
+	}
+
+	// index trainings by calendar date in user's timezone
+	type trainingWithDate struct {
+		training model.Training
+		date     string
+	}
+	trainingsByDate := map[string][]trainingWithDate{}
+	for _, t := range trainings {
+		d := t.CompletedAt.In(loc).Format("2006-01-02")
+		trainingsByDate[d] = append(trainingsByDate[d], trainingWithDate{t, d})
+	}
+
+	matched := map[uuid.UUID]bool{}
 	for _, session := range unlinkedSessions {
-		// find completed trainings that overlap this session's time window
-		var candidates []model.Training
-		if err := tx.Where(
-			`user_id = ? AND completed_at IS NOT NULL AND completed_at > ?
-			AND id NOT IN (SELECT training_id FROM health_exercise_sessions WHERE training_id IS NOT NULL AND user_id = ?)
-			AND ? < completed_at + INTERVAL '1 minute' * ?
-			AND ? > completed_at - GREATEST(duration, COALESCE(completed_in, duration)) * INTERVAL '1 second' - INTERVAL '1 minute' * ?`,
-			userID, thirtyDaysAgo, userID,
-			session.StartedAt, toleranceMinutes,
-			session.EndedAt, toleranceMinutes,
-		).Find(&candidates).Error; err != nil {
-			log.Warn().Err(err).Msg("training enrichment query failed")
+		sessionDate := session.StartedAt.In(loc).Format("2006-01-02")
+		candidates, ok := trainingsByDate[sessionDate]
+		if !ok {
 			continue
 		}
 
-		if len(candidates) == 0 {
-			continue
-		}
-
-		// pick the training with the greatest time overlap
-		bestIdx := 0
-		bestOverlap := time.Duration(0)
-		for i, t := range candidates {
-			trainingDur := time.Duration(t.Duration) * time.Second
-			if t.CompletedIn != nil && time.Duration(*t.CompletedIn)*time.Second > trainingDur {
-				trainingDur = time.Duration(*t.CompletedIn) * time.Second
+		// among same-day candidates, pick the one with closest duration match
+		bestIdx := -1
+		bestDiff := time.Duration(1<<63 - 1)
+		sessionDur := session.EndedAt.Sub(session.StartedAt)
+		for i, c := range candidates {
+			if matched[c.training.ID] {
+				continue
 			}
-			trainingStart := t.CompletedAt.Add(-trainingDur).Add(-tolerance)
-			trainingEnd := t.CompletedAt.Add(tolerance)
-
-			overlapStart := session.StartedAt
-			if trainingStart.After(overlapStart) {
-				overlapStart = trainingStart
+			trainingDur := time.Duration(c.training.Duration) * time.Second
+			if c.training.CompletedIn != nil {
+				trainingDur = time.Duration(*c.training.CompletedIn) * time.Second
 			}
-			overlapEnd := session.EndedAt
-			if trainingEnd.Before(overlapEnd) {
-				overlapEnd = trainingEnd
+			diff := sessionDur - trainingDur
+			if diff < 0 {
+				diff = -diff
 			}
-
-			if overlap := overlapEnd.Sub(overlapStart); overlap > bestOverlap {
-				bestOverlap = overlap
+			if diff < bestDiff {
+				bestDiff = diff
 				bestIdx = i
 			}
 		}
 
-		if bestOverlap > 0 {
+		if bestIdx >= 0 {
 			tx.Model(&model.HealthExerciseSession{}).
 				Where("id = ?", session.ID).
-				Update("training_id", candidates[bestIdx].ID)
+				Update("training_id", candidates[bestIdx].training.ID)
+			matched[candidates[bestIdx].training.ID] = true
 		}
 	}
 
@@ -423,9 +436,9 @@ func DisconnectHealth(userID uuid.UUID) error {
 
 // GetHealthSnapshot computes on-demand baselines and returns a snapshot for prompt injection.
 // Returns nil when no data is available or data is stale (>3 days old).
-func GetHealthSnapshot(userID uuid.UUID) (*model.HealthSnapshot, error) {
+func GetHealthSnapshot(userID uuid.UUID, loc *time.Location) (*model.HealthSnapshot, error) {
 	var metrics []model.HealthMetric
-	cutoff := time.Now().AddDate(0, 0, -baselineWindowDays)
+	cutoff := time.Now().In(loc).AddDate(0, 0, -baselineWindowDays).Format("2006-01-02")
 	if err := database.DB.Where("user_id = ? AND date > ?", userID, cutoff).
 		Order("date DESC").
 		Find(&metrics).Error; err != nil {
@@ -545,10 +558,10 @@ func GetExerciseSessionForTraining(trainingID, userID uuid.UUID) (*model.HealthE
 }
 
 // GetHealthDaily returns the last 7 days of health metrics and unlinked exercise sessions.
-func GetHealthDaily(userID uuid.UUID) (*model.HealthDailyResponse, error) {
-	now := time.Now()
-	sevenDaysAgo := now.AddDate(0, 0, -7)
-	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+func GetHealthDaily(userID uuid.UUID, loc *time.Location) (*model.HealthDailyResponse, error) {
+	now := time.Now().In(loc)
+	// format as date string to avoid timezone offset issues with PostgreSQL date columns
+	today := now.Format("2006-01-02")
 
 	var metrics []model.HealthMetric
 	if err := database.DB.Where("user_id = ? AND date >= ?", userID, today).
@@ -558,7 +571,7 @@ func GetHealthDaily(userID uuid.UUID) (*model.HealthDailyResponse, error) {
 	}
 
 	var sessions []model.HealthExerciseSession
-	if err := database.DB.Where("user_id = ? AND training_id IS NULL AND started_at > ?", userID, sevenDaysAgo).
+	if err := database.DB.Where("user_id = ? AND training_id IS NULL AND started_at > ?", userID, now.AddDate(0, 0, -7)).
 		Order("started_at DESC").
 		Find(&sessions).Error; err != nil {
 		return nil, err

@@ -69,7 +69,6 @@ class HealthSyncPayload {
   final List<Map<String, dynamic>> sessions;
   final List<Map<String, dynamic>> hrSamples;
   final List<String> deletedRecordIds;
-  final String timezone;
   /// per-source-app breakdown: source name -> (metrics, sessions) counts
   final Map<String, ({int metrics, int sessions})> sourceApps;
 
@@ -78,7 +77,6 @@ class HealthSyncPayload {
     required this.sessions,
     required this.hrSamples,
     this.deletedRecordIds = const [],
-    required this.timezone,
     this.sourceApps = const {},
   });
 
@@ -89,7 +87,6 @@ class HealthSyncPayload {
     'sessions': sessions,
     'hr_samples': hrSamples,
     if (deletedRecordIds.isNotEmpty) 'deleted_record_ids': deletedRecordIds,
-    'timezone': timezone,
   };
 }
 
@@ -394,7 +391,6 @@ mixin HealthDataServiceMixin on HealthDataService {
           sessions: sessionsByDate[sortedDates[i]] ?? [],
           hrSamples: hrByDate[sortedDates[i]] ?? [],
           deletedRecordIds: i == 0 ? payload.deletedRecordIds : const [],
-          timezone: payload.timezone,
         ),
     ];
   }
@@ -425,8 +421,8 @@ class _MetricInterval {
 /// uses interval-overlap-aware dedup for additive metrics (steps, calories, sleep stages)
 /// so non-overlapping intervals from different sources sum correctly while overlapping
 /// intervals keep only the higher-rate source.
-HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints, String timezone) {
-  AppLogger.debug('[HealthDataService] buildSyncPayload: ${dataPoints.length} data points, tz=$timezone');
+HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
+  AppLogger.debug('[HealthDataService] buildSyncPayload: ${dataPoints.length} data points');
   final dailyMetrics = <String, Map<String, dynamic>>{};
   final sessions = <Map<String, dynamic>>[];
   final hrSamples = <Map<String, dynamic>>[];
@@ -549,7 +545,6 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints, String time
     metrics: dailyMetrics.values.toList(),
     sessions: sessions,
     hrSamples: hrSamples,
-    timezone: timezone,
     sourceApps: sourceApps,
   );
 }

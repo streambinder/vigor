@@ -10,8 +10,6 @@ part 'health_sync_request.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class HealthSyncRequest {
-  @JsonKey(name: 'timezone', defaultValue: '')
-  final String timezone;
   @JsonKey(name: 'metrics', defaultValue: [])
   final List<HealthSyncMetric> metrics;
   @JsonKey(name: 'sessions', defaultValue: [])
@@ -22,7 +20,6 @@ class HealthSyncRequest {
   final List<String> deletedRecordIDs;
 
   HealthSyncRequest({
-    required this.timezone,
     required this.metrics,
     required this.sessions,
     required this.hRSamples,

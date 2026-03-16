@@ -40,6 +40,7 @@ func postTraining(c *fiber.Ctx) error {
 		req.Methodology,
 		req.Goals,
 		req.Muscles,
+		service.ParseTimezone(c.Get("X-Timezone")),
 	)
 	if err != nil {
 		switch {

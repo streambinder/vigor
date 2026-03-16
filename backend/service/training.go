@@ -42,7 +42,7 @@ var (
 )
 
 // GenerateTraining creates a new training for a user.
-func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string) (*model.Training, error) {
+func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string, loc *time.Location) (*model.Training, error) {
 	if duration <= 0 {
 		return nil, ErrDurationRequired
 	}
@@ -269,7 +269,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	// health snapshot: nil for partner trainings (M2), nil when no data available
 	var healthSnapshot *model.HealthSnapshot
 	if len(partnerUserIDs) == 0 {
-		healthSnapshot, _ = GetHealthSnapshot(userID)
+		healthSnapshot, _ = GetHealthSnapshot(userID, loc)
 	}
 
 	// HR aggregates for recent trainings: batch query for [HISTORY] section enrichment

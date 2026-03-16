@@ -1,4 +1,3 @@
-import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:health/health.dart';
 import 'app_logger.dart';
 import 'health_data_service.dart';
@@ -97,8 +96,7 @@ class AndroidHealthDataService extends HealthDataService
   Future<HealthSyncPayload> readAllData() async {
     AppLogger.info('[AndroidHealth] readAllData — full 30-day read');
     await _ensureConfigured();
-    final timezone = await FlutterTimezone.getLocalTimezone();
-    return _doFullRead(timezone);
+    return _doFullRead();
   }
 
   // sleep stage types to fetch explicitly when changes include sleep data
@@ -122,14 +120,13 @@ class AndroidHealthDataService extends HealthDataService
   @override
   Future<HealthSyncPayload> readNewData() async {
     await _ensureConfigured();
-    final timezone = await FlutterTimezone.getLocalTimezone();
     final token = prefs.hcChangesToken;
     AppLogger.debug('[AndroidHealth] readNewData: existing token=$token');
 
     // first sync — no existing token, do full 30-day read
     if (token == null) {
       AppLogger.info('[AndroidHealth] first sync — doing full 30-day read');
-      return _doFullRead(timezone);
+      return _doFullRead();
     }
 
     final allDataPoints = <HealthDataPoint>[];
@@ -152,7 +149,7 @@ class AndroidHealthDataService extends HealthDataService
       // token expired — fall back to full re-read
       if (changesResponse.changesTokenExpired) {
         AppLogger.warning('[AndroidHealth] changes token expired, doing full re-read');
-        return _doFullRead(timezone);
+        return _doFullRead();
       }
 
       AppLogger.debug('[AndroidHealth] changes page: ${changesResponse.upsertedDataPoints.length} upserted, ${changesResponse.deletedRecordIds.length} deleted, hasMore=${changesResponse.hasMore}');
@@ -194,20 +191,19 @@ class AndroidHealthDataService extends HealthDataService
       }
     }
 
-    final payload = buildSyncPayload(Health().removeDuplicates(allDataPoints), timezone);
+    final payload = buildSyncPayload(Health().removeDuplicates(allDataPoints));
     if (deletedRecordIds.isEmpty) return payload;
     return HealthSyncPayload(
       metrics: payload.metrics,
       sessions: payload.sessions,
       hrSamples: payload.hrSamples,
       deletedRecordIds: deletedRecordIds,
-      timezone: payload.timezone,
       sourceApps: payload.sourceApps,
     );
   }
 
   /// full re-read on first sync or expired token
-  Future<HealthSyncPayload> _doFullRead(String timezone) async {
+  Future<HealthSyncPayload> _doFullRead() async {
     final now = DateTime.now();
     final thirtyDaysAgo = now.subtract(const Duration(days: 30));
 
@@ -228,7 +224,7 @@ class AndroidHealthDataService extends HealthDataService
     final deduped = Health().removeDuplicates(dataPoints);
     AppLogger.debug('[AndroidHealth] after dedup: ${deduped.length} data points (removed ${dataPoints.length - deduped.length})');
 
-    return buildSyncPayload(deduped, timezone);
+    return buildSyncPayload(deduped);
   }
 
   @override

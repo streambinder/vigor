@@ -17,7 +17,6 @@ type Profile struct {
 	Language  string         `gorm:"default:'english'" json:"language" flutter:"required"`
 	Height    float64        `json:"height" flutter:"required"`
 	Weight    float64        `json:"weight" flutter:"required"`
-	Timezone           string         `json:"timezone"`
 	HealthDisconnected bool           `json:"health_disconnected"`
 	Data               datatypes.JSON `gorm:"type:jsonb" json:"data"`
 

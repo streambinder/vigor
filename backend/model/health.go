@@ -108,7 +108,6 @@ type HealthDailyResponse struct {
 // HealthSyncRequest is the DTO for POST /health/sync.
 // timestamps are unix milliseconds, HR values in bpm, sleep in hours, steps as count
 type HealthSyncRequest struct {
-	Timezone         string              `json:"timezone"` // IANA timezone string (e.g. "Europe/Rome")
 	Metrics          []HealthSyncMetric  `json:"metrics"`
 	Sessions         []HealthSyncSession `json:"sessions"`
 	HRSamples        []HealthSyncHRSample `json:"hr_samples"`

@@ -40,7 +40,7 @@ func postHealthSync(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
 	}
 
-	resp, err := service.SyncHealthData(c.Locals("userID").(uuid.UUID), req)
+	resp, err := service.SyncHealthData(c.Locals("userID").(uuid.UUID), req, service.ParseTimezone(c.Get("X-Timezone")))
 	if err != nil {
 		middleware.Log(c).Error().Err(err).Msg("failed to sync health data")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "sync failed"})
@@ -68,7 +68,7 @@ func postHealthDisconnect(c *fiber.Ctx) error {
 }
 
 func getHealthDaily(c *fiber.Ctx) error {
-	resp, err := service.GetHealthDaily(c.Locals("userID").(uuid.UUID))
+	resp, err := service.GetHealthDaily(c.Locals("userID").(uuid.UUID), service.ParseTimezone(c.Get("X-Timezone")))
 	if err != nil {
 		middleware.Log(c).Error().Err(err).Msg("failed to get health daily")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to get health daily"})

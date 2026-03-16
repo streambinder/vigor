@@ -1,3 +1,5 @@
+import 'package:flutter_timezone/flutter_timezone.dart';
+
 import '../config/api_config.dart';
 import '../models/api_response.dart';
 import '../models/auth_tokens.dart';
@@ -116,7 +118,10 @@ class AuthenticatedApiService {
     if (accessToken == null) {
       return null;
     }
-    return {ApiConfig.authorizationHeader: 'Bearer $accessToken'};
+    return {
+      ApiConfig.authorizationHeader: 'Bearer $accessToken',
+      'X-Timezone': await FlutterTimezone.getLocalTimezone(),
+    };
   }
 
   Future<ApiResponse<Map<String, dynamic>>> _doGet(String endpoint) async {

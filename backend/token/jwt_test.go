@@ -33,7 +33,6 @@ func setupTestDB(t *testing.T) *gorm.DB {
 			language TEXT DEFAULT 'english',
 			height REAL,
 			weight REAL,
-			timezone TEXT DEFAULT '',
 			health_disconnected INTEGER DEFAULT 0,
 			data TEXT,
 			created_at DATETIME,

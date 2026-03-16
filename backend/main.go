@@ -7,6 +7,7 @@ package main
 
 import (
 	"os"
+	_ "time/tzdata"
 
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/database"

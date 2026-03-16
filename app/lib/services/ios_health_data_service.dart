@@ -1,4 +1,3 @@
-import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:health/health.dart';
 import 'app_logger.dart';
 import 'health_data_service.dart';
@@ -64,7 +63,6 @@ class IOSHealthDataService extends HealthDataService
   Future<HealthSyncPayload> readAllData() async {
     AppLogger.info('[IOSHealth] readAllData — full 30-day read');
     await _health.configure();
-    final timezone = await FlutterTimezone.getLocalTimezone();
     final now = DateTime.now();
     final thirtyDaysAgo = now.subtract(const Duration(days: 30));
 
@@ -78,13 +76,12 @@ class IOSHealthDataService extends HealthDataService
 
     final deduped = Health().removeDuplicates(dataPoints);
     AppLogger.debug('[IOSHealth] after dedup: ${deduped.length} data points (removed ${dataPoints.length - deduped.length})');
-    return buildSyncPayload(deduped, timezone);
+    return buildSyncPayload(deduped);
   }
 
   @override
   Future<HealthSyncPayload> readNewData() async {
     await _health.configure();
-    final timezone = await FlutterTimezone.getLocalTimezone();
     final now = DateTime.now();
     final maxLookback = now.subtract(const Duration(days: 30));
 
@@ -109,7 +106,7 @@ class IOSHealthDataService extends HealthDataService
 
     final deduped = Health().removeDuplicates(dataPoints);
     AppLogger.debug('[IOSHealth] after dedup: ${deduped.length} data points (removed ${dataPoints.length - deduped.length})');
-    return buildSyncPayload(deduped, timezone);
+    return buildSyncPayload(deduped);
   }
 
   @override
