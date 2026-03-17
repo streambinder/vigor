@@ -49,6 +49,8 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Vigor reads your sleep, heart rate, HRV, steps, and workout data to personalize your training plans based on your recovery and activity levels.</string>
 	<key>NSHealthUpdateUsageDescription</key>

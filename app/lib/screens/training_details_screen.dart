@@ -129,7 +129,22 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
         training: _training,
         prefs: context.read<PreferencesService>(),
         serviceLocator: context.read<ServiceLocator>(),
-      )..initialize();
+        context: context,
+      );
+      // notification actions just trigger the same flow as ui buttons
+      _timerNotifier!.onNotificationStop = () {
+        // bring app to foreground and trigger stop confirmation
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _confirmStopTimer();
+        });
+      };
+      _timerNotifier!.onNotificationComplete = () {
+        // bring app to foreground and trigger complete flow
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _completeFromTimer(navigateOnDone: false);
+        });
+      };
+      _timerNotifier!.initialize();
       _timerNotifier!.addListener(_onTimerUpdate);
     });
     // measure timer height + scroll to it after insertion
@@ -220,6 +235,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
       ),
     );
   }
+
 
   void _completeFromTimer({bool navigateOnDone = false}) {
     _timerNotifier?.captureEarlyExitStats();

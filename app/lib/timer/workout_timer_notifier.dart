@@ -5,6 +5,8 @@ import '../models/training.dart';
 import '../services/audio_service.dart';
 import '../services/preferences_service.dart';
 import '../services/service_locator.dart';
+import '../services/live_notification_service.dart';
+import '../generated/app_localizations.dart';
 import 'timer_controller.dart';
 import 'timer_mode.dart';
 import 'training_interval.dart';
@@ -29,13 +31,17 @@ class WorkoutTimerNotifier extends ChangeNotifier with WidgetsBindingObserver {
   bool _isSubmitting = false;
   String? _previousIntervalKey;
   final AudioService _audioService = AudioService();
+  final LiveNotificationService _liveNotificationService = LiveNotificationService();
   String? _methodologyStats;
   int _accumulatedElapsedSeconds = 0;
+
+  final BuildContext context;
 
   WorkoutTimerNotifier({
     required this.training,
     required this.prefs,
     required this.serviceLocator,
+    required this.context,
   });
 
   // --- public getters ---
@@ -97,13 +103,26 @@ class WorkoutTimerNotifier extends ChangeNotifier with WidgetsBindingObserver {
       training.methodology,
     );
     _initializeAudio();
+    _setupNotificationCallbacks();
     _startCurrentSegment();
   }
+
+  void _setupNotificationCallbacks() {
+    _liveNotificationService.onTimerStop = onNotificationStop;
+    _liveNotificationService.onTimerComplete = onNotificationComplete;
+  }
+
+  /// callback for notification stop button - override by screen
+  Function()? onNotificationStop;
+
+  /// callback for notification complete button - override by screen
+  Function()? onNotificationComplete;
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     WakelockPlus.disable();
+    _liveNotificationService.cancelTimerNotification();
     _controller?.removeListener(_onControllerUpdate);
     _controller?.dispose();
     super.dispose();
@@ -180,6 +199,9 @@ class WorkoutTimerNotifier extends ChangeNotifier with WidgetsBindingObserver {
     }
     _previousIntervalKey = currentKey;
 
+    // update live notification with current timer state
+    _updateLiveNotification();
+
     notifyListeners();
   }
 
@@ -215,6 +237,7 @@ class WorkoutTimerNotifier extends ChangeNotifier with WidgetsBindingObserver {
 
   void _completeWorkout() {
     _workoutCompleted = true;
+    _liveNotificationService.cancelTimerNotification();
     notifyListeners();
   }
 
@@ -291,5 +314,36 @@ class WorkoutTimerNotifier extends ChangeNotifier with WidgetsBindingObserver {
   String? _intervalKey(TrainingInterval? interval) {
     if (interval == null) return null;
     return '${interval.type}:${interval.activityNumber}:${interval.blockNumber}:${interval.routineNumber}';
+  }
+
+  void _updateLiveNotification() {
+    if (_controller == null || !_controller!.hasStarted) return;
+
+    final interval = _controller!.currentInterval;
+    if (interval == null) return;
+
+    final l10n = AppLocalizations.of(context);
+
+    // build content text: "Exercise Name" or "Rest"
+    String contentText;
+    if (interval.type == IntervalType.rest) {
+      contentText = 'Rest';
+    } else {
+      contentText = interval.activityName ?? 'Work';
+    }
+
+    // determine if this interval is duration-based (vs rep-based)
+    final isDurationBased = !interval.isRepBased;
+
+    _liveNotificationService.updateTimerNotification(
+      trainingName: training.name,
+      totalElapsedSeconds: totalElapsedSeconds,
+      contentText: contentText,
+      intervalRemainingSeconds: currentRemainingSeconds,
+      isDurationBased: isDurationBased,
+      progress: progress,
+      stopLabel: l10n.stop,
+      completeLabel: l10n.complete,
+    );
   }
 }
