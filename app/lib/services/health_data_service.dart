@@ -528,6 +528,10 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
     HealthDataType.SLEEP_ASLEEP,
   };
 
+  const sleepSessionTypes = {
+    HealthDataType.SLEEP_SESSION,
+  };
+
   // sort by dateTo so last-write-wins for non-additive metrics (RHR, HRV)
   // picks the most recent reading deterministically
   final sortedPoints = List<HealthDataPoint>.from(dataPoints)
@@ -554,12 +558,21 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
         });
       }
     } else {
-      // for sleep stages, attribute to sleep onset date (dateFrom) to match industry standards
-      final dateKey = _dateKey(point.dateFrom);
+      // attribute sleep to wake-up date (dateTo) so users see sleep on the day they wake up
+      final dateKey = _dateKey(point.dateTo);
       dailyMetrics.putIfAbsent(dateKey, () => {'date': dateKey});
       sourceMetricCounts[point.sourceName] = (sourceMetricCounts[point.sourceName] ?? 0) + 1;
 
-      if (additiveTypes.contains(point.type)) {
+      if (sleepSessionTypes.contains(point.type)) {
+        // SLEEP_SESSION is the authoritative total - use longest session (workaround for devices that report multiple sessions)
+        final hours = point.dateTo.difference(point.dateFrom).inMinutes / 60.0;
+        final bucket = dailyMetrics[dateKey]!;
+        final existing = bucket['sleep_session_hours'] as double? ?? 0.0;
+        if (hours > existing) {
+          bucket['sleep_session_hours'] = hours;
+          AppLogger.info('[HealthDataService] SLEEP_SESSION: ${hours.toStringAsFixed(2)}h from ${point.sourceName} for $dateKey (replaced ${existing.toStringAsFixed(2)}h)');
+        }
+      } else if (additiveTypes.contains(point.type)) {
         double value;
         if (sleepTypes.contains(point.type)) {
           value = point.dateTo.difference(point.dateFrom).inMinutes / 60.0;
@@ -592,21 +605,34 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
         break;
       case 'SLEEP_DEEP':
         bucket['sleep_deep_hours'] = resolved;
-        _updateSleepTotal(bucket);
         break;
       case 'SLEEP_LIGHT':
         bucket['sleep_light_hours'] = resolved;
-        _updateSleepTotal(bucket);
         break;
       case 'SLEEP_REM':
         bucket['sleep_rem_hours'] = resolved;
-        _updateSleepTotal(bucket);
         break;
       case 'SLEEP_ASLEEP':
-        // undifferentiated sleep — stored separately, included in total
         bucket['sleep_asleep_hours'] = resolved;
-        _updateSleepTotal(bucket);
         break;
+    }
+  });
+
+  // finalize sleep totals after all stages and sessions are processed
+  dailyMetrics.values.forEach((bucket) {
+    if (bucket.containsKey('sleep_deep_hours') ||
+        bucket.containsKey('sleep_light_hours') ||
+        bucket.containsKey('sleep_rem_hours') ||
+        bucket.containsKey('sleep_asleep_hours') ||
+        bucket.containsKey('sleep_session_hours')) {
+      final session = bucket['sleep_session_hours'] ?? 0.0;
+      final deep = bucket['sleep_deep_hours'] ?? 0.0;
+      final light = bucket['sleep_light_hours'] ?? 0.0;
+      final rem = bucket['sleep_rem_hours'] ?? 0.0;
+      final asleep = bucket['sleep_asleep_hours'] ?? 0.0;
+      final staged = deep + light + rem;
+      _updateSleepTotal(bucket);
+      AppLogger.info('[HealthDataService] sleep for ${bucket['date']}: session=${session.toStringAsFixed(2)}h, staged=${staged.toStringAsFixed(2)}h (D${deep.toStringAsFixed(1)} L${light.toStringAsFixed(1)} R${rem.toStringAsFixed(1)}), asleep=${asleep.toStringAsFixed(2)}h → total=${bucket['sleep_hours'].toStringAsFixed(2)}h');
     }
   });
 
@@ -617,7 +643,8 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
       name: (metrics: sourceMetricCounts[name] ?? 0, sessions: sourceSessionCounts[name] ?? 0),
   };
 
-  AppLogger.debug('[HealthDataService] payload built: ${dailyMetrics.length} daily buckets, ${sessions.length} sessions, ${hrSamples.length} HR samples, sources=${sourceApps.keys.join(', ')}');
+  final sourceSummary = sourceApps.entries.map((e) => '${e.key}(${e.value.metrics}m/${e.value.sessions}s)').join(', ');
+  AppLogger.info('[HealthDataService] payload built: ${dailyMetrics.length} daily buckets, ${sessions.length} sessions, ${hrSamples.length} HR samples, sources: $sourceSummary');
   return HealthSyncPayload(
     metrics: dailyMetrics.values.toList(),
     sessions: sessions,
@@ -679,12 +706,14 @@ double _resolveOverlaps(List<_MetricInterval> intervals) {
 }
 
 void _updateSleepTotal(Map<String, dynamic> bucket) {
+  final session = (bucket['sleep_session_hours'] as double?) ?? 0.0;
   final staged = ((bucket['sleep_deep_hours'] as double?) ?? 0.0) +
       ((bucket['sleep_light_hours'] as double?) ?? 0.0) +
       ((bucket['sleep_rem_hours'] as double?) ?? 0.0);
   final asleep = (bucket['sleep_asleep_hours'] as double?) ?? 0.0;
-  // use staged breakdown if available, otherwise fall back to undifferentiated SLEEP_ASLEEP
-  bucket['sleep_hours'] = staged > 0 ? staged : asleep;
+  // prioritize SLEEP_SESSION (authoritative device total) over staged breakdown,
+  // since devices may report incomplete stage classification but accurate session duration
+  bucket['sleep_hours'] = session > 0 ? session : (staged > 0 ? staged : asleep);
 }
 
 String _dateKey(DateTime dt) =>
