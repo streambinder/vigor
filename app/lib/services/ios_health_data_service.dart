@@ -82,27 +82,18 @@ class IOSHealthDataService extends HealthDataService
   @override
   Future<HealthSyncPayload> readNewData() async {
     await _health.configure();
+
+    // read last 7 days for server-driven delta sync (mixin filters by date)
     final now = DateTime.now();
-    final maxLookback = now.subtract(const Duration(days: 30));
+    final sevenDaysAgo = now.subtract(const Duration(days: 7));
 
-    // use last sync timestamp or fall back to 30 days ago
-    final lastSyncMs = prefs.hcLastSyncMs;
-    DateTime startTime;
-    if (lastSyncMs != null) {
-      startTime = DateTime.fromMillisecondsSinceEpoch(lastSyncMs);
-      // cap to 30 days back
-      if (startTime.isBefore(maxLookback)) startTime = maxLookback;
-    } else {
-      startTime = maxLookback;
-    }
-
-    AppLogger.debug('[IOSHealth] readNewData: ${startTime.toIso8601String()} to ${now.toIso8601String()} (lastSyncMs=$lastSyncMs)');
+    AppLogger.info('[IOSHealth] reading 7 days: ${sevenDaysAgo.toIso8601String()} to ${now.toIso8601String()}');
     final dataPoints = await _health.getHealthDataFromTypes(
       types: _iosTypes,
-      startTime: startTime,
+      startTime: sevenDaysAgo,
       endTime: now,
     );
-    AppLogger.info('[IOSHealth] incremental read returned ${dataPoints.length} data points');
+    AppLogger.info('[IOSHealth] read returned ${dataPoints.length} data points');
 
     final deduped = Health().removeDuplicates(dataPoints);
     AppLogger.debug('[IOSHealth] after dedup: ${deduped.length} data points (removed ${dataPoints.length - deduped.length})');

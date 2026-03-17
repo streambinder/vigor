@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:health/health.dart';
 import '../utils/platform_helper.dart';
+import '../models/api_response.dart';
 import 'app_logger.dart';
 import 'preferences_service.dart';
 import 'authenticated_api_service.dart';
@@ -295,8 +296,10 @@ mixin HealthDataServiceMixin on HealthDataService {
         AppLogger.debug('[HealthDataService] permissions confirmed');
       }
 
-      AppLogger.debug('[HealthDataService] reading health data (${force ? 'full' : 'incremental'})');
-      final payload = force ? await readAllData() : await readNewData();
+      // server-driven delta sync: ask backend what dates it has, then only sync missing data
+      // force sync still does full 30 days to handle edge cases
+      AppLogger.debug('[HealthDataService] reading health data (${force ? 'full 30-day' : 'server-driven delta'})');
+      final payload = force ? await readAllData() : await _readDeltaSync();
       AppLogger.info('[HealthDataService] read complete: ${payload.metrics.length} metrics, ${payload.sessions.length} sessions, ${payload.hrSamples.length} HR samples, ${payload.deletedRecordIds.length} deletions');
 
       if (payload.isEmpty) {
@@ -317,12 +320,29 @@ mixin HealthDataServiceMixin on HealthDataService {
 
       for (int i = 0; i < batches.length; i++) {
         if (i > 0) await Future.delayed(const Duration(milliseconds: 200));
-        final response = await apiService
-            .post('/health/sync', body: batches[i].toJson())
-            .timeout(_syncTimeout);
 
-        if (!response.isSuccess) {
-          AppLogger.error('[HealthDataService] sync POST failed for batch ${i + 1}/${batches.length}: ${response.error} (status=${response.statusCode})');
+        // retry on 429 with exponential backoff
+        int attempts = 0;
+        const maxAttempts = 3;
+        ApiResponse? response;
+
+        while (attempts < maxAttempts) {
+          response = await apiService
+              .post('/health/sync', body: batches[i].toJson())
+              .timeout(_syncTimeout);
+
+          if (response.isSuccess || response.statusCode != 429) break;
+
+          attempts++;
+          if (attempts < maxAttempts) {
+            final backoffMs = 2000 * attempts; // 2s, 4s
+            AppLogger.warning('[HealthDataService] batch ${i + 1}/${batches.length} rate limited, retrying in ${backoffMs}ms (attempt $attempts/$maxAttempts)');
+            await Future.delayed(Duration(milliseconds: backoffMs));
+          }
+        }
+
+        if (response == null || !response.isSuccess) {
+          AppLogger.error('[HealthDataService] sync POST failed for batch ${i + 1}/${batches.length}: ${response?.error} (status=${response?.statusCode})');
           _lastSyncResult.value = HealthSyncResult(
             metricsSynced: 0, sessionsSynced: 0,
             totalMetrics: _lastSyncResult.value?.totalMetrics ?? 0,
@@ -330,7 +350,7 @@ mixin HealthDataServiceMixin on HealthDataService {
             syncedAt: DateTime.now(),
             wasForced: force,
             deviceSources: payload.sourceApps,
-            syncError: response.error ?? 'Upload failed',
+            syncError: response?.error ?? 'Upload failed',
           );
           return false;
         }
@@ -363,8 +383,8 @@ mixin HealthDataServiceMixin on HealthDataService {
   }
 
   /// split payload into one batch per date so each POST stays under the
-  /// server body limit. with the rate limit at 60 req/hour this is safe
-  /// for up to ~30 days of data.
+  /// server body limit. batches are ordered newest-first to ensure most
+  /// recent data syncs first (critical if sync fails mid-way).
   List<HealthSyncPayload> _splitByDate(HealthSyncPayload payload) {
     final metricsByDate = <String, List<Map<String, dynamic>>>{};
     for (final m in payload.metrics) {
@@ -381,7 +401,8 @@ mixin HealthDataServiceMixin on HealthDataService {
       hrByDate.putIfAbsent(_dateKeyFromMs(hr['timestamp'] as int), () => []).add(hr);
     }
 
-    final sortedDates = {...metricsByDate.keys, ...sessionsByDate.keys, ...hrByDate.keys}.toList()..sort();
+    final sortedDates = {...metricsByDate.keys, ...sessionsByDate.keys, ...hrByDate.keys}.toList()
+      ..sort((a, b) => b.compareTo(a)); // descending: newest first
     if (sortedDates.length <= 1) return [payload];
 
     return [
@@ -398,6 +419,64 @@ mixin HealthDataServiceMixin on HealthDataService {
   String _dateKeyFromMs(int ms) {
     final dt = DateTime.fromMillisecondsSinceEpoch(ms);
     return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
+  }
+
+  /// server-driven delta sync: backend tells us what dates it has, we only send missing data
+  /// this is extremely efficient and handles corrections automatically
+  Future<HealthSyncPayload> _readDeltaSync() async {
+    try {
+      // ask backend what dates it has
+      final response = await apiService.get('/health/manifest').timeout(_syncTimeout);
+      if (!response.isSuccess || response.data == null) {
+        AppLogger.warning('[HealthDataService] failed to get manifest, falling back to 7-day sync');
+        return readNewData();
+      }
+
+      final serverDates = Set<String>.from((response.data!['dates_with_data'] as List?)?.cast<String>() ?? []);
+      AppLogger.debug('[HealthDataService] server has ${serverDates.length} dates with data');
+
+      // read last 7 days of local data (efficient, recent)
+      final now = DateTime.now();
+      final sevenDaysAgo = now.subtract(const Duration(days: 7));
+      final allPayload = await readNewData(); // delegates to platform's 7-day read
+
+      if (allPayload.isEmpty) return allPayload;
+
+      // filter to only missing dates + last 3 days (today, yesterday, 2 days ago)
+      // this ensures recent data stays fresh even if devices sync late updates
+      final recentDates = <String>{};
+      for (int i = 0; i < 3; i++) {
+        final date = now.subtract(Duration(days: i));
+        recentDates.add('${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}');
+      }
+
+      final filteredMetrics = allPayload.metrics.where((m) {
+        final date = m['date'] as String;
+        return !serverDates.contains(date) || recentDates.contains(date);
+      }).toList();
+
+      final filteredSessions = allPayload.sessions.where((s) {
+        final date = _dateKeyFromMs(s['started_at'] as int);
+        return !serverDates.contains(date) || recentDates.contains(date);
+      }).toList();
+
+      final filteredHR = allPayload.hrSamples.where((hr) {
+        final date = _dateKeyFromMs(hr['timestamp'] as int);
+        return !serverDates.contains(date) || recentDates.contains(date);
+      }).toList();
+
+      AppLogger.info('[HealthDataService] delta sync: ${filteredMetrics.length} metrics, ${filteredSessions.length} sessions, ${filteredHR.length} HR samples (filtered from ${allPayload.metrics.length}/${allPayload.sessions.length}/${allPayload.hrSamples.length})');
+
+      return HealthSyncPayload(
+        metrics: filteredMetrics,
+        sessions: filteredSessions,
+        hrSamples: filteredHR,
+        deletedRecordIds: allPayload.deletedRecordIds,
+      );
+    } catch (e) {
+      AppLogger.error('[HealthDataService] delta sync failed, falling back', e);
+      return readNewData();
+    }
   }
 
   /// called after successful backend POST — persist platform-specific tokens

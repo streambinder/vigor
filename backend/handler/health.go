@@ -15,7 +15,7 @@ import (
 
 func initHealth(app *fiber.App) {
 	syncLimiter := limiter.New(limiter.Config{
-		Max:        60,
+		Max:        120,
 		Expiration: 1 * time.Hour,
 		KeyGenerator: func(c *fiber.Ctx) string {
 			if uid, ok := c.Locals("userID").(uuid.UUID); ok {
@@ -33,6 +33,7 @@ func initHealth(app *fiber.App) {
 	app.Get("/health/stats", middleware.Authorized(), getHealthStats)
 	app.Get("/health/daily", middleware.Authorized(), getHealthDaily)
 	app.Get("/health/session/:id", middleware.Authorized(), getHealthSession)
+	app.Get("/health/manifest", middleware.Authorized(), getHealthManifest)
 }
 
 func postHealthSync(c *fiber.Ctx) error {
@@ -119,4 +120,13 @@ func getHealthSession(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(session)
+}
+
+func getHealthManifest(c *fiber.Ctx) error {
+	resp, err := service.GetHealthManifest(c.Locals("userID").(uuid.UUID))
+	if err != nil {
+		middleware.Log(c).Error().Err(err).Msg("failed to get health manifest")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to get health manifest"})
+	}
+	return c.JSON(resp)
 }

@@ -306,6 +306,32 @@ func GetHealthStats(userID uuid.UUID) (*model.HealthStatsResponse, error) {
 	return resp, nil
 }
 
+// GetHealthManifest returns list of dates with health data (last 30 days) for delta sync.
+// client compares local data against this manifest and only syncs missing/changed dates.
+func GetHealthManifest(userID uuid.UUID) (*model.HealthManifestResponse, error) {
+	thirtyDaysAgo := time.Now().UTC().AddDate(0, 0, -30)
+
+	var dates []struct {
+		Date time.Time
+	}
+	if err := database.DB.Model(&model.HealthMetric{}).
+		Where("user_id = ? AND date > ?", userID, thirtyDaysAgo).
+		Select("date").
+		Order("date DESC").
+		Scan(&dates).Error; err != nil {
+		return nil, err
+	}
+
+	datesWithData := make([]string, len(dates))
+	for i, d := range dates {
+		datesWithData[i] = d.Date.Format("2006-01-02")
+	}
+
+	return &model.HealthManifestResponse{
+		DatesWithData: datesWithData,
+	}, nil
+}
+
 // populateDateRanges queries min/max dates for metrics and sessions
 func populateDateRanges(userID uuid.UUID, metricsFrom, metricsTo, sessionsFrom, sessionsTo *string) {
 	var mRange struct{ MinDate, MaxDate *time.Time }

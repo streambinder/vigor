@@ -12,8 +12,6 @@ class AndroidHealthDataService extends HealthDataService
   final SecureStorageService storage;
 
   final Health _health = Health();
-  // hold new token in memory until backend POST succeeds (H3)
-  String? _pendingChangesToken;
   bool _configured = false;
 
   AndroidHealthDataService({required this.prefs, required this.storage});
@@ -99,118 +97,32 @@ class AndroidHealthDataService extends HealthDataService
     return _doFullRead();
   }
 
-  // sleep stage types to fetch explicitly when changes include sleep data
-  static const _sleepStageTypes = [
-    HealthDataType.SLEEP_ASLEEP,
-    HealthDataType.SLEEP_DEEP,
-    HealthDataType.SLEEP_LIGHT,
-    HealthDataType.SLEEP_REM,
-    HealthDataType.SLEEP_AWAKE,
-    HealthDataType.SLEEP_AWAKE_IN_BED,
-  ];
-
-  static const _sleepChangeTypes = {
-    HealthDataType.SLEEP_SESSION,
-    HealthDataType.SLEEP_ASLEEP,
-    HealthDataType.SLEEP_DEEP,
-    HealthDataType.SLEEP_LIGHT,
-    HealthDataType.SLEEP_REM,
-  };
-
   @override
   Future<HealthSyncPayload> readNewData() async {
     await _ensureConfigured();
-    final token = prefs.hcChangesToken;
-    AppLogger.debug('[AndroidHealth] readNewData: existing token=$token');
 
-    // first sync — no existing token, do full 30-day read
-    if (token == null) {
-      AppLogger.info('[AndroidHealth] first sync — doing full 30-day read');
-      return _doFullRead();
-    }
+    // read last 7 days for server-driven delta sync (mixin filters by date)
+    final now = DateTime.now();
+    final sevenDaysAgo = now.subtract(const Duration(days: 7));
 
-    final allDataPoints = <HealthDataPoint>[];
-    final deletedRecordIds = <String>[];
-    var currentToken = token;
-    var hasMore = true;
-    var completedSuccessfully = true;
-
-    while (hasMore) {
-      final changesResponse = await _health.getChanges(
-        changesToken: currentToken,
-      );
-
-      if (changesResponse == null) {
-        AppLogger.error('[AndroidHealth] getChanges returned null');
-        completedSuccessfully = false;
-        break;
-      }
-
-      // token expired — fall back to full re-read
-      if (changesResponse.changesTokenExpired) {
-        AppLogger.warning('[AndroidHealth] changes token expired, doing full re-read');
-        return _doFullRead();
-      }
-
-      AppLogger.debug('[AndroidHealth] changes page: ${changesResponse.upsertedDataPoints.length} upserted, ${changesResponse.deletedRecordIds.length} deleted, hasMore=${changesResponse.hasMore}');
-      allDataPoints.addAll(changesResponse.upsertedDataPoints);
-      deletedRecordIds.addAll(changesResponse.deletedRecordIds);
-      currentToken = changesResponse.nextChangesToken;
-      hasMore = changesResponse.hasMore;
-    }
-
-    AppLogger.info('[AndroidHealth] changes loop done: ${allDataPoints.length} total upserted, ${deletedRecordIds.length} total deleted');
-    // only advance the token if the loop completed without errors
-    if (completedSuccessfully) {
-      _pendingChangesToken = currentToken;
-    }
-
-    // the changes API delivers SLEEP_SESSION parent records but not the
-    // individual stage sub-records (SLEEP_DEEP, SLEEP_LIGHT, SLEEP_REM, etc.)
-    // so when sleep changes are detected, do a supplemental read of stage types
-    final hasSleepChanges = allDataPoints.any((p) => _sleepChangeTypes.contains(p.type));
-    if (hasSleepChanges) {
-      AppLogger.info('[AndroidHealth] sleep changes detected — fetching stage breakdown');
-      DateTime? earliest;
-      DateTime? latest;
-      for (final p in allDataPoints.where((p) => _sleepChangeTypes.contains(p.type))) {
-        if (earliest == null || p.dateFrom.isBefore(earliest)) earliest = p.dateFrom;
-        if (latest == null || p.dateTo.isAfter(latest)) latest = p.dateTo;
-      }
-      if (earliest != null && latest != null) {
-        // widen window slightly to catch full sessions spanning midnight
-        final sleepStart = earliest.subtract(const Duration(hours: 12));
-        final sleepEnd = latest.add(const Duration(hours: 1));
-        final stagePoints = await _health.getHealthDataFromTypes(
-          types: _sleepStageTypes,
-          startTime: sleepStart,
-          endTime: sleepEnd,
-        );
-        AppLogger.debug('[AndroidHealth] fetched ${stagePoints.length} sleep stage records (${sleepStart.toIso8601String()} to ${sleepEnd.toIso8601String()})');
-        allDataPoints.addAll(stagePoints);
-      }
-    }
-
-    final payload = buildSyncPayload(Health().removeDuplicates(allDataPoints));
-    if (deletedRecordIds.isEmpty) return payload;
-    return HealthSyncPayload(
-      metrics: payload.metrics,
-      sessions: payload.sessions,
-      hrSamples: payload.hrSamples,
-      deletedRecordIds: deletedRecordIds,
-      sourceApps: payload.sourceApps,
+    AppLogger.info('[AndroidHealth] reading 7 days: ${sevenDaysAgo.toIso8601String()} to ${now.toIso8601String()}');
+    final dataPoints = await _health.getHealthDataFromTypes(
+      types: healthPermissionTypes,
+      startTime: sevenDaysAgo,
+      endTime: now,
     );
+    AppLogger.info('[AndroidHealth] read returned ${dataPoints.length} data points');
+
+    final deduped = Health().removeDuplicates(dataPoints);
+    AppLogger.debug('[AndroidHealth] after dedup: ${deduped.length} data points (removed ${dataPoints.length - deduped.length})');
+
+    return buildSyncPayload(deduped);
   }
 
-  /// full re-read on first sync or expired token
+  /// full 30-day read for manual/force sync
   Future<HealthSyncPayload> _doFullRead() async {
     final now = DateTime.now();
     final thirtyDaysAgo = now.subtract(const Duration(days: 30));
-
-    // get a fresh token for next time
-    final newToken = await _health.getChangesToken(types: healthPermissionTypes);
-    _pendingChangesToken = newToken;
-    AppLogger.debug('[AndroidHealth] acquired new changes token: $newToken');
 
     AppLogger.debug('[AndroidHealth] full read: ${thirtyDaysAgo.toIso8601String()} to ${now.toIso8601String()}');
     final dataPoints = await _health.getHealthDataFromTypes(
@@ -229,10 +141,6 @@ class AndroidHealthDataService extends HealthDataService
 
   @override
   Future<void> onSyncSuccess() async {
-    if (_pendingChangesToken != null) {
-      AppLogger.debug('[AndroidHealth] persisting changes token after successful sync');
-      await prefs.setHcChangesToken(_pendingChangesToken);
-      _pendingChangesToken = null;
-    }
+    // no tokens to persist with rolling window approach
   }
 }

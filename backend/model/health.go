@@ -139,3 +139,9 @@ type HealthSyncHRSample struct {
 	Timestamp int64 `json:"timestamp"` // unix ms
 	BPM       int   `json:"bpm"`
 }
+
+// HealthManifestResponse returns list of dates with existing health data for delta sync.
+// codegen:skip
+type HealthManifestResponse struct {
+	DatesWithData []string `json:"dates_with_data"` // YYYY-MM-DD format
+}
