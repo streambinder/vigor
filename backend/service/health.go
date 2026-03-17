@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"sort"
 	"strings"
@@ -23,13 +24,18 @@ const (
 	maxHRSamplesPerSession = 15000
 )
 
-// ParseTimezone parses an IANA timezone string into a *time.Location, falling back to UTC.
-func ParseTimezone(tz string) *time.Location {
-	if loc, err := time.LoadLocation(tz); err == nil {
-		return loc
+// ParseTimezone parses an IANA timezone string into a *time.Location.
+// returns error if timezone is empty or invalid - callers should reject requests
+// rather than silently defaulting to UTC (which causes data attribution bugs).
+func ParseTimezone(tz string) (*time.Location, error) {
+	if tz == "" {
+		return nil, fmt.Errorf("timezone is required")
 	}
-	log.Warn().Str("timezone", tz).Msg("failed to load timezone, falling back to UTC")
-	return time.UTC
+	loc, err := time.LoadLocation(tz)
+	if err != nil {
+		return nil, fmt.Errorf("invalid timezone %q: %w", tz, err)
+	}
+	return loc, nil
 }
 
 // estimateMaxHR uses modern formulas: Tanaka (2001) for general population,
@@ -81,8 +87,9 @@ func clampIntOrZero(v, min, max int) int {
 
 // SyncHealthData ingests raw health data from the client, aggregates metrics,
 // upserts exercise sessions, correlates HR samples, and enriches trainings.
+// loc is the client's timezone (from X-Timezone header) used for date attribution.
 func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Location) (*model.HealthSyncResponse, error) {
-	now := time.Now()
+	now := time.Now().UTC()
 	thirtyDaysAgo := now.AddDate(0, 0, -30)
 
 	// payload size limits — silently truncate oversized payloads
@@ -191,8 +198,8 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Loc
 				UserID:       userID,
 				SourceApp:    s.SourceApp,
 				ExerciseType: strings.ToLower(s.ExerciseType),
-				StartedAt:    startedAt,
-				EndedAt:      endedAt,
+				StartedAt:    startedAt.UTC(),
+				EndedAt:      endedAt.UTC(),
 				Calories:     s.Calories,
 				HCRecordID:   s.HCRecordID,
 				SyncedAt:     now,
@@ -399,7 +406,7 @@ func computeHRZones(samples []model.HealthSyncHRSample, maxHR int, restingHR *in
 // the training methodology. this is resilient to timezone mismatches between the
 // health data source (e.g. Fitbit) and the Vigor completion timestamp.
 func enrichTrainings(tx *gorm.DB, userID uuid.UUID, loc *time.Location) error {
-	thirtyDaysAgo := time.Now().AddDate(0, 0, -enrichmentMaxDays)
+	thirtyDaysAgo := time.Now().UTC().AddDate(0, 0, -enrichmentMaxDays)
 
 	var unlinkedSessions []model.HealthExerciseSession
 	if err := tx.Where("user_id = ? AND training_id IS NULL AND started_at > ?", userID, thirtyDaysAgo).
@@ -490,7 +497,7 @@ func DisconnectHealth(userID uuid.UUID) error {
 // Returns nil when no data is available or data is stale (>3 days old).
 func GetHealthSnapshot(userID uuid.UUID, loc *time.Location) (*model.HealthSnapshot, error) {
 	var metrics []model.HealthMetric
-	cutoff := time.Now().In(loc).AddDate(0, 0, -baselineWindowDays).Format("2006-01-02")
+	cutoff := time.Now().UTC().In(loc).AddDate(0, 0, -baselineWindowDays).Format("2006-01-02")
 	if err := database.DB.Where("user_id = ? AND date > ?", userID, cutoff).
 		Order("date DESC").
 		Find(&metrics).Error; err != nil {
@@ -566,7 +573,7 @@ func GetHealthSnapshot(userID uuid.UUID, loc *time.Location) (*model.HealthSnaps
 	}
 
 	// external workouts (last 3 days, unlinked to Vigor trainings)
-	externalCutoff := time.Now().AddDate(0, 0, -externalWorkoutDays)
+	externalCutoff := time.Now().UTC().AddDate(0, 0, -externalWorkoutDays)
 	var externalSessions []model.HealthExerciseSession
 	if err := database.DB.Where("user_id = ? AND training_id IS NULL AND started_at > ?", userID, externalCutoff).
 		Order("started_at DESC").
@@ -611,7 +618,7 @@ func GetExerciseSessionForTraining(trainingID, userID uuid.UUID) (*model.HealthE
 
 // GetHealthDaily returns the last 7 days of health metrics and unlinked exercise sessions.
 func GetHealthDaily(userID uuid.UUID, loc *time.Location) (*model.HealthDailyResponse, error) {
-	now := time.Now().In(loc)
+	now := time.Now().UTC().In(loc)
 	// format as date string to avoid timezone offset issues with PostgreSQL date columns
 	today := now.Format("2006-01-02")
 

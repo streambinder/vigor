@@ -11,8 +11,8 @@ type User struct {
 	ID    uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
 	Email string    `gorm:"uniqueIndex;not null" json:"email"`
 
-	CreatedAt time.Time `json:"-"`
-	UpdatedAt time.Time `json:"-"`
+	CreatedAt time.Time `gorm:"type:timestamptz;default:now()" json:"-"`
+	UpdatedAt time.Time `gorm:"type:timestamptz;default:now()" json:"-"`
 
 	Profile    Profile    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID;references:ID" json:"profile"`
 	Identities []Identity `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID;references:ID" json:"-"`

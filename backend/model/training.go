@@ -123,8 +123,8 @@ type TrainingFeedback struct {
 	QualityReason    string         `json:"qualityReason"`
 	Message          string         `json:"message"`
 	ActivityFeedback datatypes.JSON `gorm:"type:jsonb" json:"activityFeedback"` // map[exerciseID]string
-	CreatedAt        time.Time      `json:"createdAt"`
-	UpdatedAt        time.Time      `json:"-"`
+	CreatedAt        time.Time      `gorm:"type:timestamptz;default:now()" json:"createdAt"`
+	UpdatedAt        time.Time      `gorm:"type:timestamptz;default:now()" json:"-"`
 }
 
 // TrainingReference holds a resolved fact excerpt with its source URL.
@@ -154,12 +154,12 @@ type Training struct {
 	Routines    []Routine      `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"routines" prompt:"Training routines"`
 	Prompt   datatypes.JSONType[TrainingPrompt]    `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
 
-	CompletedAt *time.Time `json:"completed_at" prompt:"-"`
+	CompletedAt *time.Time `gorm:"type:timestamptz" json:"completed_at" prompt:"-"`
 	CompletedIn *int       `json:"completed_in" prompt:"-"`
 	HealthInfluenced bool  `json:"health_influenced" prompt:"-"`
 	HasHealthSession bool  `gorm:"-" json:"has_health_session" prompt:"-"`
-	CreatedAt   time.Time  `json:"created_at" prompt:"-"`
-	UpdatedAt   time.Time  `json:"-"`
+	CreatedAt   time.Time  `gorm:"type:timestamptz;default:now()" json:"created_at" prompt:"-"`
+	UpdatedAt   time.Time  `gorm:"type:timestamptz;default:now()" json:"-"`
 
 	UserID   uuid.UUID  `gorm:"type:uuid;not null" json:"user_id" prompt:"-"`
 	User     User       `gorm:"constraint:OnDelete:CASCADE;" json:"-"`

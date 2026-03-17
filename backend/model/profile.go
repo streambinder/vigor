@@ -20,8 +20,8 @@ type Profile struct {
 	HealthDisconnected bool           `json:"health_disconnected"`
 	Data               datatypes.JSON `gorm:"type:jsonb" json:"data"`
 
-	CreatedAt time.Time `json:"-"`
-	UpdatedAt time.Time `json:"-"`
+	CreatedAt time.Time `gorm:"type:timestamptz;default:now()" json:"-"`
+	UpdatedAt time.Time `gorm:"type:timestamptz;default:now()" json:"-"`
 
 	UserID uuid.UUID `gorm:"type:uuid;primaryKey" json:"user_id"`
 	User   *User     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`

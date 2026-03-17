@@ -20,7 +20,7 @@ type HealthMetric struct {
 	HRVRMSSD       float64   `gorm:"column:hrv_rmssd" json:"hrv_rmssd"`
 	Steps          int       `json:"steps"`
 	ActiveCalories float64   `json:"active_calories"`
-	SyncedAt       time.Time `json:"synced_at"`
+	SyncedAt       time.Time `gorm:"type:timestamptz;default:now()" json:"synced_at"`
 }
 
 type HealthExerciseSession struct {
@@ -31,15 +31,15 @@ type HealthExerciseSession struct {
 	Training             *Training       `gorm:"constraint:OnDelete:SET NULL;" json:"-"`
 	SourceApp            string          `gorm:"type:varchar(255)" json:"source_app"`
 	ExerciseType         string          `gorm:"type:varchar(64)" json:"exercise_type"`
-	StartedAt            time.Time       `gorm:"not null;index:idx_health_session_user_started" json:"started_at"`
-	EndedAt              time.Time       `gorm:"not null" json:"ended_at"`
+	StartedAt            time.Time       `gorm:"type:timestamptz;not null;index:idx_health_session_user_started" json:"started_at"`
+	EndedAt              time.Time       `gorm:"type:timestamptz;not null" json:"ended_at"`
 	AvgHR                *int            `json:"avg_hr"`
 	MaxHR                *int            `json:"max_hr"`
 	Calories             *float64        `json:"calories"`
 	HRZoneDistributionJSON datatypes.JSON `gorm:"type:jsonb" json:"hr_zone_distribution_json"`
 	HRSamplesJSON        datatypes.JSON  `gorm:"type:jsonb" json:"hr_samples_json"`
 	HCRecordID           string          `gorm:"type:varchar(255);not null;uniqueIndex:idx_health_session_user_record" json:"hc_record_id"`
-	SyncedAt             time.Time       `json:"synced_at"`
+	SyncedAt             time.Time       `gorm:"type:timestamptz;default:now()" json:"synced_at"`
 }
 
 // codegen:skip

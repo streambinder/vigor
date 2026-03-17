@@ -230,13 +230,7 @@ class AuthService {
 
     if (firstName != null) body['first_name'] = firstName;
     if (lastName != null) body['last_name'] = lastName;
-    if (birthdate != null) {
-      // Format as DD/MM/YYYY as expected by server
-      final day = birthdate.day.toString().padLeft(2, '0');
-      final month = birthdate.month.toString().padLeft(2, '0');
-      final year = birthdate.year.toString();
-      body['birthdate'] = '$day/$month/$year';
-    }
+    if (birthdate != null) body['birthdate'] = birthdate.toIso8601String().split('T')[0];
     if (gender != null) body['gender'] = gender;
     if (language != null) body['language'] = language;
     if (height != null) body['height'] = height;

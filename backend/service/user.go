@@ -80,11 +80,11 @@ func UpdateProfile(userID uuid.UUID, params UpdateProfileParams) (model.Profile,
 		profile.LastName = params.LastName
 	}
 	if params.Birthdate != "" {
-		t, err := time.Parse("02/01/2006", params.Birthdate)
+		t, err := time.Parse("2006-01-02", params.Birthdate)
 		if err != nil {
-			return profile, err
+			return profile, fmt.Errorf("invalid birthdate format (expected YYYY-MM-DD): %w", err)
 		}
-		profile.Birthdate = t
+		profile.Birthdate = t.UTC()
 	}
 	if params.Gender != "" {
 		profile.Gender = params.Gender

@@ -644,7 +644,7 @@ func CompleteTraining(userID uuid.UUID, trainingID string, quality *bool, qualit
 		return nil, ErrTrainingNotFound
 	}
 
-	now := time.Now()
+	now := time.Now().UTC()
 	training.CompletedAt = &now
 	training.CompletedIn = completedIn
 

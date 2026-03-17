@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -40,7 +41,14 @@ func postHealthSync(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
 	}
 
-	resp, err := service.SyncHealthData(c.Locals("userID").(uuid.UUID), req, service.ParseTimezone(c.Get("X-Timezone")))
+	// validate X-Timezone header and reject if invalid
+	loc, err := service.ParseTimezone(c.Get("X-Timezone"))
+	if err != nil {
+		middleware.Log(c).Warn().Err(err).Msg("invalid timezone header")
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": fmt.Sprintf("invalid timezone: %v", err)})
+	}
+
+	resp, err := service.SyncHealthData(c.Locals("userID").(uuid.UUID), req, loc)
 	if err != nil {
 		middleware.Log(c).Error().Err(err).Msg("failed to sync health data")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "sync failed"})
@@ -68,7 +76,14 @@ func postHealthDisconnect(c *fiber.Ctx) error {
 }
 
 func getHealthDaily(c *fiber.Ctx) error {
-	resp, err := service.GetHealthDaily(c.Locals("userID").(uuid.UUID), service.ParseTimezone(c.Get("X-Timezone")))
+	// validate X-Timezone header
+	loc, err := service.ParseTimezone(c.Get("X-Timezone"))
+	if err != nil {
+		middleware.Log(c).Warn().Err(err).Msg("invalid timezone header")
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": fmt.Sprintf("invalid timezone: %v", err)})
+	}
+
+	resp, err := service.GetHealthDaily(c.Locals("userID").(uuid.UUID), loc)
 	if err != nil {
 		middleware.Log(c).Error().Err(err).Msg("failed to get health daily")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to get health daily"})

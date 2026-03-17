@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -29,6 +30,13 @@ func postTraining(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
 	}
 
+	// validate X-Timezone header
+	loc, err := service.ParseTimezone(c.Get("X-Timezone"))
+	if err != nil {
+		middleware.Log(c).Warn().Err(err).Msg("invalid timezone header")
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": fmt.Sprintf("invalid timezone: %v", err)})
+	}
+
 	training, err := service.GenerateTraining(
 		c.Locals("userID").(uuid.UUID),
 		req.Duration,
@@ -40,7 +48,7 @@ func postTraining(c *fiber.Ctx) error {
 		req.Methodology,
 		req.Goals,
 		req.Muscles,
-		service.ParseTimezone(c.Get("X-Timezone")),
+		loc,
 	)
 	if err != nil {
 		switch {
