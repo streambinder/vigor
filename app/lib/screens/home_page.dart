@@ -12,6 +12,7 @@ import '../models/weekly_target.dart';
 import '../models/week_progress.dart';
 import '../models/week_summary.dart';
 import '../providers/auth_provider.dart';
+import '../services/app_event.dart';
 import '../services/app_logger.dart';
 import '../services/preferences_service.dart';
 import '../services/secure_storage_service.dart';
@@ -33,13 +34,14 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
   Progress? _progress;
   WeeklyTarget? _weeklyTarget;
   Map<String, dynamic>? _healthDaily;
   bool _isLoading = false;
   bool _hasLoadedOnce = false;
   bool _consumedInitialData = false;
+  bool _subscribedToEvents = false;
 
   void _consumePreloadedData() {
     if (_consumedInitialData) return;
@@ -52,6 +54,17 @@ class _HomePageState extends State<HomePage> {
       _hasLoadedOnce = true;
       serviceLocator.initialProgress = null;
       serviceLocator.initialWeeklyTarget = null;
+    }
+    if (!_subscribedToEvents) {
+      _subscribedToEvents = true;
+      subscribeToEvents(serviceLocator.events, _onAppEvent);
+    }
+  }
+
+  void _onAppEvent(AppEvent event) {
+    if (!mounted) return;
+    if (event is TrainingCompleted || event is TrainingListChanged) {
+      _loadProgress();
     }
   }
 

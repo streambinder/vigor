@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/user.dart';
+import '../services/app_event.dart';
 import '../services/app_logger.dart';
 import '../services/auth_service.dart';
 import '../services/secure_storage_service.dart';
@@ -20,6 +21,9 @@ class AuthProvider with ChangeNotifier {
   AuthState _state = AuthState.initial;
   User? _currentUser;
   String? _errorMessage;
+
+  /// event callback set by ServiceLocator after creation
+  void Function(AppEvent)? emitEvent;
 
   AuthProvider({
     AuthService? authService,
@@ -188,6 +192,7 @@ class AuthProvider with ChangeNotifier {
       if (response.isSuccess) {
         // Refresh user data to get updated profile
         await refreshUserData();
+        emitEvent?.call(ProfileUpdated());
         return true;
       } else {
         _errorMessage = response.error ?? 'Failed to update profile';

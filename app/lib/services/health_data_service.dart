@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:health/health.dart';
 import '../utils/platform_helper.dart';
 import '../models/api_response.dart';
+import 'app_event.dart';
 import 'app_logger.dart';
 import 'preferences_service.dart';
 import 'authenticated_api_service.dart';
@@ -171,6 +172,9 @@ abstract class HealthDataService {
 mixin HealthDataServiceMixin on HealthDataService {
   PreferencesService get prefs;
   SecureStorageService get storage;
+
+  /// event callback set by ServiceLocator after creation
+  void Function(AppEvent)? emitEvent;
 
   final ValueNotifier<bool> _syncing = ValueNotifier(false);
   @override
@@ -373,6 +377,7 @@ mixin HealthDataServiceMixin on HealthDataService {
       // persist tokens/timestamps only after successful POST (H3)
       await onSyncSuccess();
       await prefs.setHcLastSyncMs(DateTime.now().millisecondsSinceEpoch);
+      emitEvent?.call(HealthSyncCompleted());
       return true;
     } catch (e) {
       AppLogger.error('[HealthDataService] sync failed', e);

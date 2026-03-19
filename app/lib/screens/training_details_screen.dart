@@ -15,6 +15,7 @@ import '../models/exercise.dart';
 import '../dto/partner_info.dart';
 import '../models/training_feedback.dart';
 import '../providers/auth_provider.dart';
+import '../services/app_event.dart';
 import '../services/preferences_service.dart';
 import '../services/service_locator.dart';
 import '../timer/workout_timer_notifier.dart';
@@ -37,7 +38,7 @@ class TrainingDetailsScreen extends StatefulWidget {
   State<TrainingDetailsScreen> createState() => _TrainingDetailsScreenState();
 }
 
-class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
+class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppEventSubscriber<TrainingDetailsScreen> {
   late Training _training;
   List<PartnerInfo> _partners = [];
   TrainingFeedback? _userFeedback;
@@ -55,9 +56,17 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
   void initState() {
     super.initState();
     _training = widget.training;
+    subscribeToEvents(context.read<ServiceLocator>().events, _onAppEvent);
     _loadPartners();
     if (_training.completedAt != null) _loadUserFeedback();
     if (_training.hasHealthSession) _loadHealthSession();
+  }
+
+  void _onAppEvent(AppEvent event) {
+    if (!mounted) return;
+    if (event is FeedbackSubmitted && event.trainingId == _training.id) {
+      _loadUserFeedback();
+    }
   }
 
   @override

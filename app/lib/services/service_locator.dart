@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/family_progress.dart';
 import '../models/gym.dart';
 import '../models/progress.dart';
 import '../models/training.dart';
 import '../models/weekly_target.dart';
+import 'app_event.dart';
 import 'training_service.dart';
 import 'gym_service.dart';
 import 'progress_service.dart';
@@ -45,16 +47,41 @@ class ServiceLocator extends ChangeNotifier {
   bool _isRefreshingGyms = false;
   bool _isRefreshingTrainings = false;
 
-  ServiceLocator(this._storage, this._prefs);
+  // typed event bus
+  final _eventController = StreamController<AppEvent>.broadcast();
+  StreamSubscription<AppEvent>? _eventSub;
+  Stream<AppEvent> get events => _eventController.stream;
+  void emit(AppEvent event) => _eventController.add(event);
+
+  ServiceLocator(this._storage, this._prefs) {
+    _eventSub = _eventController.stream.listen(_onEvent);
+  }
+
+  void _onEvent(AppEvent event) {
+    switch (event) {
+      case TrainingListChanged():
+        refreshTrainings();
+      case TrainingCompleted():
+        refreshTrainings();
+        refreshHealthDaily();
+      case GymListChanged():
+        refreshGyms();
+      case HealthSyncCompleted():
+        refreshHealthDaily();
+      case FeedbackSubmitted():
+      case ProfileUpdated():
+        break; // handled at screen level / by AuthProvider
+    }
+  }
 
   TrainingService get trainingService => _trainingService ??= TrainingService(
         storageService: _storage,
-        onDataChanged: refreshTrainings,
+        emitEvent: emit,
       );
 
   GymService get gymService => _gymService ??= GymService(
         storageService: _storage,
-        onDataChanged: refreshGyms,
+        emitEvent: emit,
       );
 
   ProgressService get progressService =>
@@ -63,8 +90,14 @@ class ServiceLocator extends ChangeNotifier {
   UserService get userService =>
       _userService ??= UserService(storageService: _storage);
 
-  HealthDataService? get healthDataService => _healthDataService ??=
-      HealthDataService.create(prefs: _prefs, storage: _storage);
+  HealthDataService? get healthDataService {
+    if (_healthDataService != null) return _healthDataService;
+    _healthDataService = HealthDataService.create(prefs: _prefs, storage: _storage);
+    if (_healthDataService is HealthDataServiceMixin) {
+      (_healthDataService as HealthDataServiceMixin).emitEvent = emit;
+    }
+    return _healthDataService;
+  }
 
   Future<void> refreshGyms() async {
     if (_isRefreshingGyms) return;
@@ -151,6 +184,8 @@ class ServiceLocator extends ChangeNotifier {
 
   @override
   void dispose() {
+    _eventSub?.cancel();
+    _eventController.close();
     gymsNotifier.dispose();
     trainingsNotifier.dispose();
     isCalibratingNotifier.dispose();

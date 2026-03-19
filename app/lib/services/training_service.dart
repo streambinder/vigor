@@ -1,21 +1,21 @@
-import 'dart:ui';
 import '../models/api_response.dart';
 import '../models/activity.dart';
 import '../dto/partner_info.dart';
 import '../models/training.dart';
 import '../models/training_feedback.dart';
+import 'app_event.dart';
 import 'app_logger.dart';
 import 'authenticated_api_service.dart';
 import 'secure_storage_service.dart';
 
 class TrainingService {
   final AuthenticatedApiService _apiService;
-  final VoidCallback? onDataChanged;
+  final void Function(AppEvent)? emitEvent;
 
   TrainingService({
     AuthenticatedApiService? apiService,
     SecureStorageService? storageService,
-    this.onDataChanged,
+    this.emitEvent,
   }) : _apiService = apiService ??
             AuthenticatedApiService(storageService: storageService);
 
@@ -76,7 +76,7 @@ class TrainingService {
         try {
           final training = Training.fromJson(response.data!);
           AppLogger.info('[TrainingService] Generated training: ${training.id}');
-          onDataChanged?.call();
+          emitEvent?.call(TrainingListChanged());
           return ApiResponse.success(training, response.statusCode);
         } catch (e) {
           AppLogger.error('[TrainingService] failed to parse training', e);
@@ -127,7 +127,7 @@ class TrainingService {
     if (response.isSuccess) {
       final message = response.data?['message'] as String? ?? 'Training deleted';
       AppLogger.info('[TrainingService] Deleted training: $trainingId');
-      onDataChanged?.call();
+      emitEvent?.call(TrainingListChanged());
       return ApiResponse.success(message, response.statusCode);
     } else {
       AppLogger.error('[TrainingService] Failed to delete training: ${response.error}');
@@ -169,7 +169,7 @@ class TrainingService {
       try {
         final training = Training.fromJson(response.data!['training']);
         AppLogger.info('[TrainingService] Completed training: $trainingId');
-        onDataChanged?.call();
+        emitEvent?.call(TrainingCompleted(trainingId));
         return ApiResponse.success(training, response.statusCode);
       } catch (e) {
         AppLogger.error('[TrainingService] failed to parse completed training', e);
@@ -211,6 +211,7 @@ class TrainingService {
       try {
         final training = Training.fromJson(response.data!['training']);
         AppLogger.info('[TrainingService] Updated feedback for training: $trainingId');
+        emitEvent?.call(FeedbackSubmitted(trainingId));
         return ApiResponse.success(training, response.statusCode);
       } catch (e) {
         AppLogger.error('[TrainingService] failed to parse updated training', e);
@@ -297,7 +298,7 @@ class TrainingService {
       try {
         final training = Training.fromJson(response.data!);
         AppLogger.info('[TrainingService] Copied training: $trainingId');
-        onDataChanged?.call();
+        emitEvent?.call(TrainingListChanged());
         return ApiResponse.success(training, response.statusCode);
       } catch (e) {
         AppLogger.error('[TrainingService] failed to parse copied training', e);
@@ -399,7 +400,7 @@ class TrainingService {
     if (response.isSuccess && response.data != null) {
       try {
         final training = Training.fromJson(response.data!);
-        onDataChanged?.call();
+        emitEvent?.call(TrainingListChanged());
         return ApiResponse.success(training, response.statusCode);
       } catch (e) {
         return ApiResponse.error('Failed to parse claimed training', response.statusCode);
