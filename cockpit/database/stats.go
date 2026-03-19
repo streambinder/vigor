@@ -116,12 +116,12 @@ func GetBadQualityPerModel() ([]ModelQualityPoint, error) {
 	}
 	var results []ModelQualityPoint
 	err := DB.Raw(`
-		SELECT prompt->>'model' AS model, COUNT(*) AS count
+		SELECT prompt->'reasoning'->>'model' AS model, COUNT(*) AS count
 		FROM trainings
 		WHERE feedback->>'quality' = 'false'
-		  AND prompt->>'model' IS NOT NULL
-		  AND prompt->>'model' != ''
-		GROUP BY prompt->>'model'
+		  AND prompt->'reasoning'->>'model' IS NOT NULL
+		  AND prompt->'reasoning'->>'model' != ''
+		GROUP BY prompt->'reasoning'->>'model'
 		ORDER BY count DESC
 	`).Scan(&results).Error
 	return results, err

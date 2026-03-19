@@ -28,14 +28,14 @@ func GetTrainingGenerationStats(days int) ([]LatencyPoint, error) {
 		WITH ranked AS (
 			SELECT
 				date(time) as day,
-				model,
+				reasoning_model,
 				latency / 1000000.0 as ms,
-				ROW_NUMBER() OVER (PARTITION BY date(time), model ORDER BY latency) as rn,
-				COUNT(*) OVER (PARTITION BY date(time), model) as cnt
+				ROW_NUMBER() OVER (PARTITION BY date(time), reasoning_model ORDER BY latency) as rn,
+				COUNT(*) OVER (PARTITION BY date(time), reasoning_model) as cnt
 			FROM %s
 			WHERE time > datetime('now', '-%d days')
 		)
-		SELECT day, model as "group", ms as p95_ms, cnt as count
+		SELECT day, reasoning_model as "group", ms as p95_ms, cnt as count
 		FROM ranked
 		WHERE rn = CAST(cnt * 0.95 - 0.0001 AS INTEGER) + 1
 		ORDER BY day
@@ -118,11 +118,11 @@ func GetTrainingGenerationFailures(days int) ([]ErrorPoint, error) {
 	err := Metrics.Raw(fmt.Sprintf(`
 		SELECT
 			date(time) as day,
-			model || ' ' || reason as "group",
+			reasoning_model || ' ' || reason as "group",
 			count(*) as count
 		FROM %s
 		WHERE time > datetime('now', '-%d days')
-		GROUP BY day, model, reason
+		GROUP BY day, reasoning_model, reason
 		ORDER BY day
 	`, stmt.Table, days)).Scan(&results).Error
 

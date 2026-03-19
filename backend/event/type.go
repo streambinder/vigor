@@ -17,15 +17,17 @@ type LatencyEvent struct {
 // TrainingGenerationEvent tracks LLM training generation
 type TrainingGenerationEvent struct {
 	LatencyEvent
-	Model string `gorm:"column:model" json:"model"`
+	ReasoningModel   string `gorm:"column:reasoning_model" json:"reasoning_model"`
+	StructuringModel string `gorm:"column:structuring_model" json:"structuring_model"`
 }
 
 // TrainingGenerationFailureEvent tracks LLM training generation failures
 type TrainingGenerationFailureEvent struct {
 	Event
-	Model   string `gorm:"column:model" json:"model"`
-	Reason  string `gorm:"column:reason" json:"reason"`
-	Message string `gorm:"column:message" json:"message"`
+	ReasoningModel   string `gorm:"column:reasoning_model" json:"reasoning_model"`
+	StructuringModel string `gorm:"column:structuring_model" json:"structuring_model"`
+	Reason           string `gorm:"column:reason" json:"reason"`
+	Message          string `gorm:"column:message" json:"message"`
 }
 
 // HandlerRequestEvent tracks HTTP request handling

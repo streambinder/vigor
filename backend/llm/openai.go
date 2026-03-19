@@ -14,7 +14,6 @@ import (
 )
 
 type OpenAI struct {
-	LLM
 	provider string
 	model    string
 	client   openai.Client
@@ -29,7 +28,7 @@ func openAIClient(host, apiKey string) openai.Client {
 	)
 }
 
-func (llm *OpenAI) query(prompt model.LLMPrompt, temperature float64, maxTokens int) ([]byte, string, error) {
+func (llm *OpenAI) query(prompt model.LLMPrompt, temperature float64, maxTokens int, topP float64, schema *model.JSONSchemaFormat) ([]byte, string, error) {
 	start := time.Now()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
@@ -41,18 +40,24 @@ func (llm *OpenAI) query(prompt model.LLMPrompt, temperature float64, maxTokens 
 		},
 		Temperature: openai.Float(temperature),
 		MaxTokens:   openai.Int(int64(maxTokens)),
-		TopP:        openai.Float(0.9), // Good sampling balance
-		ResponseFormat: openai.ChatCompletionNewParamsResponseFormatUnion{
+	}
+	if topP > 0 {
+		params.TopP = openai.Float(topP)
+	}
+
+	// only apply schema if provided (structuring stage)
+	if schema != nil {
+		params.ResponseFormat = openai.ChatCompletionNewParamsResponseFormatUnion{
 			OfJSONSchema: &shared.ResponseFormatJSONSchemaParam{
 				Type: "json_schema",
 				JSONSchema: shared.ResponseFormatJSONSchemaJSONSchemaParam{
-					Name:        model.TrainingSchema.JSONSchema.Name,
-					Description: openai.String(model.TrainingSchema.JSONSchema.Description),
-					Schema:      model.TrainingSchema.JSONSchema.Schema,
-					Strict:      openai.Bool(model.TrainingSchema.JSONSchema.Strict),
+					Name:        schema.JSONSchema.Name,
+					Description: openai.String(schema.JSONSchema.Description),
+					Schema:      schema.JSONSchema.Schema,
+					Strict:      openai.Bool(schema.JSONSchema.Strict),
 				},
 			},
-		},
+		}
 	}
 	promptJSON, _ := json.Marshal(prompt)
 	log.Debug().Str("provider", llm.provider).Str("model", llm.model).RawJSON("request", promptJSON).Msg("Sending request to LLM")

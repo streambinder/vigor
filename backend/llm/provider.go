@@ -1,11 +1,11 @@
 package llm
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
@@ -19,150 +19,167 @@ var (
 	ErrLLMUnmarshal = errors.New("llm unmarshal failed")
 )
 
-var providers = []LLM{}
+type Stage string
+
+const (
+	StageReasoning   Stage = "reasoning"
+	StageStructuring Stage = "structuring"
+)
+
+var (
+	reasoningProviders   = []LLM{}
+	structuringProviders = []LLM{}
+)
+
+type TrainingGenerationRequest struct {
+	Profiles              []model.Profile
+	Goals                 []model.Goal
+	WorkExercises         []model.Exercise
+	WarmupExercises       []model.Exercise
+	CooldownExercises     []model.Exercise
+	EquipmentIDs          []string
+	Modifiers             []model.Modifier
+	ModifierVariants      map[string][]float64
+	FavoriteExercises     []model.Exercise
+	FavoriteEquipmentIDs  []string
+	Methodology           *model.Methodology
+	Methodologies         []model.Methodology
+	UserPrompt            string
+	Duration              int
+	RecentTrainings       []model.Training
+	RecentFeedback        map[uuid.UUID]model.TrainingFeedback
+	Facts                 []model.Fact
+	SkipWarmupCooldown    bool
+	CalibrationGaps       map[string]int
+	HealthSnapshot        *model.HealthSnapshot
+	RecentHR              map[uuid.UUID]*model.HealthExerciseSession
+	Reminders             []string
+	LastReasoningModel    string
+	LastStructuringModel  string
+	CorrectionHint        string
+}
 
 // LLM defines the interface for language model providers.
 type LLM interface {
-	query(prompt model.LLMPrompt, temperature float64, maxTokens int) ([]byte, string, error)
+	query(prompt model.LLMPrompt, temperature float64, maxTokens int, topP float64, schema *model.JSONSchemaFormat) ([]byte, string, error)
 }
 
-// getLLM selects a provider. If model is non-empty, returns that specific provider
-// (for retry consistency). Otherwise picks randomly.
-func getLLM(model string) LLM {
-	if len(providers) == 0 {
-		log.Fatal().Msg("No LLMs available")
+// ValidateProviders checks that both reasoning and structuring pools have at least one provider.
+// call at startup to fail fast instead of on first request.
+func ValidateProviders() error {
+	if len(reasoningProviders) == 0 {
+		return fmt.Errorf("no LLM providers configured for reasoning stage")
 	}
-	if model != "" {
-		for _, p := range providers {
-			if oai, ok := p.(*OpenAI); ok && oai.model == model {
+	if len(structuringProviders) == 0 {
+		return fmt.Errorf("no LLM providers configured for structuring stage")
+	}
+	return nil
+}
+
+// getLLM selects a provider from the specified stage pool.
+// if modelName is non-empty, returns that specific provider (for retry consistency).
+// otherwise picks randomly from the stage's pool.
+func getLLM(stage Stage, modelName string) LLM {
+	pool := reasoningProviders
+	if stage == StageStructuring {
+		pool = structuringProviders
+	}
+	if len(pool) == 0 {
+		log.Fatal().Str("stage", string(stage)).Msg("no LLMs available for stage")
+	}
+	if modelName != "" {
+		for _, p := range pool {
+			if oai, ok := p.(*OpenAI); ok && oai.model == modelName {
 				return p
 			}
 		}
+		log.Warn().Str("stage", string(stage)).Str("model", modelName).Msg("requested model not found in pool, falling back to random")
 	}
-	return providers[rand.Intn(len(providers))]
+	return pool[rand.Intn(len(pool))]
 }
 
-// GenTraining generates a personalized training plan using an LLM.
-// lastModel, when non-empty, pins retries to the same provider.
-// correctionHint, when non-empty, is appended to the user prompt to guide the
-// model away from a previous validation failure (e.g. duration mismatch).
-func GenTraining(
-	profiles []model.Profile,
-	goals []model.Goal,
-	workExercises []model.Exercise,
-	warmupExercises []model.Exercise,
-	cooldownExercises []model.Exercise,
-	equipment []string,
-	modifiers []model.Modifier,
-	modifierVariants map[string][]float64,
-	favoriteExercises []model.Exercise,
-	favoriteEquipment []string,
-	methodology *model.Methodology,
-	methodologies []model.Methodology,
-	userPrompt string,
-	duration int,
-	recentTrainings []model.Training,
-	recentFeedback map[uuid.UUID]model.TrainingFeedback,
-	facts []model.Fact,
-	skipWarmupCooldown bool,
-	calibrationGaps map[string]int,
-	healthSnapshot *model.HealthSnapshot,
-	recentHR map[uuid.UUID]*model.HealthExerciseSession,
-	lastModel string,
-	correctionHint string,
-) (*model.Training, model.LLMPrompt, string, error) {
-	goalIDs := make([]string, len(goals))
-	for i, g := range goals {
+// GenTraining generates a personalized training plan using a two-stage LLM approach:
+// stage 1 (reasoning): creative thinking at high temperature without schema constraints
+// stage 2 (structuring): deterministic extraction at zero temperature with strict JSON schema
+// returns partial execution data even on error so callers can pin models on retry.
+func GenTraining(req TrainingGenerationRequest) (*model.Training, model.TrainingPrompt, error) {
+	goalIDs := make([]string, len(req.Goals))
+	for i, g := range req.Goals {
 		goalIDs[i] = g.ID
 	}
 
-	// build recency-bias reminders: critical signals echoed at the end of the prompt
-	// to exploit recency bias. LLMs exhibit a U-shaped attention curve (strong at
-	// beginning/end, weak in the middle) due to left-skewed training distributions,
-	// positional encoding saturation, and softmax attention dynamics — amplified in
-	// smaller models. see: https://arxiv.org/html/2511.12869v1
-	var reminders []string
-	for _, p := range profiles {
-		for _, inj := range p.Injuries() {
-			reminders = append(reminders, fmt.Sprintf("Injury: %s", inj.Description))
-		}
-	}
-	for _, fb := range recentFeedback {
-		if fb.Quality != nil && !*fb.Quality {
-			reason := fb.QualityReason
-			if fb.Message != "" {
-				reason = strings.TrimSpace(reason + " — " + fb.Message)
-			}
-			reminders = append(reminders, fmt.Sprintf("Last training rated bad: %s", reason))
-			break // one reminder is enough
-		}
-	}
-	if len(calibrationGaps) > 0 {
-		families := make([]string, 0, len(calibrationGaps))
-		for f := range calibrationGaps {
-			families = append(families, f)
-		}
-		reminders = append(reminders, fmt.Sprintf("Calibrating: prioritize %s", strings.Join(families, ", ")))
-	}
-	if healthSnapshot != nil {
-		const deviationThreshold = 20.0 // flag deviations >= 20%
-		if healthSnapshot.SleepDeviation <= -deviationThreshold {
-			reminders = append(reminders, fmt.Sprintf("Recovery concern: sleep %.0f%% below baseline", -healthSnapshot.SleepDeviation))
-		}
-		if healthSnapshot.HRVDeviation <= -deviationThreshold {
-			reminders = append(reminders, fmt.Sprintf("Recovery concern: HRV %.0f%% below baseline", -healthSnapshot.HRVDeviation))
-		}
-		if healthSnapshot.RHRDeviation >= deviationThreshold {
-			reminders = append(reminders, fmt.Sprintf("Recovery concern: resting HR %.0f%% above baseline", healthSnapshot.RHRDeviation))
-		}
+	var execution model.TrainingPrompt
+
+	// stage 1: reasoning — creative exploration of training design
+	reasoningUserMessage := prompt.GenTrainingReasoning(
+		req.Profiles,
+		goalIDs,
+		req.WorkExercises,
+		req.WarmupExercises,
+		req.CooldownExercises,
+		req.EquipmentIDs,
+		req.Modifiers,
+		req.ModifierVariants,
+		req.FavoriteExercises,
+		req.FavoriteEquipmentIDs,
+		req.Methodology,
+		req.UserPrompt,
+		req.Duration,
+		req.RecentTrainings,
+		req.RecentFeedback,
+		req.Facts,
+		req.SkipWarmupCooldown,
+		req.CalibrationGaps,
+		req.HealthSnapshot,
+		req.RecentHR,
+		req.Reminders,
+	)
+	if req.CorrectionHint != "" {
+		reasoningUserMessage += "\n\nCORRECTION (previous attempt failed server-side validation): " + req.CorrectionHint + ". Fix this issue and regenerate."
 	}
 
-	userMessage := prompt.GenTraining(
-		profiles,
-		goalIDs,
-		workExercises,
-		warmupExercises,
-		cooldownExercises,
-		equipment,
-		modifiers,
-		modifierVariants,
-		favoriteExercises,
-		favoriteEquipment,
-		methodology,
-		userPrompt,
-		duration,
-		recentTrainings,
-		recentFeedback,
-		facts,
-		skipWarmupCooldown,
-		calibrationGaps,
-		healthSnapshot,
-		recentHR,
-		reminders,
-	)
-	if correctionHint != "" {
-		userMessage += "\n\nCORRECTION (previous attempt failed server-side validation): " + correctionHint + ". Fix this issue and regenerate."
+	reasoningPrompt := model.LLMPrompt{
+		System: prompt.ReasoningSystem(req.Goals, req.Methodology, req.Methodologies, req.SkipWarmupCooldown, len(req.Modifiers) > 0, len(req.ModifierVariants) > 0, req.HealthSnapshot),
+		User:   reasoningUserMessage,
 	}
-	request := model.LLMPrompt{
-		System: prompt.System(goals, methodology, methodologies, skipWarmupCooldown, len(modifiers) > 0, len(modifierVariants) > 0, healthSnapshot),
-		User:   userMessage,
-	}
-	response, llmModel, err := getLLM(lastModel).query(
-		request,
-		0.35, // low temperature for structured JSON output reliability
-		16000,
+
+	reasoningOutput, reasoningModel, err := getLLM(StageReasoning, req.LastReasoningModel).query(
+		reasoningPrompt,
+		0.8,   // high temperature for creative reasoning
+		10000, // reasoning can be verbose
+		0.9,   // top-p sampling for reasoning only
+		nil,   // no schema — free-form thinking
 	)
+	execution.Reasoning = model.LLMStep{Model: reasoningModel, Prompt: reasoningPrompt, Output: string(reasoningOutput)}
 	if err != nil {
-		if errors.Is(err, ErrLLMTruncated) {
-			return nil, request, llmModel, err
-		}
-		return nil, request, llmModel, fmt.Errorf("%w: %s", ErrLLMQuery, err)
+		return nil, execution, fmt.Errorf("%w (reasoning stage): %w", ErrLLMQuery, err)
+	}
+	if len(bytes.TrimSpace(reasoningOutput)) == 0 {
+		return nil, execution, fmt.Errorf("%w (reasoning stage): empty response", ErrLLMQuery)
+	}
+
+	// stage 2: structuring — extract JSON from reasoning at deterministic temp
+	structuringPrompt := model.LLMPrompt{
+		System: "You are a fitness data extraction assistant. Parse the training reasoning into strict JSON format.",
+		User:   prompt.GenTrainingStructuring(string(reasoningOutput)),
+	}
+
+	structuredOutput, structuringModel, err := getLLM(StageStructuring, req.LastStructuringModel).query(
+		structuringPrompt,
+		0.0,  // zero temperature for deterministic extraction
+		4000, // structured output is more compact
+		0,    // no top-p — deterministic
+		&model.TrainingSchema,
+	)
+	execution.Structuring = model.LLMStep{Model: structuringModel, Prompt: structuringPrompt, Output: string(structuredOutput)}
+	if err != nil {
+		return nil, execution, fmt.Errorf("%w (structuring stage): %w", ErrLLMQuery, err)
 	}
 
 	training := &model.Training{}
-	if err := json.Unmarshal(response, &training); err != nil {
-		return nil, request, llmModel, fmt.Errorf("%w: %s", ErrLLMUnmarshal, err)
+	if err := json.Unmarshal(structuredOutput, &training); err != nil {
+		return nil, execution, fmt.Errorf("%w: %s", ErrLLMUnmarshal, err)
 	}
 
-	return training, request, llmModel, nil
+	return training, execution, nil
 }

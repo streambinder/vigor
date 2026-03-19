@@ -1,5 +1,5 @@
-//go:generate go run github.com/valyala/quicktemplate/qtc@latest -dir=llm/prompt
-//go:generate go run github.com/valyala/quicktemplate/qtc@latest -dir=llm/rag
+//go:generate go run github.com/valyala/quicktemplate/qtc@latest -skipLineComments -dir=llm/prompt
+//go:generate go run github.com/valyala/quicktemplate/qtc@latest -skipLineComments -dir=llm/rag
 //go:generate sh -c "cd tools/codegen && go run . -models ../../model -output ../../../app/lib/models"
 //go:generate sh -c "cd tools/codegen && go run . -models ../../handler/dto -output ../../../app/lib/dto -model-import ../models/"
 //go:generate sh -c "cd ../app && dart run build_runner build"
@@ -13,6 +13,7 @@ import (
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/event"
 	"github.com/streambinder/vigor/handler"
+	"github.com/streambinder/vigor/llm"
 )
 
 func main() {
@@ -24,6 +25,10 @@ func main() {
 
 	if err := database.Init(); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize database")
+	}
+
+	if err := llm.ValidateProviders(); err != nil {
+		log.Fatal().Err(err).Msg("Failed to validate LLM providers")
 	}
 
 	port := os.Getenv("PORT")

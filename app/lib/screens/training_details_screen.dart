@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -11,9 +12,7 @@ import '../models/block.dart';
 import '../models/activity.dart';
 import '../models/activity_ext.dart';
 import '../models/exercise.dart';
-import '../models/exercise_selection.dart';
 import '../dto/partner_info.dart';
-import '../models/progression_adjustment.dart';
 import '../models/training_feedback.dart';
 import '../providers/auth_provider.dart';
 import '../services/preferences_service.dart';
@@ -501,8 +500,12 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
 
   void _showReasoningDialog(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final r = training.reasoning;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final reasoningText = training.prompt.reasoning.output?.isNotEmpty == true
+        ? training.prompt.reasoning.output!
+        : training.prompt.reasoning.prompt.user;
+    final reasoningModel = training.prompt.reasoning.model;
+    final structuringModel = training.prompt.structuring.model;
 
     showDialog(
       context: context,
@@ -513,22 +516,59 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
           children: [
             const Icon(Icons.psychology, color: VigorColors.stone),
             const SizedBox(width: VigorSpacing.sm),
-            Text(l10n.reasoning, style: VigorTypography.headline.copyWith(color: VigorColors.textPrimary(ctx))),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.reasoning, style: VigorTypography.headline.copyWith(color: VigorColors.textPrimary(ctx))),
+                  const SizedBox(height: VigorSpacing.xs),
+                  Text(
+                    '$reasoningModel → $structuringModel',
+                    style: VigorTypography.caption.copyWith(color: VigorColors.stone),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
         content: SizedBox(
           width: double.maxFinite,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (r.healthAdjustment.isNotEmpty) _buildReasoningText(title: l10n.healthAdjustment, text: r.healthAdjustment),
-                if (r.constraints.isNotEmpty) _buildReasoningSection(title: l10n.constraints, items: r.constraints),
-                if (r.strategy.isNotEmpty) _buildReasoningText(title: l10n.strategy, text: r.strategy),
-                if (r.adjustments.isNotEmpty) _buildAdjustmentsSection(l10n, r.adjustments),
-                if (r.exercises.isNotEmpty) _buildExercisesReasoningSection(l10n, r.exercises),
-              ],
+          child: Container(
+            padding: VigorSpacing.paddingMd,
+            decoration: BoxDecoration(
+              color: VigorColors.stone.withValues(alpha: 0.08),
+              borderRadius: VigorRadius.radiusMd,
+            ),
+            child: Markdown(
+              data: reasoningText,
+              selectable: true,
+              shrinkWrap: true,
+              styleSheet: MarkdownStyleSheet(
+                p: VigorTypography.body.copyWith(
+                  color: VigorColors.textPrimary(ctx),
+                  fontSize: 14,
+                ),
+                h1: VigorTypography.headline.copyWith(
+                  color: VigorColors.textPrimary(ctx),
+                  fontSize: 18,
+                ),
+                h2: VigorTypography.headline.copyWith(
+                  color: VigorColors.textPrimary(ctx),
+                  fontSize: 16,
+                ),
+                h3: VigorTypography.headline.copyWith(
+                  color: VigorColors.textPrimary(ctx),
+                  fontSize: 14,
+                ),
+                code: VigorTypography.body.copyWith(
+                  fontFamily: 'monospace',
+                  fontSize: 13,
+                  color: VigorColors.indigo,
+                ),
+                listBullet: VigorTypography.body.copyWith(
+                  color: VigorColors.stone,
+                ),
+              ),
             ),
           ),
         ),
@@ -542,151 +582,6 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> {
     );
   }
 
-  Widget _buildReasoningSection({required String title, required List<String> items}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: VigorSpacing.md),
-      padding: VigorSpacing.paddingMd,
-      decoration: BoxDecoration(
-        color: VigorColors.stone.withValues(alpha: 0.08),
-        borderRadius: VigorRadius.radiusMd,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: VigorTypography.label.copyWith(color: VigorColors.stone, fontWeight: FontWeight.w600)),
-          const SizedBox(height: VigorSpacing.sm),
-          ...items.map((item) => Padding(
-            padding: const EdgeInsets.only(bottom: VigorSpacing.xs),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 6, right: VigorSpacing.sm),
-                  width: 5,
-                  height: 5,
-                  decoration: const BoxDecoration(color: VigorColors.stone, shape: BoxShape.circle),
-                ),
-                Expanded(child: Text(item, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)))),
-              ],
-            ),
-          )),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReasoningText({required String title, required String text}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: VigorSpacing.md),
-      padding: VigorSpacing.paddingMd,
-      decoration: BoxDecoration(
-        color: VigorColors.stone.withValues(alpha: 0.08),
-        borderRadius: VigorRadius.radiusMd,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: VigorTypography.label.copyWith(color: VigorColors.stone, fontWeight: FontWeight.w600)),
-          const SizedBox(height: VigorSpacing.sm),
-          Text(text, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAdjustmentsSection(AppLocalizations l10n, List<ProgressionAdjustment> adjustments) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: VigorSpacing.md),
-      padding: VigorSpacing.paddingMd,
-      decoration: BoxDecoration(
-        color: VigorColors.stone.withValues(alpha: 0.08),
-        borderRadius: VigorRadius.radiusMd,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.progression, style: VigorTypography.label.copyWith(color: VigorColors.stone, fontWeight: FontWeight.w600)),
-          const SizedBox(height: VigorSpacing.sm),
-          ...adjustments.map((a) => Padding(
-            padding: const EdgeInsets.only(bottom: VigorSpacing.xs),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 6, right: VigorSpacing.sm),
-                  width: 5,
-                  height: 5,
-                  decoration: const BoxDecoration(color: VigorColors.stone, shape: BoxShape.circle),
-                ),
-                Expanded(child: Text('${a.exercise}: ${a.adjustment} (${a.reason})', style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)))),
-              ],
-            ),
-          )),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildExercisesReasoningSection(AppLocalizations l10n, List<ExerciseSelection> exercises) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: VigorSpacing.md),
-      padding: VigorSpacing.paddingMd,
-      decoration: BoxDecoration(
-        color: VigorColors.stone.withValues(alpha: 0.08),
-        borderRadius: VigorRadius.radiusMd,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.exercises, style: VigorTypography.label.copyWith(color: VigorColors.stone, fontWeight: FontWeight.w600)),
-          const SizedBox(height: VigorSpacing.sm),
-          ...exercises.map((e) {
-            final rationaleEntries = e.rationale.toJson().entries.where((entry) => entry.value != '').toList();
-            return Padding(
-              padding: const EdgeInsets.only(bottom: VigorSpacing.sm),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 6, right: VigorSpacing.sm),
-                    width: 5,
-                    height: 5,
-                    decoration: const BoxDecoration(color: VigorColors.stone, shape: BoxShape.circle),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(e.id, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
-                        if (rationaleEntries.isNotEmpty) ...[
-                          const SizedBox(height: VigorSpacing.xs),
-                          Wrap(
-                            spacing: VigorSpacing.xs,
-                            runSpacing: VigorSpacing.xs,
-                            children: rationaleEntries.map((entry) {
-                              final accentColor = VigorColors.indigoAdaptive(context);
-                              return Container(
-                                padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: accentColor.withValues(alpha: 0.15),
-                                  borderRadius: VigorRadius.radiusXs,
-                                ),
-                                child: Text('${entry.key}: ${entry.value}', style: VigorTypography.caption.copyWith(color: accentColor, fontSize: 10)),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
 
   Future<void> _showReportDialog(BuildContext context) async {
     final l10n = AppLocalizations.of(context);

@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -329,63 +330,115 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		modifierVariants = gym.ModifierVariants.Data()
 	}
 
+	// build recency-bias reminders: critical signals echoed at the end of the prompt
+	// to exploit recency bias. LLMs exhibit a U-shaped attention curve (strong at
+	// beginning/end, weak in the middle) due to left-skewed training distributions,
+	// positional encoding saturation, and softmax attention dynamics — amplified in
+	// smaller models. see: https://arxiv.org/html/2511.12869v1
+	var reminders []string
+	for _, p := range profiles {
+		for _, inj := range p.Injuries() {
+			reminders = append(reminders, fmt.Sprintf("Injury: %s", inj.Description))
+		}
+	}
+	for _, fb := range recentFeedback {
+		if fb.Quality != nil && !*fb.Quality {
+			reason := fb.QualityReason
+			if fb.Message != "" {
+				reason = strings.TrimSpace(reason + " — " + fb.Message)
+			}
+			reminders = append(reminders, fmt.Sprintf("Last training rated bad: %s", reason))
+			break // one reminder is enough
+		}
+	}
+	if len(calibrationGaps) > 0 {
+		families := make([]string, 0, len(calibrationGaps))
+		for f := range calibrationGaps {
+			families = append(families, f)
+		}
+		reminders = append(reminders, fmt.Sprintf("Calibrating: prioritize %s", strings.Join(families, ", ")))
+	}
+	if healthSnapshot != nil {
+		const deviationThreshold = 20.0 // flag deviations >= 20%
+		if healthSnapshot.SleepDeviation <= -deviationThreshold {
+			reminders = append(reminders, fmt.Sprintf("Recovery concern: sleep %.0f%% below baseline", -healthSnapshot.SleepDeviation))
+		}
+		if healthSnapshot.HRVDeviation <= -deviationThreshold {
+			reminders = append(reminders, fmt.Sprintf("Recovery concern: HRV %.0f%% below baseline", -healthSnapshot.HRVDeviation))
+		}
+		if healthSnapshot.RHRDeviation >= deviationThreshold {
+			reminders = append(reminders, fmt.Sprintf("Recovery concern: resting HR %.0f%% above baseline", healthSnapshot.RHRDeviation))
+		}
+	}
+
 	llmStart := time.Now()
 	var training *model.Training
-	var llmPrompt model.LLMPrompt
-	var llmModel string
+	var execution model.TrainingPrompt
 	var correctionHint string
 	var actualMuscles []string
 
 	for attempt := 0; attempt <= maxGenerationRetries; attempt++ {
 		var err error
-		training, llmPrompt, llmModel, err = llm.GenTraining(
-			profiles,
-			goalData,
-			workExercises,
-			warmupExercises,
-			cooldownExercises,
-			equipmentIDs,
-			llmModifiers,
-			modifierVariants,
-			favoriteExercises,
-			favoriteEquipmentIDs,
-			methodologyData,
-			methodologies,
-			prompt,
-			duration,
-			recentTrainings,
-			recentFeedback,
-			facts,
-			skipWarmupCooldown,
-			calibrationGaps,
-			healthSnapshot,
-			recentHR,
-			llmModel,
-			correctionHint,
-		)
+		training, execution, err = llm.GenTraining(llm.TrainingGenerationRequest{
+			Profiles:             profiles,
+			Goals:                goalData,
+			WorkExercises:        workExercises,
+			WarmupExercises:      warmupExercises,
+			CooldownExercises:    cooldownExercises,
+			EquipmentIDs:         equipmentIDs,
+			Modifiers:            llmModifiers,
+			ModifierVariants:     modifierVariants,
+			FavoriteExercises:    favoriteExercises,
+			FavoriteEquipmentIDs: favoriteEquipmentIDs,
+			Methodology:          methodologyData,
+			Methodologies:        methodologies,
+			UserPrompt:           prompt,
+			Duration:             duration,
+			RecentTrainings:      recentTrainings,
+			RecentFeedback:       recentFeedback,
+			Facts:                facts,
+			SkipWarmupCooldown:   skipWarmupCooldown,
+			CalibrationGaps:      calibrationGaps,
+			HealthSnapshot:        healthSnapshot,
+			RecentHR:              recentHR,
+			Reminders:             reminders,
+			LastReasoningModel:    execution.Reasoning.Model,
+			LastStructuringModel:  execution.Structuring.Model,
+			CorrectionHint:        correctionHint,
+		})
 		if err != nil {
 			reason := "llm_error"
-			if errors.Is(err, llm.ErrLLMUnmarshal) {
-				reason = "unmarshal_error"
-			}
+			retryable := false
 			if errors.Is(err, llm.ErrLLMTruncated) {
 				reason = "truncated_error"
-				if attempt < maxGenerationRetries {
-					log.Warn().
-						Int("attempt", attempt+1).
-						Int("max_attempts", maxGenerationRetries+1).
-						Err(err).Msg("LLM response truncated, retrying with conciseness hint")
-					correctionHint = "response was truncated (too long). Be much more concise in reasoning: use 3-5 word rationales, fewer exercises, shorter strategy"
-					continue
-				}
+				retryable = true
+				correctionHint = "response was truncated (too long). Be much more concise in reasoning: use 3-5 word rationales, fewer exercises, shorter strategy"
+			} else if errors.Is(err, llm.ErrLLMUnmarshal) {
+				reason = "unmarshal_error"
+				retryable = true
+				correctionHint = "structuring stage produced invalid JSON. Ensure all exercise IDs are from provided lists and all fields match the schema"
 			}
+
+			failureEvent := event.TrainingGenerationFailureEvent{
+				Event:            event.Event{Time: time.Now()},
+				ReasoningModel:   execution.Reasoning.Model,
+				StructuringModel: execution.Structuring.Model,
+				Reason:           reason,
+				Message:          err.Error(),
+			}
+
+			if retryable && attempt < maxGenerationRetries {
+				log.Warn().
+					Interface("event", failureEvent).
+					Int("attempt", attempt+1).
+					Int("max_attempts", maxGenerationRetries+1).
+					Err(err).Msg("retryable LLM error, retrying")
+				continue
+			}
+
 			log.Error().
-				Interface("event", event.TrainingGenerationFailureEvent{
-					Event:   event.Event{Time: time.Now()},
-					Model:   llmModel,
-					Reason:  reason,
-					Message: err.Error(),
-				}).Err(err).Msg("training generation failed")
+				Interface("event", failureEvent).
+				Err(err).Msg("training generation failed")
 			return nil, err
 		}
 
@@ -465,10 +518,11 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 
 		ve := validationErr.(*model.ValidationError)
 		failureEvent := event.TrainingGenerationFailureEvent{
-			Event:   event.Event{Time: time.Now()},
-			Model:   llmModel,
-			Reason:  ve.Reason(),
-			Message: ve.Error(),
+			Event:            event.Event{Time: time.Now()},
+			ReasoningModel:   execution.Reasoning.Model,
+			StructuringModel: execution.Structuring.Model,
+			Reason:           ve.Reason(),
+			Message:          ve.Error(),
 		}
 
 		if attempt < maxGenerationRetries {
@@ -493,12 +547,13 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 				Event:   event.Event{Time: time.Now()},
 				Latency: time.Since(llmStart),
 			},
-			Model: llmModel,
+			ReasoningModel:   execution.Reasoning.Model,
+			StructuringModel: execution.Structuring.Model,
 		}).Msg("training generated")
 
-	training.Description = training.BuildDescription()
 	training.UserID = requestorProfile.UserID
-	training.HealthInfluenced = training.Reasoning.Data().HealthAdjustment != ""
+	// description is now generated by LLM in the JSON schema
+	// health influence would need to be parsed from reasoning text if needed
 
 	// resolve fact indices to structured references
 	var refs []model.TrainingReference
@@ -513,10 +568,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	training.References = datatypes.NewJSONType(refs)
 	training.FactIndices = nil // clear after resolution
 
-	training.Prompt = datatypes.NewJSONType(model.TrainingPrompt{
-		Query: llmPrompt,
-		Model: llmModel,
-	})
+	training.Prompt = datatypes.NewJSONType(execution)
 	if gym != nil {
 		training.GymID = &gym.ID
 		training.Gym = gym

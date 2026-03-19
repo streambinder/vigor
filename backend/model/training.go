@@ -3,7 +3,6 @@ package model
 import (
 	"encoding/json"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -44,10 +43,17 @@ type LLMPrompt struct {
 	User   string `json:"user"`
 }
 
-// TrainingPrompt wraps the LLM prompt with the model that served it.
+// LLMStep represents a single LLM query with its model and prompt.
+type LLMStep struct {
+	Model  string    `json:"model"`
+	Prompt LLMPrompt `json:"prompt"`
+	Output string    `json:"output,omitempty"`
+}
+
+// TrainingPrompt captures the two-stage LLM execution.
 type TrainingPrompt struct {
-	Query LLMPrompt `json:"query"`
-	Model string    `json:"model"`
+	Reasoning   LLMStep `json:"reasoning"`
+	Structuring LLMStep `json:"structuring"`
 }
 
 // JSONSchemaFormat defines the structure for OpenRouter's structured outputs
@@ -78,41 +84,6 @@ func init() {
 	}
 }
 
-// ProgressionAdjustment captures a single progression/regression decision based on feedback.
-type ProgressionAdjustment struct {
-	Exercise   string `json:"exercise" prompt:"Exercise ID that was adjusted"`
-	Adjustment string `json:"adjustment" prompt:"What was changed (e.g. '+2kg', '-2 reps', 'added weighted vest')"`
-	Reason     string `json:"reason" prompt:"Why this adjustment was made (e.g. 'user marked too easy', 'user marked too hard', 'progressive overload')"`
-}
-
-// ExerciseRationale captures brief reasons per scoring category for an exercise choice.
-type ExerciseRationale struct {
-	Goal        string `json:"goal" prompt:"3-8 words"`
-	Muscle      string `json:"muscle" prompt:"3-8 words"`
-	Methodology string `json:"methodology" prompt:"3-8 words"`
-	Favorite    string `json:"favorite" prompt:"3-8 words"`
-	Equipment   string `json:"equipment" prompt:"3-8 words"`
-	Progression string `json:"progression" prompt:"3-8 words"`
-	Feedback    string `json:"feedback" prompt:"3-8 words"`
-	Variety     string `json:"variety" prompt:"3-8 words"`
-	Injury      string `json:"injury" prompt:"3-8 words"`
-}
-
-// ExerciseSelection captures an exercise choice with its rationale categories.
-type ExerciseSelection struct {
-	ID        string            `json:"id" prompt:"Exercise ID from list"`
-	Rationale ExerciseRationale `json:"rationale" prompt:"Brief reason per category (3-8 words each)"`
-}
-
-// TrainingReasoning captures the model's thought process before generating training structure.
-// Simplified to reduce token usage while preserving essential planning information.
-type TrainingReasoning struct {
-	Constraints      []string              `json:"constraints" prompt:"Active constraints (injuries, equipment, time)"`
-	Strategy         string                `json:"strategy" prompt:"1-2 sentence approach: methodology choice + how it serves goals"`
-	Adjustments      []ProgressionAdjustment `json:"adjustments" prompt:"Feedback-driven changes (empty array if none)"`
-	Exercises        []ExerciseSelection   `json:"exercises" prompt:"Selected exercises with rationale"`
-	HealthAdjustment string                `json:"health_adjustment" prompt:"Brief explanation if health data influenced training design; empty if not"`
-}
 
 // TrainingFeedback captures per-user structured feedback for a completed training.
 type TrainingFeedback struct {
@@ -137,12 +108,8 @@ type TrainingReference struct {
 type Training struct {
 	ID uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
 
-	// Reasoning captures the model's thought process before generating training structure.
-	// This forces coherent planning: constraints → strategy → exercises → naming.
-	Reasoning datatypes.JSONType[TrainingReasoning] `gorm:"type:jsonb,not null" json:"reasoning" prompt:"Planning before output"`
-
 	Name        string         `gorm:"not null" json:"name" prompt:"3-4 word action-oriented title (see NAME rules)"`
-	Description string         `gorm:"not null" json:"description" prompt:"-"`
+	Description string         `gorm:"not null" json:"description" prompt:"2-3 sentence summary of training approach, methodology choice, and key exercises"`
 	Methodology string         `gorm:"column:methodology;not null" json:"methodology" prompt:"Methodology;enum:strength,supersets,circuit,emom,amrap,hiit,for_time,endurance,mobility"`
 	Duration    int            `gorm:"not null" json:"duration" prompt:"Total seconds"`
 	Equipment   pq.StringArray `gorm:"type:text[]" json:"equipment" prompt:"-"`
@@ -156,7 +123,6 @@ type Training struct {
 
 	CompletedAt *time.Time `gorm:"type:timestamptz" json:"completed_at" prompt:"-"`
 	CompletedIn *int       `json:"completed_in" prompt:"-"`
-	HealthInfluenced bool  `json:"health_influenced" prompt:"-"`
 	HasHealthSession bool  `gorm:"-" json:"has_health_session" prompt:"-"`
 	CreatedAt   time.Time  `gorm:"type:timestamptz;default:now()" json:"created_at" prompt:"-"`
 	UpdatedAt   time.Time  `gorm:"type:timestamptz;default:now()" json:"-"`
@@ -353,19 +319,6 @@ func (t *Training) ValidateDuration(userRequestedMinutes int) error {
 	return nil
 }
 
-// BuildDescription returns the AI strategy and any adjustments as the training description.
-func (t *Training) BuildDescription() string {
-	reasoning := t.Reasoning.Data()
-	if len(reasoning.Adjustments) == 0 {
-		return reasoning.Strategy
-	}
-	parts := make([]string, 0, len(reasoning.Adjustments)+1)
-	parts = append(parts, reasoning.Strategy)
-	for _, adj := range reasoning.Adjustments {
-		parts = append(parts, adj.Exercise+" "+adj.Adjustment+".")
-	}
-	return strings.Join(parts, " ")
-}
 
 // Activities returns unique work activities for capability tracking.
 func (t *Training) Activities() []*Activity {
