@@ -1555,7 +1555,7 @@ class AppLocalizationsJa extends AppLocalizations {
       'Vigorはヘルスデータを読み取り、ワークアウトをパーソナライズします。睡眠・回復・活動データが充実するほど、より的確なトレーニング提案が可能になります。';
 
   @override
-  String get healthPermissionsReadOnly => '読み取り専用';
+  String get healthPermissionsReadOnly => '身長・体重をヘルスと同期';
 
   @override
   String get healthPermissionsSleep => '睡眠時間とステージ';

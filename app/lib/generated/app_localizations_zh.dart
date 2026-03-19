@@ -1551,7 +1551,7 @@ class AppLocalizationsZh extends AppLocalizations {
       'Vigor读取你的健康数据以个性化训练。更好的睡眠、恢复和活动数据意味着更智能的训练建议。';
 
   @override
-  String get healthPermissionsReadOnly => '仅读取访问';
+  String get healthPermissionsReadOnly => '身高和体重与健康同步';
 
   @override
   String get healthPermissionsSleep => '睡眠时长和阶段';

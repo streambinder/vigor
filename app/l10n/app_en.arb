@@ -757,7 +757,7 @@
 
   "healthPermissionsTitle": "Connect Your Wearable",
   "healthPermissionsDescription": "Vigor reads your health data to personalize your workouts. Better sleep data, recovery metrics, and activity history mean smarter training recommendations.",
-  "healthPermissionsReadOnly": "Read-only access",
+  "healthPermissionsReadOnly": "Height & weight sync with Health",
   "healthPermissionsSleep": "Sleep duration and stages",
   "healthPermissionsHrv": "Heart rate variability (HRV)",
   "healthPermissionsRhr": "Resting heart rate",

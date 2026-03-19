@@ -523,7 +523,7 @@
   "healthPermissionsGrant": "连接健康数据",
   "healthPermissionsGranted": "健康数据已连接",
   "healthPermissionsHrv": "心率变异性（HRV）",
-  "healthPermissionsReadOnly": "仅读取访问",
+  "healthPermissionsReadOnly": "身高和体重与健康同步",
   "healthPermissionsRhr": "静息心率",
   "healthPermissionsSkip": "暂时不用",
   "healthPermissionsSleep": "睡眠时长和阶段",

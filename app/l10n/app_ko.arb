@@ -523,7 +523,7 @@
   "healthPermissionsGrant": "건강 데이터 연결",
   "healthPermissionsGranted": "건강 데이터가 연결되었습니다",
   "healthPermissionsHrv": "심박변이도 (HRV)",
-  "healthPermissionsReadOnly": "읽기 전용",
+  "healthPermissionsReadOnly": "키와 체중을 건강 앱과 동기화",
   "healthPermissionsRhr": "안정시 심박수",
   "healthPermissionsSkip": "나중에",
   "healthPermissionsSleep": "수면 시간 및 단계",

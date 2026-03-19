@@ -178,7 +178,9 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
     _initDeepLinks();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // wire event bus into auth provider so profile updates emit events
-      context.read<AuthProvider>().emitEvent = context.read<ServiceLocator>().emit;
+      final serviceLocator = context.read<ServiceLocator>();
+      context.read<AuthProvider>().emitEvent = serviceLocator.emit;
+      context.read<AuthProvider>().healthDataService = serviceLocator.healthDataService;
       context.read<AuthProvider>().initialize();
     });
   }

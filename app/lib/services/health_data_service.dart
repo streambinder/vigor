@@ -146,6 +146,11 @@ abstract class HealthDataService {
   /// set [force] to bypass throttle AND do a full re-read (e.g. manual sync from settings).
   Future<bool> syncToBackend({bool force = false});
 
+  /// write height (cm) and/or weight (kg) back to the health platform so other
+  /// apps (e.g. fitness trackers) see Vigor's user-provided values.
+  /// fire-and-forget — failures are logged but never surfaced to the user.
+  Future<void> writeBodyMetrics({double? height, double? weight});
+
   /// factory: returns the right implementation or null on web
   static HealthDataService? create({
     required PreferencesService prefs,

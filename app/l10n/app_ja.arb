@@ -523,7 +523,7 @@
   "healthPermissionsGrant": "ヘルスデータを接続",
   "healthPermissionsGranted": "ヘルスデータが接続されました",
   "healthPermissionsHrv": "心拍変動（HRV）",
-  "healthPermissionsReadOnly": "読み取り専用",
+  "healthPermissionsReadOnly": "身長・体重をヘルスと同期",
   "healthPermissionsRhr": "安静時心拍数",
   "healthPermissionsSkip": "今はしない",
   "healthPermissionsSleep": "睡眠時間とステージ",

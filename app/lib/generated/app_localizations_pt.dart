@@ -1586,7 +1586,8 @@ class AppLocalizationsPt extends AppLocalizations {
       'O Vigor lê seus dados de saúde para personalizar seus treinos. Melhores dados de sono, recuperação e atividade significam recomendações mais inteligentes.';
 
   @override
-  String get healthPermissionsReadOnly => 'Acesso somente leitura';
+  String get healthPermissionsReadOnly =>
+      'Altura e peso sincronizados com Saúde';
 
   @override
   String get healthPermissionsSleep => 'Duração e fases do sono';

@@ -523,7 +523,7 @@
   "healthPermissionsGrant": "Connecter les données de santé",
   "healthPermissionsGranted": "Données de santé connectées",
   "healthPermissionsHrv": "Variabilité de la fréquence cardiaque (VFC)",
-  "healthPermissionsReadOnly": "Accès en lecture seule",
+  "healthPermissionsReadOnly": "Taille et poids synchronisés avec Santé",
   "healthPermissionsRhr": "Fréquence cardiaque au repos",
   "healthPermissionsSkip": "Pas maintenant",
   "healthPermissionsSleep": "Durée et phases du sommeil",

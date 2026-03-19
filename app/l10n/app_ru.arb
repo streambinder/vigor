@@ -523,7 +523,7 @@
   "healthPermissionsGrant": "Подключить данные о здоровье",
   "healthPermissionsGranted": "Данные о здоровье подключены",
   "healthPermissionsHrv": "Вариабельность сердечного ритма (ВСР)",
-  "healthPermissionsReadOnly": "Только чтение",
+  "healthPermissionsReadOnly": "Рост и вес синхронизируются с Здоровьем",
   "healthPermissionsRhr": "Пульс в покое",
   "healthPermissionsSkip": "Не сейчас",
   "healthPermissionsSleep": "Продолжительность и фазы сна",

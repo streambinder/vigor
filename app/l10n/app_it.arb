@@ -523,7 +523,7 @@
   "healthPermissionsGrant": "Connetti dati salute",
   "healthPermissionsGranted": "Dati salute connessi",
   "healthPermissionsHrv": "Variabilità della frequenza cardiaca (HRV)",
-  "healthPermissionsReadOnly": "Accesso in sola lettura",
+  "healthPermissionsReadOnly": "Altezza e peso sincronizzati con Salute",
   "healthPermissionsRhr": "Frequenza cardiaca a riposo",
   "healthPermissionsSkip": "Non ora",
   "healthPermissionsSleep": "Durata e fasi del sonno",

@@ -1592,7 +1592,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'Vigor lee tus datos de salud para personalizar tus entrenamientos. Mejores datos de sueño, recuperación y actividad significan recomendaciones más inteligentes.';
 
   @override
-  String get healthPermissionsReadOnly => 'Acceso de solo lectura';
+  String get healthPermissionsReadOnly =>
+      'Altura y peso sincronizados con Salud';
 
   @override
   String get healthPermissionsSleep => 'Duración y fases del sueño';

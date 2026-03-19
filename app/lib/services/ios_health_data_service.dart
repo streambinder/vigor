@@ -39,7 +39,12 @@ class IOSHealthDataService extends HealthDataService
     try {
       AppLogger.info('[IOSHealth] requesting permissions for ${_iosTypes.length} types');
       await _health.configure();
-      final granted = await _health.requestAuthorization(_iosTypes);
+      // READ_WRITE for height/weight, READ for everything else
+      final writeSet = {HealthDataType.HEIGHT, HealthDataType.WEIGHT};
+      final permissions = _iosTypes
+          .map((t) => writeSet.contains(t) ? HealthDataAccess.READ_WRITE : HealthDataAccess.READ)
+          .toList().cast<HealthDataAccess>();
+      final granted = await _health.requestAuthorization(_iosTypes, permissions: permissions);
       AppLogger.info('[IOSHealth] permissions ${granted ? 'granted' : 'denied'}');
       return granted;
     } catch (e) {
@@ -98,6 +103,34 @@ class IOSHealthDataService extends HealthDataService
     final deduped = Health().removeDuplicates(dataPoints);
     AppLogger.debug('[IOSHealth] after dedup: ${deduped.length} data points (removed ${dataPoints.length - deduped.length})');
     return buildSyncPayload(deduped);
+  }
+
+  @override
+  Future<void> writeBodyMetrics({double? height, double? weight}) async {
+    if (height == null && weight == null) return;
+    try {
+      await _health.configure();
+      final now = DateTime.now();
+      if (height != null) {
+        // healthkit expects meters; profile stores cm
+        final ok = await _health.writeHealthData(
+          value: height / 100.0,
+          type: HealthDataType.HEIGHT,
+          startTime: now,
+        );
+        AppLogger.info('[IOSHealth] writeHeight ${height}cm → ${ok ? 'ok' : 'failed'}');
+      }
+      if (weight != null) {
+        final ok = await _health.writeHealthData(
+          value: weight,
+          type: HealthDataType.WEIGHT,
+          startTime: now,
+        );
+        AppLogger.info('[IOSHealth] writeWeight ${weight}kg → ${ok ? 'ok' : 'failed'}');
+      }
+    } catch (e) {
+      AppLogger.error('[IOSHealth] writeBodyMetrics failed', e);
+    }
   }
 
   @override

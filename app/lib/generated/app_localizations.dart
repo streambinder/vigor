@@ -3033,7 +3033,7 @@ abstract class AppLocalizations {
   /// No description provided for @healthPermissionsReadOnly.
   ///
   /// In en, this message translates to:
-  /// **'Read-only access'**
+  /// **'Height & weight sync with Health'**
   String get healthPermissionsReadOnly;
 
   /// No description provided for @healthPermissionsSleep.

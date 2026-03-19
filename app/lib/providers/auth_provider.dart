@@ -4,6 +4,7 @@ import '../models/user.dart';
 import '../services/app_event.dart';
 import '../services/app_logger.dart';
 import '../services/auth_service.dart';
+import '../services/health_data_service.dart';
 import '../services/secure_storage_service.dart';
 
 /// Authentication state
@@ -24,6 +25,10 @@ class AuthProvider with ChangeNotifier {
 
   /// event callback set by ServiceLocator after creation
   void Function(AppEvent)? emitEvent;
+
+  /// set by main.dart after service locator is ready — used to write
+  /// height/weight back to the health platform on profile update
+  HealthDataService? healthDataService;
 
   AuthProvider({
     AuthService? authService,
@@ -178,6 +183,10 @@ class AuthProvider with ChangeNotifier {
     }
 
     try {
+      // capture old values before update for change detection
+      final prevHeight = _currentUser?.profile.height;
+      final prevWeight = _currentUser?.profile.weight;
+
       final response = await _authService.updateProfile(
         firstName: firstName,
         lastName: lastName,
@@ -193,6 +202,14 @@ class AuthProvider with ChangeNotifier {
         // Refresh user data to get updated profile
         await refreshUserData();
         emitEvent?.call(ProfileUpdated());
+
+        // write changed height/weight to health platform (fire-and-forget)
+        final changedHeight = height != null && height != prevHeight ? height : null;
+        final changedWeight = weight != null && weight != prevWeight ? weight : null;
+        if (changedHeight != null || changedWeight != null) {
+          healthDataService?.writeBodyMetrics(height: changedHeight, weight: changedWeight);
+        }
+
         return true;
       } else {
         _errorMessage = response.error ?? 'Failed to update profile';

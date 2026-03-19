@@ -56,7 +56,12 @@ class AndroidHealthDataService extends HealthDataService
     try {
       AppLogger.info('[AndroidHealth] requesting permissions for ${healthPermissionTypes.length} types');
       await _ensureConfigured();
-      final granted = await _health.requestAuthorization(healthPermissionTypes);
+      // build a parallel permissions list: READ for all types, READ_WRITE for height/weight
+      final writeSet = {HealthDataType.HEIGHT, HealthDataType.WEIGHT};
+      final permissions = healthPermissionTypes
+          .map((t) => writeSet.contains(t) ? HealthDataAccess.READ_WRITE : HealthDataAccess.READ)
+          .toList().cast<HealthDataAccess>();
+      final granted = await _health.requestAuthorization(healthPermissionTypes, permissions: permissions);
       AppLogger.info('[AndroidHealth] permissions ${granted ? 'granted' : 'denied'}');
       return granted;
     } catch (e) {
@@ -137,6 +142,34 @@ class AndroidHealthDataService extends HealthDataService
     AppLogger.debug('[AndroidHealth] after dedup: ${deduped.length} data points (removed ${dataPoints.length - deduped.length})');
 
     return buildSyncPayload(deduped);
+  }
+
+  @override
+  Future<void> writeBodyMetrics({double? height, double? weight}) async {
+    if (height == null && weight == null) return;
+    try {
+      await _ensureConfigured();
+      final now = DateTime.now();
+      if (height != null) {
+        // health connect expects meters; profile stores cm
+        final ok = await _health.writeHealthData(
+          value: height / 100.0,
+          type: HealthDataType.HEIGHT,
+          startTime: now,
+        );
+        AppLogger.info('[AndroidHealth] writeHeight ${height}cm → ${ok ? 'ok' : 'failed'}');
+      }
+      if (weight != null) {
+        final ok = await _health.writeHealthData(
+          value: weight,
+          type: HealthDataType.WEIGHT,
+          startTime: now,
+        );
+        AppLogger.info('[AndroidHealth] writeWeight ${weight}kg → ${ok ? 'ok' : 'failed'}');
+      }
+    } catch (e) {
+      AppLogger.error('[AndroidHealth] writeBodyMetrics failed', e);
+    }
   }
 
   @override

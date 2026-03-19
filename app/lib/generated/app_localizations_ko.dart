@@ -1555,7 +1555,7 @@ class AppLocalizationsKo extends AppLocalizations {
       'Vigor가 건강 데이터를 읽어 운동을 맞춤화합니다. 수면, 회복, 활동 데이터가 많을수록 더 스마트한 트레이닝 추천이 가능합니다.';
 
   @override
-  String get healthPermissionsReadOnly => '읽기 전용';
+  String get healthPermissionsReadOnly => '키와 체중을 건강 앱과 동기화';
 
   @override
   String get healthPermissionsSleep => '수면 시간 및 단계';

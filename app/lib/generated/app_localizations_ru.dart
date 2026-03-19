@@ -1581,7 +1581,8 @@ class AppLocalizationsRu extends AppLocalizations {
       'Vigor читает ваши данные о здоровье для персонализации тренировок. Лучшие данные о сне, восстановлении и активности — более умные рекомендации.';
 
   @override
-  String get healthPermissionsReadOnly => 'Только чтение';
+  String get healthPermissionsReadOnly =>
+      'Рост и вес синхронизируются с Здоровьем';
 
   @override
   String get healthPermissionsSleep => 'Продолжительность и фазы сна';
