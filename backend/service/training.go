@@ -15,6 +15,7 @@ import (
 	"github.com/streambinder/vigor/llm"
 	"github.com/streambinder/vigor/llm/rag"
 	"github.com/streambinder/vigor/model"
+	"github.com/streambinder/vigor/util"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -292,16 +293,17 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	}
 
 	// build validation lookup tables once before the generation loop
-	validExerciseIDs := make(map[string]bool, len(workExercises)+len(warmupExercises)+len(cooldownExercises))
+	allExerciseIDs := make([]string, 0, len(workExercises)+len(warmupExercises)+len(cooldownExercises))
 	for _, e := range workExercises {
-		validExerciseIDs[e.ID] = true
+		allExerciseIDs = append(allExerciseIDs, e.ID)
 	}
 	for _, e := range warmupExercises {
-		validExerciseIDs[e.ID] = true
+		allExerciseIDs = append(allExerciseIDs, e.ID)
 	}
 	for _, e := range cooldownExercises {
-		validExerciseIDs[e.ID] = true
+		allExerciseIDs = append(allExerciseIDs, e.ID)
 	}
+	validExerciseIDs := util.CanonicalExerciseIDs(allExerciseIDs)
 	validModifierIDs := make(map[string]bool, len(modifiers)+1)
 	weightedModifierIDs := make(map[string]bool)
 	for _, m := range modifiers {

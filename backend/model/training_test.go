@@ -674,7 +674,7 @@ func TestSetDuration_AMRAP_SkipWarmupCooldown(t *testing.T) {
 }
 
 func TestValidate_WeightModifierConsistency(t *testing.T) {
-	validExercises := map[string]bool{"bench-press": true, "push-up": true}
+	validExercises := map[string]string{"bench-press": "bench-press", "push-up": "push-up"}
 	validModifiers := map[string]bool{"weight": true, "weighted vest": true}
 	validRoutines := map[string]bool{"work": true}
 	weightedModifiers := map[string]bool{"weight": true, "weighted vest": true}
@@ -733,7 +733,7 @@ func TestValidate_WeightModifierConsistency(t *testing.T) {
 }
 
 func TestValidate_DurationTolerance(t *testing.T) {
-	validExercises := map[string]bool{"ex1": true}
+	validExercises := map[string]string{"ex1": "ex1"}
 	validModifiers := map[string]bool{}
 	validRoutines := map[string]bool{"work": true}
 	weightedModifiers := map[string]bool{}
@@ -795,7 +795,7 @@ func TestValidate_DurationTolerance(t *testing.T) {
 }
 
 func TestValidate_TargetMuscles(t *testing.T) {
-	validExercises := map[string]bool{"ex1": true, "ex2": true}
+	validExercises := map[string]string{"ex1": "ex1", "ex2": "ex2"}
 	validModifiers := map[string]bool{}
 	validRoutines := map[string]bool{"work": true}
 	weightedModifiers := map[string]bool{}
@@ -840,7 +840,7 @@ func TestValidate_TargetMuscles(t *testing.T) {
 }
 
 func TestValidate_NewChecks(t *testing.T) {
-	validExercises := map[string]bool{"ex1": true}
+	validExercises := map[string]string{"ex1": "ex1"}
 	validModifiers := map[string]bool{}
 	validRoutines := map[string]bool{"work": true}
 	weightedModifiers := map[string]bool{}

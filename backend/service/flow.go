@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,6 +13,7 @@ import (
 	"github.com/streambinder/vigor/llm"
 	"github.com/streambinder/vigor/llm/rag"
 	"github.com/streambinder/vigor/model"
+	"github.com/streambinder/vigor/util"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
@@ -92,13 +92,17 @@ func GenerateFlow(userID uuid.UUID, duration int, muscles []string, prompt strin
 	}
 	facts = filtered
 
-	// build valid exercise ID set from the retrieved pool (both hyphen and underscore variants)
-	// so validation can catch hallucinated IDs without a DB round-trip per pose
-	validExerciseIDs := make(map[string]bool, len(exercises)*2)
+	// canonical lookup: normalize any incoming ID (lowercase, spaces/underscores→dashes)
+	// and resolve to the exact exercise ID from the retrieved pool — no DB round-trip needed
+	canonicalID := util.CanonicalExerciseIDs(func() []string {
+		ids := make([]string, len(exercises))
+		for i, ex := range exercises {
+			ids[i] = ex.ID
+		}
+		return ids
+	}())
 	exerciseMuscles := make(map[string][]string, len(exercises))
 	for _, ex := range exercises {
-		validExerciseIDs[ex.ID] = true
-		validExerciseIDs[strings.ReplaceAll(ex.ID, "-", "_")] = true // accept underscore alias
 		exerciseMuscles[ex.ID] = ex.Muscles
 	}
 
@@ -150,17 +154,19 @@ func GenerateFlow(userID uuid.UUID, duration int, muscles []string, prompt strin
 
 		// validate each pose has a valid duration and exercise ID from the retrieved pool
 		allValid := true
-		for _, pose := range poses {
+		for i, pose := range poses {
 			if pose.Duration <= 0 {
 				correctionHint = "Each pose must have duration > 0 seconds."
 				allValid = false
 				break
 			}
-			if !validExerciseIDs[pose.ExerciseID] {
+			canonical, ok := canonicalID[util.NormalizeExerciseID(pose.ExerciseID)]
+			if !ok {
 				correctionHint = "Exercise ID '" + pose.ExerciseID + "' is not in the provided [EXERCISES] list. Use only exercise IDs from that list."
 				allValid = false
 				break
 			}
+			poses[i].ExerciseID = canonical
 		}
 		if !allValid {
 			log.Warn().Int("attempt", attempt).Str("reason", correctionHint).Msg("flow generation invalid exercise ID, retrying")
@@ -233,13 +239,8 @@ func GenerateFlow(userID uuid.UUID, duration int, muscles []string, prompt strin
 		for i, pose := range poses {
 			var exercise model.Exercise
 			if err := database.Knowledge.First(&exercise, "id = ?", pose.ExerciseID).Error; err != nil {
-				// retry with hyphen variant (cat_cow_stretch → cat-cow-stretch)
-				normalized := strings.ReplaceAll(pose.ExerciseID, "_", "-")
-				if err2 := database.Knowledge.First(&exercise, "id = ?", normalized).Error; err2 != nil {
-					log.Warn().Err(err).Str("exercise", pose.ExerciseID).Msg("flow pose exercise not found in knowledge DB")
-					continue
-				}
-				poses[i].ExerciseID = exercise.ID // correct the stored ID
+				log.Warn().Err(err).Str("exercise", pose.ExerciseID).Msg("flow pose exercise not found in knowledge DB")
+				continue
 			}
 			poses[i].Name = exercise.Name
 			if detailJSON, marshalErr := json.Marshal(exercise); marshalErr == nil {

@@ -9,6 +9,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/encoder"
+	"github.com/streambinder/vigor/util"
 	"gorm.io/datatypes"
 )
 
@@ -191,7 +192,7 @@ func (t Training) DaysSince() int {
 }
 
 // Validate checks that the training has valid structure.
-func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, requireWarmupCooldown bool, targetMuscles []string, actualMuscles []string) error {
+func (t *Training) Validate(validExerciseIDs map[string]string, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, requireWarmupCooldown bool, targetMuscles []string, actualMuscles []string) error {
 	if t.Name == "" {
 		return &ValidationError{"empty_name", "training name is empty"}
 	}
@@ -241,9 +242,11 @@ func (t *Training) Validate(validExerciseIDs, validModifierIDs, validRoutineType
 				if activity.ExerciseID == "" {
 					return &ValidationError{"missing_exercise", "activity " + strconv.Itoa(k) + " in block " + strconv.Itoa(j) + " has no exercise ID"}
 				}
-				if !validExerciseIDs[activity.ExerciseID] {
+				canonical, ok := validExerciseIDs[util.NormalizeExerciseID(activity.ExerciseID)]
+				if !ok {
 					return &ValidationError{"invalid_exercise", "activity " + strconv.Itoa(k) + " has invalid exercise: " + activity.ExerciseID}
 				}
+				block.Activities[k].ExerciseID = canonical
 				for _, mod := range activity.Modifiers {
 					if !validModifierIDs[mod] {
 						return &ValidationError{"invalid_modifier", "activity " + strconv.Itoa(k) + " has invalid modifier: " + mod}
