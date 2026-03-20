@@ -408,7 +408,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get musclesOptional => 'Мышцы (необязательно)';
 
   @override
-  String get musclesAuto => 'Все';
+  String get musclesAuto => 'Auto';
 
   @override
   String get advancedSettings => 'Дополнительно';

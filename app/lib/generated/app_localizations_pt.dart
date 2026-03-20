@@ -412,7 +412,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get musclesOptional => 'Músculos (opcional)';
 
   @override
-  String get musclesAuto => 'Todos';
+  String get musclesAuto => 'Auto';
 
   @override
   String get advancedSettings => 'Avançado';

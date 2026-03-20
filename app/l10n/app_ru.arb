@@ -124,7 +124,7 @@
   "methodologyAuto": "Авто",
   "goalsOptional": "Цели (необязательно)",
   "musclesOptional": "Мышцы (необязательно)",
-  "musclesAuto": "Все",
+  "musclesAuto": "Auto",
   "advancedSettings": "Дополнительно",
   "failedToUpdateProfile": "Не удалось обновить профиль",
   "activity": "Активность",

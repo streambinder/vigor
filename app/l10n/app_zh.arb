@@ -124,7 +124,7 @@
   "methodologyAuto": "自动",
   "goalsOptional": "目标（可选）",
   "musclesOptional": "肌肉（可选）",
-  "musclesAuto": "全部",
+  "musclesAuto": "Auto",
   "advancedSettings": "高级",
   "failedToUpdateProfile": "更新个人资料失败",
   "activity": "活动",

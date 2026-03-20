@@ -395,7 +395,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get musclesOptional => '肌肉（可选）';
 
   @override
-  String get musclesAuto => '全部';
+  String get musclesAuto => 'Auto';
 
   @override
   String get advancedSettings => '高级';

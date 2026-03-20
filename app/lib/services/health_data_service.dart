@@ -156,10 +156,7 @@ abstract class HealthDataService {
     required PreferencesService prefs,
     required SecureStorageService storage,
   }) {
-    if (PlatformHelper.isWeb) {
-      AppLogger.debug('[HealthDataService] skipping creation on web');
-      return null;
-    }
+    if (PlatformHelper.isWeb) return null;
     if (PlatformHelper.isAndroid) {
       AppLogger.info('[HealthDataService] creating AndroidHealthDataService');
       return AndroidHealthDataService(prefs: prefs, storage: storage);
