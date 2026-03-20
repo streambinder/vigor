@@ -12,6 +12,9 @@ class AdaptiveButton extends StatelessWidget {
   final bool isDestructive;
   final bool useGradient;
   final bool isSecondary;
+  // overrides the default persimmon accent (color + matching glow shadow)
+  final Color? accentColor;
+  final List<BoxShadow>? accentGlow;
 
   const AdaptiveButton({
     super.key,
@@ -20,6 +23,8 @@ class AdaptiveButton extends StatelessWidget {
     this.isDestructive = false,
     this.useGradient = false,
     this.isSecondary = false,
+    this.accentColor,
+    this.accentGlow,
   });
 
   @override
@@ -35,7 +40,10 @@ class AdaptiveButton extends StatelessWidget {
         ? VigorColors.error
         : isSecondary
             ? VigorColors.indigo
-            : VigorColors.persimmon;
+            : accentColor ?? VigorColors.persimmon;
+    final glow = isSecondary
+        ? VigorShadows.indigoGlow
+        : accentGlow ?? VigorShadows.persimmonGlow;
 
     // RepaintBoundary isolates the expensive blur effect from the rest of the widget tree
     return RepaintBoundary(
@@ -46,7 +54,7 @@ class AdaptiveButton extends StatelessWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: AnimatedContainer(
-              duration: VigorAnimation.fast,
+              duration: VigorAnimation.medium,
               padding: VigorSpacing.buttonPadding,
               decoration: useGradient
                   ? LiquidGlassTheme.vibrantGradient(
@@ -60,11 +68,7 @@ class AdaptiveButton extends StatelessWidget {
                         color: Colors.white.withValues(alpha: 0.2),
                         width: 1,
                       ),
-                      boxShadow: onPressed != null
-                          ? (isSecondary
-                              ? VigorShadows.indigoGlow
-                              : VigorShadows.persimmonGlow)
-                          : null,
+                      boxShadow: onPressed != null ? glow : null,
                     ),
               child: DefaultTextStyle(
                 style: VigorTypography.label.copyWith(
@@ -98,7 +102,12 @@ class AdaptiveButton extends StatelessWidget {
               backgroundColor: VigorColors.error,
               foregroundColor: Colors.white,
             )
-          : null,
+          : accentColor != null
+              ? FilledButton.styleFrom(
+                  backgroundColor: accentColor,
+                  foregroundColor: Colors.white,
+                )
+              : null,
       child: child,
     );
   }

@@ -1238,20 +1238,33 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // session mode toggle
+                  // session mode toggle — accent color follows selected mode
                   SizedBox(
                     width: double.infinity,
-                    child: SegmentedButton<_SessionMode>(
-                      segments: [
-                        ButtonSegment(value: _SessionMode.training, label: Text(l10n.trainingRoutines)),
-                        const ButtonSegment(value: _SessionMode.flow, label: Text('Flow')),
-                      ],
-                      selected: {_sessionMode},
-                      onSelectionChanged: (selected) => setState(() {
-                        _sessionMode = selected.first;
-                        if (_sessionMode == _SessionMode.flow && _duration > 60) _duration = 60;
-                      }),
-                      showSelectedIcon: false,
+                    child: AnimatedTheme(
+                      duration: VigorAnimation.medium,
+                      data: Theme.of(context).copyWith(
+                        colorScheme: Theme.of(context).colorScheme.copyWith(
+                          secondaryContainer: _sessionMode == _SessionMode.flow
+                              ? VigorColors.byakurokuAdaptive(context).withValues(alpha: 0.25)
+                              : VigorColors.persimmon.withValues(alpha: 0.25),
+                          onSecondaryContainer: _sessionMode == _SessionMode.flow
+                              ? VigorColors.byakurokuAdaptive(context)
+                              : VigorColors.persimmon,
+                        ),
+                      ),
+                      child: SegmentedButton<_SessionMode>(
+                        segments: [
+                          ButtonSegment(value: _SessionMode.training, label: Text(l10n.trainingRoutines)),
+                          const ButtonSegment(value: _SessionMode.flow, label: Text('Flow')),
+                        ],
+                        selected: {_sessionMode},
+                        onSelectionChanged: (selected) => setState(() {
+                          _sessionMode = selected.first;
+                          if (_sessionMode == _SessionMode.flow && _duration > 60) _duration = 60;
+                        }),
+                        showSelectedIcon: false,
+                      ),
                     ),
                   ),
                   const SizedBox(height: VigorSpacing.md),
@@ -1300,6 +1313,12 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 const SizedBox(width: VigorSpacing.sm),
                 AdaptiveButton(
                   onPressed: _generateTraining,
+                  accentColor: _sessionMode == _SessionMode.flow
+                      ? VigorColors.byakurokuAdaptive(context)
+                      : null,
+                  accentGlow: _sessionMode == _SessionMode.flow
+                      ? VigorShadows.byakurokuGlow
+                      : null,
                   child: Text(l10n.generate),
                 ),
               ],
