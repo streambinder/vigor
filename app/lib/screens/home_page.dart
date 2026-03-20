@@ -65,6 +65,10 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     if (!mounted) return;
     if (event is TrainingCompleted || event is TrainingListChanged) {
       _loadProgress();
+    } else if (event is HealthSyncCompleted) {
+      // background sync finished — pull updated metrics from the notifier
+      final updated = context.read<ServiceLocator>().healthDailyNotifier.value;
+      if (updated != null) setState(() => _healthDaily = updated);
     }
   }
 
