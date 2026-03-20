@@ -12,6 +12,7 @@ class CachedExerciseImage extends StatelessWidget {
   final BoxFit fit;
   final BorderRadius? borderRadius;
   final bool isCircular;
+  final IconData placeholderIcon;
 
   const CachedExerciseImage({
     super.key,
@@ -21,6 +22,7 @@ class CachedExerciseImage extends StatelessWidget {
     this.fit = BoxFit.cover,
     this.borderRadius,
     this.isCircular = false,
+    this.placeholderIcon = Icons.fitness_center,
   });
 
   static bool isValidUrl(String? url) {
@@ -77,7 +79,7 @@ class CachedExerciseImage extends StatelessWidget {
       ),
       child: Center(
         child: Icon(
-          Icons.fitness_center,
+          placeholderIcon,
           size: (width ?? 72) * 0.4,
           color: VigorColors.stone.withValues(alpha: 0.5),
         ),

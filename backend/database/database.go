@@ -51,6 +51,7 @@ func Init() error {
 		&model.TrainingFeedback{},
 		&model.HealthMetric{},
 		&model.HealthExerciseSession{},
+		&model.FlowSession{},
 	); err != nil {
 		return fmt.Errorf("failed to migrate database: %w", err)
 	}

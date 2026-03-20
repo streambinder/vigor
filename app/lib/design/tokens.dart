@@ -20,6 +20,11 @@ class VigorColors {
   static const Color indigoLight = Color(0xFF5A9ABF); // lighter variant for dark mode contrast
   static const Color persimmon = Color(0xFFE65D38); // warm: active muscle, building heat
   static const Color crimson = Color(0xFF8F1D21); // hot: overload, high stress, need recovery
+  static const Color byakuroku = Color(0xFF4A7C6F); // byakuroku (mineral sage-green): flow/wellness
+  static const Color byakurokuLight = Color(0xFF7DB5A0); // lighter variant for dark mode contrast
+
+  static Color byakurokuAdaptive(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? byakurokuLight : byakuroku;
 
   // Semantic aliases
   static const Color success = Color(0xFF22C55E);
@@ -318,6 +323,10 @@ class VigorShadows {
   // Glow shadows — using brand colors
   static List<BoxShadow> persimmonGlow = [
     BoxShadow(color: VigorColors.persimmon.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 4)),
+  ];
+
+  static List<BoxShadow> byakurokuGlow = [
+    BoxShadow(color: VigorColors.byakuroku.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 4)),
   ];
 
   static List<BoxShadow> goldGlow = [

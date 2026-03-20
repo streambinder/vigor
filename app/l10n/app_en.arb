@@ -825,5 +825,16 @@
     "placeholders": {
       "count": {"type": "int"}
     }
-  }
+  },
+
+  "generateSession": "Generate Session",
+  "flowSession": "Flow Session",
+  "flowSessionDescription": "Yoga, stretching & mobility for recovery and wellbeing",
+  "loadingMsgFlow1": "Targeting your recently trained muscles...",
+  "loadingMsgFlow2": "Designing your recovery flow...",
+  "loadingMsgFlow3": "Selecting holds for your mobility needs...",
+  "loadingMsgFlow4": "Checking for injury-safe movements...",
+  "loadingMsgFlow5": "Curating your mindful movement sequence...",
+  "noFlowSessionsYet": "No flow sessions yet",
+  "generateFirstFlow": "Generate your first flow session to start recovering and stretching."
 }

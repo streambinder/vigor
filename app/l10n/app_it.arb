@@ -579,5 +579,16 @@
     "placeholders": {
       "count": {"type": "int"}
     }
-  }
+  },
+
+  "generateSession": "Genera Sessione",
+  "flowSession": "Sessione Benessere",
+  "flowSessionDescription": "Yoga, stretching e mobilità per recupero e benessere",
+  "loadingMsgFlow1": "Individuando i muscoli allenati di recente...",
+  "loadingMsgFlow2": "Progettando il tuo flow di recupero...",
+  "loadingMsgFlow3": "Selezionando le posture per la tua mobilità...",
+  "loadingMsgFlow4": "Verificando i movimenti sicuri per gli infortuni...",
+  "loadingMsgFlow5": "Creando la tua sequenza di movimento consapevole...",
+  "noFlowSessionsYet": "Nessuna sessione flow",
+  "generateFirstFlow": "Genera la tua prima sessione flow per iniziare a recuperare e allungarti."
 }

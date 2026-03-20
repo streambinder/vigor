@@ -66,6 +66,7 @@ We avoid artificial neons. The palette is derived from natural materials and the
 |**Indigo Dye**|`#2B4C5D`|Data: Cool|Fully recovered, low intensity.|
 |**Persimmon**|`#E65D38`|Data: Warm|Active muscle, building heat.|
 |**Crimson**|`#8F1D21`|Data: Hot|Overload, high stress, need recovery.|
+|**Byakuroku**|`#4A7C6F`|Flow / Wellness|Mineral sage-green; recovery, stillness, mobility sessions.|
 
 ### 3.3 Typography
 
@@ -209,6 +210,7 @@ We redefine fitness terms to align with the engineering-meets-biology backend.
   --vigor-indigo: #2B4C5D;
   --vigor-persimmon: #E65D38;
   --vigor-crimson: #8F1D21;
+  --vigor-byakuroku: #4A7C6F;
 }
 ```
 

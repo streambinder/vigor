@@ -579,5 +579,16 @@
     "placeholders": {
       "count": {"type": "int"}
     }
-  }
+  },
+
+  "generateSession": "セッションを生成",
+  "flowSession": "フローセッション",
+  "flowSessionDescription": "リカバリーとウェルネスのためのヨガ、ストレッチ、モビリティ",
+  "loadingMsgFlow1": "最近トレーニングした筋肉を特定中...",
+  "loadingMsgFlow2": "リカバリーフローを設計中...",
+  "loadingMsgFlow3": "モビリティに合わせたポーズを選択中...",
+  "loadingMsgFlow4": "怪我に安全な動きを確認中...",
+  "loadingMsgFlow5": "マインドフルな動きのシーケンスを作成中...",
+  "noFlowSessionsYet": "フローセッションはまだありません",
+  "generateFirstFlow": "最初のフローセッションを生成して、リカバリーとストレッチを始めましょう。"
 }

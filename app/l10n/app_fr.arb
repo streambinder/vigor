@@ -579,5 +579,16 @@
     "placeholders": {
       "count": {"type": "int"}
     }
-  }
+  },
+
+  "generateSession": "Générer une Séance",
+  "flowSession": "Séance Flow",
+  "flowSessionDescription": "Yoga, étirements et mobilité pour la récupération et le bien-être",
+  "loadingMsgFlow1": "Ciblage des muscles récemment entraînés...",
+  "loadingMsgFlow2": "Conception de votre flow de récupération...",
+  "loadingMsgFlow3": "Sélection des postures pour votre mobilité...",
+  "loadingMsgFlow4": "Vérification des mouvements sûrs pour les blessures...",
+  "loadingMsgFlow5": "Création de votre séquence de mouvement conscient...",
+  "noFlowSessionsYet": "Pas encore de séances flow",
+  "generateFirstFlow": "Génère ta première séance flow pour commencer à récupérer et t'étirer."
 }

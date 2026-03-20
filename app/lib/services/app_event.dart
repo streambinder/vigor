@@ -21,6 +21,8 @@ class FeedbackSubmitted extends AppEvent {
   FeedbackSubmitted(this.trainingId);
 }
 
+class FlowSessionListChanged extends AppEvent {}
+
 /// mixin for screens that need to react to app events beyond ValueNotifier changes
 mixin AppEventSubscriber<T extends StatefulWidget> on State<T> {
   StreamSubscription<AppEvent>? _eventSub;

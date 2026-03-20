@@ -47,6 +47,7 @@ func Init() *fiber.App {
 	initProgress(app)
 	initReport(app)
 	initHealth(app)
+	initFlow(app)
 
 	return app
 }

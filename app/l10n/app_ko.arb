@@ -579,5 +579,16 @@
     "placeholders": {
       "count": {"type": "int"}
     }
-  }
+  },
+
+  "generateSession": "세션 생성",
+  "flowSession": "플로우 세션",
+  "flowSessionDescription": "회복과 웰빙을 위한 요가, 스트레칭, 유연성 운동",
+  "loadingMsgFlow1": "최근 훈련한 근육을 파악 중...",
+  "loadingMsgFlow2": "회복 플로우를 설계 중...",
+  "loadingMsgFlow3": "유연성에 맞는 자세를 선택 중...",
+  "loadingMsgFlow4": "부상에 안전한 동작을 확인 중...",
+  "loadingMsgFlow5": "마음챙김 동작 시퀀스를 구성 중...",
+  "noFlowSessionsYet": "아직 플로우 세션이 없습니다",
+  "generateFirstFlow": "첫 플로우 세션을 생성하여 회복과 스트레칭을 시작하세요."
 }

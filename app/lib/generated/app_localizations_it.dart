@@ -1777,4 +1777,39 @@ class AppLocalizationsIt extends AppLocalizations {
   String logEntries(int count) {
     return '$count voci di log';
   }
+
+  @override
+  String get generateSession => 'Genera Sessione';
+
+  @override
+  String get flowSession => 'Sessione Benessere';
+
+  @override
+  String get flowSessionDescription =>
+      'Yoga, stretching e mobilità per recupero e benessere';
+
+  @override
+  String get loadingMsgFlow1 => 'Individuando i muscoli allenati di recente...';
+
+  @override
+  String get loadingMsgFlow2 => 'Progettando il tuo flow di recupero...';
+
+  @override
+  String get loadingMsgFlow3 =>
+      'Selezionando le posture per la tua mobilità...';
+
+  @override
+  String get loadingMsgFlow4 =>
+      'Verificando i movimenti sicuri per gli infortuni...';
+
+  @override
+  String get loadingMsgFlow5 =>
+      'Creando la tua sequenza di movimento consapevole...';
+
+  @override
+  String get noFlowSessionsYet => 'Nessuna sessione flow';
+
+  @override
+  String get generateFirstFlow =>
+      'Genera la tua prima sessione flow per iniziare a recuperare e allungarti.';
 }

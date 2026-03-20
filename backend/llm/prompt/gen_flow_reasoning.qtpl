@@ -1,0 +1,62 @@
+{% package prompt %}
+
+{% import "github.com/streambinder/vigor/model" %}
+
+{% func GenFlowReasoning(
+    profile model.Profile,
+    muscles []string,
+    musclesFromRecent bool,
+    exercises []model.Exercise,
+    facts []model.Fact,
+    userPrompt string,
+    duration int,
+) -%}
+Design a {%d duration %}-minute flow session for mobility, recovery, and mindful movement.
+
+Let's think step by step:
+
+1. CONSTRAINTS: What injuries or limitations must I work around?
+2. MUSCLE TARGETING: Which muscles need the most attention given the context?
+3. POSE SELECTION: Which exercises from the pool best serve recovery for these muscles?
+4. FLOW STRUCTURE: How should I sequence poses for a smooth, progressive flow?
+5. CREATIVE TITLE: What evocative name captures the session's character?
+
+{% if len(userPrompt) > 0 %}
+[USER REQUEST]
+{%s userPrompt %}
+
+{% endif %}
+[TARGET MUSCLES]
+{% if musclesFromRecent %}Recently trained — prioritize these for recovery:
+{% else %}Full body flow:
+{% endif %}
+{% for i, m := range muscles %}{%s m %}{% if i < len(muscles)-1 %}, {% endif %}{% endfor %}
+
+[PROFILE]
+Age:{%d profile.Age() %} Height:{%f.0 profile.Height %}cm Weight:{%f.0 profile.Weight %}kg Gender:{%s profile.Gender %}
+{% if len(profile.Injuries()) > 0 %}Injuries: {% for j, injury := range profile.Injuries() %}{%s injury.Description %}({%d injury.Year %}){% if j < len(profile.Injuries())-1 %}, {% endif %}{% endfor %}
+{% endif %}{% if len(profile.Limitations()) > 0 %}Limitations: {% for j, limitation := range profile.Limitations() %}{%s limitation %}{% if j < len(profile.Limitations())-1 %}, {% endif %}{% endfor %}
+{% endif %}{% if len(profile.Conditions()) > 0 %}Conditions: {% for j, condition := range profile.Conditions() %}{%s condition %}{% if j < len(profile.Conditions())-1 %}, {% endif %}{% endfor %}
+{% endif %}
+
+[EXERCISES] {%d len(exercises) %} options
+{% for _, exercise := range exercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}, {% endfor %}
+
+{% if len(facts) > 0 %}
+[FACTS]
+Apply when relevant to selected poses:
+{% for i, fact := range facts %}- [F{%d i %}] {%s fact.Content %}
+{% endfor %}
+{% endif %}
+Output language: {% if len(profile.Language) > 0 %}{%s profile.Language %}{% else %}English{% endif %}
+
+[REMINDERS]
+{% if len(profile.Injuries()) > 0 %}- CRITICAL: avoid all poses contraindicated by injuries: {% for j, injury := range profile.Injuries() %}{%s injury.Description %}{% if j < len(profile.Injuries())-1 %}, {% endif %}{% endfor %}
+
+{% endif %}- TARGET: total session must be approximately {%d duration*60 %} seconds (holds + transition rests combined)
+- Hold durations: 10–60 seconds per pose (ACSM: 10–30s per hold, up to 60s for 2-rep equivalent in a single pass)
+- Transition rest between poses: 5–15 seconds (not counted in hold time)
+- Minimum 4 poses, maximum 40. Use enough poses to reach the target duration.
+- This is a single continuous flow — no warmup/cooldown split
+- Sequence from gentle mobilization to deeper stretches, ending with calming poses
+{% endfunc %}

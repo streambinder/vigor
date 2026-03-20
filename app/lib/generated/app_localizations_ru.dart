@@ -1762,4 +1762,38 @@ class AppLocalizationsRu extends AppLocalizations {
   String logEntries(int count) {
     return '$count записей';
   }
+
+  @override
+  String get generateSession => 'Создать Сеанс';
+
+  @override
+  String get flowSession => 'Flow-сеанс';
+
+  @override
+  String get flowSessionDescription =>
+      'Йога, растяжка и мобильность для восстановления и самочувствия';
+
+  @override
+  String get loadingMsgFlow1 => 'Определение недавно тренированных мышц...';
+
+  @override
+  String get loadingMsgFlow2 =>
+      'Разработка вашего восстановительного потока...';
+
+  @override
+  String get loadingMsgFlow3 => 'Подбор поз для вашей мобильности...';
+
+  @override
+  String get loadingMsgFlow4 => 'Проверка безопасных движений при травмах...';
+
+  @override
+  String get loadingMsgFlow5 =>
+      'Составление вашей осознанной последовательности движений...';
+
+  @override
+  String get noFlowSessionsYet => 'Пока нет flow-сеансов';
+
+  @override
+  String get generateFirstFlow =>
+      'Создайте первый flow-сеанс, чтобы начать восстановление и растяжку.';
 }

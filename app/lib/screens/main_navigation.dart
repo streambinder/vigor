@@ -14,6 +14,7 @@ import 'home_page.dart';
 import 'activity_screen.dart';
 import 'profile_screen.dart';
 import 'training_details_screen.dart';
+import 'flow_details_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -59,6 +60,13 @@ class MainNavigationState extends State<MainNavigation> {
             Navigator.of(dialogContext).push(
               MaterialPageRoute(
                 builder: (context) => TrainingDetailsScreen(training: training),
+              ),
+            );
+          },
+          onFlowSuccess: (flowSession) {
+            Navigator.of(dialogContext).push(
+              MaterialPageRoute(
+                builder: (context) => FlowDetailsScreen(flowSession: flowSession),
               ),
             );
           },
@@ -128,7 +136,7 @@ class MainNavigationState extends State<MainNavigation> {
     final isExpanded = _currentIndex == 1;
 
     final label = Text(
-      l10n.generateTraining,
+      l10n.generateSession,
       style: VigorTypography.label.copyWith(
         color: Colors.white,
         fontWeight: FontWeight.w600,

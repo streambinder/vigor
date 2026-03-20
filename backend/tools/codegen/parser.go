@@ -24,7 +24,8 @@ type Field struct {
 	IsOptional   bool // pointer or omitempty
 	IsCollection bool // slice/array
 	CollectionOf string
-	IsRequired   bool // flutter:"required"
+	IsRequired   bool   // flutter:"required"
+	DartOverride string // dart:"Type" overrides generated Dart type
 }
 
 // Parser parses Go source files
@@ -180,6 +181,11 @@ func (p *Parser) parseField(field *ast.Field) Field {
 		// Parse flutter tag
 		if tag.Get("flutter") == "required" {
 			f.IsRequired = true
+		}
+
+		// Parse dart tag (overrides generated Dart type)
+		if dartType := tag.Get("dart"); dartType != "" {
+			f.DartOverride = dartType
 		}
 	}
 

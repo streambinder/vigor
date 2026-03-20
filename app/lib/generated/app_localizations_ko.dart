@@ -1734,4 +1734,34 @@ class AppLocalizationsKo extends AppLocalizations {
   String logEntries(int count) {
     return '$count개 로그 항목';
   }
+
+  @override
+  String get generateSession => '세션 생성';
+
+  @override
+  String get flowSession => '플로우 세션';
+
+  @override
+  String get flowSessionDescription => '회복과 웰빙을 위한 요가, 스트레칭, 유연성 운동';
+
+  @override
+  String get loadingMsgFlow1 => '최근 훈련한 근육을 파악 중...';
+
+  @override
+  String get loadingMsgFlow2 => '회복 플로우를 설계 중...';
+
+  @override
+  String get loadingMsgFlow3 => '유연성에 맞는 자세를 선택 중...';
+
+  @override
+  String get loadingMsgFlow4 => '부상에 안전한 동작을 확인 중...';
+
+  @override
+  String get loadingMsgFlow5 => '마음챙김 동작 시퀀스를 구성 중...';
+
+  @override
+  String get noFlowSessionsYet => '아직 플로우 세션이 없습니다';
+
+  @override
+  String get generateFirstFlow => '첫 플로우 세션을 생성하여 회복과 스트레칭을 시작하세요.';
 }

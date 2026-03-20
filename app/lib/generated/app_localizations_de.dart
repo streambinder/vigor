@@ -1775,4 +1775,37 @@ class AppLocalizationsDe extends AppLocalizations {
   String logEntries(int count) {
     return '$count Protokolleinträge';
   }
+
+  @override
+  String get generateSession => 'Sitzung Erstellen';
+
+  @override
+  String get flowSession => 'Flow-Sitzung';
+
+  @override
+  String get flowSessionDescription =>
+      'Yoga, Dehnung und Mobilität für Erholung und Wohlbefinden';
+
+  @override
+  String get loadingMsgFlow1 => 'Kürzlich trainierte Muskeln erfassen...';
+
+  @override
+  String get loadingMsgFlow2 => 'Deinen Erholungsflow gestalten...';
+
+  @override
+  String get loadingMsgFlow3 => 'Haltungen für deine Mobilität auswählen...';
+
+  @override
+  String get loadingMsgFlow4 => 'Verletzungssichere Bewegungen prüfen...';
+
+  @override
+  String get loadingMsgFlow5 =>
+      'Deine achtsame Bewegungssequenz zusammenstellen...';
+
+  @override
+  String get noFlowSessionsYet => 'Noch keine Flow-Sitzungen';
+
+  @override
+  String get generateFirstFlow =>
+      'Erstelle deine erste Flow-Sitzung, um mit Erholung und Dehnung zu beginnen.';
 }

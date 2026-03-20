@@ -13,7 +13,9 @@ import '../widgets/training_generation_modal.dart';
 import '../services/service_locator.dart';
 import '../models/training.dart';
 import '../models/gym.dart';
+import '../models/flow_session.dart';
 import 'training_details_screen.dart';
+import 'flow_details_screen.dart';
 
 class ActivityScreen extends StatefulWidget {
   const ActivityScreen({super.key});
@@ -65,6 +67,13 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
               ),
             );
           },
+          onFlowSuccess: (flowSession) {
+            Navigator.of(dialogContext).push(
+              MaterialPageRoute(
+                builder: (context) => FlowDetailsScreen(flowSession: flowSession),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -89,7 +98,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       }
     }
 
-    await Future.wait([locator.refreshTrainings(), locator.refreshGyms()]);
+    await Future.wait([locator.refreshTrainings(), locator.refreshGyms(), locator.refreshFlowSessions()]);
     if (mounted) {
       setState(() => _isLoading = false);
       _loadPartnerCounts(locator.trainingsNotifier.value);
@@ -230,7 +239,9 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       valueListenable: locator.trainingsNotifier,
       builder: (context, trainings, _) => ValueListenableBuilder<List<Gym>?>(
         valueListenable: locator.gymsNotifier,
-        builder: (context, gyms, _) => PopScope(
+        builder: (context, gyms, _) => ValueListenableBuilder<List<FlowSession>?>(
+          valueListenable: locator.flowSessionsNotifier,
+          builder: (context, flowSessions, _) => PopScope(
           canPop: !_isSelecting,
           onPopInvokedWithResult: (didPop, _) {
             if (!didPop) setState(() => _selectedIds.clear());
@@ -284,11 +295,12 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
               color: VigorColors.persimmon,
               child: _isLoading
                   ? const Center(child: AdaptiveLoadingIndicator())
-                  : trainings == null || trainings.isEmpty
+                  : (trainings == null || trainings.isEmpty) && (flowSessions == null || flowSessions.isEmpty)
                       ? _buildEmptyState(l10n, gyms ?? [])
-                      : _buildContent(l10n, isDark, trainings),
+                      : _buildContent(l10n, isDark, trainings ?? [], flowSessions ?? []),
             ),
           ),
+        ),
         ),
       ),
     );
@@ -336,7 +348,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                     const Icon(Icons.bolt, color: Colors.white),
                     const SizedBox(width: 8),
                     Text(
-                      l10n.generateTraining,
+                      l10n.generateSession,
                       style: VigorTypography.label.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
@@ -352,19 +364,21 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     );
   }
 
-  Widget _buildContent(AppLocalizations l10n, bool isDark, List<Training> trainings) {
+  Widget _buildContent(AppLocalizations l10n, bool isDark, List<Training> trainings, List<FlowSession> flowSessions) {
+    final pendingFlows = flowSessions.where((f) => f.completedAt == null).toList();
+    final completedFlows = flowSessions.where((f) => f.completedAt != null).toList();
     final available = _availableTrainings(trainings);
     final past = _pastTrainings(trainings);
 
     return Column(
       children: [
-        _buildSegmentedControl(l10n, available.length, past.length, isDark),
+        _buildSegmentedControl(l10n, available.length + pendingFlows.length, past.length + completedFlows.length, isDark),
         Expanded(
           child: TabBarView(
             controller: _tabController,
             children: [
-              _buildTrainingList(available, l10n, isAvailable: true),
-              _buildTrainingList(past, l10n, isAvailable: false),
+              _buildTrainingList(available, l10n, isAvailable: true, flowSessions: pendingFlows),
+              _buildTrainingList(past, l10n, isAvailable: false, flowSessions: completedFlows),
             ],
           ),
         ),
@@ -418,10 +432,10 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     );
   }
 
-  Widget _buildTrainingList(List<Training> trainings, AppLocalizations l10n, {required bool isAvailable}) {
+  Widget _buildTrainingList(List<Training> trainings, AppLocalizations l10n, {required bool isAvailable, List<FlowSession> flowSessions = const []}) {
     final externalSessions = !isAvailable ? _getExternalSessions() : <Map<String, dynamic>>[];
 
-    if (trainings.isEmpty && externalSessions.isEmpty) {
+    if (trainings.isEmpty && externalSessions.isEmpty && flowSessions.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -441,15 +455,23 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       );
     }
 
-    // for available tab, just list trainings
+    // for available tab, merge trainings and pending flow sessions
     if (isAvailable) {
+      final List<_CompletedItem> items = [
+        ...trainings.map((t) => _CompletedItem(date: t.createdAt, training: t)),
+        ...flowSessions.map((f) => _CompletedItem(date: f.createdAt, flowSession: f)),
+      ]..sort((a, b) => b.date.compareTo(a.date));
+
       return ListView.separated(
         padding: VigorSpacing.paddingLg,
-        itemCount: trainings.length,
+        itemCount: items.length,
         separatorBuilder: (_, __) => const SizedBox(height: VigorSpacing.sm),
         itemBuilder: (context, index) {
-          final training = trainings[index];
-          return _buildTrainingCard(training, l10n, isAvailable: true, key: ValueKey(training.id));
+          final item = items[index];
+          if (item.flowSession != null) {
+            return _buildFlowSessionCard(item.flowSession!);
+          }
+          return _buildTrainingCard(item.training!, l10n, isAvailable: true, key: ValueKey(item.training!.id));
         },
       );
     }
@@ -467,6 +489,10 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       ...trainings.map((t) => _CompletedItem(
         date: t.completedAt ?? t.createdAt,
         training: t,
+      )),
+      ...flowSessions.map((f) => _CompletedItem(
+        date: f.completedAt ?? f.createdAt,
+        flowSession: f,
       )),
       ...sessionsByDay.entries.map((e) {
         // use the latest session's start time as the group date
@@ -487,6 +513,9 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
         final item = items[index];
         if (item.training != null) {
           return _buildTrainingCard(item.training!, l10n, isAvailable: false, key: ValueKey(item.training!.id));
+        }
+        if (item.flowSession != null) {
+          return _buildFlowSessionCard(item.flowSession!);
         }
         return _buildExternalSessionsCard(item.externalSessions!, l10n);
       },
@@ -721,6 +750,100 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     );
   }
 
+  Future<void> _deleteFlowSession(FlowSession session) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await AdaptiveAlertDialog.show<bool>(
+      context: context,
+      title: l10n.deleteTraining,
+      content: l10n.deleteSelectedTrainings(1),
+      actions: [
+        AdaptiveDialogAction(label: l10n.cancel, onPressed: () => Navigator.of(context).pop(false)),
+        AdaptiveDialogAction(label: l10n.delete, isDestructive: true, onPressed: () => Navigator.of(context).pop(true)),
+      ],
+    );
+    if (confirmed != true || !mounted) return;
+    final response = await context.read<ServiceLocator>().flowService.deleteFlow(session.id);
+    if (!mounted) return;
+    if (!response.isSuccess) {
+      AdaptiveNotification.showError(context: context, message: l10n.failedToDeleteTraining);
+    }
+  }
+
+  Widget _buildFlowSessionCard(FlowSession session) {
+    final dateStr = session.completedAt != null
+        ? _formatFullDate(session.completedAt!)
+        : _formatDate(session.createdAt);
+
+    return Opacity(
+      opacity: 0.85,
+      child: Container(
+        decoration: BoxDecoration(
+          color: VigorColors.surface(context),
+          borderRadius: VigorRadius.radiusMd,
+        ),
+        child: InkWell(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => FlowDetailsScreen(flowSession: session)),
+          ),
+          onLongPress: () => _deleteFlowSession(session),
+          borderRadius: VigorRadius.radiusMd,
+          child: Padding(
+            padding: VigorSpacing.paddingMd,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: VigorColors.stone.withValues(alpha: 0.1),
+                        borderRadius: VigorRadius.radiusXs,
+                      ),
+                      child: Icon(Icons.self_improvement, size: 14, color: VigorColors.stone),
+                    ),
+                    const SizedBox(width: VigorSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        session.name,
+                        style: VigorTypography.headline.copyWith(
+                          fontSize: 16,
+                          color: VigorColors.textPrimary(context),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                if (session.description.isNotEmpty) ...[
+                  const SizedBox(height: VigorSpacing.xs),
+                  Text(
+                    session.description,
+                    style: VigorTypography.body.copyWith(
+                      color: VigorColors.textSecondary(context),
+                      fontSize: 13,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                const SizedBox(height: VigorSpacing.sm),
+                Row(
+                  children: [
+                    _buildDataChip(Icons.schedule, _formatDuration(session.duration)),
+                    const SizedBox(width: VigorSpacing.sm),
+                    _buildDataChip(Icons.calendar_today, dateStr),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   // kintsugi: gold for completed, stone for stale
   Widget _buildStatusBadge(String text, Color color, IconData icon) {
     return Container(
@@ -777,10 +900,11 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   }
 }
 
-/// unified item for chronological sorting of vigor trainings and day-grouped external HC sessions
+/// unified item for chronological sorting of vigor trainings, flow sessions, and day-grouped external HC sessions
 class _CompletedItem {
   final DateTime date;
   final Training? training;
+  final FlowSession? flowSession;
   final List<Map<String, dynamic>>? externalSessions;
-  const _CompletedItem({required this.date, this.training, this.externalSessions});
+  const _CompletedItem({required this.date, this.training, this.flowSession, this.externalSessions});
 }

@@ -26,6 +26,7 @@ func NewGenerator(outputDir, modelImportPath string, localTypes map[string]bool)
 
 	tmpl := template.Must(template.New("dart").Funcs(template.FuncMap{
 		"toDartType":          toDartType,
+		"fieldDartType":       fieldDartType,
 		"toSnakeCase":         toSnakeCase,
 		"toCamelCase":         toCamelCase,
 		"toClassName":         toClassName,
@@ -72,6 +73,17 @@ func (g *Generator) Generate(s Struct) error {
 	return nil
 }
 
+// fieldDartType returns the Dart type for a field, respecting DartOverride
+func fieldDartType(field Field) string {
+	if field.DartOverride != "" {
+		if field.IsOptional {
+			return field.DartOverride + "?"
+		}
+		return field.DartOverride
+	}
+	return toDartType(field.Type, field.IsOptional, field.IsCollection, field.CollectionOf)
+}
+
 // toDartType converts a Go type to a Dart type
 func toDartType(goType string, isOptional bool, isCollection bool, collectionOf string) string {
 	var dartType string
@@ -115,6 +127,10 @@ func mapGoTypeToDart(goType string) string {
 			}
 		case "datatypes":
 			if typeName == "JSON" || typeName == "JSONMap" {
+				return "Map<String, dynamic>"
+			}
+		case "json":
+			if typeName == "RawMessage" {
 				return "Map<String, dynamic>"
 			}
 		case "gorm":
@@ -175,7 +191,34 @@ func (g *Generator) getImports(s Struct) []string {
 	var imports []string
 	seen := make(map[string]bool)
 
+	addImport := func(dartType string) {
+		primitives := []string{"String", "int", "double", "bool", "DateTime", "dynamic", "List", "Map"}
+		for _, prim := range primitives {
+			if strings.HasPrefix(dartType, prim) {
+				return
+			}
+		}
+		fileName := toSnakeCase(dartType) + ".dart"
+		if g.modelImportPath != "" && !g.localTypes[dartType] {
+			fileName = g.modelImportPath + fileName
+		}
+		if !seen[fileName] {
+			seen[fileName] = true
+			imports = append(imports, fileName)
+		}
+	}
+
 	for _, field := range s.Fields {
+		if field.DartOverride != "" {
+			// extract inner type from List<T> or Map<K,V> overrides
+			override := field.DartOverride
+			if strings.HasPrefix(override, "List<") && strings.HasSuffix(override, ">") {
+				addImport(override[5 : len(override)-1])
+			} else if !strings.HasPrefix(override, "Map<") {
+				addImport(override)
+			}
+			continue
+		}
 		if needsImport(field) {
 			typeName := field.CollectionOf
 			if typeName == "" {
@@ -229,6 +272,9 @@ func needsListDefault(field Field) bool {
 	if field.IsOptional {
 		return false
 	}
+	if field.DartOverride != "" {
+		return strings.HasPrefix(field.DartOverride, "List<")
+	}
 	// Check if it's a direct collection ([]Type)
 	if field.IsCollection {
 		return true
@@ -243,6 +289,9 @@ func needsStringDefault(field Field) bool {
 	if field.IsOptional || field.IsRequired || field.IsCollection {
 		return false
 	}
+	if field.DartOverride != "" {
+		return field.DartOverride == "String"
+	}
 	dartType := toDartType(field.Type, false, field.IsCollection, field.CollectionOf)
 	return dartType == "String"
 }
@@ -251,6 +300,9 @@ func needsStringDefault(field Field) bool {
 func needsMapDefault(field Field) bool {
 	if field.IsOptional {
 		return false
+	}
+	if field.DartOverride != "" {
+		return strings.HasPrefix(field.DartOverride, "Map<")
 	}
 	dartType := toDartType(field.Type, false, field.IsCollection, field.CollectionOf)
 	return strings.HasPrefix(dartType, "Map<")
@@ -307,7 +359,7 @@ class {{ toClassName .Name }} {
 
 {{- range .Fields }}
   @JsonKey(name: '{{ .JsonTag }}'{{- if needsListDefault . }}, defaultValue: []{{- else if needsMapDefault . }}, defaultValue: {}{{- else if needsStringDefault . }}, defaultValue: ''{{- end }}{{- if isDateTime .Type }}{{- if .IsOptional }}, toJson: _nullableDateTimeToJson{{- else }}, toJson: _dateTimeToJson{{- end }}{{- end }})
-  final {{ toDartType .Type .IsOptional .IsCollection .CollectionOf }} {{ toCamelCase .Name }};
+  final {{ fieldDartType . }} {{ toCamelCase .Name }};
 {{- end }}
 
   {{ toClassName .Name }}({

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
+import '../models/flow_session.dart';
 import '../models/gym.dart';
 import '../models/profile_data.dart' as profile_models;
 import '../models/training.dart';
@@ -20,15 +21,18 @@ import '../utils/knowledge_labels.dart';
 import '../utils/platform_helper.dart';
 
 enum EquipmentMode { bodyweight, gym, custom }
+enum _SessionMode { training, flow }
 
 class TrainingGenerationModal extends StatefulWidget {
   final List<Gym> gyms;
   final Function(Training)? onSuccess;
+  final Function(FlowSession)? onFlowSuccess;
 
   const TrainingGenerationModal({
     super.key,
     required this.gyms,
     this.onSuccess,
+    this.onFlowSuccess,
   });
 
   @override
@@ -43,6 +47,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   late int _duration; // minutes, range: 10-180
 
   EquipmentMode _equipmentMode = EquipmentMode.bodyweight;
+  _SessionMode _sessionMode = _SessionMode.training;
   Gym? _selectedGym;
   bool _isGenerating = false;
   int? _retryAttempt;
@@ -161,6 +166,19 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
   List<String> _buildMessagePool() {
     final l10n = AppLocalizations.of(context);
+
+    if (_sessionMode == _SessionMode.flow) {
+      final messages = <String>[
+        l10n.loadingMsgFlow1,
+        l10n.loadingMsgFlow2,
+        l10n.loadingMsgFlow3,
+        l10n.loadingMsgFlow4,
+        l10n.loadingMsgFlow5,
+      ];
+      messages.shuffle(_random);
+      return messages;
+    }
+
     final messages = <String>[
       l10n.loadingMsg1,
       l10n.loadingMsg2,
@@ -726,20 +744,24 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         ),
         const SizedBox(height: VigorSpacing.md),
 
-        // Warmup/cooldown toggle
-        _buildWarmupToggle(),
-        const SizedBox(height: VigorSpacing.md),
+        if (_sessionMode == _SessionMode.training) ...[
+          // Warmup/cooldown toggle
+          _buildWarmupToggle(),
+          const SizedBox(height: VigorSpacing.md),
+        ],
 
         // Muscles selection
         _buildMusclesSection(),
         if (_availableMuscles.isNotEmpty) const SizedBox(height: VigorSpacing.md),
 
-        // Methodology selection
-        _buildMethodologySection(),
-        if (_availableMethodologies.isNotEmpty) const SizedBox(height: VigorSpacing.md),
+        if (_sessionMode == _SessionMode.training) ...[
+          // Methodology selection
+          _buildMethodologySection(),
+          if (_availableMethodologies.isNotEmpty) const SizedBox(height: VigorSpacing.md),
 
-        // Goals selection
-        _buildGoalsSection(),
+          // Goals selection
+          _buildGoalsSection(),
+        ],
       ],
     );
   }
@@ -844,6 +866,59 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     });
     _startMessageRotation();
 
+    if (_sessionMode == _SessionMode.flow) {
+      await _generateFlow();
+    } else {
+      await _generateTrainingSession();
+    }
+  }
+
+  Future<void> _generateFlow() async {
+    final flowService = context.read<ServiceLocator>().flowService;
+    final prompt = _promptController.text.trim();
+
+    final response = await flowService.generateFlow(
+      duration: _duration,
+      muscles: _selectedMuscles.isEmpty ? null : _selectedMuscles.toList(),
+      prompt: prompt.isEmpty ? null : prompt,
+      onRetry: (attempt) {
+        if (!mounted) return;
+        setState(() {
+          _retryAttempt = attempt;
+          _showingRetryMessage = true;
+        });
+        _stopMessageRotation();
+        final callbackId = ++_retryCallbackId;
+        Timer(const Duration(seconds: 4), () {
+          if (!mounted || !_isGenerating || callbackId != _retryCallbackId) return;
+          setState(() => _showingRetryMessage = false);
+          _startMessageRotation();
+        });
+      },
+    );
+
+    _stopMessageRotation();
+
+    if (mounted) {
+      setState(() => _isGenerating = false);
+      if (response.isSuccess) {
+        Navigator.of(context).pop();
+        AdaptiveNotification.show(
+          context: context,
+          message: AppLocalizations.of(context).trainingGeneratedSuccessfully,
+        );
+        widget.onFlowSuccess?.call(response.data!);
+      } else {
+        AdaptiveNotification.showError(
+          context: context,
+          message: AppLocalizations.of(context).failedToGenerateTraining,
+          rawError: response.error,
+        );
+      }
+    }
+  }
+
+  Future<void> _generateTrainingSession() async {
     final trainingService = context.read<ServiceLocator>().trainingService;
 
     final prompt = _promptController.text.trim();
@@ -953,12 +1028,15 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
   Widget _buildDurationSlider(AppLocalizations l10n) {
     final rec = _recommendedDurationRange;
-    final hasRecommendation = rec != null && rec.length >= 2;
+    final hasRecommendation = rec != null && rec.length >= 2 && _sessionMode == _SessionMode.training;
     final isSingleValue = hasRecommendation && rec[0] == rec[1];
     // format recommendation label: "X min" if single value, "X-Y min" if range
     final recLabel = hasRecommendation
         ? (isSingleValue ? '${rec[0]} min' : '${rec[0]}-${rec[1]} min')
         : '';
+
+    final maxDuration = _sessionMode == _SessionMode.flow ? 60.0 : 180.0;
+    final divisions = _sessionMode == _SessionMode.flow ? 10 : 34;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1006,8 +1084,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             const sliderPadding = 12.0;
             final trackWidth = constraints.maxWidth - (sliderPadding * 2);
             const minVal = 10.0;
-            const maxVal = 180.0;
-            const range = maxVal - minVal;
+            final range = maxDuration - minVal;
 
             Widget? rangeIndicator;
             if (hasRecommendation) {
@@ -1015,8 +1092,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               final rawMin = rec[0];
               final rawMax = rec[1];
               final rangeWidth = rawMax - rawMin;
-              final recMin = (rangeWidth < 20 ? rawMin - 10 : rawMin).clamp(10, 180).toDouble();
-              final recMax = (rangeWidth < 20 ? rawMax + 10 : rawMax).clamp(10, 180).toDouble();
+              final recMin = (rangeWidth < 20 ? rawMin - 10 : rawMin).clamp(10, maxDuration.toInt()).toDouble();
+              final recMax = (rangeWidth < 20 ? rawMax + 10 : rawMax).clamp(10, maxDuration.toInt()).toDouble();
               final leftPos = sliderPadding + ((recMin - minVal) / range) * trackWidth;
               final rightPos = sliderPadding + ((recMax - minVal) / range) * trackWidth;
               final width = (rightPos - leftPos).clamp(4.0, trackWidth);
@@ -1048,10 +1125,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                       thumbShape: SliderComponentShape.noThumb,
                     ),
                     child: Slider(
-                      value: _duration.toDouble(),
+                      value: _duration.toDouble().clamp(minVal, maxDuration),
                       min: minVal,
-                      max: maxVal,
-                      divisions: 34,
+                      max: maxDuration,
+                      divisions: divisions,
                       activeColor: VigorColors.indigo,
                       onChanged: (_) {},
                     ),
@@ -1067,10 +1144,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                     overlayColor: VigorColors.indigo.withValues(alpha: 0.2),
                   ),
                   child: Slider(
-                    value: _duration.toDouble(),
+                    value: _duration.toDouble().clamp(minVal, maxDuration),
                     min: minVal,
-                    max: maxVal,
-                    divisions: 34,
+                    max: maxDuration,
+                    divisions: divisions,
                     onChanged: (value) => setState(() => _duration = value.round()),
                   ),
                 ),
@@ -1161,26 +1238,37 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    l10n.generateTraining,
-                    style: VigorTypography.headline.copyWith(
-                      fontSize: 24,
-                      color: VigorColors.textPrimary(context),
+                  // session mode toggle
+                  SizedBox(
+                    width: double.infinity,
+                    child: SegmentedButton<_SessionMode>(
+                      segments: [
+                        ButtonSegment(value: _SessionMode.training, label: Text(l10n.trainingRoutines)),
+                        const ButtonSegment(value: _SessionMode.flow, label: Text('Flow')),
+                      ],
+                      selected: {_sessionMode},
+                      onSelectionChanged: (selected) => setState(() {
+                        _sessionMode = selected.first;
+                        if (_sessionMode == _SessionMode.flow && _duration > 60) _duration = 60;
+                      }),
+                      showSelectedIcon: false,
                     ),
                   ),
-                  const SizedBox(height: VigorSpacing.lg),
+                  const SizedBox(height: VigorSpacing.md),
 
                   // Duration slider with recommended range
                   _buildDurationSlider(l10n),
                   const SizedBox(height: VigorSpacing.md),
 
-                  // Equipment mode selection
-                  _buildEquipmentSection(),
-                  const SizedBox(height: VigorSpacing.md),
+                  // Equipment mode selection (training only)
+                  if (_sessionMode == _SessionMode.training) ...[
+                    _buildEquipmentSection(),
+                    const SizedBox(height: VigorSpacing.md),
 
-                  // Partners section
-                  _buildPartnersSection(),
-                  const SizedBox(height: VigorSpacing.md),
+                    // Partners section
+                    _buildPartnersSection(),
+                    const SizedBox(height: VigorSpacing.md),
+                  ],
 
                   // Advanced settings collapsible
                   _buildAdvancedHeader(),

@@ -7,6 +7,7 @@ import '../services/preferences_service.dart';
 import '../services/service_locator.dart';
 import '../services/live_notification_service.dart';
 import '../generated/app_localizations.dart';
+import 'base_timer_notifier.dart';
 import 'timer_controller.dart';
 import 'timer_mode.dart';
 import 'training_interval.dart';
@@ -19,7 +20,7 @@ import 'for_time_controller.dart';
 /// Timer orchestration ChangeNotifier. Manages segment lifecycle, audio,
 /// wakelock, background drift, and controller transitions.
 /// Used by InlineTimerSection in TrainingDetailsScreen.
-class WorkoutTimerNotifier extends ChangeNotifier with WidgetsBindingObserver {
+class WorkoutTimerNotifier extends BaseTimerNotifier with WidgetsBindingObserver {
   final Training training;
   final PreferencesService prefs;
   final ServiceLocator serviceLocator;
@@ -46,16 +47,21 @@ class WorkoutTimerNotifier extends ChangeNotifier with WidgetsBindingObserver {
 
   // --- public getters ---
 
+  @override
   TimerController? get controller => _controller;
+  @override
   bool get workoutCompleted => _workoutCompleted;
+  @override
   bool get isSubmitting => _isSubmitting;
   String? get methodologyStats => _methodologyStats;
   int get accumulatedElapsedSeconds => _accumulatedElapsedSeconds;
 
+  @override
   int get totalElapsedSeconds => _workoutCompleted
       ? _accumulatedElapsedSeconds
       : _accumulatedElapsedSeconds + (_controller?.elapsedSeconds ?? 0);
 
+  @override
   TimerMode? get currentMode =>
       _currentSegmentIndex < _segments.length
           ? _segments[_currentSegmentIndex].mode
@@ -68,6 +74,7 @@ class WorkoutTimerNotifier extends ChangeNotifier with WidgetsBindingObserver {
   int get currentRemainingSeconds => _controller?.remainingSeconds ?? 0;
 
   /// overall training progress as 0.0-1.0 fraction based on exercises done vs total
+  @override
   double get progress {
     if (_workoutCompleted) return 1.0;
     final total = _totalActivities;
@@ -85,6 +92,7 @@ class WorkoutTimerNotifier extends ChangeNotifier with WidgetsBindingObserver {
     return count;
   }
 
+  @override
   Color phaseColor(Brightness brightness) {
     final controller = _controller;
     if (controller == null || !controller.hasStarted) return VigorColors.persimmon;
@@ -243,6 +251,7 @@ class WorkoutTimerNotifier extends ChangeNotifier with WidgetsBindingObserver {
 
   // --- actions ---
 
+  @override
   void handleTap(TapUpDetails details, double sectionWidth) {
     final controller = _controller;
     if (controller == null) return;
@@ -264,6 +273,7 @@ class WorkoutTimerNotifier extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
+  @override
   void stopWhistle() => _audioService.stopWhistle();
 
   /// mark submitting state for UI feedback
@@ -305,6 +315,7 @@ class WorkoutTimerNotifier extends ChangeNotifier with WidgetsBindingObserver {
 
   // --- utils ---
 
+  @override
   String formatDuration(int seconds) {
     final minutes = seconds ~/ 60;
     final secs = seconds % 60;

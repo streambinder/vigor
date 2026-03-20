@@ -3383,6 +3383,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} log entries'**
   String logEntries(int count);
+
+  /// No description provided for @generateSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Session'**
+  String get generateSession;
+
+  /// No description provided for @flowSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Flow Session'**
+  String get flowSession;
+
+  /// No description provided for @flowSessionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Yoga, stretching & mobility for recovery and wellbeing'**
+  String get flowSessionDescription;
+
+  /// No description provided for @loadingMsgFlow1.
+  ///
+  /// In en, this message translates to:
+  /// **'Targeting your recently trained muscles...'**
+  String get loadingMsgFlow1;
+
+  /// No description provided for @loadingMsgFlow2.
+  ///
+  /// In en, this message translates to:
+  /// **'Designing your recovery flow...'**
+  String get loadingMsgFlow2;
+
+  /// No description provided for @loadingMsgFlow3.
+  ///
+  /// In en, this message translates to:
+  /// **'Selecting holds for your mobility needs...'**
+  String get loadingMsgFlow3;
+
+  /// No description provided for @loadingMsgFlow4.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking for injury-safe movements...'**
+  String get loadingMsgFlow4;
+
+  /// No description provided for @loadingMsgFlow5.
+  ///
+  /// In en, this message translates to:
+  /// **'Curating your mindful movement sequence...'**
+  String get loadingMsgFlow5;
+
+  /// No description provided for @noFlowSessionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No flow sessions yet'**
+  String get noFlowSessionsYet;
+
+  /// No description provided for @generateFirstFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate your first flow session to start recovering and stretching.'**
+  String get generateFirstFlow;
 }
 
 class _AppLocalizationsDelegate

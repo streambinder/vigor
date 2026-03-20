@@ -1,0 +1,8 @@
+{% package prompt %}
+
+{% func GenFlowStructuring(reasoningOutput string) -%}
+Extract the flow session from the reasoning below into the provided JSON schema.
+Use exercise IDs (not names) for exercise_id fields. Map [FN] markers to the fact_indices array.
+
+{%s reasoningOutput %}
+{% endfunc %}

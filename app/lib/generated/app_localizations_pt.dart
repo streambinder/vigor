@@ -1768,4 +1768,39 @@ class AppLocalizationsPt extends AppLocalizations {
   String logEntries(int count) {
     return '$count entradas de log';
   }
+
+  @override
+  String get generateSession => 'Gerar Sessão';
+
+  @override
+  String get flowSession => 'Sessão Flow';
+
+  @override
+  String get flowSessionDescription =>
+      'Yoga, alongamento e mobilidade para recuperação e bem-estar';
+
+  @override
+  String get loadingMsgFlow1 =>
+      'Identificando os músculos treinados recentemente...';
+
+  @override
+  String get loadingMsgFlow2 => 'Projetando o teu fluxo de recuperação...';
+
+  @override
+  String get loadingMsgFlow3 =>
+      'Selecionando posturas para a tua mobilidade...';
+
+  @override
+  String get loadingMsgFlow4 => 'Verificando movimentos seguros para lesões...';
+
+  @override
+  String get loadingMsgFlow5 =>
+      'Criando a tua sequência de movimento consciente...';
+
+  @override
+  String get noFlowSessionsYet => 'Nenhuma sessão flow ainda';
+
+  @override
+  String get generateFirstFlow =>
+      'Gera a tua primeira sessão flow para começar a recuperar e alongar.';
 }

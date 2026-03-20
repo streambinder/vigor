@@ -579,5 +579,16 @@
     "placeholders": {
       "count": {"type": "int"}
     }
-  }
+  },
+
+  "generateSession": "生成课程",
+  "flowSession": "Flow 课程",
+  "flowSessionDescription": "瑜伽、拉伸和灵活性训练，用于恢复和身心健康",
+  "loadingMsgFlow1": "识别最近训练的肌肉...",
+  "loadingMsgFlow2": "设计你的恢复流程...",
+  "loadingMsgFlow3": "为你的灵活性选择体式...",
+  "loadingMsgFlow4": "检查伤病安全动作...",
+  "loadingMsgFlow5": "编排你的正念运动序列...",
+  "noFlowSessionsYet": "暂无 Flow 课程",
+  "generateFirstFlow": "生成你的第一个 Flow 课程，开始恢复和拉伸。"
 }

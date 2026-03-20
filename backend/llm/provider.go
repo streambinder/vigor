@@ -6,11 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/llm/prompt"
 	"github.com/streambinder/vigor/model"
+	"gorm.io/datatypes"
 )
 
 var (
@@ -61,7 +63,7 @@ type TrainingGenerationRequest struct {
 
 // LLM defines the interface for language model providers.
 type LLM interface {
-	query(prompt model.LLMPrompt, temperature float64, maxTokens int, topP float64, schema *model.JSONSchemaFormat) ([]byte, string, error)
+	query(prompt model.LLMPrompt, temperature float64, maxTokens int, topP float64, schema *model.JSONSchemaFormat, timeout time.Duration) ([]byte, string, error)
 }
 
 // ValidateProviders checks that both reasoning and structuring pools have at least one provider.
@@ -149,6 +151,7 @@ func GenTraining(req TrainingGenerationRequest) (*model.Training, model.Training
 		10000, // reasoning can be verbose
 		0.9,   // top-p sampling for reasoning only
 		nil,   // no schema — free-form thinking
+		90*time.Second,
 	)
 	execution.Reasoning = model.LLMStep{Model: reasoningModel, Prompt: reasoningPrompt, Output: string(reasoningOutput)}
 	if err != nil {
@@ -170,6 +173,7 @@ func GenTraining(req TrainingGenerationRequest) (*model.Training, model.Training
 		4000, // structured output is more compact
 		0,    // no top-p — deterministic
 		&model.TrainingSchema,
+		90*time.Second,
 	)
 	execution.Structuring = model.LLMStep{Model: structuringModel, Prompt: structuringPrompt, Output: string(structuredOutput)}
 	if err != nil {
@@ -182,4 +186,106 @@ func GenTraining(req TrainingGenerationRequest) (*model.Training, model.Training
 	}
 
 	return training, execution, nil
+}
+
+type FlowGenerationRequest struct {
+	Profile              model.Profile
+	Muscles              []string
+	MusclesFromRecent    bool
+	Exercises            []model.Exercise
+	Facts                []model.Fact
+	UserPrompt           string
+	Duration             int // minutes
+	CorrectionHint       string
+	LastReasoningModel   string
+	LastStructuringModel string
+}
+
+// flowLLMOutput mirrors the LLM-facing schema: flat poses slice for unmarshaling structuring output.
+type flowLLMOutput struct {
+	Name        string           `json:"name"`
+	Description string           `json:"description"`
+	FactIndices []int            `json:"fact_indices"`
+	Poses       []model.FlowPose `json:"poses"`
+}
+
+// GenFlow generates a personalized flow/yoga/stretching session using the same two-stage approach
+// as GenTraining: reasoning at high temp, then deterministic schema extraction.
+func GenFlow(req FlowGenerationRequest) (*model.FlowSession, model.TrainingPrompt, error) {
+	var execution model.TrainingPrompt
+
+	// stage 1: reasoning — creative flow design
+	reasoningUserMessage := prompt.GenFlowReasoning(
+		req.Profile,
+		req.Muscles,
+		req.MusclesFromRecent,
+		req.Exercises,
+		req.Facts,
+		req.UserPrompt,
+		req.Duration,
+	)
+	if req.CorrectionHint != "" {
+		reasoningUserMessage += "\n\nCORRECTION (previous attempt failed server-side validation): " + req.CorrectionHint + ". Fix this issue and regenerate."
+	}
+
+	reasoningPrompt := model.LLMPrompt{
+		System: prompt.FlowReasoningSystem(),
+		User:   reasoningUserMessage,
+	}
+
+	reasoningOutput, reasoningModel, err := getLLM(StageReasoning, req.LastReasoningModel).query(
+		reasoningPrompt,
+		0.8,
+		8000,
+		0.9,
+		nil,
+		90*time.Second,
+	)
+	execution.Reasoning = model.LLMStep{Model: reasoningModel, Prompt: reasoningPrompt, Output: string(reasoningOutput)}
+	if err != nil {
+		return nil, execution, fmt.Errorf("%w (reasoning stage): %w", ErrLLMQuery, err)
+	}
+	if len(bytes.TrimSpace(reasoningOutput)) == 0 {
+		return nil, execution, fmt.Errorf("%w (reasoning stage): empty response", ErrLLMQuery)
+	}
+
+	// stage 2: structuring — extract JSON from reasoning
+	structuringPrompt := model.LLMPrompt{
+		System: prompt.FlowSystem(),
+		User:   prompt.GenFlowStructuring(string(reasoningOutput)),
+	}
+
+	structuredOutput, structuringModel, err := getLLM(StageStructuring, req.LastStructuringModel).query(
+		structuringPrompt,
+		0.0,
+		3000,
+		0,
+		&model.FlowSessionSchema,
+		90*time.Second,
+	)
+	execution.Structuring = model.LLMStep{Model: structuringModel, Prompt: structuringPrompt, Output: string(structuredOutput)}
+	if err != nil {
+		return nil, execution, fmt.Errorf("%w (structuring stage): %w", ErrLLMQuery, err)
+	}
+
+	var output flowLLMOutput
+	if err := json.Unmarshal(structuredOutput, &output); err != nil {
+		return nil, execution, fmt.Errorf("%w: %s", ErrLLMUnmarshal, err)
+	}
+
+	// marshal poses to JSONB right away — service will hydrate names/details from knowledge DB
+	posesJSON, err := json.Marshal(output.Poses)
+	if err != nil {
+		return nil, execution, fmt.Errorf("%w: marshaling poses: %s", ErrLLMUnmarshal, err)
+	}
+
+	// map LLM output → FlowSession; caller populates UserID, Muscles, Request, etc.
+	session := &model.FlowSession{
+		Name:        output.Name,
+		Description: output.Description,
+		FactIndices: output.FactIndices,
+		Poses:       datatypes.JSON(posesJSON),
+	}
+
+	return session, execution, nil
 }

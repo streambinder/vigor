@@ -2,7 +2,6 @@ package llm
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -28,9 +27,9 @@ func openAIClient(host, apiKey string) openai.Client {
 	)
 }
 
-func (llm *OpenAI) query(prompt model.LLMPrompt, temperature float64, maxTokens int, topP float64, schema *model.JSONSchemaFormat) ([]byte, string, error) {
+func (llm *OpenAI) query(prompt model.LLMPrompt, temperature float64, maxTokens int, topP float64, schema *model.JSONSchemaFormat, timeout time.Duration) ([]byte, string, error) {
 	start := time.Now()
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	params := openai.ChatCompletionNewParams{
 		Model: llm.model,
@@ -59,10 +58,10 @@ func (llm *OpenAI) query(prompt model.LLMPrompt, temperature float64, maxTokens 
 			},
 		}
 	}
-	promptJSON, _ := json.Marshal(prompt)
-	log.Debug().Str("provider", llm.provider).Str("model", llm.model).RawJSON("request", promptJSON).Msg("Sending request to LLM")
+	log.Debug().Str("provider", llm.provider).Str("model", llm.model).Msg("Sending request to LLM")
 	completion, err := llm.client.Chat.Completions.New(ctx, params)
 	if err != nil {
+		log.Warn().Str("provider", llm.provider).Str("model", llm.model).Dur("elapsed", time.Since(start)).Err(err).Msg("LLM request failed")
 		return nil, llm.model, fmt.Errorf("unable to send request to %s: %s", llm.provider, err)
 	} else if len(completion.Choices) == 0 {
 		return nil, llm.model, fmt.Errorf("no choices in %s response", llm.provider)
@@ -78,6 +77,6 @@ func (llm *OpenAI) query(prompt model.LLMPrompt, temperature float64, maxTokens 
 
 	log.Info().Str("provider", llm.provider).Str("model", llm.model).Dur("latency", time.Since(start)).Msg("LLM query completed")
 
-	log.Debug().Str("provider", llm.provider).Dur("latency", time.Since(start)).RawJSON("request", promptJSON).Str("content", completionChoice.Message.Content).Msg("Received LLM response")
+	log.Debug().Str("provider", llm.provider).Dur("latency", time.Since(start)).Str("content", completionChoice.Message.Content).Msg("Received LLM response")
 	return []byte(completionChoice.Message.Content), llm.model, nil
 }

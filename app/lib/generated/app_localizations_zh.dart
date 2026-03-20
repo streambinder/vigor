@@ -1729,4 +1729,34 @@ class AppLocalizationsZh extends AppLocalizations {
   String logEntries(int count) {
     return '$count 条日志';
   }
+
+  @override
+  String get generateSession => '生成课程';
+
+  @override
+  String get flowSession => 'Flow 课程';
+
+  @override
+  String get flowSessionDescription => '瑜伽、拉伸和灵活性训练，用于恢复和身心健康';
+
+  @override
+  String get loadingMsgFlow1 => '识别最近训练的肌肉...';
+
+  @override
+  String get loadingMsgFlow2 => '设计你的恢复流程...';
+
+  @override
+  String get loadingMsgFlow3 => '为你的灵活性选择体式...';
+
+  @override
+  String get loadingMsgFlow4 => '检查伤病安全动作...';
+
+  @override
+  String get loadingMsgFlow5 => '编排你的正念运动序列...';
+
+  @override
+  String get noFlowSessionsYet => '暂无 Flow 课程';
+
+  @override
+  String get generateFirstFlow => '生成你的第一个 Flow 课程，开始恢复和拉伸。';
 }

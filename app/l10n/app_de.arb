@@ -579,5 +579,16 @@
     "placeholders": {
       "count": {"type": "int"}
     }
-  }
+  },
+
+  "generateSession": "Sitzung Erstellen",
+  "flowSession": "Flow-Sitzung",
+  "flowSessionDescription": "Yoga, Dehnung und Mobilität für Erholung und Wohlbefinden",
+  "loadingMsgFlow1": "Kürzlich trainierte Muskeln erfassen...",
+  "loadingMsgFlow2": "Deinen Erholungsflow gestalten...",
+  "loadingMsgFlow3": "Haltungen für deine Mobilität auswählen...",
+  "loadingMsgFlow4": "Verletzungssichere Bewegungen prüfen...",
+  "loadingMsgFlow5": "Deine achtsame Bewegungssequenz zusammenstellen...",
+  "noFlowSessionsYet": "Noch keine Flow-Sitzungen",
+  "generateFirstFlow": "Erstelle deine erste Flow-Sitzung, um mit Erholung und Dehnung zu beginnen."
 }

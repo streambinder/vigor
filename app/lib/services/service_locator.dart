@@ -3,9 +3,11 @@ import 'package:flutter/foundation.dart';
 import '../models/family_progress.dart';
 import '../models/gym.dart';
 import '../models/progress.dart';
+import '../models/flow_session.dart';
 import '../models/training.dart';
 import '../models/weekly_target.dart';
 import 'app_event.dart';
+import 'flow_service.dart';
 import 'training_service.dart';
 import 'gym_service.dart';
 import 'progress_service.dart';
@@ -27,12 +29,14 @@ class ServiceLocator extends ChangeNotifier {
   ProgressService? _progressService;
   UserService? _userService;
   HealthDataService? _healthDataService;
+  FlowService? _flowService;
 
   // shared observable state for cross-screen sync
   final ValueNotifier<List<Gym>?> gymsNotifier = ValueNotifier(null);
   final ValueNotifier<List<Training>?> trainingsNotifier = ValueNotifier(null);
   final ValueNotifier<bool> isCalibratingNotifier = ValueNotifier(false);
   final ValueNotifier<Map<String, dynamic>?> healthDailyNotifier = ValueNotifier(null);
+  final ValueNotifier<List<FlowSession>?> flowSessionsNotifier = ValueNotifier(null);
 
   // pending share token to process after login completes
   String? pendingShareToken;
@@ -46,6 +50,7 @@ class ServiceLocator extends ChangeNotifier {
   // concurrency guards to prevent duplicate refresh requests
   bool _isRefreshingGyms = false;
   bool _isRefreshingTrainings = false;
+  bool _isRefreshingFlowSessions = false;
 
   // typed event bus
   final _eventController = StreamController<AppEvent>.broadcast();
@@ -68,6 +73,8 @@ class ServiceLocator extends ChangeNotifier {
         refreshGyms();
       case HealthSyncCompleted():
         refreshHealthDaily();
+      case FlowSessionListChanged():
+        refreshFlowSessions();
       case FeedbackSubmitted():
       case ProfileUpdated():
         break; // handled at screen level / by AuthProvider
@@ -99,6 +106,11 @@ class ServiceLocator extends ChangeNotifier {
     return _healthDataService;
   }
 
+  FlowService get flowService => _flowService ??= FlowService(
+        storageService: _storage,
+        emitEvent: emit,
+      );
+
   Future<void> refreshGyms() async {
     if (_isRefreshingGyms) return;
     _isRefreshingGyms = true;
@@ -122,6 +134,19 @@ class ServiceLocator extends ChangeNotifier {
       }
     } finally {
       _isRefreshingTrainings = false;
+    }
+  }
+
+  Future<void> refreshFlowSessions() async {
+    if (_isRefreshingFlowSessions) return;
+    _isRefreshingFlowSessions = true;
+    try {
+      final response = await flowService.getFlowSessions();
+      if (response.isSuccess) {
+        flowSessionsNotifier.value = response.data;
+      }
+    } finally {
+      _isRefreshingFlowSessions = false;
     }
   }
 
@@ -168,10 +193,12 @@ class ServiceLocator extends ChangeNotifier {
     _progressService = null;
     _userService = null;
     _healthDataService = null;
+    _flowService = null;
     gymsNotifier.value = null;
     trainingsNotifier.value = null;
     isCalibratingNotifier.value = false;
     healthDailyNotifier.value = null;
+    flowSessionsNotifier.value = null;
     pendingShareToken = null;
     pendingShareAutoClaim = false;
     initialProgress = null;
@@ -190,6 +217,7 @@ class ServiceLocator extends ChangeNotifier {
     trainingsNotifier.dispose();
     isCalibratingNotifier.dispose();
     healthDailyNotifier.dispose();
+    flowSessionsNotifier.dispose();
     super.dispose();
   }
 }

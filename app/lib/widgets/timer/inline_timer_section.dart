@@ -2,26 +2,28 @@ import 'package:flutter/material.dart';
 import '../../design/tokens.dart';
 import '../../generated/app_localizations.dart';
 import '../../models/activity_ext.dart';
+import '../../timer/base_timer_notifier.dart';
 import '../../timer/amrap_controller.dart';
 import '../../timer/emom_controller.dart';
 import '../../timer/for_time_controller.dart';
 import '../../timer/timer_controller.dart';
 import '../../timer/timer_mode.dart';
 import '../../timer/training_interval.dart';
-import '../../timer/workout_timer_notifier.dart';
 import '../../utils/knowledge_labels.dart';
 import '../cached_exercise_image.dart';
 
 /// Inline timer section for embedding in TrainingDetailsScreen.
 /// Bordered card with progress bar, background exercise image, and attached control buttons.
 class InlineTimerSection extends StatelessWidget {
-  final WorkoutTimerNotifier notifier;
+  final BaseTimerNotifier notifier;
   final VoidCallback? onDone;
+  final IconData fallbackIcon;
 
   const InlineTimerSection({
     super.key,
     required this.notifier,
     this.onDone,
+    this.fallbackIcon = Icons.fitness_center,
   });
 
   @override
@@ -180,19 +182,19 @@ class InlineTimerSection extends StatelessWidget {
     AppLocalizations l10n,
   ) {
     // always use 220px fixed height — image or fallback background
-    final fallbackIcon = isRest ? Icons.local_drink : Icons.fitness_center;
+    final exerciseFallbackIcon = isRest ? Icons.local_drink : fallbackIcon;
     final background = hasImage && !isRest
         ? Image.network(
             CachedExerciseImage.proxyUrl(imageUrl!),
             fit: BoxFit.cover,
             errorBuilder: (_, _, _) => Container(
               color: VigorColors.stone.withValues(alpha: 0.1),
-              child: Center(child: Icon(fallbackIcon, size: 120, color: VigorColors.stone.withValues(alpha: 0.3))),
+              child: Center(child: Icon(exerciseFallbackIcon, size: 120, color: VigorColors.stone.withValues(alpha: 0.3))),
             ),
           )
         : Container(
             color: VigorColors.stone.withValues(alpha: 0.1),
-            child: Center(child: Icon(fallbackIcon, size: 120, color: VigorColors.stone.withValues(alpha: 0.3))),
+            child: Center(child: Icon(exerciseFallbackIcon, size: 120, color: VigorColors.stone.withValues(alpha: 0.3))),
           );
 
     return Stack(
