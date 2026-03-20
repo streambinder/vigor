@@ -14,6 +14,7 @@ import (
 var allowedImageDomains = []string{
 	"static.exercisedb.dev",
 	"exercisedb.dev",
+	"raw.githubusercontent.com",
 }
 
 // initProxy registers proxy routes.

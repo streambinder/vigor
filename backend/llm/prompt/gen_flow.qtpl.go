@@ -16,7 +16,7 @@ var (
 
 func StreamGenFlowStructuring(qw422016 *qt422016.Writer, reasoningOutput string) {
 	qw422016.N().S(`Extract the flow session from the reasoning below into the provided JSON schema.
-Use exercise IDs (not names) for exercise_id fields. Map [FN] markers to the fact_indices array.
+Use exercise IDs (not names) for exercise_id fields — copy them verbatim from the reasoning's [EXERCISES] list. Never invent IDs or add suffixes. Map [FN] markers to the fact_indices array.
 
 `)
 	qw422016.E().S(reasoningOutput)

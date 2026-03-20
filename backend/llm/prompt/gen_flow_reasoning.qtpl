@@ -39,8 +39,8 @@ Age:{%d profile.Age() %} Height:{%f.0 profile.Height %}cm Weight:{%f.0 profile.W
 {% endif %}{% if len(profile.Conditions()) > 0 %}Conditions: {% for j, condition := range profile.Conditions() %}{%s condition %}{% if j < len(profile.Conditions())-1 %}, {% endif %}{% endfor %}
 {% endif %}
 
-[EXERCISES] {%d len(exercises) %} options
-{% for _, exercise := range exercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}, {% endfor %}
+[EXERCISES] {%d len(exercises) %} options (id: name[primary_muscle])
+{% for _, exercise := range exercises %}{%s exercise.ID %}: {%s exercise.Name %}{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}, {% endfor %}
 
 {% if len(facts) > 0 %}
 [FACTS]
@@ -59,4 +59,5 @@ Output language: {% if len(profile.Language) > 0 %}{%s profile.Language %}{% els
 - Minimum 4 poses, maximum 40. Use enough poses to reach the target duration.
 - This is a single continuous flow — no warmup/cooldown split
 - Sequence from gentle mobilization to deeper stretches, ending with calming poses
+- ONLY use exercise IDs from the [EXERCISES] list above — never invent IDs, variants, or suffixes
 {% endfunc %}

@@ -118,10 +118,12 @@ Age:`)
 
 [EXERCISES] `)
 	qw422016.N().D(len(exercises))
-	qw422016.N().S(` options
+	qw422016.N().S(` options (id: name[primary_muscle])
 `)
 	for _, exercise := range exercises {
 		qw422016.E().S(exercise.ID)
+		qw422016.N().S(`: `)
+		qw422016.E().S(exercise.Name)
 		if len(exercise.Muscles) > 0 {
 			qw422016.N().S(`[`)
 			qw422016.E().S(exercise.Muscles[0])
@@ -179,6 +181,7 @@ Output language: `)
 - Minimum 4 poses, maximum 40. Use enough poses to reach the target duration.
 - This is a single continuous flow — no warmup/cooldown split
 - Sequence from gentle mobilization to deeper stretches, ending with calming poses
+- ONLY use exercise IDs from the [EXERCISES] list above — never invent IDs, variants, or suffixes
 `)
 }
 
