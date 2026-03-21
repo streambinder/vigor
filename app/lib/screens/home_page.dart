@@ -42,6 +42,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
   bool _hasLoadedOnce = false;
   bool _consumedInitialData = false;
   bool _subscribedToEvents = false;
+  ValueNotifier<Map<String, dynamic>?>? _healthDailyNotifier;
 
   void _consumePreloadedData() {
     if (_consumedInitialData) return;
@@ -58,17 +59,28 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     if (!_subscribedToEvents) {
       _subscribedToEvents = true;
       subscribeToEvents(serviceLocator.events, _onAppEvent);
+      // listen directly to the notifier so background refreshHealthDaily() updates propagate
+      _healthDailyNotifier = serviceLocator.healthDailyNotifier;
+      _healthDailyNotifier!.addListener(_onHealthDailyChanged);
     }
+  }
+
+  void _onHealthDailyChanged() {
+    if (!mounted) return;
+    final updated = _healthDailyNotifier?.value;
+    if (updated != null && updated != _healthDaily) setState(() => _healthDaily = updated);
+  }
+
+  @override
+  void dispose() {
+    _healthDailyNotifier?.removeListener(_onHealthDailyChanged);
+    super.dispose();
   }
 
   void _onAppEvent(AppEvent event) {
     if (!mounted) return;
     if (event is TrainingCompleted || event is TrainingListChanged) {
       _loadProgress();
-    } else if (event is HealthSyncCompleted) {
-      // background sync finished — pull updated metrics from the notifier
-      final updated = context.read<ServiceLocator>().healthDailyNotifier.value;
-      if (updated != null) setState(() => _healthDaily = updated);
     }
   }
 
