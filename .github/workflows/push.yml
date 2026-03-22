@@ -25,8 +25,37 @@ env:
   DOCKER_PLATFORMS: linux/arm64
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      go: ${{ steps.filter.outputs.go }}
+      app: ${{ steps.filter.outputs.app }}
+      knowledge: ${{ steps.filter.outputs.knowledge }}
+      cockpit: ${{ steps.filter.outputs.cockpit }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
+        id: filter
+        with:
+          filters: |
+            go:
+              - 'backend/**'
+              - 'cockpit/**'
+              - 'knowledge/**'
+            app:
+              - 'app/**'
+            knowledge:
+              - 'knowledge/**'
+              - 'backend/model/**'
+              - 'backend/llm/embedding/**'
+              - 'backend/llm/rag/**'
+            cockpit:
+              - 'cockpit/**'
+
   gofumpt:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.go == 'true'
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
@@ -38,23 +67,35 @@ jobs:
           export PATH
           go install mvdan.cc/gofumpt@latest
           gofumpt -e -d backend cockpit knowledge
+
   go-channel-closure:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.go == 'true'
     steps:
       - uses: actions/checkout@v6
       - run: test "$(grep -Erc --include='*.go' --exclude-dir=".git*" 'make\(chan\s')" = "$(grep -Erc --include='*.go' --exclude-dir=".git*" '\sclose\(')"
+
   go-http-body-closure:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.go == 'true'
     steps:
       - uses: actions/checkout@v6
       - run: test "$(grep -Erc --include='*.go' --exclude-dir=".git*" 'http\.(Get|Head)\(|http\.DefaultClient\.Do\(|client\.(Get|Head|Do)\(')" = "$(grep -rc --include='*.go' --exclude-dir=".git*" '\.Body\.Close()')"
+
   go-mockey-unpatch:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.go == 'true'
     steps:
       - uses: actions/checkout@v6
       - run: test "$(grep -cr --include='*.go' 'mockey.Mock(')" = "$(grep -cr --include='*.go' '\.UnPatch()$')"
+
   go-generate:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.go == 'true' || needs.changes.outputs.app == 'true'
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
@@ -71,8 +112,11 @@ jobs:
           cd ../backend && go generate
           cd ../cockpit && go generate
           git diff --exit-code
+
   dart-build-runner:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
     steps:
       - uses: actions/checkout@v6
       - uses: subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e
@@ -83,8 +127,11 @@ jobs:
           flutter pub get
           flutter pub run build_runner build --delete-conflicting-outputs
           git diff --exit-code
+
   flutter-l10n:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
     steps:
       - uses: actions/checkout@v6
       - uses: subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e
@@ -95,8 +142,11 @@ jobs:
           flutter pub get
           flutter gen-l10n
           git diff --exit-code
+
   flutter-analyze:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
     steps:
       - uses: actions/checkout@v6
       - uses: subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e
@@ -107,10 +157,18 @@ jobs:
           flutter pub get
           flutter pub run build_runner build --delete-conflicting-outputs
           flutter analyze
+
   app-apk:
     runs-on: ubuntu-latest
-    needs: [go-generate, dart-build-runner, flutter-l10n, flutter-analyze]
-    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: [changes, go-generate, dart-build-runner, flutter-l10n, flutter-analyze]
+    if: |
+      always() &&
+      needs.changes.outputs.app == 'true' &&
+      (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
+      needs.dart-build-runner.result == 'success' &&
+      needs.flutter-l10n.result == 'success' &&
+      needs.flutter-analyze.result == 'success' &&
+      github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v6
       - uses: subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e
@@ -133,10 +191,18 @@ jobs:
         with:
           name: release-apk
           path: app/build/app/outputs/flutter-apk/app-release.apk
+
   app-docker:
     runs-on: ubuntu-latest
-    needs: [go-generate, dart-build-runner, flutter-l10n, flutter-analyze]
-    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: [changes, go-generate, dart-build-runner, flutter-l10n, flutter-analyze]
+    if: |
+      always() &&
+      needs.changes.outputs.app == 'true' &&
+      (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
+      needs.dart-build-runner.result == 'success' &&
+      needs.flutter-l10n.result == 'success' &&
+      needs.flutter-analyze.result == 'success' &&
+      github.event_name == 'push' && github.ref == 'refs/heads/master'
     permissions:
       contents: read
       packages: write
@@ -157,43 +223,40 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           build-args: |
             BUILD_VERSION=${{ github.sha }}
+
   knowledge-docker:
     runs-on: ubuntu-latest
     needs:
       [
+        changes,
         gofumpt,
         go-channel-closure,
         go-http-body-closure,
         go-mockey-unpatch,
         go-generate,
       ]
-    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: |
+      always() &&
+      needs.changes.outputs.knowledge == 'true' &&
+      (needs.gofumpt.result == 'success' || needs.gofumpt.result == 'skipped') &&
+      (needs.go-channel-closure.result == 'success' || needs.go-channel-closure.result == 'skipped') &&
+      (needs.go-http-body-closure.result == 'success' || needs.go-http-body-closure.result == 'skipped') &&
+      (needs.go-mockey-unpatch.result == 'success' || needs.go-mockey-unpatch.result == 'skipped') &&
+      (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
+      github.event_name == 'push' && github.ref == 'refs/heads/master'
     permissions:
       contents: read
       packages: write
     steps:
       - uses: actions/checkout@v6
-      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
-        id: changes
-        with:
-          filters: |
-            knowledge:
-              - 'knowledge/**'
-              - 'backend/model/**'
-              - 'backend/llm/embedding/**'
-              - 'backend/llm/rag/**'
       - uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a
-        if: steps.changes.outputs.knowledge == 'true'
       - uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
-        if: steps.changes.outputs.knowledge == 'true'
       - uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2
-        if: steps.changes.outputs.knowledge == 'true'
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
-        if: steps.changes.outputs.knowledge == 'true'
         with:
           context: .
           file: knowledge/Dockerfile
@@ -204,17 +267,27 @@ jobs:
             OPENROUTER_EMBEDDING_MODELS=google/gemini-embedding-001
           secrets: |
             openrouter_api_key=${{ secrets.OPENROUTER_API_KEY }}
+
   backend-docker:
     runs-on: ubuntu-latest
     needs:
       [
+        changes,
         gofumpt,
         go-channel-closure,
         go-http-body-closure,
         go-mockey-unpatch,
         go-generate,
       ]
-    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: |
+      always() &&
+      needs.changes.outputs.go == 'true' &&
+      (needs.gofumpt.result == 'success' || needs.gofumpt.result == 'skipped') &&
+      (needs.go-channel-closure.result == 'success' || needs.go-channel-closure.result == 'skipped') &&
+      (needs.go-http-body-closure.result == 'success' || needs.go-http-body-closure.result == 'skipped') &&
+      (needs.go-mockey-unpatch.result == 'success' || needs.go-mockey-unpatch.result == 'skipped') &&
+      (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
+      github.event_name == 'push' && github.ref == 'refs/heads/master'
     permissions:
       contents: read
       packages: write
@@ -234,17 +307,27 @@ jobs:
           platforms: ${{ env.DOCKER_PLATFORMS }}
           tags: ghcr.io/streambinder/vigor/backend:latest
           push: ${{ github.event_name != 'pull_request' }}
+
   cockpit-docker:
     runs-on: ubuntu-latest
     needs:
       [
+        changes,
         gofumpt,
         go-channel-closure,
         go-http-body-closure,
         go-mockey-unpatch,
         go-generate,
       ]
-    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: |
+      always() &&
+      needs.changes.outputs.cockpit == 'true' &&
+      (needs.gofumpt.result == 'success' || needs.gofumpt.result == 'skipped') &&
+      (needs.go-channel-closure.result == 'success' || needs.go-channel-closure.result == 'skipped') &&
+      (needs.go-http-body-closure.result == 'success' || needs.go-http-body-closure.result == 'skipped') &&
+      (needs.go-mockey-unpatch.result == 'success' || needs.go-mockey-unpatch.result == 'skipped') &&
+      (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
+      github.event_name == 'push' && github.ref == 'refs/heads/master'
     permissions:
       contents: read
       packages: write
