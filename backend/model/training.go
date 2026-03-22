@@ -473,8 +473,13 @@ func (t *Training) calcIntervalDuration(routineTypes ...string) int {
 					isLastRepeat := repeat == block.Repeats-1
 					isLastOfTraining := isLastRoutine && isLastBlock && isLastRepeat && isLastInRepeat
 
-					if isLastInRepeat && block.Rest > 0 && !isLastOfTraining {
-						addRest(block.Rest)
+					if isLastInRepeat && !isLastOfTraining {
+						// prefer block rest; fall back to last activity's own rest
+						if block.Rest > 0 {
+							addRest(block.Rest)
+						} else if activity.Rest > 0 {
+							addRest(activity.Rest)
+						}
 					} else if !isLastInRepeat && activity.Rest > 0 {
 						addRest(activity.Rest)
 					}

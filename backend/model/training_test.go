@@ -994,3 +994,44 @@ func TestPurgeRepsDuration(t *testing.T) {
 		})
 	}
 }
+
+func TestCalculateDuration_BlockRestFallback(t *testing.T) {
+	// block.rest=0, last activity has rest=45s → should be used as inter-repeat rest
+	tr := makeTraining("strength", []Routine{
+		routine("work", 0, []Block{
+			block(3, 0, []Activity{
+				act(0, 10, 30), // 40s work + 30s rest (not last)
+				act(0, 10, 45), // 40s work + 45s rest fallback (last in repeat, block.rest=0)
+			}),
+		}),
+	})
+
+	got := tr.CalculateDuration()
+
+	// each repeat: 40 + 30(act rest) + 40 + 45(fallback) = 155
+	// last repeat has no trailing rest (isLastOfTraining)
+	// repeat 1: 155, repeat 2: 155, repeat 3: 40 + 30 + 40 = 110
+	// total = 155 + 155 + 110 = 420
+	if got != 420 {
+		t.Errorf("block rest fallback CalculateDuration() = %d, want 420", got)
+	}
+}
+
+func TestCalculateDuration_BlockRestOverridesActivityRest(t *testing.T) {
+	// when block.rest > 0, it takes priority over the last activity's rest
+	tr := makeTraining("strength", []Routine{
+		routine("work", 0, []Block{
+			block(2, 60, []Activity{
+				act(0, 10, 0), // 40s work (last in repeat → block.rest=60 takes precedence)
+			}),
+		}),
+	})
+
+	got := tr.CalculateDuration()
+
+	// repeat 1: 40 + 60(block rest) = 100, repeat 2: 40 (last, no rest)
+	// total = 140
+	if got != 140 {
+		t.Errorf("block rest priority CalculateDuration() = %d, want 140", got)
+	}
+}

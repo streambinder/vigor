@@ -261,18 +261,22 @@ class IntervalController extends TimerController {
             final isLastActivityOfTraining =
                 isLastRoutine && isLastBlock && isLastRepeat && isLastActivityInRepeat;
 
-            if (isLastActivityInRepeat && block.rest > 0 && !isLastActivityOfTraining) {
-              addRestInterval(TrainingInterval(
-                type: IntervalType.rest,
-                duration: block.rest,
-                routineName: routine.type,
-                activityNumber: activityCounter,
-                totalActivities: totalActivities,
-                blockNumber: blockIndex,
-                totalBlocks: routine.blocks.length,
-                routineNumber: routineIndex,
-                totalRoutines: training.routines.length,
-              ));
+            if (isLastActivityInRepeat && !isLastActivityOfTraining) {
+              // prefer block rest; fall back to last activity's own rest
+              final restDuration = block.rest > 0 ? block.rest : activity.rest;
+              if (restDuration > 0) {
+                addRestInterval(TrainingInterval(
+                  type: IntervalType.rest,
+                  duration: restDuration,
+                  routineName: routine.type,
+                  activityNumber: activityCounter,
+                  totalActivities: totalActivities,
+                  blockNumber: blockIndex,
+                  totalBlocks: routine.blocks.length,
+                  routineNumber: routineIndex,
+                  totalRoutines: training.routines.length,
+                ));
+              }
             } else if (!isLastActivityInRepeat && activity.rest > 0) {
               addRestInterval(TrainingInterval(
                 type: IntervalType.rest,
