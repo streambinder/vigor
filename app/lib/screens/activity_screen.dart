@@ -32,6 +32,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   final Map<String, List<PartnerInfo>> _partnerData = {};
   final Set<String> _selectedIds = {};
   bool get _isSelecting => _selectedIds.isNotEmpty;
+  ValueNotifier<Map<String, dynamic>?>? _healthDailyNotifier;
 
   late TabController _tabController;
 
@@ -46,7 +47,21 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_healthDailyNotifier == null) {
+      _healthDailyNotifier = context.read<ServiceLocator>().healthDailyNotifier;
+      _healthDailyNotifier!.addListener(_onHealthDailyChanged);
+    }
+  }
+
+  void _onHealthDailyChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    _healthDailyNotifier?.removeListener(_onHealthDailyChanged);
     _tabController.dispose();
     super.dispose();
   }
@@ -523,7 +538,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   }
 
   List<Map<String, dynamic>> _getExternalSessions() {
-    final healthDaily = context.read<ServiceLocator>().healthDailyNotifier.value;
+    final healthDaily = _healthDailyNotifier?.value;
     if (healthDaily == null) return [];
     final sessions = healthDaily['sessions'] as List?;
     if (sessions == null) return [];
