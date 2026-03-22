@@ -34,6 +34,13 @@ STRUCTURE REQUIREMENTS:
 - Cooldown: static stretches for all muscles worked. Use [primary_muscle] hints to cover all muscle groups. AVOID stretches aggravating injuries.
 {% else %}- EXACTLY 1 routine named "work" only. No warmup or cooldown.
 {% endif %}
+EXERCISE COUNT: Scale work exercises to fit the session duration. Each exercise takes ~8-10min (hypertrophy/strength: 3 sets + rest) or ~4-5min (circuits/HIIT). {% if !skipWarmupCooldown %}Warmup+cooldown consume ~12min, leaving the rest for work.{% endif %} Stay within these ranges for the work routine:
+- ≤30min{% if !skipWarmupCooldown %} session (~18min work){% endif %}: 2-3 exercises
+- 31-45min{% if !skipWarmupCooldown %} session (~19-33min work){% endif %}: 3-4 exercises
+- 46-60min{% if !skipWarmupCooldown %} session (~34-48min work){% endif %}: 4-6 exercises
+- 61-90min{% if !skipWarmupCooldown %} session (~49-78min work){% endif %}: 6-9 exercises
+- >90min{% if !skipWarmupCooldown %} session (>78min work){% endif %}: 8-12 exercises
+Circuits/HIIT allow ~2x more exercises per duration band. Never exceed these ranges.
 
 ACTIVITY RULES:
 - Each activity: EXACTLY ONE of reps or duration must be > 0 (never both, never neither)
