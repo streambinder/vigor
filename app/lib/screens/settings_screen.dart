@@ -28,6 +28,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late bool _duckOtherAudio;
   late bool _warmupCooldown;
   late bool _useRecommendedDuration;
+  late bool _liveTimerNotification;
 
   @override
   void initState() {
@@ -38,6 +39,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _duckOtherAudio = prefs.duckOtherAudio;
     _warmupCooldown = prefs.warmupCooldown;
     _useRecommendedDuration = prefs.useRecommendedDuration;
+    _liveTimerNotification = prefs.liveTimerNotification;
   }
 
   @override
@@ -201,6 +203,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
                 ),
+              ),
+              Divider(height: 1, color: VigorColors.border(context)),
+              SwitchListTile(
+                title: Text(l10n.liveTimerNotification, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+                subtitle: Text(l10n.liveTimerNotificationDescription, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
+                value: _liveTimerNotification,
+                activeColor: VigorColors.indigo,
+                onChanged: (value) {
+                  setState(() => _liveTimerNotification = value);
+                  context.read<PreferencesService>().setLiveTimerNotification(value);
+                },
               ),
             ],
           ),

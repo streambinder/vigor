@@ -318,6 +318,8 @@
   "intervalJingle": "Apito na troca de intervalo",
   "duckOtherAudio": "Baixar outro áudio",
   "duckOtherAudioDescription": "Reduz o volume de música e outros apps durante o apito",
+  "liveTimerNotification": "Notificação de timer ao vivo",
+  "liveTimerNotificationDescription": "Exibe o tempo decorrido e controles na barra de status durante o treino",
   "goalHypertrophy": "Hipertrofia",
   "goalHypertrophyDescription": "Aumente a massa muscular com treino de resistência",
   "goalFatLoss": "Perda de Gordura",

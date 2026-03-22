@@ -1024,6 +1024,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get duckOtherAudioDescription => '호루라기 중 음악 및 다른 앱의 볼륨을 줄입니다';
 
   @override
+  String get liveTimerNotification => '라이브 타이머 알림';
+
+  @override
+  String get liveTimerNotificationDescription =>
+      '운동 중 상태 표시줄에 경과 시간과 컨트롤을 표시합니다';
+
+  @override
   String get goalHypertrophy => '근육 증가';
 
   @override

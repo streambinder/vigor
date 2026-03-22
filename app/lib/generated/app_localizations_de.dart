@@ -1053,6 +1053,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Reduziert die Lautstärke von Musik und anderen Apps während des Pfiffs';
 
   @override
+  String get liveTimerNotification => 'Live-Timer-Benachrichtigung';
+
+  @override
+  String get liveTimerNotificationDescription =>
+      'Zeigt die verstrichene Zeit und Steuerungen in der Statusleiste während des Trainings an';
+
+  @override
   String get goalHypertrophy => 'Muskelaufbau';
 
   @override

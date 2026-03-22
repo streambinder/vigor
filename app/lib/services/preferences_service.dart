@@ -9,6 +9,7 @@ class PreferencesService {
   static const String _defaultDurationKey = 'default_duration';
   static const String _intervalJingleKey = 'interval_jingle';
   static const String _duckOtherAudioKey = 'duck_other_audio';
+  static const String _liveTimerNotificationKey = 'live_timer_notification';
   static const String _warmupCooldownKey = 'warmup_cooldown';
   static const String _useRecommendedDurationKey = 'use_recommended_duration';
   static const String _hcChangesTokenKey = 'hc_changes_token';
@@ -87,6 +88,12 @@ class PreferencesService {
 
   Future<void> setDuckOtherAudio(bool enabled) async {
     await _prefs?.setBool(_duckOtherAudioKey, enabled);
+  }
+
+  bool get liveTimerNotification => _prefs?.getBool(_liveTimerNotificationKey) ?? true;
+
+  Future<void> setLiveTimerNotification(bool enabled) async {
+    await _prefs?.setBool(_liveTimerNotificationKey, enabled);
   }
 
   bool get warmupCooldown => _prefs?.getBool(_warmupCooldownKey) ?? true;

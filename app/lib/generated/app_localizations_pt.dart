@@ -1045,6 +1045,13 @@ class AppLocalizationsPt extends AppLocalizations {
       'Reduz o volume de música e outros apps durante o apito';
 
   @override
+  String get liveTimerNotification => 'Notificação de timer ao vivo';
+
+  @override
+  String get liveTimerNotificationDescription =>
+      'Exibe o tempo decorrido e controles na barra de status durante o treino';
+
+  @override
   String get goalHypertrophy => 'Hipertrofia';
 
   @override

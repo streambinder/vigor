@@ -318,6 +318,8 @@
   "intervalJingle": "Silbato al cambio de intervalo",
   "duckOtherAudio": "Bajar otro audio",
   "duckOtherAudioDescription": "Reduce el volumen de música y otras apps durante el silbato",
+  "liveTimerNotification": "Notificación de temporizador en vivo",
+  "liveTimerNotificationDescription": "Muestra el tiempo transcurrido y controles en la barra de estado durante el entrenamiento",
   "goalHypertrophy": "Desarrollo Muscular",
   "goalHypertrophyDescription": "Aumenta el tamaño muscular con entrenamiento de resistencia",
   "goalFatLoss": "Pérdida de Grasa",

@@ -318,6 +318,8 @@
   "intervalJingle": "Свисток при смене интервала",
   "duckOtherAudio": "Приглушить другое аудио",
   "duckOtherAudioDescription": "Уменьшает громкость музыки и других приложений во время свистка",
+  "liveTimerNotification": "Живое уведомление таймера",
+  "liveTimerNotificationDescription": "Показывать прошедшее время и элементы управления в строке состояния во время тренировки",
   "goalHypertrophy": "Набор массы",
   "goalHypertrophyDescription": "Наращивайте мышечную массу с силовыми тренировками",
   "goalFatLoss": "Сжигание жира",

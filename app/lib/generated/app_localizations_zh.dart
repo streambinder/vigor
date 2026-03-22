@@ -1022,6 +1022,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get duckOtherAudioDescription => '吹哨时降低音乐和其他应用的音量';
 
   @override
+  String get liveTimerNotification => '实时计时器通知';
+
+  @override
+  String get liveTimerNotificationDescription => '训练期间在状态栏显示已用时间和控制按钮';
+
+  @override
   String get goalHypertrophy => '增肌';
 
   @override

@@ -318,6 +318,8 @@
   "intervalJingle": "间隔切换时吹哨",
   "duckOtherAudio": "降低其他音频",
   "duckOtherAudioDescription": "吹哨时降低音乐和其他应用的音量",
+  "liveTimerNotification": "实时计时器通知",
+  "liveTimerNotificationDescription": "训练期间在状态栏显示已用时间和控制按钮",
   "goalHypertrophy": "增肌",
   "goalHypertrophyDescription": "通过针对性力量训练增加肌肉量",
   "goalFatLoss": "减脂",

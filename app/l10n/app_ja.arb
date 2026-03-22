@@ -318,6 +318,8 @@
   "intervalJingle": "インターバル切替時にホイッスル",
   "duckOtherAudio": "他のオーディオを下げる",
   "duckOtherAudioDescription": "ホイッスル中に音楽や他のアプリの音量を下げます",
+  "liveTimerNotification": "ライブタイマー通知",
+  "liveTimerNotificationDescription": "トレーニング中にステータスバーに経過時間とコントロールを表示します",
   "goalHypertrophy": "筋肥大",
   "goalHypertrophyDescription": "ターゲットを絞った筋トレで筋肉量を増やす",
   "goalFatLoss": "脂肪燃焼",

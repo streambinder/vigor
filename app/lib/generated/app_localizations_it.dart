@@ -1052,6 +1052,13 @@ class AppLocalizationsIt extends AppLocalizations {
       'Riduce il volume della musica e altre app durante il fischietto';
 
   @override
+  String get liveTimerNotification => 'Notifica timer live';
+
+  @override
+  String get liveTimerNotificationDescription =>
+      'Mostra il tempo trascorso e i controlli nella barra di stato durante l\'allenamento';
+
+  @override
   String get goalHypertrophy => 'Massa Muscolare';
 
   @override

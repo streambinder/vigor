@@ -1024,6 +1024,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get duckOtherAudioDescription => 'ホイッスル中に音楽や他のアプリの音量を下げます';
 
   @override
+  String get liveTimerNotification => 'ライブタイマー通知';
+
+  @override
+  String get liveTimerNotificationDescription =>
+      'トレーニング中にステータスバーに経過時間とコントロールを表示します';
+
+  @override
   String get goalHypertrophy => '筋肥大';
 
   @override

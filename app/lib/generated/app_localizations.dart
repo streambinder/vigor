@@ -2022,6 +2022,18 @@ abstract class AppLocalizations {
   /// **'Reduce volume of music and other apps during whistle'**
   String get duckOtherAudioDescription;
 
+  /// No description provided for @liveTimerNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Live timer notification'**
+  String get liveTimerNotification;
+
+  /// No description provided for @liveTimerNotificationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Show elapsed time and controls in the status bar during training'**
+  String get liveTimerNotificationDescription;
+
   /// No description provided for @goalHypertrophy.
   ///
   /// In en, this message translates to:

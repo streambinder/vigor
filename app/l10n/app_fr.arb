@@ -318,6 +318,8 @@
   "intervalJingle": "Sifflet au changement d'intervalle",
   "duckOtherAudio": "Baisser l'autre audio",
   "duckOtherAudioDescription": "Réduit le volume de la musique et des autres apps pendant le sifflet",
+  "liveTimerNotification": "Notification de minuterie en direct",
+  "liveTimerNotificationDescription": "Affiche le temps écoulé et les contrôles dans la barre d'état pendant l'entraînement",
   "goalHypertrophy": "Prise de Masse",
   "goalHypertrophyDescription": "Développe la masse musculaire avec un entraînement ciblé",
   "goalFatLoss": "Perte de Graisse",

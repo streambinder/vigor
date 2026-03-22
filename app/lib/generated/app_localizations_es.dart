@@ -1049,6 +1049,13 @@ class AppLocalizationsEs extends AppLocalizations {
       'Reduce el volumen de música y otras apps durante el silbato';
 
   @override
+  String get liveTimerNotification => 'Notificación de temporizador en vivo';
+
+  @override
+  String get liveTimerNotificationDescription =>
+      'Muestra el tiempo transcurrido y controles en la barra de estado durante el entrenamiento';
+
+  @override
   String get goalHypertrophy => 'Desarrollo Muscular';
 
   @override

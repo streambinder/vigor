@@ -46,6 +46,7 @@ class MainActivity : FlutterFragmentActivity() {
                     val progress = call.argument<Double>("progress") ?: 0.0
                     val stopLabel = call.argument<String>("stopLabel") ?: "Stop"
                     val completeLabel = call.argument<String>("completeLabel") ?: "Complete"
+                    val isPaused = call.argument<Boolean>("isPaused") ?: false
 
                     TimerNotificationService.showLiveTimerNotification(
                         this,
@@ -56,7 +57,8 @@ class MainActivity : FlutterFragmentActivity() {
                         isDurationBased,
                         progress,
                         stopLabel,
-                        completeLabel
+                        completeLabel,
+                        isPaused
                     )
                     result.success(null)
                 }

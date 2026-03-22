@@ -1041,6 +1041,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'Уменьшает громкость музыки и других приложений во время свистка';
 
   @override
+  String get liveTimerNotification => 'Живое уведомление таймера';
+
+  @override
+  String get liveTimerNotificationDescription =>
+      'Показывать прошедшее время и элементы управления в строке состояния во время тренировки';
+
+  @override
   String get goalHypertrophy => 'Набор массы';
 
   @override

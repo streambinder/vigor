@@ -36,6 +36,7 @@ class LiveNotificationService {
     required double progress,
     required String stopLabel,
     required String completeLabel,
+    required bool isPaused,
   }) async {
     if (!_isActive) {
       _isActive = true;
@@ -52,6 +53,7 @@ class LiveNotificationService {
           'progress': progress,
           'stopLabel': stopLabel,
           'completeLabel': completeLabel,
+          'isPaused': isPaused,
         });
       } else if (Platform.isIOS) {
         await _androidChannel.invokeMethod('updateTimerNotification', {
@@ -59,6 +61,7 @@ class LiveNotificationService {
           'exerciseName': contentText,
           'remainingSeconds': intervalRemainingSeconds,
           'progress': progress,
+          'isPaused': isPaused,
         });
       }
     } catch (e) {

@@ -328,6 +328,7 @@ class WorkoutTimerNotifier extends BaseTimerNotifier with WidgetsBindingObserver
   }
 
   void _updateLiveNotification() {
+    if (!prefs.liveTimerNotification) return;
     if (_controller == null || !_controller!.hasStarted) return;
 
     final interval = _controller!.currentInterval;
@@ -355,6 +356,7 @@ class WorkoutTimerNotifier extends BaseTimerNotifier with WidgetsBindingObserver
       progress: progress,
       stopLabel: l10n.stop,
       completeLabel: l10n.complete,
+      isPaused: _controller?.isPaused ?? false,
     );
   }
 }

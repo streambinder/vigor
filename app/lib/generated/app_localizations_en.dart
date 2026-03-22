@@ -1042,6 +1042,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Reduce volume of music and other apps during whistle';
 
   @override
+  String get liveTimerNotification => 'Live timer notification';
+
+  @override
+  String get liveTimerNotificationDescription =>
+      'Show elapsed time and controls in the status bar during training';
+
+  @override
   String get goalHypertrophy => 'Muscle Building';
 
   @override

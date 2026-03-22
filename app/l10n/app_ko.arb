@@ -318,6 +318,8 @@
   "intervalJingle": "인터벌 전환 시 호루라기",
   "duckOtherAudio": "다른 오디오 줄이기",
   "duckOtherAudioDescription": "호루라기 중 음악 및 다른 앱의 볼륨을 줄입니다",
+  "liveTimerNotification": "라이브 타이머 알림",
+  "liveTimerNotificationDescription": "운동 중 상태 표시줄에 경과 시간과 컨트롤을 표시합니다",
   "goalHypertrophy": "근육 증가",
   "goalHypertrophyDescription": "타겟 저항 훈련으로 근육량 증가",
   "goalFatLoss": "체지방 감소",

@@ -39,7 +39,8 @@ class TimerNotificationService {
             isDurationBased: Boolean,
             progress: Double,
             stopLabel: String,
-            completeLabel: String
+            completeLabel: String,
+            isPaused: Boolean = false
         ) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return
 
@@ -111,9 +112,15 @@ class TimerNotificationService {
             if (Build.VERSION.SDK_INT >= 36) {
                 builder.extras.putBoolean("android.extraRequestPromotedOngoing", true)
                 builder.setShortCriticalText(totalElapsedTimeText)
-                builder.setWhen(System.currentTimeMillis() - (totalElapsedSeconds * 1000L))
-                builder.setUsesChronometer(true)
-                builder.setChronometerCountDown(false)
+                if (isPaused) {
+                    // freeze chronometer: disable auto-tick so it stops advancing
+                    builder.setUsesChronometer(false)
+                    builder.setWhen(System.currentTimeMillis() - (totalElapsedSeconds * 1000L))
+                } else {
+                    builder.setWhen(System.currentTimeMillis() - (totalElapsedSeconds * 1000L))
+                    builder.setUsesChronometer(true)
+                    builder.setChronometerCountDown(false)
+                }
             }
 
             val notification = builder.build()

@@ -318,6 +318,8 @@
   "intervalJingle": "Pfeife bei Intervallwechsel",
   "duckOtherAudio": "Andere Audiowiedergabe leiser",
   "duckOtherAudioDescription": "Reduziert die Lautstärke von Musik und anderen Apps während des Pfiffs",
+  "liveTimerNotification": "Live-Timer-Benachrichtigung",
+  "liveTimerNotificationDescription": "Zeigt die verstrichene Zeit und Steuerungen in der Statusleiste während des Trainings an",
   "goalHypertrophy": "Muskelaufbau",
   "goalHypertrophyDescription": "Baue Muskelmasse mit gezieltem Krafttraining auf",
   "goalFatLoss": "Fettabbau",

@@ -1052,6 +1052,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Réduit le volume de la musique et des autres apps pendant le sifflet';
 
   @override
+  String get liveTimerNotification => 'Notification de minuterie en direct';
+
+  @override
+  String get liveTimerNotificationDescription =>
+      'Affiche le temps écoulé et les contrôles dans la barre d\'état pendant l\'entraînement';
+
+  @override
   String get goalHypertrophy => 'Prise de Masse';
 
   @override

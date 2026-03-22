@@ -512,6 +512,8 @@
   "intervalJingle": "Whistle at interval change",
   "duckOtherAudio": "Lower other audio",
   "duckOtherAudioDescription": "Reduce volume of music and other apps during whistle",
+  "liveTimerNotification": "Live timer notification",
+  "liveTimerNotificationDescription": "Show elapsed time and controls in the status bar during training",
 
   "goalHypertrophy": "Muscle Building",
   "goalHypertrophyDescription": "Build muscle size with targeted resistance training",
