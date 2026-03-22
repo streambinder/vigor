@@ -16,7 +16,7 @@ var (
 	_ = qt422016.AcquireByteBuffer
 )
 
-func StreamReasoningSystem(qw422016 *qt422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) {
+func StreamReasoningSystem(qw422016 *qt422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) {
 	qw422016.N().S(`You are an expert personal trainer AI designing individualized training programs.
 
 CORE PRINCIPLES:
@@ -58,16 +58,23 @@ METHODOLOGY (applies to work routine ONLY, not warmup/cooldown): `)
 `)
 	} else {
 		qw422016.N().S(`
-METHODOLOGIES (pick one for work routine based on goals and equipment; not warmup/cooldown):
+METHODOLOGIES (pick one for work routine based on goals and exercise pool; not warmup/cooldown):
 `)
 		for _, m := range methodologies {
+			count := methodologyCoverage[m.ID]
+
 			qw422016.N().S(`- `)
 			qw422016.E().S(m.ID)
-			qw422016.N().S(`: `)
+			qw422016.N().S(` [`)
+			qw422016.N().D(count)
+			qw422016.N().S(` compatible exercises]: `)
 			qw422016.E().S(m.Description)
 			qw422016.N().S(`
 `)
 		}
+		qw422016.N().S(`
+IMPORTANT: Methodologies with fewer compatible exercises severely constrain your options. Prefer methodologies with higher counts unless user goals or user request explicitly require otherwise.
+`)
 	}
 	qw422016.N().S(`
 
@@ -186,15 +193,15 @@ HEALTH-DRIVEN ADJUSTMENTS:
 `)
 }
 
-func WriteReasoningSystem(qq422016 qtio422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) {
+func WriteReasoningSystem(qq422016 qtio422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamReasoningSystem(qw422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers, hasModifierVariants, healthSnapshot)
+	StreamReasoningSystem(qw422016, goals, methodology, methodologies, methodologyCoverage, skipWarmupCooldown, hasModifiers, hasModifierVariants, healthSnapshot)
 	qt422016.ReleaseWriter(qw422016)
 }
 
-func ReasoningSystem(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) string {
+func ReasoningSystem(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteReasoningSystem(qb422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers, hasModifierVariants, healthSnapshot)
+	WriteReasoningSystem(qb422016, goals, methodology, methodologies, methodologyCoverage, skipWarmupCooldown, hasModifiers, hasModifierVariants, healthSnapshot)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

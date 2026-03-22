@@ -21,6 +21,25 @@ var (
 	ErrLLMUnmarshal = errors.New("llm unmarshal failed")
 )
 
+// methodologyCoverage counts how many work exercises are compatible with each methodology.
+// an exercise is compatible if it belongs to at least one of the methodology's required families.
+func methodologyCoverage(exercises []model.Exercise, methodologies []model.Methodology) map[string]int {
+	counts := make(map[string]int, len(methodologies))
+	for _, m := range methodologies {
+		families := m.GetWork()
+		for _, ex := range exercises {
+			progressions := ex.GetProgressions()
+			for family := range families {
+				if _, ok := progressions[family]; ok {
+					counts[m.ID]++
+					break
+				}
+			}
+		}
+	}
+	return counts
+}
+
 type Stage string
 
 const (
@@ -141,7 +160,7 @@ func GenTraining(req TrainingGenerationRequest) (*model.Training, model.Training
 	}
 
 	reasoningPrompt := model.LLMPrompt{
-		System: prompt.ReasoningSystem(req.Goals, req.Methodology, req.Methodologies, req.SkipWarmupCooldown, len(req.Modifiers) > 0, len(req.ModifierVariants) > 0, req.HealthSnapshot),
+		System: prompt.ReasoningSystem(req.Goals, req.Methodology, req.Methodologies, methodologyCoverage(req.WorkExercises, req.Methodologies), req.SkipWarmupCooldown, len(req.Modifiers) > 0, len(req.ModifierVariants) > 0, req.HealthSnapshot),
 		User:   reasoningUserMessage,
 	}
 

@@ -2,7 +2,7 @@
 
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func ReasoningSystem(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) -%}
+{% func ReasoningSystem(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) -%}
 You are an expert personal trainer AI designing individualized training programs.
 
 CORE PRINCIPLES:
@@ -24,9 +24,11 @@ MUSCLE COVERAGE: Default to training ALL major groups each session (chest, back,
 METHODOLOGY (applies to work routine ONLY, not warmup/cooldown): {%s methodology.ID %}
 {%s methodology.Description %}
 {% else %}
-METHODOLOGIES (pick one for work routine based on goals and equipment; not warmup/cooldown):
-{% for _, m := range methodologies %}- {%s m.ID %}: {%s m.Description %}
-{% endfor %}{% endif %}
+METHODOLOGIES (pick one for work routine based on goals and exercise pool; not warmup/cooldown):
+{% for _, m := range methodologies %}{% code count := methodologyCoverage[m.ID] %}- {%s m.ID %} [{%d count %} compatible exercises]: {%s m.Description %}
+{% endfor %}
+IMPORTANT: Methodologies with fewer compatible exercises severely constrain your options. Prefer methodologies with higher counts unless user goals or user request explicitly require otherwise.
+{% endif %}
 
 STRUCTURE REQUIREMENTS:
 {% if !skipWarmupCooldown %}- EXACTLY 3 routines: one "warmup", one "work", one "cooldown"

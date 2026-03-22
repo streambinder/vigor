@@ -583,6 +583,12 @@ func (t *Training) scaleWorkRepeats(targetDuration int) {
 
 		if diff > 0 {
 			for i, b := range blocks {
+				// don't scale beyond 2× the LLM-assigned repeats — if the structure
+				// can't reach the target within that, ValidateDuration will reject it
+				// and trigger a retry with a better structure
+				if b.Repeats >= 2*original[i] {
+					continue
+				}
 				b.Repeats++
 				d := abs(targetDuration - t.CalculateDuration())
 				b.Repeats--
