@@ -31,7 +31,7 @@ class VigorTheme {
       navigationBarTheme: _navigationBarTheme(Brightness.light),
       switchTheme: _switchTheme(),
       chipTheme: _chipTheme(Brightness.light),
-      progressIndicatorTheme: _progressIndicatorTheme(),
+      progressIndicatorTheme: _progressIndicatorTheme(Brightness.light),
     );
   }
 
@@ -59,7 +59,7 @@ class VigorTheme {
       navigationBarTheme: _navigationBarTheme(Brightness.dark),
       switchTheme: _switchTheme(),
       chipTheme: _chipTheme(Brightness.dark),
-      progressIndicatorTheme: _progressIndicatorTheme(),
+      progressIndicatorTheme: _progressIndicatorTheme(Brightness.dark),
     );
   }
 
@@ -341,11 +341,12 @@ class VigorTheme {
     );
   }
 
-  static ProgressIndicatorThemeData _progressIndicatorTheme() {
-    return const ProgressIndicatorThemeData(
-      color: VigorColors.indigo,
-      linearTrackColor: VigorColors.darkBorder,
-      circularTrackColor: VigorColors.darkBorder,
+  static ProgressIndicatorThemeData _progressIndicatorTheme(Brightness brightness) {
+    final isLight = brightness == Brightness.light;
+    return ProgressIndicatorThemeData(
+      color: isLight ? VigorColors.indigo : VigorColors.indigoLight,
+      linearTrackColor: isLight ? VigorColors.lightBorder : VigorColors.darkBorder,
+      circularTrackColor: isLight ? VigorColors.lightBorder : VigorColors.darkBorder,
     );
   }
 }
