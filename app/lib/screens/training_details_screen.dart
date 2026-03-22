@@ -283,11 +283,13 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
 
   String _formatDate(DateTime date) {
     final l10n = AppLocalizations.of(context);
-    final diff = DateTime.now().difference(date).inDays;
+    final localDate = date.toLocal();
+    final now = DateTime.now();
+    final diff = DateTime(now.year, now.month, now.day).difference(DateTime(localDate.year, localDate.month, localDate.day)).inDays;
     if (diff == 0) return l10n.today;
     if (diff == 1) return l10n.yesterday;
     if (diff < 7) return l10n.daysAgo(diff);
-    return '${date.day}/${date.month}';
+    return '${localDate.day}/${localDate.month}';
   }
 
   String _formatDuration(int seconds) {
