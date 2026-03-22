@@ -64,6 +64,7 @@ CONSTRAINTS:
 - fact_indices: array of 0-based indices referencing [FN] markers used from [FACTS].
 - poses: flat list of objects with exercise_id, duration (seconds, 10–60), rest (seconds, 5–15).
 - Minimum 4 poses, maximum 40.
+- The name and description fields MUST be written in the same language as the reasoning output — never translate them to English.
 `)
 }
 

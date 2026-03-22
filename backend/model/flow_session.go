@@ -15,8 +15,8 @@ var FlowSessionSchema JSONSchemaFormat
 // flowSessionLLMOutput is the LLM-facing schema: Poses as a typed slice so the encoder can
 // generate proper JSON schema for it (datatypes.JSON is just []byte and would be skipped).
 type flowSessionLLMOutput struct {
-	Name        string     `json:"name" prompt:"Session name"`
-	Description string     `json:"description" prompt:"Brief description of the flow"`
+	Name        string     `json:"name" prompt:"Session name. MUST match the output language of the reasoning — never translate to English."`
+	Description string     `json:"description" prompt:"Brief description of the flow. MUST match the output language of the reasoning — never translate to English."`
 	FactIndices []int      `json:"fact_indices" prompt:"Indices of [FACTS] used (0-based)"`
 	Poses       []FlowPose `json:"poses" prompt:"Flat list of poses in sequence"`
 }

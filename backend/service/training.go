@@ -541,7 +541,11 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 				Int("attempt", attempt+1).
 				Int("max_attempts", maxGenerationRetries+1).
 				Err(validationErr).Msg("generated training validation failed, retrying")
-			correctionHint = validationErr.Error()
+			if ve.Code == "invalid_exercise" {
+				correctionHint = ve.Error() + " — this exercise ID is not in the [WORK], [WARMUP], or [COOLDOWN] lists. Only use IDs from those lists; never use IDs from [HISTORY]"
+			} else {
+				correctionHint = ve.Error()
+			}
 			continue
 		}
 

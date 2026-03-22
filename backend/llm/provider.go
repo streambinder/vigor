@@ -163,7 +163,7 @@ func GenTraining(req TrainingGenerationRequest) (*model.Training, model.Training
 
 	// stage 2: structuring — extract JSON from reasoning at deterministic temp
 	structuringPrompt := model.LLMPrompt{
-		System: "You are a fitness data extraction assistant. Parse the training reasoning into strict JSON format.",
+		System: "You are a fitness data extraction assistant. Parse the training reasoning into strict JSON format. The name and description fields MUST be written in the same language as the reasoning output — never translate them to English.",
 		User:   prompt.GenTrainingStructuring(string(reasoningOutput)),
 	}
 

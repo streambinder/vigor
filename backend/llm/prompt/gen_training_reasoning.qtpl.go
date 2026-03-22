@@ -74,7 +74,7 @@ Let's think step by step:
 `)
 	if len(recentTrainings) > 0 {
 		qw422016.N().S(`
-[HISTORY]
+[HISTORY — reference only: exercise IDs listed here are NOT available for selection; use ONLY IDs from [WORK]/[WARMUP]/[COOLDOWN]]
 `)
 		for _, training := range recentTrainings {
 			qw422016.N().S(`

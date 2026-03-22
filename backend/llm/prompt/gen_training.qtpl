@@ -40,7 +40,7 @@ Work routine ONLY. No warmup/cooldown.
 
 {% endif %}
 {% if len(recentTrainings) > 0 %}
-[HISTORY]
+[HISTORY — reference only: exercise IDs listed here are NOT available for selection; use ONLY IDs from [WORK]/[WARMUP]/[COOLDOWN]]
 {% for _, training := range recentTrainings %}
 {% code fb, hasFb := recentFeedback[training.ID] %}
 {% code var afb map[string]string; if hasFb { json.Unmarshal(fb.ActivityFeedback, &afb) } %}
