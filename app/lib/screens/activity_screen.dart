@@ -300,13 +300,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                 : AdaptiveAppBar(
                     automaticallyImplyLeading: false,
                     title: Text(l10n.activity),
-                    actions: [
-                      AdaptiveIconButton(
-                        icon: const Icon(Icons.refresh),
-                        tooltip: l10n.refresh,
-                        onPressed: _loadData,
-                      ),
-                    ],
+                    actions: const [],
                   ),
             body: RefreshIndicator(
               onRefresh: _loadData,

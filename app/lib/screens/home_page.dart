@@ -179,18 +179,14 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
             Text(l10n.appName.toUpperCase()),
           ],
         ),
-        actions: [
-          AdaptiveIconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: l10n.refresh,
-            onPressed: _loadProgress,
-          ),
-        ],
+        actions: const [],
       ),
       body: RefreshIndicator(
         onRefresh: _loadProgress,
         color: VigorColors.stone,
-        child: _isLoading
+        // only show full-screen spinner on initial load; during refresh keep
+        // existing data visible so the pull-to-refresh bubble is the only indicator
+        child: _isLoading && _progress == null && _weeklyTarget == null
             ? const Center(child: AdaptiveLoadingIndicator())
             : _buildContent(l10n),
       ),

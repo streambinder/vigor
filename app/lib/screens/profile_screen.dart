@@ -143,17 +143,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: Text(l10n.profile),
         actions: [
           AdaptiveIconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: l10n.refresh,
-            onPressed: () async {
-              await authProvider.refreshUserData();
-              await locator.refreshGyms();
-              if (context.mounted) {
-                AdaptiveNotification.show(context: context, message: l10n.userDataRefreshed, duration: const Duration(seconds: 2));
-              }
-            },
-          ),
-          AdaptiveIconButton(
             icon: const Icon(Icons.logout),
             tooltip: l10n.logout,
             onPressed: () => _showLogoutDialog(context, l10n),
