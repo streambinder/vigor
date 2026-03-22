@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	MaxWorkExercises       = 15 // RAG-based retrieval for main training (reduced from 30)
+	MaxWorkExercises       = 22 // RAG-based retrieval for main training
+	MaxPerMuscleExercises  = 4  // hard cap per muscle group in final list to prevent skew
 	MaxWarmupExercises     = 6  // random selection for warmup
 	CooldownPerMuscle      = 2  // cooldown exercises per muscle group
 	MaxPromptFacts         = 5
@@ -78,6 +79,7 @@ func RetrieveWorkExercises(
 	methodology *model.Methodology,
 	muscles []string,
 	prompt string,
+	favoriteIDs []string,
 ) ([]model.Exercise, error) {
 	embeddingText := GenProfile(profiles, goals, equipment, muscles, prompt)
 	exerciseEmbedding, err := embedding.GenVector(embeddingText)
@@ -108,12 +110,15 @@ func RetrieveWorkExercises(
 		}
 	}
 
-	return retrieveBalancedByMuscle(exerciseEmbedding, keywordQuery, methodology, equipment, targetMuscles, methodologyFamilies, proficiencies, proficiencyMargin), nil
+	return retrieveBalancedByMuscle(exerciseEmbedding, keywordQuery, methodology, equipment, targetMuscles, methodologyFamilies, proficiencies, proficiencyMargin, favoriteIDs), nil
 }
 
 // retrieveBalancedByMuscle queries and filters exercises per muscle group independently,
 // then assembles a balanced final list. Each muscle group gets its own proficiency filtering
 // with graceful degradation, so equipment/proficiency constraints on one group can't starve it.
+// Favorites are sorted to the front (first+last positions exploit recency bias), remaining slots
+// get a light shuffle to avoid muscle ordering bias. A per-muscle cap prevents any single group
+// from dominating the final list.
 func retrieveBalancedByMuscle(
 	exerciseEmbedding []float32,
 	keywordQuery string,
@@ -123,6 +128,7 @@ func retrieveBalancedByMuscle(
 	methodologyFamilies []string,
 	proficiencies map[string]float64,
 	proficiencyMargin float64,
+	favoriteIDs []string,
 ) []model.Exercise {
 	if len(muscles) == 0 {
 		return nil
@@ -138,24 +144,29 @@ func retrieveBalancedByMuscle(
 		perMuscleQuota = MinPerMuscleExercises
 	}
 
+	// track how many exercises each primary muscle has in the final list
+	muscleCounts := make(map[string]int)
 	var combined []model.Exercise
 	seen := make(map[string]bool)
 
 	for _, muscle := range muscles {
-		// retrieve candidates for this muscle group
 		candidates, err := retrieveBySimilarity(exerciseEmbedding, keywordQuery, equipment, []string{muscle}, methodologyFamilies)
 		if err != nil {
 			log.Warn().Err(err).Str("muscle", muscle).Msg("failed to retrieve exercises for muscle group")
 			continue
 		}
 
-		// apply proficiency filtering per muscle with graceful degradation
 		filtered := filterByProficiencyPerMuscle(candidates, proficiencies, methodologyWork, proficiencyMargin)
 
 		added := 0
 		for _, ex := range filtered {
-			if !seen[ex.ID] {
+			primaryMuscle := muscle
+			if len(ex.Muscles) > 0 {
+				primaryMuscle = ex.Muscles[0]
+			}
+			if !seen[ex.ID] && muscleCounts[primaryMuscle] < MaxPerMuscleExercises {
 				seen[ex.ID] = true
+				muscleCounts[primaryMuscle]++
 				combined = append(combined, ex)
 				added++
 				if added >= perMuscleQuota {
@@ -166,15 +177,25 @@ func retrieveBalancedByMuscle(
 		log.Debug().Str("muscle", muscle).Int("candidates", len(candidates)).Int("filtered", len(filtered)).Int("added", added).Int("quota", perMuscleQuota).Msg("retrieved exercises for muscle group")
 	}
 
-	// shuffle to avoid muscle ordering bias
-	rand.Shuffle(len(combined), func(i, j int) {
-		combined[i], combined[j] = combined[j], combined[i]
-	})
-
 	if len(combined) > MaxWorkExercises {
-		return combined[:MaxWorkExercises]
+		combined = combined[:MaxWorkExercises]
 	}
-	return combined
+
+	// sort: favorites first (exploit recency bias at list head), shuffle the rest
+	favSet := make(map[string]bool, len(favoriteIDs))
+	for _, id := range favoriteIDs {
+		favSet[id] = true
+	}
+	var favorites, rest []model.Exercise
+	for _, ex := range combined {
+		if favSet[ex.ID] {
+			favorites = append(favorites, ex)
+		} else {
+			rest = append(rest, ex)
+		}
+	}
+	rand.Shuffle(len(rest), func(i, j int) { rest[i], rest[j] = rest[j], rest[i] })
+	return append(favorites, rest...)
 }
 
 // filterByProficiencyPerMuscle applies proficiency filtering for a single muscle group's candidates.

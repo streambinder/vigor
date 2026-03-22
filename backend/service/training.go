@@ -174,7 +174,14 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	}
 
 	proficiencyMargin := ProgressiveMargin(trainingsComplete)
-	workExercises, err := rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles, prompt)
+
+	var allFavoriteExercises, allFavoriteEquipment []string
+	for _, profile := range profiles {
+		allFavoriteExercises = append(allFavoriteExercises, profile.FavoriteExercises()...)
+		allFavoriteEquipment = append(allFavoriteEquipment, profile.FavoriteEquipment()...)
+	}
+
+	workExercises, err := rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles, prompt, allFavoriteExercises)
 	if err != nil {
 		return nil, err
 	}
@@ -216,12 +223,6 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 
 	// strip weight modifier from LLM input — it's auto-attached post-generation
 	llmModifiers := stripWeightModifier(modifiers)
-
-	var allFavoriteExercises, allFavoriteEquipment []string
-	for _, profile := range profiles {
-		allFavoriteExercises = append(allFavoriteExercises, profile.FavoriteExercises()...)
-		allFavoriteEquipment = append(allFavoriteEquipment, profile.FavoriteEquipment()...)
-	}
 
 	favoriteExercises, err := rag.RetrieveFavoriteExercises(allFavoriteExercises)
 	if err != nil {

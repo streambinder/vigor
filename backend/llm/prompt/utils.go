@@ -57,7 +57,36 @@ func formatDeviation(pct float64) string {
 	return fmt.Sprintf("%.0f%%", pct)
 }
 
-// formatNumber renders an integer with comma-separated thousands (e.g. 4200 -> "4,200").
+// groupExercisesByMuscle groups exercises by their primary muscle for structured [WORK] prompt output.
+func groupExercisesByMuscle(exercises []model.Exercise) map[string][]model.Exercise {
+	groups := make(map[string][]model.Exercise)
+	for _, ex := range exercises {
+		muscle := "other"
+		if len(ex.Muscles) > 0 {
+			muscle = ex.Muscles[0]
+		}
+		groups[muscle] = append(groups[muscle], ex)
+	}
+	return groups
+}
+
+// workExerciseMuscleOrder returns muscle keys in the order they first appear in the exercise list,
+// preserving the priority sort (favorites first) from retrieval.
+func workExerciseMuscleOrder(exercises []model.Exercise) []string {
+	seen := make(map[string]bool)
+	var order []string
+	for _, ex := range exercises {
+		muscle := "other"
+		if len(ex.Muscles) > 0 {
+			muscle = ex.Muscles[0]
+		}
+		if !seen[muscle] {
+			seen[muscle] = true
+			order = append(order, muscle)
+		}
+	}
+	return order
+}
 func formatNumber(n int) string {
 	if n < 0 {
 		return "-" + formatNumber(-n)
