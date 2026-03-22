@@ -20,7 +20,6 @@ import '../utils/knowledge_labels.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/progress/progress.dart';
 import '../models/progress.dart';
-import '../models/training.dart';
 import '../services/progress_service.dart';
 import '../services/service_locator.dart';
 import '../widgets/vigor_logo.dart';
@@ -92,6 +91,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     // on web, storage may need a moment to persist after login
     final storage = context.read<SecureStorageService>();
     final progressService = context.read<ServiceLocator>().progressService;
+    final locator = context.read<ServiceLocator>();
     if (!await storage.hasTokens()) {
       if (retryCount < 3) {
         await Future.delayed(const Duration(milliseconds: 100));
@@ -105,7 +105,6 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     }
 
     try {
-      final locator = context.read<ServiceLocator>();
       final futures = <Future>[
         progressService.getProgress(),
         progressService.getWeeklyTarget(),
@@ -201,10 +200,6 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     final families = ProgressService.parseFamilies(_progress!.families);
     final muscles = ProgressService.parseMuscles(_progress!.muscles);
     final trainings = _progress!.trainings;
-
-    // get gender from user profile for body figure
-    final authProvider = context.read<AuthProvider>();
-    final gender = authProvider.currentUser?.profile.gender ?? '';
 
     if (trainings == 0) {
       return _buildWelcomeState(l10n);
@@ -330,7 +325,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
                   await prefs.setHcOnboardingDismissedMs(DateTime.now().millisecondsSinceEpoch);
                   if (mounted) setState(() {});
                 },
-                child: Text(l10n.healthOnboardingDismiss, style: TextStyle(color: VigorColors.stone)),
+                child: Text(l10n.healthOnboardingDismiss, style: const TextStyle(color: VigorColors.stone)),
               ),
             ],
           ),
@@ -363,7 +358,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
       children: [
         Row(
           children: [
-            Icon(Icons.monitor_heart, size: 24, color: VigorColors.stone),
+            const Icon(Icons.monitor_heart, size: 24, color: VigorColors.stone),
             const SizedBox(width: VigorSpacing.sm),
             Text(
               l10n.healthMetrics,
@@ -435,7 +430,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
       children: [
         Row(
           children: [
-            Icon(Icons.rate_review, color: VigorColors.persimmon, size: 24),
+            const Icon(Icons.rate_review, color: VigorColors.persimmon, size: 24),
             const SizedBox(width: VigorSpacing.sm),
             Text(
               l10n.pendingFeedbacks,
@@ -471,7 +466,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        Icon(Icons.chevron_right, color: VigorColors.stone, size: 20),
+                        const Icon(Icons.chevron_right, color: VigorColors.stone, size: 20),
                       ],
                     ),
                   ),
@@ -588,7 +583,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
                             ),
                           ),
                           const SizedBox(width: 2),
-                          Icon(Icons.help_outline, size: 12, color: VigorColors.stone),
+                          const Icon(Icons.help_outline, size: 12, color: VigorColors.stone),
                         ],
                       ),
                     ),
@@ -721,7 +716,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
       children: [
         Row(
           children: [
-            Icon(Icons.accessibility_new, color: VigorColors.stone, size: 24),
+            const Icon(Icons.accessibility_new, color: VigorColors.stone, size: 24),
             const SizedBox(width: VigorSpacing.sm),
             Text(
               l10n.muscleHeatMap,
@@ -795,7 +790,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
       children: [
         Row(
           children: [
-            Icon(Icons.show_chart, color: VigorColors.stone, size: 24),
+            const Icon(Icons.show_chart, color: VigorColors.stone, size: 24),
             const SizedBox(width: VigorSpacing.sm),
             Text(
               l10n.capabilities,
@@ -832,7 +827,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
         children: [
           Row(
             children: [
-              Icon(Icons.event_note, color: VigorColors.stone, size: 24),
+              const Icon(Icons.event_note, color: VigorColors.stone, size: 24),
               const SizedBox(width: VigorSpacing.sm),
               Text(
                 l10n.weeklyTarget,
@@ -873,7 +868,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
                           ),
                         ),
                         if (current.sessionsCompleted > targetAvg)
-                          Icon(Icons.check, size: 28, color: VigorColors.persimmon)
+                          const Icon(Icons.check, size: 28, color: VigorColors.persimmon)
                         else
                           Text.rich(
                             TextSpan(
@@ -1027,7 +1022,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
               color: VigorColors.surface(context),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.trending_up, size: 56, color: VigorColors.stone),
+            child: const Icon(Icons.trending_up, size: 56, color: VigorColors.stone),
           ),
         ),
         const SizedBox(height: VigorSpacing.lg),
@@ -1201,7 +1196,7 @@ class _CalibrationModal extends StatelessWidget {
                 const Spacer(),
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: Icon(Icons.close, color: VigorColors.stone, size: 24),
+                  child: const Icon(Icons.close, color: VigorColors.stone, size: 24),
                 ),
               ],
             ),
@@ -1367,7 +1362,7 @@ class _WeeklyTargetModal extends StatelessWidget {
             padding: VigorSpacing.paddingMd,
             child: Row(
               children: [
-                Icon(Icons.event_note, color: VigorColors.stone, size: 24),
+                const Icon(Icons.event_note, color: VigorColors.stone, size: 24),
                 const SizedBox(width: VigorSpacing.sm),
                 Text(
                   l10n.weeklyTarget,
@@ -1378,7 +1373,7 @@ class _WeeklyTargetModal extends StatelessWidget {
                 const Spacer(),
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: Icon(Icons.close, color: VigorColors.stone, size: 24),
+                  child: const Icon(Icons.close, color: VigorColors.stone, size: 24),
                 ),
               ],
             ),
@@ -1392,7 +1387,7 @@ class _WeeklyTargetModal extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md),
             child: Row(
               children: [
-                Icon(Icons.flag, color: VigorColors.stone, size: 18),
+                const Icon(Icons.flag, color: VigorColors.stone, size: 18),
                 const SizedBox(width: VigorSpacing.sm),
                 Text(
                   l10n.goals,
@@ -1732,7 +1727,7 @@ class _WeeklyTargetModal extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           if (week.onTarget)
-            Icon(Icons.check_circle, size: 16, color: VigorColors.persimmon)
+            const Icon(Icons.check_circle, size: 16, color: VigorColors.persimmon)
           else
             const SizedBox(width: 16),
         ],

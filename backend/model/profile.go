@@ -10,13 +10,13 @@ import (
 
 // Profile stores user's physical attributes and fitness-related metadata.
 type Profile struct {
-	FirstName string         `json:"first_name" flutter:"required"`
-	LastName  string         `json:"last_name" flutter:"required"`
-	Birthdate time.Time      `json:"birthdate" flutter:"required"`
-	Gender    string         `json:"gender" flutter:"required"`
-	Language  string         `gorm:"default:'english'" json:"language" flutter:"required"`
-	Height    float64        `json:"height" flutter:"required"`
-	Weight    float64        `json:"weight" flutter:"required"`
+	FirstName          string         `json:"first_name" flutter:"required"`
+	LastName           string         `json:"last_name" flutter:"required"`
+	Birthdate          time.Time      `json:"birthdate" flutter:"required"`
+	Gender             string         `json:"gender" flutter:"required"`
+	Language           string         `gorm:"default:'english'" json:"language" flutter:"required"`
+	Height             float64        `json:"height" flutter:"required"`
+	Weight             float64        `json:"weight" flutter:"required"`
 	HealthDisconnected bool           `json:"health_disconnected"`
 	Data               datatypes.JSON `gorm:"type:jsonb" json:"data"`
 

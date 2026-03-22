@@ -68,6 +68,7 @@ func GenVectors(sequences []string) ([][]float32, error) {
 	}
 
 	wg.Wait()
+	close(sem)
 
 	// collect in order
 	allVectors := make([][]float32, 0, len(sequences))

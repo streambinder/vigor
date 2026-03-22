@@ -835,56 +835,6 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
     );
   }
 
-  Widget _buildHeader(AppLocalizations l10n, bool isDark) {
-    return Container(
-      padding: VigorSpacing.paddingLg,
-      decoration: BoxDecoration(
-        color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
-        borderRadius: VigorRadius.radiusLg,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildMetadataChips(l10n),
-          const SizedBox(height: VigorSpacing.md),
-          Text(training.description, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context), height: 1.5)),
-          if (training.request.isNotEmpty) ...[
-            const SizedBox(height: VigorSpacing.md),
-            _buildInlineRequest(l10n),
-          ],
-          if (training.references.isNotEmpty) ...[
-            const SizedBox(height: VigorSpacing.md),
-            _buildInlineReferences(l10n),
-          ],
-          if (training.equipment.isNotEmpty) ...[
-            const SizedBox(height: VigorSpacing.md),
-            Wrap(
-              spacing: VigorSpacing.xs,
-              runSpacing: VigorSpacing.xs,
-              children: training.equipment.map((eq) => _buildChip(Icons.fitness_center, KnowledgeLabels.equipmentLabel(eq, l10n))).toList(),
-            ),
-          ],
-          if (training.goals.isNotEmpty) ...[
-            const SizedBox(height: VigorSpacing.md),
-            Wrap(
-              spacing: VigorSpacing.xs,
-              runSpacing: VigorSpacing.xs,
-              children: training.goals.map((goal) => _buildChip(Icons.track_changes, KnowledgeLabels.goalLabel(goal, l10n))).toList(),
-            ),
-          ],
-          if (training.muscles.isNotEmpty) ...[
-            const SizedBox(height: VigorSpacing.md),
-            Wrap(
-              spacing: VigorSpacing.xs,
-              runSpacing: VigorSpacing.xs,
-              children: training.muscles.map((muscle) => _buildChip(Icons.accessibility_new, KnowledgeLabels.muscleLabel(muscle, l10n))).toList(),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
   Widget _buildInlineRequest(AppLocalizations l10n) {
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -1076,41 +1026,6 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
     );
   }
 
-  Widget _buildReferencesSection(AppLocalizations l10n) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final linkColor = VigorColors.indigoAdaptive(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
-        borderRadius: VigorRadius.radiusMd,
-      ),
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          leading: const Icon(Icons.science, size: 20, color: VigorColors.stone),
-          title: Text(l10n.references, style: VigorTypography.label.copyWith(color: VigorColors.textSecondary(context))),
-          childrenPadding: const EdgeInsets.only(left: VigorSpacing.md, right: VigorSpacing.md, bottom: VigorSpacing.md),
-          children: training.references.map((ref) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: VigorSpacing.xs),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(ref.excerpt, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context)), maxLines: 3, overflow: TextOverflow.ellipsis),
-                ),
-                const SizedBox(width: VigorSpacing.sm),
-                GestureDetector(
-                  onTap: () => _launchUrl(ref.url),
-                  child: Icon(Icons.open_in_new, size: 16, color: linkColor),
-                ),
-              ],
-            ),
-          )).toList(),
-        ),
-      ),
-    );
-  }
-
   Widget _buildPrimaryActions(AppLocalizations l10n, bool isOwner) {
     final isCompleted = training.completedAt != null;
     final indigoColor = VigorColors.indigoAdaptive(context);
@@ -1253,7 +1168,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
           value: 'delete',
           child: Row(
             children: [
-              Icon(Icons.delete, size: 20, color: VigorColors.error),
+              const Icon(Icons.delete, size: 20, color: VigorColors.error),
               const SizedBox(width: VigorSpacing.sm),
               Text(isOwner ? l10n.delete : l10n.leave, style: VigorTypography.body.copyWith(color: VigorColors.error)),
             ],

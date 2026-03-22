@@ -11,7 +11,7 @@ import (
 // Patterns are regex strings matched against exercise IDs.
 // Aliases are multilingual names used for semantic matching.
 type Modifier struct {
-	ID       string         `gorm:"type:varchar(255);primaryKey" json:"id"`
+	ID           string         `gorm:"type:varchar(255);primaryKey" json:"id"`
 	Patterns     pq.StringArray `gorm:"type:text[]" json:"patterns"`
 	Antipatterns pq.StringArray `gorm:"type:text[]" json:"antipatterns,omitempty"`
 	Aliases      pq.StringArray `gorm:"type:text[]" json:"aliases,omitempty"`

@@ -180,7 +180,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SwitchListTile(
                 title: Text(l10n.intervalJingle, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
                 value: _intervalJingle,
-                activeColor: VigorColors.indigo,
+                activeThumbColor: VigorColors.indigo,
                 onChanged: (value) {
                   setState(() => _intervalJingle = value);
                   context.read<PreferencesService>().setIntervalJingle(value);
@@ -196,7 +196,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     title: Text(l10n.duckOtherAudio, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
                     subtitle: Text(l10n.duckOtherAudioDescription, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
                     value: _duckOtherAudio,
-                    activeColor: VigorColors.indigo,
+                    activeThumbColor: VigorColors.indigo,
                     onChanged: (value) {
                       setState(() => _duckOtherAudio = value);
                       context.read<PreferencesService>().setDuckOtherAudio(value);
@@ -209,7 +209,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: Text(l10n.liveTimerNotification, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
                 subtitle: Text(l10n.liveTimerNotificationDescription, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
                 value: _liveTimerNotification,
-                activeColor: VigorColors.indigo,
+                activeThumbColor: VigorColors.indigo,
                 onChanged: (value) {
                   setState(() => _liveTimerNotification = value);
                   context.read<PreferencesService>().setLiveTimerNotification(value);
@@ -272,7 +272,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(l10n.recommended, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
                   Switch(
                     value: _useRecommendedDuration,
-                    activeColor: VigorColors.indigo,
+                    activeThumbColor: VigorColors.indigo,
                     onChanged: (value) {
                       setState(() => _useRecommendedDuration = value);
                       context.read<PreferencesService>().setUseRecommendedDuration(value);
@@ -305,7 +305,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(l10n.warmupCooldown, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
                   Switch(
                     value: _warmupCooldown,
-                    activeColor: VigorColors.indigo,
+                    activeThumbColor: VigorColors.indigo,
                     onChanged: (value) {
                       setState(() => _warmupCooldown = value);
                       context.read<PreferencesService>().setWarmupCooldown(value);
@@ -371,7 +371,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                           String? backendDateRange;
                           if (hasBackendData) {
-                            final dates = [syncResult!.metricsFrom, syncResult.sessionsFrom].whereType<DateTime>();
+                            final dates = [syncResult.metricsFrom, syncResult.sessionsFrom].whereType<DateTime>();
                             final endDates = [syncResult.metricsTo, syncResult.sessionsTo].whereType<DateTime>();
                             if (dates.isNotEmpty && endDates.isNotEmpty) {
                               final from = dates.reduce((a, b) => a.isBefore(b) ? a : b);
@@ -386,7 +386,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               leading: isSyncing
                                   ? SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: VigorColors.indigoAdaptive(context)))
                                   : hasSyncError
-                                      ? Icon(Icons.error_outline, color: VigorColors.warning, size: 22)
+                                      ? const Icon(Icons.error_outline, color: VigorColors.warning, size: 22)
                                       : Icon(Icons.check_circle, color: VigorColors.indigoAdaptive(context), size: 22),
                               title: Text(
                                 isSyncing ? l10n.healthSynchronizing : hasSyncError ? l10n.healthSyncFailed : l10n.healthSynchronized,
@@ -404,10 +404,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             // device + backend data block (compact, no dividers between them)
                             if (!isSyncing && hasDeviceData) ...[
                               Divider(height: 1, color: VigorColors.border(context)),
-                              ...syncResult!.deviceSources.entries.map((entry) => ListTile(
+                              ...syncResult.deviceSources.entries.map((entry) => ListTile(
                                 dense: true,
                                 visualDensity: VisualDensity.compact,
-                                leading: Icon(Icons.smartphone, color: VigorColors.stone, size: 22),
+                                leading: const Icon(Icons.smartphone, color: VigorColors.stone, size: 22),
                                 title: Text(entry.key, style: VigorTypography.caption.copyWith(color: VigorColors.stone)),
                                 subtitle: Text(
                                   l10n.healthSourceData(entry.value.metrics, entry.value.sessions),
@@ -419,7 +419,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ListTile(
                                 dense: true,
                                 visualDensity: VisualDensity.compact,
-                                leading: Icon(Icons.warning_amber_rounded, color: VigorColors.warning, size: 22),
+                                leading: const Icon(Icons.warning_amber_rounded, color: VigorColors.warning, size: 22),
                                 title: Text(l10n.healthSyncNoData, style: VigorTypography.caption.copyWith(color: VigorColors.stone)),
                               ),
                             ],
@@ -427,12 +427,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ListTile(
                                 dense: true,
                                 visualDensity: VisualDensity.compact,
-                                leading: Icon(Icons.cloud_done_outlined, color: VigorColors.stone, size: 22),
+                                leading: const Icon(Icons.cloud_done_outlined, color: VigorColors.stone, size: 22),
                                 title: Text(l10n.healthBackend, style: VigorTypography.caption.copyWith(color: VigorColors.stone)),
                                 subtitle: Text(
                                   backendDateRange != null
-                                      ? '${l10n.healthBackendData(syncResult!.totalMetrics, syncResult.totalSessions)} · $backendDateRange'
-                                      : l10n.healthBackendData(syncResult!.totalMetrics, syncResult.totalSessions),
+                                      ? '${l10n.healthBackendData(syncResult.totalMetrics, syncResult.totalSessions)} · $backendDateRange'
+                                      : l10n.healthBackendData(syncResult.totalMetrics, syncResult.totalSessions),
                                   style: VigorTypography.caption.copyWith(color: VigorColors.stone.withValues(alpha: 0.6)),
                                 ),
                               ),
@@ -461,7 +461,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     )
                   else
                     ListTile(
-                      leading: Icon(Icons.link_off, color: VigorColors.stone, size: 22),
+                      leading: const Icon(Icons.link_off, color: VigorColors.stone, size: 22),
                       title: Text(l10n.healthNotConnected, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
                       subtitle: !isNative ? Text(l10n.healthNativeOnly, style: VigorTypography.caption.copyWith(color: VigorColors.stone)) : null,
                       trailing: healthService != null

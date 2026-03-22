@@ -34,16 +34,16 @@ func init() {
 }
 
 type FlowSession struct {
-	ID          uuid.UUID                              `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
-	Name        string                                 `gorm:"not null" json:"name" prompt:"Session name"`
-	Description string                                 `gorm:"not null" json:"description" prompt:"Brief description of the flow"`
-	Duration    int                                    `json:"duration" prompt:"-"`
-	Muscles     pq.StringArray                         `gorm:"type:text[]" json:"muscles" prompt:"-"`
-	Request     string                                 `json:"request" prompt:"-"`
+	ID          uuid.UUID                               `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
+	Name        string                                  `gorm:"not null" json:"name" prompt:"Session name"`
+	Description string                                  `gorm:"not null" json:"description" prompt:"Brief description of the flow"`
+	Duration    int                                     `json:"duration" prompt:"-"`
+	Muscles     pq.StringArray                          `gorm:"type:text[]" json:"muscles" prompt:"-"`
+	Request     string                                  `json:"request" prompt:"-"`
 	References  datatypes.JSONType[[]TrainingReference] `gorm:"type:jsonb" json:"references" prompt:"-"`
-	FactIndices []int                                  `gorm:"-" json:"fact_indices" prompt:"Indices of [FACTS] used (0-based)"`
-	Poses       datatypes.JSON                         `gorm:"type:jsonb" json:"poses" dart:"List<FlowPose>" prompt:"-"`
-	Prompt      datatypes.JSONType[TrainingPrompt]     `gorm:"type:jsonb" json:"prompt" prompt:"-"`
+	FactIndices []int                                   `gorm:"-" json:"fact_indices" prompt:"Indices of [FACTS] used (0-based)"`
+	Poses       datatypes.JSON                          `gorm:"type:jsonb" json:"poses" dart:"List<FlowPose>" prompt:"-"`
+	Prompt      datatypes.JSONType[TrainingPrompt]      `gorm:"type:jsonb" json:"prompt" prompt:"-"`
 
 	CompletedAt *time.Time `gorm:"type:timestamptz" json:"completed_at" prompt:"-"`
 	CreatedAt   time.Time  `gorm:"type:timestamptz;default:now()" json:"created_at" prompt:"-"`

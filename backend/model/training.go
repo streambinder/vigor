@@ -85,7 +85,6 @@ func init() {
 	}
 }
 
-
 // TrainingFeedback captures per-user structured feedback for a completed training.
 type TrainingFeedback struct {
 	ID               uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
@@ -109,24 +108,24 @@ type TrainingReference struct {
 type Training struct {
 	ID uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
 
-	Name        string         `gorm:"not null" json:"name" prompt:"3-4 word action-oriented title (see NAME rules). MUST match the output language of the reasoning — never translate to English."`
-	Description string         `gorm:"not null" json:"description" prompt:"3-5 sentence description. Open with the methodology and primary focus. Then explicitly surface any progression decisions driven by past training feedback (e.g. weight bumps, rep adjustments, exercise swaps based on too_easy/too_hard signals). If health or recovery data influenced volume or intensity, state the design rationale without naming the metric (e.g. 'keeping volume conservative today to support recovery'). Close with the key exercises or structure highlights. The user must be able to infer that their feedback and biometric signals were actively considered. MUST match the output language of the reasoning — never translate to English."`
-	Methodology string         `gorm:"column:methodology;not null" json:"methodology" prompt:"Methodology;enum:strength,supersets,circuit,emom,amrap,hiit,for_time,endurance,mobility"`
-	Duration    int            `gorm:"not null" json:"duration" prompt:"Total seconds"`
-	Equipment   pq.StringArray `gorm:"type:text[]" json:"equipment" prompt:"-"`
-	Goals       pq.StringArray `gorm:"type:text[]" json:"goals" prompt:"-"`
-	Muscles     pq.StringArray `gorm:"type:text[]" json:"muscles" prompt:"-"`
-	Request     string         `json:"request" prompt:"-"`
+	Name        string                                  `gorm:"not null" json:"name" prompt:"3-4 word action-oriented title (see NAME rules). MUST match the output language of the reasoning — never translate to English."`
+	Description string                                  `gorm:"not null" json:"description" prompt:"3-5 sentence description. Open with the methodology and primary focus. Then explicitly surface any progression decisions driven by past training feedback (e.g. weight bumps, rep adjustments, exercise swaps based on too_easy/too_hard signals). If health or recovery data influenced volume or intensity, state the design rationale without naming the metric (e.g. 'keeping volume conservative today to support recovery'). Close with the key exercises or structure highlights. The user must be able to infer that their feedback and biometric signals were actively considered. MUST match the output language of the reasoning — never translate to English."`
+	Methodology string                                  `gorm:"column:methodology;not null" json:"methodology" prompt:"Methodology;enum:strength,supersets,circuit,emom,amrap,hiit,for_time,endurance,mobility"`
+	Duration    int                                     `gorm:"not null" json:"duration" prompt:"Total seconds"`
+	Equipment   pq.StringArray                          `gorm:"type:text[]" json:"equipment" prompt:"-"`
+	Goals       pq.StringArray                          `gorm:"type:text[]" json:"goals" prompt:"-"`
+	Muscles     pq.StringArray                          `gorm:"type:text[]" json:"muscles" prompt:"-"`
+	Request     string                                  `json:"request" prompt:"-"`
 	References  datatypes.JSONType[[]TrainingReference] `gorm:"type:jsonb" json:"references" prompt:"-"`
-	FactIndices []int          `gorm:"-" json:"fact_indices" prompt:"Indices of [FACTS] used (e.g. [0,2]), empty if none"`
-	Routines    []Routine      `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"routines" prompt:"Training routines"`
-	Prompt   datatypes.JSONType[TrainingPrompt]    `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
+	FactIndices []int                                   `gorm:"-" json:"fact_indices" prompt:"Indices of [FACTS] used (e.g. [0,2]), empty if none"`
+	Routines    []Routine                               `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"routines" prompt:"Training routines"`
+	Prompt      datatypes.JSONType[TrainingPrompt]      `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
 
-	CompletedAt *time.Time `gorm:"type:timestamptz" json:"completed_at" prompt:"-"`
-	CompletedIn *int       `json:"completed_in" prompt:"-"`
-	HasHealthSession bool  `gorm:"-" json:"has_health_session" prompt:"-"`
-	CreatedAt   time.Time  `gorm:"type:timestamptz;default:now()" json:"created_at" prompt:"-"`
-	UpdatedAt   time.Time  `gorm:"type:timestamptz;default:now()" json:"-"`
+	CompletedAt      *time.Time `gorm:"type:timestamptz" json:"completed_at" prompt:"-"`
+	CompletedIn      *int       `json:"completed_in" prompt:"-"`
+	HasHealthSession bool       `gorm:"-" json:"has_health_session" prompt:"-"`
+	CreatedAt        time.Time  `gorm:"type:timestamptz;default:now()" json:"created_at" prompt:"-"`
+	UpdatedAt        time.Time  `gorm:"type:timestamptz;default:now()" json:"-"`
 
 	UserID   uuid.UUID  `gorm:"type:uuid;not null" json:"user_id" prompt:"-"`
 	User     User       `gorm:"constraint:OnDelete:CASCADE;" json:"-"`
@@ -325,7 +324,6 @@ func (t *Training) ValidateDuration(userRequestedMinutes int) error {
 	}
 	return nil
 }
-
 
 // Activities returns unique work activities for capability tracking.
 func (t *Training) Activities() []*Activity {

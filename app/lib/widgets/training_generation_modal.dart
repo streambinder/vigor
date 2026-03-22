@@ -506,7 +506,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           child: ListView.separated(
             shrinkWrap: true,
             itemCount: _availableMethodologies.length,
-            separatorBuilder: (_, __) => const SizedBox(height: VigorSpacing.xs),
+            separatorBuilder: (_, _) => const SizedBox(height: VigorSpacing.xs),
             itemBuilder: (context, index) {
               final methodology = _availableMethodologies[index];
               final isSelected = _methodology == methodology;
@@ -608,7 +608,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           child: ListView.separated(
             shrinkWrap: true,
             itemCount: _availableGoals.length,
-            separatorBuilder: (_, __) => const SizedBox(height: VigorSpacing.xs),
+            separatorBuilder: (_, _) => const SizedBox(height: VigorSpacing.xs),
             itemBuilder: (context, index) {
               final goal = _availableGoals[index];
               final isSelected = _selectedGoals.contains(goal);
@@ -1174,7 +1174,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AdaptiveLoadingIndicator(color: VigorColors.persimmon),
+            const AdaptiveLoadingIndicator(color: VigorColors.persimmon),
             const SizedBox(height: VigorSpacing.md),
             SizedBox(
               height: 24,

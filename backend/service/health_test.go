@@ -7,10 +7,10 @@ import (
 
 func TestParseTimezone(t *testing.T) {
 	tests := []struct {
-		name      string
-		timezone  string
-		wantErr   bool
-		wantName  string
+		name     string
+		timezone string
+		wantErr  bool
+		wantName string
 	}{
 		{
 			name:     "valid US timezone",

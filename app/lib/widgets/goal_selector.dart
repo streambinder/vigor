@@ -243,7 +243,7 @@ class _GoalSelectorState extends State<GoalSelector> {
             child: ListView.separated(
               shrinkWrap: true,
               itemCount: filtered.length,
-              separatorBuilder: (_, __) => const SizedBox(height: VigorSpacing.xs),
+              separatorBuilder: (_, _) => const SizedBox(height: VigorSpacing.xs),
               itemBuilder: (context, index) {
                 final goal = filtered[index];
                 final isSelected = selectedSet.contains(goal);

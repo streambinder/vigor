@@ -87,6 +87,7 @@ func workExerciseMuscleOrder(exercises []model.Exercise) []string {
 	}
 	return order
 }
+
 func formatNumber(n int) string {
 	if n < 0 {
 		return "-" + formatNumber(-n)

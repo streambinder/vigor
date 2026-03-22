@@ -574,9 +574,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           },
           borderRadius: VigorRadius.radiusSm,
           child: InputDecorator(
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
               suffixIcon: Icon(Icons.calendar_today, size: 18, color: VigorColors.stone),
             ),
             child: Text(
@@ -600,7 +600,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         _buildFieldLabel(l10n.gender, required: true),
         const SizedBox(height: VigorSpacing.sm),
         DropdownButtonFormField<String>(
-          value: _gender,
+          initialValue: _gender,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
@@ -640,7 +640,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         _buildFieldLabel(l10n.language, required: true),
         const SizedBox(height: VigorSpacing.sm),
         DropdownButtonFormField<String>(
-          value: _language,
+          initialValue: _language,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
@@ -747,7 +747,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   entry.value,
                   style: VigorTypography.caption.copyWith(color: VigorColors.textPrimary(context)),
                 ),
-                deleteIcon: Icon(Icons.close, size: 16, color: VigorColors.stone),
+                deleteIcon: const Icon(Icons.close, size: 16, color: VigorColors.stone),
                 onDeleted: () => onRemove(entry.key),
                 backgroundColor: VigorColors.surfaceElevated(context),
                 side: BorderSide.none,

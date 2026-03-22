@@ -256,7 +256,7 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Loc
 			}
 
 			if err := tx.Clauses(clause.OnConflict{
-				Columns:   []clause.Column{{Name: "user_id"}, {Name: "hc_record_id"}},
+				Columns: []clause.Column{{Name: "user_id"}, {Name: "hc_record_id"}},
 				DoUpdates: clause.AssignmentColumns([]string{
 					"source_app", "exercise_type", "started_at", "ended_at",
 					"avg_hr", "max_hr", "calories",

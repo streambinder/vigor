@@ -409,12 +409,12 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			Facts:                facts,
 			SkipWarmupCooldown:   skipWarmupCooldown,
 			CalibrationGaps:      calibrationGaps,
-			HealthSnapshot:        healthSnapshot,
-			RecentHR:              recentHR,
-			Reminders:             reminders,
-			LastReasoningModel:    execution.Reasoning.Model,
-			LastStructuringModel:  execution.Structuring.Model,
-			CorrectionHint:        correctionHint,
+			HealthSnapshot:       healthSnapshot,
+			RecentHR:             recentHR,
+			Reminders:            reminders,
+			LastReasoningModel:   execution.Reasoning.Model,
+			LastStructuringModel: execution.Structuring.Model,
+			CorrectionHint:       correctionHint,
 		})
 		if err != nil {
 			reason := "llm_error"

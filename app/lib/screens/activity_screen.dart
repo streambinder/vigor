@@ -324,7 +324,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       padding: VigorSpacing.paddingLg,
       children: [
         SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-        Center(
+        const Center(
           child: Icon(
             Icons.fitness_center,
             size: 56,
@@ -477,7 +477,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       return ListView.separated(
         padding: VigorSpacing.paddingLg,
         itemCount: items.length,
-        separatorBuilder: (_, __) => const SizedBox(height: VigorSpacing.sm),
+        separatorBuilder: (_, _) => const SizedBox(height: VigorSpacing.sm),
         itemBuilder: (context, index) {
           final item = items[index];
           if (item.flowSession != null) {
@@ -520,7 +520,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     return ListView.separated(
       padding: VigorSpacing.paddingLg,
       itemCount: items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: VigorSpacing.sm),
+      separatorBuilder: (_, _) => const SizedBox(height: VigorSpacing.sm),
       itemBuilder: (context, index) {
         final item = items[index];
         if (item.training != null) {
@@ -675,8 +675,8 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
               Row(
                 children: [
                   if (isSelected)
-                    Padding(
-                      padding: const EdgeInsets.only(right: VigorSpacing.sm),
+                    const Padding(
+                      padding: EdgeInsets.only(right: VigorSpacing.sm),
                       child: Icon(Icons.check_circle, size: 20, color: VigorColors.indigo),
                     ),
                   // methodology badge
@@ -812,7 +812,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                         color: VigorColors.stone.withValues(alpha: 0.1),
                         borderRadius: VigorRadius.radiusXs,
                       ),
-                      child: Icon(Icons.self_improvement, size: 14, color: VigorColors.stone),
+                      child: const Icon(Icons.self_improvement, size: 14, color: VigorColors.stone),
                     ),
                     const SizedBox(width: VigorSpacing.sm),
                     Expanded(

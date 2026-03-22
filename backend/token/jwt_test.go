@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/glebarez/sqlite"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/streambinder/vigor/model"
-	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 )
 

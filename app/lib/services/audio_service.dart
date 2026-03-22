@@ -29,12 +29,12 @@ class AudioService {
   Future<void> setDuckOtherAudio(bool enabled) async {
     if (enabled) {
       await _player.setAudioContext(AudioContext(
-        android: AudioContextAndroid(
+        android: const AudioContextAndroid(
           audioFocus: AndroidAudioFocus.gainTransientMayDuck,
         ),
         iOS: AudioContextIOS(
           category: AVAudioSessionCategory.playback,
-          options: {
+          options: const {
             AVAudioSessionOptions.duckOthers,
             AVAudioSessionOptions.mixWithOthers,
           },
@@ -42,12 +42,12 @@ class AudioService {
       ));
     } else {
       await _player.setAudioContext(AudioContext(
-        android: AudioContextAndroid(
+        android: const AudioContextAndroid(
           audioFocus: AndroidAudioFocus.none,
         ),
         iOS: AudioContextIOS(
           category: AVAudioSessionCategory.playback,
-          options: {AVAudioSessionOptions.mixWithOthers},
+          options: const {AVAudioSessionOptions.mixWithOthers},
         ),
       ));
     }

@@ -444,7 +444,6 @@ mixin HealthDataServiceMixin on HealthDataService {
 
       // read last 7 days of local data (efficient, recent)
       final now = DateTime.now();
-      final sevenDaysAgo = now.subtract(const Duration(days: 7));
       final allPayload = await readNewData(); // delegates to platform's 7-day read
 
       if (allPayload.isEmpty) return allPayload;
@@ -626,7 +625,7 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
   });
 
   // finalize sleep totals after all stages and sessions are processed
-  dailyMetrics.values.forEach((bucket) {
+  for (final bucket in dailyMetrics.values) {
     if (bucket.containsKey('sleep_deep_hours') ||
         bucket.containsKey('sleep_light_hours') ||
         bucket.containsKey('sleep_rem_hours') ||
@@ -641,7 +640,7 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
       _updateSleepTotal(bucket);
       AppLogger.info('[HealthDataService] sleep for ${bucket['date']}: session=${session.toStringAsFixed(2)}h, staged=${staged.toStringAsFixed(2)}h (D${deep.toStringAsFixed(1)} L${light.toStringAsFixed(1)} R${rem.toStringAsFixed(1)}), asleep=${asleep.toStringAsFixed(2)}h → total=${bucket['sleep_hours'].toStringAsFixed(2)}h');
     }
-  });
+  }
 
   // merge source counts into a single map
   final allSourceNames = {...sourceMetricCounts.keys, ...sourceSessionCounts.keys};

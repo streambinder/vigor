@@ -39,11 +39,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _pickAndUploadAvatar() async {
+    final userService = context.read<ServiceLocator>().userService;
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 256, maxHeight: 256);
     if (picked == null) return;
 
     final bytes = await picked.readAsBytes();
-    final response = await context.read<ServiceLocator>().userService.uploadAvatar(bytes, picked.name);
+    final response = await userService.uploadAvatar(bytes, picked.name);
     if (!mounted) return;
     if (response.isSuccess) {
       setState(() => _avatarVersion++);
@@ -232,7 +233,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     errorWidget: (context, url, error) => CircleAvatar(
                       radius: 36,
                       backgroundColor: VigorColors.surface(context),
-                      child: Icon(Icons.person, size: 40, color: VigorColors.stone),
+                      child: const Icon(Icons.person, size: 40, color: VigorColors.stone),
                     ),
                   ),
                 ),
@@ -294,31 +295,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildQuickStats(User user, AppLocalizations l10n) {
-    final now = DateTime.now();
-    final birth = user.profile.birthdate;
-    int age = now.year - birth.year;
-    // adjust if birthday hasn't occurred yet this year
-    if (now.month < birth.month || (now.month == birth.month && now.day < birth.day)) {
-      age--;
-    }
-    // kanso: all stat pills use stone for visual calm
-    return Wrap(
-      spacing: VigorSpacing.sm,
-      runSpacing: VigorSpacing.sm,
-      alignment: WrapAlignment.center,
-      children: [
-        _buildStatPill(Icons.cake, '$age'),
-        _buildStatPill(Icons.height, '${user.profile.height.toInt()} cm'),
-        _buildStatPill(Icons.monitor_weight, '${user.profile.weight.toInt()} kg'),
-        _buildStatPill(
-          user.profile.gender == 'male' ? Icons.male : Icons.female,
-          user.profile.gender == 'male' ? l10n.male : l10n.female,
-        ),
-      ],
     );
   }
 
@@ -507,7 +483,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Row(
           children: [
             // stone icon, no gradient
-            Icon(Icons.fitness_center, color: VigorColors.stone, size: 24),
+            const Icon(Icons.fitness_center, color: VigorColors.stone, size: 24),
             const SizedBox(width: VigorSpacing.sm),
             Expanded(
               child: Text(l10n.myGyms, style: VigorTypography.headline.copyWith(fontSize: 18, color: VigorColors.textPrimary(context))),
@@ -671,7 +647,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // section header
         Row(
           children: [
-            Icon(Icons.more_horiz, color: VigorColors.stone, size: 24),
+            const Icon(Icons.more_horiz, color: VigorColors.stone, size: 24),
             const SizedBox(width: VigorSpacing.sm),
             Text(l10n.other, style: VigorTypography.headline.copyWith(fontSize: 18, color: VigorColors.textPrimary(context))),
           ],
@@ -697,8 +673,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await context.read<AuthProvider>().logout();
     }
   }
-
-  String _capitalizeFirst(String text) => text.isEmpty ? text : text[0].toUpperCase() + text.substring(1);
 
   List<String> _getGoals(Map<String, dynamic> data) {
     try {

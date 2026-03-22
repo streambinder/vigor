@@ -43,7 +43,7 @@ class HealthPermissionsScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.lock_outline, size: 14, color: VigorColors.stone),
+                const Icon(Icons.lock_outline, size: 14, color: VigorColors.stone),
                 const SizedBox(width: VigorSpacing.xs),
                 Text(l10n.healthPermissionsReadOnly, style: VigorTypography.caption.copyWith(color: VigorColors.stone)),
               ],
@@ -72,7 +72,7 @@ class HealthPermissionsScreen extends StatelessWidget {
             const SizedBox(height: VigorSpacing.sm),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.healthPermissionsSkip, style: TextStyle(color: VigorColors.stone)),
+              child: Text(l10n.healthPermissionsSkip, style: const TextStyle(color: VigorColors.stone)),
             ),
             const SizedBox(height: VigorSpacing.lg),
           ],

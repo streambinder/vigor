@@ -10,9 +10,9 @@ import (
 
 // Gym represents a user's training location with available equipment.
 type Gym struct {
-	ID               uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
-	Name             string         `gorm:"not null;uniqueIndex:idx_user_gym_name" json:"name"`
-	Equipment        pq.StringArray `gorm:"type:text[]" json:"equipment"`
+	ID               uuid.UUID                                `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	Name             string                                   `gorm:"not null;uniqueIndex:idx_user_gym_name" json:"name"`
+	Equipment        pq.StringArray                           `gorm:"type:text[]" json:"equipment"`
 	ModifierVariants datatypes.JSONType[map[string][]float64] `gorm:"type:jsonb" json:"modifier_variants,omitempty"`
 
 	CreatedAt time.Time `json:"-"`

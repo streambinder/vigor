@@ -20,21 +20,21 @@ type TopActiveUser struct {
 }
 
 type DashboardData struct {
-	UserCount                     int64
-	AvgActiveUsersPerDay          float64
-	TrainingGenerationCount       int64
-	AvgTrainingGenerationsPerDay  float64
-	CompletedTrainingCount        int64
-	AvgCompletedTrainingsPerDay   float64
-	ActiveUsersPerDay             []LatencySeries
-	ActiveUsersPerDayPerUser      []LatencySeries
-	TopActiveUsers                []TopActiveUser
-	TrainingGenerationLatencies   []LatencySeries
-	HandlerRequestLatencies       []LatencySeries
-	HandlerRequestErrors          []LatencySeries
-	TrainingGenerationFailures    []LatencySeries
-	BadQualityPerModel            []LatencySeries
-	Trainings                     []model.Training
-	Reports                       []model.Report
-	Users                         []model.User
+	UserCount                    int64
+	AvgActiveUsersPerDay         float64
+	TrainingGenerationCount      int64
+	AvgTrainingGenerationsPerDay float64
+	CompletedTrainingCount       int64
+	AvgCompletedTrainingsPerDay  float64
+	ActiveUsersPerDay            []LatencySeries
+	ActiveUsersPerDayPerUser     []LatencySeries
+	TopActiveUsers               []TopActiveUser
+	TrainingGenerationLatencies  []LatencySeries
+	HandlerRequestLatencies      []LatencySeries
+	HandlerRequestErrors         []LatencySeries
+	TrainingGenerationFailures   []LatencySeries
+	BadQualityPerModel           []LatencySeries
+	Trainings                    []model.Training
+	Reports                      []model.Report
+	Users                        []model.User
 }

@@ -53,31 +53,31 @@ var (
 )
 
 type TrainingGenerationRequest struct {
-	Profiles              []model.Profile
-	Goals                 []model.Goal
-	WorkExercises         []model.Exercise
-	WarmupExercises       []model.Exercise
-	CooldownExercises     []model.Exercise
-	EquipmentIDs          []string
-	Modifiers             []model.Modifier
-	ModifierVariants      map[string][]float64
-	FavoriteExercises     []model.Exercise
-	FavoriteEquipmentIDs  []string
-	Methodology           *model.Methodology
-	Methodologies         []model.Methodology
-	UserPrompt            string
-	Duration              int
-	RecentTrainings       []model.Training
-	RecentFeedback        map[uuid.UUID]model.TrainingFeedback
-	Facts                 []model.Fact
-	SkipWarmupCooldown    bool
-	CalibrationGaps       map[string]int
-	HealthSnapshot        *model.HealthSnapshot
-	RecentHR              map[uuid.UUID]*model.HealthExerciseSession
-	Reminders             []string
-	LastReasoningModel    string
-	LastStructuringModel  string
-	CorrectionHint        string
+	Profiles             []model.Profile
+	Goals                []model.Goal
+	WorkExercises        []model.Exercise
+	WarmupExercises      []model.Exercise
+	CooldownExercises    []model.Exercise
+	EquipmentIDs         []string
+	Modifiers            []model.Modifier
+	ModifierVariants     map[string][]float64
+	FavoriteExercises    []model.Exercise
+	FavoriteEquipmentIDs []string
+	Methodology          *model.Methodology
+	Methodologies        []model.Methodology
+	UserPrompt           string
+	Duration             int
+	RecentTrainings      []model.Training
+	RecentFeedback       map[uuid.UUID]model.TrainingFeedback
+	Facts                []model.Fact
+	SkipWarmupCooldown   bool
+	CalibrationGaps      map[string]int
+	HealthSnapshot       *model.HealthSnapshot
+	RecentHR             map[uuid.UUID]*model.HealthExerciseSession
+	Reminders            []string
+	LastReasoningModel   string
+	LastStructuringModel string
+	CorrectionHint       string
 }
 
 // LLM defines the interface for language model providers.

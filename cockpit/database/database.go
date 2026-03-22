@@ -3,8 +3,8 @@ package database
 import (
 	"os"
 
-	"gorm.io/driver/postgres"
 	"github.com/glebarez/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )

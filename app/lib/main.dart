@@ -19,7 +19,6 @@ import 'screens/training_details_screen.dart';
 import 'services/secure_storage_service.dart';
 import 'services/preferences_service.dart';
 import 'services/service_locator.dart';
-import 'services/health_data_service.dart';
 import 'services/app_logger.dart';
 
 void main() async {
@@ -270,14 +269,15 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
             WidgetsBinding.instance.addPostFrameCallback((_) async {
               if (autoClaim) {
                 // user explicitly tapped "login to add" — claim directly
+                final navigator = Navigator.of(context);
                 final response = await serviceLocator.trainingService.claimSharedTraining(token);
                 if (!mounted) return;
                 if (response.isSuccess && response.data != null) {
-                  Navigator.of(context).push(
+                  navigator.push(
                     MaterialPageRoute(builder: (_) => TrainingDetailsScreen(training: response.data!)),
                   );
                 } else {
-                  Navigator.of(context).push(
+                  navigator.push(
                     MaterialPageRoute(builder: (_) => SharedTrainingScreen(token: token)),
                   );
                 }

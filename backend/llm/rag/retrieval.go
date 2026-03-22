@@ -20,8 +20,8 @@ const (
 	MaxWarmupExercises     = 6  // random selection for warmup
 	CooldownPerMuscle      = 2  // cooldown exercises per muscle group
 	MaxPromptFacts         = 5
-	MaxFactDistance         = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
-	MaxExerciseDistance     = 0.2 // Maximum cosine distance for exercise matching
+	MaxFactDistance        = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
+	MaxExerciseDistance    = 0.2 // Maximum cosine distance for exercise matching
 	WarmupCooldownMaxScore = 30  // max progression score for warmup/cooldown exercises
 	MinPerMuscleExercises  = 2   // minimum exercises per muscle group after proficiency filtering
 

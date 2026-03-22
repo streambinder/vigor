@@ -226,7 +226,7 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
                 else if (kIsWeb)
                   Center(
                     child: web_only.renderButton(
-                      configuration: web_only.GSIButtonConfiguration(
+                      configuration: const web_only.GSIButtonConfiguration(
                         type: web_only.GSIButtonType.standard,
                         theme: web_only.GSIButtonTheme.outline,
                         size: web_only.GSIButtonSize.large,

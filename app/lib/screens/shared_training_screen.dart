@@ -170,7 +170,7 @@ class _SharedTrainingScreenState extends State<SharedTrainingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 64, color: VigorColors.error),
+          const Icon(Icons.error_outline, size: 64, color: VigorColors.error),
           const SizedBox(height: VigorSpacing.md),
           Text(l10n.trainingNotFound, style: VigorTypography.title.copyWith(color: VigorColors.textPrimary(context))),
         ],

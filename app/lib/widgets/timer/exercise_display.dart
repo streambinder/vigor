@@ -78,7 +78,7 @@ class ExerciseDisplay extends StatelessWidget {
               if (loadingProgress == null) return child;
               return _buildPlaceholder(size);
             },
-            errorBuilder: (_, __, ___) => _buildPlaceholder(size),
+            errorBuilder: (_, _, _) => _buildPlaceholder(size),
           ),
         ),
       ),

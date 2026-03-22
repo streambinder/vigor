@@ -30,10 +30,10 @@ func TestActivityWorkDuration(t *testing.T) {
 		expected int
 	}{
 		{"explicit duration", act(45, 0, 0), 45},
-		{"reps high", act(0, 10, 0), 40},                   // 10*4=40
-		{"reps low", act(0, 5, 0), 20},                     // 5*4=20
-		{"zero reps zero duration", act(0, 0, 0), 30},      // fallback
-		{"duration takes precedence", act(60, 12, 0), 60},  // duration > 0 wins
+		{"reps high", act(0, 10, 0), 40},                  // 10*4=40
+		{"reps low", act(0, 5, 0), 20},                    // 5*4=20
+		{"zero reps zero duration", act(0, 0, 0), 30},     // fallback
+		{"duration takes precedence", act(60, 12, 0), 60}, // duration > 0 wins
 	}
 	for _, tt := range tests {
 		if got := activityWorkDuration(tt.activity); got != tt.expected {
@@ -439,7 +439,7 @@ func TestSetDuration_DifferentPerRepeatCosts(t *testing.T) {
 			block(1, 0, []Activity{act(60, 0, 0)}),
 		}),
 		routine("work", 0, []Block{
-			block(2, 0, []Activity{act(30, 0, 0)}),  // 2 × 30s = 60s
+			block(2, 0, []Activity{act(30, 0, 0)}),   // 2 × 30s = 60s
 			block(2, 60, []Activity{act(120, 0, 0)}), // 2 × (120+60) - 60 last rest suppressed = 300s
 		}),
 		routine("cooldown", 0, []Block{
@@ -482,7 +482,7 @@ func TestSetDuration_BalancesBlockRepeats(t *testing.T) {
 	tr := makeTraining("supersets", []Routine{
 		routine("work", 0, []Block{
 			block(3, 60, []Activity{
-				act(0, 8, 0),  // ~32s work
+				act(0, 8, 0),   // ~32s work
 				act(0, 10, 60), // ~40s work + 60s rest
 			}),
 			block(3, 60, []Activity{
@@ -682,9 +682,9 @@ func TestValidate_WeightModifierConsistency(t *testing.T) {
 	weightedModifiers := map[string]bool{"weight": true, "weighted vest": true}
 
 	tests := []struct {
-		name    string
+		name     string
 		activity Activity
-		wantErr bool
+		wantErr  bool
 	}{
 		{
 			"weight_kg with weighted modifier passes",
