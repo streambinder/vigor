@@ -492,7 +492,7 @@ func TestSetDuration_BalancesBlockRepeats(t *testing.T) {
 		}),
 	})
 
-	tr.SetDuration(35) // 35 min = 2100s
+	tr.SetDuration(30) // 30 min = 1800s; 2x cap (3→6 repeats each) reaches ~2040s, within ±15%
 
 	r0 := tr.Routines[0].Blocks[0].Repeats
 	r1 := tr.Routines[0].Blocks[1].Repeats
@@ -509,7 +509,7 @@ func TestSetDuration_BalancesBlockRepeats(t *testing.T) {
 
 	// verify duration is still within tolerance
 	total := tr.CalculateDuration()
-	target := 2100
+	target := 1800
 	low := float64(target) * (1 - durationTolerancePct)
 	high := float64(target) * (1 + durationTolerancePct)
 	if float64(total) < low || float64(total) > high {
@@ -567,7 +567,9 @@ func TestSetDuration_WithinTolerance(t *testing.T) {
 			45,
 		},
 		{
-			"circuit 30min",
+			// light circuit: 4 initial repeats, 2x cap = 8. at 8 repeats:
+			// 8*(30+10+30+10+30) + 7*30 = 1090s work, total ~1210s ≈ 20min within ±15%
+			"circuit 20min",
 			"circuit",
 			[]Routine{
 				routine("warmup", 0, []Block{block(1, 0, []Activity{act(60, 0, 0)})}),
@@ -576,7 +578,7 @@ func TestSetDuration_WithinTolerance(t *testing.T) {
 				}),
 				routine("cooldown", 0, []Block{block(1, 0, []Activity{act(60, 0, 0)})}),
 			},
-			30,
+			20,
 		},
 		{
 			"emom 20min",
@@ -771,8 +773,9 @@ func TestValidate_DurationTolerance(t *testing.T) {
 		{"exact match", actualMinutes, false},
 		{"within tolerance (slightly over)", actualMinutes + 2, false},
 		{"within tolerance (slightly under)", actualMinutes - 2, false},
-		// SetDuration now scales repeats, so large upward mismatches get corrected
-		{"way over requested (scaled)", actualMinutes * 3, false},
+		// 2x cap on scaleWorkRepeats means 3x the original duration can't be reached;
+		// ValidateDuration correctly rejects it so the LLM retries with a better structure
+		{"way over requested (scaled)", actualMinutes * 3, true},
 		// scaling down hits the 1-repeat clamp — rest times alone exceed 5m budget
 		{"way under requested (clamped)", actualMinutes / 3, true},
 		{"zero skips check", 0, false},
