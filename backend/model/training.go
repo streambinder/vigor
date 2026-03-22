@@ -110,7 +110,7 @@ type Training struct {
 	ID uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" prompt:"-"`
 
 	Name        string         `gorm:"not null" json:"name" prompt:"3-4 word action-oriented title (see NAME rules)"`
-	Description string         `gorm:"not null" json:"description" prompt:"2-3 sentence summary of training approach, methodology choice, and key exercises"`
+	Description string         `gorm:"not null" json:"description" prompt:"3-5 sentence description. Open with the methodology and primary focus. Then explicitly surface any progression decisions driven by past training feedback (e.g. weight bumps, rep adjustments, exercise swaps based on too_easy/too_hard signals). If health or recovery data influenced volume or intensity, state the design rationale without naming the metric (e.g. 'keeping volume conservative today to support recovery'). Close with the key exercises or structure highlights. The user must be able to infer that their feedback and biometric signals were actively considered."`
 	Methodology string         `gorm:"column:methodology;not null" json:"methodology" prompt:"Methodology;enum:strength,supersets,circuit,emom,amrap,hiit,for_time,endurance,mobility"`
 	Duration    int            `gorm:"not null" json:"duration" prompt:"Total seconds"`
 	Equipment   pq.StringArray `gorm:"type:text[]" json:"equipment" prompt:"-"`

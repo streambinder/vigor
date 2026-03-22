@@ -37,7 +37,8 @@ Let's think step by step:
 2. METHODOLOGY SELECTION: Which training approach best serves the user's goals and current state?
 3. EXERCISE SELECTION: Which exercises from the available pool optimize for goals, muscle coverage, and progression?
 4. CREATIVE TITLE: What memorable, evocative name captures this training's character?
-5. TRAINING STRUCTURE: How should I organize warmup, work, and cooldown to maximize effectiveness?
+5. DESCRIPTION: Write 3-5 sentences the user will read. Surface progression decisions from past feedback (weight/rep changes, swaps) and any recovery-driven design choices — without naming raw metrics.
+6. TRAINING STRUCTURE: How should I organize warmup, work, and cooldown to maximize effectiveness?
 
 {% if len(userPrompt) > 0 %}
 [USER REQUEST]
@@ -116,15 +117,15 @@ Steps yesterday: {%s formatNumber(healthSnapshot.Steps) %} (baseline: {%s format
 
 {% if !skipWarmupCooldown %}
 [WARMUP] {%d len(warmupExercises) %} options
-{% for _, exercise := range warmupExercises %}{%s exercise.ID %}, {% endfor %}
+{% for _, exercise := range warmupExercises %}{%s exercise.ID %} "{%s exercise.Name %}", {% endfor %}
 
 {% endif %}
 [WORK] {%d len(workExercises) %} options
-{% for _, exercise := range workExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}{% if hasLoadableEquipment(exercise) %}[W]{% endif %}, {% endfor %}
-
+{% code workByMuscle := groupExercisesByMuscle(workExercises) %}{% for _, muscle := range workExerciseMuscleOrder(workExercises) %}{%s muscle %}: {% for i, ex := range workByMuscle[muscle] %}{%s ex.ID %} "{%s ex.Name %}"{% if hasLoadableEquipment(ex) %}[W]{% endif %}{% if i < len(workByMuscle[muscle])-1 %}, {% endif %}{% endfor %}
+{% endfor %}
 {% if !skipWarmupCooldown %}
 [COOLDOWN] {%d len(cooldownExercises) %} options
-{% for _, exercise := range cooldownExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}, {% endfor %}
+{% for _, exercise := range cooldownExercises %}{%s exercise.ID %} "{%s exercise.Name %}"{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}, {% endfor %}
 
 {% endif %}
 {% if len(facts) > 0 %}

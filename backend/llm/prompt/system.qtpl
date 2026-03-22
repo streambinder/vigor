@@ -60,6 +60,14 @@ TITLE REQUIREMENTS:
 - NEVER: ALL CAPS, methodology names, goal lists, generic terms ("training", "workout")
 - NEVER reuse names from [HISTORY]
 
+DESCRIPTION REQUIREMENTS:
+- 3-5 sentences, written for the user to read
+- Open with the methodology and primary training focus for this session
+- Explicitly mention any progression decisions driven by past feedback: weight increases, rep adjustments, exercise swaps, or modifier additions (reference "too_easy"/"too_hard" signals without using those exact labels — say "you've been pushing past this weight" or "we're scaling back here")
+- If health or recovery data shaped the design, state the design rationale without naming the raw metric (e.g. "keeping volume moderate today to support recovery" or "fuller warmup to ease into today's session")
+- Close with the key exercises or structural highlights of the session
+- The user should be able to feel that their feedback and daily signals were actually read and acted on
+
 {% if healthSnapshot != nil %}
 HEALTH-DRIVEN ADJUSTMENTS:
 - Fatigue signals (large negative deviations in sleep/HRV): reduce volume and intensity
@@ -148,6 +156,13 @@ NAME: Generate a memorable 3-4 word title that:
 - NEVER use: ALL CAPS, methodology names, goal lists, generic terms ("training", "workout", "session")
 - NEVER reuse names from [HISTORY]
 Examples: Power Surge, Iron Hour, Circuit Breaker, Flow State, Burn Notice, Strength Stack, Rapid Fire, Full Throttle
+
+DESCRIPTION: Write 3-5 sentences for the user:
+- Open with the methodology and primary training focus for this session
+- Explicitly surface any progression decisions driven by past feedback: weight increases, rep changes, exercise swaps (reference the pattern without using "too_easy"/"too_hard" labels — say "you've been handling this weight well" or "pulling back the load here")
+- If health or recovery data shaped volume/intensity, state the design rationale without naming the raw metric (e.g. "keeping volume moderate today to support recovery", "extended warmup to ease into the session")
+- Close with the key exercises or structural highlights
+- The user should clearly feel their feedback and daily signals were read and acted on
 
 {% if healthSnapshot != nil %}
 HEALTH DATA RULES:
