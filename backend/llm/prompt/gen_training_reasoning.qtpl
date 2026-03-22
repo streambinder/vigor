@@ -48,9 +48,12 @@ Let's think step by step:
 [HISTORY]
 {% for _, training := range recentTrainings %}
 {% code fb, hasFb := recentFeedback[training.ID] %}
+{% code var afb map[string]string; if hasFb { json.Unmarshal(fb.ActivityFeedback, &afb) } %}
+{% code actWeights := activityWeights(training) %}
 - "{%s training.Name %}" | {%d training.DaysSince() %}d ago | {%s training.Methodology %}{% if training.CompletedIn != nil %} | {%d *training.CompletedIn / 60 %}min actual{% endif %}{% if hasFb && fb.Quality != nil %}{% if *fb.Quality %} | Quality: good{% else %} | Quality: bad{% if fb.QualityReason != "" %} ({%s fb.QualityReason %}){% endif %}{% endif %}{% endif %}{% if hasFb && fb.Message != "" %} | Feedback: "{%s fb.Message %}"{% endif %}{% code hr := recentHR[training.ID] %}{% if hr != nil && hr.AvgHR != nil %} | HR: avg {%d *hr.AvgHR %}{% if hr.MaxHR != nil %}, max {%d *hr.MaxHR %}{% endif %}bpm{% endif %}
-{% if hasFb %}{% code var afb map[string]string; json.Unmarshal(fb.ActivityFeedback, &afb) %}{% for exID, exFb := range afb %}{% if len(exFb) > 0 %}  {%s exID %}: {%s exFb %}
-{% endif %}{% endfor %}{% endif %}
+{% code seen := make(map[string]bool) %}{% for exID, act := range actWeights %}{% code seen[exID] = true %}  {%s exID %}: {%s formatWeight(act.WeightKg) %}×{%d act.Reps %}{% if fb := afb[exID]; len(fb) > 0 %} ({%s fb %}){% endif %}
+{% endfor %}{% for exID, exFb := range afb %}{% if !seen[exID] && len(exFb) > 0 %}  {%s exID %}: {%s exFb %}
+{% endif %}{% endfor %}
 {% endfor %}
 {% endif %}
 {% if len(calibrationGaps) > 0 %}
@@ -117,7 +120,7 @@ Steps yesterday: {%s formatNumber(healthSnapshot.Steps) %} (baseline: {%s format
 
 {% endif %}
 [WORK] {%d len(workExercises) %} options
-{% for _, exercise := range workExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}, {% endfor %}
+{% for _, exercise := range workExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}{% if hasLoadableEquipment(exercise) %}[W]{% endif %}, {% endfor %}
 
 {% if !skipWarmupCooldown %}
 [COOLDOWN] {%d len(cooldownExercises) %} options

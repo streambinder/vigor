@@ -80,6 +80,17 @@ Work routine ONLY. No warmup/cooldown.
 			fb, hasFb := recentFeedback[training.ID]
 
 			qw422016.N().S(`
+`)
+			var afb map[string]string
+			if hasFb {
+				json.Unmarshal(fb.ActivityFeedback, &afb)
+			}
+
+			qw422016.N().S(`
+`)
+			actWeights := activityWeights(training)
+
+			qw422016.N().S(`
 - "`)
 			qw422016.E().S(training.Name)
 			qw422016.N().S(`" | `)
@@ -121,19 +132,33 @@ Work routine ONLY. No warmup/cooldown.
 			}
 			qw422016.N().S(`
 `)
-			if hasFb {
-				var afb map[string]string
-				json.Unmarshal(fb.ActivityFeedback, &afb)
+			seen := make(map[string]bool)
 
-				for exID, exFb := range afb {
-					if len(exFb) > 0 {
-						qw422016.N().S(`  `)
-						qw422016.E().S(exID)
-						qw422016.N().S(`: `)
-						qw422016.E().S(exFb)
-						qw422016.N().S(`
+			for exID, act := range actWeights {
+				seen[exID] = true
+
+				qw422016.N().S(`  `)
+				qw422016.E().S(exID)
+				qw422016.N().S(`: `)
+				qw422016.E().S(formatWeight(act.WeightKg))
+				qw422016.N().S(`×`)
+				qw422016.N().D(act.Reps)
+				if fb := afb[exID]; len(fb) > 0 {
+					qw422016.N().S(` (`)
+					qw422016.E().S(fb)
+					qw422016.N().S(`)`)
+				}
+				qw422016.N().S(`
 `)
-					}
+			}
+			for exID, exFb := range afb {
+				if !seen[exID] && len(exFb) > 0 {
+					qw422016.N().S(`  `)
+					qw422016.E().S(exID)
+					qw422016.N().S(`: `)
+					qw422016.E().S(exFb)
+					qw422016.N().S(`
+`)
 				}
 			}
 			qw422016.N().S(`
@@ -431,6 +456,9 @@ Steps yesterday: `)
 			qw422016.N().S(`[`)
 			qw422016.E().S(exercise.Muscles[0])
 			qw422016.N().S(`]`)
+		}
+		if hasLoadableEquipment(exercise) {
+			qw422016.N().S(`[W]`)
 		}
 		qw422016.N().S(`, `)
 	}

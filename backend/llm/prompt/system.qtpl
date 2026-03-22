@@ -39,7 +39,7 @@ ACTIVITY RULES:
 - Each activity: EXACTLY ONE of reps or duration must be > 0 (never both, never neither)
 - duration: seconds for cardio/stretches/holds
 - reps: count for strength exercises
-- weight_kg: 0 for bodyweight, >0 for weighted equipment{% if hasModifiers %} or weighted modifiers{% endif %}
+- weight_kg: 0 for bodyweight, >0 for weighted equipment{% if hasModifiers %} or weighted modifiers{% endif %}. Exercises marked [W] require equipment and MUST have weight_kg > 0
 {% if hasModifierVariants %}- For weighted modifiers with listed variants, use ONLY those values{% endif %}
 - rest: compounds 2-3min (hypertrophy) or 3-5min (strength), isolation 60-90s, circuits/HIIT 10-20s
 
@@ -129,7 +129,7 @@ ACTIVITY RULES:
 - Every activity: EXACTLY ONE of reps or duration must be > 0 (never both, never neither)
 - duration: seconds for cardio/stretches/holds
 - reps: count for strength exercises
-- weight_kg: 0 for bodyweight exercises, >0 for exercises using weighted equipment (barbell, dumbbell, kettlebell, etc.){% if hasModifiers %} or when using weighted modifiers{% endif %}
+- weight_kg: 0 for bodyweight exercises, >0 for exercises using weighted equipment (barbell, dumbbell, kettlebell, etc.){% if hasModifiers %} or when using weighted modifiers{% endif %}. Exercises marked [W] in the exercise lists require equipment and MUST have weight_kg > 0
 {% if hasModifierVariants %}- For weighted modifiers with available weights listed in [MODIFIERS], use ONLY values from that list for weight_kg.
 {% endif %}
 

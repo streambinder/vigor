@@ -7983,9 +7983,7 @@
   {
     "id": "body-up",
     "name": "Body-Up",
-    "equipment": [
-      "pull-up bar"
-    ],
+    "equipment": [],
     "muscles": [
       "chest",
       "shoulders"

@@ -192,7 +192,7 @@ func (t Training) DaysSince() int {
 }
 
 // Validate checks that the training has valid structure.
-func (t *Training) Validate(validExerciseIDs map[string]string, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, requireWarmupCooldown bool, targetMuscles []string, actualMuscles []string) error {
+func (t *Training) Validate(validExerciseIDs map[string]string, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, weightedExerciseIDs map[string]bool, requireWarmupCooldown bool, targetMuscles []string, actualMuscles []string) error {
 	if t.Name == "" {
 		return &ValidationError{"empty_name", "training name is empty"}
 	}
@@ -264,6 +264,10 @@ func (t *Training) Validate(validExerciseIDs map[string]string, validModifierIDs
 					if !hasWeightedMod {
 						return &ValidationError{"missing_weight_modifier", "activity " + strconv.Itoa(k) + " has weight_kg > 0 but no weighted modifier"}
 					}
+				}
+				// weighted exercises must have weight_kg > 0
+				if activity.WeightKg == 0 && weightedExerciseIDs[canonical] {
+					return &ValidationError{"missing_weight", "activity " + strconv.Itoa(k) + " uses weighted exercise " + canonical + " but has weight_kg == 0"}
 				}
 				if activity.Duration == 0 && activity.Reps == 0 {
 					return &ValidationError{"no_duration_or_reps", "activity " + strconv.Itoa(k) + " in block " + strconv.Itoa(j) + " has neither duration nor reps"}

@@ -92,7 +92,7 @@ ACTIVITY RULES:
 	if hasModifiers {
 		qw422016.N().S(` or weighted modifiers`)
 	}
-	qw422016.N().S(`
+	qw422016.N().S(`. Exercises marked [W] require equipment and MUST have weight_kg > 0
 `)
 	if hasModifierVariants {
 		qw422016.N().S(`- For weighted modifiers with listed variants, use ONLY those values`)
@@ -256,7 +256,7 @@ ACTIVITY RULES:
 	if hasModifiers {
 		qw422016.N().S(` or when using weighted modifiers`)
 	}
-	qw422016.N().S(`
+	qw422016.N().S(`. Exercises marked [W] in the exercise lists require equipment and MUST have weight_kg > 0
 `)
 	if hasModifierVariants {
 		qw422016.N().S(`- For weighted modifiers with available weights listed in [MODIFIERS], use ONLY values from that list for weight_kg.

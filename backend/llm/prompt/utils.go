@@ -3,7 +3,43 @@ package prompt
 import (
 	"fmt"
 	"math"
+
+	"github.com/streambinder/vigor/model"
 )
+
+// loadableEquipment is the set of equipment IDs that require selecting a specific weight.
+// apparatus/cardio equipment (pull-up bar, bench, rings, trx, treadmill, etc.) is excluded.
+var loadableEquipment = map[string]bool{
+	"barbell": true, "cable": true, "dumbbell": true, "ez barbell": true,
+	"hammer": true, "kettlebell": true, "leverage machine": true, "medicine ball": true,
+	"olympic barbell": true, "smith machine": true, "sled machine": true, "trap bar": true,
+}
+
+// hasLoadableEquipment returns true if the exercise uses any equipment that requires weight selection.
+func hasLoadableEquipment(exercise model.Exercise) bool {
+	for _, eq := range exercise.Equipment {
+		if loadableEquipment[eq] {
+			return true
+		}
+	}
+	return false
+}
+
+// activityWeights builds a map of exerciseID → Activity for all weighted activities in a training,
+// used to surface past weight_kg and reps in [HISTORY] for progression context.
+func activityWeights(training model.Training) map[string]model.Activity {
+	result := make(map[string]model.Activity)
+	for _, routine := range training.Routines {
+		for _, block := range routine.Blocks {
+			for _, activity := range block.Activities {
+				if activity.WeightKg > 0 {
+					result[activity.ExerciseID] = activity
+				}
+			}
+		}
+	}
+	return result
+}
 
 // formatWeight renders a weight value as "Xkg", dropping the decimal when it's a whole number.
 func formatWeight(w float64) string {
