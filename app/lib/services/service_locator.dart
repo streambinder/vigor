@@ -73,6 +73,7 @@ class ServiceLocator extends ChangeNotifier {
         refreshGyms();
       case HealthSyncCompleted():
         refreshHealthDaily();
+        refreshTrainings();
       case FlowSessionListChanged():
         refreshFlowSessions();
       case FeedbackSubmitted():
