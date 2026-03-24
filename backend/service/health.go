@@ -49,6 +49,17 @@ func estimateMaxHR(age int, gender string) int {
 	return clampInt(208-int(0.7*float64(age)), 100, 220)
 }
 
+func median(values []float64) float64 {
+	sorted := make([]float64, len(values))
+	copy(sorted, values)
+	sort.Float64s(sorted)
+	n := len(sorted)
+	if n%2 == 0 {
+		return (sorted[n/2-1] + sorted[n/2]) / 2
+	}
+	return sorted[n/2]
+}
+
 func clampFloat(v, min, max float64) float64 {
 	if v < min {
 		return min
@@ -145,10 +156,10 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Loc
 			metric := model.HealthMetric{
 				UserID:          userID,
 				Date:            date,
-				SleepHours:      clampFloat(m.SleepHours, 0, 24),
-				SleepDeepHours:  clampFloat(m.SleepDeepHours, 0, 24),
-				SleepLightHours: clampFloat(m.SleepLightHours, 0, 24),
-				SleepREMHours:   clampFloat(m.SleepREMHours, 0, 24),
+				SleepHours:      clampFloatOrZero(m.SleepHours, 0, 16),
+				SleepDeepHours:  clampFloat(m.SleepDeepHours, 0, 16),
+				SleepLightHours: clampFloat(m.SleepLightHours, 0, 16),
+				SleepREMHours:   clampFloat(m.SleepREMHours, 0, 16),
 				RestingHR:       clampIntOrZero(m.RestingHR, 25, 220),
 				HRVRMSSD:        clampFloatOrZero(m.HRVRMSSD, 1, 300),
 				Steps:           clampInt(m.Steps, 0, 200000),
@@ -539,25 +550,20 @@ func GetHealthSnapshot(userID uuid.UUID, loc *time.Location) (*model.HealthSnaps
 		return nil, nil
 	}
 
-	// compute baselines from all available days
-	var sumSleep, sumHRV, sumSteps, sumRHR float64
-	var countSleep, countHRV, countSteps, countRHR int
+	// compute baselines from all available days using median (robust to outliers)
+	var sleepSamples, hrvSamples, stepSamples, rhrSamples []float64
 	for _, m := range metrics {
 		if m.SleepHours > 0 {
-			sumSleep += m.SleepHours
-			countSleep++
+			sleepSamples = append(sleepSamples, m.SleepHours)
 		}
 		if m.HRVRMSSD > 0 {
-			sumHRV += m.HRVRMSSD
-			countHRV++
+			hrvSamples = append(hrvSamples, m.HRVRMSSD)
 		}
 		if m.Steps > 0 {
-			sumSteps += float64(m.Steps)
-			countSteps++
+			stepSamples = append(stepSamples, float64(m.Steps))
 		}
 		if m.RestingHR > 0 {
-			sumRHR += float64(m.RestingHR)
-			countRHR++
+			rhrSamples = append(rhrSamples, float64(m.RestingHR))
 		}
 	}
 
@@ -573,26 +579,26 @@ func GetHealthSnapshot(userID uuid.UUID, loc *time.Location) (*model.HealthSnaps
 		BaselineDays:    len(metrics),
 	}
 
-	if countSleep > 0 {
-		snapshot.SleepBaseline = sumSleep / float64(countSleep)
+	if len(sleepSamples) > 0 {
+		snapshot.SleepBaseline = median(sleepSamples)
 		if snapshot.SleepBaseline > 0 {
 			snapshot.SleepDeviation = (snapshot.SleepHours - snapshot.SleepBaseline) / snapshot.SleepBaseline * 100
 		}
 	}
-	if countHRV > 0 {
-		snapshot.HRVBaseline = sumHRV / float64(countHRV)
+	if len(hrvSamples) > 0 {
+		snapshot.HRVBaseline = median(hrvSamples)
 		if snapshot.HRVBaseline > 0 {
 			snapshot.HRVDeviation = (snapshot.HRVRMSSD - snapshot.HRVBaseline) / snapshot.HRVBaseline * 100
 		}
 	}
-	if countRHR > 0 {
-		snapshot.RHRBaseline = sumRHR / float64(countRHR)
+	if len(rhrSamples) > 0 {
+		snapshot.RHRBaseline = median(rhrSamples)
 		if snapshot.RHRBaseline > 0 {
 			snapshot.RHRDeviation = (float64(snapshot.RestingHR) - snapshot.RHRBaseline) / snapshot.RHRBaseline * 100
 		}
 	}
-	if countSteps > 0 {
-		snapshot.StepsBaseline = sumSteps / float64(countSteps)
+	if len(stepSamples) > 0 {
+		snapshot.StepsBaseline = median(stepSamples)
 		if snapshot.StepsBaseline > 0 {
 			snapshot.StepsDeviation = (float64(snapshot.Steps) - snapshot.StepsBaseline) / snapshot.StepsBaseline * 100
 		}
