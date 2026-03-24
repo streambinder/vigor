@@ -181,7 +181,24 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		allFavoriteEquipment = append(allFavoriteEquipment, profile.FavoriteEquipment()...)
 	}
 
-	workExercises, err := rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles, prompt, allFavoriteExercises)
+	// load exercise IDs from recent trainings upfront to exclude from retrieval pool
+	var recentExerciseIDs []string
+	{
+		var recentActivityRows []struct{ ExerciseID string }
+		database.DB.Raw(`
+			SELECT DISTINCT a.exercise_id
+			FROM activities a
+			JOIN blocks b ON b.id = a.block_id
+			JOIN routines r ON r.id = b.routine_id
+			JOIN trainings t ON t.id = r.training_id
+			WHERE t.user_id = ? AND t.completed_at > ? AND t.completed_at IS NOT NULL
+		`, requestorProfile.UserID, time.Now().Add(-time.Hour*24*recentTrainingDays)).Scan(&recentActivityRows)
+		for _, row := range recentActivityRows {
+			recentExerciseIDs = append(recentExerciseIDs, row.ExerciseID)
+		}
+	}
+
+	workExercises, err := rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles, prompt, allFavoriteExercises, recentExerciseIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -415,6 +432,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			LastReasoningModel:   execution.Reasoning.Model,
 			LastStructuringModel: execution.Structuring.Model,
 			CorrectionHint:       correctionHint,
+			RecentExerciseIDs:    recentExerciseIDs,
 		})
 		if err != nil {
 			reason := "llm_error"

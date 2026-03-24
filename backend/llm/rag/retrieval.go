@@ -80,6 +80,7 @@ func RetrieveWorkExercises(
 	muscles []string,
 	prompt string,
 	favoriteIDs []string,
+	excludeIDs []string,
 ) ([]model.Exercise, error) {
 	embeddingText := GenProfile(profiles, goals, equipment, muscles, prompt)
 	exerciseEmbedding, err := embedding.GenVector(embeddingText)
@@ -110,7 +111,7 @@ func RetrieveWorkExercises(
 		}
 	}
 
-	return retrieveBalancedByMuscle(exerciseEmbedding, keywordQuery, methodology, equipment, targetMuscles, methodologyFamilies, proficiencies, proficiencyMargin, favoriteIDs), nil
+	return retrieveBalancedByMuscle(exerciseEmbedding, keywordQuery, methodology, equipment, targetMuscles, methodologyFamilies, proficiencies, proficiencyMargin, favoriteIDs, excludeIDs), nil
 }
 
 // retrieveBalancedByMuscle queries and filters exercises per muscle group independently,
@@ -129,6 +130,7 @@ func retrieveBalancedByMuscle(
 	proficiencies map[string]float64,
 	proficiencyMargin float64,
 	favoriteIDs []string,
+	excludeIDs []string,
 ) []model.Exercise {
 	if len(muscles) == 0 {
 		return nil
@@ -150,7 +152,7 @@ func retrieveBalancedByMuscle(
 	seen := make(map[string]bool)
 
 	for _, muscle := range muscles {
-		candidates, err := retrieveBySimilarity(exerciseEmbedding, keywordQuery, equipment, []string{muscle}, methodologyFamilies)
+		candidates, err := retrieveBySimilarity(exerciseEmbedding, keywordQuery, equipment, []string{muscle}, methodologyFamilies, excludeIDs)
 		if err != nil {
 			log.Warn().Err(err).Str("muscle", muscle).Msg("failed to retrieve exercises for muscle group")
 			continue
@@ -223,7 +225,7 @@ func filterByProficiencyPerMuscle(exercises []model.Exercise, proficiencies map[
 // retrieveBySimilarity performs hybrid search combining embedding cosine similarity
 // with full-text keyword relevance. When keywordQuery is non-empty, scores are fused
 // (0.7 vector + 0.3 keyword) to surface both semantically and lexically relevant exercises.
-func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equipment []string, muscles []string, families []string) ([]model.Exercise, error) {
+func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equipment []string, muscles []string, families []string, excludeIDs []string) ([]model.Exercise, error) {
 	var results []struct {
 		ExerciseID string
 		Text       string
@@ -301,6 +303,11 @@ func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equi
 	// filter by target muscles if specified (primary muscle only - first element)
 	if len(muscles) > 0 {
 		query = query.Where("exercises.muscles[1] = ANY(?)", pq.Array(muscles))
+	}
+
+	// exclude recently used exercises to avoid repetition across sessions
+	if len(excludeIDs) > 0 {
+		query = query.Where("exercises.id NOT IN ?", excludeIDs)
 	}
 
 	// hybrid scoring: fuse vector similarity with keyword relevance, then randomize.

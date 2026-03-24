@@ -28,6 +28,7 @@
     healthSnapshot *model.HealthSnapshot,
     recentHR map[uuid.UUID]*model.HealthExerciseSession,
     reminders []string,
+    recentExerciseIDs []string,
 ) -%}
 Generate a {%d duration %}-minute training.
 {% if skipWarmupCooldown %}
@@ -115,7 +116,8 @@ Steps yesterday: {%s formatNumber(healthSnapshot.Steps) %} (baseline: {%s format
 
 {% endif %}
 [WORK] {%d len(workExercises) %} options
-{% for _, exercise := range workExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}{% if hasLoadableEquipment(exercise) %}[W]{% endif %}, {% endfor %}
+{% code recentSet := make(map[string]bool, len(recentExerciseIDs)); for _, id := range recentExerciseIDs { recentSet[id] = true } %}
+{% for _, exercise := range workExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}{% if hasLoadableEquipment(exercise) %}[W]{% endif %}{% if recentSet[exercise.ID] %}[recent]{% endif %}, {% endfor %}
 
 {% if !skipWarmupCooldown %}
 [COOLDOWN] {%d len(cooldownExercises) %} options
@@ -134,8 +136,9 @@ Output language: {% if len(profiles) > 0 && len(profiles[0].Language) > 0 %}{%s 
   recency bias — LLMs attend strongest at beginning/end, weakest in the middle.
   see: https://arxiv.org/html/2511.12869v1
 {%endcomment%}
-{% if len(reminders) > 0 %}
+{% if len(reminders) > 0 || len(recentExerciseIDs) > 0 %}
 [REMINDERS]
 {% for _, r := range reminders %}- {%s r %}
-{% endfor %}{% endif %}
+{% endfor %}{% if len(recentExerciseIDs) > 0 %}- Exercises marked [recent] were used in the last 14 days — prefer alternatives for those muscle groups.
+{% endif %}{% endif %}
 {% endfunc %}

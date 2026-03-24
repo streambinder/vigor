@@ -46,6 +46,7 @@ func StreamGenTraining(qw422016 *qt422016.Writer,
 	healthSnapshot *model.HealthSnapshot,
 	recentHR map[uuid.UUID]*model.HealthExerciseSession,
 	reminders []string,
+	recentExerciseIDs []string,
 ) {
 	qw422016.N().S(`Generate a `)
 	qw422016.N().D(duration)
@@ -450,6 +451,13 @@ Steps yesterday: `)
 	qw422016.N().D(len(workExercises))
 	qw422016.N().S(` options
 `)
+	recentSet := make(map[string]bool, len(recentExerciseIDs))
+	for _, id := range recentExerciseIDs {
+		recentSet[id] = true
+	}
+
+	qw422016.N().S(`
+`)
 	for _, exercise := range workExercises {
 		qw422016.E().S(exercise.ID)
 		if len(exercise.Muscles) > 0 {
@@ -459,6 +467,9 @@ Steps yesterday: `)
 		}
 		if hasLoadableEquipment(exercise) {
 			qw422016.N().S(`[W]`)
+		}
+		if recentSet[exercise.ID] {
+			qw422016.N().S(`[recent]`)
 		}
 		qw422016.N().S(`, `)
 	}
@@ -513,7 +524,7 @@ Output language: `)
 `)
 	qw422016.N().S(`
 `)
-	if len(reminders) > 0 {
+	if len(reminders) > 0 || len(recentExerciseIDs) > 0 {
 		qw422016.N().S(`
 [REMINDERS]
 `)
@@ -521,6 +532,10 @@ Output language: `)
 			qw422016.N().S(`- `)
 			qw422016.E().S(r)
 			qw422016.N().S(`
+`)
+		}
+		if len(recentExerciseIDs) > 0 {
+			qw422016.N().S(`- Exercises marked [recent] were used in the last 14 days — prefer alternatives for those muscle groups.
 `)
 		}
 	}
@@ -550,9 +565,10 @@ func WriteGenTraining(qq422016 qtio422016.Writer,
 	healthSnapshot *model.HealthSnapshot,
 	recentHR map[uuid.UUID]*model.HealthExerciseSession,
 	reminders []string,
+	recentExerciseIDs []string,
 ) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamGenTraining(qw422016, profiles, goals, workExercises, warmupExercises, cooldownExercises, equipment, modifiers, modifierVariants, favoriteExercises, favoriteEquipment, methodology, userPrompt, duration, recentTrainings, recentFeedback, facts, skipWarmupCooldown, calibrationGaps, healthSnapshot, recentHR, reminders)
+	StreamGenTraining(qw422016, profiles, goals, workExercises, warmupExercises, cooldownExercises, equipment, modifiers, modifierVariants, favoriteExercises, favoriteEquipment, methodology, userPrompt, duration, recentTrainings, recentFeedback, facts, skipWarmupCooldown, calibrationGaps, healthSnapshot, recentHR, reminders, recentExerciseIDs)
 	qt422016.ReleaseWriter(qw422016)
 }
 
@@ -578,9 +594,10 @@ func GenTraining(
 	healthSnapshot *model.HealthSnapshot,
 	recentHR map[uuid.UUID]*model.HealthExerciseSession,
 	reminders []string,
+	recentExerciseIDs []string,
 ) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteGenTraining(qb422016, profiles, goals, workExercises, warmupExercises, cooldownExercises, equipment, modifiers, modifierVariants, favoriteExercises, favoriteEquipment, methodology, userPrompt, duration, recentTrainings, recentFeedback, facts, skipWarmupCooldown, calibrationGaps, healthSnapshot, recentHR, reminders)
+	WriteGenTraining(qb422016, profiles, goals, workExercises, warmupExercises, cooldownExercises, equipment, modifiers, modifierVariants, favoriteExercises, favoriteEquipment, methodology, userPrompt, duration, recentTrainings, recentFeedback, facts, skipWarmupCooldown, calibrationGaps, healthSnapshot, recentHR, reminders, recentExerciseIDs)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

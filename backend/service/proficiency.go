@@ -18,16 +18,20 @@ const (
 func GetProficiencies(userID uuid.UUID) (map[string]float64, error) {
 	var records []struct {
 		MovementFamily string
-		Value          float64
-		CreatedAt      time.Time
+		MaxValue       float64
+		LastSeenAt     time.Time
 	}
 
-	// get max value per movement family with latest timestamp for that max
+	// decay from most-recent demonstration, not from when the peak was achieved.
+	// a user who keeps training core at score 40 (below their peak of 60) should
+	// not have their peak treated as 60+ days stale just because they never re-hit it.
 	err := database.DB.Raw(`
-		SELECT DISTINCT ON (movement_family) movement_family, value, created_at
+		SELECT movement_family,
+		       MAX(value)      AS max_value,
+		       MAX(created_at) AS last_seen_at
 		FROM proficiencies
 		WHERE user_id = ?
-		ORDER BY movement_family, value DESC, created_at DESC
+		GROUP BY movement_family
 	`, userID).Scan(&records).Error
 	if err != nil {
 		return nil, err
@@ -36,7 +40,7 @@ func GetProficiencies(userID uuid.UUID) (map[string]float64, error) {
 	now := time.Now()
 	result := make(map[string]float64)
 	for _, r := range records {
-		result[r.MovementFamily] = DecayProficiency(r.Value, r.CreatedAt, now)
+		result[r.MovementFamily] = DecayProficiency(r.MaxValue, r.LastSeenAt, now)
 	}
 	return result, nil
 }
@@ -203,24 +207,8 @@ func IsPositiveFeedback(feedback string) bool {
 
 // RecordProficiencies writes proficiency records for a user based on training activities.
 func RecordProficiencies(userID, trainingID uuid.UUID, activities []*model.Activity, activityFeedback map[string]string, exerciseMap map[string]*model.Exercise, modifierMap map[string]*model.Modifier) error {
-	// get current max per movement family for this user
-	currentMax := make(map[string]float64)
-	var existing []struct {
-		MovementFamily string
-		Value          float64
-	}
-	database.DB.Raw(`
-		SELECT DISTINCT ON (movement_family) movement_family, value
-		FROM proficiencies
-		WHERE user_id = ?
-		ORDER BY movement_family, value DESC
-	`, userID).Scan(&existing)
-	for _, e := range existing {
-		currentMax[e.MovementFamily] = e.Value
-	}
-
-	// process activities
-	toInsert := make([]model.Proficiency, 0)
+	// process activities — collect max effective score per family within this training
+	familyMax := make(map[string]float64)
 	for _, activity := range activities {
 		feedback := activityFeedback[activity.ExerciseID]
 		if !IsPositiveFeedback(feedback) {
@@ -239,19 +227,23 @@ func RecordProficiencies(userID, trainingID uuid.UUID, activities []*model.Activ
 		impact := ModifierImpact(activity.Modifiers, activity.WeightKg, modifierMap)
 		for family, baseOrder := range progressions {
 			effective := baseOrder + impact
-			if effective >= currentMax[family] {
-				toInsert = append(toInsert, model.Proficiency{
-					UserID:         userID,
-					TrainingID:     trainingID,
-					MovementFamily: family,
-					Value:          effective,
-				})
-				// update local max for subsequent activities in same call
-				if effective > currentMax[family] {
-					currentMax[family] = effective
-				}
+			if effective > familyMax[family] {
+				familyMax[family] = effective
 			}
 		}
+	}
+
+	// write one record per family: always write to update recency, even if below all-time peak.
+	// GetProficiencies uses MAX(value) for the score and MAX(created_at) for decay — so writing
+	// a below-peak row is harmless for the score but correctly refreshes the decay clock.
+	toInsert := make([]model.Proficiency, 0, len(familyMax))
+	for family, effective := range familyMax {
+		toInsert = append(toInsert, model.Proficiency{
+			UserID:         userID,
+			TrainingID:     trainingID,
+			MovementFamily: family,
+			Value:          effective,
+		})
 	}
 
 	if len(toInsert) == 0 {

@@ -78,6 +78,7 @@ type TrainingGenerationRequest struct {
 	LastReasoningModel   string
 	LastStructuringModel string
 	CorrectionHint       string
+	RecentExerciseIDs    []string
 }
 
 // LLM defines the interface for language model providers.
@@ -154,6 +155,7 @@ func GenTraining(req TrainingGenerationRequest) (*model.Training, model.Training
 		req.HealthSnapshot,
 		req.RecentHR,
 		req.Reminders,
+		req.RecentExerciseIDs,
 	)
 	if req.CorrectionHint != "" {
 		reasoningUserMessage += "\n\nCORRECTION (previous attempt failed server-side validation): " + req.CorrectionHint + ". Fix this issue and regenerate."
