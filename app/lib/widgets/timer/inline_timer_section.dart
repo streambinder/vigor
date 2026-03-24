@@ -228,6 +228,7 @@ class InlineTimerSection extends StatelessWidget {
                 _buildDataRow(context, controller, interval, isRest),
                 // exercise/rest label right above controls
                 _buildLabel(interval, isRest, l10n),
+                _buildNextChip(controller),
               ],
             ),
           ),
@@ -288,6 +289,32 @@ class InlineTimerSection extends StatelessWidget {
         }
         return const SizedBox.shrink();
     }
+  }
+
+  /// pill chip shown below the exercise/rest label with the next interval name
+  Widget _buildNextChip(TimerController controller) {
+    final upcoming = controller.upcomingIntervals;
+    if (upcoming.isEmpty) return const SizedBox.shrink();
+    final next = upcoming.first;
+    final isNextRest = next.type == IntervalType.rest;
+    final name = isNextRest ? 'REST' : (next.activityName?.toUpperCase() ?? '');
+    final durationHint = next.duration > 0 && !next.isRepBased ? ' · ${_formatTime(next.duration)}' : '';
+    return Padding(
+      padding: const EdgeInsets.only(top: VigorSpacing.xs),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: 3),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.35),
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: Text(
+          '→  $name$durationHint',
+          style: VigorTypography.label.copyWith(color: Colors.white70, fontSize: 11),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
   }
 
   Widget _buildCompletionPhase(BuildContext context) {
