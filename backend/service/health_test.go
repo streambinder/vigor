@@ -3,6 +3,11 @@ package service
 import (
 	"testing"
 	"time"
+
+	"github.com/glebarez/sqlite"
+	"github.com/google/uuid"
+	"github.com/streambinder/vigor/model"
+	"gorm.io/gorm"
 )
 
 func TestParseTimezone(t *testing.T) {
@@ -104,5 +109,89 @@ func TestExplicitUTCStorage(t *testing.T) {
 	_, offset := now.Zone()
 	if offset != 0 {
 		t.Errorf("time.Now().UTC() offset = %d seconds, want 0", offset)
+	}
+}
+
+func TestEnrichTrainings_LinksPartnerTraining(t *testing.T) {
+	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("open sqlite db: %v", err)
+	}
+
+	for _, stmt := range []string{
+		`CREATE TABLE trainings (
+			id TEXT PRIMARY KEY,
+			user_id TEXT NOT NULL,
+			duration INTEGER NOT NULL,
+			completed_in INTEGER,
+			completed_at DATETIME
+		)`,
+		`CREATE TABLE partners (
+			training_id TEXT NOT NULL,
+			user_id TEXT NOT NULL
+		)`,
+		`CREATE TABLE health_exercise_sessions (
+			id TEXT PRIMARY KEY,
+			user_id TEXT NOT NULL,
+			training_id TEXT NULL,
+			started_at DATETIME NOT NULL,
+			ended_at DATETIME NOT NULL
+		)`,
+	} {
+		if err := db.Exec(stmt).Error; err != nil {
+			t.Fatalf("create schema: %v", err)
+		}
+	}
+
+	loc, err := time.LoadLocation("Europe/Rome")
+	if err != nil {
+		t.Fatalf("load location: %v", err)
+	}
+
+	ownerID := uuid.New()
+	partnerID := uuid.New()
+	trainingID := uuid.New()
+	sessionID := uuid.New()
+
+	day := time.Now().In(loc).AddDate(0, 0, -1)
+	completedAt := time.Date(day.Year(), day.Month(), day.Day(), 11, 48, 55, 0, loc).UTC()
+	startedAt := time.Date(day.Year(), day.Month(), day.Day(), 20, 24, 27, 0, loc).UTC()
+	endedAt := time.Date(day.Year(), day.Month(), day.Day(), 20, 48, 33, 0, loc).UTC()
+
+	if err := db.Exec(
+		`INSERT INTO trainings (id, user_id, duration, completed_at) VALUES (?, ?, ?, ?)`,
+		trainingID.String(), ownerID.String(), 1380, completedAt,
+	).Error; err != nil {
+		t.Fatalf("create training: %v", err)
+	}
+
+	if err := db.Exec(
+		`INSERT INTO partners (training_id, user_id) VALUES (?, ?)`,
+		trainingID.String(), partnerID.String(),
+	).Error; err != nil {
+		t.Fatalf("create partner link: %v", err)
+	}
+
+	if err := db.Exec(
+		`INSERT INTO health_exercise_sessions (id, user_id, started_at, ended_at) VALUES (?, ?, ?, ?)`,
+		sessionID.String(), partnerID.String(), startedAt, endedAt,
+	).Error; err != nil {
+		t.Fatalf("create health session: %v", err)
+	}
+
+	if err := enrichTrainings(db, partnerID, loc); err != nil {
+		t.Fatalf("enrich trainings: %v", err)
+	}
+
+	var session model.HealthExerciseSession
+	if err := db.First(&session, "id = ?", sessionID).Error; err != nil {
+		t.Fatalf("reload session: %v", err)
+	}
+
+	if session.TrainingID == nil {
+		t.Fatal("expected partner session to be linked to training")
+	}
+	if *session.TrainingID != trainingID {
+		t.Fatalf("linked training_id = %s, want %s", session.TrainingID, trainingID)
 	}
 }

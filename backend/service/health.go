@@ -451,12 +451,14 @@ func enrichTrainings(tx *gorm.DB, userID uuid.UUID, loc *time.Location) error {
 		return err
 	}
 
-	// load completed trainings not yet linked to any session
+	// load completed trainings accessible to the user and not yet linked to any
+	// session owned by that user.
 	var trainings []model.Training
 	if err := tx.Where(
-		`user_id = ? AND completed_at IS NOT NULL AND completed_at > ?
+		`(user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?))
+		AND completed_at IS NOT NULL AND completed_at > ?
 		AND id NOT IN (SELECT training_id FROM health_exercise_sessions WHERE training_id IS NOT NULL AND user_id = ?)`,
-		userID, thirtyDaysAgo, userID,
+		userID, userID, thirtyDaysAgo, userID,
 	).Find(&trainings).Error; err != nil {
 		return err
 	}
