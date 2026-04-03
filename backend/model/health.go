@@ -42,6 +42,24 @@ type HealthExerciseSession struct {
 	SyncedAt               time.Time      `gorm:"type:timestamptz;default:now()" json:"synced_at"`
 }
 
+type HealthWeight struct {
+	ID         uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	UserID     uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_health_weight_user_record;index:idx_health_weight_user_measured_at" json:"user_id"`
+	User       User      `gorm:"constraint:OnDelete:CASCADE;" json:"-"`
+	Weight     float64   `gorm:"not null" json:"weight"`
+	Source     string    `gorm:"type:varchar(32);not null" json:"source"`
+	SourceApp  string    `gorm:"type:varchar(255)" json:"source_app"`
+	MeasuredAt time.Time `gorm:"type:timestamptz;not null;index:idx_health_weight_user_measured_at" json:"measured_at"`
+	HCRecordID *string   `gorm:"column:hc_record_id;type:varchar(255);uniqueIndex:idx_health_weight_user_record" json:"hc_record_id"`
+	SyncedAt   time.Time `gorm:"type:timestamptz;default:now()" json:"synced_at"`
+	CreatedAt  time.Time `gorm:"type:timestamptz;default:now()" json:"created_at"`
+	UpdatedAt  time.Time `gorm:"type:timestamptz;default:now()" json:"updated_at"`
+}
+
+func (HealthWeight) TableName() string {
+	return "health_weight"
+}
+
 // codegen:skip
 type HealthSnapshot struct {
 	SleepHours      float64 `json:"sleep_hours"`
@@ -110,6 +128,7 @@ type HealthDailyResponse struct {
 type HealthSyncRequest struct {
 	Metrics          []HealthSyncMetric   `json:"metrics"`
 	Sessions         []HealthSyncSession  `json:"sessions"`
+	Weights          []HealthSyncWeight   `json:"weights"`
 	HRSamples        []HealthSyncHRSample `json:"hr_samples"`
 	DeletedRecordIDs []string             `json:"deleted_record_ids"`
 }
@@ -133,6 +152,13 @@ type HealthSyncSession struct {
 	StartedAt    int64    `json:"started_at"` // unix ms
 	EndedAt      int64    `json:"ended_at"`   // unix ms
 	Calories     *float64 `json:"calories"`
+}
+
+type HealthSyncWeight struct {
+	HCRecordID string  `json:"hc_record_id"`
+	SourceApp  string  `json:"source_app"`
+	MeasuredAt int64   `json:"measured_at"` // unix ms
+	Weight     float64 `json:"weight"`
 }
 
 type HealthSyncHRSample struct {

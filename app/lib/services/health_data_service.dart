@@ -18,12 +18,14 @@ class HealthSyncResult {
   final int totalSessions;
   final DateTime syncedAt;
   final bool wasForced;
+
   /// per-source-app breakdown of device data: source name -> (metrics, sessions)
   final Map<String, ({int metrics, int sessions})> deviceSources;
   final DateTime? metricsFrom;
   final DateTime? metricsTo;
   final DateTime? sessionsFrom;
   final DateTime? sessionsTo;
+
   /// non-null when device data was read but upload to backend failed
   final String? syncError;
 
@@ -42,10 +44,16 @@ class HealthSyncResult {
     this.syncError,
   });
 
-  int get deviceMetrics => deviceSources.values.fold(0, (sum, s) => sum + s.metrics);
-  int get deviceSessions => deviceSources.values.fold(0, (sum, s) => sum + s.sessions);
+  int get deviceMetrics =>
+      deviceSources.values.fold(0, (sum, s) => sum + s.metrics);
+  int get deviceSessions =>
+      deviceSources.values.fold(0, (sum, s) => sum + s.sessions);
 
-  factory HealthSyncResult.fromJson(Map<String, dynamic> json, {bool wasForced = false, Map<String, ({int metrics, int sessions})> deviceSources = const {}}) => HealthSyncResult(
+  factory HealthSyncResult.fromJson(
+    Map<String, dynamic> json, {
+    bool wasForced = false,
+    Map<String, ({int metrics, int sessions})> deviceSources = const {},
+  }) => HealthSyncResult(
     metricsSynced: json['metrics_synced'] ?? 0,
     sessionsSynced: json['sessions_synced'] ?? 0,
     totalMetrics: json['total_metrics'] ?? 0,
@@ -69,24 +77,33 @@ class HealthSyncResult {
 class HealthSyncPayload {
   final List<Map<String, dynamic>> metrics;
   final List<Map<String, dynamic>> sessions;
+  final List<Map<String, dynamic>> weights;
   final List<Map<String, dynamic>> hrSamples;
   final List<String> deletedRecordIds;
+
   /// per-source-app breakdown: source name -> (metrics, sessions) counts
   final Map<String, ({int metrics, int sessions})> sourceApps;
 
   const HealthSyncPayload({
     required this.metrics,
     required this.sessions,
+    required this.weights,
     required this.hrSamples,
     this.deletedRecordIds = const [],
     this.sourceApps = const {},
   });
 
-  bool get isEmpty => metrics.isEmpty && sessions.isEmpty && hrSamples.isEmpty && deletedRecordIds.isEmpty;
+  bool get isEmpty =>
+      metrics.isEmpty &&
+      sessions.isEmpty &&
+      weights.isEmpty &&
+      hrSamples.isEmpty &&
+      deletedRecordIds.isEmpty;
 
   Map<String, dynamic> toJson() => {
     'metrics': metrics,
     'sessions': sessions,
+    'weights': weights,
     'hr_samples': hrSamples,
     if (deletedRecordIds.isNotEmpty) 'deleted_record_ids': deletedRecordIds,
   };
@@ -136,6 +153,7 @@ abstract class HealthDataService {
   Future<bool> checkPermissions();
   Future<void> revokePermissions();
   Future<HealthSyncPayload> readNewData();
+
   /// full 30-day read ignoring incremental tokens — used by manual sync
   Future<HealthSyncPayload> readAllData();
   ValueNotifier<bool> get syncing;
@@ -165,7 +183,9 @@ abstract class HealthDataService {
       AppLogger.info('[HealthDataService] creating IOSHealthDataService');
       return IOSHealthDataService(prefs: prefs, storage: storage);
     }
-    AppLogger.warning('[HealthDataService] unsupported platform, returning null');
+    AppLogger.warning(
+      '[HealthDataService] unsupported platform, returning null',
+    );
     return null;
   }
 }
@@ -208,10 +228,14 @@ mixin HealthDataServiceMixin on HealthDataService {
     final totalMetrics = prefs.hcTotalMetrics;
     final totalSessions = prefs.hcTotalSessions;
     if (totalMetrics > 0 || totalSessions > 0) {
-      AppLogger.debug('[HealthDataService] restored persisted stats: $totalMetrics metrics, $totalSessions sessions');
+      AppLogger.debug(
+        '[HealthDataService] restored persisted stats: $totalMetrics metrics, $totalSessions sessions',
+      );
       _lastSyncResult.value = HealthSyncResult(
-        metricsSynced: 0, sessionsSynced: 0,
-        totalMetrics: totalMetrics, totalSessions: totalSessions,
+        metricsSynced: 0,
+        sessionsSynced: 0,
+        totalMetrics: totalMetrics,
+        totalSessions: totalSessions,
         syncedAt: DateTime.fromMillisecondsSinceEpoch(prefs.hcLastSyncMs ?? 0),
         wasForced: prefs.hcWasForced,
         deviceSources: prefs.hcDeviceSources,
@@ -238,22 +262,33 @@ mixin HealthDataServiceMixin on HealthDataService {
   /// fetch stats from backend without syncing data — used when throttled
   Future<void> _fetchStatsOnly() async {
     try {
-      final response = await apiService.get('/health/stats').timeout(_syncTimeout);
+      final response = await apiService
+          .get('/health/stats')
+          .timeout(_syncTimeout);
       if (response.isSuccess && response.data != null) {
-        AppLogger.debug('[HealthDataService] stats fetched: ${response.data!['total_metrics']} metrics, ${response.data!['total_sessions']} sessions');
+        AppLogger.debug(
+          '[HealthDataService] stats fetched: ${response.data!['total_metrics']} metrics, ${response.data!['total_sessions']} sessions',
+        );
         // stats-only: no device read happened, preserve previous device counts
         final prev = _lastSyncResult.value;
         final result = HealthSyncResult(
-          metricsSynced: 0, sessionsSynced: 0,
+          metricsSynced: 0,
+          sessionsSynced: 0,
           totalMetrics: response.data!['total_metrics'] ?? 0,
           totalSessions: response.data!['total_sessions'] ?? 0,
           syncedAt: DateTime.now(),
           wasForced: prev?.wasForced ?? false,
           deviceSources: prev?.deviceSources ?? const {},
-          metricsFrom: HealthSyncResult._parseDate(response.data!['metrics_from']),
+          metricsFrom: HealthSyncResult._parseDate(
+            response.data!['metrics_from'],
+          ),
           metricsTo: HealthSyncResult._parseDate(response.data!['metrics_to']),
-          sessionsFrom: HealthSyncResult._parseDate(response.data!['sessions_from']),
-          sessionsTo: HealthSyncResult._parseDate(response.data!['sessions_to']),
+          sessionsFrom: HealthSyncResult._parseDate(
+            response.data!['sessions_from'],
+          ),
+          sessionsTo: HealthSyncResult._parseDate(
+            response.data!['sessions_to'],
+          ),
         );
         _lastSyncResult.value = result;
         await _persistStats(result);
@@ -292,10 +327,14 @@ mixin HealthDataServiceMixin on HealthDataService {
       // on force sync, re-request permissions to ensure all types are authorized
       // (idempotent — returns immediately if already granted)
       if (force) {
-        AppLogger.debug('[HealthDataService] force sync — re-requesting permissions');
+        AppLogger.debug(
+          '[HealthDataService] force sync — re-requesting permissions',
+        );
         final granted = await requestPermissions();
         if (!granted) {
-          AppLogger.info('[HealthDataService] permissions denied during force sync');
+          AppLogger.info(
+            '[HealthDataService] permissions denied during force sync',
+          );
           await prefs.setHcConnected(false);
           return false;
         }
@@ -304,9 +343,13 @@ mixin HealthDataServiceMixin on HealthDataService {
 
       // server-driven delta sync: ask backend what dates it has, then only sync missing data
       // force sync still does full 30 days to handle edge cases
-      AppLogger.debug('[HealthDataService] reading health data (${force ? 'full 30-day' : 'server-driven delta'})');
+      AppLogger.debug(
+        '[HealthDataService] reading health data (${force ? 'full 30-day' : 'server-driven delta'})',
+      );
       final payload = force ? await readAllData() : await _readDeltaSync();
-      AppLogger.info('[HealthDataService] read complete: ${payload.metrics.length} metrics, ${payload.sessions.length} sessions, ${payload.hrSamples.length} HR samples, ${payload.deletedRecordIds.length} deletions');
+      AppLogger.info(
+        '[HealthDataService] read complete: ${payload.metrics.length} metrics, ${payload.sessions.length} sessions, ${payload.weights.length} weights, ${payload.hrSamples.length} HR samples, ${payload.deletedRecordIds.length} deletions',
+      );
 
       if (payload.isEmpty) {
         AppLogger.debug('[HealthDataService] no new data to sync');
@@ -318,7 +361,9 @@ mixin HealthDataServiceMixin on HealthDataService {
 
       // split into per-date batches to stay under the 4MB body limit
       final batches = _splitByDate(payload);
-      AppLogger.info('[HealthDataService] split into ${batches.length} batches');
+      AppLogger.info(
+        '[HealthDataService] split into ${batches.length} batches',
+      );
 
       int totalMetricsSynced = 0;
       int totalSessionsSynced = 0;
@@ -342,15 +387,20 @@ mixin HealthDataServiceMixin on HealthDataService {
           attempts++;
           if (attempts < maxAttempts) {
             final backoffMs = 2000 * attempts; // 2s, 4s
-            AppLogger.warning('[HealthDataService] batch ${i + 1}/${batches.length} rate limited, retrying in ${backoffMs}ms (attempt $attempts/$maxAttempts)');
+            AppLogger.warning(
+              '[HealthDataService] batch ${i + 1}/${batches.length} rate limited, retrying in ${backoffMs}ms (attempt $attempts/$maxAttempts)',
+            );
             await Future.delayed(Duration(milliseconds: backoffMs));
           }
         }
 
         if (response == null || !response.isSuccess) {
-          AppLogger.error('[HealthDataService] sync POST failed for batch ${i + 1}/${batches.length}: ${response?.error} (status=${response?.statusCode})');
+          AppLogger.error(
+            '[HealthDataService] sync POST failed for batch ${i + 1}/${batches.length}: ${response?.error} (status=${response?.statusCode})',
+          );
           _lastSyncResult.value = HealthSyncResult(
-            metricsSynced: 0, sessionsSynced: 0,
+            metricsSynced: 0,
+            sessionsSynced: 0,
             totalMetrics: _lastSyncResult.value?.totalMetrics ?? 0,
             totalSessions: _lastSyncResult.value?.totalSessions ?? 0,
             syncedAt: DateTime.now(),
@@ -366,10 +416,16 @@ mixin HealthDataServiceMixin on HealthDataService {
         lastResponseData = response.data;
       }
 
-      AppLogger.info('[HealthDataService] all batches synced ($totalMetricsSynced metrics, $totalSessionsSynced sessions)');
+      AppLogger.info(
+        '[HealthDataService] all batches synced ($totalMetricsSynced metrics, $totalSessionsSynced sessions)',
+      );
       if (lastResponseData != null) {
         final result = HealthSyncResult.fromJson(
-          {...lastResponseData, 'metrics_synced': totalMetricsSynced, 'sessions_synced': totalSessionsSynced},
+          {
+            ...lastResponseData,
+            'metrics_synced': totalMetricsSynced,
+            'sessions_synced': totalSessionsSynced,
+          },
           wasForced: force,
           deviceSources: payload.sourceApps,
         );
@@ -400,16 +456,31 @@ mixin HealthDataServiceMixin on HealthDataService {
 
     final sessionsByDate = <String, List<Map<String, dynamic>>>{};
     for (final s in payload.sessions) {
-      sessionsByDate.putIfAbsent(_dateKeyFromMs(s['started_at'] as int), () => []).add(s);
+      sessionsByDate
+          .putIfAbsent(_dateKeyFromMs(s['started_at'] as int), () => [])
+          .add(s);
+    }
+
+    final weightsByDate = <String, List<Map<String, dynamic>>>{};
+    for (final w in payload.weights) {
+      weightsByDate
+          .putIfAbsent(_dateKeyFromMs(w['measured_at'] as int), () => [])
+          .add(w);
     }
 
     final hrByDate = <String, List<Map<String, dynamic>>>{};
     for (final hr in payload.hrSamples) {
-      hrByDate.putIfAbsent(_dateKeyFromMs(hr['timestamp'] as int), () => []).add(hr);
+      hrByDate
+          .putIfAbsent(_dateKeyFromMs(hr['timestamp'] as int), () => [])
+          .add(hr);
     }
 
-    final sortedDates = {...metricsByDate.keys, ...sessionsByDate.keys, ...hrByDate.keys}.toList()
-      ..sort((a, b) => b.compareTo(a)); // descending: newest first
+    final sortedDates = {
+      ...metricsByDate.keys,
+      ...sessionsByDate.keys,
+      ...weightsByDate.keys,
+      ...hrByDate.keys,
+    }.toList()..sort((a, b) => b.compareTo(a)); // descending: newest first
     if (sortedDates.length <= 1) return [payload];
 
     return [
@@ -417,6 +488,7 @@ mixin HealthDataServiceMixin on HealthDataService {
         HealthSyncPayload(
           metrics: metricsByDate[sortedDates[i]] ?? [],
           sessions: sessionsByDate[sortedDates[i]] ?? [],
+          weights: weightsByDate[sortedDates[i]] ?? [],
           hrSamples: hrByDate[sortedDates[i]] ?? [],
           deletedRecordIds: i == 0 ? payload.deletedRecordIds : const [],
         ),
@@ -433,18 +505,27 @@ mixin HealthDataServiceMixin on HealthDataService {
   Future<HealthSyncPayload> _readDeltaSync() async {
     try {
       // ask backend what dates it has
-      final response = await apiService.get('/health/manifest').timeout(_syncTimeout);
+      final response = await apiService
+          .get('/health/manifest')
+          .timeout(_syncTimeout);
       if (!response.isSuccess || response.data == null) {
-        AppLogger.warning('[HealthDataService] failed to get manifest, falling back to 7-day sync');
+        AppLogger.warning(
+          '[HealthDataService] failed to get manifest, falling back to 7-day sync',
+        );
         return readNewData();
       }
 
-      final serverDates = Set<String>.from((response.data!['dates_with_data'] as List?)?.cast<String>() ?? []);
-      AppLogger.debug('[HealthDataService] server has ${serverDates.length} dates with data');
+      final serverDates = Set<String>.from(
+        (response.data!['dates_with_data'] as List?)?.cast<String>() ?? [],
+      );
+      AppLogger.debug(
+        '[HealthDataService] server has ${serverDates.length} dates with data',
+      );
 
       // read last 7 days of local data (efficient, recent)
       final now = DateTime.now();
-      final allPayload = await readNewData(); // delegates to platform's 7-day read
+      final allPayload =
+          await readNewData(); // delegates to platform's 7-day read
 
       if (allPayload.isEmpty) return allPayload;
 
@@ -453,7 +534,9 @@ mixin HealthDataServiceMixin on HealthDataService {
       final recentDates = <String>{};
       for (int i = 0; i < 3; i++) {
         final date = now.subtract(Duration(days: i));
-        recentDates.add('${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}');
+        recentDates.add(
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
+        );
       }
 
       final filteredMetrics = allPayload.metrics.where((m) {
@@ -466,16 +549,24 @@ mixin HealthDataServiceMixin on HealthDataService {
         return !serverDates.contains(date) || recentDates.contains(date);
       }).toList();
 
+      final filteredWeights = allPayload.weights.where((w) {
+        final date = _dateKeyFromMs(w['measured_at'] as int);
+        return !serverDates.contains(date) || recentDates.contains(date);
+      }).toList();
+
       final filteredHR = allPayload.hrSamples.where((hr) {
         final date = _dateKeyFromMs(hr['timestamp'] as int);
         return !serverDates.contains(date) || recentDates.contains(date);
       }).toList();
 
-      AppLogger.info('[HealthDataService] delta sync: ${filteredMetrics.length} metrics, ${filteredSessions.length} sessions, ${filteredHR.length} HR samples (filtered from ${allPayload.metrics.length}/${allPayload.sessions.length}/${allPayload.hrSamples.length})');
+      AppLogger.info(
+        '[HealthDataService] delta sync: ${filteredMetrics.length} metrics, ${filteredSessions.length} sessions, ${filteredWeights.length} weights, ${filteredHR.length} HR samples (filtered from ${allPayload.metrics.length}/${allPayload.sessions.length}/${allPayload.weights.length}/${allPayload.hrSamples.length})',
+      );
 
       return HealthSyncPayload(
         metrics: filteredMetrics,
         sessions: filteredSessions,
+        weights: filteredWeights,
         hrSamples: filteredHR,
         deletedRecordIds: allPayload.deletedRecordIds,
       );
@@ -507,9 +598,12 @@ class _MetricInterval {
 /// so non-overlapping intervals from different sources sum correctly while overlapping
 /// intervals keep only the higher-rate source.
 HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
-  AppLogger.debug('[HealthDataService] buildSyncPayload: ${dataPoints.length} data points');
+  AppLogger.debug(
+    '[HealthDataService] buildSyncPayload: ${dataPoints.length} data points',
+  );
   final dailyMetrics = <String, Map<String, dynamic>>{};
   final sessions = <Map<String, dynamic>>[];
+  final weights = <Map<String, dynamic>>[];
   final hrSamples = <Map<String, dynamic>>[];
   // track per-source-app data point counts (metrics vs sessions)
   final sourceMetricCounts = <String, int>{};
@@ -534,9 +628,7 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
     HealthDataType.SLEEP_ASLEEP,
   };
 
-  const sleepSessionTypes = {
-    HealthDataType.SLEEP_SESSION,
-  };
+  const sleepSessionTypes = {HealthDataType.SLEEP_SESSION};
 
   // sort by dateTo so last-write-wins for non-additive metrics (RHR, HRV)
   // picks the most recent reading deterministically
@@ -545,16 +637,20 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
 
   for (final point in sortedPoints) {
     if (point.type == HealthDataType.WORKOUT) {
-      final workoutValue = point.value is WorkoutHealthValue ? point.value as WorkoutHealthValue : null;
+      final workoutValue = point.value is WorkoutHealthValue
+          ? point.value as WorkoutHealthValue
+          : null;
       sessions.add({
         'hc_record_id': point.uuid,
         'source_app': point.sourceName,
         'exercise_type': workoutValue?.workoutActivityType.name ?? 'other',
         'started_at': point.dateFrom.millisecondsSinceEpoch,
         'ended_at': point.dateTo.millisecondsSinceEpoch,
-        if (workoutValue?.totalEnergyBurned != null) 'calories': workoutValue!.totalEnergyBurned!.toDouble(),
+        if (workoutValue?.totalEnergyBurned != null)
+          'calories': workoutValue!.totalEnergyBurned!.toDouble(),
       });
-      sourceSessionCounts[point.sourceName] = (sourceSessionCounts[point.sourceName] ?? 0) + 1;
+      sourceSessionCounts[point.sourceName] =
+          (sourceSessionCounts[point.sourceName] ?? 0) + 1;
     } else if (point.type == HealthDataType.HEART_RATE) {
       final bpm = _numericValue(point);
       if (bpm > 0) {
@@ -563,11 +659,24 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
           'bpm': bpm.round(),
         });
       }
+    } else if (point.type == HealthDataType.WEIGHT) {
+      final value = _numericValue(point);
+      if (value > 0) {
+        weights.add({
+          'hc_record_id': point.uuid,
+          'source_app': point.sourceName,
+          'measured_at': point.dateTo.millisecondsSinceEpoch,
+          'weight': value,
+        });
+        sourceMetricCounts[point.sourceName] =
+            (sourceMetricCounts[point.sourceName] ?? 0) + 1;
+      }
     } else {
       // attribute sleep to wake-up date (dateTo) so users see sleep on the day they wake up
       final dateKey = _dateKey(point.dateTo);
       dailyMetrics.putIfAbsent(dateKey, () => {'date': dateKey});
-      sourceMetricCounts[point.sourceName] = (sourceMetricCounts[point.sourceName] ?? 0) + 1;
+      sourceMetricCounts[point.sourceName] =
+          (sourceMetricCounts[point.sourceName] ?? 0) + 1;
 
       if (sleepSessionTypes.contains(point.type)) {
         // SLEEP_SESSION is the authoritative total - use longest session (workaround for devices that report multiple sessions)
@@ -576,7 +685,9 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
         final existing = bucket['sleep_session_hours'] as double? ?? 0.0;
         if (hours > existing) {
           bucket['sleep_session_hours'] = hours;
-          AppLogger.info('[HealthDataService] SLEEP_SESSION: ${hours.toStringAsFixed(2)}h from ${point.sourceName} for $dateKey (replaced ${existing.toStringAsFixed(2)}h)');
+          AppLogger.info(
+            '[HealthDataService] SLEEP_SESSION: ${hours.toStringAsFixed(2)}h from ${point.sourceName} for $dateKey (replaced ${existing.toStringAsFixed(2)}h)',
+          );
         }
       } else if (additiveTypes.contains(point.type)) {
         double value;
@@ -588,7 +699,14 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
 
         final key = '$dateKey:${point.type.name}';
         additiveIntervals.putIfAbsent(key, () => []);
-        additiveIntervals[key]!.add(_MetricInterval(point.dateFrom, point.dateTo, value, point.sourceName));
+        additiveIntervals[key]!.add(
+          _MetricInterval(
+            point.dateFrom,
+            point.dateTo,
+            value,
+            point.sourceName,
+          ),
+        );
       } else {
         _addMetricToDay(dailyMetrics[dateKey]!, point);
       }
@@ -638,22 +756,35 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
       final asleep = bucket['sleep_asleep_hours'] ?? 0.0;
       final staged = deep + light + rem;
       _updateSleepTotal(bucket);
-      AppLogger.info('[HealthDataService] sleep for ${bucket['date']}: session=${session.toStringAsFixed(2)}h, staged=${staged.toStringAsFixed(2)}h (D${deep.toStringAsFixed(1)} L${light.toStringAsFixed(1)} R${rem.toStringAsFixed(1)}), asleep=${asleep.toStringAsFixed(2)}h → total=${bucket['sleep_hours'].toStringAsFixed(2)}h');
+      AppLogger.info(
+        '[HealthDataService] sleep for ${bucket['date']}: session=${session.toStringAsFixed(2)}h, staged=${staged.toStringAsFixed(2)}h (D${deep.toStringAsFixed(1)} L${light.toStringAsFixed(1)} R${rem.toStringAsFixed(1)}), asleep=${asleep.toStringAsFixed(2)}h → total=${bucket['sleep_hours'].toStringAsFixed(2)}h',
+      );
     }
   }
 
   // merge source counts into a single map
-  final allSourceNames = {...sourceMetricCounts.keys, ...sourceSessionCounts.keys};
+  final allSourceNames = {
+    ...sourceMetricCounts.keys,
+    ...sourceSessionCounts.keys,
+  };
   final sourceApps = {
     for (final name in allSourceNames)
-      name: (metrics: sourceMetricCounts[name] ?? 0, sessions: sourceSessionCounts[name] ?? 0),
+      name: (
+        metrics: sourceMetricCounts[name] ?? 0,
+        sessions: sourceSessionCounts[name] ?? 0,
+      ),
   };
 
-  final sourceSummary = sourceApps.entries.map((e) => '${e.key}(${e.value.metrics}m/${e.value.sessions}s)').join(', ');
-  AppLogger.info('[HealthDataService] payload built: ${dailyMetrics.length} daily buckets, ${sessions.length} sessions, ${hrSamples.length} HR samples, sources: $sourceSummary');
+  final sourceSummary = sourceApps.entries
+      .map((e) => '${e.key}(${e.value.metrics}m/${e.value.sessions}s)')
+      .join(', ');
+  AppLogger.info(
+    '[HealthDataService] payload built: ${dailyMetrics.length} daily buckets, ${sessions.length} sessions, ${weights.length} weights, ${hrSamples.length} HR samples, sources: $sourceSummary',
+  );
   return HealthSyncPayload(
     metrics: dailyMetrics.values.toList(),
     sessions: sessions,
+    weights: weights,
     hrSamples: hrSamples,
     sourceApps: sourceApps,
   );
@@ -713,13 +844,16 @@ double _resolveOverlaps(List<_MetricInterval> intervals) {
 
 void _updateSleepTotal(Map<String, dynamic> bucket) {
   final session = (bucket['sleep_session_hours'] as double?) ?? 0.0;
-  final staged = ((bucket['sleep_deep_hours'] as double?) ?? 0.0) +
+  final staged =
+      ((bucket['sleep_deep_hours'] as double?) ?? 0.0) +
       ((bucket['sleep_light_hours'] as double?) ?? 0.0) +
       ((bucket['sleep_rem_hours'] as double?) ?? 0.0);
   final asleep = (bucket['sleep_asleep_hours'] as double?) ?? 0.0;
   // prioritize SLEEP_SESSION (authoritative device total) over staged breakdown,
   // since devices may report incomplete stage classification but accurate session duration
-  bucket['sleep_hours'] = session > 0 ? session : (staged > 0 ? staged : asleep);
+  bucket['sleep_hours'] = session > 0
+      ? session
+      : (staged > 0 ? staged : asleep);
 }
 
 String _dateKey(DateTime dt) =>

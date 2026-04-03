@@ -91,7 +91,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           _goals = (data['goals'] as List).cast<String>();
         }
         if (data['injuries'] != null) {
-          _injuries.addAll((data['injuries'] as List).map((i) => Injury.fromJson(i)));
+          _injuries.addAll(
+            (data['injuries'] as List).map((i) => Injury.fromJson(i)),
+          );
         }
         if (data['limitations'] != null) {
           _limitations.addAll((data['limitations'] as List).cast<String>());
@@ -102,10 +104,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         if (data['preferences'] != null) {
           final prefs = data['preferences'] as Map<String, dynamic>;
           if (prefs['exercises'] != null) {
-            _favoriteExercises.addAll((prefs['exercises'] as List).cast<String>());
+            _favoriteExercises.addAll(
+              (prefs['exercises'] as List).cast<String>(),
+            );
           }
           if (prefs['equipment'] != null) {
-            _favoriteEquipment.addAll((prefs['equipment'] as List).cast<String>());
+            _favoriteEquipment.addAll(
+              (prefs['equipment'] as List).cast<String>(),
+            );
           }
         }
       }
@@ -145,11 +151,17 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     final l10n = AppLocalizations.of(context);
 
     if (_birthdate == null) {
-      AdaptiveNotification.showError(context: context, message: l10n.pleaseSelectBirthDate);
+      AdaptiveNotification.showError(
+        context: context,
+        message: l10n.pleaseSelectBirthDate,
+      );
       return;
     }
     if (_goals.isEmpty) {
-      AdaptiveNotification.showError(context: context, message: l10n.pleaseAddAtLeastOneGoal);
+      AdaptiveNotification.showError(
+        context: context,
+        message: l10n.pleaseAddAtLeastOneGoal,
+      );
       return;
     }
 
@@ -208,17 +220,25 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       onPopInvokedWithResult: (didPop, _) {
         if (didPop && !_didSave && _language != _originalLanguage) {
           // revert locale if user cancelled without saving
-          context.read<LocaleProvider>().setFromProfileLanguage(_originalLanguage);
+          context.read<LocaleProvider>().setFromProfileLanguage(
+            _originalLanguage,
+          );
         }
       },
       child: AdaptiveScaffold(
         appBar: AdaptiveAppBar(
-          title: Text(isCompletion ? l10n.completeYourProfile : l10n.editProfile),
+          title: Text(
+            isCompletion ? l10n.completeYourProfile : l10n.editProfile,
+          ),
           automaticallyImplyLeading: !isCompletion,
           actions: [
             AdaptiveIconButton(
               icon: _isSubmitting
-                  ? const SizedBox(width: 20, height: 20, child: AdaptiveLoadingIndicator())
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: AdaptiveLoadingIndicator(),
+                    )
                   : const Icon(Icons.check),
               onPressed: _isSubmitting ? null : _submitProfile,
               tooltip: l10n.saveChanges,
@@ -239,7 +259,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
                     child: Text(
                       l10n.pleaseCompleteProfile,
-                      style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context)),
+                      style: VigorTypography.body.copyWith(
+                        color: VigorColors.textSecondary(context),
+                      ),
                     ),
                   );
                 case 1:
@@ -288,9 +310,15 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
     return Container(
       decoration: PlatformHelper.useLiquidGlass
-          ? LiquidGlassTheme.glassDecoration(borderRadius: VigorRadius.lg, opacity: 0.9, isDark: isDark)
+          ? LiquidGlassTheme.glassDecoration(
+              borderRadius: VigorRadius.lg,
+              opacity: 0.9,
+              isDark: isDark,
+            )
           : BoxDecoration(
-              color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+              color: isDark
+                  ? VigorColors.darkSurface
+                  : VigorColors.lightSurface,
               borderRadius: VigorRadius.radiusLg,
             ),
       child: Column(
@@ -378,6 +406,16 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           max: 230,
           divisions: 130,
           unit: l10n.heightUnit,
+          allowDecimals: false,
+          onEditTap: () => _editBodyMeasurement(
+            label: l10n.heightCm,
+            unit: l10n.heightUnit,
+            currentValue: _height,
+            min: 100,
+            max: 230,
+            allowDecimals: false,
+            onChanged: (value) => setState(() => _height = value),
+          ),
           onChanged: (v) => setState(() => _height = v),
         ),
         const SizedBox(height: VigorSpacing.lg),
@@ -388,8 +426,18 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           value: _weight,
           min: 30,
           max: 200,
-          divisions: 170,
+          divisions: 1700,
           unit: l10n.weightUnit,
+          allowDecimals: true,
+          onEditTap: () => _editBodyMeasurement(
+            label: l10n.weightKg,
+            unit: l10n.weightUnit,
+            currentValue: _weight,
+            min: 30,
+            max: 200,
+            allowDecimals: true,
+            onChanged: (value) => setState(() => _weight = value),
+          ),
           onChanged: (v) => setState(() => _weight = v),
         ),
       ],
@@ -490,7 +538,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         const SizedBox(height: VigorSpacing.xl),
 
         // favorite equipment
-        _buildFieldLabel(l10n.favoriteEquipment, hint: l10n.optionalEquipmentPrefer),
+        _buildFieldLabel(
+          l10n.favoriteEquipment,
+          hint: l10n.optionalEquipmentPrefer,
+        ),
         const SizedBox(height: VigorSpacing.sm),
         EquipmentSelector(
           selected: _favoriteEquipment,
@@ -517,7 +568,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           initialValue: value,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
-            contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: VigorSpacing.md,
+              vertical: VigorSpacing.md,
+            ),
           ),
           style: VigorTypography.body,
           keyboardType: keyboardType,
@@ -525,7 +579,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           inputFormatters: inputFormatters,
           validator: required
               ? (v) {
-                  if (v == null || v.isEmpty) return AppLocalizations.of(context).required;
+                  if (v == null || v.isEmpty) {
+                    return AppLocalizations.of(context).required;
+                  }
                   return null;
                 }
               : null,
@@ -549,7 +605,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           const SizedBox(width: VigorSpacing.sm),
           Text(
             hint,
-            style: VigorTypography.caption.copyWith(color: VigorColors.textMuted(context)),
+            style: VigorTypography.caption.copyWith(
+              color: VigorColors.textMuted(context),
+            ),
           ),
         ],
       ],
@@ -576,16 +634,27 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           child: InputDecorator(
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
-              suffixIcon: Icon(Icons.calendar_today, size: 18, color: VigorColors.stone),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: VigorSpacing.md,
+                vertical: VigorSpacing.md,
+              ),
+              suffixIcon: Icon(
+                Icons.calendar_today,
+                size: 18,
+                color: VigorColors.stone,
+              ),
             ),
             child: Text(
               _birthdate != null
                   ? '${_birthdate!.day}/${_birthdate!.month}/${_birthdate!.year}'
                   : '',
               style: _birthdate != null
-                  ? VigorTypography.data.copyWith(color: VigorColors.textPrimary(context))
-                  : VigorTypography.body.copyWith(color: VigorColors.textMuted(context)),
+                  ? VigorTypography.data.copyWith(
+                      color: VigorColors.textPrimary(context),
+                    )
+                  : VigorTypography.body.copyWith(
+                      color: VigorColors.textMuted(context),
+                    ),
             ),
           ),
         ),
@@ -603,12 +672,23 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           initialValue: _gender,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
-            contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: VigorSpacing.md,
+              vertical: VigorSpacing.md,
+            ),
           ),
-          style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)),
+          style: VigorTypography.body.copyWith(
+            color: VigorColors.textPrimary(context),
+          ),
           items: [
-            DropdownMenuItem(value: 'male', child: Text(l10n.male, style: VigorTypography.body)),
-            DropdownMenuItem(value: 'female', child: Text(l10n.female, style: VigorTypography.body)),
+            DropdownMenuItem(
+              value: 'male',
+              child: Text(l10n.male, style: VigorTypography.body),
+            ),
+            DropdownMenuItem(
+              value: 'female',
+              child: Text(l10n.female, style: VigorTypography.body),
+            ),
           ],
           validator: (v) {
             if (v == null || v.isEmpty) return l10n.required;
@@ -643,11 +723,21 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           initialValue: _language,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
-            contentPadding: EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: VigorSpacing.md,
+              vertical: VigorSpacing.md,
+            ),
           ),
-          style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)),
+          style: VigorTypography.body.copyWith(
+            color: VigorColors.textPrimary(context),
+          ),
           items: languages
-              .map((l) => DropdownMenuItem(value: l.$1, child: Text(l.$2, style: VigorTypography.body)))
+              .map(
+                (l) => DropdownMenuItem(
+                  value: l.$1,
+                  child: Text(l.$2, style: VigorTypography.body),
+                ),
+              )
               .toList(),
           validator: (v) {
             if (v == null || v.isEmpty) return l10n.pleaseSelectLanguage;
@@ -669,6 +759,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     required double max,
     required int divisions,
     required String unit,
+    required bool allowDecimals,
+    required VoidCallback onEditTap,
     required ValueChanged<double> onChanged,
   }) {
     return Column(
@@ -684,9 +776,32 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            Text(
-              '${value.round()} $unit',
-              style: VigorTypography.data.copyWith(color: VigorColors.textPrimary(context)),
+            InkWell(
+              onTap: onEditTap,
+              borderRadius: VigorRadius.radiusSm,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: VigorSpacing.xs,
+                  vertical: VigorSpacing.xs,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${_formatBodyMeasurement(value, allowDecimals: allowDecimals)} $unit',
+                      style: VigorTypography.data.copyWith(
+                        color: VigorColors.textPrimary(context),
+                      ),
+                    ),
+                    const SizedBox(width: VigorSpacing.xs),
+                    Icon(
+                      Icons.edit_outlined,
+                      size: 16,
+                      color: VigorColors.textMuted(context),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -711,12 +826,16 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '${min.round()}',
-              style: VigorTypography.caption.copyWith(color: VigorColors.textMuted(context)),
+              _formatBodyMeasurement(min, allowDecimals: allowDecimals),
+              style: VigorTypography.caption.copyWith(
+                color: VigorColors.textMuted(context),
+              ),
             ),
             Text(
-              '${max.round()}',
-              style: VigorTypography.caption.copyWith(color: VigorColors.textMuted(context)),
+              _formatBodyMeasurement(max, allowDecimals: allowDecimals),
+              style: VigorTypography.caption.copyWith(
+                color: VigorColors.textMuted(context),
+              ),
             ),
           ],
         ),
@@ -745,9 +864,15 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               return Chip(
                 label: Text(
                   entry.value,
-                  style: VigorTypography.caption.copyWith(color: VigorColors.textPrimary(context)),
+                  style: VigorTypography.caption.copyWith(
+                    color: VigorColors.textPrimary(context),
+                  ),
                 ),
-                deleteIcon: const Icon(Icons.close, size: 16, color: VigorColors.stone),
+                deleteIcon: const Icon(
+                  Icons.close,
+                  size: 16,
+                  color: VigorColors.stone,
+                ),
                 onDeleted: () => onRemove(entry.key),
                 backgroundColor: VigorColors.surfaceElevated(context),
                 side: BorderSide.none,
@@ -772,9 +897,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             controller: _injuryDescriptionController,
             decoration: InputDecoration(
               hintText: l10n.injuryDescription,
-              hintStyle: VigorTypography.body.copyWith(color: VigorColors.textMuted(context)),
+              hintStyle: VigorTypography.body.copyWith(
+                color: VigorColors.textMuted(context),
+              ),
               border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: VigorSpacing.md,
+                vertical: VigorSpacing.md,
+              ),
             ),
             style: VigorTypography.body,
           ),
@@ -786,9 +916,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             controller: _injuryYearController,
             decoration: InputDecoration(
               hintText: l10n.year,
-              hintStyle: VigorTypography.body.copyWith(color: VigorColors.textMuted(context)),
+              hintStyle: VigorTypography.body.copyWith(
+                color: VigorColors.textMuted(context),
+              ),
               border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: VigorSpacing.md,
+                vertical: VigorSpacing.md,
+              ),
             ),
             style: VigorTypography.data,
             keyboardType: TextInputType.number,
@@ -830,9 +965,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             controller: controller,
             decoration: InputDecoration(
               hintText: placeholder,
-              hintStyle: VigorTypography.body.copyWith(color: VigorColors.textMuted(context)),
+              hintStyle: VigorTypography.body.copyWith(
+                color: VigorColors.textMuted(context),
+              ),
               border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.md),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: VigorSpacing.md,
+                vertical: VigorSpacing.md,
+              ),
             ),
             style: VigorTypography.body,
             onSubmitted: (_) => onAdd(),
@@ -841,25 +981,163 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         const SizedBox(width: VigorSpacing.sm),
         SizedBox(
           height: 48,
-          child: AdaptiveButton(
-            onPressed: onAdd,
-            child: Text(l10n.add),
-          ),
+          child: AdaptiveButton(onPressed: onAdd, child: Text(l10n.add)),
         ),
       ],
     );
+  }
+
+  Future<void> _editBodyMeasurement({
+    required String label,
+    required String unit,
+    required double currentValue,
+    required double min,
+    required double max,
+    required bool allowDecimals,
+    required ValueChanged<double> onChanged,
+  }) async {
+    final updatedValue = await showDialog<double>(
+      context: context,
+      builder: (dialogContext) => _BodyMeasurementDialog(
+        label: label,
+        unit: unit,
+        currentValue: currentValue,
+        min: min,
+        max: max,
+        allowDecimals: allowDecimals,
+        parseValue: _parseBodyMeasurement,
+        formatValue: (value) =>
+            _formatBodyMeasurement(value, allowDecimals: allowDecimals),
+      ),
+    );
+
+    if (updatedValue != null && updatedValue != currentValue) {
+      onChanged(updatedValue);
+    }
+  }
+
+  double? _parseBodyMeasurement(String rawValue) {
+    final normalized = rawValue.trim().replaceAll(',', '.');
+    if (normalized.isEmpty) return null;
+    return double.tryParse(normalized);
+  }
+
+  String _formatBodyMeasurement(double value, {required bool allowDecimals}) {
+    if (!allowDecimals) {
+      return value.round().toString();
+    }
+    final rounded = value.toStringAsFixed(1);
+    return rounded.endsWith('.0')
+        ? rounded.substring(0, rounded.length - 2)
+        : rounded;
   }
 }
 
 /// capitalizes the first letter of each word as the user types
 class _CapitalizeWordsFormatter extends TextInputFormatter {
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.text.isEmpty) return newValue;
     final capitalized = newValue.text.replaceAllMapped(
       RegExp(r'(?:^|\s)\S'),
       (match) => match.group(0)!.toUpperCase(),
     );
     return newValue.copyWith(text: capitalized);
+  }
+}
+
+class _BodyMeasurementDialog extends StatefulWidget {
+  final String label;
+  final String unit;
+  final double currentValue;
+  final double min;
+  final double max;
+  final bool allowDecimals;
+  final double? Function(String rawValue) parseValue;
+  final String Function(double value) formatValue;
+
+  const _BodyMeasurementDialog({
+    required this.label,
+    required this.unit,
+    required this.currentValue,
+    required this.min,
+    required this.max,
+    required this.allowDecimals,
+    required this.parseValue,
+    required this.formatValue,
+  });
+
+  @override
+  State<_BodyMeasurementDialog> createState() => _BodyMeasurementDialogState();
+}
+
+class _BodyMeasurementDialogState extends State<_BodyMeasurementDialog> {
+  late final TextEditingController _controller;
+  String? _errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text: widget.formatValue(widget.currentValue),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final parsed = widget.parseValue(_controller.text);
+    if (parsed == null) {
+      setState(() => _errorText = 'Enter a valid number');
+      return;
+    }
+
+    Navigator.of(context).pop(parsed.clamp(widget.min, widget.max).toDouble());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.label),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        keyboardType: TextInputType.numberWithOptions(
+          decimal: widget.allowDecimals,
+        ),
+        textInputAction: TextInputAction.done,
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+        ],
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          suffixText: widget.unit,
+          errorText: _errorText,
+        ),
+        onChanged: (_) {
+          if (_errorText != null) {
+            setState(() => _errorText = null);
+          }
+        },
+        onSubmitted: (_) => _submit(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+        ),
+        TextButton(
+          onPressed: _submit,
+          child: Text(MaterialLocalizations.of(context).okButtonLabel),
+        ),
+      ],
+    );
   }
 }

@@ -4,6 +4,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'health_sync_metric.dart';
 import 'health_sync_session.dart';
+import 'health_sync_weight.dart';
 import 'health_sync_hr_sample.dart';
 
 part 'health_sync_request.g.dart';
@@ -14,6 +15,8 @@ class HealthSyncRequest {
   final List<HealthSyncMetric> metrics;
   @JsonKey(name: 'sessions', defaultValue: [])
   final List<HealthSyncSession> sessions;
+  @JsonKey(name: 'weights', defaultValue: [])
+  final List<HealthSyncWeight> weights;
   @JsonKey(name: 'hr_samples', defaultValue: [])
   final List<HealthSyncHRSample> hRSamples;
   @JsonKey(name: 'deleted_record_ids', defaultValue: [])
@@ -22,6 +25,7 @@ class HealthSyncRequest {
   HealthSyncRequest({
     required this.metrics,
     required this.sessions,
+    required this.weights,
     required this.hRSamples,
     required this.deletedRecordIDs,
   });

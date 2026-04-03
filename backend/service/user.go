@@ -9,6 +9,7 @@ import (
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/model"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 // GetUser retrieves a user by ID with profile.
@@ -67,6 +68,8 @@ func UpdateProfile(userID uuid.UUID, params UpdateProfileParams) (model.Profile,
 		return profile, err
 	}
 
+	previousWeight := profile.Weight
+
 	if params.Data != nil {
 		if goals, ok := params.Data["goals"].([]any); ok && len(goals) > MaxGoals {
 			return profile, fmt.Errorf("maximum of %d goals allowed", MaxGoals)
@@ -106,6 +109,18 @@ func UpdateProfile(userID uuid.UUID, params UpdateProfileParams) (model.Profile,
 		profile.Data = datatypes.JSON(jsonData)
 	}
 
-	err := database.DB.Save(&profile).Error
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Save(&profile).Error; err != nil {
+			return err
+		}
+
+		if weightChanged(previousWeight, profile.Weight) {
+			if err := insertProfileWeightEntry(tx, userID, profile.Weight, time.Now().UTC()); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 	return profile, err
 }

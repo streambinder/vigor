@@ -106,6 +106,7 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Loc
 	// payload size limits — silently truncate oversized payloads
 	const maxMetrics = 31
 	const maxSessions = 100
+	const maxWeights = 100
 	const maxHRSamples = 100000
 	if len(req.Metrics) > maxMetrics {
 		req.Metrics = req.Metrics[:maxMetrics]
@@ -113,11 +114,19 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Loc
 	if len(req.Sessions) > maxSessions {
 		req.Sessions = req.Sessions[:maxSessions]
 	}
+	if len(req.Weights) > maxWeights {
+		req.Weights = req.Weights[:maxWeights]
+	}
 	if len(req.HRSamples) > maxHRSamples {
 		req.HRSamples = req.HRSamples[:maxHRSamples]
 	}
 
-	log.Info().Int("metrics", len(req.Metrics)).Int("sessions", len(req.Sessions)).Int("hr_samples", len(req.HRSamples)).Msg("health sync request received")
+	log.Info().
+		Int("metrics", len(req.Metrics)).
+		Int("sessions", len(req.Sessions)).
+		Int("weights", len(req.Weights)).
+		Int("hr_samples", len(req.HRSamples)).
+		Msg("health sync request received")
 
 	// fetch user's profile for max HR calculation (uses modern Tanaka/Gulati formulas)
 	var profile model.Profile
@@ -278,15 +287,29 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Loc
 			}
 		}
 
-		// 3. process deletions from health connect changes API
+		// 3. upsert weight measurements
+		if err := upsertHealthWeightEntries(tx, userID, req.Weights, now, thirtyDaysAgo); err != nil {
+			return err
+		}
+
+		// 4. process deletions from health connect changes API
 		if len(req.DeletedRecordIDs) > 0 {
 			if err := tx.Where("user_id = ? AND hc_record_id IN ?", userID, req.DeletedRecordIDs).
 				Delete(&model.HealthExerciseSession{}).Error; err != nil {
 				return err
 			}
+			if err := deleteHealthWeightEntries(tx, userID, req.DeletedRecordIDs); err != nil {
+				return err
+			}
 		}
 
-		// 4. training enrichment
+		if len(req.Weights) > 0 || len(req.DeletedRecordIDs) > 0 {
+			if err := syncProfileWeightFromHistory(tx, userID); err != nil {
+				return err
+			}
+		}
+
+		// 5. training enrichment
 		return enrichTrainings(tx, userID, loc)
 	}); err != nil {
 		return nil, err
