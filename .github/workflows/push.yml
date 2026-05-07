@@ -288,7 +288,9 @@ jobs:
         with:
           context: app
           platforms: ${{ env.DOCKER_PLATFORMS }}
-          tags: ghcr.io/streambinder/vigor/app:latest
+          tags: |
+            ghcr.io/${{ github.repository }}/app:latest
+            ghcr.io/${{ github.repository }}/app:${{ github.sha }}
           push: ${{ github.event_name != 'pull_request' }}
           build-args: |
             BUILD_VERSION=${{ github.sha }}
@@ -335,7 +337,9 @@ jobs:
           context: .
           file: knowledge/Dockerfile
           platforms: ${{ env.DOCKER_PLATFORMS }}
-          tags: ghcr.io/streambinder/vigor/knowledge:latest
+          tags: |
+            ghcr.io/${{ github.repository }}/knowledge:latest
+            ghcr.io/${{ github.repository }}/knowledge:${{ github.sha }}
           push: true
           build-args: |
             OPENROUTER_EMBEDDING_MODELS=google/gemini-embedding-001
@@ -384,7 +388,9 @@ jobs:
           context: .
           file: backend/Dockerfile
           platforms: ${{ env.DOCKER_PLATFORMS }}
-          tags: ghcr.io/streambinder/vigor/backend:latest
+          tags: |
+            ghcr.io/${{ github.repository }}/backend:latest
+            ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
           push: ${{ github.event_name != 'pull_request' }}
 
   cockpit-docker:
@@ -429,5 +435,7 @@ jobs:
           context: .
           file: cockpit/Dockerfile
           platforms: ${{ env.DOCKER_PLATFORMS }}
-          tags: ghcr.io/streambinder/vigor/cockpit:latest
+          tags: |
+            ghcr.io/${{ github.repository }}/cockpit:latest
+            ghcr.io/${{ github.repository }}/cockpit:${{ github.sha }}
           push: ${{ github.event_name != 'pull_request' }}
