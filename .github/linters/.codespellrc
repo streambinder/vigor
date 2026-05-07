@@ -1,3 +1,3 @@
 [codespell]
-check-filenames =
-skip = ./knowledge/features/exercises.json
+ignore-words-list = nome,vai,impossibile,foto,ot,ans,initialisiert,deine,deines,beginn,als,sie,vor,stopp,plattform,tage,alle,passt,requiere,posible,inicial,controles,te,variantes,significan,fases,connexion,mouvement,mis,recommandations,fals,arser,nd
+skip = *.css,*.svg,*.json,*.lock,*.sum,*.arb,*.pem,*/l10n/*,*/build/*,*/generated/*,*/features/*,*/.dart_tool/*,*/Pods/*

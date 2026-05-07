@@ -1,0 +1,42 @@
+root = true
+
+[*]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{kt,kts}]
+indent_size = 4
+ktlint_standard_no-wildcard-imports = disabled
+ktlint_standard_multiline-expression-wrapping = disabled
+ktlint_standard_trailing-comma-on-call-site = disabled
+ktlint_standard_trailing-comma-on-declaration-site = disabled
+ktlint_standard_function-signature = disabled
+ktlint_standard_chain-method-continuation = disabled
+ktlint_standard_string-template-indent = disabled
+ktlint_standard_import-ordering = disabled
+ktlint_standard_blank-line-between-when-conditions = disabled
+ktlint_standard_when-entry-bracing = disabled
+
+[*.{go,gomod,gosum}]
+indent_style = tab
+
+[*.{sh,bash}]
+indent_style = tab
+indent_size = 4
+shell_variant = posix
+
+[Makefile]
+indent_style = tab
+
+# Xcode-managed files use Xcode's own formatting
+[*.{xcworkspacedata,xcsettings,xcconfig,plist,pbxproj}]
+indent_style = unset
+indent_size = unset
+
+# Android XML resources use 4-space indent per AOSP convention
+[**/android/**/*.xml]
+indent_size = 4

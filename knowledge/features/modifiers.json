@@ -3,10 +3,23 @@
     "id": "weighted vest",
     "patterns": [".*"],
     "antipatterns": [
-      "^barbell", "^dumbbell", "^cable", "^kettlebell", "^band-",
-      "^ez-bar", "^smith", "^trx", "^landmine", "^lever-", "^sled",
-      "^resistance-band", "^olympic-barbell", "^rowing-machine", "^trap-bar",
-      "machine", "stretch"
+      "^barbell",
+      "^dumbbell",
+      "^cable",
+      "^kettlebell",
+      "^band-",
+      "^ez-bar",
+      "^smith",
+      "^trx",
+      "^landmine",
+      "^lever-",
+      "^sled",
+      "^resistance-band",
+      "^olympic-barbell",
+      "^rowing-machine",
+      "^trap-bar",
+      "machine",
+      "stretch"
     ],
     "aliases": [
       "weighted vest",
@@ -25,10 +38,16 @@
     "id": "parallettes",
     "patterns": ["push-up", "(?:^|-)l-sit", "planche", "handstand"],
     "antipatterns": [
-      "lower-arm", "forearm",
-      "^band-", "^cable", "^kettlebell",
-      "^ring-", "^suspended", "wall$",
-      "^exercise-ball", "stability-ball"
+      "lower-arm",
+      "forearm",
+      "^band-",
+      "^cable",
+      "^kettlebell",
+      "^ring-",
+      "^suspended",
+      "wall$",
+      "^exercise-ball",
+      "stability-ball"
     ],
     "aliases": [
       "parallettes",

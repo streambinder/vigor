@@ -21,8 +21,10 @@ COPY docker/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh && \
 chown -R nginx:nginx /usr/share/nginx/html
 EXPOSE 80
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
+# entrypoint runs as root to bind port 80 + chown writable dirs, then nginx
+# master spawns worker processes as the unprivileged `nginx` user (NGINX default)
+# checkov:skip=CKV_DOCKER_3:nginx official image drops privileges in master/worker model
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 LABEL org.opencontainers.image.source=https://github.com/streambinder/vigor

@@ -7,7 +7,8 @@ WORKDIR /build/cockpit
 RUN go mod download
 COPY backend/ /build/backend/
 COPY cockpit/ .
-RUN go run github.com/a-h/templ/cmd/templ@latest generate ./view/ \
+# hadolint ignore=DL3062
+RUN go run github.com/a-h/templ/cmd/templ@v0.3.977 generate ./view/ \
     && CGO_ENABLED=1 go build -o cockpit main.go
 
 FROM alpine:3.22

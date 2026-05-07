@@ -4,4 +4,4 @@
 
 #import "GeneratedPluginRegistrant.h"
 
-#endif  // APP_IOS_RUNNER_RUNNER_BRIDGING_HEADER_H_
+#endif // APP_IOS_RUNNER_RUNNER_BRIDGING_HEADER_H_

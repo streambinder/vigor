@@ -1,0 +1,8 @@
+---
+rules:
+  artipacked:
+    ignore:
+      - push.yml
+  secrets-outside-env:
+    ignore:
+      - push.yml

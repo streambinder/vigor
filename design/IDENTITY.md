@@ -24,7 +24,6 @@ The identity bridges the gap between the app’s rigorous backend (RAG, vector e
 - **The Technical Bridge:** In the app’s backend, the AI analyzes "patterns" (Movement Families) and "forms" (Vector Embeddings) to calibrate the user.
 - **The Promise:** By practicing with Vigor (the AI’s plan), the user masters the form.
 
-
 ### 2.2 Aesthetic Philosophy
 
 The design system is grounded in four specific Japanese principles:
@@ -36,7 +35,6 @@ The design system is grounded in four specific Japanese principles:
 3. **Kintsugi (Golden Repair):** The metaphor for hypertrophy. We break muscle fibers to rebuild them stronger. High-proficiency stats are rendered in gold.
 
 4. **Seijaku (Stillness in Motion):** The interface is calm. No flashing lights, confetti, or erratic animations.
-
 
 ---
 
@@ -52,44 +50,39 @@ The logo combines the organic _Enso_ (Zen circle) with the precision of vector g
 
 - **Dynamic Behavior:** In the app, the stroke weight thickens based on the user's "Calibration Confidence." A new user sees a thin line; a veteran sees a bold, solid mark.
 
-
 ### 3.2 Color Palette: "Elements & Heat"
 
 We avoid artificial neons. The palette is derived from natural materials and thermal dynamics.
 
-|**Color Name**|**Hex Code**|**Usage**|**Meaning**|
-|---|---|---|---|
-|**Sumi Ink**|`#0F1115`|Background|Deep charcoal (OLED optimized).|
-|**Washi Paper**|`#F2F0EB`|Text / Light Mode|Off-white, natural texture feel.|
-|**Stone**|`#888C94`|Secondary Text|Inactive elements, history.|
-|**Gold (Kintsugi)**|`#D4AF37`|Achievements|High proficiency, personal records.|
-|**Indigo Dye**|`#2B4C5D`|Data: Cool|Fully recovered, low intensity.|
-|**Persimmon**|`#E65D38`|Data: Warm|Active muscle, building heat.|
-|**Crimson**|`#8F1D21`|Data: Hot|Overload, high stress, need recovery.|
-|**Byakuroku**|`#4A7C6F`|Flow / Wellness|Mineral sage-green; recovery, stillness, mobility sessions.|
+| **Color Name**      | **Hex Code** | **Usage**         | **Meaning**                                                 |
+| ------------------- | ------------ | ----------------- | ----------------------------------------------------------- |
+| **Sumi Ink**        | `#0F1115`    | Background        | Deep charcoal (OLED optimized).                             |
+| **Washi Paper**     | `#F2F0EB`    | Text / Light Mode | Off-white, natural texture feel.                            |
+| **Stone**           | `#888C94`    | Secondary Text    | Inactive elements, history.                                 |
+| **Gold (Kintsugi)** | `#D4AF37`    | Achievements      | High proficiency, personal records.                         |
+| **Indigo Dye**      | `#2B4C5D`    | Data: Cool        | Fully recovered, low intensity.                             |
+| **Persimmon**       | `#E65D38`    | Data: Warm        | Active muscle, building heat.                               |
+| **Crimson**         | `#8F1D21`    | Data: Hot         | Overload, high stress, need recovery.                       |
+| **Byakuroku**       | `#4A7C6F`    | Flow / Wellness   | Mineral sage-green; recovery, stillness, mobility sessions. |
 
 ### 3.3 Typography
 
 A pairing that balances the AI's calculation with the human's reading experience.
 
 - **Headlines:** **Space Grotesk**
+  - _Role:_ Branding, Motivation, Headers.
 
-    - _Role:_ Branding, Motivation, Headers.
-
-    - _Vibe:_ Geometric but with idiosyncratic quirks.
+  - _Vibe:_ Geometric but with idiosyncratic quirks.
 
 - **Body:** **Inter (Variable)**
+  - _Role:_ Content, Instructions, Long-form text.
 
-    - _Role:_ Content, Instructions, Long-form text.
-
-    - _Vibe:_ Invisible, highly legible on small screens.
+  - _Vibe:_ Invisible, highly legible on small screens.
 
 - **Data & Code:** **JetBrains Mono**
+  - _Role:_ Calibration scores, Rep counts, Timers, RAG confidence intervals.
 
-    - _Role:_ Calibration scores, Rep counts, Timers, RAG confidence intervals.
-
-    - _Vibe:_ Reminds the user that a machine is calculating this.
-
+  - _Vibe:_ Reminds the user that a machine is calculating this.
 
 ---
 
@@ -105,7 +98,6 @@ Most apps only show progress going up. VIGOR visualizes the reality of **Profici
 
 - **Psychology:** This visually enforces the "Use it or lose it" scientific principle without shaming the user.
 
-
 ### 4.2 Layout: The Masonry Dashboard
 
 Using the principle of _Fukinsei_ (Asymmetry):
@@ -116,7 +108,6 @@ Using the principle of _Fukinsei_ (Asymmetry):
 
 - If **Calibration** is low, the "Test Yourself" card becomes the focal point.
 
-
 ### 4.3 Motion: "Liquid Feedback"
 
 - **Input:** When rating RPE (Rate of Perceived Exertion), the UI reacts like water.
@@ -124,7 +115,6 @@ Using the principle of _Fukinsei_ (Asymmetry):
 - **Transition:** Screens do not "slide" or "pop." They dissolve and reshape, mimicking the rearrangement of the vector database.
 
 - **Loading:** Never use a spinning wheel. Use "Thought Process" text: _Analyzing constraints... Merging partner profiles... Calculating load..._
-
 
 ---
 
@@ -137,7 +127,6 @@ The AI is not a cheerleader. It does not use exclamation points. It is an object
 - **Voice:** Precise, Knowledgeable, Calm.
 
 - **Tone:** Analytical but deeply personalized.
-
 
 ### 5.2 Lexicon Shift
 
@@ -173,7 +162,6 @@ We redefine fitness terms to align with the engineering-meets-biology backend.
 
 - **Iconography:** 11 Abstract Glyphs for movement families (Single stroke, uniform width).
 
-
 ### 6.2 Watch (The Pulse)
 
 - **Role:** Execution and telemetry.
@@ -184,13 +172,11 @@ We redefine fitness terms to align with the engineering-meets-biology backend.
 
 - **Input:** Use the Digital Crown to "dial in" RPE. Haptic feedback replaces visual noise for tempo (EMOM/HIIT).
 
-
 ### 6.3 Web (The Archive)
 
 - **Role:** Analytics and macro-view.
 
 - **Key Feature:** **Vector Space Visualization.** A WebGL view of the 384-dimensional embedding space. The user sees their "dot" moving closer to the "Ideal Form" cluster over months of training.
-
 
 ---
 
@@ -201,16 +187,16 @@ We redefine fitness terms to align with the engineering-meets-biology backend.
 ```css
 :root {
   /* Structure */
-  --vigor-sumi: #0F1115;
-  --vigor-washi: #F2F0EB;
-  --vigor-stone: #888C94;
+  --vigor-sumi: #0f1115;
+  --vigor-washi: #f2f0eb;
+  --vigor-stone: #888c94;
 
   /* Status/Data */
-  --vigor-gold: #D4AF37;
-  --vigor-indigo: #2B4C5D;
-  --vigor-persimmon: #E65D38;
-  --vigor-crimson: #8F1D21;
-  --vigor-byakuroku: #4A7C6F;
+  --vigor-gold: #d4af37;
+  --vigor-indigo: #2b4c5d;
+  --vigor-persimmon: #e65d38;
+  --vigor-crimson: #8f1d21;
+  --vigor-byakuroku: #4a7c6f;
 }
 ```
 
@@ -232,11 +218,10 @@ We redefine fitness terms to align with the engineering-meets-biology backend.
 ### Accessibility Notes
 
 - **Heat Maps:** Do not rely on color alone for muscle heat.
+  - _Cool:_ Smooth fill.
 
-    - _Cool:_ Smooth fill.
+  - _Warm:_ Diagonal hatch pattern.
 
-    - _Warm:_ Diagonal hatch pattern.
-
-    - _Hot:_ Stippled/Noise texture.
+  - _Hot:_ Stippled/Noise texture.
 
 - **Contrast:** All "Washi" text on "Sumi" backgrounds must meet WCAG AAA standards (Contrast ratio > 7:1).

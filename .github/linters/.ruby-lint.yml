@@ -1,0 +1,7 @@
+AllCops:
+  NewCops: enable
+  Exclude:
+    - "app/ios/Podfile"
+    - "**/Pods/**"
+    - "**/build/**"
+    - "**/.dart_tool/**"

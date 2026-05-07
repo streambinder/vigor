@@ -39,9 +39,9 @@
     "sessions_per_week": [3, 5],
     "session_duration_mins": [45, 75],
     "methodology_weights": {
-      "strength": 0.50,
-      "supersets": 0.30,
-      "circuit": 0.20
+      "strength": 0.5,
+      "supersets": 0.3,
+      "circuit": 0.2
     },
     "preferred_hours": [17, 21]
   },
@@ -89,10 +89,10 @@
     "sessions_per_week": [4, 6],
     "session_duration_mins": [30, 60],
     "methodology_weights": {
-      "circuit": 0.40,
-      "hiit": 0.30,
-      "emom": 0.20,
-      "strength": 0.10
+      "circuit": 0.4,
+      "hiit": 0.3,
+      "emom": 0.2,
+      "strength": 0.1
     },
     "preferred_hours": [6, 10]
   },
@@ -134,9 +134,9 @@
     "sessions_per_week": [3, 4],
     "session_duration_mins": [30, 45],
     "methodology_weights": {
-      "circuit": 0.40,
-      "supersets": 0.30,
-      "strength": 0.30
+      "circuit": 0.4,
+      "supersets": 0.3,
+      "strength": 0.3
     },
     "preferred_hours": [0, 24]
   },
@@ -199,9 +199,9 @@
     "sessions_per_week": [3, 5],
     "session_duration_mins": [30, 45],
     "methodology_weights": {
-      "strength": 0.40,
-      "mobility": 0.40,
-      "supersets": 0.20
+      "strength": 0.4,
+      "mobility": 0.4,
+      "supersets": 0.2
     },
     "preferred_hours": [0, 24]
   },
@@ -250,8 +250,8 @@
     "sessions_per_week": [2, 4],
     "session_duration_mins": [20, 40],
     "methodology_weights": {
-      "mobility": 0.60,
-      "strength": 0.40
+      "mobility": 0.6,
+      "strength": 0.4
     },
     "preferred_hours": [0, 24]
   },
@@ -306,10 +306,10 @@
     "sessions_per_week": [2, 4],
     "session_duration_mins": [30, 45],
     "methodology_weights": {
-      "circuit": 0.30,
-      "strength": 0.30,
-      "mobility": 0.20,
-      "hiit": 0.20
+      "circuit": 0.3,
+      "strength": 0.3,
+      "mobility": 0.2,
+      "hiit": 0.2
     },
     "preferred_hours": [6, 10]
   },
@@ -355,7 +355,7 @@
     "sessions_per_week": [3, 5],
     "session_duration_mins": [20, 30],
     "methodology_weights": {
-      "mobility": 1.00
+      "mobility": 1.0
     },
     "preferred_hours": [18, 22]
   },
@@ -395,10 +395,10 @@
     "sessions_per_week": [4, 6],
     "session_duration_mins": [45, 90],
     "methodology_weights": {
-      "strength": 0.40,
-      "hiit": 0.30,
-      "circuit": 0.20,
-      "emom": 0.10
+      "strength": 0.4,
+      "hiit": 0.3,
+      "circuit": 0.2,
+      "emom": 0.1
     },
     "preferred_hours": [0, 24]
   }
