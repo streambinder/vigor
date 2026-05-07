@@ -1,0 +1,14 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.10/schema.json",
+  "root": true,
+  "files": {
+    "includes": [
+      "**",
+      "!**/*.css",
+      "!knowledge/features/exercises.json",
+      "!**/build",
+      "!**/.dart_tool",
+      "!**/node_modules"
+    ]
+  }
+}
