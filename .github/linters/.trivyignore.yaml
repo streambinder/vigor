@@ -1,6 +1,0 @@
-misconfigurations:
-  # nginx official image runs master as root to bind port 80, workers run as
-  # unprivileged nginx user — trivy can't infer this multi-process model
-  - id: AVD-DS-0002
-    paths:
-      - "app/Dockerfile"
