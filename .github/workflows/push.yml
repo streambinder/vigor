@@ -25,6 +25,24 @@ env:
   DOCKER_PLATFORMS: linux/arm64
 
 jobs:
+  super-linter:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: ln -sv .github/linters/commitlint.config.js ./
+      - uses: super-linter/super-linter/slim@9e863354e3ff62e0727d37183162c4a88873df41
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_ALL_CODEBASE: ${{ !contains(github.event_name, 'pull_request') }}
+          VALIDATE_JSCPD: false
+          VALIDATE_JAVASCRIPT_ES: false
+
   changes:
     runs-on: ubuntu-latest
     outputs:
@@ -160,9 +178,10 @@ jobs:
 
   app-apk:
     runs-on: ubuntu-latest
-    needs: [changes, go-generate, dart-build-runner, flutter-l10n, flutter-analyze]
+    needs: [super-linter, changes, go-generate, dart-build-runner, flutter-l10n, flutter-analyze]
     if: |
       always() &&
+      needs.super-linter.result == 'success' &&
       needs.changes.outputs.app == 'true' &&
       (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
       needs.dart-build-runner.result == 'success' &&
@@ -194,9 +213,10 @@ jobs:
 
   app-docker:
     runs-on: ubuntu-latest
-    needs: [changes, go-generate, dart-build-runner, flutter-l10n, flutter-analyze]
+    needs: [super-linter, changes, go-generate, dart-build-runner, flutter-l10n, flutter-analyze]
     if: |
       always() &&
+      needs.super-linter.result == 'success' &&
       needs.changes.outputs.app == 'true' &&
       (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
       needs.dart-build-runner.result == 'success' &&
@@ -228,6 +248,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       [
+        super-linter,
         changes,
         gofumpt,
         go-channel-closure,
@@ -237,6 +258,7 @@ jobs:
       ]
     if: |
       always() &&
+      needs.super-linter.result == 'success' &&
       needs.changes.outputs.knowledge == 'true' &&
       (needs.gofumpt.result == 'success' || needs.gofumpt.result == 'skipped') &&
       (needs.go-channel-closure.result == 'success' || needs.go-channel-closure.result == 'skipped') &&
@@ -272,6 +294,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       [
+        super-linter,
         changes,
         gofumpt,
         go-channel-closure,
@@ -281,6 +304,7 @@ jobs:
       ]
     if: |
       always() &&
+      needs.super-linter.result == 'success' &&
       needs.changes.outputs.go == 'true' &&
       (needs.gofumpt.result == 'success' || needs.gofumpt.result == 'skipped') &&
       (needs.go-channel-closure.result == 'success' || needs.go-channel-closure.result == 'skipped') &&
@@ -312,6 +336,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       [
+        super-linter,
         changes,
         gofumpt,
         go-channel-closure,
@@ -321,6 +346,7 @@ jobs:
       ]
     if: |
       always() &&
+      needs.super-linter.result == 'success' &&
       needs.changes.outputs.cockpit == 'true' &&
       (needs.gofumpt.result == 'success' || needs.gofumpt.result == 'skipped') &&
       (needs.go-channel-closure.result == 'success' || needs.go-channel-closure.result == 'skipped') &&
