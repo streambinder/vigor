@@ -1,3 +1,0 @@
-ignored:
-  - DL3008 # apt-get version pinning brittle for ca-certificates
-  - DL3018 # apk add version pinning brittle for ca-certificates

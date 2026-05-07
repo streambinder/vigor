@@ -35,18 +35,17 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - run: ln -sv .github/linters/commitlint.config.js ./
+      - run: ln -sv .github/linters/commitlint.config.mjs ./
       - uses: super-linter/super-linter/slim@9e863354e3ff62e0727d37183162c4a88873df41
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: ${{ !contains(github.event_name, 'pull_request') }}
           VALIDATE_JSCPD: false
-          VALIDATE_JAVASCRIPT_ES: false
           # Go/Dart validated by dedicated jobs in this workflow
           VALIDATE_GO: false
           VALIDATE_GO_MODULES: false
           VALIDATE_DART: false
-          # cpplint is overly strict for the iOS bridging header (whitespace
+          # cpplint is overly strict for iOS bridging header (whitespace
           # rules conflict with clang-format output)
           VALIDATE_CPP: false
           # editorconfig-checker conflicts with Xcode/Android-managed files

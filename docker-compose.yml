@@ -79,14 +79,14 @@ services:
       #   condition: service_healthy
     environment:
       PORT: 8000
-      DATABASE_URL: postgres://user:pass@database:5432/db?sslmode=disable
-      KNOWLEDGE_URL: postgres://user:pass@knowledge:5432/db?sslmode=disable
-      JWT_SECRET: 123456789
+      DATABASE_URL: ${DATABASE_URL:?set in .env}
+      KNOWLEDGE_URL: ${KNOWLEDGE_URL:?set in .env}
+      JWT_SECRET: ${JWT_SECRET:?set in .env}
       LLAMACPP_TIERS: http://llm:8080
       INFINITY_TIERS: http://embedding:7997
-      OPENROUTER_API_KEY: sk-or-v1-blablabla
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       OPENROUTER_MODELS: openai/gpt-oss-20b:free
-      GOOGLE_CLIENT_ID: 123123123-abcedfghilmnopqrstuvz.apps.googleusercontent.com
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       METRICS_URL: /data/metrics.db
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
     volumes:
@@ -132,11 +132,11 @@ services:
         condition: service_healthy
     environment:
       PORT: 8080
-      DATABASE_URL: postgres://user:pass@database:5432/db?sslmode=disable
-      KNOWLEDGE_URL: postgres://user:pass@knowledge:5432/db?sslmode=disable
+      DATABASE_URL: ${DATABASE_URL:?set in .env}
+      KNOWLEDGE_URL: ${KNOWLEDGE_URL:?set in .env}
       METRICS_URL: /data/metrics.db
-      USER: admin
-      PASSWORD: admin
+      USER: ${COCKPIT_USER:-admin}
+      PASSWORD: ${COCKPIT_PASSWORD:?set in .env}
     ports:
       - 8081:8080
     volumes:

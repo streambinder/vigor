@@ -146,8 +146,12 @@ We redefine fitness terms to align with the engineering-meets-biology backend.
 >
 > **Vigor:** "Session complete. Vertical Pull capacity increased by 1.2%. Deltoid heat is elevated; 48-hour recovery recommended."
 
+---
+
 > **Standard App:** "Warning: Don't do this if your knee hurts."
->
+
+---
+
 > **Vigor:** "Constraint Detected: Right Knee Meniscus (2024). Optimization: Replacing Squat Jump with Low-Impact Box Step-up."
 
 ---

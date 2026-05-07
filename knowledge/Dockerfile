@@ -3,7 +3,7 @@
 #   --build-arg OPENROUTER_EMBEDDING_MODELS=google/gemini-embedding-001 .
 
 FROM golang:1.26.1-alpine3.22 AS bootstrap-builder
-RUN apk add --no-cache gcc musl-dev
+RUN apk add --no-cache gcc=14.2.0-r6 musl-dev=1.2.5-r12
 WORKDIR /build/knowledge
 COPY knowledge/go.mod knowledge/go.sum ./
 COPY backend/go.mod backend/go.sum ../backend/
@@ -15,7 +15,7 @@ RUN CGO_ENABLED=0 go build -o bootstrap main.go
 FROM pgvector/pgvector:0.8.1-pg18 AS data-builder
 ARG OPENROUTER_EMBEDDING_MODELS
 USER root
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates=20230311+deb12u1 && rm -rf /var/lib/apt/lists/*
 USER postgres
 WORKDIR /build
 COPY --from=bootstrap-builder /build/knowledge/bootstrap /usr/local/bin/bootstrap

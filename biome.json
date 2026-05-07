@@ -28,34 +28,5 @@
       "indentStyle": "space",
       "indentWidth": 2
     }
-  },
-  "linter": {
-    "rules": {
-      "a11y": {
-        "useHtmlLang": "off"
-      },
-      "complexity": {
-        "noImportantStyles": "off",
-        "useArrowFunction": "off",
-        "useOptionalChain": "off"
-      },
-      "style": {
-        "useTemplate": "off",
-        "noUselessElse": "off",
-        "useConst": "off",
-        "useExponentiationOperator": "off"
-      },
-      "suspicious": {
-        "noAssignInExpressions": "off",
-        "noShadowRestrictedNames": "off",
-        "noGlobalIsFinite": "off"
-      },
-      "correctness": {
-        "noUnusedVariables": "off",
-        "noInnerDeclarations": "off",
-        "noSelfAssign": "off",
-        "noUnusedFunctionParameters": "off"
-      }
-    }
   }
 }
