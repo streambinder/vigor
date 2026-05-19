@@ -1,3 +1,3 @@
-# Vigor <a href="https://davidepucci.it/doc"><img alt="documentation" align="left" src="https://github.com/streambinder.png?size=96"></a>
+# Vigor <a href="https://github.com/streambinder/vigor"><img alt="documentation" align="left" src="https://github.com/streambinder.png?size=96"></a>
 
-Documentation not available yet.
+Mobile application for fitness training management
