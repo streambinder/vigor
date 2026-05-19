@@ -43,6 +43,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
   List<PartnerInfo> _partners = [];
   TrainingFeedback? _userFeedback;
   Map<String, dynamic>? _healthSessionData;
+  final Set<String> _shufflingActivityIds = {};
 
   // inline timer state
   WorkoutTimerNotifier? _timerNotifier;
@@ -632,7 +633,9 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
   }
 
   Future<void> _shuffleActivity(Activity activity) async {
+    if (_shufflingActivityIds.contains(activity.id)) return;
     final l10n = AppLocalizations.of(context);
+    setState(() => _shufflingActivityIds.add(activity.id));
     final response = await context.read<ServiceLocator>().trainingService.shuffleActivity(activity.id);
 
     if (!mounted) return;
@@ -644,13 +647,15 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
           final idx = block.activities.indexWhere((a) => a.id == activity.id);
           if (idx >= 0) {
             block.activities[idx] = newActivity;
-            setState(() {});
+            setState(() => _shufflingActivityIds.remove(activity.id));
             AdaptiveNotification.show(context: context, message: l10n.exerciseShuffled);
             return;
           }
         }
       }
+      setState(() => _shufflingActivityIds.remove(activity.id));
     } else {
+      setState(() => _shufflingActivityIds.remove(activity.id));
       AdaptiveNotification.showError(context: context, message: l10n.failedToShuffleExercise, rawError: response.error);
     }
   }
@@ -1389,16 +1394,9 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
               // move refresh button down if first exercise in single-block routine with chips
               padding: EdgeInsets.only(top: isFirstInBlock ? VigorSpacing.xl : 0),
               child: Center(
-                child: GestureDetector(
+                child: _ShuffleButton(
+                  isLoading: _shufflingActivityIds.contains(activity.id),
                   onTap: () => _shuffleActivity(activity),
-                  child: Container(
-                    padding: VigorSpacing.paddingSm,
-                    decoration: BoxDecoration(
-                      color: VigorColors.stone.withValues(alpha: 0.1),
-                      borderRadius: VigorRadius.radiusFull,
-                    ),
-                    child: const Icon(Icons.refresh, size: 18, color: VigorColors.stone),
-                  ),
                 ),
               ),
             ),
@@ -1514,4 +1512,64 @@ class _SliverTimerDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(_SliverTimerDelegate oldDelegate) => height != oldDelegate.height;
+}
+
+class _ShuffleButton extends StatefulWidget {
+  final bool isLoading;
+  final VoidCallback onTap;
+
+  const _ShuffleButton({required this.isLoading, required this.onTap});
+
+  @override
+  State<_ShuffleButton> createState() => _ShuffleButtonState();
+}
+
+class _ShuffleButtonState extends State<_ShuffleButton> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 800),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isLoading) _controller.repeat();
+  }
+
+  @override
+  void didUpdateWidget(_ShuffleButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isLoading && !_controller.isAnimating) {
+      _controller.repeat();
+    } else if (!widget.isLoading && _controller.isAnimating) {
+      // finish current rotation cleanly instead of snapping
+      _controller.forward().whenComplete(() {
+        if (!widget.isLoading) _controller.stop();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.isLoading ? null : widget.onTap,
+      child: Container(
+        padding: VigorSpacing.paddingSm,
+        decoration: BoxDecoration(
+          color: VigorColors.stone.withValues(alpha: 0.1),
+          borderRadius: VigorRadius.radiusFull,
+        ),
+        child: RotationTransition(
+          turns: _controller,
+          child: const Icon(Icons.refresh, size: 18, color: VigorColors.stone),
+        ),
+      ),
+    );
+  }
 }

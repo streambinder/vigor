@@ -366,6 +366,7 @@ class TrainingService {
       try {
         final activity = Activity.fromJson(response.data!);
         AppLogger.info('[TrainingService] Shuffled activity: $activityId');
+        emitEvent?.call(TrainingListChanged());
         return ApiResponse.success(activity, response.statusCode);
       } catch (e) {
         AppLogger.error('[TrainingService] failed to parse shuffled activity', e);
