@@ -5,6 +5,10 @@ on: # yamllint disable-line rule:truthy
   workflow_dispatch: null
   push: null
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   actions: read
   attestations: none
@@ -50,6 +54,9 @@ jobs:
           VALIDATE_CPP: false
           # editorconfig-checker conflicts with Xcode/Android-managed files
           VALIDATE_EDITORCONFIG: false
+          SAVE_SUPER_LINTER_OUTPUT: false
+          MULTI_STATUS: false
+          LOG_LEVEL: WARN
 
   changes:
     runs-on: ubuntu-latest
@@ -250,7 +257,7 @@ jobs:
           path: app/build/app/outputs/flutter-apk/app-release.apk
 
   app-docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     environment: deploy
     needs:
       [
@@ -277,7 +284,6 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           persist-credentials: false
-      - uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a
       - uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
       - uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121
         with:
@@ -288,6 +294,8 @@ jobs:
         with:
           context: app
           platforms: ${{ env.DOCKER_PLATFORMS }}
+          cache-from: type=gha,scope=app
+          cache-to: type=gha,scope=app,mode=max
           tags: |
             ghcr.io/${{ github.repository }}/app:latest
             ghcr.io/${{ github.repository }}/app:${{ github.sha }}
@@ -296,7 +304,7 @@ jobs:
             BUILD_VERSION=${{ github.sha }}
 
   knowledge-docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     environment: deploy
     needs:
       [
@@ -325,7 +333,6 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           persist-credentials: false
-      - uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a
       - uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
       - uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121
         with:
@@ -337,6 +344,8 @@ jobs:
           context: .
           file: knowledge/Dockerfile
           platforms: ${{ env.DOCKER_PLATFORMS }}
+          cache-from: type=gha,scope=knowledge
+          cache-to: type=gha,scope=knowledge,mode=max
           tags: |
             ghcr.io/${{ github.repository }}/knowledge:latest
             ghcr.io/${{ github.repository }}/knowledge:${{ github.sha }}
@@ -347,7 +356,7 @@ jobs:
             openrouter_api_key=${{ secrets.OPENROUTER_API_KEY }}
 
   backend-docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     environment: deploy
     needs:
       [
@@ -376,7 +385,6 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           persist-credentials: false
-      - uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a
       - uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
       - uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121
         with:
@@ -388,13 +396,15 @@ jobs:
           context: .
           file: backend/Dockerfile
           platforms: ${{ env.DOCKER_PLATFORMS }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,scope=backend,mode=max
           tags: |
             ghcr.io/${{ github.repository }}/backend:latest
             ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
           push: ${{ github.event_name != 'pull_request' }}
 
   cockpit-docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     environment: deploy
     needs:
       [
@@ -423,7 +433,6 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           persist-credentials: false
-      - uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a
       - uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
       - uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121
         with:
@@ -435,6 +444,8 @@ jobs:
           context: .
           file: cockpit/Dockerfile
           platforms: ${{ env.DOCKER_PLATFORMS }}
+          cache-from: type=gha,scope=cockpit
+          cache-to: type=gha,scope=cockpit,mode=max
           tags: |
             ghcr.io/${{ github.repository }}/cockpit:latest
             ghcr.io/${{ github.repository }}/cockpit:${{ github.sha }}
