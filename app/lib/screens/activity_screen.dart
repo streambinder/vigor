@@ -311,15 +311,15 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
                     title: Text(l10n.activity),
                     actions: const [],
                   ),
-            body: RefreshIndicator(
-              onRefresh: _loadData,
-              color: VigorColors.persimmon,
-              child: _isLoading
-                  ? const Center(child: AdaptiveLoadingIndicator())
-                  : (trainings == null || trainings.isEmpty) && (flowSessions == null || flowSessions.isEmpty)
-                      ? _buildEmptyState(l10n, gyms ?? [])
-                      : _buildContent(l10n, isDark, trainings ?? [], flowSessions ?? []),
-            ),
+            body: _isLoading
+                ? const Center(child: AdaptiveLoadingIndicator())
+                : (trainings == null || trainings.isEmpty) && (flowSessions == null || flowSessions.isEmpty)
+                    ? RefreshIndicator(
+                        onRefresh: _loadData,
+                        color: VigorColors.persimmon,
+                        child: _buildEmptyState(l10n, gyms ?? []),
+                      )
+                    : _buildContent(l10n, isDark, trainings ?? [], flowSessions ?? []),
           ),
         ),
         ),
@@ -331,6 +331,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
   Widget _buildEmptyState(AppLocalizations l10n, List<Gym> gyms) {
     return ListView(
       padding: VigorSpacing.paddingLg,
+      physics: const AlwaysScrollableScrollPhysics(),
       children: [
         SizedBox(height: MediaQuery.of(context).size.height * 0.15),
         const Center(
@@ -457,21 +458,33 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     final externalSessions = !isAvailable ? _getExternalSessions() : <Map<String, dynamic>>[];
 
     if (trainings.isEmpty && externalSessions.isEmpty && flowSessions.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isAvailable ? Icons.fitness_center : Icons.history,
-              size: 48,
-              color: VigorColors.stone,
+      return RefreshIndicator(
+        onRefresh: _loadData,
+        color: VigorColors.persimmon,
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      isAvailable ? Icons.fitness_center : Icons.history,
+                      size: 48,
+                      color: VigorColors.stone,
+                    ),
+                    const SizedBox(height: VigorSpacing.sm),
+                    Text(
+                      isAvailable ? l10n.noTrainingAvailable : l10n.noPastTrainings,
+                      style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context)),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: VigorSpacing.sm),
-            Text(
-              isAvailable ? l10n.noTrainingAvailable : l10n.noPastTrainings,
-              style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(context)),
-            ),
-          ],
+          ),
         ),
       );
     }
@@ -483,17 +496,22 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
         ...flowSessions.map((f) => _CompletedItem(date: f.createdAt, flowSession: f)),
       ]..sort((a, b) => b.date.compareTo(a.date));
 
-      return ListView.separated(
-        padding: VigorSpacing.paddingLg,
-        itemCount: items.length,
-        separatorBuilder: (_, _) => const SizedBox(height: VigorSpacing.sm),
-        itemBuilder: (context, index) {
-          final item = items[index];
-          if (item.flowSession != null) {
-            return _buildFlowSessionCard(item.flowSession!);
-          }
-          return _buildTrainingCard(item.training!, l10n, isAvailable: true, key: ValueKey(item.training!.id));
-        },
+      return RefreshIndicator(
+        onRefresh: _loadData,
+        color: VigorColors.persimmon,
+        child: ListView.separated(
+          padding: VigorSpacing.paddingLg,
+          physics: const AlwaysScrollableScrollPhysics(),
+          itemCount: items.length,
+          separatorBuilder: (_, _) => const SizedBox(height: VigorSpacing.sm),
+          itemBuilder: (context, index) {
+            final item = items[index];
+            if (item.flowSession != null) {
+              return _buildFlowSessionCard(item.flowSession!);
+            }
+            return _buildTrainingCard(item.training!, l10n, isAvailable: true, key: ValueKey(item.training!.id));
+          },
+        ),
       );
     }
 
@@ -526,20 +544,25 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       }),
     ]..sort((a, b) => b.date.compareTo(a.date));
 
-    return ListView.separated(
-      padding: VigorSpacing.paddingLg,
-      itemCount: items.length,
-      separatorBuilder: (_, _) => const SizedBox(height: VigorSpacing.sm),
-      itemBuilder: (context, index) {
-        final item = items[index];
-        if (item.training != null) {
-          return _buildTrainingCard(item.training!, l10n, isAvailable: false, key: ValueKey(item.training!.id));
-        }
-        if (item.flowSession != null) {
-          return _buildFlowSessionCard(item.flowSession!);
-        }
-        return _buildExternalSessionsCard(item.externalSessions!, l10n);
-      },
+    return RefreshIndicator(
+      onRefresh: _loadData,
+      color: VigorColors.persimmon,
+      child: ListView.separated(
+        padding: VigorSpacing.paddingLg,
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: items.length,
+        separatorBuilder: (_, _) => const SizedBox(height: VigorSpacing.sm),
+        itemBuilder: (context, index) {
+          final item = items[index];
+          if (item.training != null) {
+            return _buildTrainingCard(item.training!, l10n, isAvailable: false, key: ValueKey(item.training!.id));
+          }
+          if (item.flowSession != null) {
+            return _buildFlowSessionCard(item.flowSession!);
+          }
+          return _buildExternalSessionsCard(item.externalSessions!, l10n);
+        },
+      ),
     );
   }
 
