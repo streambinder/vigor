@@ -17,6 +17,15 @@ var (
 func StreamGenTrainingStructuring(qw422016 *qt422016.Writer, reasoningOutput string) {
 	qw422016.N().S(`Extract the training program from the reasoning below into the provided JSON schema.
 Use exercise IDs (not names) for exercise_id fields. Map [FN] markers to the fact_indices array.
+If the reasoning assigns modifier IDs to an activity (e.g. "weighted vest", "ankle weights"), include them in that activity's `)
+	qw422016.N().S("`")
+	qw422016.N().S(`modifiers`)
+	qw422016.N().S("`")
+	qw422016.N().S(` array using the exact IDs from the reasoning. Leave `)
+	qw422016.N().S("`")
+	qw422016.N().S(`modifiers`)
+	qw422016.N().S("`")
+	qw422016.N().S(` empty only when the reasoning does not assign any to that activity.
 
 `)
 	qw422016.E().S(reasoningOutput)

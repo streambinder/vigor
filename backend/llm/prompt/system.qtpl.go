@@ -141,7 +141,7 @@ ACTIVITY RULES:
 `)
 	if hasModifiers {
 		qw422016.N().S(`
-MODIFIERS: Add from [MODIFIERS] list when feedback shows "too_easy". Never invent modifier IDs.
+MODIFIERS: Use [MODIFIERS] list to intensify activities. Add modifier IDs to the activity to push intensity beyond bodyweight or progress past plateaus. Triggers: "too_easy" feedback (mandatory add), progressive overload on exercises the user has handled cleanly multiple times, or methodologies that benefit from added load (strength, hypertrophy). Never invent modifier IDs. Never add if user feedback shows "too_hard" or "impossible" on that exercise. Bodyweight-only exercises without applicable modifiers in [MODIFIERS] stay unmodified.
 `)
 	}
 	qw422016.N().S(`
@@ -315,7 +315,11 @@ ACTIVITY RULES:
 `)
 	if hasModifiers {
 		qw422016.N().S(`
-MODIFIERS: When feedback shows "too_easy", add modifier IDs from [MODIFIERS] section to activity.modifiers array. Never invent modifier IDs.
+MODIFIERS: Use [MODIFIERS] list to intensify activities. Populate `)
+		qw422016.N().S("`")
+		qw422016.N().S(`activity.modifiers`)
+		qw422016.N().S("`")
+		qw422016.N().S(` with modifier IDs to push intensity beyond bodyweight or progress past plateaus. Triggers: "too_easy" feedback (mandatory add), progressive overload on exercises handled cleanly in [HISTORY], or methodologies that benefit from added load (strength, hypertrophy). Never invent modifier IDs. Never add if feedback shows "too_hard" or "impossible" on that exercise. Bodyweight-only exercises without applicable modifiers in [MODIFIERS] stay unmodified.
 `)
 	}
 	qw422016.N().S(`

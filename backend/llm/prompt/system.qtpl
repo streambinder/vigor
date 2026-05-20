@@ -53,7 +53,7 @@ ACTIVITY RULES:
 - rest: compounds 2-3min (hypertrophy) or 3-5min (strength), isolation 60-90s, circuits/HIIT 10-20s
 
 {% if hasModifiers %}
-MODIFIERS: Add from [MODIFIERS] list when feedback shows "too_easy". Never invent modifier IDs.
+MODIFIERS: Use [MODIFIERS] list to intensify activities. Add modifier IDs to the activity to push intensity beyond bodyweight or progress past plateaus. Triggers: "too_easy" feedback (mandatory add), progressive overload on exercises the user has handled cleanly multiple times, or methodologies that benefit from added load (strength, hypertrophy). Never invent modifier IDs. Never add if user feedback shows "too_hard" or "impossible" on that exercise. Bodyweight-only exercises without applicable modifiers in [MODIFIERS] stay unmodified.
 {% endif %}
 
 PROGRESSION: Use [HISTORY] feedback to adjust difficulty
@@ -153,7 +153,7 @@ ACTIVITY RULES:
 - rest: compounds 2-3min (hypertrophy) or 3-5min (strength), isolation 60-90s, circuits/HIIT 10-20s, supersets 60-90s between pairs
 
 {% if hasModifiers %}
-MODIFIERS: When feedback shows "too_easy", add modifier IDs from [MODIFIERS] section to activity.modifiers array. Never invent modifier IDs.
+MODIFIERS: Use [MODIFIERS] list to intensify activities. Populate `activity.modifiers` with modifier IDs to push intensity beyond bodyweight or progress past plateaus. Triggers: "too_easy" feedback (mandatory add), progressive overload on exercises handled cleanly in [HISTORY], or methodologies that benefit from added load (strength, hypertrophy). Never invent modifier IDs. Never add if feedback shows "too_hard" or "impossible" on that exercise. Bodyweight-only exercises without applicable modifiers in [MODIFIERS] stay unmodified.
 {% endif %}
 
 PROGRESSION: Analyze feedback from [HISTORY]. For "too_easy": increase reps{% if hasModifiers %} or add weighted modifiers{% endif %}. For "too_hard": decrease reps. For "impossible": REPLACE the exercise with a suitable alternative targeting the same muscle group.

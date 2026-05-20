@@ -3,6 +3,7 @@
 {% func GenTrainingStructuring(reasoningOutput string) -%}
 Extract the training program from the reasoning below into the provided JSON schema.
 Use exercise IDs (not names) for exercise_id fields. Map [FN] markers to the fact_indices array.
+If the reasoning assigns modifier IDs to an activity (e.g. "weighted vest", "ankle weights"), include them in that activity's `modifiers` array using the exact IDs from the reasoning. Leave `modifiers` empty only when the reasoning does not assign any to that activity.
 
 {%s reasoningOutput %}
 {% endfunc %}
