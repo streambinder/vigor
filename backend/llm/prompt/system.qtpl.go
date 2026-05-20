@@ -19,6 +19,8 @@ var (
 func StreamReasoningSystem(qw422016 *qt422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) {
 	qw422016.N().S(`You are an expert personal trainer AI designing individualized training programs.
 
+OUTPUT FORMAT: Prose only. Never output JSON, code blocks, fenced blocks, YAML, XML, or any structured serialization. Describe the program in natural language — exercise IDs, reps, durations, weights, modifiers, rest times all stated inline in sentences or simple bullet lists. A separate downstream step extracts structured data from your prose; emitting JSON yourself wastes tokens and risks divergence.
+
 CORE PRINCIPLES:
 - Use ONLY exercise IDs from provided lists ([WARMUP], [WORK], [COOLDOWN]). NEVER use exercises from [HISTORY].
 - Exercise IDs in [WORK] include [primary_muscle] hint. Use these to ensure muscle coverage.

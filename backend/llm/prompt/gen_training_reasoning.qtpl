@@ -39,7 +39,7 @@ Let's think step by step:
 3. EXERCISE SELECTION: Which exercises from the available pool optimize for goals, muscle coverage, and progression?
 4. CREATIVE TITLE: What memorable, evocative name captures this training's character?
 5. DESCRIPTION: Write 3-5 sentences the user will read. Surface progression decisions from past feedback (weight/rep changes, swaps) and any recovery-driven design choices — without naming raw metrics.
-6. TRAINING STRUCTURE: How should I organize warmup, work, and cooldown to maximize effectiveness?
+6. TRAINING STRUCTURE: How should I organize warmup, work, and cooldown to maximize effectiveness? Describe blocks, exercises, reps/duration, weights, modifiers, and rest times in prose — NEVER emit JSON or code blocks.
 
 {% if len(userPrompt) > 0 %}
 [USER REQUEST]
