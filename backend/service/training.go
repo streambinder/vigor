@@ -313,8 +313,10 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	// build validation lookup tables once before the generation loop
 	allExerciseIDs := make([]string, 0, len(workExercises)+len(warmupExercises)+len(cooldownExercises))
 	weightedExerciseIDs := make(map[string]bool) // exercises requiring loadable weight
+	exerciseModes := make(map[string]string)     // canonical id -> reps/duration/either
 	for _, e := range workExercises {
 		allExerciseIDs = append(allExerciseIDs, e.ID)
+		exerciseModes[e.ID] = e.Mode
 		for _, eq := range e.Equipment {
 			if LoadableEquipment[eq] {
 				weightedExerciseIDs[e.ID] = true
@@ -324,9 +326,11 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	}
 	for _, e := range warmupExercises {
 		allExerciseIDs = append(allExerciseIDs, e.ID)
+		exerciseModes[e.ID] = e.Mode
 	}
 	for _, e := range cooldownExercises {
 		allExerciseIDs = append(allExerciseIDs, e.ID)
+		exerciseModes[e.ID] = e.Mode
 	}
 	validExerciseIDs := util.CanonicalExerciseIDs(allExerciseIDs)
 	validModifierIDs := make(map[string]bool, len(modifiers)+1)
@@ -532,7 +536,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		}
 
 		// structural validation before scaling — fail fast on invalid LLM output
-		validationErr := training.Validate(validExerciseIDs, validModifierIDs, validRoutineTypes, weightedModifierIDs, weightedExerciseIDs, !skipWarmupCooldown, targetMuscles, actualMuscles)
+		validationErr := training.Validate(validExerciseIDs, exerciseModes, validModifierIDs, validRoutineTypes, weightedModifierIDs, weightedExerciseIDs, !skipWarmupCooldown, targetMuscles, actualMuscles)
 
 		if validationErr == nil {
 			// only scale repeats on structurally valid trainings

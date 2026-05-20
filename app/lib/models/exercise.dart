@@ -23,6 +23,8 @@ class Exercise {
   final List<String> cues;
   @JsonKey(name: 'progressions', defaultValue: {})
   final Map<String, dynamic> progressions;
+  @JsonKey(name: 'mode', defaultValue: '')
+  final String mode;
 
   Exercise({
     required this.id,
@@ -33,6 +35,7 @@ class Exercise {
     required this.instructions,
     required this.cues,
     required this.progressions,
+    required this.mode,
   });
 
   factory Exercise.fromJson(Map<String, dynamic> json) => _$ExerciseFromJson(json);

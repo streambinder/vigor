@@ -117,11 +117,11 @@ Steps yesterday: {%s formatNumber(healthSnapshot.Steps) %} (baseline: {%s format
 {% endif %}
 [WORK] {%d len(workExercises) %} options
 {% code recentSet := make(map[string]bool, len(recentExerciseIDs)); for _, id := range recentExerciseIDs { recentSet[id] = true } %}
-{% for _, exercise := range workExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}{% if hasLoadableEquipment(exercise) %}[W]{% endif %}{% if recentSet[exercise.ID] %}[recent]{% endif %}, {% endfor %}
+{% for _, exercise := range workExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}{% if hasLoadableEquipment(exercise) %}[W]{% endif %}{% if exercise.Mode == "duration" %}[T]{% endif %}{% if exercise.Mode == "reps" %}[R]{% endif %}{% if recentSet[exercise.ID] %}[recent]{% endif %}, {% endfor %}
 
 {% if !skipWarmupCooldown %}
 [COOLDOWN] {%d len(cooldownExercises) %} options
-{% for _, exercise := range cooldownExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}, {% endfor %}
+{% for _, exercise := range cooldownExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %}[{%s exercise.Muscles[0] %}]{% endif %}{% if exercise.Mode == "duration" %}[T]{% endif %}{% if exercise.Mode == "reps" %}[R]{% endif %}, {% endfor %}
 
 {% endif %}
 {% if len(facts) > 0 %}

@@ -726,7 +726,7 @@ func TestValidate_WeightModifierConsistency(t *testing.T) {
 					}},
 				}},
 			}
-			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, nil, false, nil, nil)
+			err := tr.Validate(validExercises, nil, validModifiers, validRoutines, weightedModifiers, nil, false, nil, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -784,7 +784,7 @@ func TestValidate_DurationTolerance(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tr := makeTestTraining()
-			if err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, nil, false, nil, nil); err != nil {
+			if err := tr.Validate(validExercises, nil, validModifiers, validRoutines, weightedModifiers, nil, false, nil, nil); err != nil {
 				t.Fatalf("Validate() unexpected structural error: %v", err)
 			}
 			tr.SetDuration(tt.requestedMinutes)
@@ -834,7 +834,7 @@ func TestValidate_TargetMuscles(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tr := base()
-			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, nil, false, tt.target, tt.actual)
+			err := tr.Validate(validExercises, nil, validModifiers, validRoutines, weightedModifiers, nil, false, tt.target, tt.actual)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -936,7 +936,7 @@ func TestValidate_NewChecks(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tr := base()
 			tt.mutate(&tr)
-			err := tr.Validate(validExercises, validModifiers, validRoutines, weightedModifiers, nil, false, nil, nil)
+			err := tr.Validate(validExercises, nil, validModifiers, validRoutines, weightedModifiers, nil, false, nil, nil)
 			if tt.wantCode == "" {
 				if err != nil {
 					t.Errorf("Validate() unexpected error: %v", err)

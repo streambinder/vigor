@@ -191,7 +191,7 @@ func (t Training) DaysSince() int {
 }
 
 // Validate checks that the training has valid structure.
-func (t *Training) Validate(validExerciseIDs map[string]string, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, weightedExerciseIDs map[string]bool, requireWarmupCooldown bool, targetMuscles []string, actualMuscles []string) error {
+func (t *Training) Validate(validExerciseIDs map[string]string, exerciseModes map[string]string, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, weightedExerciseIDs map[string]bool, requireWarmupCooldown bool, targetMuscles []string, actualMuscles []string) error {
 	if t.Name == "" {
 		return &ValidationError{"empty_name", "training name is empty"}
 	}
@@ -270,6 +270,11 @@ func (t *Training) Validate(validExerciseIDs map[string]string, validModifierIDs
 				}
 				if activity.Duration == 0 && activity.Reps == 0 {
 					return &ValidationError{"no_duration_or_reps", "activity " + strconv.Itoa(k) + " in block " + strconv.Itoa(j) + " has neither duration nor reps"}
+				}
+				if mode := exerciseModes[canonical]; mode == "duration" && activity.Duration == 0 {
+					return &ValidationError{"mode_mismatch", "activity " + strconv.Itoa(k) + " in block " + strconv.Itoa(j) + " uses timer-only exercise " + canonical + " but has reps instead of duration"}
+				} else if mode == "reps" && activity.Reps == 0 {
+					return &ValidationError{"mode_mismatch", "activity " + strconv.Itoa(k) + " in block " + strconv.Itoa(j) + " uses rep-only exercise " + canonical + " but has duration instead of reps"}
 				}
 				if activity.Duration < 0 {
 					return &ValidationError{"negative_duration", "activity " + strconv.Itoa(k) + " in block " + strconv.Itoa(j) + " has negative duration"}

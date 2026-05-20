@@ -128,6 +128,7 @@ ACTIVITY RULES:
 - Each activity: EXACTLY ONE of reps or duration must be > 0 (never both, never neither)
 - duration: seconds for cardio/stretches/holds
 - reps: count for strength exercises
+- Exercises marked [T] are timer-only — MUST use duration (never reps). Exercises marked [R] are rep-only — MUST use reps (never duration). Untagged exercises accept either; pick based on methodology.
 - weight_kg: 0 for bodyweight, >0 for weighted equipment`)
 	if hasModifiers {
 		qw422016.N().S(` or weighted modifiers`)
@@ -300,6 +301,7 @@ ACTIVITY RULES:
 - Every activity: EXACTLY ONE of reps or duration must be > 0 (never both, never neither)
 - duration: seconds for cardio/stretches/holds
 - reps: count for strength exercises
+- Exercises marked [T] are timer-only — MUST use duration (never reps). Exercises marked [R] are rep-only — MUST use reps (never duration). Untagged exercises accept either; pick based on methodology.
 - weight_kg: 0 for bodyweight exercises, >0 for exercises using weighted equipment (barbell, dumbbell, kettlebell, etc.)`)
 	if hasModifiers {
 		qw422016.N().S(` or when using weighted modifiers`)

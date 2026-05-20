@@ -468,6 +468,12 @@ Steps yesterday: `)
 		if hasLoadableEquipment(exercise) {
 			qw422016.N().S(`[W]`)
 		}
+		if exercise.Mode == "duration" {
+			qw422016.N().S(`[T]`)
+		}
+		if exercise.Mode == "reps" {
+			qw422016.N().S(`[R]`)
+		}
 		if recentSet[exercise.ID] {
 			qw422016.N().S(`[recent]`)
 		}
@@ -488,6 +494,12 @@ Steps yesterday: `)
 				qw422016.N().S(`[`)
 				qw422016.E().S(exercise.Muscles[0])
 				qw422016.N().S(`]`)
+			}
+			if exercise.Mode == "duration" {
+				qw422016.N().S(`[T]`)
+			}
+			if exercise.Mode == "reps" {
+				qw422016.N().S(`[R]`)
 			}
 			qw422016.N().S(`, `)
 		}

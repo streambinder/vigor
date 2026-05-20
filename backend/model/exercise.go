@@ -23,6 +23,12 @@ type Exercise struct {
 	// e.g., {"horizontal_push": 50, "core": 30} for push-up
 	Progressions datatypes.JSON `gorm:"type:jsonb;default:'{}'" json:"progressions"`
 
+	// Mode declares how the exercise is measured.
+	// "duration": timer-only (holds, stretches, isometrics, cardio bouts) — activity must set duration > 0
+	// "reps": rep-only (most strength) — activity must set reps > 0
+	// "either": works either way (e.g. squats prescribed as reps or as time-under-tension) — default
+	Mode string `gorm:"type:varchar(16);not null;default:'either'" json:"mode"`
+
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
 
