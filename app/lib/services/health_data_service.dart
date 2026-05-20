@@ -161,8 +161,10 @@ abstract class HealthDataService {
 
   /// trigger sync: read new data, POST to backend, persist tokens.
   /// returns true if sync completed successfully.
-  /// set [force] to bypass throttle AND do a full re-read (e.g. manual sync from settings).
-  Future<bool> syncToBackend({bool force = false});
+  /// set [fullRescan] to do a full 30-day re-read and re-request permissions
+  /// (e.g. manual sync from settings). default is incremental delta sync.
+  /// throttling lives server-side only; client never gates.
+  Future<bool> syncToBackend({bool fullRescan = false});
 
   /// write height (cm) and/or weight (kg) back to the health platform so other
   /// apps (e.g. fitness trackers) see Vigor's user-provided values.
@@ -206,20 +208,11 @@ mixin HealthDataServiceMixin on HealthDataService {
   @override
   ValueNotifier<HealthSyncResult?> get lastSyncResult => _lastSyncResult;
 
-  static const _throttleDuration = Duration(hours: 1);
   static const _syncTimeout = Duration(seconds: 60);
 
   AuthenticatedApiService? _apiService;
   AuthenticatedApiService get apiService =>
       _apiService ??= AuthenticatedApiService(storageService: storage);
-
-  /// check if sync should be throttled (< 1 hour since last sync)
-  bool get _shouldThrottle {
-    final lastSyncMs = prefs.hcLastSyncMs;
-    if (lastSyncMs == null) return false;
-    final elapsed = DateTime.now().millisecondsSinceEpoch - lastSyncMs;
-    return elapsed < _throttleDuration.inMilliseconds;
-  }
 
   /// restore persisted stats into the in-memory notifier so settings
   /// screen always has something to show, even before the first sync
@@ -299,22 +292,17 @@ mixin HealthDataServiceMixin on HealthDataService {
   }
 
   @override
-  Future<bool> syncToBackend({bool force = false}) async {
+  Future<bool> syncToBackend({bool fullRescan = false}) async {
     if (_syncing.value) {
       AppLogger.debug('[HealthDataService] sync skipped — already in progress');
       return false;
     }
-    AppLogger.info('[HealthDataService] syncToBackend started (force=$force)');
+    AppLogger.info(
+      '[HealthDataService] syncToBackend started (fullRescan=$fullRescan)',
+    );
 
     // always restore persisted stats so the UI has data immediately
     _restorePersistedStats();
-
-    if (!force && _shouldThrottle) {
-      AppLogger.debug('[HealthDataService] throttled — fetching stats only');
-      // still fetch fresh stats from backend so settings always shows current totals
-      await _fetchStatsOnly();
-      return true;
-    }
 
     _syncing.value = true;
     try {
@@ -324,16 +312,16 @@ mixin HealthDataServiceMixin on HealthDataService {
         return false;
       }
 
-      // on force sync, re-request permissions to ensure all types are authorized
+      // full rescan re-requests permissions to ensure all types are authorized
       // (idempotent — returns immediately if already granted)
-      if (force) {
+      if (fullRescan) {
         AppLogger.debug(
-          '[HealthDataService] force sync — re-requesting permissions',
+          '[HealthDataService] full rescan — re-requesting permissions',
         );
         final granted = await requestPermissions();
         if (!granted) {
           AppLogger.info(
-            '[HealthDataService] permissions denied during force sync',
+            '[HealthDataService] permissions denied during full rescan',
           );
           await prefs.setHcConnected(false);
           return false;
@@ -342,11 +330,11 @@ mixin HealthDataServiceMixin on HealthDataService {
       }
 
       // server-driven delta sync: ask backend what dates it has, then only sync missing data
-      // force sync still does full 30 days to handle edge cases
+      // full rescan reads the entire 30-day window to handle edge cases
       AppLogger.debug(
-        '[HealthDataService] reading health data (${force ? 'full 30-day' : 'server-driven delta'})',
+        '[HealthDataService] reading health data (${fullRescan ? 'full 30-day' : 'server-driven delta'})',
       );
-      final payload = force ? await readAllData() : await _readDeltaSync();
+      final payload = fullRescan ? await readAllData() : await _readDeltaSync();
       AppLogger.info(
         '[HealthDataService] read complete: ${payload.metrics.length} metrics, ${payload.sessions.length} sessions, ${payload.weights.length} weights, ${payload.hrSamples.length} HR samples, ${payload.deletedRecordIds.length} deletions',
       );
@@ -372,7 +360,7 @@ mixin HealthDataServiceMixin on HealthDataService {
       for (int i = 0; i < batches.length; i++) {
         if (i > 0) await Future.delayed(const Duration(milliseconds: 200));
 
-        // retry on 429 with exponential backoff
+        // retry on 429 with backoff sized for server's 1/min rate limit window
         int attempts = 0;
         const maxAttempts = 3;
         ApiResponse? response;
@@ -386,7 +374,7 @@ mixin HealthDataServiceMixin on HealthDataService {
 
           attempts++;
           if (attempts < maxAttempts) {
-            final backoffMs = 2000 * attempts; // 2s, 4s
+            final backoffMs = 30000 * attempts; // 30s, 60s — match server window
             AppLogger.warning(
               '[HealthDataService] batch ${i + 1}/${batches.length} rate limited, retrying in ${backoffMs}ms (attempt $attempts/$maxAttempts)',
             );
@@ -404,7 +392,7 @@ mixin HealthDataServiceMixin on HealthDataService {
             totalMetrics: _lastSyncResult.value?.totalMetrics ?? 0,
             totalSessions: _lastSyncResult.value?.totalSessions ?? 0,
             syncedAt: DateTime.now(),
-            wasForced: force,
+            wasForced: fullRescan,
             deviceSources: payload.sourceApps,
             syncError: response?.error ?? 'Upload failed',
           );
@@ -426,7 +414,7 @@ mixin HealthDataServiceMixin on HealthDataService {
             'metrics_synced': totalMetricsSynced,
             'sessions_synced': totalSessionsSynced,
           },
-          wasForced: force,
+          wasForced: fullRescan,
           deviceSources: payload.sourceApps,
         );
         _lastSyncResult.value = result;

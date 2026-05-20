@@ -14,9 +14,11 @@ import (
 )
 
 func initHealth(app *fiber.App) {
+	// budget covers one full incremental sync (worst case ~30 per-date batches);
+	// second logical sync inside the window is blocked → effective 1 sync/min/user
 	syncLimiter := limiter.New(limiter.Config{
-		Max:        120,
-		Expiration: 1 * time.Hour,
+		Max:        30,
+		Expiration: 1 * time.Minute,
 		KeyGenerator: func(c *fiber.Ctx) string {
 			if uid, ok := c.Locals("userID").(uuid.UUID); ok {
 				return "health_sync:" + uid.String()

@@ -113,7 +113,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
 
       final results = await Future.wait(futures);
 
-      // trigger incremental health metrics sync (throttled, fire-and-forget)
+      // trigger incremental health metrics sync (fire-and-forget, server-throttled)
       if (locator.healthDataService != null) {
         AppLogger.debug('[HomePage] triggering health sync on refresh');
       }

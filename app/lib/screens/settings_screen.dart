@@ -445,7 +445,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 AppLogger.info('[Settings] manual sync triggered');
                                 final healthService = context.read<ServiceLocator>().healthDataService;
                                 if (healthService == null) return;
-                                healthService.syncToBackend(force: true);
+                                healthService.syncToBackend(fullRescan: true);
                               },
                             ),
                             // disconnect
