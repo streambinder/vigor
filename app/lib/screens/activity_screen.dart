@@ -113,7 +113,16 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       }
     }
 
-    await Future.wait([locator.refreshTrainings(), locator.refreshGyms(), locator.refreshFlowSessions()]);
+    await Future.wait([
+      locator.refreshTrainings(),
+      locator.refreshGyms(),
+      locator.refreshFlowSessions(),
+      locator.refreshHealthDaily(),
+    ]);
+
+    // trigger incremental health metrics sync (fire-and-forget, server-throttled)
+    locator.healthDataService?.syncToBackend();
+
     if (mounted) {
       setState(() => _isLoading = false);
       _loadPartnerCounts(locator.trainingsNotifier.value);
