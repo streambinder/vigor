@@ -16698,6 +16698,27 @@
     "cues": []
   },
   {
+    "id": "elevated-push-up",
+    "name": "Elevated Push Up",
+    "equipment": [],
+    "muscles": ["chest", "shoulders", "core"],
+    "reference": "https://static.exercisedb.dev/media/tgryw5Y.gif",
+    "instructions": [
+      "Place hands on an elevated surface (bench or box)",
+      "Assume push-up position with body straight",
+      "Lower chest toward the surface with control",
+      "Press back up to starting position"
+    ],
+    "progressions": {
+      "horizontal_push": 50
+    },
+    "cues": [
+      "Keep body in a straight line",
+      "Elbows at 45 degrees",
+      "Touch chest to the surface"
+    ]
+  },
+  {
     "id": "elevated-wide-push-up",
     "name": "Elevated Wide Push-Up",
     "equipment": [],
@@ -25688,27 +25709,6 @@
     ],
     "progressions": {
       "vertical_push": 50
-    },
-    "cues": [
-      "Keep body in a straight line",
-      "Elbows at 45 degrees",
-      "Touch chest to the floor"
-    ]
-  },
-  {
-    "id": "ring-push-up",
-    "name": "Ring Push Up",
-    "equipment": ["rings"],
-    "muscles": ["chest", "shoulders", "core"],
-    "reference": "https://static.exercisedb.dev/media/tgryw5Y.gif",
-    "instructions": [
-      "Set rings to low height",
-      "Grip rings and assume pushup position",
-      "Lower chest between rings with control",
-      "Press up while stabilizing rings"
-    ],
-    "progressions": {
-      "horizontal_push": 50
     },
     "cues": [
       "Keep body in a straight line",
