@@ -112,6 +112,11 @@ class WorkoutTimerNotifier extends BaseTimerNotifier with WidgetsBindingObserver
     );
     _initializeAudio();
     _setupNotificationCallbacks();
+    // request notification permission upfront if user opted into live timer notifications;
+    // fire-and-forget — timer must not block on user decision
+    if (prefs.liveTimerNotification) {
+      _liveNotificationService.ensureNotificationPermission();
+    }
     _startCurrentSegment();
   }
 

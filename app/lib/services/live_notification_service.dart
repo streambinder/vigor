@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// service to manage live status bar notifications for training timers
 /// android 16+ uses live update notifications with status bar chips
@@ -13,6 +14,19 @@ class LiveNotificationService {
 
   LiveNotificationService() {
     _androidChannel.setMethodCallHandler(_handleMethodCall);
+  }
+
+  /// request notification permission if not granted yet
+  /// android 13+ (API 33+) requires runtime POST_NOTIFICATIONS permission
+  /// ios prompts UNUserNotificationCenter authorization (alert/badge/sound)
+  /// returns true if granted, false otherwise — never blocks the caller indefinitely
+  Future<bool> ensureNotificationPermission() async {
+    final status = await Permission.notification.status;
+    if (status.isGranted) return true;
+    // permanently denied means user must enable from system settings — don't re-prompt
+    if (status.isPermanentlyDenied) return false;
+    final result = await Permission.notification.request();
+    return result.isGranted;
   }
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
