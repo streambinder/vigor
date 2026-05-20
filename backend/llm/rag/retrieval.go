@@ -81,6 +81,7 @@ func RetrieveWorkExercises(
 	prompt string,
 	favoriteIDs []string,
 	excludeIDs []string,
+	calibrationGaps map[string]int,
 ) ([]model.Exercise, error) {
 	embeddingText := GenProfile(profiles, goals, equipment, muscles, prompt)
 	exerciseEmbedding, err := embedding.GenVector(embeddingText)
@@ -111,7 +112,7 @@ func RetrieveWorkExercises(
 		}
 	}
 
-	return retrieveBalancedByMuscle(exerciseEmbedding, keywordQuery, methodology, equipment, targetMuscles, methodologyFamilies, proficiencies, proficiencyMargin, favoriteIDs, excludeIDs), nil
+	return retrieveBalancedByMuscle(exerciseEmbedding, keywordQuery, methodology, equipment, targetMuscles, methodologyFamilies, proficiencies, proficiencyMargin, favoriteIDs, excludeIDs, calibrationGaps), nil
 }
 
 // retrieveBalancedByMuscle queries and filters exercises per muscle group independently,
@@ -131,6 +132,7 @@ func retrieveBalancedByMuscle(
 	proficiencyMargin float64,
 	favoriteIDs []string,
 	excludeIDs []string,
+	calibrationGaps map[string]int,
 ) []model.Exercise {
 	if len(muscles) == 0 {
 		return nil
@@ -158,7 +160,7 @@ func retrieveBalancedByMuscle(
 			continue
 		}
 
-		filtered := filterByProficiencyPerMuscle(candidates, proficiencies, methodologyWork, proficiencyMargin)
+		filtered := filterByProficiencyPerMuscle(candidates, proficiencies, methodologyWork, proficiencyMargin, calibrationGaps)
 
 		added := 0
 		for _, ex := range filtered {
@@ -202,21 +204,21 @@ func retrieveBalancedByMuscle(
 
 // filterByProficiencyPerMuscle applies proficiency filtering for a single muscle group's candidates.
 // Uses the same graceful degradation as the old global filter but with a per-muscle minimum threshold.
-func filterByProficiencyPerMuscle(exercises []model.Exercise, proficiencies map[string]float64, methodologyWork map[string]model.MethodologyWork, margin float64) []model.Exercise {
+func filterByProficiencyPerMuscle(exercises []model.Exercise, proficiencies map[string]float64, methodologyWork map[string]model.MethodologyWork, margin float64, calibrationGaps map[string]int) []model.Exercise {
 	// first pass: full constraints (methodology min + proficiency max)
-	filtered := filterWithConstraints(exercises, proficiencies, methodologyWork, margin, true)
+	filtered := filterWithConstraints(exercises, proficiencies, methodologyWork, margin, true, calibrationGaps)
 
 	// drop methodology min if too few
 	if len(filtered) < MinPerMuscleExercises && methodologyWork != nil {
 		log.Debug().Int("count", len(filtered)).Msg("per-muscle: too few with methodology min, dropping")
-		filtered = filterWithConstraints(exercises, proficiencies, methodologyWork, margin, false)
+		filtered = filterWithConstraints(exercises, proficiencies, methodologyWork, margin, false, calibrationGaps)
 	}
 
 	// progressive margin expansion if still too few
 	for step := 1; len(filtered) < MinPerMuscleExercises && step <= 3; step++ {
 		expandedMargin := margin + float64(step)*15
 		log.Debug().Int("count", len(filtered)).Float64("expanded_margin", expandedMargin).Msg("per-muscle: expanding margin")
-		filtered = filterWithConstraints(exercises, proficiencies, methodologyWork, expandedMargin, false)
+		filtered = filterWithConstraints(exercises, proficiencies, methodologyWork, expandedMargin, false, calibrationGaps)
 	}
 
 	return filtered
@@ -557,7 +559,10 @@ func RetrieveFavoriteExercises(favorites []string) ([]model.Exercise, error) {
 }
 
 // filterWithConstraints applies proficiency and optionally methodology min constraints.
-func filterWithConstraints(exercises []model.Exercise, proficiencies map[string]float64, methodologyWork map[string]model.MethodologyWork, margin float64, applyMin bool) []model.Exercise {
+// Families listed in calibrationGaps bypass the proficiency max cap so the LLM
+// has actual candidates for uncalibrated families (cap starves families whose
+// lowest exercise order exceeds margin, e.g. hinge starts at 20 with margin 15).
+func filterWithConstraints(exercises []model.Exercise, proficiencies map[string]float64, methodologyWork map[string]model.MethodologyWork, margin float64, applyMin bool, calibrationGaps map[string]int) []model.Exercise {
 	filtered := make([]model.Exercise, 0, len(exercises))
 	for _, exercise := range exercises {
 		progressions := exercise.GetProgressions()
@@ -569,9 +574,12 @@ func filterWithConstraints(exercises []model.Exercise, proficiencies map[string]
 		allowed := true
 		for family, score := range progressions {
 			// proficiency max: score must be within user proficiency + margin
-			if score > proficiencies[family]+margin {
-				allowed = false
-				break
+			// skip cap for families being calibrated — they have no proficiency baseline yet
+			if _, isGap := calibrationGaps[family]; !isGap {
+				if score > proficiencies[family]+margin {
+					allowed = false
+					break
+				}
 			}
 			// methodology min: score must be at or above methodology's min for this family
 			if applyMin && methodologyWork != nil {

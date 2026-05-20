@@ -198,7 +198,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		}
 	}
 
-	workExercises, err := rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles, prompt, allFavoriteExercises, recentExerciseIDs)
+	workExercises, err := rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles, prompt, allFavoriteExercises, recentExerciseIDs, calibrationGaps)
 	if err != nil {
 		return nil, err
 	}

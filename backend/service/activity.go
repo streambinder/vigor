@@ -19,6 +19,7 @@ var (
 	ErrNoAlternativeFound = errors.New("no alternative exercise found")
 	ErrInvalidExercise    = errors.New("activity has no valid exercise")
 	ErrNotParticipant     = errors.New("only training participants can shuffle exercises")
+	ErrCalibrating        = errors.New("shuffle disabled during calibration")
 )
 
 // ShuffleActivity replaces an activity's exercise with a random alternative.
@@ -68,6 +69,29 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		return model.Activity{}, ErrTrainingCompleted
 	}
 
+	// reject shuffle when any participant has uncalibrated families: shuffling
+	// undermines calibration-driven family coverage by swapping a deliberately
+	// selected gap-filling exercise for an unconstrained alternative.
+	allUserIDs := []uuid.UUID{training.UserID}
+	for _, p := range partners {
+		allUserIDs = append(allUserIDs, p.UserID)
+	}
+	for _, uid := range allUserIDs {
+		calibration, err := GetProficiencyCalibration(uid)
+		if err != nil {
+			return model.Activity{}, err
+		}
+		families, err := GetMovementFamilies()
+		if err != nil {
+			return model.Activity{}, err
+		}
+		for _, family := range families {
+			if calibration[family] < CalibrationThreshold {
+				return model.Activity{}, ErrCalibrating
+			}
+		}
+	}
+
 	var currentExercise struct {
 		ID           string             `json:"id"`
 		Muscles      []string           `json:"muscles"`
@@ -88,11 +112,6 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 	}
 	if primaryFamily == "" {
 		return model.Activity{}, ErrInvalidExercise
-	}
-
-	allUserIDs := []uuid.UUID{training.UserID}
-	for _, p := range partners {
-		allUserIDs = append(allUserIDs, p.UserID)
 	}
 
 	// use average proficiency across owner + partners

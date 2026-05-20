@@ -30,6 +30,8 @@ func postActivityShuffle(c *fiber.Ctx) error {
 			return c.Status(http.StatusForbidden).JSON(fiber.Map{"error": "only training participants can shuffle exercises"})
 		case errors.Is(err, service.ErrTrainingCompleted):
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "cannot shuffle exercises in completed training"})
+		case errors.Is(err, service.ErrCalibrating):
+			return c.Status(http.StatusConflict).JSON(fiber.Map{"error": "shuffle disabled during calibration"})
 		case errors.Is(err, service.ErrInvalidExercise):
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "activity has no valid exercise"})
 		case errors.Is(err, service.ErrNoAlternativeFound):

@@ -4885,7 +4885,7 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "squat": 45
+      "hinge": 45
     },
     "cues": [],
     "mode": "either"
@@ -13912,7 +13912,7 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "squat": 40
+      "hinge": 40
     },
     "cues": [],
     "mode": "either"
@@ -18549,7 +18549,7 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45
+      "vertical_pull": 45
     },
     "cues": [],
     "mode": "either"
@@ -19176,7 +19176,7 @@
     ],
     "progressions": {
       "core": 25,
-      "squat": 30
+      "hinge": 30
     },
     "cues": [],
     "mode": "reps"
@@ -28272,7 +28272,7 @@
       "Repeat for the desired number of repetitions"
     ],
     "progressions": {
-      "horizontal_pull": 45
+      "vertical_pull": 45
     },
     "cues": [],
     "mode": "either"

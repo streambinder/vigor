@@ -1388,18 +1388,24 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
           ),
         ),
         if (training.completedAt == null)
-          SizedBox(
-            height: 72,
-            child: Padding(
-              // move refresh button down if first exercise in single-block routine with chips
-              padding: EdgeInsets.only(top: isFirstInBlock ? VigorSpacing.xl : 0),
-              child: Center(
-                child: _ShuffleButton(
-                  isLoading: _shufflingActivityIds.contains(activity.id),
-                  onTap: () => _shuffleActivity(activity),
+          ValueListenableBuilder<bool>(
+            valueListenable: context.read<ServiceLocator>().isCalibratingNotifier,
+            builder: (context, isCalibrating, _) {
+              if (isCalibrating) return const SizedBox.shrink();
+              return SizedBox(
+                height: 72,
+                child: Padding(
+                  // move refresh button down if first exercise in single-block routine with chips
+                  padding: EdgeInsets.only(top: isFirstInBlock ? VigorSpacing.xl : 0),
+                  child: Center(
+                    child: _ShuffleButton(
+                      isLoading: _shufflingActivityIds.contains(activity.id),
+                      onTap: () => _shuffleActivity(activity),
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
       ],
     );
