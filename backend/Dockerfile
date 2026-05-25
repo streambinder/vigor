@@ -1,4 +1,4 @@
-FROM golang:1.26.1-alpine3.22 AS builder
+FROM golang:1.26.3-alpine3.22 AS builder
 WORKDIR /app
 COPY knowledge/ ./knowledge/
 COPY backend/go.mod backend/go.sum ./backend/
