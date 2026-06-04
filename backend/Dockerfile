@@ -14,9 +14,6 @@ LABEL org.opencontainers.image.source=https://github.com/streambinder/vigor
 # Create non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-# Install wget for healthcheck
-RUN apk add --no-cache wget=1.25.0-r1
-
 WORKDIR /home/appuser
 COPY --from=builder /app/backend/backend .
 
