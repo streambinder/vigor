@@ -19,7 +19,7 @@ type HealthMetric struct {
 	RestingHR       int       `gorm:"column:resting_hr" json:"resting_hr"`
 	HRVRMSSD        float64   `gorm:"column:hrv_rmssd" json:"hrv_rmssd"`
 	Steps           int       `json:"steps"`
-	TotalCalories   float64   `gorm:"column:total_calories" json:"total_calories"`
+	TotalCalories   float64   `json:"total_calories"`
 	SyncedAt        time.Time `gorm:"type:timestamptz;default:now()" json:"synced_at"`
 }
 
