@@ -23,7 +23,7 @@ func TestFilterByProficiencyPerMuscle(t *testing.T) {
 
 	t.Run("new user with margin 45 no methodology", func(t *testing.T) {
 		profs := map[string]float64{}
-		filtered := filterByProficiencyPerMuscle(exercises, profs, nil, 45.0)
+		filtered := filterByProficiencyPerMuscle(exercises, profs, nil, 45.0, nil)
 		// max core=45, max push=45 → easy(10), medium(30), multi-easy(10,10) pass
 		// hard(50) > 45 → rejected. multi-mixed push=40 < 45 → passes
 		// that's 4 exercises, which is >= MinPerMuscleExercises(2), no degradation
@@ -35,7 +35,7 @@ func TestFilterByProficiencyPerMuscle(t *testing.T) {
 
 	t.Run("experienced user with margin 15 no methodology", func(t *testing.T) {
 		profs := map[string]float64{"core": 30, "push": 20}
-		filtered := filterByProficiencyPerMuscle(exercises, profs, nil, 15.0)
+		filtered := filterByProficiencyPerMuscle(exercises, profs, nil, 15.0, nil)
 		// core max: 45, push max: 35
 		// easy(10)✓, medium(30)✓, hard(50>45)✗, multi-easy(10,10)✓, multi-mixed(10,40>35)✗
 		// 3 results >= MinPerMuscleExercises(2), no degradation
@@ -47,7 +47,7 @@ func TestFilterByProficiencyPerMuscle(t *testing.T) {
 	t.Run("strict margin triggers degradation", func(t *testing.T) {
 		// only 1 exercise passes with margin 5, degradation expands margin
 		profs := map[string]float64{"core": 5, "push": 5}
-		filtered := filterByProficiencyPerMuscle(exercises, profs, nil, 5.0)
+		filtered := filterByProficiencyPerMuscle(exercises, profs, nil, 5.0, nil)
 		// margin 5: max=10 → only easy(10) passes → 1 < MinPerMuscleExercises(2)
 		// margin 20: max=25 → easy(10), multi-easy(10,10) pass → 2 >= 2, done
 		if len(filtered) < MinPerMuscleExercises {
@@ -57,7 +57,7 @@ func TestFilterByProficiencyPerMuscle(t *testing.T) {
 
 	t.Run("exercise without progressions passes", func(t *testing.T) {
 		noProgs := []model.Exercise{{ID: "no-progs", Progressions: nil}}
-		filtered := filterByProficiencyPerMuscle(noProgs, map[string]float64{}, nil, 15.0)
+		filtered := filterByProficiencyPerMuscle(noProgs, map[string]float64{}, nil, 15.0, nil)
 		if len(filtered) != 1 {
 			t.Errorf("exercise without progressions should pass, got %d", len(filtered))
 		}
@@ -74,7 +74,7 @@ func TestFilterByProficiencyPerMuscle(t *testing.T) {
 			"core": {Min: 35},
 		})
 		profs := map[string]float64{"core": 60}
-		filtered := filterByProficiencyPerMuscle(testExercises, profs, methodology.GetWork(), 15.0)
+		filtered := filterByProficiencyPerMuscle(testExercises, profs, methodology.GetWork(), 15.0, nil)
 		// min 35, max 75 → mid(35)✓, high(50)✓, low(20)✗
 		for _, ex := range filtered {
 			progs := ex.GetProgressions()
@@ -99,7 +99,7 @@ func TestFilterByProficiencyPerMuscle(t *testing.T) {
 			"core": {Min: 50},
 		})
 		profs := map[string]float64{"core": 30}
-		filtered := filterByProficiencyPerMuscle(testExercises, profs, methodology.GetWork(), 15.0)
+		filtered := filterByProficiencyPerMuscle(testExercises, profs, methodology.GetWork(), 15.0, nil)
 		// with min 50 and max 45: empty → drop min → max 45: a(10)✓, b(20)✓, c(30)✓
 		if len(filtered) < MinPerMuscleExercises {
 			t.Errorf("graceful degradation should have kicked in, got %d exercises", len(filtered))

@@ -602,7 +602,7 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
 
   const additiveTypes = {
     HealthDataType.STEPS,
-    HealthDataType.ACTIVE_ENERGY_BURNED,
+    HealthDataType.TOTAL_CALORIES_BURNED,
     HealthDataType.SLEEP_DEEP,
     HealthDataType.SLEEP_LIGHT,
     HealthDataType.SLEEP_REM,
@@ -712,8 +712,8 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
       case 'STEPS':
         bucket['steps'] = resolved.round();
         break;
-      case 'ACTIVE_ENERGY_BURNED':
-        bucket['active_calories'] = resolved;
+      case 'TOTAL_CALORIES_BURNED':
+        bucket['total_calories'] = resolved;
         break;
       case 'SLEEP_DEEP':
         bucket['sleep_deep_hours'] = resolved;

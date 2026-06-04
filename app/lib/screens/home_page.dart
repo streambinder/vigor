@@ -342,7 +342,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     final restingHR = (today?['resting_hr'] as num?)?.toInt() ?? 0;
     final hrv = (today?['hrv_rmssd'] as num?)?.toDouble() ?? 0;
     final steps = (today?['steps'] as num?)?.toInt() ?? 0;
-    final calories = (today?['active_calories'] as num?)?.toDouble() ?? 0;
+    final calories = (today?['total_calories'] as num?)?.toDouble() ?? 0;
 
     // always show all tiles — use — for missing values
     final tiles = <Widget>[

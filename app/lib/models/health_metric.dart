@@ -25,8 +25,8 @@ class HealthMetric {
   final double hRVRMSSD;
   @JsonKey(name: 'steps')
   final int steps;
-  @JsonKey(name: 'active_calories')
-  final double activeCalories;
+  @JsonKey(name: 'total_calories')
+  final double totalCalories;
   @JsonKey(name: 'synced_at', toJson: _dateTimeToJson)
   final DateTime syncedAt;
 
@@ -40,7 +40,7 @@ class HealthMetric {
     required this.restingHR,
     required this.hRVRMSSD,
     required this.steps,
-    required this.activeCalories,
+    required this.totalCalories,
     required this.syncedAt,
   });
 

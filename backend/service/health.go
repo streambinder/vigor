@@ -172,7 +172,7 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Loc
 				RestingHR:       clampIntOrZero(m.RestingHR, 25, 220),
 				HRVRMSSD:        clampFloatOrZero(m.HRVRMSSD, 1, 300),
 				Steps:           clampInt(m.Steps, 0, 200000),
-				ActiveCalories:  clampFloat(m.ActiveCalories, 0, 50000),
+				TotalCalories:   clampFloat(m.TotalCalories, 0, 50000),
 				SyncedAt:        now,
 			}
 
@@ -189,7 +189,7 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Loc
 					{Column: clause.Column{Name: "resting_hr"}, Value: gorm.Expr("GREATEST(EXCLUDED.resting_hr, health_metrics.resting_hr)")},
 					{Column: clause.Column{Name: "hrv_rmssd"}, Value: gorm.Expr("GREATEST(EXCLUDED.hrv_rmssd, health_metrics.hrv_rmssd)")},
 					{Column: clause.Column{Name: "steps"}, Value: gorm.Expr("GREATEST(EXCLUDED.steps, health_metrics.steps)")},
-					{Column: clause.Column{Name: "active_calories"}, Value: gorm.Expr("GREATEST(EXCLUDED.active_calories, health_metrics.active_calories)")},
+					{Column: clause.Column{Name: "total_calories"}, Value: gorm.Expr("GREATEST(EXCLUDED.total_calories, health_metrics.total_calories)")},
 					{Column: clause.Column{Name: "synced_at"}, Value: gorm.Expr("EXCLUDED.synced_at")},
 				},
 			}).Create(&metric).Error; err != nil {
