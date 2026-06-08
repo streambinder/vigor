@@ -2,7 +2,7 @@
 #   --secret id=openrouter_api_key,env=OPENROUTER_API_KEY \
 #   --build-arg OPENROUTER_EMBEDDING_MODELS=google/gemini-embedding-001 .
 
-FROM golang:1.26.3-alpine3.22 AS bootstrap-builder
+FROM golang:1.26.4-alpine3.22 AS bootstrap-builder
 RUN apk add --no-cache gcc=14.2.0-r6 musl-dev=1.2.5-r12
 WORKDIR /build/knowledge
 COPY knowledge/go.mod knowledge/go.sum ./
