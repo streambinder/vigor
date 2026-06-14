@@ -15,10 +15,8 @@ import (
 )
 
 const (
-	MaxWorkExercises       = 22 // RAG-based retrieval for main training
-	MaxPerMuscleExercises  = 4  // hard cap per muscle group in final list to prevent skew
-	MaxWarmupExercises     = 6  // random selection for warmup
-	CooldownPerMuscle      = 2  // cooldown exercises per muscle group
+	MaxWarmupExercises     = 6 // random selection for warmup
+	CooldownPerMuscle      = 2 // cooldown exercises per muscle group
 	MaxPromptFacts         = 5
 	MaxFactDistance        = 0.7 // Maximum cosine distance for facts (0=identical, 2=opposite)
 	MaxExerciseDistance    = 0.2 // Maximum cosine distance for exercise matching
@@ -29,6 +27,37 @@ const (
 	vectorWeight  = 0.7
 	keywordWeight = 0.3
 )
+
+// maxWorkExercises scales the RAG retrieval pool with session duration.
+// longer sessions need more variety so the LLM can pick from a wider pool
+// instead of repeating fewer exercises through extra block repeats.
+func maxWorkExercises(durationMin int) int {
+	switch {
+	case durationMin <= 30:
+		return 16
+	case durationMin <= 45:
+		return 20
+	case durationMin <= 60:
+		return 22
+	case durationMin <= 90:
+		return 30
+	default:
+		return 40
+	}
+}
+
+// maxPerMuscleExercises scales the per-muscle cap so longer sessions
+// don't get choked by a tight per-group limit when the total pool is larger.
+func maxPerMuscleExercises(durationMin int) int {
+	switch {
+	case durationMin <= 45:
+		return 4
+	case durationMin <= 90:
+		return 5
+	default:
+		return 7
+	}
+}
 
 // validFamilyName ensures family names are safe for SQL interpolation (JSONB ? operator can't use placeholders).
 var validFamilyName = regexp.MustCompile(`^[a-z_]+$`)
@@ -82,6 +111,7 @@ func RetrieveWorkExercises(
 	favoriteIDs []string,
 	excludeIDs []string,
 	calibrationGaps map[string]int,
+	durationMin int,
 ) ([]model.Exercise, error) {
 	embeddingText := GenProfile(profiles, goals, equipment, muscles, prompt)
 	exerciseEmbedding, err := embedding.GenVector(embeddingText)
@@ -112,7 +142,7 @@ func RetrieveWorkExercises(
 		}
 	}
 
-	return retrieveBalancedByMuscle(exerciseEmbedding, keywordQuery, methodology, equipment, targetMuscles, methodologyFamilies, proficiencies, proficiencyMargin, favoriteIDs, excludeIDs, calibrationGaps), nil
+	return retrieveBalancedByMuscle(exerciseEmbedding, keywordQuery, methodology, equipment, targetMuscles, methodologyFamilies, proficiencies, proficiencyMargin, favoriteIDs, excludeIDs, calibrationGaps, durationMin), nil
 }
 
 // retrieveBalancedByMuscle queries and filters exercises per muscle group independently,
@@ -133,6 +163,7 @@ func retrieveBalancedByMuscle(
 	favoriteIDs []string,
 	excludeIDs []string,
 	calibrationGaps map[string]int,
+	durationMin int,
 ) []model.Exercise {
 	if len(muscles) == 0 {
 		return nil
@@ -143,7 +174,10 @@ func retrieveBalancedByMuscle(
 		methodologyWork = methodology.GetWork()
 	}
 
-	perMuscleQuota := (MaxWorkExercises * 2) / len(muscles)
+	maxWork := maxWorkExercises(durationMin)
+	maxPerMuscle := maxPerMuscleExercises(durationMin)
+
+	perMuscleQuota := (maxWork * 2) / len(muscles)
 	if perMuscleQuota < MinPerMuscleExercises {
 		perMuscleQuota = MinPerMuscleExercises
 	}
@@ -154,7 +188,7 @@ func retrieveBalancedByMuscle(
 	seen := make(map[string]bool)
 
 	for _, muscle := range muscles {
-		candidates, err := retrieveBySimilarity(exerciseEmbedding, keywordQuery, equipment, []string{muscle}, methodologyFamilies, excludeIDs)
+		candidates, err := retrieveBySimilarity(exerciseEmbedding, keywordQuery, equipment, []string{muscle}, methodologyFamilies, excludeIDs, maxWork)
 		if err != nil {
 			log.Warn().Err(err).Str("muscle", muscle).Msg("failed to retrieve exercises for muscle group")
 			continue
@@ -168,7 +202,7 @@ func retrieveBalancedByMuscle(
 			if len(ex.Muscles) > 0 {
 				primaryMuscle = ex.Muscles[0]
 			}
-			if !seen[ex.ID] && muscleCounts[primaryMuscle] < MaxPerMuscleExercises {
+			if !seen[ex.ID] && muscleCounts[primaryMuscle] < maxPerMuscle {
 				seen[ex.ID] = true
 				muscleCounts[primaryMuscle]++
 				combined = append(combined, ex)
@@ -181,8 +215,8 @@ func retrieveBalancedByMuscle(
 		log.Debug().Str("muscle", muscle).Int("candidates", len(candidates)).Int("filtered", len(filtered)).Int("added", added).Int("quota", perMuscleQuota).Msg("retrieved exercises for muscle group")
 	}
 
-	if len(combined) > MaxWorkExercises {
-		combined = combined[:MaxWorkExercises]
+	if len(combined) > maxWork {
+		combined = combined[:maxWork]
 	}
 
 	// sort: favorites first (exploit recency bias at list head), shuffle the rest
@@ -227,7 +261,7 @@ func filterByProficiencyPerMuscle(exercises []model.Exercise, proficiencies map[
 // retrieveBySimilarity performs hybrid search combining embedding cosine similarity
 // with full-text keyword relevance. When keywordQuery is non-empty, scores are fused
 // (0.7 vector + 0.3 keyword) to surface both semantically and lexically relevant exercises.
-func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equipment []string, muscles []string, families []string, excludeIDs []string) ([]model.Exercise, error) {
+func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equipment []string, muscles []string, families []string, excludeIDs []string, maxWork int) ([]model.Exercise, error) {
 	var results []struct {
 		ExerciseID string
 		Text       string
@@ -315,7 +349,7 @@ func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equi
 	// hybrid scoring: fuse vector similarity with keyword relevance, then randomize.
 	// DISTINCT prevents window functions in ORDER BY, so we use a two-layer subquery:
 	// inner = DISTINCT + vector-sorted candidates, outer = hybrid re-ranking.
-	innerQuery := query.Order("has_equipment DESC, distance ASC").Limit(MaxWorkExercises * 3)
+	innerQuery := query.Order("has_equipment DESC, distance ASC").Limit(maxWork * 3)
 
 	if hasKeywords {
 		orderClause := fmt.Sprintf(
@@ -325,7 +359,7 @@ func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equi
 		if err := database.Knowledge.
 			Table("(?) AS pool", innerQuery).
 			Order(orderClause).
-			Limit(MaxWorkExercises * 3).
+			Limit(maxWork * 3).
 			Scan(&results).
 			Error; err != nil {
 			return nil, fmt.Errorf("failed to execute similarity search: %w", err)
@@ -334,7 +368,7 @@ func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equi
 		if err := database.Knowledge.
 			Table("(?) AS pool", innerQuery).
 			Order("RANDOM()").
-			Limit(MaxWorkExercises * 3).
+			Limit(maxWork * 3).
 			Scan(&results).
 			Error; err != nil {
 			return nil, fmt.Errorf("failed to execute similarity search: %w", err)

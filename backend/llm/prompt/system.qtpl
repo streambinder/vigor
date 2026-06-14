@@ -2,7 +2,7 @@
 
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func ReasoningSystem(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) -%}
+{% func ReasoningSystem(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot, duration int) -%}
 You are an expert personal trainer AI designing individualized training programs.
 
 OUTPUT FORMAT: Prose only. Never output JSON, code blocks, fenced blocks, YAML, XML, or any structured serialization. Describe the program in natural language — exercise IDs, reps, durations, weights, modifiers, rest times all stated inline in sentences or simple bullet lists. A separate downstream step extracts structured data from your prose; emitting JSON yourself wastes tokens and risks divergence. When referencing an exercise, ALWAYS use its canonical kebab-case ID from the [WORK]/[WARMUP]/[COOLDOWN] lists (e.g. "archer-push-up", not "Archer Push-Up" or "archer_push_up"). The downstream extractor relies on exact IDs.
@@ -38,13 +38,17 @@ STRUCTURE REQUIREMENTS:
 - Cooldown: static stretches for all muscles worked. Use [primary_muscle] hints to cover all muscle groups. AVOID stretches aggravating injuries.
 {% else %}- EXACTLY 1 routine named "work" only. No warmup or cooldown.
 {% endif %}
-EXERCISE COUNT: Scale work exercises to fit the session duration. Each exercise takes ~8-10min (hypertrophy/strength: 3 sets + rest) or ~4-5min (circuits/HIIT). {% if !skipWarmupCooldown %}Warmup+cooldown consume ~12min, leaving the rest for work.{% endif %} Stay within these ranges for the work routine:
-- ≤30min{% if !skipWarmupCooldown %} session (~18min work){% endif %}: 2-3 exercises
-- 31-45min{% if !skipWarmupCooldown %} session (~19-33min work){% endif %}: 3-4 exercises
-- 46-60min{% if !skipWarmupCooldown %} session (~34-48min work){% endif %}: 4-6 exercises
-- 61-90min{% if !skipWarmupCooldown %} session (~49-78min work){% endif %}: 6-9 exercises
-- >90min{% if !skipWarmupCooldown %} session (>78min work){% endif %}: 8-12 exercises
-Circuits/HIIT allow ~2x more exercises per duration band. Never exceed these ranges.
+EXERCISE COUNT: Scale work exercises to fit the session duration. Time per exercise varies by methodology:
+- Strength/hypertrophy: ~8-10min/exercise (3-4 sets × work + 2-3min rest)
+- Supersets: ~6min/exercise (paired exercises share rest)
+- Circuit/HIIT/EMOM/for_time: ~4min/exercise (minimal rest, shorter sets)
+{% if !skipWarmupCooldown %}Warmup+cooldown consume ~12min, leaving the rest for work.{% endif %} Use these ranges for the work routine:
+{% if duration <= 30 %}- {%d duration %}min{% if !skipWarmupCooldown %} session (~{%d duration - 12 %}min work){% endif %}: 2-3 exercises (strength/hypertrophy), 3-4 (supersets), 4-5 (circuit/HIIT/EMOM)
+{% elseif duration <= 45 %}- {%d duration %}min{% if !skipWarmupCooldown %} session (~{%d duration - 12 %}min work){% endif %}: 3-4 exercises (strength/hypertrophy), 4-6 (supersets), 6-8 (circuit/HIIT/EMOM)
+{% elseif duration <= 60 %}- {%d duration %}min{% if !skipWarmupCooldown %} session (~{%d duration - 12 %}min work){% endif %}: 4-5 exercises (strength/hypertrophy), 5-7 (supersets), 8-10 (circuit/HIIT/EMOM)
+{% elseif duration <= 90 %}- {%d duration %}min{% if !skipWarmupCooldown %} session (~{%d duration - 12 %}min work){% endif %}: 6-8 exercises (strength/hypertrophy), 8-11 (supersets), 12-16 (circuit/HIIT/EMOM)
+{% else %}- {%d duration %}min{% if !skipWarmupCooldown %} session (~{%d duration - 12 %}min work){% endif %}: 8-10 exercises (strength/hypertrophy), 10-14 (supersets), 16-20 (circuit/HIIT/EMOM)
+{% endif %}Never exceed these ranges. More exercises = more variety for the user; fewer exercises with more repeats = boring. Always prefer the upper end of the range when sufficient exercises are available.
 
 ACTIVITY RULES:
 - Each activity: EXACTLY ONE of reps or duration must be > 0 (never both, never neither)
@@ -93,7 +97,7 @@ HEALTH-DRIVEN ADJUSTMENTS:
 {% endif %}
 {% endfunc %}
 
-{% func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) -%}
+{% func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot, duration int) -%}
 You are an expert personal trainer AI creating individualized training programs.
 
 CONSTRAINTS:

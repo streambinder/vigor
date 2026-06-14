@@ -170,7 +170,7 @@ func GenTraining(req TrainingGenerationRequest) (*model.Training, model.Training
 	}
 
 	reasoningPrompt := model.LLMPrompt{
-		System: prompt.ReasoningSystem(req.Goals, req.Methodology, req.Methodologies, methodologyCoverage(req.WorkExercises, req.Methodologies), req.SkipWarmupCooldown, len(req.Modifiers) > 0, len(req.ModifierVariants) > 0, req.HealthSnapshot),
+		System: prompt.ReasoningSystem(req.Goals, req.Methodology, req.Methodologies, methodologyCoverage(req.WorkExercises, req.Methodologies), req.SkipWarmupCooldown, len(req.Modifiers) > 0, len(req.ModifierVariants) > 0, req.HealthSnapshot, req.Duration),
 		User:   reasoningUserMessage,
 	}
 

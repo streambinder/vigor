@@ -16,7 +16,7 @@ var (
 	_ = qt422016.AcquireByteBuffer
 )
 
-func StreamReasoningSystem(qw422016 *qt422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) {
+func StreamReasoningSystem(qw422016 *qt422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot, duration int) {
 	qw422016.N().S(`You are an expert personal trainer AI designing individualized training programs.
 
 OUTPUT FORMAT: Prose only. Never output JSON, code blocks, fenced blocks, YAML, XML, or any structured serialization. Describe the program in natural language — exercise IDs, reps, durations, weights, modifiers, rest times all stated inline in sentences or simple bullet lists. A separate downstream step extracts structured data from your prose; emitting JSON yourself wastes tokens and risks divergence. When referencing an exercise, ALWAYS use its canonical kebab-case ID from the [WORK]/[WARMUP]/[COOLDOWN] lists (e.g. "archer-push-up", not "Archer Push-Up" or "archer_push_up"). The downstream extractor relies on exact IDs.
@@ -92,37 +92,73 @@ STRUCTURE REQUIREMENTS:
 `)
 	}
 	qw422016.N().S(`
-EXERCISE COUNT: Scale work exercises to fit the session duration. Each exercise takes ~8-10min (hypertrophy/strength: 3 sets + rest) or ~4-5min (circuits/HIIT). `)
+EXERCISE COUNT: Scale work exercises to fit the session duration. Time per exercise varies by methodology:
+- Strength/hypertrophy: ~8-10min/exercise (3-4 sets × work + 2-3min rest)
+- Supersets: ~6min/exercise (paired exercises share rest)
+- Circuit/HIIT/EMOM/for_time: ~4min/exercise (minimal rest, shorter sets)
+`)
 	if !skipWarmupCooldown {
 		qw422016.N().S(`Warmup+cooldown consume ~12min, leaving the rest for work.`)
 	}
-	qw422016.N().S(` Stay within these ranges for the work routine:
-- ≤30min`)
-	if !skipWarmupCooldown {
-		qw422016.N().S(` session (~18min work)`)
+	qw422016.N().S(` Use these ranges for the work routine:
+`)
+	if duration <= 30 {
+		qw422016.N().S(`- `)
+		qw422016.N().D(duration)
+		qw422016.N().S(`min`)
+		if !skipWarmupCooldown {
+			qw422016.N().S(` session (~`)
+			qw422016.N().D(duration - 12)
+			qw422016.N().S(`min work)`)
+		}
+		qw422016.N().S(`: 2-3 exercises (strength/hypertrophy), 3-4 (supersets), 4-5 (circuit/HIIT/EMOM)
+`)
+	} else if duration <= 45 {
+		qw422016.N().S(`- `)
+		qw422016.N().D(duration)
+		qw422016.N().S(`min`)
+		if !skipWarmupCooldown {
+			qw422016.N().S(` session (~`)
+			qw422016.N().D(duration - 12)
+			qw422016.N().S(`min work)`)
+		}
+		qw422016.N().S(`: 3-4 exercises (strength/hypertrophy), 4-6 (supersets), 6-8 (circuit/HIIT/EMOM)
+`)
+	} else if duration <= 60 {
+		qw422016.N().S(`- `)
+		qw422016.N().D(duration)
+		qw422016.N().S(`min`)
+		if !skipWarmupCooldown {
+			qw422016.N().S(` session (~`)
+			qw422016.N().D(duration - 12)
+			qw422016.N().S(`min work)`)
+		}
+		qw422016.N().S(`: 4-5 exercises (strength/hypertrophy), 5-7 (supersets), 8-10 (circuit/HIIT/EMOM)
+`)
+	} else if duration <= 90 {
+		qw422016.N().S(`- `)
+		qw422016.N().D(duration)
+		qw422016.N().S(`min`)
+		if !skipWarmupCooldown {
+			qw422016.N().S(` session (~`)
+			qw422016.N().D(duration - 12)
+			qw422016.N().S(`min work)`)
+		}
+		qw422016.N().S(`: 6-8 exercises (strength/hypertrophy), 8-11 (supersets), 12-16 (circuit/HIIT/EMOM)
+`)
+	} else {
+		qw422016.N().S(`- `)
+		qw422016.N().D(duration)
+		qw422016.N().S(`min`)
+		if !skipWarmupCooldown {
+			qw422016.N().S(` session (~`)
+			qw422016.N().D(duration - 12)
+			qw422016.N().S(`min work)`)
+		}
+		qw422016.N().S(`: 8-10 exercises (strength/hypertrophy), 10-14 (supersets), 16-20 (circuit/HIIT/EMOM)
+`)
 	}
-	qw422016.N().S(`: 2-3 exercises
-- 31-45min`)
-	if !skipWarmupCooldown {
-		qw422016.N().S(` session (~19-33min work)`)
-	}
-	qw422016.N().S(`: 3-4 exercises
-- 46-60min`)
-	if !skipWarmupCooldown {
-		qw422016.N().S(` session (~34-48min work)`)
-	}
-	qw422016.N().S(`: 4-6 exercises
-- 61-90min`)
-	if !skipWarmupCooldown {
-		qw422016.N().S(` session (~49-78min work)`)
-	}
-	qw422016.N().S(`: 6-9 exercises
-- >90min`)
-	if !skipWarmupCooldown {
-		qw422016.N().S(` session (>78min work)`)
-	}
-	qw422016.N().S(`: 8-12 exercises
-Circuits/HIIT allow ~2x more exercises per duration band. Never exceed these ranges.
+	qw422016.N().S(`Never exceed these ranges. More exercises = more variety for the user; fewer exercises with more repeats = boring. Always prefer the upper end of the range when sufficient exercises are available.
 
 ACTIVITY RULES:
 - Each activity: EXACTLY ONE of reps or duration must be > 0 (never both, never neither)
@@ -196,21 +232,21 @@ HEALTH-DRIVEN ADJUSTMENTS:
 `)
 }
 
-func WriteReasoningSystem(qq422016 qtio422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) {
+func WriteReasoningSystem(qq422016 qtio422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot, duration int) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamReasoningSystem(qw422016, goals, methodology, methodologies, methodologyCoverage, skipWarmupCooldown, hasModifiers, hasModifierVariants, healthSnapshot)
+	StreamReasoningSystem(qw422016, goals, methodology, methodologies, methodologyCoverage, skipWarmupCooldown, hasModifiers, hasModifierVariants, healthSnapshot, duration)
 	qt422016.ReleaseWriter(qw422016)
 }
 
-func ReasoningSystem(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) string {
+func ReasoningSystem(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot, duration int) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteReasoningSystem(qb422016, goals, methodology, methodologies, methodologyCoverage, skipWarmupCooldown, hasModifiers, hasModifierVariants, healthSnapshot)
+	WriteReasoningSystem(qb422016, goals, methodology, methodologies, methodologyCoverage, skipWarmupCooldown, hasModifiers, hasModifierVariants, healthSnapshot, duration)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016
 }
 
-func StreamSystem(qw422016 *qt422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) {
+func StreamSystem(qw422016 *qt422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot, duration int) {
 	qw422016.N().S(`You are an expert personal trainer AI creating individualized training programs.
 
 CONSTRAINTS:
@@ -372,15 +408,15 @@ HEALTH DATA RULES:
 `)
 }
 
-func WriteSystem(qq422016 qtio422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) {
+func WriteSystem(qq422016 qtio422016.Writer, goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot, duration int) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamSystem(qw422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers, hasModifierVariants, healthSnapshot)
+	StreamSystem(qw422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers, hasModifierVariants, healthSnapshot, duration)
 	qt422016.ReleaseWriter(qw422016)
 }
 
-func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot) string {
+func System(goals []model.Goal, methodology *model.Methodology, methodologies []model.Methodology, skipWarmupCooldown bool, hasModifiers bool, hasModifierVariants bool, healthSnapshot *model.HealthSnapshot, duration int) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteSystem(qb422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers, hasModifierVariants, healthSnapshot)
+	WriteSystem(qb422016, goals, methodology, methodologies, skipWarmupCooldown, hasModifiers, hasModifierVariants, healthSnapshot, duration)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016
