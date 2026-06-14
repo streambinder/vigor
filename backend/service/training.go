@@ -435,6 +435,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			Reminders:            reminders,
 			LastReasoningModel:   execution.Reasoning.Model,
 			LastStructuringModel: execution.Structuring.Model,
+			LastReasoningOutput:  execution.Reasoning.Output,
 			CorrectionHint:       correctionHint,
 			RecentExerciseIDs:    recentExerciseIDs,
 		})
@@ -446,9 +447,11 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 				retryable = true
 				correctionHint = "response was truncated (too long). Be much more concise in reasoning: use 3-5 word rationales, fewer exercises, shorter strategy"
 			} else if errors.Is(err, llm.ErrLLMUnmarshal) {
+				// structuring-only retries are exhausted inside GenTraining;
+				// if we get here, the reasoning itself is likely ambiguous
 				reason = "unmarshal_error"
 				retryable = true
-				correctionHint = "structuring stage produced invalid JSON. Ensure all exercise IDs are from provided lists and all fields match the schema"
+				correctionHint = "structuring stage produced invalid JSON even after retrying. Produce clearer, less ambiguous reasoning output"
 			}
 
 			failureEvent := event.TrainingGenerationFailureEvent{

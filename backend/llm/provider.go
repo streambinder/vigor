@@ -45,6 +45,8 @@ type Stage string
 const (
 	StageReasoning   Stage = "reasoning"
 	StageStructuring Stage = "structuring"
+
+	maxStructuringRetries = 1
 )
 
 var (
@@ -78,6 +80,7 @@ type TrainingGenerationRequest struct {
 	LastReasoningModel   string
 	LastStructuringModel string
 	CorrectionHint       string
+	LastReasoningOutput  string
 	RecentExerciseIDs    []string
 }
 
@@ -158,7 +161,12 @@ func GenTraining(req TrainingGenerationRequest) (*model.Training, model.Training
 		req.RecentExerciseIDs,
 	)
 	if req.CorrectionHint != "" {
-		reasoningUserMessage += "\n\nCORRECTION (previous attempt failed server-side validation): " + req.CorrectionHint + ". Fix this issue and regenerate."
+		if req.LastReasoningOutput != "" {
+			// feed prior reasoning so the model can patch rather than regenerate blind
+			reasoningUserMessage += "\n\nPREVIOUS REASONING FAULTY OUTPUT (error: " + req.CorrectionHint + "):\n" + req.LastReasoningOutput + "\n\nFix the above issue and regenerate."
+		} else {
+			reasoningUserMessage += "\n\nCORRECTION (previous attempt failed server-side validation): " + req.CorrectionHint + ". Fix this issue and regenerate."
+		}
 	}
 
 	reasoningPrompt := model.LLMPrompt{
@@ -182,28 +190,44 @@ func GenTraining(req TrainingGenerationRequest) (*model.Training, model.Training
 		return nil, execution, fmt.Errorf("%w (reasoning stage): empty response", ErrLLMQuery)
 	}
 
-	// stage 2: structuring — extract JSON from reasoning at deterministic temp
-	structuringPrompt := model.LLMPrompt{
-		System: "You are a fitness data extraction assistant. Parse the training reasoning into strict JSON format. The name and description fields MUST be written in the same language as the reasoning output — never translate them to English.",
-		User:   prompt.GenTrainingStructuring(string(reasoningOutput)),
-	}
-
-	structuredOutput, structuringModel, err := getLLM(StageStructuring, req.LastStructuringModel).query(
-		structuringPrompt,
-		0.0,  // zero temperature for deterministic extraction
-		4000, // structured output is more compact
-		0,    // no top-p — deterministic
-		&model.TrainingSchema,
-		90*time.Second,
+	// stage 2: structuring — extract JSON from reasoning at deterministic temp.
+	// unmarshal failures get one structuring-only retry with the error fed back,
+	// since the reasoning output is fine — only the extraction failed.
+	structuringSystem := "You are a fitness data extraction assistant. Parse the training reasoning into strict JSON format. The name and description fields MUST be written in the same language as the reasoning output — never translate them to English."
+	var (
+		training         *model.Training
+		lastUnmarshalErr error // set by prior iteration's unmarshal failure
 	)
-	execution.Structuring = model.LLMStep{Model: structuringModel, Prompt: structuringPrompt, Output: string(structuredOutput)}
-	if err != nil {
-		return nil, execution, fmt.Errorf("%w (structuring stage): %w", ErrLLMQuery, err)
-	}
+	for structAttempt := 0; structAttempt <= maxStructuringRetries; structAttempt++ {
+		structuringUser := prompt.GenTrainingStructuring(string(reasoningOutput))
+		if structAttempt > 0 {
+			structuringUser += "\n\nPREVIOUS STRUCTURING ATTEMPT FAILED: " + lastUnmarshalErr.Error() + ". Fix the JSON output."
+		}
 
-	training := &model.Training{}
-	if err := json.Unmarshal(structuredOutput, &training); err != nil {
-		return nil, execution, fmt.Errorf("%w: %s", ErrLLMUnmarshal, err)
+		structuringPrompt := model.LLMPrompt{System: structuringSystem, User: structuringUser}
+		structuredOutput, structuringModel, err := getLLM(StageStructuring, req.LastStructuringModel).query(
+			structuringPrompt,
+			0.0,  // zero temperature for deterministic extraction
+			4000, // structured output is more compact
+			0,    // no top-p — deterministic
+			&model.TrainingSchema,
+			90*time.Second,
+		)
+		execution.Structuring = model.LLMStep{Model: structuringModel, Prompt: structuringPrompt, Output: string(structuredOutput)}
+		if err != nil {
+			return nil, execution, fmt.Errorf("%w (structuring stage): %w", ErrLLMQuery, err)
+		}
+
+		training = &model.Training{}
+		if err := json.Unmarshal(structuredOutput, training); err != nil {
+			lastUnmarshalErr = err
+			if structAttempt < maxStructuringRetries {
+				log.Warn().Err(err).Int("struct_attempt", structAttempt+1).Msg("structuring unmarshal failed, retrying structuring only")
+				continue
+			}
+			return nil, execution, fmt.Errorf("%w: %s", ErrLLMUnmarshal, err)
+		}
+		break
 	}
 
 	return training, execution, nil
