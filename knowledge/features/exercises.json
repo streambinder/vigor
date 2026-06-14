@@ -32243,7 +32243,7 @@
       "horizontal_push": 45
     },
     "cues": [],
-    "mode": "either"
+    "mode": "reps"
   },
   {
     "id": "v-sit-on-floor",
