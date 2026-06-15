@@ -539,8 +539,18 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			actualMuscles = append(actualMuscles, muscle)
 		}
 
+		// skip muscle coverage validation for short sessions: <=30min yields 2-5
+		// exercises depending on methodology, making full coverage of all 7 muscle
+		// groups structurally impossible
+		validationTargetMuscles := targetMuscles
+		validationActualMuscles := actualMuscles
+		if duration <= 30 {
+			validationTargetMuscles = nil
+			validationActualMuscles = nil
+		}
+
 		// structural validation before scaling — fail fast on invalid LLM output
-		validationErr := training.Validate(validExerciseIDs, exerciseModes, validModifierIDs, validRoutineTypes, weightedModifierIDs, weightedExerciseIDs, !skipWarmupCooldown, targetMuscles, actualMuscles)
+		validationErr := training.Validate(validExerciseIDs, exerciseModes, validModifierIDs, validRoutineTypes, weightedModifierIDs, weightedExerciseIDs, !skipWarmupCooldown, validationTargetMuscles, validationActualMuscles)
 
 		if validationErr == nil {
 			// only scale repeats on structurally valid trainings
