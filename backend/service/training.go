@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -566,9 +567,21 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 				Int("attempt", attempt+1).
 				Int("max_attempts", maxGenerationRetries+1).
 				Err(validationErr).Msg("generated training validation failed, retrying")
-			if ve.Code == "invalid_exercise" {
+			switch ve.Code {
+			case "invalid_exercise":
 				correctionHint = ve.Error() + " — this exercise ID is not in the [WORK], [WARMUP], or [COOLDOWN] lists. Only use IDs from those lists; never use IDs from [HISTORY]"
-			} else {
+			case "missing_muscle":
+				// tell the LLM exactly which exercises cover the missing muscle
+				// so it doesn't hallucinate that none exist in the pool
+				missingMuscle := strings.TrimPrefix(ve.Error(), "training missing target muscle: ")
+				var available []string
+				for _, ex := range workExercises {
+					if slices.Contains(ex.Muscles, missingMuscle) {
+						available = append(available, ex.ID)
+					}
+				}
+				correctionHint = ve.Error() + " — the [WORK] list contains these " + missingMuscle + " exercises: " + strings.Join(available, ", ") + ". You MUST include at least one of them"
+			default:
 				correctionHint = ve.Error()
 			}
 			continue
