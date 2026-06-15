@@ -7,7 +7,7 @@ RUN go mod download
 COPY backend/ .
 RUN CGO_ENABLED=0 GOOS=linux go build -o backend main.go
 
-FROM alpine:3.23.4
+FROM alpine:3.24.0
 
 LABEL org.opencontainers.image.source=https://github.com/streambinder/vigor
 
