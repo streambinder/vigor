@@ -12,7 +12,7 @@ COPY backend ../backend/
 COPY knowledge/main.go ./
 RUN CGO_ENABLED=0 go build -o bootstrap main.go
 
-FROM pgvector/pgvector:0.8.2-pg18 AS data-builder
+FROM pgvector/pgvector:0.8.3-pg18 AS data-builder
 ARG OPENROUTER_EMBEDDING_MODELS
 USER root
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates=20230311+deb12u1 && rm -rf /var/lib/apt/lists/*
@@ -34,7 +34,7 @@ RUN --mount=type=secret,id=openrouter_api_key,uid=999 initdb -D /tmp/pgdata && \
   pg_dump -h /tmp -U postgres -d db --clean --if-exists >/build/init.sql && \
   pg_ctl -D /tmp/pgdata stop
 
-FROM pgvector/pgvector:0.8.2-pg18
+FROM pgvector/pgvector:0.8.3-pg18
 
 LABEL org.opencontainers.image.source=https://github.com/streambinder/vigor
 
