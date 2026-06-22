@@ -13,7 +13,7 @@ COPY . .
 RUN dart run build_runner build --delete-conflicting-outputs \
     && flutter build web --release
 
-FROM nginx:1.31.1-alpine
+FROM nginx:1.31.2-alpine
 
 COPY --from=builder /app/build/web /usr/share/nginx/html
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
