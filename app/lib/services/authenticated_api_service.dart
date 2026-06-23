@@ -51,6 +51,16 @@ class AuthenticatedApiService {
     return _authenticatedRequest(() => _doPostMultipart(endpoint, bytes: bytes, fieldName: fieldName, filename: filename));
   }
 
+  /// POST request that returns an SSE event stream with auth headers.
+  Stream<SSEEvent> postSSE(
+    String endpoint, {
+    Map<String, dynamic>? body,
+  }) async* {
+    final headers = await _getAuthHeaders();
+    if (headers == null) return;
+    yield* _apiService.postSSE(endpoint, headers: headers, body: body);
+  }
+
   /// Wraps a request with 401 interception and token refresh logic
   Future<ApiResponse<Map<String, dynamic>>> _authenticatedRequest(
     Future<ApiResponse<Map<String, dynamic>>> Function() request,

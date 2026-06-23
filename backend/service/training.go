@@ -43,7 +43,8 @@ var (
 )
 
 // GenerateTraining creates a new training for a user.
-func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string, loc *time.Location) (*model.Training, error) {
+// onProgress is called after each DAG node completes (may be nil).
+func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string, loc *time.Location, onProgress llm.DAGProgressFunc) (*model.Training, error) {
 	if duration <= 0 {
 		return nil, ErrDurationRequired
 	}
@@ -390,7 +391,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			HealthSnapshot:       healthSnapshot,
 			RecentHR:             recentHR,
 			RecentExerciseIDs:    recentExerciseIDs,
-		}, nil)
+		}, onProgress)
 		if err != nil {
 			failureEvent := event.TrainingGenerationFailureEvent{
 				Event:            event.Event{Time: time.Now()},

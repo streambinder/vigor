@@ -1,3 +1,4 @@
+import 'dart:async';
 import '../models/api_response.dart';
 import '../models/activity.dart';
 import '../dto/partner_info.dart';
@@ -30,6 +31,7 @@ class TrainingService {
     List<String>? goals,
     List<String>? muscles,
     void Function(int attempt)? onRetry,
+    void Function(String step)? onStep,
   }) async {
     AppLogger.debug('[TrainingService] Generating training with duration: $duration, gym: $gym');
 
@@ -37,62 +39,62 @@ class TrainingService {
       'duration': duration,
       'gym': gym,
     };
-    if (prompt != null && prompt.isNotEmpty) {
-      body['prompt'] = prompt;
-    }
-    if (equipment != null && equipment.isNotEmpty) {
-      body['equipment'] = equipment;
-    }
-    if (partners != null && partners.isNotEmpty) {
-      body['partners'] = partners;
-    }
-    if (skipWarmupCooldown == true) {
-      body['skipWarmupCooldown'] = true;
-    }
-    if (methodology != null && methodology.isNotEmpty) {
-      body['methodology'] = methodology;
-    }
-    if (goals != null && goals.isNotEmpty) {
-      body['goals'] = goals;
-    }
-    if (muscles != null && muscles.isNotEmpty) {
-      body['muscles'] = muscles;
-    }
+    if (prompt != null && prompt.isNotEmpty) body['prompt'] = prompt;
+    if (equipment != null && equipment.isNotEmpty) body['equipment'] = equipment;
+    if (partners != null && partners.isNotEmpty) body['partners'] = partners;
+    if (skipWarmupCooldown == true) body['skipWarmupCooldown'] = true;
+    if (methodology != null && methodology.isNotEmpty) body['methodology'] = methodology;
+    if (goals != null && goals.isNotEmpty) body['goals'] = goals;
+    if (muscles != null && muscles.isNotEmpty) body['muscles'] = muscles;
 
     const maxRetries = 2;
-    const retryableStatusCodes = [500, 502, 503, 504];
-    for (var attempt = 0; attempt <= maxRetries; attempt++) {
-      final response = await _apiService.post('/training', body: body);
 
-      // retry on 5xx errors (transient server issues) up to maxRetries times
-      if (retryableStatusCodes.contains(response.statusCode) && attempt < maxRetries) {
-        AppLogger.warning('[TrainingService] Got ${response.statusCode}, retrying (attempt ${attempt + 1})');
-        onRetry?.call(attempt + 1);
-        await Future.delayed(const Duration(seconds: 3));
-        continue;
+    for (var attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        final result = await _generateViaSSE(body, onStep: onStep);
+        if (result != null) {
+          emitEvent?.call(TrainingListChanged());
+          return ApiResponse.success(result, 200);
+        }
+        // SSE returned an error event — treat as retryable
+      } catch (e) {
+        AppLogger.warning('[TrainingService] SSE attempt failed: $e');
       }
 
-      if (response.isSuccess && response.data != null) {
-        try {
-          final training = Training.fromJson(response.data!);
-          AppLogger.info('[TrainingService] Generated training: ${training.id}');
-          emitEvent?.call(TrainingListChanged());
-          return ApiResponse.success(training, response.statusCode);
-        } catch (e) {
-          AppLogger.error('[TrainingService] failed to parse training', e);
-          return ApiResponse.error('Failed to parse training', response.statusCode);
-        }
-      } else {
-        AppLogger.error('[TrainingService] Failed to generate training: ${response.error}');
-        return ApiResponse.error(
-          response.error ?? 'Failed to generate training',
-          response.statusCode,
-        );
+      if (attempt < maxRetries) {
+        AppLogger.warning('[TrainingService] Retrying (attempt ${attempt + 1})');
+        onRetry?.call(attempt + 1);
+        await Future.delayed(const Duration(seconds: 3));
       }
     }
 
-    // should not reach here, but just in case
     return ApiResponse.error('Failed to generate training after retries', 500);
+  }
+
+  /// streams SSE events from POST /training, calls onStep for each step event,
+  /// returns the training on "done" or null on "error".
+  Future<Training?> _generateViaSSE(
+    Map<String, dynamic> body, {
+    void Function(String step)? onStep,
+  }) async {
+    await for (final event in _apiService.postSSE('/training', body: body)) {
+      switch (event.event) {
+        case 'step':
+          final step = event.data['step'] as String?;
+          if (step != null) {
+            AppLogger.debug('[TrainingService] SSE step: $step');
+            onStep?.call(step);
+          }
+        case 'done':
+          final training = Training.fromJson(event.data);
+          AppLogger.info('[TrainingService] Generated training: ${training.id}');
+          return training;
+        case 'error':
+          AppLogger.error('[TrainingService] SSE error: ${event.data['error']}');
+          return null;
+      }
+    }
+    return null;
   }
 
   Future<ApiResponse<List<Training>>> getTrainings() async {

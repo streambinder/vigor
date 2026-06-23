@@ -411,6 +411,15 @@
   "failedToGenerateTraining": "Failed to generate training",
   "generate": "Generate",
 
+  "generationStepAnalyzeRecovery": "Analyzing recovery data...",
+  "generationStepReviewHistory": "Reviewing training history...",
+  "generationStepCheckConstraints": "Checking constraints...",
+  "generationStepPickStrategy": "Choosing strategy...",
+  "generationStepSelectExercises": "Selecting exercises...",
+  "generationStepProgramLoad": "Programming sets & reps...",
+  "generationStepWriteCopy": "Writing session details...",
+  "generationStepStructure": "Finalizing...",
+
   "editGym": "Edit Gym",
   "gymName": "Gym Name",
   "gymNamePlaceholder": "e.g., Home Gym, LA Fitness",

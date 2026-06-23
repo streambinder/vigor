@@ -790,6 +790,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generate => '生成';
 
   @override
+  String get generationStepAnalyzeRecovery => '正在分析恢复数据...';
+
+  @override
+  String get generationStepReviewHistory => '正在查看训练记录...';
+
+  @override
+  String get generationStepCheckConstraints => '正在检查限制条件...';
+
+  @override
+  String get generationStepPickStrategy => '正在选择策略...';
+
+  @override
+  String get generationStepSelectExercises => '正在选择动作...';
+
+  @override
+  String get generationStepProgramLoad => '正在设定组数与次数...';
+
+  @override
+  String get generationStepWriteCopy => '正在撰写训练详情...';
+
+  @override
+  String get generationStepStructure => '正在完成...';
+
+  @override
   String get editGym => '编辑健身房';
 
   @override

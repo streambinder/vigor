@@ -803,6 +803,31 @@ class AppLocalizationsRu extends AppLocalizations {
   String get generate => 'Создать';
 
   @override
+  String get generationStepAnalyzeRecovery => 'Анализ данных восстановления...';
+
+  @override
+  String get generationStepReviewHistory => 'Обзор истории тренировок...';
+
+  @override
+  String get generationStepCheckConstraints => 'Проверка ограничений...';
+
+  @override
+  String get generationStepPickStrategy => 'Выбор стратегии...';
+
+  @override
+  String get generationStepSelectExercises => 'Подбор упражнений...';
+
+  @override
+  String get generationStepProgramLoad =>
+      'Программирование подходов и повторений...';
+
+  @override
+  String get generationStepWriteCopy => 'Создание описания тренировки...';
+
+  @override
+  String get generationStepStructure => 'Завершение...';
+
+  @override
   String get editGym => 'Редактировать Зал';
 
   @override

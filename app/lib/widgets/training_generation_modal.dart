@@ -70,6 +70,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   List<String> _messagePool = [];
   bool _showingRetryMessage = false;
   int _retryCallbackId = 0;
+  String? _currentStepMessage; // real SSE step message, overrides pool rotation
 
   @override
   void initState() {
@@ -270,6 +271,22 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       l10n.loadingRetryMsg6,
     ];
     return retryMessages[(_retryAttempt ?? 0) % retryMessages.length];
+  }
+
+  /// maps SSE step constants to localized UI messages
+  String? _stepMessage(String step) {
+    final l10n = AppLocalizations.of(context);
+    return switch (step) {
+      'ANALYZE_RECOVERY' => l10n.generationStepAnalyzeRecovery,
+      'REVIEW_HISTORY' => l10n.generationStepReviewHistory,
+      'CHECK_CONSTRAINTS' => l10n.generationStepCheckConstraints,
+      'PICK_STRATEGY' => l10n.generationStepPickStrategy,
+      'SELECT_EXERCISES' => l10n.generationStepSelectExercises,
+      'PROGRAM_LOAD' => l10n.generationStepProgramLoad,
+      'WRITE_COPY' => l10n.generationStepWriteCopy,
+      'STRUCTURE' => l10n.generationStepStructure,
+      _ => null,
+    };
   }
 
   // -- end rotating status messages --
@@ -863,6 +880,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       _isGenerating = true;
       _retryAttempt = null;
       _showingRetryMessage = false;
+      _currentStepMessage = null;
     });
     _startMessageRotation();
 
@@ -948,14 +966,25 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       methodology: _methodology,
       goals: _selectedGoals.isEmpty ? null : _selectedGoals.toList(),
       muscles: _selectedMuscles.isEmpty ? null : _selectedMuscles.toList(),
+      onStep: (step) {
+        if (!mounted || !_isGenerating) return;
+        final msg = _stepMessage(step);
+        if (msg != null) {
+          _stopMessageRotation();
+          setState(() {
+            _showingRetryMessage = false;
+            _currentStepMessage = msg;
+          });
+        }
+      },
       onRetry: (attempt) {
         if (!mounted) return;
         setState(() {
           _retryAttempt = attempt;
           _showingRetryMessage = true;
+          _currentStepMessage = null;
         });
         _stopMessageRotation();
-        // resume rotation after 4s, guard against stale callbacks
         final callbackId = ++_retryCallbackId;
         Timer(const Duration(seconds: 4), () {
           if (!mounted || !_isGenerating || callbackId != _retryCallbackId) return;
@@ -1163,9 +1192,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     final l10n = AppLocalizations.of(context);
     final statusText = _showingRetryMessage
         ? _getRetryMessage(l10n)
-        : (_messagePool.isNotEmpty
-            ? _messagePool[_currentMessageIndex % _messagePool.length]
-            : l10n.thisMayTakeAMoment);
+        : _currentStepMessage
+            ?? (_messagePool.isNotEmpty
+                ? _messagePool[_currentMessageIndex % _messagePool.length]
+                : l10n.thisMayTakeAMoment);
 
     return SizedBox(
       width: double.infinity,

@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -9,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/streambinder/vigor/handler/dto"
 	"github.com/streambinder/vigor/handler/middleware"
+	"github.com/streambinder/vigor/llm/pipeline"
 	"github.com/streambinder/vigor/service"
 )
 
@@ -25,12 +28,19 @@ func initTraining(app *fiber.App) {
 }
 
 func postTraining(c *fiber.Ctx) error {
+	if c.Get("Accept") == "text/event-stream" {
+		return postTrainingSSE(c)
+	}
+	return postTrainingJSON(c)
+}
+
+// postTrainingJSON is the original synchronous handler.
+func postTrainingJSON(c *fiber.Ctx) error {
 	var req dto.PostTrainingRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
 	}
 
-	// validate X-Timezone header
 	loc, err := service.ParseTimezone(c.Get("X-Timezone"))
 	if err != nil {
 		middleware.Log(c).Warn().Err(err).Msg("invalid timezone header")
@@ -39,39 +49,100 @@ func postTraining(c *fiber.Ctx) error {
 
 	training, err := service.GenerateTraining(
 		c.Locals("userID").(uuid.UUID),
-		req.Duration,
-		req.Equipment,
-		req.Gym,
-		req.Prompt,
-		req.Partners,
-		req.SkipWarmupCooldown,
-		req.Methodology,
-		req.Goals,
-		req.Muscles,
-		loc,
+		req.Duration, req.Equipment, req.Gym, req.Prompt, req.Partners,
+		req.SkipWarmupCooldown, req.Methodology, req.Goals, req.Muscles,
+		loc, nil,
 	)
 	if err != nil {
-		switch {
-		case errors.Is(err, service.ErrDurationRequired):
-			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "duration is required"})
-		case errors.Is(err, service.ErrDurationOutOfRange):
-			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "duration must be between 10 and 180 minutes"})
-		case errors.Is(err, service.ErrPromptTooLong):
-			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "prompt exceeds maximum length"})
-		case errors.Is(err, service.ErrUserNotFound):
-			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
-		case errors.Is(err, service.ErrInvalidGym):
-			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "gym not found"})
-		case errors.Is(err, service.ErrMalformedTraining):
-			c.Set("Retry-After", "3")
-			return c.Status(http.StatusServiceUnavailable).JSON(fiber.Map{"error": "malformed generated training"})
-		default:
-			middleware.Log(c).Error().Err(err).Msg("failed to generate training")
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-		}
+		return trainingError(c, err)
 	}
 
 	return c.JSON(dto.PostTrainingResponse(*training))
+}
+
+// postTrainingSSE streams generation progress via SSE, then sends the final training.
+// events: "step" with {"step":"STEP_NAME"}, "done" with full training JSON, "error" with {"error":"msg"}.
+func postTrainingSSE(c *fiber.Ctx) error {
+	var req dto.PostTrainingRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
+	}
+
+	loc, err := service.ParseTimezone(c.Get("X-Timezone"))
+	if err != nil {
+		middleware.Log(c).Warn().Err(err).Msg("invalid timezone header")
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": fmt.Sprintf("invalid timezone: %v", err)})
+	}
+
+	userID := c.Locals("userID").(uuid.UUID)
+
+	c.Set("Content-Type", "text/event-stream")
+	c.Set("Cache-Control", "no-cache")
+	c.Set("Connection", "keep-alive")
+
+	c.Context().SetBodyStreamWriter(func(w *bufio.Writer) {
+		// progress callback writes SSE step events
+		onProgress := func(step pipeline.GenerationStep) {
+			fmt.Fprintf(w, "event: step\ndata: {\"step\":%q}\n\n", step)
+			w.Flush()
+		}
+
+		training, genErr := service.GenerateTraining(
+			userID,
+			req.Duration, req.Equipment, req.Gym, req.Prompt, req.Partners,
+			req.SkipWarmupCooldown, req.Methodology, req.Goals, req.Muscles,
+			loc, onProgress,
+		)
+
+		if genErr != nil {
+			errMsg := trainingErrorMessage(genErr)
+			fmt.Fprintf(w, "event: error\ndata: {\"error\":%q}\n\n", errMsg)
+			w.Flush()
+			return
+		}
+
+		data, _ := json.Marshal(dto.PostTrainingResponse(*training))
+		fmt.Fprintf(w, "event: done\ndata: %s\n\n", data)
+		w.Flush()
+	})
+
+	return nil
+}
+
+// trainingError returns the appropriate HTTP error for a generation failure.
+func trainingError(c *fiber.Ctx, err error) error {
+	switch {
+	case errors.Is(err, service.ErrDurationRequired):
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "duration is required"})
+	case errors.Is(err, service.ErrDurationOutOfRange):
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "duration must be between 10 and 180 minutes"})
+	case errors.Is(err, service.ErrPromptTooLong):
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "prompt exceeds maximum length"})
+	case errors.Is(err, service.ErrUserNotFound):
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
+	case errors.Is(err, service.ErrInvalidGym):
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "gym not found"})
+	case errors.Is(err, service.ErrMalformedTraining):
+		c.Set("Retry-After", "3")
+		return c.Status(http.StatusServiceUnavailable).JSON(fiber.Map{"error": "malformed generated training"})
+	default:
+		middleware.Log(c).Error().Err(err).Msg("failed to generate training")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+}
+
+// trainingErrorMessage extracts a user-facing error message from a generation error.
+func trainingErrorMessage(err error) string {
+	switch {
+	case errors.Is(err, service.ErrMalformedTraining):
+		return "malformed generated training"
+	case errors.Is(err, service.ErrDurationRequired):
+		return "duration is required"
+	case errors.Is(err, service.ErrDurationOutOfRange):
+		return "duration must be between 10 and 180 minutes"
+	default:
+		return err.Error()
+	}
 }
 
 func getTraining(c *fiber.Ctx) error {

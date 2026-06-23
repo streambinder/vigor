@@ -1572,6 +1572,54 @@ abstract class AppLocalizations {
   /// **'Generate'**
   String get generate;
 
+  /// No description provided for @generationStepAnalyzeRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing recovery data...'**
+  String get generationStepAnalyzeRecovery;
+
+  /// No description provided for @generationStepReviewHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewing training history...'**
+  String get generationStepReviewHistory;
+
+  /// No description provided for @generationStepCheckConstraints.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking constraints...'**
+  String get generationStepCheckConstraints;
+
+  /// No description provided for @generationStepPickStrategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Choosing strategy...'**
+  String get generationStepPickStrategy;
+
+  /// No description provided for @generationStepSelectExercises.
+  ///
+  /// In en, this message translates to:
+  /// **'Selecting exercises...'**
+  String get generationStepSelectExercises;
+
+  /// No description provided for @generationStepProgramLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Programming sets & reps...'**
+  String get generationStepProgramLoad;
+
+  /// No description provided for @generationStepWriteCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing session details...'**
+  String get generationStepWriteCopy;
+
+  /// No description provided for @generationStepStructure.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalizing...'**
+  String get generationStepStructure;
+
   /// No description provided for @editGym.
   ///
   /// In en, this message translates to:

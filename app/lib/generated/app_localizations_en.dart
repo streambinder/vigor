@@ -805,6 +805,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generate => 'Generate';
 
   @override
+  String get generationStepAnalyzeRecovery => 'Analyzing recovery data...';
+
+  @override
+  String get generationStepReviewHistory => 'Reviewing training history...';
+
+  @override
+  String get generationStepCheckConstraints => 'Checking constraints...';
+
+  @override
+  String get generationStepPickStrategy => 'Choosing strategy...';
+
+  @override
+  String get generationStepSelectExercises => 'Selecting exercises...';
+
+  @override
+  String get generationStepProgramLoad => 'Programming sets & reps...';
+
+  @override
+  String get generationStepWriteCopy => 'Writing session details...';
+
+  @override
+  String get generationStepStructure => 'Finalizing...';
+
+  @override
   String get editGym => 'Edit Gym';
 
   @override

@@ -1,9 +1,17 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import '../models/api_response.dart';
 import 'app_logger.dart';
+
+/// A single SSE event with an event type and parsed JSON data.
+class SSEEvent {
+  final String event;
+  final Map<String, dynamic> data;
+  SSEEvent(this.event, this.data);
+}
 
 class ApiService {
   final http.Client _client;
@@ -141,6 +149,32 @@ class ApiService {
     } catch (e) {
       AppLogger.error('[ApiService] POST multipart request failed', e);
       return ApiResponse.networkError('Something went wrong');
+    }
+  }
+
+  /// POST request that returns an SSE event stream.
+  Stream<SSEEvent> postSSE(
+    String endpoint, {
+    Map<String, dynamic>? body,
+    Map<String, String>? headers,
+  }) async* {
+    final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+    final request = http.Request('POST', url);
+    request.headers.addAll(_buildHeaders(headers));
+    request.headers['Accept'] = 'text/event-stream';
+    if (body != null) request.body = jsonEncode(body);
+
+    final response = await _client.send(request);
+    String eventType = '';
+    await for (final chunk in response.stream.transform(utf8.decoder).transform(const LineSplitter())) {
+      if (chunk.startsWith('event: ')) {
+        eventType = chunk.substring(7).trim();
+      } else if (chunk.startsWith('data: ')) {
+        final data = chunk.substring(6).trim();
+        try {
+          yield SSEEvent(eventType, jsonDecode(data) as Map<String, dynamic>);
+        } catch (_) {}
+      }
     }
   }
 

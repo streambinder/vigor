@@ -790,6 +790,30 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generate => '生成';
 
   @override
+  String get generationStepAnalyzeRecovery => '回復データを分析中...';
+
+  @override
+  String get generationStepReviewHistory => 'トレーニング履歴を確認中...';
+
+  @override
+  String get generationStepCheckConstraints => '制約を確認中...';
+
+  @override
+  String get generationStepPickStrategy => '戦略を選択中...';
+
+  @override
+  String get generationStepSelectExercises => 'エクササイズを選択中...';
+
+  @override
+  String get generationStepProgramLoad => 'セットとレップを設定中...';
+
+  @override
+  String get generationStepWriteCopy => 'セッション詳細を作成中...';
+
+  @override
+  String get generationStepStructure => '最終処理中...';
+
+  @override
   String get editGym => 'ジムを編集';
 
   @override

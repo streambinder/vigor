@@ -790,6 +790,30 @@ class AppLocalizationsKo extends AppLocalizations {
   String get generate => '생성';
 
   @override
+  String get generationStepAnalyzeRecovery => '회복 데이터 분석 중...';
+
+  @override
+  String get generationStepReviewHistory => '운동 기록 검토 중...';
+
+  @override
+  String get generationStepCheckConstraints => '제약 조건 확인 중...';
+
+  @override
+  String get generationStepPickStrategy => '전략 선택 중...';
+
+  @override
+  String get generationStepSelectExercises => '운동 선택 중...';
+
+  @override
+  String get generationStepProgramLoad => '세트와 반복 수 설정 중...';
+
+  @override
+  String get generationStepWriteCopy => '세션 세부 사항 작성 중...';
+
+  @override
+  String get generationStepStructure => '마무리 중...';
+
+  @override
   String get editGym => '헬스장 수정';
 
   @override
