@@ -191,7 +191,7 @@ func (t Training) DaysSince() int {
 }
 
 // Validate checks that the training has valid structure.
-func (t *Training) Validate(validExerciseIDs map[string]string, exerciseModes map[string]string, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, weightedExerciseIDs map[string]bool, requireWarmupCooldown bool, targetMuscles []string, actualMuscles []string) error {
+func (t *Training) Validate(validExerciseIDs map[string]string, exerciseModes map[string]string, validModifierIDs, validRoutineTypes map[string]bool, weightedModifierIDs map[string]bool, weightedExerciseIDs map[string]bool, requireWarmupCooldown bool) error {
 	if t.Name == "" {
 		return &ValidationError{"empty_name", "training name is empty"}
 	}
@@ -299,19 +299,6 @@ func (t *Training) Validate(validExerciseIDs map[string]string, exerciseModes ma
 	}
 	if !validMethodologies[t.Methodology] {
 		return &ValidationError{"invalid_methodology", "invalid methodology: " + t.Methodology}
-	}
-
-	// validate target muscles coverage
-	if len(targetMuscles) > 0 && len(actualMuscles) > 0 {
-		actualSet := make(map[string]bool, len(actualMuscles))
-		for _, m := range actualMuscles {
-			actualSet[m] = true
-		}
-		for _, m := range targetMuscles {
-			if !actualSet[m] {
-				return &ValidationError{"missing_muscle", "training missing target muscle: " + m}
-			}
-		}
 	}
 
 	return nil

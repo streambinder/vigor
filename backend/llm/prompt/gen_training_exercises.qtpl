@@ -1,0 +1,69 @@
+{% package prompt %}
+
+{% import "strings" %}
+{% import "github.com/streambinder/vigor/model" %}
+
+{% func NodeExercisesSystem(skipWarmupCooldown bool, duration int) -%}
+You are an exercise selection specialist. Pick exercises from the provided pools for a training session.
+
+Output a JSON object with:
+- exercises: array of {exercise_id, rationale, phase} where phase is "warmup", "work", or "cooldown"
+
+Rules:
+- Use only exercise IDs from the provided lists — never invent IDs
+- Annotations in parentheses (weighted, timer-only, reps-only, recent) are metadata — not part of the ID
+- For work exercises: cover the primary muscles with higher count, secondary muscles with 1-2 exercises
+- Avoid exercises matching any contraindicated pattern
+- Prefer favorite exercises when they fit
+- Prefer non-recent exercises over recent ones for variety
+- Avoid exercises listed in avoid_exercises
+{% if !skipWarmupCooldown %}- Include 3-4 warmup exercises and 4-6 cooldown exercises covering worked muscles{% endif %}
+- Scale work exercise count to session duration:
+{% if duration <= 30 %}  2-4 work exercises{% elseif duration <= 45 %}  3-5 work exercises{% elseif duration <= 60 %}  4-6 work exercises{% elseif duration <= 90 %}  6-9 work exercises{% else %}  8-12 work exercises{% endif %}
+- Keep rationale to 3-8 words per exercise
+{% endfunc %}
+
+{% func NodeExercisesUser(
+    methodology string,
+    primaryMuscles []string,
+    secondaryMuscles []string,
+    contraindicatedPatterns []string,
+    avoidExercises []string,
+    workExercises []model.Exercise,
+    warmupExercises []model.Exercise,
+    cooldownExercises []model.Exercise,
+    favoriteExercises []model.Exercise,
+    recentExerciseIDs []string,
+    calibrationFamilies []string,
+    skipWarmupCooldown bool,
+) -%}
+Methodology: {%s methodology %}
+Primary muscles: {%s strings.Join(primaryMuscles, ", ") %}
+{% if len(secondaryMuscles) > 0 %}Secondary muscles: {%s strings.Join(secondaryMuscles, ", ") %}{% endif %}
+{% if len(contraindicatedPatterns) > 0 %}
+Avoid these patterns: {%s strings.Join(contraindicatedPatterns, "; ") %}
+{% endif %}
+{% if len(avoidExercises) > 0 %}
+Avoid these exercises: {%s strings.Join(avoidExercises, ", ") %}
+{% endif %}
+{% if len(calibrationFamilies) > 0 %}
+Calibration priority — include exercises from: {%s strings.Join(calibrationFamilies, ", ") %}
+{% endif %}
+{% if len(favoriteExercises) > 0 %}
+Favorites: {% for i, ex := range favoriteExercises %}{%s ex.ID %}{% if i < len(favoriteExercises)-1 %}, {% endif %}{% endfor %}
+{% endif %}
+
+{% code recentSet := make(map[string]bool, len(recentExerciseIDs)); for _, id := range recentExerciseIDs { recentSet[id] = true } %}
+{% if !skipWarmupCooldown %}
+[WARMUP] {%d len(warmupExercises) %} options
+{% for _, exercise := range warmupExercises %}{%s exercise.ID %}, {% endfor %}
+
+{% endif %}
+[WORK] {%d len(workExercises) %} options
+{% code workByMuscle := groupExercisesByMuscle(workExercises) %}{% for _, muscle := range workExerciseMuscleOrder(workExercises) %}{%s muscle %}: {% for i, ex := range workByMuscle[muscle] %}{%s ex.ID %}{% code annotations := exerciseAnnotations(ex, recentSet) %}{% if annotations != "" %} ({%s annotations %}){% endif %}{% if i < len(workByMuscle[muscle])-1 %}, {% endif %}{% endfor %}
+{% endfor %}
+{% if !skipWarmupCooldown %}
+[COOLDOWN] {%d len(cooldownExercises) %} options
+{% for i, exercise := range cooldownExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %} ({%s exercise.Muscles[0] %}){% endif %}{% if i < len(cooldownExercises)-1 %}, {% endif %}{% endfor %}
+{% endif %}
+{% endfunc %}

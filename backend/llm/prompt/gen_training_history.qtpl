@@ -1,0 +1,42 @@
+{% package prompt %}
+
+{% import "encoding/json" %}
+{% import "github.com/google/uuid" %}
+{% import "github.com/streambinder/vigor/model" %}
+
+{% func NodeHistorySystem() -%}
+You are a training history analyst. Review recent training sessions and user feedback to identify progression signals.
+
+Output a JSON object with:
+- progressions: array of {exercise_id, action, from_weight, to_weight, signal} where action is one of: increase_weight, decrease_weight, increase_reps, decrease_reps, replace, add_modifier
+- avoid_exercises: array of exercise IDs rated "impossible" or consistently "too_hard"
+- recent_names: array of training names from history (to avoid reusing)
+- pattern_notes: one sentence about overall patterns (e.g. "user finds leg sessions too hard")
+- bad_session_notes: one sentence if any recent session was rated bad, empty string otherwise
+
+Rules:
+- "too_easy" → increase_weight or increase_reps or add_modifier
+- "too_hard" → decrease_weight or decrease_reps
+- "impossible" → replace (add to avoid_exercises)
+- If quality was rated bad, note the reason
+- Be concise — only report actionable signals
+{% endfunc %}
+
+{% func NodeHistoryUser(
+    recentTrainings []model.Training,
+    recentFeedback map[uuid.UUID]model.TrainingFeedback,
+    recentHR map[uuid.UUID]*model.HealthExerciseSession,
+) -%}
+{% if len(recentTrainings) == 0 %}No training history. Return empty progressions, avoid_exercises, recent_names, and empty notes.
+{% else %}
+{% for _, training := range recentTrainings %}
+{% code fb, hasFb := recentFeedback[training.ID] %}
+{% code var afb map[string]string; if hasFb { json.Unmarshal(fb.ActivityFeedback, &afb) } %}
+{% code actWeights := activityWeights(training) %}
+- "{%s training.Name %}" | {%d training.DaysSince() %}d ago | {%s training.Methodology %}{% if training.CompletedIn != nil %} | {%d *training.CompletedIn / 60 %}min{% endif %}{% if hasFb && fb.Quality != nil %}{% if *fb.Quality %} | good{% else %} | bad{% if fb.QualityReason != "" %} ({%s fb.QualityReason %}){% endif %}{% endif %}{% endif %}{% if hasFb && fb.Message != "" %} | "{%s fb.Message %}"{% endif %}{% code hr := recentHR[training.ID] %}{% if hr != nil && hr.AvgHR != nil %} | HR avg {%d *hr.AvgHR %}{% if hr.MaxHR != nil %} max {%d *hr.MaxHR %}{% endif %}bpm{% endif %}
+{% code seen := make(map[string]bool) %}{% for exID, act := range actWeights %}{% code seen[exID] = true %}  {%s exID %}: {%s formatWeight(act.WeightKg) %}×{%d act.Reps %}{% if fb := afb[exID]; len(fb) > 0 %} ({%s fb %}){% endif %}
+{% endfor %}{% for exID, exFb := range afb %}{% if !seen[exID] && len(exFb) > 0 %}  {%s exID %}: {%s exFb %}
+{% endif %}{% endfor %}
+{% endfor %}
+{% endif %}
+{% endfunc %}

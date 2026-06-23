@@ -3,9 +3,7 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"regexp"
-	"slices"
 	"strings"
 	"time"
 
@@ -208,7 +206,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		return nil, err
 	}
 
-	// resolve target muscles early: needed for cooldown retrieval and later validation
+	// resolve target muscles for cooldown retrieval (cooldown stretches match worked muscles)
 	targetMuscles := muscles
 	if len(targetMuscles) == 0 {
 		var allMuscles []model.Muscle
@@ -362,56 +360,14 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		modifierVariants = gym.ModifierVariants.Data()
 	}
 
-	// build recency-bias reminders: critical signals echoed at the end of the prompt
-	// to exploit recency bias. LLMs exhibit a U-shaped attention curve (strong at
-	// beginning/end, weak in the middle) due to left-skewed training distributions,
-	// positional encoding saturation, and softmax attention dynamics — amplified in
-	// smaller models. see: https://arxiv.org/html/2511.12869v1
-	var reminders []string
-	for _, p := range profiles {
-		for _, inj := range p.Injuries() {
-			reminders = append(reminders, fmt.Sprintf("Injury: %s", inj.Description))
-		}
-	}
-	for _, fb := range recentFeedback {
-		if fb.Quality != nil && !*fb.Quality {
-			reason := fb.QualityReason
-			if fb.Message != "" {
-				reason = strings.TrimSpace(reason + " — " + fb.Message)
-			}
-			reminders = append(reminders, fmt.Sprintf("Last training rated bad: %s", reason))
-			break // one reminder is enough
-		}
-	}
-	if len(calibrationGaps) > 0 {
-		families := make([]string, 0, len(calibrationGaps))
-		for f := range calibrationGaps {
-			families = append(families, f)
-		}
-		reminders = append(reminders, fmt.Sprintf("Calibrating: prioritize %s", strings.Join(families, ", ")))
-	}
-	if healthSnapshot != nil {
-		const deviationThreshold = 20.0 // flag deviations >= 20%
-		if healthSnapshot.SleepDeviation <= -deviationThreshold {
-			reminders = append(reminders, fmt.Sprintf("Recovery concern: sleep %.0f%% below baseline", -healthSnapshot.SleepDeviation))
-		}
-		if healthSnapshot.HRVDeviation <= -deviationThreshold {
-			reminders = append(reminders, fmt.Sprintf("Recovery concern: HRV %.0f%% below baseline", -healthSnapshot.HRVDeviation))
-		}
-		if healthSnapshot.RHRDeviation >= deviationThreshold {
-			reminders = append(reminders, fmt.Sprintf("Recovery concern: resting HR %.0f%% above baseline", healthSnapshot.RHRDeviation))
-		}
-	}
-
 	llmStart := time.Now()
 	var training *model.Training
 	var execution model.TrainingPrompt
-	var correctionHint string
 	var actualMuscles []string
 
 	for attempt := 0; attempt <= maxGenerationRetries; attempt++ {
 		var err error
-		training, execution, err = llm.GenTraining(llm.TrainingGenerationRequest{
+		training, execution, err = llm.GenTrainingDAG(llm.TrainingGenerationRequest{
 			Profiles:             profiles,
 			Goals:                goalData,
 			WorkExercises:        workExercises,
@@ -433,45 +389,24 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			CalibrationGaps:      calibrationGaps,
 			HealthSnapshot:       healthSnapshot,
 			RecentHR:             recentHR,
-			Reminders:            reminders,
-			LastReasoningModel:   execution.Reasoning.Model,
-			LastStructuringModel: execution.Structuring.Model,
-			LastReasoningOutput:  execution.Reasoning.Output,
-			CorrectionHint:       correctionHint,
 			RecentExerciseIDs:    recentExerciseIDs,
-		})
+		}, nil)
 		if err != nil {
-			reason := "llm_error"
-			retryable := false
-			if errors.Is(err, llm.ErrLLMTruncated) {
-				reason = "truncated_error"
-				retryable = true
-				correctionHint = "response was truncated (too long). Be much more concise in reasoning: use 3-5 word rationales, fewer exercises, shorter strategy"
-			} else if errors.Is(err, llm.ErrLLMUnmarshal) {
-				// structuring-only retries are exhausted inside GenTraining;
-				// if we get here, the reasoning itself is likely ambiguous
-				reason = "unmarshal_error"
-				retryable = true
-				correctionHint = "structuring stage produced invalid JSON even after retrying. Produce clearer, less ambiguous reasoning output"
-			}
-
 			failureEvent := event.TrainingGenerationFailureEvent{
 				Event:            event.Event{Time: time.Now()},
 				ReasoningModel:   execution.Reasoning.Model,
 				StructuringModel: execution.Structuring.Model,
-				Reason:           reason,
+				Reason:           "llm_error",
 				Message:          err.Error(),
 			}
-
-			if retryable && attempt < maxGenerationRetries {
+			if attempt < maxGenerationRetries {
 				log.Warn().
 					Interface("event", failureEvent).
 					Int("attempt", attempt+1).
 					Int("max_attempts", maxGenerationRetries+1).
-					Err(err).Msg("retryable LLM error, retrying")
+					Err(err).Msg("DAG generation failed, retrying")
 				continue
 			}
-
 			log.Error().
 				Interface("event", failureEvent).
 				Err(err).Msg("training generation failed")
@@ -512,10 +447,8 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			}
 		}
 
-		// enforce reps/duration mutual exclusivity: methodology determines which one to keep
 		training.PurgeRepsDuration()
 
-		// strip warmup/cooldown routines the LLM may have generated despite being told not to
 		if skipWarmupCooldown {
 			workOnly := training.Routines[:0]
 			for _, r := range training.Routines {
@@ -539,21 +472,10 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			actualMuscles = append(actualMuscles, muscle)
 		}
 
-		// skip muscle coverage validation for short sessions: <=30min yields 2-5
-		// exercises depending on methodology, making full coverage of all 7 muscle
-		// groups structurally impossible
-		validationTargetMuscles := targetMuscles
-		validationActualMuscles := actualMuscles
-		if duration <= 30 {
-			validationTargetMuscles = nil
-			validationActualMuscles = nil
-		}
-
-		// structural validation before scaling — fail fast on invalid LLM output
-		validationErr := training.Validate(validExerciseIDs, exerciseModes, validModifierIDs, validRoutineTypes, weightedModifierIDs, weightedExerciseIDs, !skipWarmupCooldown, validationTargetMuscles, validationActualMuscles)
+		// structural validation only — muscle coverage is owned by the strategy node, not the validator
+		validationErr := training.Validate(validExerciseIDs, exerciseModes, validModifierIDs, validRoutineTypes, weightedModifierIDs, weightedExerciseIDs, !skipWarmupCooldown)
 
 		if validationErr == nil {
-			// only scale repeats on structurally valid trainings
 			training.SetDuration(duration)
 			validationErr = training.ValidateDuration(duration)
 		}
@@ -577,23 +499,6 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 				Int("attempt", attempt+1).
 				Int("max_attempts", maxGenerationRetries+1).
 				Err(validationErr).Msg("generated training validation failed, retrying")
-			switch ve.Code {
-			case "invalid_exercise":
-				correctionHint = ve.Error() + " — this exercise ID is not in the [WORK], [WARMUP], or [COOLDOWN] lists. Only use IDs from those lists; never use IDs from [HISTORY]"
-			case "missing_muscle":
-				// tell the LLM exactly which exercises cover the missing muscle
-				// so it doesn't hallucinate that none exist in the pool
-				missingMuscle := strings.TrimPrefix(ve.Error(), "training missing target muscle: ")
-				var available []string
-				for _, ex := range workExercises {
-					if slices.Contains(ex.Muscles, missingMuscle) {
-						available = append(available, ex.ID)
-					}
-				}
-				correctionHint = ve.Error() + " — the [WORK] list contains these " + missingMuscle + " exercises: " + strings.Join(available, ", ") + ". You MUST include at least one of them"
-			default:
-				correctionHint = ve.Error()
-			}
 			continue
 		}
 

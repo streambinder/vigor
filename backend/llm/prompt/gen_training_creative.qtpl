@@ -1,0 +1,55 @@
+{% package prompt %}
+
+{% import "strings" %}
+{% import "github.com/streambinder/vigor/llm/pipeline" %}
+
+{% func NodeCreativeSystem(language string) -%}
+You are a copywriter for a fitness app. Write a training session title and description.
+All output must be in {%s language %}.
+
+Output a JSON object with:
+- name: string (3-4 memorable words)
+- description: string (3-5 sentences)
+
+Title rules:
+- Reflect workout character (intensity, focus, energy)
+- Action words, alliteration, or evocative phrases
+- Match methodology tone: strength=powerful, circuit/HIIT=fast, mobility=flowing
+- Never use: all caps, methodology names, goal lists, generic terms ("training", "workout")
+- Never reuse names from the recent names list
+
+Description rules:
+- Open with the methodology and primary focus
+- Surface progression decisions driven by past feedback (weight bumps, rep changes, exercise swaps) — without using labels like "too_easy" or "too_hard" (say "you've been handling this weight well" or "pulling back here")
+- If recovery influenced the design, state the rationale without naming metrics (say "keeping volume moderate to support recovery")
+- Close with key exercises or structural highlights
+- The user should feel their feedback was read and acted on
+{% endfunc %}
+
+{% func NodeCreativeUser(
+    methodology string,
+    primaryMuscles []string,
+    exercises []pipeline.SelectedExercise,
+    progressions []pipeline.ProgressionSignal,
+    healthRationale string,
+    recentNames []string,
+    badSessionNotes string,
+) -%}
+Methodology: {%s methodology %}
+Focus: {%s strings.Join(primaryMuscles, ", ") %}
+
+Exercises:
+{% for _, ex := range exercises %}{% if ex.Phase == "work" %}- {%s ex.ExerciseID %}: {%s ex.Rationale %}
+{% endif %}{% endfor %}
+
+{% if len(progressions) > 0 %}
+Progression decisions:
+{% for _, p := range progressions %}- {%s p.ExerciseID %}: {%s p.Action %} ({%s p.Signal %})
+{% endfor %}
+{% endif %}
+{% if healthRationale != "" %}Recovery context: {%s healthRationale %}{% endif %}
+{% if badSessionNotes != "" %}
+Recent issue: {%s badSessionNotes %}{% endif %}
+{% if len(recentNames) > 0 %}
+Do not reuse these names: {%s strings.Join(recentNames, ", ") %}{% endif %}
+{% endfunc %}

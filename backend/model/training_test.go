@@ -726,7 +726,7 @@ func TestValidate_WeightModifierConsistency(t *testing.T) {
 					}},
 				}},
 			}
-			err := tr.Validate(validExercises, nil, validModifiers, validRoutines, weightedModifiers, nil, false, nil, nil)
+			err := tr.Validate(validExercises, nil, validModifiers, validRoutines, weightedModifiers, nil, false)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -784,7 +784,7 @@ func TestValidate_DurationTolerance(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tr := makeTestTraining()
-			if err := tr.Validate(validExercises, nil, validModifiers, validRoutines, weightedModifiers, nil, false, nil, nil); err != nil {
+			if err := tr.Validate(validExercises, nil, validModifiers, validRoutines, weightedModifiers, nil, false); err != nil {
 				t.Fatalf("Validate() unexpected structural error: %v", err)
 			}
 			tr.SetDuration(tt.requestedMinutes)
@@ -792,51 +792,6 @@ func TestValidate_DurationTolerance(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ValidateDuration() with requested=%dm, actual=%ds: error = %v, wantErr %v",
 					tt.requestedMinutes, actualDuration, err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestValidate_TargetMuscles(t *testing.T) {
-	validExercises := map[string]string{"ex1": "ex1", "ex2": "ex2"}
-	validModifiers := map[string]bool{}
-	validRoutines := map[string]bool{"work": true}
-	weightedModifiers := map[string]bool{}
-
-	base := func() Training {
-		return Training{
-			Name:        "Test",
-			Methodology: "strength",
-			Routines: []Routine{routine("work", 0, []Block{
-				block(1, 0, []Activity{
-					{ExerciseID: "ex1", Reps: 10},
-					{ExerciseID: "ex2", Reps: 10},
-				}),
-			})},
-		}
-	}
-
-	tests := []struct {
-		name    string
-		target  []string
-		actual  []string
-		wantErr bool
-	}{
-		{"all targets covered", []string{"chest", "arms"}, []string{"chest", "arms", "core"}, false},
-		{"exact match", []string{"chest", "arms"}, []string{"chest", "arms"}, false},
-		{"missing target muscle", []string{"chest", "arms", "legs"}, []string{"chest", "arms"}, true},
-		{"nil targets skips check", nil, []string{"chest"}, false},
-		{"empty targets skips check", []string{}, []string{"chest"}, false},
-		{"nil actuals skips check", []string{"chest"}, nil, false},
-		{"empty actuals skips check", []string{"chest"}, []string{}, false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tr := base()
-			err := tr.Validate(validExercises, nil, validModifiers, validRoutines, weightedModifiers, nil, false, tt.target, tt.actual)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -936,7 +891,7 @@ func TestValidate_NewChecks(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tr := base()
 			tt.mutate(&tr)
-			err := tr.Validate(validExercises, nil, validModifiers, validRoutines, weightedModifiers, nil, false, nil, nil)
+			err := tr.Validate(validExercises, nil, validModifiers, validRoutines, weightedModifiers, nil, false)
 			if tt.wantCode == "" {
 				if err != nil {
 					t.Errorf("Validate() unexpected error: %v", err)

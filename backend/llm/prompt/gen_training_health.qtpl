@@ -1,0 +1,41 @@
+{% package prompt %}
+
+{% import "github.com/streambinder/vigor/model" %}
+
+{% func NodeHealthSystem() -%}
+You are a recovery analyst. Given a user's health snapshot, determine how training volume and intensity should be adjusted.
+
+Output a JSON object with:
+- volume_modifier: float 0.0-1.0 (1.0 = full volume, 0.7 = 30% reduction)
+- intensity_modifier: float 0.0-1.0 (1.0 = full intensity)
+- extend_warmup: boolean
+- rationale: one sentence explaining your reasoning (internal, not shown to user)
+
+Rules:
+- Sleep deviation <= -15%: reduce volume proportionally
+- HRV deviation <= -15%: reduce both volume and intensity
+- RHR deviation >= +15%: reduce intensity
+- Low step count vs baseline: extend warmup
+- External workouts in last 48h: reduce volume for overlapping muscle groups
+- Multiple negative deviations compound: reduce more aggressively
+- Extreme values (sleep < 5h, HRV < 15ms RMSSD): significant reduction regardless of baseline
+- If baselines not established (< 7 days): only apply extreme-value rules
+- Negligible deviations: return 1.0 for both modifiers
+{% endfunc %}
+
+{% func NodeHealthUser(healthSnapshot *model.HealthSnapshot) -%}
+{% if healthSnapshot == nil %}No health data available. Return volume_modifier=1.0, intensity_modifier=1.0, extend_warmup=false, rationale="no data".
+{% else %}
+Sleep: {%f.1 healthSnapshot.SleepHours %}h (baseline: {%f.1 healthSnapshot.SleepBaseline %}h, deviation: {%s formatDeviation(healthSnapshot.SleepDeviation) %})
+  Deep: {%f.1 healthSnapshot.SleepDeepHours %}h, Light: {%f.1 healthSnapshot.SleepLightHours %}h, REM: {%f.1 healthSnapshot.SleepREMHours %}h
+HRV: {%f.0 healthSnapshot.HRVRMSSD %}ms RMSSD (baseline: {%f.0 healthSnapshot.HRVBaseline %}ms, deviation: {%s formatDeviation(healthSnapshot.HRVDeviation) %})
+RHR: {%d healthSnapshot.RestingHR %}bpm (baseline: {%f.0 healthSnapshot.RHRBaseline %}bpm, deviation: {%s formatDeviation(healthSnapshot.RHRDeviation) %})
+Steps yesterday: {%s formatNumber(healthSnapshot.Steps) %} (baseline: {%s formatNumber(int(healthSnapshot.StepsBaseline)) %}, deviation: {%s formatDeviation(healthSnapshot.StepsDeviation) %})
+{% if len(healthSnapshot.ExternalWorkouts) > 0 %}External workouts (last 3 days):
+{% for _, w := range healthSnapshot.ExternalWorkouts %}  - {%d w.DaysAgo %} day{% if w.DaysAgo != 1 %}s{% endif %} ago: {%s w.ExerciseType %}, {%d w.DurationMins %}min
+{% endfor %}{% endif %}
+{% if healthSnapshot.BaselineDays >= 7 %}Baselines from {%d healthSnapshot.BaselineDays %}-day rolling averages.
+{% else %}Baselines not established ({%d healthSnapshot.BaselineDays %}/7 days) — extreme-value rules only.
+{% endif %}
+{% endif %}
+{% endfunc %}

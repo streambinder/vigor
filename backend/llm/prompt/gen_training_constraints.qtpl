@@ -1,0 +1,26 @@
+{% package prompt %}
+
+{% import "github.com/streambinder/vigor/model" %}
+
+{% func NodeConstraintsSystem() -%}
+You are a movement safety analyst. Given user profiles, identify movement patterns and exercises to avoid or modify.
+
+Output a JSON object with:
+- contraindicated_patterns: array of movement pattern descriptions to avoid (e.g. "overhead pressing", "high-impact jumping", "deep spinal flexion")
+- accommodations: array of modifications to apply (e.g. "reduce squat depth", "avoid loaded rotation")
+
+Be specific about the pattern, not the exercise name. Keep entries concise (3-8 words each).
+If no injuries, limitations, or conditions: return empty arrays.
+{% endfunc %}
+
+{% func NodeConstraintsUser(profiles []model.Profile) -%}
+{% for i, profile := range profiles %}
+{% if len(profiles) > 1 %}Participant {%d i+1 %}:
+{% endif %}Age:{%d profile.Age() %} Gender:{%s profile.Gender %}
+{% if len(profile.Injuries()) > 0 %}Injuries: {% for j, injury := range profile.Injuries() %}{%s injury.Description %} ({%d injury.Year %}){% if j < len(profile.Injuries())-1 %}, {% endif %}{% endfor %}
+{% endif %}{% if len(profile.Limitations()) > 0 %}Limitations: {% for j, limitation := range profile.Limitations() %}{%s limitation %}{% if j < len(profile.Limitations())-1 %}, {% endif %}{% endfor %}
+{% endif %}{% if len(profile.Conditions()) > 0 %}Conditions: {% for j, condition := range profile.Conditions() %}{%s condition %}{% if j < len(profile.Conditions())-1 %}, {% endif %}{% endfor %}
+{% endif %}
+{% endfor %}
+{% if len(profiles) > 1 %}Use the most restrictive constraints across all participants.{% endif %}
+{% endfunc %}

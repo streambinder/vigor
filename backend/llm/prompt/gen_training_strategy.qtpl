@@ -1,0 +1,62 @@
+{% package prompt %}
+
+{% import "fmt" %}
+{% import "github.com/streambinder/vigor/model" %}
+
+{% func NodeStrategySystem(methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int) -%}
+You are a training program strategist. Choose a methodology and define the session's muscle emphasis and intensity targets.
+
+Output a JSON object with:
+- methodology: string (methodology ID)
+- methodology_reason: one sentence
+- primary_muscles: array of muscle groups for high-volume emphasis
+- secondary_muscles: array of muscle groups for maintenance volume
+- volume_target: "low" | "moderate" | "high"
+- intensity_target: "low" | "moderate" | "high"
+- calibration_families: array of movement families to prioritize (empty if not calibrating)
+
+{% if methodology != nil %}
+Methodology is preselected: {%s methodology.ID %}
+{%s methodology.Description %}
+Use this methodology. Focus on muscle emphasis and volume/intensity targets.
+{% else %}
+Available methodologies (pick one):
+{% for _, m := range methodologies %}{% code count := methodologyCoverage[m.ID] %}- {%s m.ID %} [{%d count %} compatible exercises]: {%s m.Description %}
+{% endfor %}
+Prefer methodologies with higher compatible exercise counts unless goals require otherwise.
+{% endif %}
+{% endfunc %}
+
+{% func NodeStrategyUser(
+    goals []model.Goal,
+    calibrationGaps map[string]int,
+    healthVolumeModifier float64,
+    healthIntensityModifier float64,
+    healthRationale string,
+    historyPatternNotes string,
+    historyBadSessionNotes string,
+    userPrompt string,
+    duration int,
+    skipWarmupCooldown bool,
+) -%}
+Duration: {%d duration %} minutes{% if skipWarmupCooldown %} (work only, no warmup/cooldown){% endif %}
+
+{% if len(goals) > 0 %}
+Goals:
+{% for _, goal := range goals %}- {%s goal.ID %}: {%s goal.Description %}
+{% endfor %}
+{% endif %}
+{% if healthVolumeModifier < 1.0 || healthIntensityModifier < 1.0 %}
+Recovery status: volume at {%s fmt.Sprintf("%.0f%%", healthVolumeModifier*100) %}, intensity at {%s fmt.Sprintf("%.0f%%", healthIntensityModifier*100) %}. {%s healthRationale %}
+{% endif %}
+{% if historyPatternNotes != "" %}History: {%s historyPatternNotes %}{% endif %}
+{% if historyBadSessionNotes != "" %}
+Recent issue: {%s historyBadSessionNotes %}{% endif %}
+{% if userPrompt != "" %}
+User request: {%s userPrompt %}
+{% endif %}
+{% if len(calibrationGaps) > 0 %}
+Calibration override: prioritize these under-sampled movement families over goals:
+{% for family, count := range calibrationGaps %}- {%s family %} ({%d count %}/5 sessions)
+{% endfor %}{% endif %}
+{% endfunc %}

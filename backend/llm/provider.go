@@ -76,11 +76,6 @@ type TrainingGenerationRequest struct {
 	CalibrationGaps      map[string]int
 	HealthSnapshot       *model.HealthSnapshot
 	RecentHR             map[uuid.UUID]*model.HealthExerciseSession
-	Reminders            []string
-	LastReasoningModel   string
-	LastStructuringModel string
-	CorrectionHint       string
-	LastReasoningOutput  string
 	RecentExerciseIDs    []string
 }
 
@@ -121,116 +116,6 @@ func getLLM(stage Stage, modelName string) LLM {
 		log.Warn().Str("stage", string(stage)).Str("model", modelName).Msg("requested model not found in pool, falling back to random")
 	}
 	return pool[rand.Intn(len(pool))]
-}
-
-// GenTraining generates a personalized training plan using a two-stage LLM approach:
-// stage 1 (reasoning): creative thinking at high temperature without schema constraints
-// stage 2 (structuring): deterministic extraction at zero temperature with strict JSON schema
-// returns partial execution data even on error so callers can pin models on retry.
-func GenTraining(req TrainingGenerationRequest) (*model.Training, model.TrainingPrompt, error) {
-	goalIDs := make([]string, len(req.Goals))
-	for i, g := range req.Goals {
-		goalIDs[i] = g.ID
-	}
-
-	var execution model.TrainingPrompt
-
-	// stage 1: reasoning — creative exploration of training design
-	reasoningUserMessage := prompt.GenTrainingReasoning(
-		req.Profiles,
-		goalIDs,
-		req.WorkExercises,
-		req.WarmupExercises,
-		req.CooldownExercises,
-		req.EquipmentIDs,
-		req.Modifiers,
-		req.ModifierVariants,
-		req.FavoriteExercises,
-		req.FavoriteEquipmentIDs,
-		req.Methodology,
-		req.UserPrompt,
-		req.Duration,
-		req.RecentTrainings,
-		req.RecentFeedback,
-		req.Facts,
-		req.SkipWarmupCooldown,
-		req.CalibrationGaps,
-		req.HealthSnapshot,
-		req.RecentHR,
-		req.Reminders,
-		req.RecentExerciseIDs,
-	)
-	if req.CorrectionHint != "" {
-		if req.LastReasoningOutput != "" {
-			// feed prior reasoning so the model can patch rather than regenerate blind
-			reasoningUserMessage += "\n\nPREVIOUS REASONING FAULTY OUTPUT (error: " + req.CorrectionHint + "):\n" + req.LastReasoningOutput + "\n\nFix the above issue and regenerate."
-		} else {
-			reasoningUserMessage += "\n\nCORRECTION (previous attempt failed server-side validation): " + req.CorrectionHint + ". Fix this issue and regenerate."
-		}
-	}
-
-	reasoningPrompt := model.LLMPrompt{
-		System: prompt.ReasoningSystem(req.Goals, req.Methodology, req.Methodologies, methodologyCoverage(req.WorkExercises, req.Methodologies), req.SkipWarmupCooldown, len(req.Modifiers) > 0, len(req.ModifierVariants) > 0, req.HealthSnapshot, req.Duration),
-		User:   reasoningUserMessage,
-	}
-
-	reasoningOutput, reasoningModel, err := getLLM(StageReasoning, req.LastReasoningModel).query(
-		reasoningPrompt,
-		0.8,   // high temperature for creative reasoning
-		10000, // reasoning can be verbose
-		0.9,   // top-p sampling for reasoning only
-		nil,   // no schema — free-form thinking
-		90*time.Second,
-	)
-	execution.Reasoning = model.LLMStep{Model: reasoningModel, Prompt: reasoningPrompt, Output: string(reasoningOutput)}
-	if err != nil {
-		return nil, execution, fmt.Errorf("%w (reasoning stage): %w", ErrLLMQuery, err)
-	}
-	if len(bytes.TrimSpace(reasoningOutput)) == 0 {
-		return nil, execution, fmt.Errorf("%w (reasoning stage): empty response", ErrLLMQuery)
-	}
-
-	// stage 2: structuring — extract JSON from reasoning at deterministic temp.
-	// unmarshal failures get one structuring-only retry with the error fed back,
-	// since the reasoning output is fine — only the extraction failed.
-	structuringSystem := "You are a fitness data extraction assistant. Parse the training reasoning into strict JSON format. The name and description fields MUST be written in the same language as the reasoning output — never translate them to English."
-	var (
-		training         *model.Training
-		lastUnmarshalErr error // set by prior iteration's unmarshal failure
-	)
-	for structAttempt := 0; structAttempt <= maxStructuringRetries; structAttempt++ {
-		structuringUser := prompt.GenTrainingStructuring(string(reasoningOutput))
-		if structAttempt > 0 {
-			structuringUser += "\n\nPREVIOUS STRUCTURING ATTEMPT FAILED: " + lastUnmarshalErr.Error() + ". Fix the JSON output."
-		}
-
-		structuringPrompt := model.LLMPrompt{System: structuringSystem, User: structuringUser}
-		structuredOutput, structuringModel, err := getLLM(StageStructuring, req.LastStructuringModel).query(
-			structuringPrompt,
-			0.0,  // zero temperature for deterministic extraction
-			4000, // structured output is more compact
-			0,    // no top-p — deterministic
-			&model.TrainingSchema,
-			90*time.Second,
-		)
-		execution.Structuring = model.LLMStep{Model: structuringModel, Prompt: structuringPrompt, Output: string(structuredOutput)}
-		if err != nil {
-			return nil, execution, fmt.Errorf("%w (structuring stage): %w", ErrLLMQuery, err)
-		}
-
-		training = &model.Training{}
-		if err := json.Unmarshal(structuredOutput, training); err != nil {
-			lastUnmarshalErr = err
-			if structAttempt < maxStructuringRetries {
-				log.Warn().Err(err).Int("struct_attempt", structAttempt+1).Msg("structuring unmarshal failed, retrying structuring only")
-				continue
-			}
-			return nil, execution, fmt.Errorf("%w: %s", ErrLLMUnmarshal, err)
-		}
-		break
-	}
-
-	return training, execution, nil
 }
 
 type FlowGenerationRequest struct {

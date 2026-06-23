@@ -3,6 +3,7 @@ package prompt
 import (
 	"fmt"
 	"math"
+	"strings"
 
 	"github.com/streambinder/vigor/model"
 )
@@ -23,6 +24,11 @@ func hasLoadableEquipment(exercise model.Exercise) bool {
 		}
 	}
 	return false
+}
+
+// IsLoadableEquipment returns true if the given equipment ID requires weight selection.
+func IsLoadableEquipment(eq string) bool {
+	return loadableEquipment[eq]
 }
 
 // activityWeights builds a map of exerciseID → Activity for all weighted activities in a training,
@@ -105,4 +111,22 @@ func formatNumber(n int) string {
 		result = append(result, byte(c))
 	}
 	return string(result)
+}
+
+// exerciseAnnotations builds a comma-separated annotation string for an exercise
+// (e.g. "weighted, timer-only, recent") for human-readable prompt output.
+func exerciseAnnotations(ex model.Exercise, recentSet map[string]bool) string {
+	var parts []string
+	if hasLoadableEquipment(ex) {
+		parts = append(parts, "weighted")
+	}
+	if ex.Mode == "duration" {
+		parts = append(parts, "timer-only")
+	} else if ex.Mode == "reps" {
+		parts = append(parts, "reps-only")
+	}
+	if recentSet[ex.ID] {
+		parts = append(parts, "recent")
+	}
+	return strings.Join(parts, ", ")
 }

@@ -1,0 +1,81 @@
+{% package prompt %}
+
+{% import "fmt" %}
+{% import "strings" %}
+{% import "github.com/streambinder/vigor/model" %}
+{% import "github.com/streambinder/vigor/llm/pipeline" %}
+
+{% func NodeLoadSystem(methodology *model.Methodology, hasModifiers bool, hasModifierVariants bool) -%}
+You are a strength & conditioning programmer. Given selected exercises and context, assign exact reps/duration, weight, rest, modifiers, and block structure.
+
+Output a JSON object with:
+- routines: array of {type, blocks: [{activities: [{exercise_id, reps, duration, weight_kg, rest, modifiers}], repeats, rest}], rest}
+- fact_indices: array of integer indices referencing [FACTS] used (empty array if none)
+
+Produce one routine per phase present in the exercise list (warmup, work, cooldown). Routine type must be one of "warmup", "work", "cooldown" — never the methodology name.
+
+Rules:
+- Each activity: exactly one of reps or duration > 0, never both
+- "timer-only" exercises use duration in seconds, never reps
+- "reps-only" exercises use reps count, never duration
+- Exercises without a mode annotation: pick reps or duration based on methodology
+- "weighted" exercises require weight_kg > 0
+- weight_kg: 0 for bodyweight, > 0 for weighted equipment{% if hasModifiers %} or weighted modifiers{% endif %}
+{% if hasModifierVariants %}- For modifiers with listed weight variants, use only those values{% endif %}
+- modifiers: only IDs from the [MODIFIERS] list — never invent modifiers or use instructions like "per side", "each side", "slow tempo" as modifier IDs
+- Duration is adjusted server-side by scaling block repeats — focus on structure quality
+
+Methodology: {%s methodology.ID %}
+{%s methodology.Description %}
+
+{% if hasModifiers %}
+Modifiers: add modifier IDs to activities to push intensity. Triggers: "too_easy" feedback, progressive overload. Never add if feedback shows "too_hard". Never invent modifier IDs.
+{% endif %}
+
+Progression adjustments:
+- "increase_weight": bump weight_kg from the from_weight value
+- "decrease_weight" / "decrease_reps": reduce load
+- "add_modifier": attach the appropriate modifier ID
+{% endfunc %}
+
+{% func NodeLoadUser(
+    exercises []pipeline.SelectedExercise,
+    exerciseModes map[string]string,
+    weightedExercises map[string]bool,
+    progressions []pipeline.ProgressionSignal,
+    volumeTarget string,
+    intensityTarget string,
+    modifiers []model.Modifier,
+    modifierVariants map[string][]float64,
+    facts []model.Fact,
+    equipmentIDs []string,
+    favoriteEquipmentIDs []string,
+    skipWarmupCooldown bool,
+    duration int,
+) -%}
+Duration: {%d duration %} minutes. Volume: {%s volumeTarget %}. Intensity: {%s intensityTarget %}.
+
+Exercises to program:
+{% for _, ex := range exercises %}{% code mode := exerciseModes[ex.ExerciseID] %}- {%s ex.ExerciseID %} ({%s ex.Phase %}{% if mode == "duration" %}, timer-only{% endif %}{% if mode == "reps" %}, reps-only{% endif %}{% if weightedExercises[ex.ExerciseID] %}, weighted{% endif %})
+{% endfor %}
+
+{% if len(progressions) > 0 %}
+Progression signals:
+{% for _, p := range progressions %}- {%s p.ExerciseID %}: {%s p.Action %}{% if p.FromWeight > 0 %} from {%s fmt.Sprintf("%.1f", p.FromWeight) %}kg{% endif %}{% if p.ToWeight > 0 %} to {%s fmt.Sprintf("%.1f", p.ToWeight) %}kg{% endif %} ({%s p.Signal %})
+{% endfor %}
+{% endif %}
+{% if len(modifiers) > 0 %}
+[MODIFIERS]
+{% for _, mod := range modifiers %}{%s mod.ID %}: [{%s strings.Join(mod.Patterns, ",") %}]{% if len(mod.Antipatterns) > 0 %} (exclude: [{%s strings.Join(mod.Antipatterns, ",") %}]){% endif %}{% code variants := modifierVariants[mod.ID] %}{% if len(variants) > 0 %} (available: {% for i, w := range variants %}{%s fmt.Sprintf("%.1f", w) %}kg{% if i < len(variants)-1 %}, {% endif %}{% endfor %}){% endif %}
+{% endfor %}
+{% endif %}
+{% if len(equipmentIDs) > 0 %}
+Equipment: {%s strings.Join(equipmentIDs, ", ") %}
+{% endif %}
+{% if len(facts) > 0 %}
+[FACTS]
+{% for i, fact := range facts %}- [F{%d i %}] {%s fact.Content %}
+{% endfor %}
+{% endif %}
+{% if skipWarmupCooldown %}Work routine only, no warmup/cooldown.{% endif %}
+{% endfunc %}
