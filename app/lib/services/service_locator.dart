@@ -152,28 +152,35 @@ class ServiceLocator extends ChangeNotifier {
   }
 
   Future<void> refreshHealthDaily() async {
-    final response = await trainingService.getHealthDaily();
-    if (response.isSuccess) {
-      healthDailyNotifier.value = response.data;
-    }
+    // non-blocking health daily fetch — triggers backend sync
+    trainingService.getHealthDaily().then((response) {
+      if (response.isSuccess && response.data != null) {
+        healthDailyNotifier.value = response.data;
+      }
+    });
   }
 
   /// Pre-load homepage data so splash stays until everything is ready
+  /// Note: health daily fetch is intentionally NOT included here because it
+  /// triggers backend sync which can block on expensive database joins.
+  /// Health data is fetched separately via fire-and-forget syncToBackend().
   Future<void> loadInitialData() async {
     final results = await Future.wait([
       progressService.getProgress(),
       progressService.getWeeklyTarget(),
-      trainingService.getHealthDaily(),
     ]);
     if (results[0].isSuccess) {
       initialProgress = results[0].data as Progress?;
       _updateCalibrationState();
     }
     if (results[1].isSuccess) initialWeeklyTarget = results[1].data as WeeklyTarget?;
-    if (results[2].isSuccess) {
-      healthDailyNotifier.value = results[2].data as Map<String, dynamic>?;
-    }
     initialDataLoaded = true;
+    // fire-and-forget health daily fetch — non-blocking
+    trainingService.getHealthDaily().then((response) {
+      if (response.isSuccess && response.data != null) {
+        healthDailyNotifier.value = response.data;
+      }
+    });
   }
 
   void _updateCalibrationState() {

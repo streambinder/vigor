@@ -105,13 +105,22 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     }
 
     try {
+      // Only wait for progress and weekly target; health daily is fetched separately
       final futures = <Future>[
         progressService.getProgress(),
         progressService.getWeeklyTarget(),
-        locator.trainingService.getHealthDaily(),
       ];
 
       final results = await Future.wait(futures);
+
+      // fire-and-forget health daily fetch — non-blocking
+      locator.trainingService.getHealthDaily().then((response) {
+        if (!mounted) return;
+        if (response.isSuccess && response.data != null) {
+          _healthDaily = response.data;
+          locator.healthDailyNotifier.value = _healthDaily;
+        }
+      });
 
       // trigger incremental health metrics sync (fire-and-forget, server-throttled)
       if (locator.healthDataService != null) {
@@ -129,10 +138,6 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
           }
           if (weeklyTargetResponse.isSuccess) {
             _weeklyTarget = weeklyTargetResponse.data as WeeklyTarget?;
-          }
-          if (results[2].isSuccess) {
-            _healthDaily = results[2].data as Map<String, dynamic>?;
-            locator.healthDailyNotifier.value = _healthDaily;
           }
           _isLoading = false;
         });

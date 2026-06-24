@@ -24,6 +24,7 @@ class GoogleAuthScreen extends StatefulWidget {
 class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
   bool _initialized = false;
   bool _isLoading = false;
+  bool _authInProgress = false;
   String? _errorMessage;
   StreamSubscription<GoogleSignInAuthenticationEvent>? _authEventsSubscription;
 
@@ -92,6 +93,10 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
   }
 
   Future<void> _handleSignInSuccess(GoogleSignInAccount user) async {
+    // guard against GSI emitting multiple events for a single click
+    if (_authInProgress) return;
+    _authInProgress = true;
+
     final authProvider = context.read<AuthProvider>();
     final l10n = AppLocalizations.of(context);
 
@@ -135,6 +140,8 @@ class _GoogleAuthScreenState extends State<GoogleAuthScreen> {
         });
       }
       await GoogleSignIn.instance.signOut();
+    } finally {
+      _authInProgress = false;
     }
   }
 
