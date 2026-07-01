@@ -310,9 +310,12 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
                 color: accentColor,
                 borderRadius: VigorRadius.radiusSm,
                 child: InkWell(
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const HealthPermissionsScreen()),
-                  ),
+                  onTap: () async {
+                    final connected = await Navigator.of(context).push<bool>(
+                      MaterialPageRoute(builder: (_) => const HealthPermissionsScreen()),
+                    );
+                    if (connected == true && mounted) setState(() {});
+                  },
                   borderRadius: VigorRadius.radiusSm,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
