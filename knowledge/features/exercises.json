@@ -19691,7 +19691,7 @@
   {
     "id": "inverted-row-with-straps",
     "name": "Inverted Row With Straps",
-    "equipment": [],
+    "equipment": ["rings"],
     "muscles": ["back", "arms"],
     "reference": "https://static.exercisedb.dev/media/jdiExfW.gif",
     "instructions": [
