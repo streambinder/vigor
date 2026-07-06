@@ -18,7 +18,7 @@ var (
 	_ = qt422016.AcquireByteBuffer
 )
 
-func StreamNodeExercisesSystem(qw422016 *qt422016.Writer, skipWarmupCooldown bool, duration int) {
+func StreamNodeExercisesSystem(qw422016 *qt422016.Writer, skipWarmupCooldown bool, minWork int, maxWork int) {
 	qw422016.N().S(`You are an exercise selection specialist. Pick exercises from the provided pools for a training session.
 
 Output a JSON object with:
@@ -37,33 +37,24 @@ Rules:
 		qw422016.N().S(`- Include 3-4 warmup exercises and 4-6 cooldown exercises covering worked muscles`)
 	}
 	qw422016.N().S(`
-- Scale work exercise count to session duration:
-`)
-	if duration <= 30 {
-		qw422016.N().S(`  2-4 work exercises`)
-	} else if duration <= 45 {
-		qw422016.N().S(`  3-5 work exercises`)
-	} else if duration <= 60 {
-		qw422016.N().S(`  4-6 work exercises`)
-	} else if duration <= 90 {
-		qw422016.N().S(`  6-9 work exercises`)
-	} else {
-		qw422016.N().S(`  8-12 work exercises`)
-	}
-	qw422016.N().S(`
+- Select `)
+	qw422016.N().D(minWork)
+	qw422016.N().S(`-`)
+	qw422016.N().D(maxWork)
+	qw422016.N().S(` distinct work exercises (band scaled to methodology density and session duration)
 - Keep rationale to 3-8 words per exercise
 `)
 }
 
-func WriteNodeExercisesSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool, duration int) {
+func WriteNodeExercisesSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool, minWork int, maxWork int) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeExercisesSystem(qw422016, skipWarmupCooldown, duration)
+	StreamNodeExercisesSystem(qw422016, skipWarmupCooldown, minWork, maxWork)
 	qt422016.ReleaseWriter(qw422016)
 }
 
-func NodeExercisesSystem(skipWarmupCooldown bool, duration int) string {
+func NodeExercisesSystem(skipWarmupCooldown bool, minWork int, maxWork int) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeExercisesSystem(qb422016, skipWarmupCooldown, duration)
+	WriteNodeExercisesSystem(qb422016, skipWarmupCooldown, minWork, maxWork)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

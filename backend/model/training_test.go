@@ -914,34 +914,29 @@ func TestValidate_NewChecks(t *testing.T) {
 
 func TestPurgeRepsDuration(t *testing.T) {
 	tests := []struct {
-		name         string
-		methodology  string
-		duration     int
-		reps         int
-		wantDuration int
-		wantReps     int
+		name          string
+		durationBased bool
+		duration      int
+		reps          int
+		wantDuration  int
+		wantReps      int
 	}{
-		{"hiit: both set, keep duration", "hiit", 30, 15, 30, 0},
-		{"circuit: both set, keep duration", "circuit", 40, 10, 40, 0},
-		{"amrap: both set, keep duration", "amrap", 60, 20, 60, 0},
-		{"for_time: both set, keep duration", "for_time", 45, 12, 45, 0},
-		{"endurance: both set, keep duration", "endurance", 90, 8, 90, 0},
-		{"mobility: both set, keep duration", "mobility", 30, 10, 30, 0},
-		{"strength: both set, keep reps", "strength", 30, 10, 0, 10},
-		{"supersets: both set, keep reps", "supersets", 40, 12, 0, 12},
-		{"emom: both set, keep reps", "emom", 30, 8, 0, 8},
-		{"hiit: only duration, no change", "hiit", 30, 0, 30, 0},
-		{"strength: only reps, no change", "strength", 0, 10, 0, 10},
-		{"hiit: only reps, no change", "hiit", 0, 15, 0, 15},
+		{"duration-based: both set, keep duration", true, 30, 15, 30, 0},
+		{"duration-based: both set, keep duration (2)", true, 90, 8, 90, 0},
+		{"reps-based: both set, keep reps", false, 30, 10, 0, 10},
+		{"reps-based: both set, keep reps (2)", false, 40, 12, 0, 12},
+		{"duration-based: only duration, no change", true, 30, 0, 30, 0},
+		{"reps-based: only reps, no change", false, 0, 10, 0, 10},
+		{"duration-based: only reps, no change", true, 0, 15, 0, 15},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tr := makeTraining(tt.methodology, []Routine{
+			tr := makeTraining("strength", []Routine{
 				routine("work", 0, []Block{
 					block(1, 0, []Activity{{Duration: tt.duration, Reps: tt.reps}}),
 				}),
 			})
-			tr.PurgeRepsDuration()
+			tr.PurgeRepsDuration(tt.durationBased)
 			a := tr.Routines[0].Blocks[0].Activities[0]
 			if a.Duration != tt.wantDuration {
 				t.Errorf("duration = %d, want %d", a.Duration, tt.wantDuration)

@@ -99,12 +99,28 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	}
 	progress(pipeline.StepPickStrategy)
 
+	// resolve the strategy's chosen methodology to the full knowledge object.
+	// done before exercise selection so the density band (exercises_per_hour) and
+	// reps/duration mode can be sourced from the record rather than hardcoded.
+	resolvedMethodology := req.Methodology
+	if resolvedMethodology == nil || resolvedMethodology.ID != strategyResult.Methodology {
+		for i := range req.Methodologies {
+			if req.Methodologies[i].ID == strategyResult.Methodology {
+				resolvedMethodology = &req.Methodologies[i]
+				break
+			}
+		}
+	}
+	if resolvedMethodology == nil {
+		return nil, dagToLegacyExecution(execution), fmt.Errorf("strategy picked unknown methodology: %s", strategyResult.Methodology)
+	}
+
 	// layer 2: exercise selection
 	exerciseResult, exerciseStep, err := runExercisesNode(
 		strategyResult, constraintResult, historyResult,
 		req.WorkExercises, req.WarmupExercises, req.CooldownExercises,
 		req.FavoriteExercises, req.RecentExerciseIDs,
-		req.SkipWarmupCooldown, req.Duration,
+		resolvedMethodology, req.SkipWarmupCooldown, req.Duration,
 	)
 	execution.Nodes[pipeline.StepSelectExercises] = exerciseStep
 	if err != nil {
@@ -129,20 +145,6 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	}
 	for _, ex := range req.CooldownExercises {
 		exerciseModes[ex.ID] = ex.Mode
-	}
-
-	// resolve the strategy's chosen methodology to the full knowledge object
-	resolvedMethodology := req.Methodology
-	if resolvedMethodology == nil || resolvedMethodology.ID != strategyResult.Methodology {
-		for i := range req.Methodologies {
-			if req.Methodologies[i].ID == strategyResult.Methodology {
-				resolvedMethodology = &req.Methodologies[i]
-				break
-			}
-		}
-	}
-	if resolvedMethodology == nil {
-		return nil, dagToLegacyExecution(execution), fmt.Errorf("strategy picked unknown methodology: %s", strategyResult.Methodology)
 	}
 
 	// layer 3: load programming
@@ -315,6 +317,21 @@ func runStrategyNode(
 	return result, step, nil
 }
 
+// exerciseCountBand derives the work-exercise selection range from the methodology's
+// per-hour density and the session duration, replacing the old hardcoded duration ladder.
+// enforces a hard floor of 3 so short sessions of any methodology stay non-degenerate,
+// and guarantees max >= min.
+func exerciseCountBand(methodology *model.Methodology, durationMinutes int) (int, int) {
+	const floor = 3
+	density := methodology.GetExercisesPerHour()
+	hours := float64(durationMinutes) / 60.0
+
+	// round to nearest rather than truncate — a 30m session shouldn't lose an exercise to floor()
+	minCount := max(int(float64(density.Min)*hours+0.5), floor)
+	maxCount := max(int(float64(density.Max)*hours+0.5), minCount)
+	return minCount, maxCount
+}
+
 // runExercisesNode executes the exercise selection node.
 func runExercisesNode(
 	strategy pipeline.Strategy,
@@ -323,11 +340,13 @@ func runExercisesNode(
 	workExercises, warmupExercises, cooldownExercises []model.Exercise,
 	favoriteExercises []model.Exercise,
 	recentExerciseIDs []string,
+	methodology *model.Methodology,
 	skipWarmupCooldown bool,
 	duration int,
 ) (pipeline.ExerciseSelection, model.LLMStep, error) {
+	minExercises, maxExercises := exerciseCountBand(methodology, duration)
 	p := model.LLMPrompt{
-		System: prompt.NodeExercisesSystem(skipWarmupCooldown, duration),
+		System: prompt.NodeExercisesSystem(skipWarmupCooldown, minExercises, maxExercises),
 		User: prompt.NodeExercisesUser(
 			strategy.Methodology,
 			strategy.PrimaryMuscles, strategy.SecondaryMuscles,

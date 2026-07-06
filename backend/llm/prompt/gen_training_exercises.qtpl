@@ -3,7 +3,7 @@
 {% import "strings" %}
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func NodeExercisesSystem(skipWarmupCooldown bool, duration int) -%}
+{% func NodeExercisesSystem(skipWarmupCooldown bool, minWork int, maxWork int) -%}
 You are an exercise selection specialist. Pick exercises from the provided pools for a training session.
 
 Output a JSON object with:
@@ -18,8 +18,7 @@ Rules:
 - Prefer non-recent exercises over recent ones for variety
 - Avoid exercises listed in avoid_exercises
 {% if !skipWarmupCooldown %}- Include 3-4 warmup exercises and 4-6 cooldown exercises covering worked muscles{% endif %}
-- Scale work exercise count to session duration:
-{% if duration <= 30 %}  2-4 work exercises{% elseif duration <= 45 %}  3-5 work exercises{% elseif duration <= 60 %}  4-6 work exercises{% elseif duration <= 90 %}  6-9 work exercises{% else %}  8-12 work exercises{% endif %}
+- Select {%d minWork %}-{%d maxWork %} distinct work exercises (band scaled to methodology density and session duration)
 - Keep rationale to 3-8 words per exercise
 {% endfunc %}
 

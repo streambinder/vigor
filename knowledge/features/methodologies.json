@@ -3,6 +3,8 @@
     "id": "strength",
     "name": "Strength Training",
     "description": "Traditional lifting with sets × reps × weight. Focus on progressive overload and compound movements. Create multiple blocks as needed, each grouping exercises with similar rest needs. Repeats = sets per exercise. Activities MUST use reps (never duration). REST RULES: determined by training goal, not exercise type — strength focus (heavy load, <6 reps) → 120-300s; hypertrophy focus (moderate load, 6-12 reps) → 90-180s; muscular endurance (light load, >12 reps) → 30-60s. Longer rests (≥90s) preserve volume quality and are supported over short rests for hypertrophy outcomes (NSCA CSCS; Schoenfeld et al., 2016, JSCR).",
+    "duration_based": false,
+    "exercises_per_hour": { "min": 5, "max": 8 },
     "work": {
       "horizontal_push": { "min": 25 },
       "horizontal_pull": { "min": 25 },
@@ -17,6 +19,8 @@
     "id": "supersets",
     "name": "Superset Training",
     "description": "Pair agonist-antagonist exercises back-to-back with no rest between paired exercises; rest only after both are done. Reduces session time ~30-40% vs traditional sets with equivalent hypertrophy (Weakley et al., 2021, Sports Medicine). Create blocks where each block contains exactly TWO exercises (the superset pair). Repeats = sets per pair. Activities MUST use reps (never duration). First activity in each block: rest = 0 (immediate transition to second exercise). Second activity: rest = 90-120s (recovery before next pair — antagonist concurrent rest makes shorter rest unnecessary). Pair examples: bench press / barbell row, bicep curl / tricep pushdown, leg press / leg curl. Avoid same-muscle pairs (agonist-agonist) — they degrade performance and eliminate the time-efficiency advantage.",
+    "duration_based": false,
+    "exercises_per_hour": { "min": 6, "max": 10 },
     "work": {
       "horizontal_push": { "min": 25 },
       "horizontal_pull": { "min": 25 },
@@ -31,6 +35,8 @@
     "id": "circuit",
     "name": "Circuit Training",
     "description": "Rotate through 6-10 stations targeting different muscle groups with minimal rest between exercises. Medium intensity (~60-70% effort) sustained continuously — not the same as HIIT, which requires near-maximal effort. Create ONE block with repeats = circuit rounds (typically 2-3 rounds). Minimal rest between activities (0-15s to keep HR elevated), moderate rest between rounds (60-90s via block rest). Activities MUST use reps; use duration only for holds/carries or cardio stations (30-60s). Rep ranges: 10-20 per station (NASM).",
+    "duration_based": false,
+    "exercises_per_hour": { "min": 12, "max": 20 },
     "work": {
       "horizontal_push": { "min": 20 },
       "horizontal_pull": { "min": 20 },
@@ -44,6 +50,8 @@
     "id": "emom",
     "name": "EMOM (Every Minute on the Minute)",
     "description": "STRUCTURE RULE: Each block MUST contain exactly ONE exercise. For full-body or multi-exercise coverage, create MULTIPLE blocks executed sequentially (complete all repeats of one block before moving to the next). NEVER put multiple exercises in the same block — this defeats EMOM's self-regulation mechanism by eliminating rest. Example: 3 exercises over 12 minutes = Block A (exercise 1, repeats: 4), Block B (exercise 2, repeats: 4), Block C (exercise 3, repeats: 4); execution order is A→A→A→A→B→B→B→B→C→C→C→C. TIMING: Work must complete in ≤40s leaving ≥20s of rest per minute. REP GUIDELINES: scale reps so (reps × avg_rep_time) ≤ 40s — this is movement-dependent; simple movements (air squat, push-up) allow 10-15 reps, complex or loaded movements (barbell clean, pull-up) allow 5-8 reps. Reduce to the lower end for new users or if RECENT_HISTORY shows 'too hard' feedback. Activities MUST use reps (never duration, except monostructural cardio like row or bike).",
+    "duration_based": false,
+    "exercises_per_hour": { "min": 10, "max": 16 },
     "work": {
       "horizontal_push": { "min": 20 },
       "horizontal_pull": { "min": 20 },
@@ -56,6 +64,8 @@
     "id": "amrap",
     "name": "AMRAP (As Many Rounds As Possible)",
     "description": "Complete as many rounds as possible within a time cap. Self-paced intensity — athletes choose their own pace. Create ONE block with repeats: 1 (the user repeats the block continuously until time expires). Activities MUST use reps (never duration). ROUND CALIBRATION: design each round to take ~60-90s at a sustainable pace, targeting ≥5 rounds for short sessions (8-12 min work) or ≥3 rounds for longer ones (15-20 min work). Use 2-4 exercises per round, 5-15 reps each. If rep counts would produce rounds longer than 90s, reduce reps — overly long rounds cause early deceleration and defeat the AMRAP purpose.",
+    "duration_based": false,
+    "exercises_per_hour": { "min": 8, "max": 14 },
     "work": {
       "horizontal_push": { "min": 20 },
       "horizontal_pull": { "min": 20 },
@@ -68,6 +78,8 @@
     "id": "hiit",
     "name": "HIIT (High-Intensity Interval Training)",
     "description": "Near-maximal effort intervals (85-95% HRmax) alternating with structured recovery. Distinct from circuit training — HIIT requires true high-intensity work periods, not sustained medium-effort rotation. Activities MUST use duration for work time; use rest field for recovery between intervals. WORK/REST RATIOS: 20s work / 10s rest (Tabata-style, 8 rounds = 4 min block); 30s work / 30s rest (1:1, general); 60s work / 120s rest (1:2, higher-intensity bouts) — longer recovery is needed for shorter, harder bouts to allow true max effort repetition (ACE/ACSM). Use the rest field on each activity for recovery duration. Structure 4-10 intervals per block depending on work duration and session length.",
+    "duration_based": true,
+    "exercises_per_hour": { "min": 8, "max": 16 },
     "work": {
       "cardio": { "min": 20 },
       "squat": { "min": 20 },
@@ -78,6 +90,8 @@
     "id": "for_time",
     "name": "For Time",
     "description": "Complete prescribed work as fast as possible. Competition-style intensity — athletes push for speed while maintaining movement quality. Create 1-2 blocks: either a chipper (single pass through all movements in one block, repeats: 1) or rounds for time (repeats = target rounds, typically 3-7). Activities MUST use reps (never duration). REST: athletes self-pace and rest as needed — set rest = 0 on all activities (no structured rest). Rep schemes should allow the session to complete in 8-20 minutes at target intensity; calibrate reps so each round is completable in 1-3 minutes.",
+    "duration_based": false,
+    "exercises_per_hour": { "min": 8, "max": 14 },
     "work": {
       "horizontal_push": { "min": 20 },
       "horizontal_pull": { "min": 20 },
@@ -89,6 +103,8 @@
     "id": "endurance",
     "name": "Endurance Training",
     "description": "Sustained aerobic effort at moderate-to-vigorous intensity to build aerobic base and muscular endurance. Activities MUST use duration (never reps). INTENSITY: moderate (can speak in full sentences, ~64-76% HRmax) or vigorous (can speak only a few words, ~77-95% HRmax). SESSION DURATION: 20-60 min for vigorous intensity, 30-60 min for moderate intensity (ACSM). Structure as 1-2 long-duration activities per block with minimal inter-activity rest (0-30s). Core supplementary work is acceptable (planks, carries) but cardio must dominate. Avoid mixing in strength exercises — endurance means sustained aerobic output.",
+    "duration_based": true,
+    "exercises_per_hour": { "min": 3, "max": 6 },
     "work": {
       "cardio": { "min": 15 },
       "core": { "min": 10 }
@@ -98,6 +114,8 @@
     "id": "mobility",
     "name": "Mobility Training",
     "description": "Flexibility and range of motion focus. Combine static holds, dynamic mobility drills, and PNF sequences. Activities use duration for holds and dynamic drills; use reps only for PNF contract-relax cycles. STATIC HOLDS: 10-30s per hold, 2-4 reps per muscle group (ACSM); ~60s total accumulated per muscle group. Higher-intensity stretching (at the edge of tolerable range) produces greater ROM gains than prolonged comfortable holds. DYNAMIC DRILLS: use duration (10-30s per movement). PNF CONTRACT-RELAX: 3-6s isometric contraction followed by 10-30s assisted stretch, 2-5 cycles per muscle group (ACSM); use reps for the contract-relax cycles. Restrict PNF to large muscle groups (hamstrings, hip flexors, glutes, lats). Loaded stretching at light intensity is acceptable for combined flexibility and hypertrophy stimulus.",
+    "duration_based": true,
+    "exercises_per_hour": { "min": 12, "max": 24 },
     "work": {
       "mobility": { "min": 15, "max": 70 }
     }

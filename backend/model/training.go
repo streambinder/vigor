@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"github.com/rs/zerolog/log"
-	"github.com/streambinder/vigor/encoder"
 	"github.com/streambinder/vigor/util"
 	"gorm.io/datatypes"
 )
@@ -71,20 +70,6 @@ type JSONSchema struct {
 	Description string                 `json:"description,omitempty"`
 }
 
-var TrainingSchema JSONSchemaFormat
-
-func init() {
-	TrainingSchema = JSONSchemaFormat{
-		Type: "json_schema",
-		JSONSchema: JSONSchema{
-			Name:        "training_schema",
-			Strict:      true,
-			Description: "AI-generated personalized training session",
-			Schema:      encoder.JSONSchema(Training{}),
-		},
-	}
-}
-
 // TrainingFeedback captures per-user structured feedback for a completed training.
 type TrainingFeedback struct {
 	ID               uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
@@ -110,7 +95,7 @@ type Training struct {
 
 	Name        string                                  `gorm:"not null" json:"name" prompt:"3-4 word action-oriented title (see NAME rules). MUST match the output language of the reasoning — never translate to English."`
 	Description string                                  `gorm:"not null" json:"description" prompt:"3-5 sentence description. Open with the methodology and primary focus. Then explicitly surface any progression decisions driven by past training feedback (e.g. weight bumps, rep adjustments, exercise swaps based on too_easy/too_hard signals). If health or recovery data influenced volume or intensity, state the design rationale without naming the metric (e.g. 'keeping volume conservative today to support recovery'). Close with the key exercises or structure highlights. The user must be able to infer that their feedback and biometric signals were actively considered. MUST match the output language of the reasoning — never translate to English."`
-	Methodology string                                  `gorm:"column:methodology;not null" json:"methodology" prompt:"Methodology;enum:strength,supersets,circuit,emom,amrap,hiit,for_time,endurance,mobility"`
+	Methodology string                                  `gorm:"column:methodology;not null" json:"methodology" prompt:"Methodology"`
 	Duration    int                                     `gorm:"not null" json:"duration" prompt:"Total seconds"`
 	Equipment   pq.StringArray                          `gorm:"type:text[]" json:"equipment" prompt:"-"`
 	Goals       pq.StringArray                          `gorm:"type:text[]" json:"goals" prompt:"-"`
@@ -381,20 +366,16 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 	return clone
 }
 
-// durationBasedMethodologies lists methodologies where duration takes precedence over reps
-var durationBasedMethodologies = map[string]bool{
-	"hiit": true, "circuit": true, "amrap": true, "for_time": true, "endurance": true, "mobility": true,
-}
-
 // PurgeRepsDuration enforces mutual exclusivity between reps and duration on activities.
-// when both are set, methodology determines which one to zero out.
-func (t *Training) PurgeRepsDuration() {
+// when both are set, durationBased (sourced from the methodology record) decides which
+// one to zero out: true → keep duration, false → keep reps.
+func (t *Training) PurgeRepsDuration(durationBased bool) {
 	for i := range t.Routines {
 		for j := range t.Routines[i].Blocks {
 			for k := range t.Routines[i].Blocks[j].Activities {
 				a := &t.Routines[i].Blocks[j].Activities[k]
 				if a.Reps > 0 && a.Duration > 0 {
-					if durationBasedMethodologies[t.Methodology] {
+					if durationBased {
 						a.Reps = 0
 					} else {
 						a.Duration = 0

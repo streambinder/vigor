@@ -448,7 +448,16 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			}
 		}
 
-		training.PurgeRepsDuration()
+		// reps-vs-duration mode is a property of the chosen methodology (knowledge data),
+		// resolved from the record rather than a hardcoded map
+		durationBased := false
+		for i := range methodologies {
+			if methodologies[i].ID == training.Methodology {
+				durationBased = methodologies[i].DurationBased
+				break
+			}
+		}
+		training.PurgeRepsDuration(durationBased)
 
 		if skipWarmupCooldown {
 			workOnly := training.Routines[:0]

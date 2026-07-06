@@ -378,10 +378,12 @@ func boostrapFacts(gormDB *gorm.DB) error {
 
 // methodologyJSON mirrors the JSON structure for unmarshaling work map directly.
 type methodologyJSON struct {
-	ID          string                           `json:"id"`
-	Name        string                           `json:"name"`
-	Description string                           `json:"description"`
-	Work        map[string]model.MethodologyWork `json:"work"`
+	ID               string                           `json:"id"`
+	Name             string                           `json:"name"`
+	Description      string                           `json:"description"`
+	DurationBased    bool                             `json:"duration_based"`
+	ExercisesPerHour model.ExerciseDensity            `json:"exercises_per_hour"`
+	Work             map[string]model.MethodologyWork `json:"work"`
 }
 
 func bootstrapMethodologies(gormDB *gorm.DB) error {
@@ -397,11 +399,15 @@ func bootstrapMethodologies(gormDB *gorm.DB) error {
 
 	for _, row := range rows {
 		methodology := model.Methodology{
-			ID:          row.ID,
-			Name:        row.Name,
-			Description: row.Description,
+			ID:            row.ID,
+			Name:          row.Name,
+			Description:   row.Description,
+			DurationBased: row.DurationBased,
 		}
 		if err := methodology.SetWork(row.Work); err != nil {
+			return err
+		}
+		if err := methodology.SetExercisesPerHour(row.ExercisesPerHour); err != nil {
 			return err
 		}
 		if err := gormDB.Save(&methodology).Error; err != nil {
