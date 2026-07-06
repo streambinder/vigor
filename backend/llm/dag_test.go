@@ -3,6 +3,7 @@ package llm
 import (
 	"testing"
 
+	"github.com/streambinder/vigor/llm/pipeline"
 	"github.com/streambinder/vigor/model"
 )
 
@@ -54,5 +55,44 @@ func TestExerciseCountBand_MissingDensityFallsBack(t *testing.T) {
 	gotMin, gotMax := exerciseCountBand(&model.Methodology{}, 60)
 	if gotMin != 4 || gotMax != 8 {
 		t.Errorf("fallback band = (%d, %d), want (4, 8)", gotMin, gotMax)
+	}
+}
+
+// TestProgressionsForSelected is the regression guard for the description hallucinating
+// rep bumps on exercises not in the session: only progressions whose exercise is actually
+// selected must survive.
+func TestProgressionsForSelected(t *testing.T) {
+	selected := []pipeline.SelectedExercise{
+		{ExerciseID: "inverted-row"},
+		{ExerciseID: "hanging-leg-raise"},
+	}
+	progressions := []pipeline.ProgressionSignal{
+		{ExerciseID: "inverted-row", Action: "increase_reps", Signal: "easy"}, // in session → keep
+		{ExerciseID: "triceps-dips-floor", Action: "increase_reps"},           // not in session → drop
+		{ExerciseID: "arch-body-circle", Action: "increase_reps"},             // not in session → drop
+		{ExerciseID: "hanging-leg-raise", Action: "add_modifier"},             // in session → keep
+	}
+
+	kept := progressionsForSelected(progressions, selected)
+
+	if len(kept) != 2 {
+		t.Fatalf("kept %d progressions, want 2: %+v", len(kept), kept)
+	}
+	for _, p := range kept {
+		if p.ExerciseID != "inverted-row" && p.ExerciseID != "hanging-leg-raise" {
+			t.Errorf("kept progression for non-selected exercise %q", p.ExerciseID)
+		}
+	}
+}
+
+func TestProgressionsForSelected_NoneMatch(t *testing.T) {
+	// all past progressions reference exercises not in this session → empty result,
+	// so the copy has nothing to (falsely) narrate
+	kept := progressionsForSelected(
+		[]pipeline.ProgressionSignal{{ExerciseID: "muscle-up"}, {ExerciseID: "pistol-squat"}},
+		[]pipeline.SelectedExercise{{ExerciseID: "push-up"}},
+	)
+	if len(kept) != 0 {
+		t.Errorf("kept %d progressions, want 0", len(kept))
 	}
 }

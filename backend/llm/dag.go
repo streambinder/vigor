@@ -168,6 +168,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	}
 	creativeResult, creativeStep, err := runCreativeNode(
 		language, strategyResult, exerciseResult, historyResult, healthResult,
+		req.SkipWarmupCooldown,
 	)
 	execution.Nodes[pipeline.StepWriteCopy] = creativeStep
 	if err != nil {
@@ -418,6 +419,22 @@ func runLoadNode(
 	return result, step, nil
 }
 
+// progressionsForSelected keeps only the progression signals whose exercise is part of the
+// current session, so the copy never narrates rep/weight changes on exercises not present.
+func progressionsForSelected(progressions []pipeline.ProgressionSignal, selectedExercises []pipeline.SelectedExercise) []pipeline.ProgressionSignal {
+	selected := make(map[string]bool, len(selectedExercises))
+	for _, ex := range selectedExercises {
+		selected[ex.ExerciseID] = true
+	}
+	var kept []pipeline.ProgressionSignal
+	for _, p := range progressions {
+		if selected[p.ExerciseID] {
+			kept = append(kept, p)
+		}
+	}
+	return kept
+}
+
 // runCreativeNode executes the creative copy (title + description) node.
 func runCreativeNode(
 	language string,
@@ -425,13 +442,22 @@ func runCreativeNode(
 	exercises pipeline.ExerciseSelection,
 	history pipeline.HistoryAnalysis,
 	health pipeline.HealthAssessment,
+	skipWarmupCooldown bool,
 ) (pipeline.CreativeCopy, model.LLMStep, error) {
+	// only surface progressions for exercises actually in this session — otherwise the copy
+	// narrates rep bumps on past exercises the user won't see here (a checkable falsehood).
+	relevantProgressions := progressionsForSelected(history.Progressions, exercises.Exercises)
+
+	// extend_warmup is meaningless when there's no warmup routine — don't let the copy
+	// claim an extended warmup for a work-only session.
+	extendWarmup := health.ExtendWarmup && !skipWarmupCooldown
+
 	p := model.LLMPrompt{
 		System: prompt.NodeCreativeSystem(language),
 		User: prompt.NodeCreativeUser(
 			strategy.Methodology, strategy.PrimaryMuscles,
-			exercises.Exercises, history.Progressions,
-			health.Rationale, health.VolumeModifier, health.IntensityModifier, health.ExtendWarmup,
+			exercises.Exercises, relevantProgressions,
+			health.Rationale, health.VolumeModifier, health.IntensityModifier, extendWarmup,
 			history.RecentNames, history.BadSessionNotes,
 		),
 	}
