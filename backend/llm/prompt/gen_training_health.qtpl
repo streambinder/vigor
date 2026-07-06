@@ -21,16 +21,21 @@ Rules:
 - Extreme values (sleep < 5h, HRV < 15ms RMSSD): significant reduction regardless of baseline
 - If baselines not established (< 7 days): only apply extreme-value rules
 - Negligible deviations: return 1.0 for both modifiers
+- Only reason about metrics explicitly listed below. A metric that is absent was NOT measured — never treat a missing metric as a low or extreme value, and never reduce because of it.
 {% endfunc %}
 
 {% func NodeHealthUser(healthSnapshot *model.HealthSnapshot) -%}
-{% if healthSnapshot == nil %}No health data available. Return volume_modifier=1.0, intensity_modifier=1.0, extend_warmup=false, rationale="no data".
+{% if healthSnapshot == nil || !healthSnapshot.HasRecoverySignal() %}No recovery metrics available. Return volume_modifier=1.0, intensity_modifier=1.0, extend_warmup=false, rationale="no data".
 {% else %}
-Sleep: {%f.1 healthSnapshot.SleepHours %}h (baseline: {%f.1 healthSnapshot.SleepBaseline %}h, deviation: {%s formatDeviation(healthSnapshot.SleepDeviation) %})
+{% if healthSnapshot.SleepPresent %}Sleep: {%f.1 healthSnapshot.SleepHours %}h (baseline: {%f.1 healthSnapshot.SleepBaseline %}h, deviation: {%s formatDeviation(healthSnapshot.SleepDeviation) %})
   Deep: {%f.1 healthSnapshot.SleepDeepHours %}h, Light: {%f.1 healthSnapshot.SleepLightHours %}h, REM: {%f.1 healthSnapshot.SleepREMHours %}h
-HRV: {%f.0 healthSnapshot.HRVRMSSD %}ms RMSSD (baseline: {%f.0 healthSnapshot.HRVBaseline %}ms, deviation: {%s formatDeviation(healthSnapshot.HRVDeviation) %})
-RHR: {%d healthSnapshot.RestingHR %}bpm (baseline: {%f.0 healthSnapshot.RHRBaseline %}bpm, deviation: {%s formatDeviation(healthSnapshot.RHRDeviation) %})
-Steps yesterday: {%s formatNumber(healthSnapshot.Steps) %} (baseline: {%s formatNumber(int(healthSnapshot.StepsBaseline)) %}, deviation: {%s formatDeviation(healthSnapshot.StepsDeviation) %})
+{% endif %}
+{% if healthSnapshot.HRVPresent %}HRV: {%f.0 healthSnapshot.HRVRMSSD %}ms RMSSD (baseline: {%f.0 healthSnapshot.HRVBaseline %}ms, deviation: {%s formatDeviation(healthSnapshot.HRVDeviation) %})
+{% endif %}
+{% if healthSnapshot.RHRPresent %}RHR: {%d healthSnapshot.RestingHR %}bpm (baseline: {%f.0 healthSnapshot.RHRBaseline %}bpm, deviation: {%s formatDeviation(healthSnapshot.RHRDeviation) %})
+{% endif %}
+{% if healthSnapshot.StepsPresent %}Steps yesterday: {%s formatNumber(healthSnapshot.Steps) %} (baseline: {%s formatNumber(int(healthSnapshot.StepsBaseline)) %}, deviation: {%s formatDeviation(healthSnapshot.StepsDeviation) %})
+{% endif %}
 {% if len(healthSnapshot.ExternalWorkouts) > 0 %}External workouts (last 3 days):
 {% for _, w := range healthSnapshot.ExternalWorkouts %}  - {%d w.DaysAgo %} day{% if w.DaysAgo != 1 %}s{% endif %} ago: {%s w.ExerciseType %}, {%d w.DurationMins %}min
 {% endfor %}{% endif %}

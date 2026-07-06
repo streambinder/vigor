@@ -81,9 +81,23 @@ type HealthSnapshot struct {
 	StepsBaseline  float64 `json:"steps_baseline"`
 	StepsDeviation float64 `json:"steps_deviation"`
 
+	// presence flags distinguish "metric not reported" from a literal 0 reading.
+	// devices commonly sync steps/sleep but not HRV/RHR, and a missing 0 must NOT be
+	// read as an extreme value by the recovery prompt.
+	SleepPresent bool `json:"sleep_present"`
+	HRVPresent   bool `json:"hrv_present"`
+	RHRPresent   bool `json:"rhr_present"`
+	StepsPresent bool `json:"steps_present"`
+
 	BaselineDays int `json:"baseline_days"`
 
 	ExternalWorkouts []ExternalWorkoutSummary `json:"external_workouts"`
+}
+
+// HasRecoverySignal reports whether any recovery-relevant metric was actually reported.
+// when false, the recovery node has nothing to assess and must not apply reductions.
+func (s *HealthSnapshot) HasRecoverySignal() bool {
+	return s.SleepPresent || s.HRVPresent || s.RHRPresent || s.StepsPresent
 }
 
 // ExternalWorkoutSummary is a condensed view of a non-Vigor exercise session for prompt injection.

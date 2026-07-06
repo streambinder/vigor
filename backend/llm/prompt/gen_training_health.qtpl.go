@@ -35,6 +35,7 @@ Rules:
 - Extreme values (sleep < 5h, HRV < 15ms RMSSD): significant reduction regardless of baseline
 - If baselines not established (< 7 days): only apply extreme-value rules
 - Negligible deviations: return 1.0 for both modifiers
+- Only reason about metrics explicitly listed below. A metric that is absent was NOT measured — never treat a missing metric as a low or extreme value, and never reduce because of it.
 `)
 }
 
@@ -53,46 +54,66 @@ func NodeHealthSystem() string {
 }
 
 func StreamNodeHealthUser(qw422016 *qt422016.Writer, healthSnapshot *model.HealthSnapshot) {
-	if healthSnapshot == nil {
-		qw422016.N().S(`No health data available. Return volume_modifier=1.0, intensity_modifier=1.0, extend_warmup=false, rationale="no data".
+	if healthSnapshot == nil || !healthSnapshot.HasRecoverySignal() {
+		qw422016.N().S(`No recovery metrics available. Return volume_modifier=1.0, intensity_modifier=1.0, extend_warmup=false, rationale="no data".
 `)
 	} else {
 		qw422016.N().S(`
-Sleep: `)
-		qw422016.N().FPrec(healthSnapshot.SleepHours, 1)
-		qw422016.N().S(`h (baseline: `)
-		qw422016.N().FPrec(healthSnapshot.SleepBaseline, 1)
-		qw422016.N().S(`h, deviation: `)
-		qw422016.E().S(formatDeviation(healthSnapshot.SleepDeviation))
-		qw422016.N().S(`)
+`)
+		if healthSnapshot.SleepPresent {
+			qw422016.N().S(`Sleep: `)
+			qw422016.N().FPrec(healthSnapshot.SleepHours, 1)
+			qw422016.N().S(`h (baseline: `)
+			qw422016.N().FPrec(healthSnapshot.SleepBaseline, 1)
+			qw422016.N().S(`h, deviation: `)
+			qw422016.E().S(formatDeviation(healthSnapshot.SleepDeviation))
+			qw422016.N().S(`)
   Deep: `)
-		qw422016.N().FPrec(healthSnapshot.SleepDeepHours, 1)
-		qw422016.N().S(`h, Light: `)
-		qw422016.N().FPrec(healthSnapshot.SleepLightHours, 1)
-		qw422016.N().S(`h, REM: `)
-		qw422016.N().FPrec(healthSnapshot.SleepREMHours, 1)
-		qw422016.N().S(`h
-HRV: `)
-		qw422016.N().FPrec(healthSnapshot.HRVRMSSD, 0)
-		qw422016.N().S(`ms RMSSD (baseline: `)
-		qw422016.N().FPrec(healthSnapshot.HRVBaseline, 0)
-		qw422016.N().S(`ms, deviation: `)
-		qw422016.E().S(formatDeviation(healthSnapshot.HRVDeviation))
-		qw422016.N().S(`)
-RHR: `)
-		qw422016.N().D(healthSnapshot.RestingHR)
-		qw422016.N().S(`bpm (baseline: `)
-		qw422016.N().FPrec(healthSnapshot.RHRBaseline, 0)
-		qw422016.N().S(`bpm, deviation: `)
-		qw422016.E().S(formatDeviation(healthSnapshot.RHRDeviation))
-		qw422016.N().S(`)
-Steps yesterday: `)
-		qw422016.E().S(formatNumber(healthSnapshot.Steps))
-		qw422016.N().S(` (baseline: `)
-		qw422016.E().S(formatNumber(int(healthSnapshot.StepsBaseline)))
-		qw422016.N().S(`, deviation: `)
-		qw422016.E().S(formatDeviation(healthSnapshot.StepsDeviation))
-		qw422016.N().S(`)
+			qw422016.N().FPrec(healthSnapshot.SleepDeepHours, 1)
+			qw422016.N().S(`h, Light: `)
+			qw422016.N().FPrec(healthSnapshot.SleepLightHours, 1)
+			qw422016.N().S(`h, REM: `)
+			qw422016.N().FPrec(healthSnapshot.SleepREMHours, 1)
+			qw422016.N().S(`h
+`)
+		}
+		qw422016.N().S(`
+`)
+		if healthSnapshot.HRVPresent {
+			qw422016.N().S(`HRV: `)
+			qw422016.N().FPrec(healthSnapshot.HRVRMSSD, 0)
+			qw422016.N().S(`ms RMSSD (baseline: `)
+			qw422016.N().FPrec(healthSnapshot.HRVBaseline, 0)
+			qw422016.N().S(`ms, deviation: `)
+			qw422016.E().S(formatDeviation(healthSnapshot.HRVDeviation))
+			qw422016.N().S(`)
+`)
+		}
+		qw422016.N().S(`
+`)
+		if healthSnapshot.RHRPresent {
+			qw422016.N().S(`RHR: `)
+			qw422016.N().D(healthSnapshot.RestingHR)
+			qw422016.N().S(`bpm (baseline: `)
+			qw422016.N().FPrec(healthSnapshot.RHRBaseline, 0)
+			qw422016.N().S(`bpm, deviation: `)
+			qw422016.E().S(formatDeviation(healthSnapshot.RHRDeviation))
+			qw422016.N().S(`)
+`)
+		}
+		qw422016.N().S(`
+`)
+		if healthSnapshot.StepsPresent {
+			qw422016.N().S(`Steps yesterday: `)
+			qw422016.E().S(formatNumber(healthSnapshot.Steps))
+			qw422016.N().S(` (baseline: `)
+			qw422016.E().S(formatNumber(int(healthSnapshot.StepsBaseline)))
+			qw422016.N().S(`, deviation: `)
+			qw422016.E().S(formatDeviation(healthSnapshot.StepsDeviation))
+			qw422016.N().S(`)
+`)
+		}
+		qw422016.N().S(`
 `)
 		if len(healthSnapshot.ExternalWorkouts) > 0 {
 			qw422016.N().S(`External workouts (last 3 days):

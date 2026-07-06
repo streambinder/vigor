@@ -188,8 +188,10 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 
 // runHealthNode executes the health assessment node.
 func runHealthNode(healthSnapshot *model.HealthSnapshot) (pipeline.HealthAssessment, model.LLMStep, error) {
-	// short-circuit: no health data → no adjustment
-	if healthSnapshot == nil {
+	// short-circuit: no snapshot, or a snapshot with no actually-reported recovery metric
+	// (e.g. device synced only steps=0/sleep=0 rows) → no adjustment. this prevents a missing
+	// metric rendered as "0" from being read as an extreme value.
+	if healthSnapshot == nil || !healthSnapshot.HasRecoverySignal() {
 		return pipeline.HealthAssessment{
 			VolumeModifier: 1.0, IntensityModifier: 1.0,
 		}, model.LLMStep{}, nil
@@ -429,7 +431,8 @@ func runCreativeNode(
 		User: prompt.NodeCreativeUser(
 			strategy.Methodology, strategy.PrimaryMuscles,
 			exercises.Exercises, history.Progressions,
-			health.Rationale, history.RecentNames, history.BadSessionNotes,
+			health.Rationale, health.VolumeModifier, health.IntensityModifier, health.ExtendWarmup,
+			history.RecentNames, history.BadSessionNotes,
 		),
 	}
 

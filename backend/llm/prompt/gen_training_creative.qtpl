@@ -21,7 +21,7 @@ Title rules:
 Description rules:
 - Open with the methodology and primary focus
 - Surface progression decisions driven by past feedback (weight bumps, rep changes, exercise swaps) — without using labels like "too_easy" or "too_hard" (say "you've been handling this weight well" or "pulling back here")
-- If recovery influenced the design, state the rationale without naming metrics (say "keeping volume moderate to support recovery")
+- Only mention recovery/readiness if a recovery adjustment was actually applied (shown below) — state the rationale without naming metrics (say "keeping volume moderate to support recovery"). If no adjustment was applied, do NOT claim the session was scaled for recovery.
 - Close with key exercises or structural highlights
 - The user should feel their feedback was read and acted on
 {% endfunc %}
@@ -32,6 +32,9 @@ Description rules:
     exercises []pipeline.SelectedExercise,
     progressions []pipeline.ProgressionSignal,
     healthRationale string,
+    volumeModifier float64,
+    intensityModifier float64,
+    extendWarmup bool,
     recentNames []string,
     badSessionNotes string,
 ) -%}
@@ -47,7 +50,11 @@ Progression decisions:
 {% for _, p := range progressions %}- {%s p.ExerciseID %}: {%s p.Action %} ({%s p.Signal %})
 {% endfor %}
 {% endif %}
-{% if healthRationale != "" %}Recovery context: {%s healthRationale %}{% endif %}
+{% code recoveryApplied := volumeModifier < 1.0 || intensityModifier < 1.0 || extendWarmup %}
+{% if recoveryApplied %}Recovery adjustment applied — volume at {%d int(volumeModifier*100) %}%, intensity at {%d int(intensityModifier*100) %}%{% if extendWarmup %}, extended warmup{% endif %}. {% if healthRationale != "" %}Reason: {%s healthRationale %}{% endif %}
+Mention this readiness-based scaling in the description (without naming metrics).
+{% else %}No recovery adjustment was applied — do NOT mention recovery, readiness, or volume/intensity reduction in the description.
+{% endif %}
 {% if badSessionNotes != "" %}
 Recent issue: {%s badSessionNotes %}{% endif %}
 {% if len(recentNames) > 0 %}

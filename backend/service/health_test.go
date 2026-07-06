@@ -6,6 +6,7 @@ import (
 
 	"github.com/glebarez/sqlite"
 	"github.com/google/uuid"
+	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/model"
 	"gorm.io/gorm"
 )
@@ -193,5 +194,121 @@ func TestEnrichTrainings_LinksPartnerTraining(t *testing.T) {
 	}
 	if *session.TrainingID != trainingID {
 		t.Fatalf("linked training_id = %s, want %s", session.TrainingID, trainingID)
+	}
+}
+
+// setupHealthMetricsDB creates an in-memory DB with the health_metrics and
+// health_exercise_sessions tables and swaps it into the global database.DB.
+func setupHealthMetricsDB(t *testing.T) *gorm.DB {
+	t.Helper()
+	db, err := gorm.Open(sqlite.Open("file:"+uuid.NewString()+"?mode=memory&cache=shared"), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("open sqlite db: %v", err)
+	}
+	for _, stmt := range []string{
+		`CREATE TABLE health_metrics (
+			user_id TEXT NOT NULL,
+			date DATE NOT NULL,
+			sleep_hours REAL,
+			sleep_deep_hours REAL,
+			sleep_light_hours REAL,
+			sleep_rem_hours REAL,
+			resting_hr INTEGER,
+			hrv_rmssd REAL,
+			steps INTEGER,
+			total_calories REAL,
+			synced_at DATETIME,
+			PRIMARY KEY (user_id, date)
+		)`,
+		`CREATE TABLE health_exercise_sessions (
+			id TEXT PRIMARY KEY,
+			user_id TEXT NOT NULL,
+			training_id TEXT NULL,
+			started_at DATETIME NOT NULL,
+			ended_at DATETIME NOT NULL
+		)`,
+	} {
+		if err := db.Exec(stmt).Error; err != nil {
+			t.Fatalf("create schema: %v", err)
+		}
+	}
+	restore := database.DB
+	database.DB = db
+	t.Cleanup(func() { database.DB = restore })
+	return db
+}
+
+// TestGetHealthSnapshot_MissingHRVNotTreatedAsPresent is the regression guard for the
+// health node collapsing to 0.3/0.3: a device that syncs sleep/steps but not HRV/RHR
+// writes recent rows with hrv_rmssd=0 / resting_hr=0. Those zeros must be reported as
+// ABSENT (not a literal extreme reading) even when earlier days have a real HRV baseline.
+func TestGetHealthSnapshot_MissingHRVNotTreatedAsPresent(t *testing.T) {
+	db := setupHealthMetricsDB(t)
+	loc := time.UTC
+	userID := uuid.New()
+
+	insert := func(daysAgo int, sleep, hrv float64, rhr, steps int) {
+		date := time.Now().UTC().AddDate(0, 0, -daysAgo).Format("2006-01-02")
+		if err := db.Exec(
+			`INSERT INTO health_metrics (user_id, date, sleep_hours, hrv_rmssd, resting_hr, steps) VALUES (?, ?, ?, ?, ?, ?)`,
+			userID.String(), date, sleep, hrv, rhr, steps,
+		).Error; err != nil {
+			t.Fatalf("insert metric: %v", err)
+		}
+	}
+
+	// today + last 2 days: sleep/steps present, HRV/RHR missing (0)
+	insert(0, 7.2, 0, 0, 9000)
+	insert(1, 7.6, 0, 0, 10000)
+	// older days DO carry a real HRV/RHR baseline
+	insert(5, 7.0, 40, 58, 8000)
+	insert(6, 7.5, 42, 57, 8500)
+
+	snapshot, err := GetHealthSnapshot(userID, loc)
+	if err != nil {
+		t.Fatalf("GetHealthSnapshot: %v", err)
+	}
+	if snapshot == nil {
+		t.Fatal("expected non-nil snapshot (sleep/steps are recent)")
+	}
+
+	if snapshot.HRVPresent {
+		t.Error("HRVPresent = true, want false (today's HRV is 0 = not reported)")
+	}
+	if snapshot.RHRPresent {
+		t.Error("RHRPresent = true, want false (today's RHR is 0 = not reported)")
+	}
+	if !snapshot.SleepPresent {
+		t.Error("SleepPresent = false, want true")
+	}
+	if !snapshot.StepsPresent {
+		t.Error("StepsPresent = false, want true")
+	}
+	if !snapshot.HasRecoverySignal() {
+		t.Error("HasRecoverySignal() = false, want true (sleep+steps present)")
+	}
+}
+
+// TestGetHealthSnapshot_NoRecoverySignal covers a recent row that carries only a zeroed
+// metric set (nothing actually reported) — HasRecoverySignal must be false so the health
+// node short-circuits to no-adjustment.
+func TestGetHealthSnapshot_NoRecoverySignal(t *testing.T) {
+	db := setupHealthMetricsDB(t)
+	userID := uuid.New()
+
+	date := time.Now().UTC().Format("2006-01-02")
+	if err := db.Exec(
+		`INSERT INTO health_metrics (user_id, date, sleep_hours, hrv_rmssd, resting_hr, steps) VALUES (?, ?, 0, 0, 0, 0)`,
+		userID.String(), date,
+	).Error; err != nil {
+		t.Fatalf("insert metric: %v", err)
+	}
+
+	snapshot, err := GetHealthSnapshot(userID, time.UTC)
+	if err != nil {
+		t.Fatalf("GetHealthSnapshot: %v", err)
+	}
+	if snapshot != nil && snapshot.HasRecoverySignal() {
+		t.Error("HasRecoverySignal() = true, want false (all metrics zero/absent)")
 	}
 }

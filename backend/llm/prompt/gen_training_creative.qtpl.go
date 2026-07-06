@@ -38,7 +38,7 @@ Title rules:
 Description rules:
 - Open with the methodology and primary focus
 - Surface progression decisions driven by past feedback (weight bumps, rep changes, exercise swaps) — without using labels like "too_easy" or "too_hard" (say "you've been handling this weight well" or "pulling back here")
-- If recovery influenced the design, state the rationale without naming metrics (say "keeping volume moderate to support recovery")
+- Only mention recovery/readiness if a recovery adjustment was actually applied (shown below) — state the rationale without naming metrics (say "keeping volume moderate to support recovery"). If no adjustment was applied, do NOT claim the session was scaled for recovery.
 - Close with key exercises or structural highlights
 - The user should feel their feedback was read and acted on
 `)
@@ -64,6 +64,9 @@ func StreamNodeCreativeUser(qw422016 *qt422016.Writer,
 	exercises []pipeline.SelectedExercise,
 	progressions []pipeline.ProgressionSignal,
 	healthRationale string,
+	volumeModifier float64,
+	intensityModifier float64,
+	extendWarmup bool,
 	recentNames []string,
 	badSessionNotes string,
 ) {
@@ -108,9 +111,30 @@ Progression decisions:
 	}
 	qw422016.N().S(`
 `)
-	if healthRationale != "" {
-		qw422016.N().S(`Recovery context: `)
-		qw422016.E().S(healthRationale)
+	recoveryApplied := volumeModifier < 1.0 || intensityModifier < 1.0 || extendWarmup
+
+	qw422016.N().S(`
+`)
+	if recoveryApplied {
+		qw422016.N().S(`Recovery adjustment applied — volume at `)
+		qw422016.N().D(int(volumeModifier * 100))
+		qw422016.N().S(`%, intensity at `)
+		qw422016.N().D(int(intensityModifier * 100))
+		qw422016.N().S(`%`)
+		if extendWarmup {
+			qw422016.N().S(`, extended warmup`)
+		}
+		qw422016.N().S(`. `)
+		if healthRationale != "" {
+			qw422016.N().S(`Reason: `)
+			qw422016.E().S(healthRationale)
+		}
+		qw422016.N().S(`
+Mention this readiness-based scaling in the description (without naming metrics).
+`)
+	} else {
+		qw422016.N().S(`No recovery adjustment was applied — do NOT mention recovery, readiness, or volume/intensity reduction in the description.
+`)
 	}
 	qw422016.N().S(`
 `)
@@ -136,11 +160,14 @@ func WriteNodeCreativeUser(qq422016 qtio422016.Writer,
 	exercises []pipeline.SelectedExercise,
 	progressions []pipeline.ProgressionSignal,
 	healthRationale string,
+	volumeModifier float64,
+	intensityModifier float64,
+	extendWarmup bool,
 	recentNames []string,
 	badSessionNotes string,
 ) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeCreativeUser(qw422016, methodology, primaryMuscles, exercises, progressions, healthRationale, recentNames, badSessionNotes)
+	StreamNodeCreativeUser(qw422016, methodology, primaryMuscles, exercises, progressions, healthRationale, volumeModifier, intensityModifier, extendWarmup, recentNames, badSessionNotes)
 	qt422016.ReleaseWriter(qw422016)
 }
 
@@ -150,11 +177,14 @@ func NodeCreativeUser(
 	exercises []pipeline.SelectedExercise,
 	progressions []pipeline.ProgressionSignal,
 	healthRationale string,
+	volumeModifier float64,
+	intensityModifier float64,
+	extendWarmup bool,
 	recentNames []string,
 	badSessionNotes string,
 ) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeCreativeUser(qb422016, methodology, primaryMuscles, exercises, progressions, healthRationale, recentNames, badSessionNotes)
+	WriteNodeCreativeUser(qb422016, methodology, primaryMuscles, exercises, progressions, healthRationale, volumeModifier, intensityModifier, extendWarmup, recentNames, badSessionNotes)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

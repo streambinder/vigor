@@ -602,6 +602,13 @@ func GetHealthSnapshot(userID uuid.UUID, loc *time.Location) (*model.HealthSnaps
 		RestingHR:       today.RestingHR,
 		Steps:           today.Steps,
 		BaselineDays:    len(metrics),
+		// 0 means "not reported" for these metrics (see ingest clamp), not a real reading —
+		// devices often sync steps/sleep but omit HRV/RHR. mark presence so the prompt can
+		// skip absent metrics instead of rendering a spurious extreme "0".
+		SleepPresent: today.SleepHours > 0,
+		HRVPresent:   today.HRVRMSSD > 0,
+		RHRPresent:   today.RestingHR > 0,
+		StepsPresent: today.Steps > 0,
 	}
 
 	if len(sleepSamples) > 0 {
