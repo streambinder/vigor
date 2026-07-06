@@ -4,7 +4,7 @@ go 1.26.1
 
 require (
 	github.com/glebarez/sqlite v1.11.0
-	github.com/gofiber/fiber/v2 v2.52.13
+	github.com/gofiber/fiber/v2 v2.52.14
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/lib/pq v1.10.9
 	github.com/openai/openai-go v1.12.0
