@@ -96,3 +96,26 @@ func TestProgressionsForSelected_NoneMatch(t *testing.T) {
 		t.Errorf("kept %d progressions, want 0", len(kept))
 	}
 }
+
+func TestMuscleCoverage(t *testing.T) {
+	exercises := []model.Exercise{
+		{Muscles: []string{"back", "arms"}},
+		{Muscles: []string{"back", "shoulders"}},
+		{Muscles: []string{"arms"}},
+	}
+	cov := muscleCoverage(exercises)
+	if cov["back"] != 2 {
+		t.Errorf("back = %d, want 2", cov["back"])
+	}
+	if cov["arms"] != 2 {
+		t.Errorf("arms = %d, want 2", cov["arms"])
+	}
+	if cov["shoulders"] != 1 {
+		t.Errorf("shoulders = %d, want 1", cov["shoulders"])
+	}
+	// a muscle no exercise trains must be absent (count 0 via missing key), so the
+	// strategy prompt won't offer it as a primary-muscle option
+	if _, ok := cov["glutes"]; ok {
+		t.Error("glutes should be absent — no exercise trains it")
+	}
+}

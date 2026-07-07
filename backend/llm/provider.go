@@ -40,6 +40,19 @@ func methodologyCoverage(exercises []model.Exercise, methodologies []model.Metho
 	return counts
 }
 
+// muscleCoverage counts how many exercises in the (already equipment-filtered) work pool
+// train each muscle. the strategy node uses this to avoid nominating primary muscles the
+// available equipment can't actually service (e.g. no hinge/glute options with only a bar).
+func muscleCoverage(exercises []model.Exercise) map[string]int {
+	counts := make(map[string]int)
+	for _, ex := range exercises {
+		for _, muscle := range ex.Muscles {
+			counts[muscle]++
+		}
+	}
+	return counts
+}
+
 type Stage string
 
 const (

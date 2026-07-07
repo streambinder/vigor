@@ -90,6 +90,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	strategyResult, strategyStep, err := runStrategyNode(
 		req.Goals, req.Methodology, req.Methodologies,
 		methodologyCoverage(req.WorkExercises, req.Methodologies),
+		muscleCoverage(req.WorkExercises),
 		req.CalibrationGaps, healthResult, historyResult,
 		req.UserPrompt, req.Duration, req.SkipWarmupCooldown,
 	)
@@ -285,6 +286,7 @@ func runStrategyNode(
 	methodology *model.Methodology,
 	methodologies []model.Methodology,
 	coverage map[string]int,
+	muscleCov map[string]int,
 	calibrationGaps map[string]int,
 	health pipeline.HealthAssessment,
 	history pipeline.HistoryAnalysis,
@@ -293,7 +295,7 @@ func runStrategyNode(
 	skipWarmupCooldown bool,
 ) (pipeline.Strategy, model.LLMStep, error) {
 	p := model.LLMPrompt{
-		System: prompt.NodeStrategySystem(methodology, methodologies, coverage),
+		System: prompt.NodeStrategySystem(methodology, methodologies, coverage, muscleCov),
 		User: prompt.NodeStrategyUser(
 			goals, calibrationGaps,
 			health.VolumeModifier, health.IntensityModifier, health.Rationale,

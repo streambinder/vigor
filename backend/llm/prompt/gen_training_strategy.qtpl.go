@@ -5,6 +5,8 @@ package prompt
 
 import "fmt"
 
+import "sort"
+
 import "github.com/streambinder/vigor/model"
 
 import (
@@ -18,7 +20,7 @@ var (
 	_ = qt422016.AcquireByteBuffer
 )
 
-func StreamNodeStrategySystem(qw422016 *qt422016.Writer, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int) {
+func StreamNodeStrategySystem(qw422016 *qt422016.Writer, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, muscleCoverage map[string]int) {
 	qw422016.N().S(`You are a training program strategist. Choose a methodology and define the session's muscle emphasis and intensity targets.
 
 Output a JSON object with:
@@ -63,17 +65,44 @@ Prefer methodologies with higher compatible exercise counts unless goals require
 	}
 	qw422016.N().S(`
 `)
+	if len(muscleCoverage) > 0 {
+		qw422016.N().S(`
+Trainable muscles with the available equipment (muscle: exercise count):
+`)
+		muscles := make([]string, 0, len(muscleCoverage))
+		for m := range muscleCoverage {
+			muscles = append(muscles, m)
+		}
+		sort.Slice(muscles, func(i, j int) bool {
+			if muscleCoverage[muscles[i]] != muscleCoverage[muscles[j]] {
+				return muscleCoverage[muscles[i]] > muscleCoverage[muscles[j]]
+			}
+			return muscles[i] < muscles[j]
+		})
+
+		for _, m := range muscles {
+			qw422016.E().S(m)
+			qw422016.N().S(`: `)
+			qw422016.N().D(muscleCoverage[m])
+			qw422016.N().S(`, `)
+		}
+		qw422016.N().S(`
+primary_muscles and secondary_muscles MUST use only muscle names from the list above — never invent finer-grained names (e.g. "lats", "rhomboids", "hamstrings"); use the coarse names shown. primary_muscles MUST have a non-zero exercise count — never nominate a muscle the equipment can't train, even if the goal suggests it. Prefer higher-count muscles for primary emphasis.
+`)
+	}
+	qw422016.N().S(`
+`)
 }
 
-func WriteNodeStrategySystem(qq422016 qtio422016.Writer, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int) {
+func WriteNodeStrategySystem(qq422016 qtio422016.Writer, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, muscleCoverage map[string]int) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeStrategySystem(qw422016, methodology, methodologies, methodologyCoverage)
+	StreamNodeStrategySystem(qw422016, methodology, methodologies, methodologyCoverage, muscleCoverage)
 	qt422016.ReleaseWriter(qw422016)
 }
 
-func NodeStrategySystem(methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int) string {
+func NodeStrategySystem(methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, muscleCoverage map[string]int) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeStrategySystem(qb422016, methodology, methodologies, methodologyCoverage)
+	WriteNodeStrategySystem(qb422016, methodology, methodologies, methodologyCoverage, muscleCoverage)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016
