@@ -1,3 +1,7 @@
 # nginx official image runs master as root to bind port 80, workers run as
 # unprivileged nginx user — trivy can't infer this multi-process model
 DS-0002
+
+# x/crypto/openpgp is unmaintained by design with no fixed version; backend only
+# imports x/crypto/bcrypt (service/session.go), openpgp is never reachable
+GO-2026-5932
