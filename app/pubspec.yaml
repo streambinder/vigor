@@ -25,7 +25,7 @@ dependencies:
   cached_network_image: ^3.4.1
   flutter_svg: ^2.3.0
   audioplayers: ^6.1.0
-  wakelock_plus: ^1.2.10
+  wakelock_plus: ^1.5.2
   image_picker: ^1.1.2
   app_links: ^6.3.3
   share_plus: ^10.1.4
