@@ -11,7 +11,7 @@ COPY cockpit/ .
 RUN go run github.com/a-h/templ/cmd/templ@v0.3.977 generate ./view/ \
     && CGO_ENABLED=1 go build -o cockpit main.go
 
-FROM alpine:3.22
+FROM alpine:3.24
 
 LABEL org.opencontainers.image.source=https://github.com/streambinder/vigor
 
