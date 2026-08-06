@@ -118,6 +118,11 @@ func TestEnrichTrainings_LinksPartnerTraining(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open sqlite db: %v", err)
 	}
+	t.Cleanup(func() {
+		if sqlDB, err := db.DB(); err == nil {
+			_ = sqlDB.Close()
+		}
+	})
 
 	for _, stmt := range []string{
 		`CREATE TABLE trainings (
@@ -205,6 +210,11 @@ func setupHealthMetricsDB(t *testing.T) *gorm.DB {
 	if err != nil {
 		t.Fatalf("open sqlite db: %v", err)
 	}
+	t.Cleanup(func() {
+		if sqlDB, err := db.DB(); err == nil {
+			_ = sqlDB.Close()
+		}
+	})
 	for _, stmt := range []string{
 		`CREATE TABLE health_metrics (
 			user_id TEXT NOT NULL,

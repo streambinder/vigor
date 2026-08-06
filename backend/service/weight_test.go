@@ -113,6 +113,11 @@ func setupWeightTestDB(t *testing.T) *gorm.DB {
 	if err != nil {
 		t.Fatalf("open sqlite db: %v", err)
 	}
+	t.Cleanup(func() {
+		if sqlDB, err := db.DB(); err == nil {
+			_ = sqlDB.Close()
+		}
+	})
 
 	for _, stmt := range []string{
 		`CREATE TABLE profiles (

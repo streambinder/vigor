@@ -17,6 +17,11 @@ func setupTestDB(t *testing.T) *gorm.DB {
 	if err != nil {
 		t.Fatalf("Failed to open test database: %v", err)
 	}
+	t.Cleanup(func() {
+		if sqlDB, err := db.DB(); err == nil {
+			_ = sqlDB.Close()
+		}
+	})
 
 	for _, ddl := range []string{
 		`CREATE TABLE users (
