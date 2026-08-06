@@ -33,7 +33,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/pgvector/pgvector-go v0.3.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
-	github.com/rs/zerolog v1.34.0 // indirect
+	github.com/rs/zerolog v1.35.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.68.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
