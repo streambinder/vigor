@@ -53,7 +53,7 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 	gorm.io/driver/mysql v1.6.0 // indirect
 	modernc.org/libc v1.22.5 // indirect
-	modernc.org/mathutil v1.5.0 // indirect
+	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.5.0 // indirect
 	modernc.org/sqlite v1.23.1 // indirect
 )
