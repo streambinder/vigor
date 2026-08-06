@@ -8,7 +8,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/lib/pq v1.10.9
 	github.com/openai/openai-go v1.12.0
-	github.com/pgvector/pgvector-go v0.3.0
+	github.com/pgvector/pgvector-go v0.4.1
 	github.com/rs/zerolog v1.35.1
 	github.com/valyala/quicktemplate v1.8.0
 	golang.org/x/crypto v0.54.0
