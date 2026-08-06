@@ -110,7 +110,7 @@ jobs:
           go install mvdan.cc/gofumpt@latest
           gofumpt -e -d backend cockpit knowledge
 
-  go-channel-closure:
+  golangci-lint:
     runs-on: ubuntu-latest
     needs: changes
     if: needs.changes.outputs.go == 'true'
@@ -118,9 +118,16 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-      - run: test "$(grep -Erc --include='*.go' --exclude-dir=".git*" 'make\(chan\s')" = "$(grep -Erc --include='*.go' --exclude-dir=".git*" '\sclose\(')"
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a
+        with:
+          working-directory: backend
+          args: --enable-only bodyclose -c ../.github/linters/.golangci.yml
 
-  go-http-body-closure:
+  go-test:
     runs-on: ubuntu-latest
     needs: changes
     if: needs.changes.outputs.go == 'true'
@@ -128,17 +135,12 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-      - run: test "$(grep -Erc --include='*.go' --exclude-dir=".git*" 'http\.(Get|Head)\(|http\.DefaultClient\.Do\(|client\.(Get|Head|Do)\(')" = "$(grep -rc --include='*.go' --exclude-dir=".git*" '\.Body\.Close()')"
-
-  go-mockey-unpatch:
-    runs-on: ubuntu-latest
-    needs: changes
-    if: needs.changes.outputs.go == 'true'
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
         with:
-          persist-credentials: false
-      - run: test "$(grep -cr --include='*.go' 'mockey.Mock(')" = "$(grep -cr --include='*.go' '\.UnPatch()$')"
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - run: go test -race -timeout 300s ./...
+        working-directory: backend
 
   go-generate:
     runs-on: ubuntu-latest
@@ -310,24 +312,14 @@ jobs:
   knowledge-docker:
     runs-on: ubuntu-24.04-arm
     environment: deploy
-    needs:
-      [
-        super-linter,
-        changes,
-        gofumpt,
-        go-channel-closure,
-        go-http-body-closure,
-        go-mockey-unpatch,
-        go-generate,
-      ]
+    needs: [super-linter, changes, gofumpt, golangci-lint, go-test, go-generate]
     if: |
       always() &&
       needs.super-linter.result == 'success' &&
       needs.changes.outputs.knowledge == 'true' &&
       (needs.gofumpt.result == 'success' || needs.gofumpt.result == 'skipped') &&
-      (needs.go-channel-closure.result == 'success' || needs.go-channel-closure.result == 'skipped') &&
-      (needs.go-http-body-closure.result == 'success' || needs.go-http-body-closure.result == 'skipped') &&
-      (needs.go-mockey-unpatch.result == 'success' || needs.go-mockey-unpatch.result == 'skipped') &&
+      (needs.golangci-lint.result == 'success' || needs.golangci-lint.result == 'skipped') &&
+      (needs.go-test.result == 'success' || needs.go-test.result == 'skipped') &&
       (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
       github.event_name == 'push' && github.ref == 'refs/heads/master'
     permissions:
@@ -362,24 +354,14 @@ jobs:
   backend-docker:
     runs-on: ubuntu-24.04-arm
     environment: deploy
-    needs:
-      [
-        super-linter,
-        changes,
-        gofumpt,
-        go-channel-closure,
-        go-http-body-closure,
-        go-mockey-unpatch,
-        go-generate,
-      ]
+    needs: [super-linter, changes, gofumpt, golangci-lint, go-test, go-generate]
     if: |
       always() &&
       needs.super-linter.result == 'success' &&
       needs.changes.outputs.go == 'true' &&
       (needs.gofumpt.result == 'success' || needs.gofumpt.result == 'skipped') &&
-      (needs.go-channel-closure.result == 'success' || needs.go-channel-closure.result == 'skipped') &&
-      (needs.go-http-body-closure.result == 'success' || needs.go-http-body-closure.result == 'skipped') &&
-      (needs.go-mockey-unpatch.result == 'success' || needs.go-mockey-unpatch.result == 'skipped') &&
+      (needs.golangci-lint.result == 'success' || needs.golangci-lint.result == 'skipped') &&
+      (needs.go-test.result == 'success' || needs.go-test.result == 'skipped') &&
       (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
       github.event_name == 'push' && github.ref == 'refs/heads/master'
     permissions:
@@ -410,24 +392,14 @@ jobs:
   cockpit-docker:
     runs-on: ubuntu-24.04-arm
     environment: deploy
-    needs:
-      [
-        super-linter,
-        changes,
-        gofumpt,
-        go-channel-closure,
-        go-http-body-closure,
-        go-mockey-unpatch,
-        go-generate,
-      ]
+    needs: [super-linter, changes, gofumpt, golangci-lint, go-test, go-generate]
     if: |
       always() &&
       needs.super-linter.result == 'success' &&
       needs.changes.outputs.cockpit == 'true' &&
       (needs.gofumpt.result == 'success' || needs.gofumpt.result == 'skipped') &&
-      (needs.go-channel-closure.result == 'success' || needs.go-channel-closure.result == 'skipped') &&
-      (needs.go-http-body-closure.result == 'success' || needs.go-http-body-closure.result == 'skipped') &&
-      (needs.go-mockey-unpatch.result == 'success' || needs.go-mockey-unpatch.result == 'skipped') &&
+      (needs.golangci-lint.result == 'success' || needs.golangci-lint.result == 'skipped') &&
+      (needs.go-test.result == 'success' || needs.go-test.result == 'skipped') &&
       (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
       github.event_name == 'push' && github.ref == 'refs/heads/master'
     permissions:
