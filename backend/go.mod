@@ -34,6 +34,7 @@ require (
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.19 // indirect
 	github.com/googleapis/gax-go/v2 v2.17.0 // indirect
+	github.com/ncruces/go-strftime v1.0.0 // indirect
 	github.com/philhofer/fwd v1.2.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/tidwall/gjson v1.14.4 // indirect
@@ -52,9 +53,9 @@ require (
 	google.golang.org/grpc v1.83.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gorm.io/driver/mysql v1.6.0 // indirect
-	modernc.org/libc v1.22.5 // indirect
+	modernc.org/libc v1.74.4 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
-	modernc.org/memory v1.5.0 // indirect
+	modernc.org/memory v1.11.0 // indirect
 	modernc.org/sqlite v1.23.1 // indirect
 )
 
