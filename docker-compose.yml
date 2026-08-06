@@ -1,7 +1,7 @@
 ---
 services:
   database:
-    image: pgvector/pgvector:0.8.1-pg18
+    image: pgvector/pgvector:0.8.6-pg18
     restart: always
     environment:
       POSTGRES_DB: db
