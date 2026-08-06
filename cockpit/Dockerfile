@@ -1,4 +1,4 @@
-FROM golang:1.26.1-alpine3.22 AS builder
+FROM golang:1.26.4-alpine3.22 AS builder
 RUN apk add --no-cache gcc=14.2.0-r6 musl-dev=1.2.5-r12
 WORKDIR /build
 COPY backend/go.mod backend/go.sum ./backend/
