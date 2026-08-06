@@ -3,7 +3,7 @@ module github.com/streambinder/vigor/cockpit
 go 1.26.1
 
 require (
-	github.com/a-h/templ v0.3.977
+	github.com/a-h/templ v0.3.1020
 	github.com/glebarez/sqlite v1.11.0
 	github.com/gofiber/fiber/v2 v2.52.14
 	github.com/google/uuid v1.6.0
@@ -31,7 +31,7 @@ require (
 	github.com/mattn/go-colorable v0.1.15 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.27 // indirect
-	github.com/pgvector/pgvector-go v0.3.0 // indirect
+	github.com/pgvector/pgvector-go v0.4.1 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rs/zerolog v1.35.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
