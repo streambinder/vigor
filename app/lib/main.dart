@@ -140,15 +140,11 @@ class VigorApp extends StatelessWidget {
           theme: VigorTheme.light,
           darkTheme: VigorTheme.dark,
           themeMode: themeProvider.themeMode,
-          onGenerateRoute: (settings) {
-            final uri = Uri.parse(settings.name ?? '/');
-            // /t/<token> → store token for post-auth processing
-            if (uri.pathSegments.length == 2 && uri.pathSegments[0] == 't') {
-              final serviceLocator = context.read<ServiceLocator>();
-              serviceLocator.pendingShareToken = uri.pathSegments[1];
-            }
-            return MaterialPageRoute(builder: (_) => const AuthenticationWrapper());
-          },
+          // pure route factory — on web the cold-start url arrives as the route
+          // name, so hand it down and let the wrapper own all link parsing
+          onGenerateRoute: (settings) => MaterialPageRoute(
+            builder: (_) => AuthenticationWrapper(initialRoute: settings.name),
+          ),
           debugShowCheckedModeBanner: false,
         ),
       ),
@@ -156,9 +152,16 @@ class VigorApp extends StatelessWidget {
   }
 }
 
+/// `/t/<token>` → share token, any other path → null
+String? _shareTokenOf(Uri uri) =>
+    uri.pathSegments.length == 2 && uri.pathSegments[0] == 't' ? uri.pathSegments[1] : null;
+
 /// Wrapper widget that handles authentication state and navigation
 class AuthenticationWrapper extends StatefulWidget {
-  const AuthenticationWrapper({super.key});
+  const AuthenticationWrapper({super.key, this.initialRoute});
+
+  /// path the app cold-started on — only carries a url on web
+  final String? initialRoute;
 
   @override
   State<AuthenticationWrapper> createState() => _AuthenticationWrapperState();
@@ -167,25 +170,44 @@ class AuthenticationWrapper extends StatefulWidget {
 class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
   late final AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
+  AuthProvider? _authProvider;
   bool _loadingInitialData = false;
-  bool _processingPendingToken = false;
+  bool _drainingShare = false;
+  String? _coldStartToken;
 
   @override
   void initState() {
     super.initState();
     _appLinks = AppLinks();
+    _coldStartToken = _shareTokenOf(Uri.parse(widget.initialRoute ?? '/'));
     _initDeepLinks();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       // wire event bus into auth provider so profile updates emit events
       final serviceLocator = context.read<ServiceLocator>();
       context.read<AuthProvider>().emitEvent = serviceLocator.emit;
       context.read<AuthProvider>().healthDataService = serviceLocator.healthDataService;
       context.read<AuthProvider>().initialize();
+      if (_coldStartToken != null) _queueShare(_coldStartToken!);
     });
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final authProvider = context.read<AuthProvider>();
+    if (!identical(authProvider, _authProvider)) {
+      _authProvider?.removeListener(_onAuthChanged);
+      _authProvider = authProvider..addListener(_onAuthChanged);
+    }
+    // a fresh wrapper can mount with a share already queued (see
+    // SharedTrainingScreen's "login to add" path)
+    _onAuthChanged();
+  }
+
+  @override
   void dispose() {
+    _authProvider?.removeListener(_onAuthChanged);
     _linkSubscription?.cancel();
     super.dispose();
   }
@@ -200,10 +222,13 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
   }
 
   Future<void> _initDeepLinks() async {
-    // cold start
+    // cold start — on web the same link already reached us as the route name,
+    // so ignore the duplicate rather than racing the drain with it
     try {
       final initialLink = await _appLinks.getInitialLink();
-      if (initialLink != null) _handleDeepLink(initialLink);
+      if (initialLink != null && _shareTokenOf(initialLink) != _coldStartToken) {
+        _handleDeepLink(initialLink);
+      }
     } catch (_) {}
 
     // warm start
@@ -211,88 +236,100 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
   }
 
   void _handleDeepLink(Uri uri) {
-    if (uri.pathSegments.length == 2 && uri.pathSegments[0] == 't') {
-      final token = uri.pathSegments[1];
-      if (!mounted) return;
+    final token = _shareTokenOf(uri);
+    if (token != null) _queueShare(token);
+  }
 
-      final serviceLocator = context.read<ServiceLocator>();
-      // skip if already queued (e.g. onGenerateRoute already stored it)
-      if (serviceLocator.pendingShareToken == token) return;
+  /// single-slot mailbox — the drain decides when the stack can take it, so a
+  /// link that lands mid-auth is never pushed onto a navigator about to be torn down
+  void _queueShare(String token) {
+    if (!mounted) return;
+    context.read<ServiceLocator>().pendingShareToken = token;
+    _scheduleDrain();
+  }
 
-      final authState = context.read<AuthProvider>().state;
-      if (authState == AuthState.authenticated) {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => SharedTrainingScreen(token: token)),
-        );
-      } else {
-        // store for post-login processing — avoids pushing onto a navigator
-        // that gets rebuilt during auth state transitions
-        serviceLocator.pendingShareToken = token;
-      }
+  void _scheduleDrain() =>
+      WidgetsBinding.instance.addPostFrameCallback((_) => _drainPendingShare());
+
+  Future<void> _drainPendingShare() async {
+    if (!mounted || _drainingShare) return;
+    final serviceLocator = context.read<ServiceLocator>();
+    final token = serviceLocator.pendingShareToken;
+    // leave it queued until auth settles and the home data is in
+    if (token == null ||
+        context.read<AuthProvider>().state != AuthState.authenticated ||
+        !serviceLocator.initialDataLoaded ||
+        _loadingInitialData) {
+      return;
     }
+
+    _drainingShare = true;
+    try {
+      Widget destination = SharedTrainingScreen(token: token);
+      if (serviceLocator.pendingShareAutoClaim) {
+        // user tapped "login to add" on the share screen — claim before showing it
+        try {
+          final response = await serviceLocator.trainingService.claimSharedTraining(token);
+          if (response.isSuccess && response.data != null) {
+            destination = TrainingDetailsScreen(training: response.data!);
+          }
+        } catch (e) {
+          AppLogger.error('[Share] claim failed for token $token', e);
+        }
+      }
+      if (!mounted) return; // token stays queued — the next trigger retries
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => destination));
+      // consumed only once the route is actually on the stack
+      serviceLocator.pendingShareToken = null;
+      serviceLocator.pendingShareAutoClaim = false;
+    } finally {
+      _drainingShare = false;
+    }
+  }
+
+  /// post-frame so a provider notification mid-build can't trigger a nested
+  /// setState or a push
+  void _onAuthChanged() =>
+      WidgetsBinding.instance.addPostFrameCallback((_) => _syncFromAuth());
+
+  /// reactions to being authenticated: locale, initial data, queued share.
+  /// ordered — the drain waits for the data load to finish.
+  void _syncFromAuth() {
+    if (!mounted || context.read<AuthProvider>().state != AuthState.authenticated) return;
+
+    final user = context.read<AuthProvider>().currentUser;
+    if (user != null) {
+      context.read<LocaleProvider>().setFromProfileLanguage(user.profile.language);
+    }
+
+    final serviceLocator = context.read<ServiceLocator>();
+    if (!serviceLocator.initialDataLoaded && !_loadingInitialData) {
+      _loadInitialData(serviceLocator);
+    } else {
+      _drainPendingShare();
+    }
+  }
+
+  /// pre-load homepage data before leaving splash
+  Future<void> _loadInitialData(ServiceLocator serviceLocator) async {
+    _loadingInitialData = true;
+    await serviceLocator.loadInitialData();
+    // trigger health sync in background after initial data loads
+    _triggerHealthSync(serviceLocator);
+    if (!mounted) return;
+    setState(() => _loadingInitialData = false);
+    _drainPendingShare();
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        // sync locale with user profile language when authenticated
         if (authProvider.state == AuthState.authenticated) {
-          final user = authProvider.currentUser;
-          if (user != null) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              context.read<LocaleProvider>().setFromProfileLanguage(user.profile.language);
-            });
-          }
-
-          // pre-load homepage data before leaving splash
-          final serviceLocator = context.read<ServiceLocator>();
-          if (!serviceLocator.initialDataLoaded && !_loadingInitialData) {
-            _loadingInitialData = true;
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
-              await serviceLocator.loadInitialData();
-              // trigger health sync in background after initial data loads
-              _triggerHealthSync(serviceLocator);
-              if (mounted) setState(() => _loadingInitialData = false);
-            });
-            return const SplashScreen();
-          }
-          if (_loadingInitialData) return const SplashScreen();
-
-          // process pending share token after auth + initial data
-          if (!_processingPendingToken && serviceLocator.pendingShareToken != null) {
-            _processingPendingToken = true;
-            final token = serviceLocator.pendingShareToken!;
-            final autoClaim = serviceLocator.pendingShareAutoClaim;
-            serviceLocator.pendingShareToken = null;
-            serviceLocator.pendingShareAutoClaim = false;
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
-              if (autoClaim) {
-                // user explicitly tapped "login to add" — claim directly
-                final navigator = Navigator.of(context);
-                final response = await serviceLocator.trainingService.claimSharedTraining(token);
-                if (!mounted) return;
-                if (response.isSuccess && response.data != null) {
-                  navigator.push(
-                    MaterialPageRoute(builder: (_) => TrainingDetailsScreen(training: response.data!)),
-                  );
-                } else {
-                  navigator.push(
-                    MaterialPageRoute(builder: (_) => SharedTrainingScreen(token: token)),
-                  );
-                }
-              } else {
-                // came from a link — just show the shared training screen
-                if (!mounted) return;
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => SharedTrainingScreen(token: token)),
-                );
-              }
-              _processingPendingToken = false;
-            });
-          }
-
-          return const HomeScreen();
+          // stay on splash until _loadInitialData has filled the caches
+          return context.read<ServiceLocator>().initialDataLoaded && !_loadingInitialData
+              ? const HomeScreen()
+              : const SplashScreen();
         }
 
         if (authProvider.state == AuthState.initial ||
