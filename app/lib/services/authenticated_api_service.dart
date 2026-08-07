@@ -130,7 +130,7 @@ class AuthenticatedApiService {
     }
     return {
       ApiConfig.authorizationHeader: 'Bearer $accessToken',
-      'X-Timezone': await FlutterTimezone.getLocalTimezone(),
+      'X-Timezone': (await FlutterTimezone.getLocalTimezone()).identifier,
     };
   }
 
