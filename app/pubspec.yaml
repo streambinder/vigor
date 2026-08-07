@@ -27,7 +27,7 @@ dependencies:
   audioplayers: ^6.1.0
   wakelock_plus: ^1.2.10
   image_picker: ^1.1.2
-  app_links: ^6.3.3
+  app_links: ^7.2.1
   share_plus: ^10.1.4
   health: ^13.3.1
   flutter_timezone: ^4.1.1
