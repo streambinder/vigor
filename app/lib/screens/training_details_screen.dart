@@ -469,7 +469,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
     if (response.isSuccess && response.data != null) {
       final url = response.data!['url']!;
       try {
-        await Share.share(url);
+        await SharePlus.instance.share(ShareParams(text: url));
       } catch (_) {
         // fallback: copy to clipboard (e.g. web where share sheet unavailable)
         await Clipboard.setData(ClipboardData(text: url));

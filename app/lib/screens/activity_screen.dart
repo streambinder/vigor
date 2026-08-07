@@ -197,7 +197,7 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
     if (response.isSuccess && response.data != null) {
       final url = response.data!['url']!;
       try {
-        await Share.share(url);
+        await SharePlus.instance.share(ShareParams(text: url));
       } catch (_) {
         await Clipboard.setData(ClipboardData(text: url));
         if (mounted) AdaptiveNotification.show(context: context, message: l10n.linkCopied);
