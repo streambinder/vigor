@@ -159,6 +159,7 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           channel: stable
+          flutter-version: 3.44.9
       - run: |
           cd app && flutter pub get
           cd ../backend && go generate
@@ -176,10 +177,11 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           channel: stable
+          flutter-version: 3.44.9
       - run: |
           cd app
           flutter pub get
-          flutter pub run build_runner build --delete-conflicting-outputs
+          dart run build_runner build --delete-conflicting-outputs
           git diff --exit-code
 
   flutter-l10n:
@@ -193,6 +195,7 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           channel: stable
+          flutter-version: 3.44.9
       - run: |
           cd app
           flutter pub get
@@ -210,10 +213,11 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           channel: stable
+          flutter-version: 3.44.9
       - run: |
           cd app
           flutter pub get
-          flutter pub run build_runner build --delete-conflicting-outputs
+          dart run build_runner build --delete-conflicting-outputs
           flutter analyze
 
   app-apk:
@@ -244,6 +248,7 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           channel: stable
+          flutter-version: 3.44.9
       - run: |
           echo "${{ secrets.APK_KEYSTORE }}" | base64 -d > app/android/app/vigor-release.jks
           cat <<EOF > app/android/key.properties
@@ -255,7 +260,7 @@ jobs:
       - run: |
           cd app
           flutter pub get
-          flutter pub run build_runner build --delete-conflicting-outputs
+          dart run build_runner build --delete-conflicting-outputs
           flutter build apk --release --dart-define=API_URL=${{ secrets.API_URL }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
