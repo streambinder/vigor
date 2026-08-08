@@ -25171,7 +25171,7 @@
     "id": "outside-leg-kick-push-up",
     "name": "Outside Leg Kick Push-Up",
     "equipment": [],
-    "muscles": ["chest", "glutes", "legs"],
+    "muscles": ["chest", "glutes"],
     "reference": "https://static.exercisedb.dev/media/jNU1gFQ.gif",
     "instructions": [
       "Start in a push-up position with your hands slightly wider than shoulder-width apart and your feet together",
@@ -26001,7 +26001,7 @@
     "id": "push-up-inside-leg-kick",
     "name": "Push-Up Inside Leg Kick",
     "equipment": [],
-    "muscles": ["chest", "core", "legs"],
+    "muscles": ["chest", "core"],
     "reference": "https://static.exercisedb.dev/media/0br45wL.gif",
     "instructions": [
       "Start in a push-up position with your hands slightly wider than shoulder-width apart and your feet together",
