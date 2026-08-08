@@ -73,10 +73,20 @@ class WorkoutTimerNotifier extends BaseTimerNotifier with WidgetsBindingObserver
   /// remaining seconds on the current interval/timer
   int get currentRemainingSeconds => _controller?.remainingSeconds ?? 0;
 
-  /// overall training progress as 0.0-1.0 fraction based on exercises done vs total
+  /// overall training progress as 0.0-1.0 fraction
+  /// AMRAP: based on global timer (time-based, since rounds are open-ended)
+  /// Other modes: based on exercises completed vs total
   @override
   double get progress {
     if (_workoutCompleted) return 1.0;
+    final mode = currentMode;
+    // AMRAP is open-ended rounds — exercise count is meaningless,
+    // compute progress from the global timer instead
+    if (mode == TimerMode.amrap) {
+      final totalSec = training.duration > 0 ? training.duration : 15 * 60;
+      final remaining = _controller?.remainingSeconds ?? 0;
+      return (1.0 - (remaining / totalSec)).clamp(0.0, 1.0);
+    }
     final total = _totalActivities;
     if (total <= 0) return 0.0;
     return ((_controller?.completedActivities ?? 0) / total).clamp(0.0, 1.0);
