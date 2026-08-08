@@ -28,6 +28,7 @@ func StreamNodeLoadSystem(qw422016 *qt422016.Writer, methodology *model.Methodol
 Output a JSON object with:
 - routines: array of {type, blocks: [{activities: [{exercise_id, reps, duration, weight_kg, rest, modifiers}], repeats, rest}], rest}
 - fact_indices: array of integer indices referencing [FACTS] used (empty array if none)
+- summary: one-sentence plain-language description of the programming approach (e.g. "emphasizes weighted pushing movements with moderate volume and longer rest periods for strength"), written conversationally without technical jargon
 
 Produce one routine per phase present in the exercise list (warmup, work, cooldown). Routine type must be one of "warmup", "work", "cooldown" — never the methodology name.
 

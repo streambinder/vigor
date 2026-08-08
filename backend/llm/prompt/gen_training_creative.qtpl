@@ -19,44 +19,57 @@ Title rules:
 - Never reuse names from the recent names list
 
 Description rules:
-- Open with the methodology and primary focus
-- Only surface progression decisions listed under "Progression decisions" below, and only for the exercises in this session — without using labels like "too_easy" or "too_hard" (say "you've been handling this weight well" or "pulling back here"). If none are listed, do NOT invent or mention any rep/weight changes.
-- Only mention recovery/readiness if a recovery adjustment was actually applied (shown below) — state the rationale without naming metrics (say "keeping volume moderate to support recovery"). If no adjustment was applied, do NOT claim the session was scaled for recovery.
-- Close with key exercises or structural highlights
-- The user should feel their feedback was read and acted on
+- Read the `summary` field from each pipeline step below and weave them into a cohesive 3-5 sentence narrative
+- Every sentence should map to a pipeline step — cover all 6 steps: recovery/health assessment, history-based progression, movement constraints, methodology choice, exercise selection, and programming approach
+- If a step's summary is empty or states "no adjustment"/"no change", skip it naturally — do NOT invent coverage
+- Write conversationally, as if explaining the workout to the user
+- Do NOT use raw data labels like "too_easy", "too_hard", or technical metric names
+- If constraints apply, mention what was worked around in a positive, practical way
+- If recovery was adjusted, mention the rationale without naming metrics
+- If no warmup/cooldown, skip structural mentions of them
+- The user should feel that every decision made during generation was based on their data
+
 {% endfunc %}
 
 {% func NodeCreativeUser(
-    methodology string,
-    primaryMuscles []string,
-    exercises []pipeline.SelectedExercise,
-    progressions []pipeline.ProgressionSignal,
-    healthRationale string,
-    volumeModifier float64,
-    intensityModifier float64,
-    extendWarmup bool,
+    strategy pipeline.Strategy,
+    exercises pipeline.ExerciseSelection,
+    history pipeline.HistoryAnalysis,
+    constraints pipeline.ConstraintExtraction,
+    loadResult pipeline.LoadProgramming,
+    health pipeline.HealthAssessment,
     recentNames []string,
-    badSessionNotes string,
 ) -%}
-Methodology: {%s methodology %}
-Focus: {%s strings.Join(primaryMuscles, ", ") %}
+Methodology: {%s strategy.Methodology %}
+Focus: {%s strings.Join(strategy.PrimaryMuscles, ", ") %}
+{%- if len(strategy.SecondaryMuscles) > 0 %}
+Secondary muscles: {%s strings.Join(strategy.SecondaryMuscles, ", ") %}
+{%- endif %}
 
 Exercises:
-{% for _, ex := range exercises %}{% if ex.Phase == "work" %}- {%s ex.ExerciseID %}: {%s ex.Rationale %}
+{% for _, ex := range exercises.Exercises %}{% if ex.Phase == "work" %}- {%s ex.ExerciseID %}: {%s ex.Rationale %}
 {% endif %}{% endfor %}
 
-{% if len(progressions) > 0 %}
+{% if len(history.Progressions) > 0 %}
 Progression decisions:
-{% for _, p := range progressions %}- {%s p.ExerciseID %}: {%s p.Action %} ({%s p.Signal %})
+{% for _, p := range history.Progressions %}- {%s p.ExerciseID %}: {%s p.Action %} ({%s p.Signal %})
 {% endfor %}
 {% endif %}
-{% code recoveryApplied := volumeModifier < 1.0 || intensityModifier < 1.0 || extendWarmup %}
-{% if recoveryApplied %}Recovery adjustment applied — volume at {%d int(volumeModifier*100) %}%, intensity at {%d int(intensityModifier*100) %}%{% if extendWarmup %}, extended warmup{% endif %}. {% if healthRationale != "" %}Reason: {%s healthRationale %}{% endif %}
-Mention this readiness-based scaling in the description (without naming metrics).
-{% else %}No recovery adjustment was applied — do NOT mention recovery, readiness, or volume/intensity reduction in the description.
+{% if len(constraints.ContraindicatedPatterns) > 0 || len(constraints.Accommodations) > 0 %}
+Contraindications:
+{% if len(constraints.ContraindicatedPatterns) > 0 %}Patterns to avoid: {%s strings.Join(constraints.ContraindicatedPatterns, ", ") %}
+{% endif %}{% if len(constraints.Accommodations) > 0 %}Accommodations applied: {%s strings.Join(constraints.Accommodations, ", ") %}
+{% endif %}{% endif %}
+{% code recoveryApplied := health.VolumeModifier < 1.0 || health.IntensityModifier < 1.0 || health.ExtendWarmup %}
+{% if recoveryApplied %}Recovery adjustment applied — volume at {%d int(health.VolumeModifier*100) %}%, intensity at {%d int(health.IntensityModifier*100) %}%{% if health.ExtendWarmup %}, extended warmup{% endif %}.
+{% else %}No recovery adjustment was applied.
 {% endif %}
-{% if badSessionNotes != "" %}
-Recent issue: {%s badSessionNotes %}{% endif %}
+{% if len(loadResult.Routines) > 0 %}
+Routine structure:
+{% for _, r := range loadResult.Routines %}- {%s r.Type %}: {%d len(r.Blocks) %} block(s), {%d r.Rest %}s rest between blocks{% if r.Rest > 0 %}, {%d r.Rest %}s rest after routine{% endif %}}
+{% endfor %}{% endif %}
+{% if history.BadSessionNotes != "" %}
+Recent issue: {%s history.BadSessionNotes %}{% endif %}
 {% if len(recentNames) > 0 %}
 Do not reuse these names: {%s strings.Join(recentNames, ", ") %}{% endif %}
 {% endfunc %}

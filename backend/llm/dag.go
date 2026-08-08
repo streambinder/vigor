@@ -168,8 +168,8 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		language = req.Profiles[0].Language
 	}
 	creativeResult, creativeStep, err := runCreativeNode(
-		language, strategyResult, exerciseResult, historyResult, healthResult,
-		req.SkipWarmupCooldown,
+		language, strategyResult, exerciseResult, historyResult, constraintResult,
+		loadResult, healthResult,
 	)
 	execution.Nodes[pipeline.StepWriteCopy] = creativeStep
 	if err != nil {
@@ -438,29 +438,21 @@ func progressionsForSelected(progressions []pipeline.ProgressionSignal, selected
 }
 
 // runCreativeNode executes the creative copy (title + description) node.
+// each pipeline node result embeds Summarizable, so the creative copy can read
+// the one-liner summary from every step and weave them into a single description.
 func runCreativeNode(
 	language string,
 	strategy pipeline.Strategy,
 	exercises pipeline.ExerciseSelection,
 	history pipeline.HistoryAnalysis,
+	constraints pipeline.ConstraintExtraction,
+	loadResult pipeline.LoadProgramming,
 	health pipeline.HealthAssessment,
-	skipWarmupCooldown bool,
 ) (pipeline.CreativeCopy, model.LLMStep, error) {
-	// only surface progressions for exercises actually in this session — otherwise the copy
-	// narrates rep bumps on past exercises the user won't see here (a checkable falsehood).
-	relevantProgressions := progressionsForSelected(history.Progressions, exercises.Exercises)
-
-	// extend_warmup is meaningless when there's no warmup routine — don't let the copy
-	// claim an extended warmup for a work-only session.
-	extendWarmup := health.ExtendWarmup && !skipWarmupCooldown
-
 	p := model.LLMPrompt{
 		System: prompt.NodeCreativeSystem(language),
 		User: prompt.NodeCreativeUser(
-			strategy.Methodology, strategy.PrimaryMuscles,
-			exercises.Exercises, relevantProgressions,
-			health.Rationale, health.VolumeModifier, health.IntensityModifier, extendWarmup,
-			history.RecentNames, history.BadSessionNotes,
+			strategy, exercises, history, constraints, loadResult, health, history.RecentNames,
 		),
 	}
 

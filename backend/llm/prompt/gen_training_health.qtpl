@@ -10,6 +10,7 @@ Output a JSON object with:
 - intensity_modifier: float 0.0-1.0 (1.0 = full intensity)
 - extend_warmup: boolean
 - rationale: one sentence explaining your reasoning (internal, not shown to user)
+- summary: one-sentence plain-language summary of the assessment and its training impact (e.g. "reduced volume due to poor sleep" or "no adjustment — recovery looks solid"), written conversationally without metrics
 
 Rules:
 - Sleep deviation <= -15%: reduce volume proportionally

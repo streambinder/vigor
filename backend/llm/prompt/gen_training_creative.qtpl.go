@@ -36,11 +36,20 @@ Title rules:
 - Never reuse names from the recent names list
 
 Description rules:
-- Open with the methodology and primary focus
-- Only surface progression decisions listed under "Progression decisions" below, and only for the exercises in this session — without using labels like "too_easy" or "too_hard" (say "you've been handling this weight well" or "pulling back here"). If none are listed, do NOT invent or mention any rep/weight changes.
-- Only mention recovery/readiness if a recovery adjustment was actually applied (shown below) — state the rationale without naming metrics (say "keeping volume moderate to support recovery"). If no adjustment was applied, do NOT claim the session was scaled for recovery.
-- Close with key exercises or structural highlights
-- The user should feel their feedback was read and acted on
+- Read the `)
+	qw422016.N().S("`")
+	qw422016.N().S(`summary`)
+	qw422016.N().S("`")
+	qw422016.N().S(` field from each pipeline step below and weave them into a cohesive 3-5 sentence narrative
+- Every sentence should map to a pipeline step — cover all 6 steps: recovery/health assessment, history-based progression, movement constraints, methodology choice, exercise selection, and programming approach
+- If a step's summary is empty or states "no adjustment"/"no change", skip it naturally — do NOT invent coverage
+- Write conversationally, as if explaining the workout to the user
+- Do NOT use raw data labels like "too_easy", "too_hard", or technical metric names
+- If constraints apply, mention what was worked around in a positive, practical way
+- If recovery was adjusted, mention the rationale without naming metrics
+- If no warmup/cooldown, skip structural mentions of them
+- The user should feel that every decision made during generation was based on their data
+
 `)
 }
 
@@ -59,27 +68,33 @@ func NodeCreativeSystem(language string) string {
 }
 
 func StreamNodeCreativeUser(qw422016 *qt422016.Writer,
-	methodology string,
-	primaryMuscles []string,
-	exercises []pipeline.SelectedExercise,
-	progressions []pipeline.ProgressionSignal,
-	healthRationale string,
-	volumeModifier float64,
-	intensityModifier float64,
-	extendWarmup bool,
+	strategy pipeline.Strategy,
+	exercises pipeline.ExerciseSelection,
+	history pipeline.HistoryAnalysis,
+	constraints pipeline.ConstraintExtraction,
+	loadResult pipeline.LoadProgramming,
+	health pipeline.HealthAssessment,
 	recentNames []string,
-	badSessionNotes string,
 ) {
 	qw422016.N().S(`Methodology: `)
-	qw422016.E().S(methodology)
+	qw422016.E().S(strategy.Methodology)
 	qw422016.N().S(`
 Focus: `)
-	qw422016.E().S(strings.Join(primaryMuscles, ", "))
+	qw422016.E().S(strings.Join(strategy.PrimaryMuscles, ", "))
+	qw422016.N().S(`
+`)
+	if len(strategy.SecondaryMuscles) > 0 {
+		qw422016.N().S(`
+Secondary muscles: `)
+		qw422016.E().S(strings.Join(strategy.SecondaryMuscles, ", "))
+		qw422016.N().S(`
+`)
+	}
 	qw422016.N().S(`
 
 Exercises:
 `)
-	for _, ex := range exercises {
+	for _, ex := range exercises.Exercises {
 		if ex.Phase == "work" {
 			qw422016.N().S(`- `)
 			qw422016.E().S(ex.ExerciseID)
@@ -92,11 +107,11 @@ Exercises:
 	qw422016.N().S(`
 
 `)
-	if len(progressions) > 0 {
+	if len(history.Progressions) > 0 {
 		qw422016.N().S(`
 Progression decisions:
 `)
-		for _, p := range progressions {
+		for _, p := range history.Progressions {
 			qw422016.N().S(`- `)
 			qw422016.E().S(p.ExerciseID)
 			qw422016.N().S(`: `)
@@ -111,37 +126,73 @@ Progression decisions:
 	}
 	qw422016.N().S(`
 `)
-	recoveryApplied := volumeModifier < 1.0 || intensityModifier < 1.0 || extendWarmup
+	if len(constraints.ContraindicatedPatterns) > 0 || len(constraints.Accommodations) > 0 {
+		qw422016.N().S(`
+Contraindications:
+`)
+		if len(constraints.ContraindicatedPatterns) > 0 {
+			qw422016.N().S(`Patterns to avoid: `)
+			qw422016.E().S(strings.Join(constraints.ContraindicatedPatterns, ", "))
+			qw422016.N().S(`
+`)
+		}
+		if len(constraints.Accommodations) > 0 {
+			qw422016.N().S(`Accommodations applied: `)
+			qw422016.E().S(strings.Join(constraints.Accommodations, ", "))
+			qw422016.N().S(`
+`)
+		}
+	}
+	qw422016.N().S(`
+`)
+	recoveryApplied := health.VolumeModifier < 1.0 || health.IntensityModifier < 1.0 || health.ExtendWarmup
 
 	qw422016.N().S(`
 `)
 	if recoveryApplied {
 		qw422016.N().S(`Recovery adjustment applied — volume at `)
-		qw422016.N().D(int(volumeModifier * 100))
+		qw422016.N().D(int(health.VolumeModifier * 100))
 		qw422016.N().S(`%, intensity at `)
-		qw422016.N().D(int(intensityModifier * 100))
+		qw422016.N().D(int(health.IntensityModifier * 100))
 		qw422016.N().S(`%`)
-		if extendWarmup {
+		if health.ExtendWarmup {
 			qw422016.N().S(`, extended warmup`)
 		}
-		qw422016.N().S(`. `)
-		if healthRationale != "" {
-			qw422016.N().S(`Reason: `)
-			qw422016.E().S(healthRationale)
-		}
-		qw422016.N().S(`
-Mention this readiness-based scaling in the description (without naming metrics).
+		qw422016.N().S(`.
 `)
 	} else {
-		qw422016.N().S(`No recovery adjustment was applied — do NOT mention recovery, readiness, or volume/intensity reduction in the description.
+		qw422016.N().S(`No recovery adjustment was applied.
 `)
 	}
 	qw422016.N().S(`
 `)
-	if badSessionNotes != "" {
+	if len(loadResult.Routines) > 0 {
+		qw422016.N().S(`
+Routine structure:
+`)
+		for _, r := range loadResult.Routines {
+			qw422016.N().S(`- `)
+			qw422016.E().S(r.Type)
+			qw422016.N().S(`: `)
+			qw422016.N().D(len(r.Blocks))
+			qw422016.N().S(` block(s), `)
+			qw422016.N().D(r.Rest)
+			qw422016.N().S(`s rest between blocks`)
+			if r.Rest > 0 {
+				qw422016.N().S(`, `)
+				qw422016.N().D(r.Rest)
+				qw422016.N().S(`s rest after routine`)
+			}
+			qw422016.N().S(`}
+`)
+		}
+	}
+	qw422016.N().S(`
+`)
+	if history.BadSessionNotes != "" {
 		qw422016.N().S(`
 Recent issue: `)
-		qw422016.E().S(badSessionNotes)
+		qw422016.E().S(history.BadSessionNotes)
 	}
 	qw422016.N().S(`
 `)
@@ -155,36 +206,30 @@ Do not reuse these names: `)
 }
 
 func WriteNodeCreativeUser(qq422016 qtio422016.Writer,
-	methodology string,
-	primaryMuscles []string,
-	exercises []pipeline.SelectedExercise,
-	progressions []pipeline.ProgressionSignal,
-	healthRationale string,
-	volumeModifier float64,
-	intensityModifier float64,
-	extendWarmup bool,
+	strategy pipeline.Strategy,
+	exercises pipeline.ExerciseSelection,
+	history pipeline.HistoryAnalysis,
+	constraints pipeline.ConstraintExtraction,
+	loadResult pipeline.LoadProgramming,
+	health pipeline.HealthAssessment,
 	recentNames []string,
-	badSessionNotes string,
 ) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeCreativeUser(qw422016, methodology, primaryMuscles, exercises, progressions, healthRationale, volumeModifier, intensityModifier, extendWarmup, recentNames, badSessionNotes)
+	StreamNodeCreativeUser(qw422016, strategy, exercises, history, constraints, loadResult, health, recentNames)
 	qt422016.ReleaseWriter(qw422016)
 }
 
 func NodeCreativeUser(
-	methodology string,
-	primaryMuscles []string,
-	exercises []pipeline.SelectedExercise,
-	progressions []pipeline.ProgressionSignal,
-	healthRationale string,
-	volumeModifier float64,
-	intensityModifier float64,
-	extendWarmup bool,
+	strategy pipeline.Strategy,
+	exercises pipeline.ExerciseSelection,
+	history pipeline.HistoryAnalysis,
+	constraints pipeline.ConstraintExtraction,
+	loadResult pipeline.LoadProgramming,
+	health pipeline.HealthAssessment,
 	recentNames []string,
-	badSessionNotes string,
 ) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeCreativeUser(qb422016, methodology, primaryMuscles, exercises, progressions, healthRationale, volumeModifier, intensityModifier, extendWarmup, recentNames, badSessionNotes)
+	WriteNodeCreativeUser(qb422016, strategy, exercises, history, constraints, loadResult, health, recentNames)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

@@ -31,6 +31,7 @@ Output a JSON object with:
 - volume_target: "low" | "moderate" | "high"
 - intensity_target: "low" | "moderate" | "high"
 - calibration_families: array of movement families to prioritize (empty if not calibrating)
+- summary: one-sentence plain-language description of why this methodology was chosen and what the session targets (e.g. "chosen for its focus on controlled pulling movements, emphasizing mid-back and rear delts"), written conversationally
 
 `)
 	if methodology != nil {

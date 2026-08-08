@@ -29,6 +29,7 @@ Output a JSON object with:
 - recent_names: array of training names from history (to avoid reusing)
 - pattern_notes: one sentence about overall patterns (e.g. "user finds leg sessions too hard")
 - bad_session_notes: one sentence if any recent session was rated bad, empty string otherwise
+- summary: one-sentence plain-language summary of what the history reveals (e.g. "user is progressing well on pressing movements but struggles with legs"), written conversationally without technical labels
 
 Rules:
 - "too_easy" → increase_weight or increase_reps or add_modifier

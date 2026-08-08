@@ -22,9 +22,10 @@ func StreamNodeConstraintsSystem(qw422016 *qt422016.Writer) {
 Output a JSON object with:
 - contraindicated_patterns: array of movement pattern descriptions to avoid (e.g. "overhead pressing", "high-impact jumping", "deep spinal flexion")
 - accommodations: array of modifications to apply (e.g. "reduce squat depth", "avoid loaded rotation")
+- summary: one-sentence plain-language summary of what movement patterns to work around (or that no patterns need to be worked around), written conversationally (e.g. "movement selection avoids deep knee flexion based on knee limitations" or "no movement restrictions apply")
 
 Be specific about the pattern, not the exercise name. Keep entries concise (3-8 words each).
-If no injuries, limitations, or conditions: return empty arrays.
+If no injuries, limitations, or conditions: return empty arrays and summary="no movement restrictions".
 `)
 }
 

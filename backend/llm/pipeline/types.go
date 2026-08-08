@@ -17,9 +17,16 @@ const (
 	StepStructure        GenerationStep = "STRUCTURE"
 )
 
+// Summarizable is the embedded base for all pipeline node outputs.
+// embed it in any response struct to get a Summary field.
+type Summarizable struct {
+	Summary string `json:"summary"` // one-liner for the creative copy node
+}
+
 // HealthAssessment is the output of the health assessment node.
 // quantifies how recovery status should influence training design.
 type HealthAssessment struct {
+	Summarizable
 	VolumeModifier    float64 `json:"volume_modifier"`    // 0.0-1.0, 1.0 = no reduction
 	IntensityModifier float64 `json:"intensity_modifier"` // 0.0-1.0, 1.0 = no reduction
 	ExtendWarmup      bool    `json:"extend_warmup"`
@@ -37,6 +44,7 @@ type ProgressionSignal struct {
 
 // HistoryAnalysis is the output of the history analysis node.
 type HistoryAnalysis struct {
+	Summarizable
 	Progressions    []ProgressionSignal `json:"progressions"`
 	AvoidExercises  []string            `json:"avoid_exercises"` // exercises rated impossible or consistently too_hard
 	RecentNames     []string            `json:"recent_names"`    // training names to avoid reusing
@@ -46,12 +54,14 @@ type HistoryAnalysis struct {
 
 // ConstraintExtraction is the output of the constraint extraction node.
 type ConstraintExtraction struct {
+	Summarizable
 	ContraindicatedPatterns []string `json:"contraindicated_patterns"` // movement patterns to avoid (e.g. "overhead press", "high-impact jumping")
 	Accommodations          []string `json:"accommodations"`           // modifications to apply (e.g. "reduce range of motion on squats")
 }
 
 // Strategy is the output of the strategy node.
 type Strategy struct {
+	Summarizable
 	Methodology         string   `json:"methodology"` // chosen methodology ID
 	MethodologyReason   string   `json:"methodology_reason"`
 	PrimaryMuscles      []string `json:"primary_muscles"`                // high-volume emphasis
@@ -70,6 +80,7 @@ type SelectedExercise struct {
 
 // ExerciseSelection is the output of the exercise selection node.
 type ExerciseSelection struct {
+	Summarizable
 	Exercises []SelectedExercise `json:"exercises"`
 }
 
@@ -99,6 +110,7 @@ type ProgrammedRoutine struct {
 
 // LoadProgramming is the output of the load programming node.
 type LoadProgramming struct {
+	Summarizable
 	Routines    []ProgrammedRoutine `json:"routines"`
 	FactIndices []int               `json:"fact_indices,omitempty"` // references to [FACTS] used
 }
