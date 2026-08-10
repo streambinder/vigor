@@ -286,8 +286,7 @@ jobs:
       (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
       needs.dart-build-runner.result == 'success' &&
       needs.flutter-l10n.result == 'success' &&
-      needs.flutter-analyze.result == 'success' &&
-      github.event_name == 'push' && github.ref == 'refs/heads/master'
+      needs.flutter-analyze.result == 'success'
     permissions:
       contents: read
       packages: write
@@ -325,8 +324,7 @@ jobs:
       (needs.gofumpt.result == 'success' || needs.gofumpt.result == 'skipped') &&
       (needs.golangci-lint.result == 'success' || needs.golangci-lint.result == 'skipped') &&
       (needs.go-test.result == 'success' || needs.go-test.result == 'skipped') &&
-      (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
-      github.event_name == 'push' && github.ref == 'refs/heads/master'
+      (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped')
     permissions:
       contents: read
       packages: write
@@ -367,8 +365,7 @@ jobs:
       (needs.gofumpt.result == 'success' || needs.gofumpt.result == 'skipped') &&
       (needs.golangci-lint.result == 'success' || needs.golangci-lint.result == 'skipped') &&
       (needs.go-test.result == 'success' || needs.go-test.result == 'skipped') &&
-      (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
-      github.event_name == 'push' && github.ref == 'refs/heads/master'
+      (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped')
     permissions:
       contents: read
       packages: write
@@ -405,8 +402,7 @@ jobs:
       (needs.gofumpt.result == 'success' || needs.gofumpt.result == 'skipped') &&
       (needs.golangci-lint.result == 'success' || needs.golangci-lint.result == 'skipped') &&
       (needs.go-test.result == 'success' || needs.go-test.result == 'skipped') &&
-      (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
-      github.event_name == 'push' && github.ref == 'refs/heads/master'
+      (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped')
     permissions:
       contents: read
       packages: write
