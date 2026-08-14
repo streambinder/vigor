@@ -596,6 +596,16 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		if err := tx.Create(&training).Error; err != nil {
 			return err
 		}
+		// Create dedicated pipeline record – unties prompt from training
+		pipeline := model.TrainingPipeline{
+			TrainingID:     training.ID,
+			Prompt:         datatypes.NewJSONType(execution),
+			UserPrompt:     prompt,
+			CombinedPrompt: prompt,
+		}
+		if err := tx.Create(&pipeline).Error; err != nil {
+			return err
+		}
 		for _, partnerUserID := range partnerUserIDs {
 			partner := model.Partner{
 				TrainingID: training.ID,

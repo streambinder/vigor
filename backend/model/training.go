@@ -126,7 +126,8 @@ type Training struct {
 	References  datatypes.JSONType[[]TrainingReference] `gorm:"type:jsonb" json:"references" prompt:"-"`
 	FactIndices []int                                   `gorm:"-" json:"fact_indices" prompt:"Indices of [FACTS] used (e.g. [0,2]), empty if none"`
 	Routines    []Routine                               `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"routines" prompt:"Training routines"`
-	Prompt      datatypes.JSONType[TrainingPrompt]      `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
+	Prompt      datatypes.JSONType[TrainingPrompt]      `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"` // Deprecated: moved to TrainingPipeline, kept for GORM compat
+	Pipeline    *TrainingPipeline                       `gorm:"foreignKey:TrainingID" json:"pipeline,omitempty"`
 
 	CompletedAt      *time.Time `gorm:"type:timestamptz" json:"completed_at" prompt:"-"`
 	CompletedIn      *int       `json:"completed_in" prompt:"-"`
