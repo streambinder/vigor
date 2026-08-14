@@ -92,9 +92,29 @@ type TrainingGenerationRequest struct {
 	RecentExerciseIDs    []string
 }
 
+// reasoning effort levels, as understood by openrouter.
+// gemini 3.x models snap unsupported levels to the nearest one they know and have
+// thinking enabled by default, so effortMinimal is the floor — not an off switch.
+const (
+	effortMinimal = "minimal"
+	effortLow     = "low"
+	effortMedium  = "medium"
+)
+
+// queryOpts carries the per-call knobs. grouped rather than passed positionally
+// because effort/schema are set on a minority of the call sites.
+type queryOpts struct {
+	temperature float64
+	maxTokens   int
+	topP        float64
+	effort      string
+	schema      *model.JSONSchemaFormat
+	timeout     time.Duration
+}
+
 // LLM defines the interface for language model providers.
 type LLM interface {
-	query(prompt model.LLMPrompt, temperature float64, maxTokens int, topP float64, schema *model.JSONSchemaFormat, timeout time.Duration) ([]byte, string, error)
+	query(prompt model.LLMPrompt, opts queryOpts) ([]byte, string, error)
 }
 
 // ValidateProviders checks that both reasoning and structuring pools have at least one provider.
@@ -178,11 +198,7 @@ func GenFlow(req FlowGenerationRequest) (*model.FlowSession, model.TrainingPromp
 
 	reasoningOutput, reasoningModel, err := getLLM(StageReasoning, req.LastReasoningModel).query(
 		reasoningPrompt,
-		0.8,
-		8000,
-		0.9,
-		nil,
-		90*time.Second,
+		queryOpts{temperature: 0.8, maxTokens: 10000, topP: 0.9, effort: effortLow, timeout: 120 * time.Second},
 	)
 	execution.Reasoning = model.LLMStep{Model: reasoningModel, Prompt: reasoningPrompt, Output: string(reasoningOutput)}
 	if err != nil {
@@ -200,11 +216,9 @@ func GenFlow(req FlowGenerationRequest) (*model.FlowSession, model.TrainingPromp
 
 	structuredOutput, structuringModel, err := getLLM(StageStructuring, req.LastStructuringModel).query(
 		structuringPrompt,
-		0.0,
-		3000,
-		0,
-		&model.FlowSessionSchema,
-		90*time.Second,
+		// no effort: 2.5-flash-lite has thinking off by default and this stage only
+		// transcribes the reasoning output into the schema — keep it deterministic
+		queryOpts{temperature: 0.0, maxTokens: 3000, schema: &model.FlowSessionSchema, timeout: 90 * time.Second},
 	)
 	execution.Structuring = model.LLMStep{Model: structuringModel, Prompt: structuringPrompt, Output: string(structuredOutput)}
 	if err != nil {

@@ -13,6 +13,15 @@ func init() {
 
 	client := openAIClient("https://openrouter.ai", apiKey)
 
+	// upstream endpoints to route to, in order. worth setting: gemini's implicit cache is
+	// per-endpoint, so letting openrouter load-balance means never getting a cache hit.
+	var order []string
+	for slug := range strings.SplitSeq(os.Getenv("OPENROUTER_PROVIDER_ORDER"), ",") {
+		if slug != "" {
+			order = append(order, slug)
+		}
+	}
+
 	// reasoning models: creative thinking at high temperature
 	reasoningModels := os.Getenv("OPENROUTER_REASONING_MODELS")
 	for m := range strings.SplitSeq(reasoningModels, ",") {
@@ -20,9 +29,10 @@ func init() {
 			continue
 		}
 		reasoningProviders = append(reasoningProviders, &OpenAI{
-			provider: "openrouter",
-			model:    m,
-			client:   client,
+			provider:      "openrouter",
+			model:         m,
+			client:        client,
+			providerOrder: order,
 		})
 	}
 
@@ -33,9 +43,10 @@ func init() {
 			continue
 		}
 		structuringProviders = append(structuringProviders, &OpenAI{
-			provider: "openrouter",
-			model:    m,
-			client:   client,
+			provider:      "openrouter",
+			model:         m,
+			client:        client,
+			providerOrder: order,
 		})
 	}
 }

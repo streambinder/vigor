@@ -82,10 +82,14 @@ services:
       DATABASE_URL: ${DATABASE_URL:?set in .env}
       KNOWLEDGE_URL: ${KNOWLEDGE_URL:?set in .env}
       JWT_SECRET: ${JWT_SECRET:?set in .env}
-      LLAMACPP_TIERS: http://llm:8080
+      # uncomment with the llm service above — pools round-robin, not fallback
+      # LLAMACPP_REASONING_TIERS: http://llm:8080
+      # LLAMACPP_STRUCTURING_TIERS: http://llm:8080
       INFINITY_TIERS: http://embedding:7997
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
-      OPENROUTER_MODELS: openai/gpt-oss-20b:free
+      OPENROUTER_PROVIDER_ORDER: google-ai-studio
+      OPENROUTER_REASONING_MODELS: google/gemini-3.1-flash-lite
+      OPENROUTER_STRUCTURING_MODELS: google/gemini-2.5-flash-lite
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       METRICS_URL: /data/metrics.db
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}

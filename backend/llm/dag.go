@@ -204,7 +204,9 @@ func runHealthNode(healthSnapshot *model.HealthSnapshot) (pipeline.HealthAssessm
 		User:   prompt.NodeHealthUser(healthSnapshot),
 	}
 
-	output, modelName, err := getLLM(StageReasoning, "").query(p, 0.1, 500, 0, nil, 30*time.Second)
+	// threshold mapping over a few recovery metrics — nothing to deliberate about
+	output, modelName, err := getLLM(StageReasoning, "").query(p,
+		queryOpts{temperature: 0.1, maxTokens: 1000, effort: effortMinimal, timeout: 30 * time.Second})
 	step := model.LLMStep{Model: modelName, Prompt: p, Output: string(output)}
 	if err != nil {
 		return pipeline.HealthAssessment{}, step, err
@@ -233,7 +235,9 @@ func runHistoryNode(
 		User:   prompt.NodeHistoryUser(recentTrainings, recentFeedback, recentHR),
 	}
 
-	output, modelName, err := getLLM(StageReasoning, "").query(p, 0.1, 1500, 0, nil, 30*time.Second)
+	// has to weigh feedback against HR trends to call a progression — some judgment
+	output, modelName, err := getLLM(StageReasoning, "").query(p,
+		queryOpts{temperature: 0.1, maxTokens: 2500, effort: effortLow, timeout: 45 * time.Second})
 	step := model.LLMStep{Model: modelName, Prompt: p, Output: string(output)}
 	if err != nil {
 		return pipeline.HistoryAnalysis{}, step, err
@@ -266,7 +270,9 @@ func runConstraintsNode(profiles []model.Profile) (pipeline.ConstraintExtraction
 		User:   prompt.NodeConstraintsUser(profiles),
 	}
 
-	output, modelName, err := getLLM(StageReasoning, "").query(p, 0.1, 500, 0, nil, 30*time.Second)
+	// pulls injuries/limitations out of profile text — extraction, not reasoning
+	output, modelName, err := getLLM(StageReasoning, "").query(p,
+		queryOpts{temperature: 0.1, maxTokens: 1000, effort: effortMinimal, timeout: 30 * time.Second})
 	step := model.LLMStep{Model: modelName, Prompt: p, Output: string(output)}
 	if err != nil {
 		return pipeline.ConstraintExtraction{}, step, err
@@ -304,7 +310,10 @@ func runStrategyNode(
 		),
 	}
 
-	output, modelName, err := getLLM(StageReasoning, "").query(p, 0.3, 800, 0, nil, 30*time.Second)
+	// picks a methodology against goals, coverage counts and recovery — real trade-off
+	output, modelName, err := getLLM(StageReasoning, "").query(p,
+		// medium effort was measured spending up to ~1700 tokens thinking, so leave room
+		queryOpts{temperature: 0.3, maxTokens: 3000, effort: effortMedium, timeout: 60 * time.Second})
 	step := model.LLMStep{Model: modelName, Prompt: p, Output: string(output)}
 	if err != nil {
 		return pipeline.Strategy{}, step, err
@@ -362,7 +371,9 @@ func runExercisesNode(
 		),
 	}
 
-	output, modelName, err := getLLM(StageReasoning, "").query(p, 0.5, 2000, 0.9, nil, 45*time.Second)
+	// the hard one: satisfy family coverage, muscles, equipment and avoid-lists at once
+	output, modelName, err := getLLM(StageReasoning, "").query(p,
+		queryOpts{temperature: 0.5, maxTokens: 4000, topP: 0.9, effort: effortMedium, timeout: 90 * time.Second})
 	step := model.LLMStep{Model: modelName, Prompt: p, Output: string(output)}
 	if err != nil {
 		return pipeline.ExerciseSelection{}, step, err
@@ -408,7 +419,9 @@ func runLoadNode(
 		),
 	}
 
-	output, modelName, err := getLLM(StageReasoning, "").query(p, 0.2, 3000, 0, nil, 60*time.Second)
+	// sets/reps/load per exercise under methodology rules — arithmetic, and wrong answers show
+	output, modelName, err := getLLM(StageReasoning, "").query(p,
+		queryOpts{temperature: 0.2, maxTokens: 6000, effort: effortMedium, timeout: 90 * time.Second})
 	step := model.LLMStep{Model: modelName, Prompt: p, Output: string(output)}
 	if err != nil {
 		return pipeline.LoadProgramming{}, step, err
@@ -456,7 +469,9 @@ func runCreativeNode(
 		),
 	}
 
-	output, modelName, err := getLLM(StageReasoning, "").query(p, 0.8, 800, 0.9, nil, 30*time.Second)
+	// title + description: deliberation buys nothing here and eats the token budget
+	output, modelName, err := getLLM(StageReasoning, "").query(p,
+		queryOpts{temperature: 0.8, maxTokens: 1500, topP: 0.9, effort: effortMinimal, timeout: 30 * time.Second})
 	step := model.LLMStep{Model: modelName, Prompt: p, Output: string(output)}
 	if err != nil {
 		return pipeline.CreativeCopy{}, step, err
