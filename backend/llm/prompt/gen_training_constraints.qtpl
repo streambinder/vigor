@@ -14,7 +14,7 @@ Be specific about the pattern, not the exercise name. Keep entries concise (3-8 
 If no injuries, limitations, or conditions: return empty arrays and summary="no movement restrictions".
 {% endfunc %}
 
-{% func NodeConstraintsUser(profiles []model.Profile) -%}
+{% func NodeConstraintsUser(profiles []model.Profile, userPrompt string) -%}
 {% for i, profile := range profiles %}
 {% if len(profiles) > 1 %}Participant {%d i+1 %}:
 {% endif %}Age:{%d profile.Age() %} Gender:{%s profile.Gender %}
@@ -23,5 +23,10 @@ If no injuries, limitations, or conditions: return empty arrays and summary="no 
 {% endif %}{% if len(profile.Conditions()) > 0 %}Conditions: {% for j, condition := range profile.Conditions() %}{%s condition %}{% if j < len(profile.Conditions())-1 %}, {% endif %}{% endfor %}
 {% endif %}
 {% endfor %}
+{% if userPrompt != "" %}
+!!! USER RULER - check for contraindications mentioned in user request !!!
+User request: {%s userPrompt %}
+If user explicitly asks to avoid or include certain movements despite profile, respect user intent while keeping safety.
+{% endif %}
 {% if len(profiles) > 1 %}Use the most restrictive constraints across all participants.{% endif %}
 {% endfunc %}

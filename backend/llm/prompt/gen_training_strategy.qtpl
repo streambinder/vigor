@@ -60,7 +60,9 @@ Recovery status: volume at {%s fmt.Sprintf("%.0f%%", healthVolumeModifier*100) %
 {% if historyBadSessionNotes != "" %}
 Recent issue: {%s historyBadSessionNotes %}{% endif %}
 {% if userPrompt != "" %}
+!!! USER RULER - HIGHEST PRIORITY - MUST OBEY !!!
 User request: {%s userPrompt %}
+This overrides all other constraints except safety. If the user asks for a specific muscle, methodology or style, you MUST honor it.
 {% endif %}
 {% if len(calibrationGaps) > 0 %}
 Calibration override: prioritize these under-sampled movement families over goals:

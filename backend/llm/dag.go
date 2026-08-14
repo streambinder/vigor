@@ -60,13 +60,13 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 
 	go func() {
 		defer wg.Done()
-		historyResult, historyStep, historyErr = runHistoryNode(req.RecentTrainings, req.RecentFeedback, req.RecentHR)
+		historyResult, historyStep, historyErr = runHistoryNode(req.RecentTrainings, req.RecentFeedback, req.RecentHR, req.UserPrompt)
 		progress(pipeline.StepReviewHistory)
 	}()
 
 	go func() {
 		defer wg.Done()
-		constraintResult, constraintStep, constraintErr = runConstraintsNode(req.Profiles)
+		constraintResult, constraintStep, constraintErr = runConstraintsNode(req.Profiles, req.UserPrompt)
 		progress(pipeline.StepCheckConstraints)
 	}()
 
@@ -122,6 +122,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		req.WorkExercises, req.WarmupExercises, req.CooldownExercises,
 		req.FavoriteExercises, req.RecentExerciseIDs,
 		resolvedMethodology, req.SkipWarmupCooldown, req.Duration,
+		req.UserPrompt,
 	)
 	execution.Nodes[pipeline.StepSelectExercises] = exerciseStep
 	if err != nil {
@@ -224,7 +225,11 @@ func runHistoryNode(
 	recentTrainings []model.Training,
 	recentFeedback map[uuid.UUID]model.TrainingFeedback,
 	recentHR map[uuid.UUID]*model.HealthExerciseSession,
+	userPrompt string,
 ) (pipeline.HistoryAnalysis, model.LLMStep, error) {
+	if userPrompt != "" {
+		log.Info().Str("user_prompt", userPrompt).Msg("history node: ruler active – logging only, history does not filter by user request")
+	}
 	if len(recentTrainings) == 0 {
 		return pipeline.HistoryAnalysis{}, model.LLMStep{}, nil
 	}
@@ -250,7 +255,7 @@ func runHistoryNode(
 }
 
 // runConstraintsNode executes the constraint extraction node.
-func runConstraintsNode(profiles []model.Profile) (pipeline.ConstraintExtraction, model.LLMStep, error) {
+func runConstraintsNode(profiles []model.Profile, userPrompt string) (pipeline.ConstraintExtraction, model.LLMStep, error) {
 	// short-circuit: no injuries/limitations/conditions → empty constraints
 	hasConstraints := false
 	for _, p := range profiles {
@@ -259,13 +264,18 @@ func runConstraintsNode(profiles []model.Profile) (pipeline.ConstraintExtraction
 			break
 		}
 	}
-	if !hasConstraints {
+	// user-prompt ruler logging
+	if userPrompt != "" {
+		log.Info().Str("user_prompt", userPrompt).Msg("constraints node: ruler active")
+	}
+	if !hasConstraints && userPrompt == "" {
 		return pipeline.ConstraintExtraction{}, model.LLMStep{}, nil
 	}
+	// when userPrompt present, still run to check user-mentioned contraindications even if no profile constraints
 
 	p := model.LLMPrompt{
 		System: prompt.NodeConstraintsSystem(),
-		User:   prompt.NodeConstraintsUser(profiles),
+		User:   prompt.NodeConstraintsUser(profiles, userPrompt),
 	}
 
 	// pulls injuries/limitations out of profile text — extraction, not reasoning
@@ -297,6 +307,9 @@ func runStrategyNode(
 	duration int,
 	skipWarmupCooldown bool,
 ) (pipeline.Strategy, model.LLMStep, error) {
+	if userPrompt != "" {
+		log.Info().Str("user_prompt", userPrompt).Msg("strategy node: ruler active – user request is highest priority")
+	}
 	p := model.LLMPrompt{
 		System: prompt.NodeStrategySystem(methodology, methodologies, coverage, muscleCov),
 		User: prompt.NodeStrategyUser(
@@ -353,7 +366,11 @@ func runExercisesNode(
 	methodology *model.Methodology,
 	skipWarmupCooldown bool,
 	duration int,
+	userPrompt string,
 ) (pipeline.ExerciseSelection, model.LLMStep, error) {
+	if userPrompt != "" {
+		log.Info().Str("user_prompt", userPrompt).Msg("exercises node: ruler active")
+	}
 	minExercises, maxExercises := exerciseCountBand(methodology, duration)
 	p := model.LLMPrompt{
 		System: prompt.NodeExercisesSystem(skipWarmupCooldown, minExercises, maxExercises),
@@ -364,6 +381,7 @@ func runExercisesNode(
 			workExercises, warmupExercises, cooldownExercises,
 			favoriteExercises, recentExerciseIDs,
 			strategy.CalibrationFamilies, skipWarmupCooldown,
+			userPrompt,
 		),
 	}
 

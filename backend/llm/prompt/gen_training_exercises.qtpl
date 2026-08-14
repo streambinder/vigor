@@ -36,7 +36,13 @@ Rules:
     recentExerciseIDs []string,
     calibrationFamilies []string,
     skipWarmupCooldown bool,
+    userPrompt string,
 ) -%}
+{% if userPrompt != "" %}
+!!! USER RULER - HIGHEST PRIORITY !!!
+User request: {%s userPrompt %}
+You MUST prioritize exercises that satisfy this request. If user names specific movements, include them (if equipment allows). If user asks for muscle targeting, bias exercise selection accordingly.
+{% endif %}
 Methodology: {%s methodology %}
 Primary muscles: {%s strings.Join(primaryMuscles, ", ") %}
 {% if len(secondaryMuscles) > 0 %}Secondary muscles: {%s strings.Join(secondaryMuscles, ", ") %}{% endif %}
