@@ -2,6 +2,12 @@ package dto
 
 import "github.com/streambinder/vigor/model"
 
+// ExcludedExercise mirrors pipeline.ExcludedExercise for API exposure.
+type ExcludedExercise struct {
+	ExerciseID string `json:"exercise_id"`
+	Reason     string `json:"reason"`
+}
+
 // PostTrainingRequest represents the request for POST /training
 type PostTrainingRequest struct {
 	Duration           int      `json:"duration"`
@@ -16,7 +22,15 @@ type PostTrainingRequest struct {
 }
 
 // PostTrainingResponse represents the response for POST /training
+// when excluded exercises are available they are surfaced via the embedded TrainingExtended.
 type PostTrainingResponse model.Training
+
+// TrainingExtended optionally carries excluded exercises for transparency.
+// kept separate to avoid breaking the existing alias conversion used in handlers.
+type TrainingExtended struct {
+	model.Training
+	ExcludedExercises []ExcludedExercise `json:"excluded_exercises,omitempty"`
+}
 
 // GetTrainingResponse represents the response for GET /training
 type GetTrainingResponse struct {

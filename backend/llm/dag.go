@@ -383,6 +383,26 @@ func runExercisesNode(
 	for i := range result.Exercises {
 		result.Exercises[i].ExerciseID = stripExerciseTags(result.Exercises[i].ExerciseID)
 	}
+
+	// build excluded list from recent IDs to hint final outcome (minimal viable)
+	if len(recentExerciseIDs) > 0 {
+		existing := make(map[string]bool, len(result.ExcludedExercises))
+		for _, ex := range result.ExcludedExercises {
+			existing[ex.ExerciseID] = true
+		}
+		for _, id := range recentExerciseIDs {
+			if id == "" {
+				continue
+			}
+			if !existing[id] {
+				result.ExcludedExercises = append(result.ExcludedExercises, pipeline.ExcludedExercise{
+					ExerciseID: id,
+					Reason:     "recently used",
+				})
+				existing[id] = true
+			}
+		}
+	}
 	return result, step, nil
 }
 

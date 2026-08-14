@@ -78,10 +78,17 @@ type SelectedExercise struct {
 	Phase      string `json:"phase"`     // warmup, work, cooldown
 }
 
+// ExcludedExercise captures why an exercise was filtered out during selection.
+type ExcludedExercise struct {
+	ExerciseID string `json:"exercise_id"`
+	Reason     string `json:"reason"` // e.g. "recently used", "contraindicated", "avoid_list"
+}
+
 // ExerciseSelection is the output of the exercise selection node.
 type ExerciseSelection struct {
 	Summarizable
-	Exercises []SelectedExercise `json:"exercises"`
+	Exercises         []SelectedExercise `json:"exercises"`
+	ExcludedExercises []ExcludedExercise `json:"excluded_exercises,omitempty"`
 }
 
 // ProgrammedActivity is a fully specified activity from the load programming node.

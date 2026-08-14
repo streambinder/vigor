@@ -23,7 +23,8 @@ func StreamNodeExercisesSystem(qw422016 *qt422016.Writer, skipWarmupCooldown boo
 
 Output a JSON object with:
 - exercises: array of {exercise_id, rationale, phase} where phase is "warmup", "work", or "cooldown"
-- summary: one-sentence plain-language summary of the exercise selection (e.g. "focuses on compound pushing and pulling with a few isolation finishers"), written conversationally
+- excluded_exercises: array of {exercise_id, reason} listing candidates filtered out (e.g. "recently used", "contraindicated") – helps hint final outcome
+- summary: one-sentence plain-language summary of the exercise selection (e.g. "focuses on compound pushing and pulling with a few isolation finishers"), mentioning excluded count if any, written conversationally
 
 Rules:
 - Use only exercise IDs from the provided lists — never invent IDs
