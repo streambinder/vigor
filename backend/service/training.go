@@ -365,6 +365,8 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	var training *model.Training
 	var execution model.TrainingPrompt
 	var actualMuscles []string
+	// totalled across attempts, like llmStart, so a retried generation reports what it really cost
+	var usage model.LLMUsage
 
 	for attempt := 0; attempt <= maxGenerationRetries; attempt++ {
 		var err error
@@ -392,6 +394,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			RecentHR:             recentHR,
 			RecentExerciseIDs:    recentExerciseIDs,
 		}, onProgress)
+		usage.Add(execution.Reasoning.Usage)
 		if err != nil {
 			failureEvent := event.TrainingGenerationFailureEvent{
 				Event:            event.Event{Time: time.Now()},
@@ -526,6 +529,11 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			},
 			ReasoningModel:   execution.Reasoning.Model,
 			StructuringModel: execution.Structuring.Model,
+			PromptTokens:     usage.PromptTokens,
+			CachedTokens:     usage.CachedTokens,
+			CompletionTokens: usage.CompletionTokens,
+			ReasoningTokens:  usage.ReasoningTokens,
+			Cost:             usage.Cost,
 		}).Msg("training generated")
 
 	training.UserID = requestorProfile.UserID

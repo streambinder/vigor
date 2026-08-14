@@ -43,11 +43,33 @@ type LLMPrompt struct {
 	User   string `json:"user"`
 }
 
+// LLMUsage is the token accounting openrouter returns on every response.
+// reasoning tokens are a subset of completion tokens, not additional to them.
+// codegen:skip — server side telemetry, never reaches the app
+type LLMUsage struct {
+	PromptTokens     int64   `json:"prompt_tokens"`
+	CachedTokens     int64   `json:"cached_tokens"`
+	CompletionTokens int64   `json:"completion_tokens"`
+	ReasoningTokens  int64   `json:"reasoning_tokens"`
+	Cost             float64 `json:"cost"`
+}
+
+// Add folds another call's usage in, for totalling a multi node run.
+func (usage *LLMUsage) Add(other LLMUsage) {
+	usage.PromptTokens += other.PromptTokens
+	usage.CachedTokens += other.CachedTokens
+	usage.CompletionTokens += other.CompletionTokens
+	usage.ReasoningTokens += other.ReasoningTokens
+	usage.Cost += other.Cost
+}
+
 // LLMStep represents a single LLM query with its model and prompt.
 type LLMStep struct {
 	Model  string    `json:"model"`
 	Prompt LLMPrompt `json:"prompt"`
 	Output string    `json:"output,omitempty"`
+	// telemetry only: goes to the metrics event, never to the client or the training jsonb
+	Usage LLMUsage `json:"-"`
 }
 
 // TrainingPrompt captures the two-stage LLM execution.

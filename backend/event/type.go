@@ -14,11 +14,18 @@ type LatencyEvent struct {
 	Latency time.Duration `gorm:"column:latency" json:"latency"`
 }
 
-// TrainingGenerationEvent tracks LLM training generation
+// TrainingGenerationEvent tracks LLM training generation.
+// token counts and cost are totals across every DAG node of a single attempt;
+// reasoning tokens are a subset of completion tokens, not additional to them.
 type TrainingGenerationEvent struct {
 	LatencyEvent
-	ReasoningModel   string `gorm:"column:reasoning_model" json:"reasoning_model"`
-	StructuringModel string `gorm:"column:structuring_model" json:"structuring_model"`
+	ReasoningModel   string  `gorm:"column:reasoning_model" json:"reasoning_model"`
+	StructuringModel string  `gorm:"column:structuring_model" json:"structuring_model"`
+	PromptTokens     int64   `gorm:"column:prompt_tokens" json:"prompt_tokens"`
+	CachedTokens     int64   `gorm:"column:cached_tokens" json:"cached_tokens"`
+	CompletionTokens int64   `gorm:"column:completion_tokens" json:"completion_tokens"`
+	ReasoningTokens  int64   `gorm:"column:reasoning_tokens" json:"reasoning_tokens"`
+	Cost             float64 `gorm:"column:cost" json:"cost"`
 }
 
 // TrainingGenerationFailureEvent tracks LLM training generation failures

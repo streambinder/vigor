@@ -1,11 +1,11 @@
 package llm
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -113,8 +113,9 @@ type queryOpts struct {
 }
 
 // LLM defines the interface for language model providers.
+// the returned step carries model, prompt, output and usage, so callers record it as is.
 type LLM interface {
-	query(prompt model.LLMPrompt, opts queryOpts) ([]byte, string, error)
+	query(prompt model.LLMPrompt, opts queryOpts) (model.LLMStep, error)
 }
 
 // ValidateProviders checks that both reasoning and structuring pools have at least one provider.
@@ -196,37 +197,37 @@ func GenFlow(req FlowGenerationRequest) (*model.FlowSession, model.TrainingPromp
 		User:   reasoningUserMessage,
 	}
 
-	reasoningOutput, reasoningModel, err := getLLM(StageReasoning, req.LastReasoningModel).query(
+	reasoningStep, err := getLLM(StageReasoning, req.LastReasoningModel).query(
 		reasoningPrompt,
 		queryOpts{temperature: 0.8, maxTokens: 10000, topP: 0.9, effort: effortLow, timeout: 120 * time.Second},
 	)
-	execution.Reasoning = model.LLMStep{Model: reasoningModel, Prompt: reasoningPrompt, Output: string(reasoningOutput)}
+	execution.Reasoning = reasoningStep
 	if err != nil {
 		return nil, execution, fmt.Errorf("%w (reasoning stage): %w", ErrLLMQuery, err)
 	}
-	if len(bytes.TrimSpace(reasoningOutput)) == 0 {
+	if strings.TrimSpace(reasoningStep.Output) == "" {
 		return nil, execution, fmt.Errorf("%w (reasoning stage): empty response", ErrLLMQuery)
 	}
 
 	// stage 2: structuring — extract JSON from reasoning
 	structuringPrompt := model.LLMPrompt{
 		System: prompt.FlowSystem(),
-		User:   prompt.GenFlowStructuring(string(reasoningOutput)),
+		User:   prompt.GenFlowStructuring(reasoningStep.Output),
 	}
 
-	structuredOutput, structuringModel, err := getLLM(StageStructuring, req.LastStructuringModel).query(
+	structuringStep, err := getLLM(StageStructuring, req.LastStructuringModel).query(
 		structuringPrompt,
 		// no effort: 2.5-flash-lite has thinking off by default and this stage only
 		// transcribes the reasoning output into the schema — keep it deterministic
 		queryOpts{temperature: 0.0, maxTokens: 3000, schema: &model.FlowSessionSchema, timeout: 90 * time.Second},
 	)
-	execution.Structuring = model.LLMStep{Model: structuringModel, Prompt: structuringPrompt, Output: string(structuredOutput)}
+	execution.Structuring = structuringStep
 	if err != nil {
 		return nil, execution, fmt.Errorf("%w (structuring stage): %w", ErrLLMQuery, err)
 	}
 
 	var output flowLLMOutput
-	if err := json.Unmarshal(structuredOutput, &output); err != nil {
+	if err := json.Unmarshal([]byte(structuringStep.Output), &output); err != nil {
 		return nil, execution, fmt.Errorf("%w: %s", ErrLLMUnmarshal, err)
 	}
 

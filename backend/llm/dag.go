@@ -205,16 +205,15 @@ func runHealthNode(healthSnapshot *model.HealthSnapshot) (pipeline.HealthAssessm
 	}
 
 	// threshold mapping over a few recovery metrics — nothing to deliberate about
-	output, modelName, err := getLLM(StageReasoning, "").query(p,
+	step, err := getLLM(StageReasoning, "").query(p,
 		queryOpts{temperature: 0.1, maxTokens: 1000, effort: effortMinimal, timeout: 30 * time.Second})
-	step := model.LLMStep{Model: modelName, Prompt: p, Output: string(output)}
 	if err != nil {
 		return pipeline.HealthAssessment{}, step, err
 	}
 
 	var result pipeline.HealthAssessment
-	if err := json.Unmarshal(extractJSON(output), &result); err != nil {
-		log.Warn().Err(err).Str("raw", string(output)).Msg("health node unmarshal failed, using defaults")
+	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
+		log.Warn().Err(err).Str("raw", step.Output).Msg("health node unmarshal failed, using defaults")
 		return pipeline.HealthAssessment{VolumeModifier: 1.0, IntensityModifier: 1.0}, step, nil
 	}
 	return result, step, nil
@@ -236,16 +235,15 @@ func runHistoryNode(
 	}
 
 	// has to weigh feedback against HR trends to call a progression — some judgment
-	output, modelName, err := getLLM(StageReasoning, "").query(p,
+	step, err := getLLM(StageReasoning, "").query(p,
 		queryOpts{temperature: 0.1, maxTokens: 2500, effort: effortLow, timeout: 45 * time.Second})
-	step := model.LLMStep{Model: modelName, Prompt: p, Output: string(output)}
 	if err != nil {
 		return pipeline.HistoryAnalysis{}, step, err
 	}
 
 	var result pipeline.HistoryAnalysis
-	if err := json.Unmarshal(extractJSON(output), &result); err != nil {
-		log.Warn().Err(err).Str("raw", string(output)).Msg("history node unmarshal failed, using empty")
+	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
+		log.Warn().Err(err).Str("raw", step.Output).Msg("history node unmarshal failed, using empty")
 		return pipeline.HistoryAnalysis{}, step, nil
 	}
 	return result, step, nil
@@ -271,16 +269,15 @@ func runConstraintsNode(profiles []model.Profile) (pipeline.ConstraintExtraction
 	}
 
 	// pulls injuries/limitations out of profile text — extraction, not reasoning
-	output, modelName, err := getLLM(StageReasoning, "").query(p,
+	step, err := getLLM(StageReasoning, "").query(p,
 		queryOpts{temperature: 0.1, maxTokens: 1000, effort: effortMinimal, timeout: 30 * time.Second})
-	step := model.LLMStep{Model: modelName, Prompt: p, Output: string(output)}
 	if err != nil {
 		return pipeline.ConstraintExtraction{}, step, err
 	}
 
 	var result pipeline.ConstraintExtraction
-	if err := json.Unmarshal(extractJSON(output), &result); err != nil {
-		log.Warn().Err(err).Str("raw", string(output)).Msg("constraints node unmarshal failed, using empty")
+	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
+		log.Warn().Err(err).Str("raw", step.Output).Msg("constraints node unmarshal failed, using empty")
 		return pipeline.ConstraintExtraction{}, step, nil
 	}
 	return result, step, nil
@@ -311,16 +308,15 @@ func runStrategyNode(
 	}
 
 	// picks a methodology against goals, coverage counts and recovery — real trade-off
-	output, modelName, err := getLLM(StageReasoning, "").query(p,
+	step, err := getLLM(StageReasoning, "").query(p,
 		// medium effort was measured spending up to ~1700 tokens thinking, so leave room
 		queryOpts{temperature: 0.3, maxTokens: 3000, effort: effortMedium, timeout: 60 * time.Second})
-	step := model.LLMStep{Model: modelName, Prompt: p, Output: string(output)}
 	if err != nil {
 		return pipeline.Strategy{}, step, err
 	}
 
 	var result pipeline.Strategy
-	if err := json.Unmarshal(extractJSON(output), &result); err != nil {
+	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
 		return pipeline.Strategy{}, step, fmt.Errorf("strategy unmarshal: %w", err)
 	}
 
@@ -372,15 +368,14 @@ func runExercisesNode(
 	}
 
 	// the hard one: satisfy family coverage, muscles, equipment and avoid-lists at once
-	output, modelName, err := getLLM(StageReasoning, "").query(p,
+	step, err := getLLM(StageReasoning, "").query(p,
 		queryOpts{temperature: 0.5, maxTokens: 4000, topP: 0.9, effort: effortMedium, timeout: 90 * time.Second})
-	step := model.LLMStep{Model: modelName, Prompt: p, Output: string(output)}
 	if err != nil {
 		return pipeline.ExerciseSelection{}, step, err
 	}
 
 	var result pipeline.ExerciseSelection
-	if err := json.Unmarshal(extractJSON(output), &result); err != nil {
+	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
 		return pipeline.ExerciseSelection{}, step, fmt.Errorf("exercises unmarshal: %w", err)
 	}
 
@@ -420,15 +415,14 @@ func runLoadNode(
 	}
 
 	// sets/reps/load per exercise under methodology rules — arithmetic, and wrong answers show
-	output, modelName, err := getLLM(StageReasoning, "").query(p,
+	step, err := getLLM(StageReasoning, "").query(p,
 		queryOpts{temperature: 0.2, maxTokens: 6000, effort: effortMedium, timeout: 90 * time.Second})
-	step := model.LLMStep{Model: modelName, Prompt: p, Output: string(output)}
 	if err != nil {
 		return pipeline.LoadProgramming{}, step, err
 	}
 
 	var result pipeline.LoadProgramming
-	if err := json.Unmarshal(extractJSON(output), &result); err != nil {
+	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
 		return pipeline.LoadProgramming{}, step, fmt.Errorf("load unmarshal: %w", err)
 	}
 	return result, step, nil
@@ -470,15 +464,14 @@ func runCreativeNode(
 	}
 
 	// title + description: deliberation buys nothing here and eats the token budget
-	output, modelName, err := getLLM(StageReasoning, "").query(p,
+	step, err := getLLM(StageReasoning, "").query(p,
 		queryOpts{temperature: 0.8, maxTokens: 1500, topP: 0.9, effort: effortMinimal, timeout: 30 * time.Second})
-	step := model.LLMStep{Model: modelName, Prompt: p, Output: string(output)}
 	if err != nil {
 		return pipeline.CreativeCopy{}, step, err
 	}
 
 	var result pipeline.CreativeCopy
-	if err := json.Unmarshal(extractJSON(output), &result); err != nil {
+	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
 		return pipeline.CreativeCopy{}, step, fmt.Errorf("creative unmarshal: %w", err)
 	}
 	return result, step, nil
@@ -526,19 +519,22 @@ func dagToLegacyExecution(dag DAGExecution) model.TrainingPrompt {
 		}
 	}
 
-	// use the first node's model as the reasoning model (they're all from the same pool)
+	// use the first node's model as the reasoning model (they're all from the same pool),
+	// and total the usage across nodes so a generation reports one figure
 	var reasoningModel string
+	var usage model.LLMUsage
 	for _, node := range dag.Nodes {
-		if node.Model != "" {
+		if reasoningModel == "" && node.Model != "" {
 			reasoningModel = node.Model
-			break
 		}
+		usage.Add(node.Usage)
 	}
 
 	return model.TrainingPrompt{
 		Reasoning: model.LLMStep{
 			Model:  reasoningModel,
 			Output: reasoningOutput,
+			Usage:  usage,
 		},
 		// structuring stage is no longer needed — the DAG produces structured output directly
 		Structuring: model.LLMStep{},
