@@ -309,7 +309,7 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}/app:latest
             ghcr.io/${{ github.repository }}/app:${{ github.sha }}
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
           build-args: |
             BUILD_VERSION=${{ github.sha }}
 
@@ -324,7 +324,8 @@ jobs:
       (needs.gofumpt.result == 'success' || needs.gofumpt.result == 'skipped') &&
       (needs.golangci-lint.result == 'success' || needs.golangci-lint.result == 'skipped') &&
       (needs.go-test.result == 'success' || needs.go-test.result == 'skipped') &&
-      (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped')
+      (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
+      github.event_name == 'push' && github.ref == 'refs/heads/master'
     permissions:
       contents: read
       packages: write
@@ -348,7 +349,7 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}/knowledge:latest
             ghcr.io/${{ github.repository }}/knowledge:${{ github.sha }}
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
           build-args: |
             OPENROUTER_EMBEDDING_MODELS=google/gemini-embedding-001
           secrets: |
@@ -389,7 +390,7 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}/backend:latest
             ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
 
   cockpit-docker:
     runs-on: ubuntu-24.04-arm
@@ -426,4 +427,4 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}/cockpit:latest
             ghcr.io/${{ github.repository }}/cockpit:${{ github.sha }}
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
