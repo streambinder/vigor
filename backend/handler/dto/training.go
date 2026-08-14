@@ -89,6 +89,14 @@ type PostTrainingCopyRequest struct {
 // PostTrainingCopyResponse represents the response for POST /training/copy/:id
 type PostTrainingCopyResponse model.Training
 
+// PostTrainingRefineRequest represents the request for POST /training/refine/:id and POST /trainings/:id/refine
+type PostTrainingRefineRequest struct {
+	Prompt string `json:"prompt"`
+}
+
+// PostTrainingRefineResponse represents the response for refined training (same shape as PostTrainingResponse)
+type PostTrainingRefineResponse model.Training
+
 // PostReportRequest represents the request for POST /report
 type PostReportRequest struct {
 	TrainingID string `json:"training_id"`

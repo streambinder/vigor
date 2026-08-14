@@ -614,6 +614,157 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	return training, nil
 }
 
+// RefineTraining regenerates a training with an additional user prompt, preserving original context.
+// It loads the original training, verifies access (owner or partner), then calls GenerateTraining
+// with combined prompt = original.Request + " " + additionalPrompt, reusing duration, equipment,
+// gym, methodology, goals, muscles and partner list. The new training's ParentID is set to the original.
+func RefineTraining(trainingID uuid.UUID, userID uuid.UUID, additionalPrompt string, loc *time.Location, onProgress llm.DAGProgressFunc) (*model.Training, error) {
+	trimmed := strings.TrimSpace(additionalPrompt)
+	if trimmed == "" {
+		return nil, ErrPromptTooLong
+	}
+	if len(trimmed) > maxPromptLength {
+		return nil, ErrPromptTooLong
+	}
+
+	// load original with routines for duration calc and skipWC detection
+	var original model.Training
+	if err := database.DB.
+		Preload("Routines", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Routines.Blocks", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Routines.Blocks.Activities", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		First(&original, "id = ?", trainingID).Error; err != nil {
+		return nil, ErrTrainingNotFound
+	}
+
+	// access check: owner or partner
+	if original.UserID != userID {
+		var partner model.Partner
+		if err := database.DB.First(&partner, "training_id = ? AND user_id = ?", trainingID, userID).Error; err != nil {
+			return nil, ErrTrainingNotFound
+		}
+	}
+
+	// derive duration in minutes from original Duration (seconds)
+	durationMin := original.Duration / 60
+	if durationMin <= 0 {
+		// fallback: use CalculateDuration (which sums intervals)
+		if calc := original.CalculateDuration(); calc > 0 {
+			durationMin = calc / 60
+		} else {
+			durationMin = 30
+		}
+	}
+	if durationMin < 10 {
+		durationMin = 10
+	}
+	if durationMin > 180 {
+		durationMin = 180
+	}
+
+	// gym
+	var gymIDStr string
+	if original.GymID != nil {
+		gymIDStr = original.GymID.String()
+	}
+
+	// equipment: original.Equipment already holds equipment IDs + modifiers (post-generation)
+	// passing them as equipment input will let RetrieveEquipment / RetrieveUserModifiers filter correctly
+	equipment := []string(original.Equipment)
+
+	// partners: preserve existing partners for context
+	var partnerRows []model.Partner
+	_ = database.DB.Where("training_id = ?", original.ID).Find(&partnerRows).Error
+	partnerStrs := make([]string, 0, len(partnerRows))
+	for _, p := range partnerRows {
+		partnerStrs = append(partnerStrs, p.UserID.String())
+	}
+
+	// skipWarmupCooldown detection: if no warmup/cooldown routines, original was generated with skip=true
+	skipWC := false
+	if len(original.Routines) > 0 {
+		hasWarmup := false
+		hasCooldown := false
+		for _, r := range original.Routines {
+			if r.Type == "warmup" {
+				hasWarmup = true
+			}
+			if r.Type == "cooldown" {
+				hasCooldown = true
+			}
+		}
+		// if both missing, treat as skip; if at least one missing but original had skip flag, we conservative false?
+		// preserve behavior: if missing warmup AND missing cooldown => skipped
+		if !hasWarmup && !hasCooldown {
+			skipWC = true
+		}
+	}
+
+	// goals & muscles
+	goals := []string(original.Goals)
+	muscles := []string(original.Muscles)
+
+	// combined prompt = original.Request + " " + additionalPrompt, preserving additionalPrompt fully
+	combined := strings.TrimSpace(original.Request)
+	if combined == "" {
+		combined = trimmed
+	} else {
+		combined = combined + " " + trimmed
+	}
+	if len(combined) > maxPromptLength {
+		// keep additionalPrompt intact, trim original part
+		remaining := maxPromptLength - len(trimmed) - 1
+		if remaining <= 0 {
+			combined = trimmed
+			if len(combined) > maxPromptLength {
+				combined = combined[:maxPromptLength]
+			}
+		} else {
+			if len(original.Request) > remaining {
+				combined = strings.TrimSpace(original.Request[:remaining]) + " " + trimmed
+			}
+		}
+	}
+
+	// generate new training using same owner (userID) – GenerateTraining will still use owner's profile for calibration,
+	// but partner equipment / goals are merged inside GenerateTraining
+	newTraining, err := GenerateTraining(
+		userID,
+		durationMin,
+		equipment,
+		gymIDStr,
+		combined,
+		partnerStrs,
+		skipWC,
+		original.Methodology,
+		goals,
+		muscles,
+		loc,
+		onProgress,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// link history via ParentID
+	if newTraining != nil {
+		// update parent_id in DB (GenerateTraining already committed)
+		if err := database.DB.Model(newTraining).Update("parent_id", original.ID).Error; err != nil {
+			// log but don't fail – training already generated
+			log.Warn().Err(err).Str("original_id", original.ID.String()).Str("new_id", newTraining.ID.String()).Msg("failed to set parent_id for refined training")
+		} else {
+			newTraining.ParentID = &original.ID
+		}
+		// ensure Request field already holds combined (GenerateTraining sets it), but double-check
+		if newTraining.Request != combined {
+			_ = database.DB.Model(newTraining).Update("request", combined).Error
+			newTraining.Request = combined
+		}
+	}
+
+	return newTraining, nil
+}
+
 // GetTrainings retrieves all trainings for a user.
 func GetTrainings(userID uuid.UUID) ([]model.Training, error) {
 	var trainings []model.Training
