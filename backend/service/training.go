@@ -393,6 +393,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			HealthSnapshot:       healthSnapshot,
 			RecentHR:             recentHR,
 			RecentExerciseIDs:    recentExerciseIDs,
+			Muscles:              muscles,
 		}, onProgress)
 		usage.Add(execution.Reasoning.Usage)
 		if err != nil {

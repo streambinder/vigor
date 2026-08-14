@@ -90,6 +90,7 @@ type TrainingGenerationRequest struct {
 	HealthSnapshot       *model.HealthSnapshot
 	RecentHR             map[uuid.UUID]*model.HealthExerciseSession
 	RecentExerciseIDs    []string
+	Muscles              []string
 }
 
 // reasoning effort levels, as understood by openrouter.

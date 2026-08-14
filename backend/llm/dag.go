@@ -86,12 +86,38 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		return nil, dagToLegacyExecution(execution), fmt.Errorf("constraints node: %w", constraintErr)
 	}
 
-	// layer 1: strategy — depends on all three above
+	// layer 0.5: muscle targeting — depends on health/history,
+	// runs after constraints so it can respect explicit user request.
+	muscleCoverageMap := muscleCoverage(req.WorkExercises)
+	methodologyCoverageMap := methodologyCoverage(req.WorkExercises, req.Methodologies)
+
+	// recent muscle frequency from history (to balance over 14 days)
+	recentMuscleFreq := make(map[string]int)
+	for _, tr := range req.RecentTrainings {
+		for _, m := range tr.Muscles {
+			recentMuscleFreq[m]++
+		}
+	}
+
+	muscleResult, muscleStep, err := runMuscleTargetingNode(
+		req.Goals, req.Muscles, muscleCoverageMap,
+		healthResult, historyResult,
+		req.UserPrompt, req.Duration,
+		recentMuscleFreq,
+	)
+	execution.Nodes[pipeline.StepTargetMuscles] = muscleStep
+	if err != nil {
+		return nil, dagToLegacyExecution(execution), fmt.Errorf("muscle targeting node: %w", err)
+	}
+	progress(pipeline.StepTargetMuscles)
+
+	// layer 1: strategy — depends on health, history, constraints + muscle targeting
 	strategyResult, strategyStep, err := runStrategyNode(
 		req.Goals, req.Methodology, req.Methodologies,
-		methodologyCoverage(req.WorkExercises, req.Methodologies),
-		muscleCoverage(req.WorkExercises),
+		methodologyCoverageMap,
+		muscleCoverageMap,
 		req.CalibrationGaps, healthResult, historyResult,
+		muscleResult,
 		req.UserPrompt, req.Duration, req.SkipWarmupCooldown,
 	)
 	execution.Nodes[pipeline.StepPickStrategy] = strategyStep
@@ -99,6 +125,15 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		return nil, dagToLegacyExecution(execution), fmt.Errorf("strategy node: %w", err)
 	}
 	progress(pipeline.StepPickStrategy)
+
+	// integrate muscle targeting into strategy if explicit or inferred
+	if len(muscleResult.Primary) > 0 {
+		strategyResult.PrimaryMuscles = muscleResult.Primary
+	}
+	// only override secondary if muscle node provided one OR if explicit request (empty secondary means user wants no secondary)
+	if muscleResult.Secondary != nil {
+		strategyResult.SecondaryMuscles = muscleResult.Secondary
+	}
 
 	// resolve the strategy's chosen methodology to the full knowledge object.
 	// done before exercise selection so the density band (exercises_per_hour) and
@@ -169,7 +204,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	}
 	creativeResult, creativeStep, err := runCreativeNode(
 		language, strategyResult, exerciseResult, historyResult, constraintResult,
-		loadResult, healthResult,
+		loadResult, healthResult, muscleResult,
 	)
 	execution.Nodes[pipeline.StepWriteCopy] = creativeStep
 	if err != nil {
@@ -284,6 +319,169 @@ func runConstraintsNode(profiles []model.Profile) (pipeline.ConstraintExtraction
 }
 
 // runStrategyNode executes the strategy & methodology selection node.
+
+// runMuscleTargetingNode executes the muscle targeting node.
+// If explicit muscles are provided, it short-circuits using them directly;
+// otherwise it calls the LLM to infer primary/secondary distribution from goals/history.
+func runMuscleTargetingNode(
+	goals []model.Goal,
+	explicitMuscles []string,
+	muscleCoverage map[string]int,
+	health pipeline.HealthAssessment,
+	history pipeline.HistoryAnalysis,
+	userPrompt string,
+	duration int,
+	recentMuscleFreq map[string]int,
+) (pipeline.MuscleTargeting, model.LLMStep, error) {
+	// short-circuit: explicit muscle list provided by user → respect it, no LLM needed
+	if len(explicitMuscles) > 0 {
+		dist := make(map[string]float64, len(explicitMuscles))
+		for _, m := range explicitMuscles {
+			dist[m] = 1.0 / float64(len(explicitMuscles))
+		}
+		result := pipeline.MuscleTargeting{
+			Primary:      explicitMuscles,
+			Secondary:    []string{},
+			Distribution: dist,
+			Reasoning:    "using explicit muscle selection from user request",
+		}
+		result.Summary = fmt.Sprintf("targeting %s as requested", strings.Join(explicitMuscles, ", "))
+		return result, model.LLMStep{}, nil
+	}
+
+	// build available muscles list from coverage (equipment-filtered pool)
+	available := make([]string, 0, len(muscleCoverage))
+	for m := range muscleCoverage {
+		available = append(available, m)
+	}
+	// sort for deterministic prompt (system does its own sort but keep stable)
+	// not strictly needed but helps caching
+
+	p := model.LLMPrompt{
+		System: prompt.NodeMusclesSystem(available, len(explicitMuscles) > 0),
+		User: prompt.NodeMusclesUser(
+			goals, explicitMuscles,
+			health.VolumeModifier, health.IntensityModifier, health.Rationale,
+			history.PatternNotes, history.BadSessionNotes,
+			userPrompt, duration, recentMuscleFreq,
+		),
+	}
+
+	// targeting is a moderate reasoning step: needs to balance goals/history/equipment
+	step, err := getLLM(StageReasoning, "").query(p,
+		queryOpts{temperature: 0.2, maxTokens: 1500, effort: effortLow, timeout: 45 * time.Second})
+	if err != nil {
+		return pipeline.MuscleTargeting{}, step, err
+	}
+
+	var result pipeline.MuscleTargeting
+	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
+		log.Warn().Err(err).Str("raw", step.Output).Msg("muscle targeting node unmarshal failed, falling back to heuristic")
+		// fallback: if we have coverage, pick top 2 muscles by exercise count; else default full-body heuristic
+		if len(muscleCoverage) > 0 {
+			type kv struct {
+				m string
+				c int
+			}
+			var sorted []kv
+			for m, c := range muscleCoverage {
+				sorted = append(sorted, kv{m, c})
+			}
+			// sort descending by count
+			for i := 0; i < len(sorted)-1; i++ {
+				for j := i + 1; j < len(sorted); j++ {
+					if sorted[j].c > sorted[i].c {
+						sorted[i], sorted[j] = sorted[j], sorted[i]
+					}
+				}
+			}
+			primary := []string{}
+			for i := 0; i < len(sorted) && i < 2; i++ {
+				primary = append(primary, sorted[i].m)
+			}
+			dist := make(map[string]float64)
+			for _, m := range primary {
+				dist[m] = 1.0 / float64(len(primary))
+			}
+			result = pipeline.MuscleTargeting{
+				Primary:      primary,
+				Secondary:    []string{},
+				Distribution: dist,
+				Reasoning:    "fallback to most trainable muscles from available equipment",
+			}
+			result.Summary = fmt.Sprintf("focusing on %s based on equipment availability", strings.Join(primary, ", "))
+			return result, step, nil
+		}
+		// ultimate fallback: empty → let strategy decide
+		return pipeline.MuscleTargeting{}, step, nil
+	}
+
+	// validation: filter primary/secondary to available muscles only (if available list non-empty)
+	if len(available) > 0 {
+		availSet := make(map[string]bool, len(available))
+		for _, m := range available {
+			availSet[m] = true
+		}
+		filteredPrimary := make([]string, 0, len(result.Primary))
+		for _, m := range result.Primary {
+			if availSet[m] {
+				filteredPrimary = append(filteredPrimary, m)
+			}
+		}
+		// if filtering removed everything, keep original LLM suggestion but log
+		if len(filteredPrimary) > 0 {
+			result.Primary = filteredPrimary
+		}
+		filteredSecondary := make([]string, 0, len(result.Secondary))
+		for _, m := range result.Secondary {
+			if availSet[m] {
+				filteredSecondary = append(filteredSecondary, m)
+			}
+		}
+		result.Secondary = filteredSecondary
+
+		// clean distribution keys
+		if len(result.Distribution) > 0 {
+			cleanDist := make(map[string]float64)
+			for k, v := range result.Distribution {
+				if availSet[k] {
+					cleanDist[k] = v
+				}
+			}
+			// if distribution empty after cleaning but we have primary, reconstruct uniform
+			if len(cleanDist) == 0 && len(result.Primary) > 0 {
+				for _, m := range result.Primary {
+					cleanDist[m] = 1.0 / float64(len(result.Primary))
+				}
+			}
+			result.Distribution = cleanDist
+		}
+
+		// normalize distribution to sum 1.0
+		if len(result.Distribution) > 0 {
+			var sum float64
+			for _, v := range result.Distribution {
+				sum += v
+			}
+			if sum > 0 && (sum < 0.95 || sum > 1.05) {
+				for k := range result.Distribution {
+					result.Distribution[k] /= sum
+				}
+			}
+		}
+	}
+
+	// default secondary to empty slice not nil (for pipeline clarity)
+	if result.Secondary == nil {
+		result.Secondary = []string{}
+	}
+	if result.Primary == nil {
+		result.Primary = []string{}
+	}
+
+	return result, step, nil
+}
+
 func runStrategyNode(
 	goals []model.Goal,
 	methodology *model.Methodology,
@@ -293,6 +491,7 @@ func runStrategyNode(
 	calibrationGaps map[string]int,
 	health pipeline.HealthAssessment,
 	history pipeline.HistoryAnalysis,
+	muscleTargeting pipeline.MuscleTargeting,
 	userPrompt string,
 	duration int,
 	skipWarmupCooldown bool,
@@ -455,12 +654,27 @@ func runCreativeNode(
 	constraints pipeline.ConstraintExtraction,
 	loadResult pipeline.LoadProgramming,
 	health pipeline.HealthAssessment,
+	muscleTargeting pipeline.MuscleTargeting,
 ) (pipeline.CreativeCopy, model.LLMStep, error) {
+	baseUser := prompt.NodeCreativeUser(
+		strategy, exercises, history, constraints, loadResult, health, history.RecentNames,
+	)
+	// weave muscle targeting summary into user prompt so creative copy mentions it
+	if muscleTargeting.Summary != "" || len(muscleTargeting.Primary) > 0 {
+		baseUser += "\n\nMuscle targeting: " + muscleTargeting.Summary
+		if len(muscleTargeting.Primary) > 0 {
+			baseUser += "\nPrimary muscles: " + strings.Join(muscleTargeting.Primary, ", ")
+		}
+		if len(muscleTargeting.Secondary) > 0 {
+			baseUser += "\nSecondary muscles: " + strings.Join(muscleTargeting.Secondary, ", ")
+		}
+		if muscleTargeting.Reasoning != "" {
+			baseUser += "\nReasoning: " + muscleTargeting.Reasoning
+		}
+	}
 	p := model.LLMPrompt{
 		System: prompt.NodeCreativeSystem(language),
-		User: prompt.NodeCreativeUser(
-			strategy, exercises, history, constraints, loadResult, health, history.RecentNames,
-		),
+		User:   baseUser,
 	}
 
 	// title + description: deliberation buys nothing here and eats the token budget
