@@ -412,7 +412,7 @@ mixin HealthDataServiceMixin on HealthDataService {
         AppLogger.warning(
           '[HealthDataService] failed to get manifest, falling back to 7-day sync',
         );
-        return readNewData();
+        return await readNewData();
       }
 
       final serverDates = Set<String>.from(
