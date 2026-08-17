@@ -1,5 +1,5 @@
 # hadolint ignore=DL3006
-FROM ghcr.io/cirruslabs/flutter:stable AS builder
+FROM ghcr.io/adrianjagielak/flutter:3.47.0 AS builder
 
 WORKDIR /app
 

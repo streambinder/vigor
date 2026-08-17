@@ -159,7 +159,7 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           channel: stable
-          flutter-version: 3.44.9
+          flutter-version: 3.47.0
       - run: |
           cd app && flutter pub get
           cd ../backend && go generate
@@ -177,7 +177,7 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           channel: stable
-          flutter-version: 3.44.9
+          flutter-version: 3.47.0
       - run: |
           cd app
           flutter pub get
@@ -195,7 +195,7 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           channel: stable
-          flutter-version: 3.44.9
+          flutter-version: 3.47.0
       - run: |
           cd app
           flutter pub get
@@ -213,7 +213,7 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           channel: stable
-          flutter-version: 3.44.9
+          flutter-version: 3.47.0
       - run: |
           cd app
           flutter pub get
@@ -248,7 +248,7 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           channel: stable
-          flutter-version: 3.44.9
+          flutter-version: 3.47.0
       - run: |
           echo "${{ secrets.APK_KEYSTORE }}" | base64 -d > app/android/app/vigor-release.jks
           cat <<EOF > app/android/key.properties
