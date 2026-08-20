@@ -1,4 +1,3 @@
----
 name: push
 
 on: # yamllint disable-line rule:truthy
@@ -300,16 +299,32 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set docker tags (app)
+        id: tags-app
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "push" ] && [ "$REF" = "refs/heads/master" ]; then
+            {
+              echo "tags<<EOF"
+              echo "ghcr.io/$REPOSITORY/app:latest"
+              echo "ghcr.io/$REPOSITORY/app:$SHA"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "tags=ghcr.io/$REPOSITORY/app:$SHA" >> "$GITHUB_OUTPUT"
+          fi
       - uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
           context: app
           platforms: ${{ env.DOCKER_PLATFORMS }}
           cache-from: type=gha,scope=app
           cache-to: type=gha,scope=app,mode=max
-          tags: |
-            ghcr.io/${{ github.repository }}/app:latest
-            ghcr.io/${{ github.repository }}/app:${{ github.sha }}
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+          tags: ${{ steps.tags-app.outputs.tags }}
+          push: true
           build-args: |
             BUILD_VERSION=${{ github.sha }}
 
@@ -324,8 +339,7 @@ jobs:
       (needs.gofumpt.result == 'success' || needs.gofumpt.result == 'skipped') &&
       (needs.golangci-lint.result == 'success' || needs.golangci-lint.result == 'skipped') &&
       (needs.go-test.result == 'success' || needs.go-test.result == 'skipped') &&
-      (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
-      github.event_name == 'push' && github.ref == 'refs/heads/master'
+      (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped')
     permissions:
       contents: read
       packages: write
@@ -339,6 +353,24 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set docker tags (knowledge)
+        id: tags-knowledge
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "push" ] && [ "$REF" = "refs/heads/master" ]; then
+            {
+              echo "tags<<EOF"
+              echo "ghcr.io/$REPOSITORY/knowledge:latest"
+              echo "ghcr.io/$REPOSITORY/knowledge:$SHA"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "tags=ghcr.io/$REPOSITORY/knowledge:$SHA" >> "$GITHUB_OUTPUT"
+          fi
       - uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
           context: .
@@ -346,10 +378,8 @@ jobs:
           platforms: ${{ env.DOCKER_PLATFORMS }}
           cache-from: type=gha,scope=knowledge
           cache-to: type=gha,scope=knowledge,mode=max
-          tags: |
-            ghcr.io/${{ github.repository }}/knowledge:latest
-            ghcr.io/${{ github.repository }}/knowledge:${{ github.sha }}
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+          tags: ${{ steps.tags-knowledge.outputs.tags }}
+          push: true
           build-args: |
             OPENROUTER_EMBEDDING_MODELS=google/gemini-embedding-001
           secrets: |
@@ -380,6 +410,24 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set docker tags (backend)
+        id: tags-backend
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "push" ] && [ "$REF" = "refs/heads/master" ]; then
+            {
+              echo "tags<<EOF"
+              echo "ghcr.io/$REPOSITORY/backend:latest"
+              echo "ghcr.io/$REPOSITORY/backend:$SHA"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "tags=ghcr.io/$REPOSITORY/backend:$SHA" >> "$GITHUB_OUTPUT"
+          fi
       - uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
           context: .
@@ -387,10 +435,8 @@ jobs:
           platforms: ${{ env.DOCKER_PLATFORMS }}
           cache-from: type=gha,scope=backend
           cache-to: type=gha,scope=backend,mode=max
-          tags: |
-            ghcr.io/${{ github.repository }}/backend:latest
-            ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+          tags: ${{ steps.tags-backend.outputs.tags }}
+          push: true
 
   cockpit-docker:
     runs-on: ubuntu-24.04-arm
@@ -417,6 +463,24 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set docker tags (cockpit)
+        id: tags-cockpit
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "push" ] && [ "$REF" = "refs/heads/master" ]; then
+            {
+              echo "tags<<EOF"
+              echo "ghcr.io/$REPOSITORY/cockpit:latest"
+              echo "ghcr.io/$REPOSITORY/cockpit:$SHA"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "tags=ghcr.io/$REPOSITORY/cockpit:$SHA" >> "$GITHUB_OUTPUT"
+          fi
       - uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
           context: .
@@ -424,7 +488,5 @@ jobs:
           platforms: ${{ env.DOCKER_PLATFORMS }}
           cache-from: type=gha,scope=cockpit
           cache-to: type=gha,scope=cockpit,mode=max
-          tags: |
-            ghcr.io/${{ github.repository }}/cockpit:latest
-            ghcr.io/${{ github.repository }}/cockpit:${{ github.sha }}
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+          tags: ${{ steps.tags-cockpit.outputs.tags }}
+          push: true
