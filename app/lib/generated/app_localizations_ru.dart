@@ -828,6 +828,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get generationStepStructure => 'Завершение...';
 
   @override
+  String get generationStepTargetMuscles => 'Определение целевых мышц...';
+
+  @override
   String get editGym => 'Редактировать Зал';
 
   @override

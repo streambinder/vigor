@@ -11,6 +11,7 @@ const (
 	StepReviewHistory    GenerationStep = "REVIEW_HISTORY"
 	StepCheckConstraints GenerationStep = "CHECK_CONSTRAINTS"
 	StepPickStrategy     GenerationStep = "PICK_STRATEGY"
+	StepTargetMuscles    GenerationStep = "TARGET_MUSCLES"
 	StepSelectExercises  GenerationStep = "SELECT_EXERCISES"
 	StepProgramLoad      GenerationStep = "PROGRAM_LOAD"
 	StepWriteCopy        GenerationStep = "WRITE_COPY"
@@ -64,11 +65,19 @@ type Strategy struct {
 	Summarizable
 	Methodology         string   `json:"methodology"` // chosen methodology ID
 	MethodologyReason   string   `json:"methodology_reason"`
-	PrimaryMuscles      []string `json:"primary_muscles"`                // high-volume emphasis
-	SecondaryMuscles    []string `json:"secondary_muscles"`              // maintenance
 	VolumeTarget        string   `json:"volume_target"`                  // low, moderate, high
 	IntensityTarget     string   `json:"intensity_target"`               // low, moderate, high
 	CalibrationFamilies []string `json:"calibration_families,omitempty"` // families to prioritize for calibration
+}
+
+// MuscleTargeting is the output of the muscle targeting node.
+// decides which muscles the session emphasizes, which it maintains, and which it rests.
+type MuscleTargeting struct {
+	Summarizable
+	PrimaryMuscles   []string `json:"primary_muscles"`             // high-volume emphasis
+	SecondaryMuscles []string `json:"secondary_muscles,omitempty"` // maintenance volume
+	AvoidMuscles     []string `json:"avoid_muscles,omitempty"`     // muscles to rest for the session
+	Rationale        string   `json:"rationale"`                   // internal, not user-facing
 }
 
 // SelectedExercise is a single exercise picked by the exercise selection node.

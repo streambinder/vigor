@@ -836,6 +836,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get generationStepStructure => 'Finalizzazione...';
 
   @override
+  String get generationStepTargetMuscles => 'Scelgo i muscoli da allenare...';
+
+  @override
   String get editGym => 'Modifica Palestra';
 
   @override

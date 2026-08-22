@@ -252,6 +252,7 @@
   "generationStepProgramLoad": "세트와 반복 수 설정 중...",
   "generationStepWriteCopy": "세션 세부 사항 작성 중...",
   "generationStepStructure": "마무리 중...",
+  "generationStepTargetMuscles": "목표 근육 결정 중...",
   "editGym": "헬스장 수정",
   "gymName": "헬스장 이름",
   "gymNamePlaceholder": "예: 홈짐, 스포애니",

@@ -20,7 +20,9 @@ Title rules:
 
 Description rules:
 - Read the `summary` field from each pipeline step below and weave them into a cohesive 3-5 sentence narrative
-- Every sentence should map to a pipeline step — cover all 6 steps: recovery/health assessment, history-based progression, movement constraints, methodology choice, exercise selection, and programming approach
+- Every sentence should map to a pipeline step — cover all 7 steps: recovery/health assessment, history-based progression, movement constraints, methodology choice, muscle targeting, exercise selection, and programming approach
+- Always name the session's muscle targets explicitly, as a deliberate choice grounded in the user's data (requested muscles, constraints, recovery, history) — never leave them implied by the exercise list alone
+- If muscles to rest are listed, mention what was deliberately left to recover and why
 - If a step's summary is empty or states "no adjustment"/"no change", skip it naturally — do NOT invent coverage
 - Write conversationally, as if explaining the workout to the user
 - Do NOT use raw data labels like "too_easy", "too_hard", or technical metric names
@@ -34,6 +36,7 @@ Description rules:
 
 {% func NodeCreativeUser(
     strategy pipeline.Strategy,
+    targeting pipeline.MuscleTargeting,
     exercises pipeline.ExerciseSelection,
     history pipeline.HistoryAnalysis,
     constraints pipeline.ConstraintExtraction,
@@ -42,9 +45,12 @@ Description rules:
     recentNames []string,
 ) -%}
 Methodology: {%s strategy.Methodology %}
-Focus: {%s strings.Join(strategy.PrimaryMuscles, ", ") %}
-{%- if len(strategy.SecondaryMuscles) > 0 %}
-Secondary muscles: {%s strings.Join(strategy.SecondaryMuscles, ", ") %}
+Focus: {%s strings.Join(targeting.PrimaryMuscles, ", ") %}
+{%- if len(targeting.SecondaryMuscles) > 0 %}
+Secondary muscles: {%s strings.Join(targeting.SecondaryMuscles, ", ") %}
+{%- endif %}
+{%- if len(targeting.AvoidMuscles) > 0 %}
+Muscles to rest: {%s strings.Join(targeting.AvoidMuscles, ", ") %}
 {%- endif %}
 
 Exercises:

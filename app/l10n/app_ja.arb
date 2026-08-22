@@ -252,6 +252,7 @@
   "generationStepProgramLoad": "セットとレップを設定中...",
   "generationStepWriteCopy": "セッション詳細を作成中...",
   "generationStepStructure": "最終処理中...",
+  "generationStepTargetMuscles": "対象筋肉を決定中...",
   "editGym": "ジムを編集",
   "gymName": "ジム名",
   "gymNamePlaceholder": "例：ホームジム、エニタイム",

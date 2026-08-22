@@ -252,6 +252,7 @@
   "generationStepProgramLoad": "Programando séries e repetições...",
   "generationStepWriteCopy": "Escrevendo detalhes da sessão...",
   "generationStepStructure": "Finalizando...",
+  "generationStepTargetMuscles": "Definindo músculos-alvo...",
   "editGym": "Editar Ginásio",
   "gymName": "Nome do Ginásio",
   "gymNamePlaceholder": "ex. Ginásio Casa, Holmes Place",

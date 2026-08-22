@@ -252,6 +252,7 @@
   "generationStepProgramLoad": "Programmo serie e ripetizioni...",
   "generationStepWriteCopy": "Scrivo i dettagli della sessione...",
   "generationStepStructure": "Finalizzazione...",
+  "generationStepTargetMuscles": "Scelgo i muscoli da allenare...",
   "editGym": "Modifica Palestra",
   "gymName": "Nome Palestra",
   "gymNamePlaceholder": "es. Palestra Casa, Virgin Active",

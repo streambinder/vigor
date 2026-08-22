@@ -281,6 +281,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       'REVIEW_HISTORY' => l10n.generationStepReviewHistory,
       'CHECK_CONSTRAINTS' => l10n.generationStepCheckConstraints,
       'PICK_STRATEGY' => l10n.generationStepPickStrategy,
+      'TARGET_MUSCLES' => l10n.generationStepTargetMuscles,
       'SELECT_EXERCISES' => l10n.generationStepSelectExercises,
       'PROGRAM_LOAD' => l10n.generationStepProgramLoad,
       'WRITE_COPY' => l10n.generationStepWriteCopy,

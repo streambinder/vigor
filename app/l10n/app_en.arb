@@ -419,6 +419,7 @@
   "generationStepProgramLoad": "Programming sets & reps...",
   "generationStepWriteCopy": "Writing session details...",
   "generationStepStructure": "Finalizing...",
+  "generationStepTargetMuscles": "Targeting muscles...",
 
   "editGym": "Edit Gym",
   "gymName": "Gym Name",

@@ -15,6 +15,7 @@ Rules:
 - Use only exercise IDs from the provided lists — never invent IDs
 - Annotations in parentheses (weighted, timer-only, reps-only, recent) are metadata — not part of the ID
 - For work exercises: cover the primary muscles with higher count, secondary muscles with 1-2 exercises
+- If muscles to rest are listed, never pick exercises from their groups
 - Avoid exercises matching any contraindicated pattern
 - Prefer favorite exercises when they fit
 - Prefer non-recent exercises over recent ones for variety
@@ -29,6 +30,7 @@ Rules:
     methodology string,
     primaryMuscles []string,
     secondaryMuscles []string,
+    avoidMuscles []string,
     contraindicatedPatterns []string,
     avoidExercises []string,
     workExercises []model.Exercise,
@@ -42,6 +44,9 @@ Rules:
 Methodology: {%s methodology %}
 Primary muscles: {%s strings.Join(primaryMuscles, ", ") %}
 {% if len(secondaryMuscles) > 0 %}Secondary muscles: {%s strings.Join(secondaryMuscles, ", ") %}{% endif %}
+{% if len(avoidMuscles) > 0 %}
+Muscles to rest this session: {%s strings.Join(avoidMuscles, ", ") %}
+{% endif %}
 {% if len(contraindicatedPatterns) > 0 %}
 Avoid these patterns: {%s strings.Join(contraindicatedPatterns, "; ") %}
 {% endif %}

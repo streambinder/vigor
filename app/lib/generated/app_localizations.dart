@@ -1620,6 +1620,12 @@ abstract class AppLocalizations {
   /// **'Finalizing...'**
   String get generationStepStructure;
 
+  /// No description provided for @generationStepTargetMuscles.
+  ///
+  /// In en, this message translates to:
+  /// **'Targeting muscles...'**
+  String get generationStepTargetMuscles;
+
   /// No description provided for @editGym.
   ///
   /// In en, this message translates to:

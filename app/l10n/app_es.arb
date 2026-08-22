@@ -252,6 +252,7 @@
   "generationStepProgramLoad": "Programando series y repeticiones...",
   "generationStepWriteCopy": "Escribiendo detalles de la sesión...",
   "generationStepStructure": "Finalizando...",
+  "generationStepTargetMuscles": "Eligiendo músculos objetivo...",
   "editGym": "Editar Gimnasio",
   "gymName": "Nombre del Gimnasio",
   "gymNamePlaceholder": "ej. Gimnasio Casa, McFit",

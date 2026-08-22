@@ -41,7 +41,9 @@ Description rules:
 	qw422016.N().S(`summary`)
 	qw422016.N().S("`")
 	qw422016.N().S(` field from each pipeline step below and weave them into a cohesive 3-5 sentence narrative
-- Every sentence should map to a pipeline step — cover all 6 steps: recovery/health assessment, history-based progression, movement constraints, methodology choice, exercise selection, and programming approach
+- Every sentence should map to a pipeline step — cover all 7 steps: recovery/health assessment, history-based progression, movement constraints, methodology choice, muscle targeting, exercise selection, and programming approach
+- Always name the session's muscle targets explicitly, as a deliberate choice grounded in the user's data (requested muscles, constraints, recovery, history) — never leave them implied by the exercise list alone
+- If muscles to rest are listed, mention what was deliberately left to recover and why
 - If a step's summary is empty or states "no adjustment"/"no change", skip it naturally — do NOT invent coverage
 - Write conversationally, as if explaining the workout to the user
 - Do NOT use raw data labels like "too_easy", "too_hard", or technical metric names
@@ -70,6 +72,7 @@ func NodeCreativeSystem(language string) string {
 
 func StreamNodeCreativeUser(qw422016 *qt422016.Writer,
 	strategy pipeline.Strategy,
+	targeting pipeline.MuscleTargeting,
 	exercises pipeline.ExerciseSelection,
 	history pipeline.HistoryAnalysis,
 	constraints pipeline.ConstraintExtraction,
@@ -81,13 +84,22 @@ func StreamNodeCreativeUser(qw422016 *qt422016.Writer,
 	qw422016.E().S(strategy.Methodology)
 	qw422016.N().S(`
 Focus: `)
-	qw422016.E().S(strings.Join(strategy.PrimaryMuscles, ", "))
+	qw422016.E().S(strings.Join(targeting.PrimaryMuscles, ", "))
 	qw422016.N().S(`
 `)
-	if len(strategy.SecondaryMuscles) > 0 {
+	if len(targeting.SecondaryMuscles) > 0 {
 		qw422016.N().S(`
 Secondary muscles: `)
-		qw422016.E().S(strings.Join(strategy.SecondaryMuscles, ", "))
+		qw422016.E().S(strings.Join(targeting.SecondaryMuscles, ", "))
+		qw422016.N().S(`
+`)
+	}
+	qw422016.N().S(`
+`)
+	if len(targeting.AvoidMuscles) > 0 {
+		qw422016.N().S(`
+Muscles to rest: `)
+		qw422016.E().S(strings.Join(targeting.AvoidMuscles, ", "))
 		qw422016.N().S(`
 `)
 	}
@@ -225,6 +237,7 @@ Do not reuse these names: `)
 
 func WriteNodeCreativeUser(qq422016 qtio422016.Writer,
 	strategy pipeline.Strategy,
+	targeting pipeline.MuscleTargeting,
 	exercises pipeline.ExerciseSelection,
 	history pipeline.HistoryAnalysis,
 	constraints pipeline.ConstraintExtraction,
@@ -233,12 +246,13 @@ func WriteNodeCreativeUser(qq422016 qtio422016.Writer,
 	recentNames []string,
 ) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeCreativeUser(qw422016, strategy, exercises, history, constraints, loadResult, health, recentNames)
+	StreamNodeCreativeUser(qw422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames)
 	qt422016.ReleaseWriter(qw422016)
 }
 
 func NodeCreativeUser(
 	strategy pipeline.Strategy,
+	targeting pipeline.MuscleTargeting,
 	exercises pipeline.ExerciseSelection,
 	history pipeline.HistoryAnalysis,
 	constraints pipeline.ConstraintExtraction,
@@ -247,7 +261,7 @@ func NodeCreativeUser(
 	recentNames []string,
 ) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeCreativeUser(qb422016, strategy, exercises, history, constraints, loadResult, health, recentNames)
+	WriteNodeCreativeUser(qb422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

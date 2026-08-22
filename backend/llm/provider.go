@@ -80,6 +80,7 @@ type TrainingGenerationRequest struct {
 	FavoriteEquipmentIDs []string
 	Methodology          *model.Methodology
 	Methodologies        []model.Methodology
+	Muscles              []string // user-selected target muscles, empty when not specified
 	UserPrompt           string
 	Duration             int
 	RecentTrainings      []model.Training

@@ -252,6 +252,7 @@
   "generationStepProgramLoad": "Sätze und Wiederholungen werden programmiert...",
   "generationStepWriteCopy": "Trainingsdetails werden erstellt...",
   "generationStepStructure": "Finalisierung...",
+  "generationStepTargetMuscles": "Zielmuskeln werden bestimmt...",
   "editGym": "Fitnessstudio Bearbeiten",
   "gymName": "Name des Fitnessstudios",
   "gymNamePlaceholder": "z.B. Home Gym, McFit",

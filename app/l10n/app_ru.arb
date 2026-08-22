@@ -252,6 +252,7 @@
   "generationStepProgramLoad": "Программирование подходов и повторений...",
   "generationStepWriteCopy": "Создание описания тренировки...",
   "generationStepStructure": "Завершение...",
+  "generationStepTargetMuscles": "Определение целевых мышц...",
   "editGym": "Редактировать Зал",
   "gymName": "Название Зала",
   "gymNamePlaceholder": "напр. Домашний Зал, World Class",

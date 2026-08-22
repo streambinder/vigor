@@ -1,0 +1,59 @@
+{% package prompt %}
+
+{% import "fmt" %}
+{% import "sort" %}
+{% import "strings" %}
+{% import "github.com/streambinder/vigor/model" %}
+
+{% func NodeMusclesSystem(coverage map[string]int) -%}
+You are a muscle targeting specialist. Decide which muscles a training session should emphasize, which to maintain, and which to rest.
+
+Output a JSON object with:
+- primary_muscles: array of muscle groups for high-volume emphasis
+- secondary_muscles: array of muscle groups for maintenance volume (empty if none)
+- avoid_muscles: array of muscle groups to deliberately rest this session (empty if none)
+- rationale: one sentence explaining the decision, internal use
+- summary: one-sentence plain-language description of the session's muscle targets (e.g. "targets back and biceps while letting the shoulders recover"), written conversationally
+
+Rules:
+- primary_muscles and secondary_muscles MUST use only muscle names from the trainable list below — never invent finer-grained names (e.g. "lats", "rhomboids", "hamstrings"); use the coarse names shown
+- primary_muscles MUST have a non-zero exercise count — never nominate a muscle the equipment can't train
+- Prefer higher-count muscles for primary emphasis
+- avoid_muscles should reflect reported injuries or limitations, poor recovery, or recent overuse — leave it empty rather than resting muscles without reason
+- When the user explicitly requests muscles, treat them as the session's target: primary_muscles will be enforced to that set, so shape secondary_muscles and avoid_muscles around it
+
+Trainable muscles with the available equipment (muscle: exercise count):
+{% code muscles := make([]string, 0, len(coverage)); for m := range coverage { muscles = append(muscles, m) }; sort.Slice(muscles, func(i, j int) bool { if coverage[muscles[i]] != coverage[muscles[j]] { return coverage[muscles[i]] > coverage[muscles[j]] }; return muscles[i] < muscles[j] }) %}{% for _, m := range muscles %}{%s m %}: {%d coverage[m] %}, {% endfor %}
+{% endfunc %}
+
+{% func NodeMusclesUser(
+    userMuscles []string,
+    goals []model.Goal,
+    contraindicatedPatterns []string,
+    accommodations []string,
+    healthVolumeModifier float64,
+    healthIntensityModifier float64,
+    healthRationale string,
+    historyPatternNotes string,
+    historyBadSessionNotes string,
+    userPrompt string,
+) -%}
+{% if len(userMuscles) > 0 %}User-requested muscles (explicit session target): {%s strings.Join(userMuscles, ", ") %}
+{% endif %}
+{% if len(goals) > 0 %}Goals:
+{% for _, goal := range goals %}- {%s goal.ID %}: {%s goal.Description %}
+{% endfor %}
+{% endif %}
+{% if len(contraindicatedPatterns) > 0 || len(accommodations) > 0 %}Constraints:
+{% if len(contraindicatedPatterns) > 0 %}- patterns to avoid: {%s strings.Join(contraindicatedPatterns, "; ") %}
+{% endif %}{% if len(accommodations) > 0 %}- accommodations: {%s strings.Join(accommodations, "; ") %}
+{% endif %}{% endif %}
+{% if healthVolumeModifier < 1.0 || healthIntensityModifier < 1.0 %}Recovery status: volume at {%s fmt.Sprintf("%.0f%%", healthVolumeModifier*100) %}, intensity at {%s fmt.Sprintf("%.0f%%", healthIntensityModifier*100) %}. {%s healthRationale %}
+{% endif %}
+{% if historyPatternNotes != "" %}History: {%s historyPatternNotes %}
+{% endif %}
+{% if historyBadSessionNotes != "" %}Recent issue: {%s historyBadSessionNotes %}
+{% endif %}
+{% if userPrompt != "" %}User request: {%s userPrompt %}
+{% endif %}
+{%- endfunc %}

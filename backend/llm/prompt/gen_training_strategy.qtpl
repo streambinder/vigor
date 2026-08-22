@@ -1,36 +1,28 @@
 {% package prompt %}
 
 {% import "fmt" %}
-{% import "sort" %}
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func NodeStrategySystem(methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, muscleCoverage map[string]int) -%}
-You are a training program strategist. Choose a methodology and define the session's muscle emphasis and intensity targets.
+{% func NodeStrategySystem(methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int) -%}
+You are a training program strategist. Choose a methodology and define the session's volume and intensity targets.
 
 Output a JSON object with:
 - methodology: string (methodology ID)
 - methodology_reason: one sentence
-- primary_muscles: array of muscle groups for high-volume emphasis
-- secondary_muscles: array of muscle groups for maintenance volume
 - volume_target: "low" | "moderate" | "high"
 - intensity_target: "low" | "moderate" | "high"
 - calibration_families: array of movement families to prioritize (empty if not calibrating)
-- summary: one-sentence plain-language description of why this methodology was chosen and what the session targets (e.g. "chosen for its focus on controlled pulling movements, emphasizing mid-back and rear delts"), written conversationally
+- summary: one-sentence plain-language description of why this methodology was chosen (e.g. "chosen for its focus on controlled, progressive compound work"), written conversationally
 
 {% if methodology != nil %}
 Methodology is preselected: {%s methodology.ID %}
 {%s methodology.Description %}
-Use this methodology. Focus on muscle emphasis and volume/intensity targets.
+Use this methodology. Focus on volume/intensity targets.
 {% else %}
 Available methodologies (pick one):
 {% for _, m := range methodologies %}{% code count := methodologyCoverage[m.ID] %}- {%s m.ID %} [{%d count %} compatible exercises]: {%s m.Description %}
 {% endfor %}
 Prefer methodologies with higher compatible exercise counts unless goals require otherwise.
-{% endif %}
-{% if len(muscleCoverage) > 0 %}
-Trainable muscles with the available equipment (muscle: exercise count):
-{% code muscles := make([]string, 0, len(muscleCoverage)); for m := range muscleCoverage { muscles = append(muscles, m) }; sort.Slice(muscles, func(i, j int) bool { if muscleCoverage[muscles[i]] != muscleCoverage[muscles[j]] { return muscleCoverage[muscles[i]] > muscleCoverage[muscles[j]] }; return muscles[i] < muscles[j] }) %}{% for _, m := range muscles %}{%s m %}: {%d muscleCoverage[m] %}, {% endfor %}
-primary_muscles and secondary_muscles MUST use only muscle names from the list above — never invent finer-grained names (e.g. "lats", "rhomboids", "hamstrings"); use the coarse names shown. primary_muscles MUST have a non-zero exercise count — never nominate a muscle the equipment can't train, even if the goal suggests it. Prefer higher-count muscles for primary emphasis.
 {% endif %}
 {% endfunc %}
 
