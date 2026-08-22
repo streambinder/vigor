@@ -379,11 +379,19 @@ func runExercisesNode(
 		return pipeline.ExerciseSelection{}, step, fmt.Errorf("exercises unmarshal: %w", err)
 	}
 
-	// strip annotations the LLM may have echoed into exercise IDs
-	for i := range result.Exercises {
-		result.Exercises[i].ExerciseID = stripExerciseTags(result.Exercises[i].ExerciseID)
-	}
+	sanitizeSelection(&result)
 	return result, step, nil
+}
+
+// sanitizeSelection strips annotations the LLM may have echoed into exercise IDs,
+// in both the selected and the excluded lists.
+func sanitizeSelection(selection *pipeline.ExerciseSelection) {
+	for i := range selection.Exercises {
+		selection.Exercises[i].ExerciseID = stripExerciseTags(selection.Exercises[i].ExerciseID)
+	}
+	for i := range selection.Excluded {
+		selection.Excluded[i].ExerciseID = stripExerciseTags(selection.Excluded[i].ExerciseID)
+	}
 }
 
 // runLoadNode executes the load programming node.

@@ -119,3 +119,27 @@ func TestMuscleCoverage(t *testing.T) {
 		t.Error("glutes should be absent — no exercise trains it")
 	}
 }
+
+func TestSanitizeSelection(t *testing.T) {
+	selection := pipeline.ExerciseSelection{
+		Exercises: []pipeline.SelectedExercise{
+			{ExerciseID: "push-up (weighted)"},
+			{ExerciseID: "pull-up"},
+		},
+		Excluded: []pipeline.ExcludedExercise{
+			{ExerciseID: "overhead-press (recent)", Reason: "trained two days ago"},
+		},
+	}
+
+	sanitizeSelection(&selection)
+
+	if selection.Exercises[0].ExerciseID != "push-up" {
+		t.Errorf("selected id = %q, want %q", selection.Exercises[0].ExerciseID, "push-up")
+	}
+	if selection.Excluded[0].ExerciseID != "overhead-press" {
+		t.Errorf("excluded id = %q, want %q", selection.Excluded[0].ExerciseID, "overhead-press")
+	}
+	if selection.Exercises[1].ExerciseID != "pull-up" {
+		t.Errorf("clean id must stay untouched, got %q", selection.Exercises[1].ExerciseID)
+	}
+}
