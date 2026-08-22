@@ -23,6 +23,7 @@ func StreamNodeExercisesSystem(qw422016 *qt422016.Writer, skipWarmupCooldown boo
 
 Output a JSON object with:
 - exercises: array of {exercise_id, rationale, phase} where phase is "warmup", "work", or "cooldown"
+- excluded: array of up to 5 {exercise_id, reason} for notable pool exercises you consciously left out (contraindicated pattern, avoid-list, recently done, or crowded out by muscle coverage) — omit exercises that simply did not make the cut
 - summary: one-sentence plain-language summary of the exercise selection (e.g. "focuses on compound pushing and pulling with a few isolation finishers"), written conversationally
 
 Rules:
@@ -44,6 +45,7 @@ Rules:
 	qw422016.N().D(maxWork)
 	qw422016.N().S(` distinct work exercises (band scaled to methodology density and session duration)
 - Keep rationale to 3-8 words per exercise
+- Keep excluded reasons to 3-6 words each, plain language — the user may read them
 `)
 }
 

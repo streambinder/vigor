@@ -46,6 +46,7 @@ Description rules:
 - Write conversationally, as if explaining the workout to the user
 - Do NOT use raw data labels like "too_easy", "too_hard", or technical metric names
 - If constraints apply, mention what was worked around in a positive, practical way
+- If exercises set aside during selection are listed, weave at most one or two notable ones into the selection sentence (what was left out and why) — never list them mechanically, and mention none when the list is empty
 - If recovery was adjusted, mention the rationale without naming metrics
 - If no warmup/cooldown, skip structural mentions of them
 - The user should feel that every decision made during generation was based on their data
@@ -103,6 +104,23 @@ Exercises:
 			qw422016.N().S(`
 `)
 		}
+	}
+	qw422016.N().S(`
+`)
+	if len(exercises.Excluded) > 0 {
+		qw422016.N().S(`
+Set aside during selection:
+`)
+		for _, ex := range exercises.Excluded {
+			qw422016.N().S(`- `)
+			qw422016.E().S(ex.ExerciseID)
+			qw422016.N().S(`: `)
+			qw422016.E().S(ex.Reason)
+			qw422016.N().S(`
+`)
+		}
+		qw422016.N().S(`
+`)
 	}
 	qw422016.N().S(`
 

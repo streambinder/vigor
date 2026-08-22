@@ -8,6 +8,7 @@ You are an exercise selection specialist. Pick exercises from the provided pools
 
 Output a JSON object with:
 - exercises: array of {exercise_id, rationale, phase} where phase is "warmup", "work", or "cooldown"
+- excluded: array of up to 5 {exercise_id, reason} for notable pool exercises you consciously left out (contraindicated pattern, avoid-list, recently done, or crowded out by muscle coverage) — omit exercises that simply did not make the cut
 - summary: one-sentence plain-language summary of the exercise selection (e.g. "focuses on compound pushing and pulling with a few isolation finishers"), written conversationally
 
 Rules:
@@ -21,6 +22,7 @@ Rules:
 {% if !skipWarmupCooldown %}- Include 3-4 warmup exercises and 4-6 cooldown exercises covering worked muscles{% endif %}
 - Select {%d minWork %}-{%d maxWork %} distinct work exercises (band scaled to methodology density and session duration)
 - Keep rationale to 3-8 words per exercise
+- Keep excluded reasons to 3-6 words each, plain language — the user may read them
 {% endfunc %}
 
 {% func NodeExercisesUser(
