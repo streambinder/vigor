@@ -58,6 +58,50 @@ func TestExerciseCountBand_MissingDensityFallsBack(t *testing.T) {
 	}
 }
 
+func TestResolvePrimaryMuscles(t *testing.T) {
+	coverage := map[string]int{"chest": 8, "back": 6, "legs": 4}
+
+	t.Run("user-selected muscles win over LLM output", func(t *testing.T) {
+		got := resolvePrimaryMuscles([]string{"back"}, []string{"chest"}, coverage)
+		if len(got) != 1 || got[0] != "back" {
+			t.Errorf("resolvePrimaryMuscles() = %v, want [back]", got)
+		}
+	})
+
+	t.Run("LLM output kept when no user selection", func(t *testing.T) {
+		got := resolvePrimaryMuscles(nil, []string{"chest", "legs"}, coverage)
+		if len(got) != 2 || got[0] != "chest" || got[1] != "legs" {
+			t.Errorf("resolvePrimaryMuscles() = %v, want [chest legs]", got)
+		}
+	})
+
+	t.Run("falls back to best-covered muscle", func(t *testing.T) {
+		got := resolvePrimaryMuscles(nil, nil, coverage)
+		if len(got) != 1 || got[0] != "chest" {
+			t.Errorf("resolvePrimaryMuscles() = %v, want [chest]", got)
+		}
+	})
+}
+
+func TestFallbackMuscles(t *testing.T) {
+	coverage := map[string]int{"legs": 4, "chest": 8, "back": 6, "arms": 6}
+
+	got := fallbackMuscles(coverage, 3)
+	want := []string{"chest", "arms", "back"} // ties on count break alphabetically
+	if len(got) != len(want) {
+		t.Fatalf("fallbackMuscles() = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("fallbackMuscles() = %v, want %v", got, want)
+		}
+	}
+
+	if got := fallbackMuscles(coverage, 10); len(got) != len(coverage) {
+		t.Errorf("fallbackMuscles() over-clamped = %v, want all %d muscles", got, len(coverage))
+	}
+}
+
 // TestProgressionsForSelected is the regression guard for the description hallucinating
 // rep bumps on exercises not in the session: only progressions whose exercise is actually
 // selected must survive.

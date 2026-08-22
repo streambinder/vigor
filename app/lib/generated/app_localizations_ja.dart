@@ -814,6 +814,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generationStepStructure => '最終処理中...';
 
   @override
+  String get generationStepTargetMuscles => '対象筋肉を決定中...';
+
+  @override
   String get editGym => 'ジムを編集';
 
   @override

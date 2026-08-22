@@ -252,6 +252,7 @@
   "generationStepProgramLoad": "正在设定组数与次数...",
   "generationStepWriteCopy": "正在撰写训练详情...",
   "generationStepStructure": "正在完成...",
+  "generationStepTargetMuscles": "正在确定目标肌肉...",
   "editGym": "编辑健身房",
   "gymName": "健身房名称",
   "gymNamePlaceholder": "例如：家庭健身房、威尔士",

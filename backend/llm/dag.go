@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -86,19 +87,47 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		return nil, dagToLegacyExecution(execution), fmt.Errorf("constraints node: %w", constraintErr)
 	}
 
-	// layer 1: strategy — depends on all three above
-	strategyResult, strategyStep, err := runStrategyNode(
-		req.Goals, req.Methodology, req.Methodologies,
-		methodologyCoverage(req.WorkExercises, req.Methodologies),
-		muscleCoverage(req.WorkExercises),
-		req.CalibrationGaps, healthResult, historyResult,
-		req.UserPrompt, req.Duration, req.SkipWarmupCooldown,
+	// layer 1: strategy and muscle targeting in parallel — both depend on layer 0 only
+	var (
+		strategyResult              pipeline.Strategy
+		targetingResult             pipeline.MuscleTargeting
+		strategyErr, targetingErr   error
+		strategyStep, targetingStep model.LLMStep
 	)
+
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		strategyResult, strategyStep, strategyErr = runStrategyNode(
+			req.Goals, req.Methodology, req.Methodologies,
+			methodologyCoverage(req.WorkExercises, req.Methodologies),
+			req.CalibrationGaps, healthResult, historyResult,
+			req.UserPrompt, req.Duration, req.SkipWarmupCooldown,
+		)
+		progress(pipeline.StepPickStrategy)
+	}()
+
+	go func() {
+		defer wg.Done()
+		targetingResult, targetingStep, targetingErr = runMuscleTargetingNode(
+			req.Muscles, req.Goals, muscleCoverage(req.WorkExercises),
+			constraintResult, healthResult, historyResult, req.UserPrompt,
+		)
+		progress(pipeline.StepTargetMuscles)
+	}()
+
+	wg.Wait()
+
 	execution.Nodes[pipeline.StepPickStrategy] = strategyStep
-	if err != nil {
-		return nil, dagToLegacyExecution(execution), fmt.Errorf("strategy node: %w", err)
+	execution.Nodes[pipeline.StepTargetMuscles] = targetingStep
+
+	if strategyErr != nil {
+		return nil, dagToLegacyExecution(execution), fmt.Errorf("strategy node: %w", strategyErr)
 	}
-	progress(pipeline.StepPickStrategy)
+	if targetingErr != nil {
+		return nil, dagToLegacyExecution(execution), fmt.Errorf("muscle targeting node: %w", targetingErr)
+	}
 
 	// resolve the strategy's chosen methodology to the full knowledge object.
 	// done before exercise selection so the density band (exercises_per_hour) and
@@ -118,7 +147,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 
 	// layer 2: exercise selection
 	exerciseResult, exerciseStep, err := runExercisesNode(
-		strategyResult, constraintResult, historyResult,
+		strategyResult, targetingResult, constraintResult, historyResult,
 		req.WorkExercises, req.WarmupExercises, req.CooldownExercises,
 		req.FavoriteExercises, req.RecentExerciseIDs,
 		resolvedMethodology, req.SkipWarmupCooldown, req.Duration,
@@ -168,7 +197,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		language = req.Profiles[0].Language
 	}
 	creativeResult, creativeStep, err := runCreativeNode(
-		language, strategyResult, exerciseResult, historyResult, constraintResult,
+		language, strategyResult, targetingResult, exerciseResult, historyResult, constraintResult,
 		loadResult, healthResult,
 	)
 	execution.Nodes[pipeline.StepWriteCopy] = creativeStep
@@ -289,7 +318,6 @@ func runStrategyNode(
 	methodology *model.Methodology,
 	methodologies []model.Methodology,
 	coverage map[string]int,
-	muscleCov map[string]int,
 	calibrationGaps map[string]int,
 	health pipeline.HealthAssessment,
 	history pipeline.HistoryAnalysis,
@@ -298,7 +326,7 @@ func runStrategyNode(
 	skipWarmupCooldown bool,
 ) (pipeline.Strategy, model.LLMStep, error) {
 	p := model.LLMPrompt{
-		System: prompt.NodeStrategySystem(methodology, methodologies, coverage, muscleCov),
+		System: prompt.NodeStrategySystem(methodology, methodologies, coverage),
 		User: prompt.NodeStrategyUser(
 			goals, calibrationGaps,
 			health.VolumeModifier, health.IntensityModifier, health.Rationale,
@@ -327,6 +355,80 @@ func runStrategyNode(
 	return result, step, nil
 }
 
+// runMuscleTargetingNode executes the muscle targeting node.
+// weighs user-selected muscles (when given) against injuries, recovery status and
+// recent history to decide the session's primary/secondary emphasis and the muscles to rest.
+func runMuscleTargetingNode(
+	userMuscles []string,
+	goals []model.Goal,
+	coverage map[string]int,
+	constraints pipeline.ConstraintExtraction,
+	health pipeline.HealthAssessment,
+	history pipeline.HistoryAnalysis,
+	userPrompt string,
+) (pipeline.MuscleTargeting, model.LLMStep, error) {
+	if len(coverage) == 0 {
+		return pipeline.MuscleTargeting{}, model.LLMStep{}, fmt.Errorf("no trainable muscles in the exercise pool")
+	}
+
+	p := model.LLMPrompt{
+		System: prompt.NodeMusclesSystem(coverage),
+		User: prompt.NodeMusclesUser(
+			userMuscles, goals,
+			constraints.ContraindicatedPatterns, constraints.Accommodations,
+			health.VolumeModifier, health.IntensityModifier, health.Rationale,
+			history.PatternNotes, history.BadSessionNotes, userPrompt,
+		),
+	}
+
+	// picks session emphasis across equipment coverage, constraints and history — a real
+	// trade-off, but a narrow one
+	step, err := getLLM(StageReasoning, "").query(p,
+		queryOpts{temperature: 0.2, maxTokens: 1500, effort: effortLow, timeout: 45 * time.Second})
+	if err != nil {
+		return pipeline.MuscleTargeting{}, step, err
+	}
+
+	var result pipeline.MuscleTargeting
+	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
+		return pipeline.MuscleTargeting{}, step, fmt.Errorf("muscle targeting unmarshal: %w", err)
+	}
+
+	result.PrimaryMuscles = resolvePrimaryMuscles(userMuscles, result.PrimaryMuscles, coverage)
+	return result, step, nil
+}
+
+// resolvePrimaryMuscles settles the session's primary emphasis. user-selected muscles are an
+// explicit request, like a preselected methodology: they win over the LLM output. when the
+// model returns nothing usable, fall back to the best-covered muscle.
+func resolvePrimaryMuscles(userMuscles, llmMuscles []string, coverage map[string]int) []string {
+	if len(userMuscles) > 0 {
+		return userMuscles
+	}
+	if len(llmMuscles) > 0 {
+		return llmMuscles
+	}
+	return fallbackMuscles(coverage, 1)
+}
+
+// fallbackMuscles returns the n best-covered muscle names, ordered by exercise count.
+func fallbackMuscles(coverage map[string]int, n int) []string {
+	muscles := make([]string, 0, len(coverage))
+	for m := range coverage {
+		muscles = append(muscles, m)
+	}
+	sort.Slice(muscles, func(i, j int) bool {
+		if coverage[muscles[i]] != coverage[muscles[j]] {
+			return coverage[muscles[i]] > coverage[muscles[j]]
+		}
+		return muscles[i] < muscles[j]
+	})
+	if n > len(muscles) {
+		n = len(muscles)
+	}
+	return muscles[:n]
+}
+
 // exerciseCountBand derives the work-exercise selection range from the methodology's
 // per-hour density and the session duration, replacing the old hardcoded duration ladder.
 // enforces a hard floor of 3 so short sessions of any methodology stay non-degenerate,
@@ -345,6 +447,7 @@ func exerciseCountBand(methodology *model.Methodology, durationMinutes int) (int
 // runExercisesNode executes the exercise selection node.
 func runExercisesNode(
 	strategy pipeline.Strategy,
+	targeting pipeline.MuscleTargeting,
 	constraints pipeline.ConstraintExtraction,
 	history pipeline.HistoryAnalysis,
 	workExercises, warmupExercises, cooldownExercises []model.Exercise,
@@ -359,7 +462,7 @@ func runExercisesNode(
 		System: prompt.NodeExercisesSystem(skipWarmupCooldown, minExercises, maxExercises),
 		User: prompt.NodeExercisesUser(
 			strategy.Methodology,
-			strategy.PrimaryMuscles, strategy.SecondaryMuscles,
+			targeting.PrimaryMuscles, targeting.SecondaryMuscles, targeting.AvoidMuscles,
 			constraints.ContraindicatedPatterns, history.AvoidExercises,
 			workExercises, warmupExercises, cooldownExercises,
 			favoriteExercises, recentExerciseIDs,
@@ -458,6 +561,7 @@ func progressionsForSelected(progressions []pipeline.ProgressionSignal, selected
 func runCreativeNode(
 	language string,
 	strategy pipeline.Strategy,
+	targeting pipeline.MuscleTargeting,
 	exercises pipeline.ExerciseSelection,
 	history pipeline.HistoryAnalysis,
 	constraints pipeline.ConstraintExtraction,
@@ -467,7 +571,7 @@ func runCreativeNode(
 	p := model.LLMPrompt{
 		System: prompt.NodeCreativeSystem(language),
 		User: prompt.NodeCreativeUser(
-			strategy, exercises, history, constraints, loadResult, health, history.RecentNames,
+			strategy, targeting, exercises, history, constraints, loadResult, health, history.RecentNames,
 		),
 	}
 

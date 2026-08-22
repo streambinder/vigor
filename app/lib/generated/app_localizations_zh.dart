@@ -814,6 +814,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generationStepStructure => '正在完成...';
 
   @override
+  String get generationStepTargetMuscles => '正在确定目标肌肉...';
+
+  @override
   String get editGym => '编辑健身房';
 
   @override

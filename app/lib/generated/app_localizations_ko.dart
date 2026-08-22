@@ -814,6 +814,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get generationStepStructure => '마무리 중...';
 
   @override
+  String get generationStepTargetMuscles => '목표 근육 결정 중...';
+
+  @override
   String get editGym => '헬스장 수정';
 
   @override

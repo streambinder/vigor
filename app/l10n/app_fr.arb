@@ -252,6 +252,7 @@
   "generationStepProgramLoad": "Programmation des séries et répétitions...",
   "generationStepWriteCopy": "Rédaction des détails de la séance...",
   "generationStepStructure": "Finalisation...",
+  "generationStepTargetMuscles": "Ciblage des muscles...",
   "editGym": "Modifier la Salle",
   "gymName": "Nom de la Salle",
   "gymNamePlaceholder": "ex. Salle Maison, Basic Fit",
