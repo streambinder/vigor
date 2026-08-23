@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/flow_session.dart';
@@ -21,6 +22,7 @@ import '../utils/knowledge_labels.dart';
 import '../utils/platform_helper.dart';
 
 enum EquipmentMode { bodyweight, gym, custom }
+
 enum _SessionMode { training, flow }
 
 class TrainingGenerationModal extends StatefulWidget {
@@ -36,7 +38,8 @@ class TrainingGenerationModal extends StatefulWidget {
   });
 
   @override
-  State<TrainingGenerationModal> createState() => _TrainingGenerationModalState();
+  State<TrainingGenerationModal> createState() =>
+      _TrainingGenerationModalState();
 }
 
 class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
@@ -209,10 +212,16 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       if (profile != null && profile.data.isNotEmpty) {
         final profileData = profile_models.ProfileData.fromJson(profile.data);
         for (final goal in profileData.goals) {
-          messages.add(l10n.loadingMsgGoal(KnowledgeLabels.goalLabel(goal, l10n)));
+          messages.add(
+            l10n.loadingMsgGoal(KnowledgeLabels.goalLabel(goal, l10n)),
+          );
         }
-        if (profileData.injuries.isNotEmpty) messages.add(l10n.loadingMsgInjuries);
-        if (profileData.conditions.isNotEmpty) messages.add(l10n.loadingMsgConditions);
+        if (profileData.injuries.isNotEmpty) {
+          messages.add(l10n.loadingMsgInjuries);
+        }
+        if (profileData.conditions.isNotEmpty) {
+          messages.add(l10n.loadingMsgConditions);
+        }
         if (profileData.preferences?.exercises?.isNotEmpty == true) {
           messages.add(l10n.loadingMsgFavorites);
         }
@@ -220,9 +229,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     } catch (_) {}
 
     if (_methodology != null) {
-      messages.add(l10n.loadingMsgMethodology(
-        KnowledgeLabels.methodologyLabel(_methodology!, l10n),
-      ));
+      messages.add(
+        l10n.loadingMsgMethodology(
+          KnowledgeLabels.methodologyLabel(_methodology!, l10n),
+        ),
+      );
     }
     if (_partners.isNotEmpty) messages.add(l10n.loadingMsgPartners);
     if (_equipmentMode == EquipmentMode.gym && _selectedGym != null) {
@@ -323,35 +334,75 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           ),
         ),
         const SizedBox(height: VigorSpacing.sm),
-        // ternary segmented button
-        SizedBox(
-          width: double.infinity,
-          child: SegmentedButton<EquipmentMode>(
-            segments: [
-              ButtonSegment(
-                value: EquipmentMode.bodyweight,
-                label: Text(l10n.bodyweight),
-                icon: const Icon(Icons.accessibility_new, size: 16),
+        // ternary equipment mode selector: compact chips on narrow
+        // screens, segmented button when there is enough width
+        LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth < 400) {
+              return Wrap(
+                spacing: VigorSpacing.sm,
+                runSpacing: VigorSpacing.sm,
+                children: [
+                  ChoiceChip(
+                    avatar: const Icon(Icons.accessibility_new, size: 16),
+                    label: Text(l10n.bodyweight),
+                    selected: _equipmentMode == EquipmentMode.bodyweight,
+                    onSelected: (_) => setState(() {
+                      _equipmentMode = EquipmentMode.bodyweight;
+                    }),
+                    showCheckmark: false,
+                  ),
+                  ChoiceChip(
+                    avatar: const Icon(Icons.fitness_center, size: 16),
+                    label: Text(l10n.gym),
+                    selected: _equipmentMode == EquipmentMode.gym,
+                    onSelected: (_) => setState(() {
+                      _equipmentMode = EquipmentMode.gym;
+                    }),
+                    showCheckmark: false,
+                  ),
+                  ChoiceChip(
+                    avatar: const Icon(Icons.build, size: 16),
+                    label: Text(l10n.custom),
+                    selected: _equipmentMode == EquipmentMode.custom,
+                    onSelected: (_) => setState(() {
+                      _equipmentMode = EquipmentMode.custom;
+                    }),
+                    showCheckmark: false,
+                  ),
+                ],
+              );
+            }
+            return SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<EquipmentMode>(
+                segments: [
+                  ButtonSegment(
+                    value: EquipmentMode.bodyweight,
+                    label: Text(l10n.bodyweight),
+                    icon: const Icon(Icons.accessibility_new, size: 16),
+                  ),
+                  ButtonSegment(
+                    value: EquipmentMode.gym,
+                    label: Text(l10n.gym),
+                    icon: const Icon(Icons.fitness_center, size: 16),
+                  ),
+                  ButtonSegment(
+                    value: EquipmentMode.custom,
+                    label: Text(l10n.custom),
+                    icon: const Icon(Icons.build, size: 16),
+                  ),
+                ],
+                selected: {_equipmentMode},
+                onSelectionChanged: (Set<EquipmentMode> selected) {
+                  setState(() {
+                    _equipmentMode = selected.first;
+                  });
+                },
+                showSelectedIcon: false,
               ),
-              ButtonSegment(
-                value: EquipmentMode.gym,
-                label: Text(l10n.gym),
-                icon: const Icon(Icons.fitness_center, size: 16),
-              ),
-              ButtonSegment(
-                value: EquipmentMode.custom,
-                label: Text(l10n.custom),
-                icon: const Icon(Icons.build, size: 16),
-              ),
-            ],
-            selected: {_equipmentMode},
-            onSelectionChanged: (Set<EquipmentMode> selected) {
-              setState(() {
-                _equipmentMode = selected.first;
-              });
-            },
-            showSelectedIcon: false,
-          ),
+            );
+          },
         ),
         const SizedBox(height: VigorSpacing.sm),
         // mode-specific content
@@ -389,14 +440,14 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               borderRadius: 12,
               isDark: isDark,
               border: Border.all(
-                color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.1),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : Colors.black.withValues(alpha: 0.1),
                 width: 1.5,
               ),
             )
           : BoxDecoration(
-              border: Border.all(
-                color: VigorColors.border(context),
-              ),
+              border: Border.all(color: VigorColors.border(context)),
               borderRadius: VigorRadius.radiusMd,
             ),
       child: DropdownButtonHideUnderline(
@@ -409,15 +460,15 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               color: VigorColors.textMuted(context),
             ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.xs),
+          padding: const EdgeInsets.symmetric(
+            horizontal: VigorSpacing.md,
+            vertical: VigorSpacing.xs,
+          ),
           borderRadius: VigorRadius.radiusMd,
           items: widget.gyms.map((gym) {
             return DropdownMenuItem<Gym>(
               value: gym,
-              child: Text(
-                gym.name,
-                style: VigorTypography.body,
-              ),
+              child: Text(gym.name, style: VigorTypography.body),
             );
           }).toList(),
           onChanged: (Gym? value) {
@@ -441,7 +492,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     );
   }
 
-  Widget _buildMethodologyTile(String methodology, bool isSelected, AppLocalizations l10n) {
+  Widget _buildMethodologyTile(
+    String methodology,
+    bool isSelected,
+    AppLocalizations l10n,
+  ) {
     final isAuto = methodology == 'auto';
     return GestureDetector(
       onTap: () {
@@ -458,7 +513,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         decoration: BoxDecoration(
           color: isSelected ? VigorColors.indigo.withValues(alpha: 0.1) : null,
           border: Border.all(
-            color: isSelected ? VigorColors.indigo : VigorColors.border(context),
+            color: isSelected
+                ? VigorColors.indigo
+                : VigorColors.border(context),
           ),
           borderRadius: VigorRadius.radiusMd,
         ),
@@ -466,7 +523,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           children: [
             Icon(
               isSelected ? Icons.check_circle : Icons.circle_outlined,
-              color: isSelected ? VigorColors.indigo : VigorColors.textMuted(context),
+              color: isSelected
+                  ? VigorColors.indigo
+                  : VigorColors.textMuted(context),
               size: 20,
             ),
             const SizedBox(width: VigorSpacing.sm),
@@ -477,11 +536,16 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                   Text(
                     KnowledgeLabels.methodologyLabel(methodology, l10n),
                     style: VigorTypography.body.copyWith(
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                       color: VigorColors.textPrimary(context),
                     ),
                   ),
-                  if (KnowledgeLabels.methodologyDescription(methodology, l10n).isNotEmpty) ...[
+                  if (KnowledgeLabels.methodologyDescription(
+                    methodology,
+                    l10n,
+                  ).isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(
                       KnowledgeLabels.methodologyDescription(methodology, l10n),
@@ -552,7 +616,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         decoration: BoxDecoration(
           color: isSelected ? VigorColors.indigo.withValues(alpha: 0.1) : null,
           border: Border.all(
-            color: isSelected ? VigorColors.indigo : VigorColors.border(context),
+            color: isSelected
+                ? VigorColors.indigo
+                : VigorColors.border(context),
           ),
           borderRadius: VigorRadius.radiusMd,
         ),
@@ -560,7 +626,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           children: [
             Icon(
               isSelected ? Icons.check_circle : Icons.circle_outlined,
-              color: isSelected ? VigorColors.indigo : VigorColors.textMuted(context),
+              color: isSelected
+                  ? VigorColors.indigo
+                  : VigorColors.textMuted(context),
               size: 20,
             ),
             const SizedBox(width: VigorSpacing.sm),
@@ -571,11 +639,16 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                   Text(
                     KnowledgeLabels.goalLabel(goal, l10n),
                     style: VigorTypography.body.copyWith(
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                       color: VigorColors.textPrimary(context),
                     ),
                   ),
-                  if (KnowledgeLabels.goalDescription(goal, l10n).isNotEmpty) ...[
+                  if (KnowledgeLabels.goalDescription(
+                    goal,
+                    l10n,
+                  ).isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(
                       KnowledgeLabels.goalDescription(goal, l10n),
@@ -662,7 +735,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               label: Text(
                 l10n.musclesAuto,
                 style: VigorTypography.caption.copyWith(
-                  color: _selectedMuscles.isEmpty ? Colors.white : VigorColors.textPrimary(context),
+                  color: _selectedMuscles.isEmpty
+                      ? Colors.white
+                      : VigorColors.textPrimary(context),
                 ),
               ),
               selected: _selectedMuscles.isEmpty,
@@ -678,7 +753,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 label: Text(
                   KnowledgeLabels.muscleLabel(muscle, l10n),
                   style: VigorTypography.caption.copyWith(
-                    color: isSelected ? Colors.white : VigorColors.textPrimary(context),
+                    color: isSelected
+                        ? Colors.white
+                        : VigorColors.textPrimary(context),
                   ),
                 ),
                 selected: isSelected,
@@ -707,11 +784,16 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     return GestureDetector(
       onTap: () => setState(() => _advancedExpanded = !_advancedExpanded),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md, vertical: VigorSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+          horizontal: VigorSpacing.md,
+          vertical: VigorSpacing.sm,
+        ),
         decoration: BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.08),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.black.withValues(alpha: 0.08),
               width: 1,
             ),
           ),
@@ -770,12 +852,14 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
         // Muscles selection
         _buildMusclesSection(),
-        if (_availableMuscles.isNotEmpty) const SizedBox(height: VigorSpacing.md),
+        if (_availableMuscles.isNotEmpty)
+          const SizedBox(height: VigorSpacing.md),
 
         if (_sessionMode == _SessionMode.training) ...[
           // Methodology selection
           _buildMethodologySection(),
-          if (_availableMethodologies.isNotEmpty) const SizedBox(height: VigorSpacing.md),
+          if (_availableMethodologies.isNotEmpty)
+            const SizedBox(height: VigorSpacing.md),
 
           // Goals selection
           _buildGoalsSection(),
@@ -788,15 +872,21 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
-      onTap: () => setState(() => _includeWarmupCooldown = !_includeWarmupCooldown),
+      onTap: () =>
+          setState(() => _includeWarmupCooldown = !_includeWarmupCooldown),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+          horizontal: VigorSpacing.sm,
+          vertical: VigorSpacing.sm,
+        ),
         decoration: PlatformHelper.useLiquidGlass
             ? LiquidGlassTheme.glassDecoration(
                 borderRadius: 12,
                 isDark: isDark,
                 border: Border.all(
-                  color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.1),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.2)
+                      : Colors.black.withValues(alpha: 0.1),
                   width: 1.5,
                 ),
               )
@@ -807,13 +897,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              l10n.includeWarmupCooldown,
-              style: VigorTypography.body,
-            ),
+            Text(l10n.includeWarmupCooldown, style: VigorTypography.body),
             AdaptiveSwitch(
               value: _includeWarmupCooldown,
-              onChanged: (value) => setState(() => _includeWarmupCooldown = value),
+              onChanged: (value) =>
+                  setState(() => _includeWarmupCooldown = value),
             ),
           ],
         ),
@@ -861,7 +949,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                     color: VigorColors.textPrimary(context),
                   ),
                 ),
-                deleteIcon: Icon(Icons.close, size: 16, color: VigorColors.textSecondary(context)),
+                deleteIcon: Icon(
+                  Icons.close,
+                  size: 16,
+                  color: VigorColors.textSecondary(context),
+                ),
                 onDeleted: () => _removePartner(partner),
                 backgroundColor: VigorColors.indigo.withValues(alpha: 0.1),
               );
@@ -909,7 +1001,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         _stopMessageRotation();
         final callbackId = ++_retryCallbackId;
         Timer(const Duration(seconds: 4), () {
-          if (!mounted || !_isGenerating || callbackId != _retryCallbackId) return;
+          if (!mounted || !_isGenerating || callbackId != _retryCallbackId) {
+            return;
+          }
           setState(() => _showingRetryMessage = false);
           _startMessageRotation();
         });
@@ -988,7 +1082,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         _stopMessageRotation();
         final callbackId = ++_retryCallbackId;
         Timer(const Duration(seconds: 4), () {
-          if (!mounted || !_isGenerating || callbackId != _retryCallbackId) return;
+          if (!mounted || !_isGenerating || callbackId != _retryCallbackId) {
+            return;
+          }
           setState(() => _showingRetryMessage = false);
           _startMessageRotation();
         });
@@ -1037,19 +1133,21 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                   borderRadius: 20,
                   isDark: isDark,
                   border: Border.all(
-                    color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.1),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.2)
+                        : Colors.black.withValues(alpha: 0.1),
                     width: 1.5,
                   ),
                 )
               : BoxDecoration(
-                  color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+                  color: isDark
+                      ? VigorColors.darkSurface
+                      : VigorColors.lightSurface,
                   borderRadius: BorderRadius.circular(20),
                 ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
-            child: _isGenerating
-                ? _buildLoadingView()
-                : _buildFormView(),
+            child: _isGenerating ? _buildLoadingView() : _buildFormView(),
           ),
         ),
       ),
@@ -1058,7 +1156,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
   Widget _buildDurationSlider(AppLocalizations l10n) {
     final rec = _recommendedDurationRange;
-    final hasRecommendation = rec != null && rec.length >= 2 && _sessionMode == _SessionMode.training;
+    final hasRecommendation =
+        rec != null && rec.length >= 2 && _sessionMode == _SessionMode.training;
     final isSingleValue = hasRecommendation && rec[0] == rec[1];
     // format recommendation label: "X min" if single value, "X-Y min" if range
     final recLabel = hasRecommendation
@@ -1122,10 +1221,16 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
               final rawMin = rec[0];
               final rawMax = rec[1];
               final rangeWidth = rawMax - rawMin;
-              final recMin = (rangeWidth < 20 ? rawMin - 10 : rawMin).clamp(10, maxDuration.toInt()).toDouble();
-              final recMax = (rangeWidth < 20 ? rawMax + 10 : rawMax).clamp(10, maxDuration.toInt()).toDouble();
-              final leftPos = sliderPadding + ((recMin - minVal) / range) * trackWidth;
-              final rightPos = sliderPadding + ((recMax - minVal) / range) * trackWidth;
+              final recMin = (rangeWidth < 20 ? rawMin - 10 : rawMin)
+                  .clamp(10, maxDuration.toInt())
+                  .toDouble();
+              final recMax = (rangeWidth < 20 ? rawMax + 10 : rawMax)
+                  .clamp(10, maxDuration.toInt())
+                  .toDouble();
+              final leftPos =
+                  sliderPadding + ((recMin - minVal) / range) * trackWidth;
+              final rightPos =
+                  sliderPadding + ((recMax - minVal) / range) * trackWidth;
               final width = (rightPos - leftPos).clamp(4.0, trackWidth);
 
               rangeIndicator = Positioned(
@@ -1151,9 +1256,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 // base slider (track only, thumb hidden)
                 IgnorePointer(
                   child: SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      thumbShape: SliderComponentShape.noThumb,
-                    ),
+                    data: SliderTheme.of(
+                      context,
+                    ).copyWith(thumbShape: SliderComponentShape.noThumb),
                     child: Slider(
                       value: _duration.toDouble().clamp(minVal, maxDuration),
                       min: minVal,
@@ -1178,7 +1283,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                     min: minVal,
                     max: maxDuration,
                     divisions: divisions,
-                    onChanged: (value) => setState(() => _duration = value.round()),
+                    onChanged: (value) =>
+                        setState(() => _duration = value.round()),
                   ),
                 ),
               ],
@@ -1193,10 +1299,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     final l10n = AppLocalizations.of(context);
     final statusText = _showingRetryMessage
         ? _getRetryMessage(l10n)
-        : _currentStepMessage
-            ?? (_messagePool.isNotEmpty
-                ? _messagePool[_currentMessageIndex % _messagePool.length]
-                : l10n.thisMayTakeAMoment);
+        : _currentStepMessage ??
+              (_messagePool.isNotEmpty
+                  ? _messagePool[_currentMessageIndex % _messagePool.length]
+                  : l10n.thisMayTakeAMoment);
 
     return SizedBox(
       width: double.infinity,
@@ -1277,22 +1383,34 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                       data: Theme.of(context).copyWith(
                         colorScheme: Theme.of(context).colorScheme.copyWith(
                           secondaryContainer: _sessionMode == _SessionMode.flow
-                              ? VigorColors.byakurokuAdaptive(context).withValues(alpha: 0.25)
+                              ? VigorColors.byakurokuAdaptive(
+                                  context,
+                                ).withValues(alpha: 0.25)
                               : VigorColors.persimmon.withValues(alpha: 0.25),
-                          onSecondaryContainer: _sessionMode == _SessionMode.flow
+                          onSecondaryContainer:
+                              _sessionMode == _SessionMode.flow
                               ? VigorColors.byakurokuAdaptive(context)
                               : VigorColors.persimmon,
                         ),
                       ),
                       child: SegmentedButton<_SessionMode>(
                         segments: [
-                          ButtonSegment(value: _SessionMode.training, label: Text(l10n.trainingRoutines)),
-                          const ButtonSegment(value: _SessionMode.flow, label: Text('Flow')),
+                          ButtonSegment(
+                            value: _SessionMode.training,
+                            label: Text(l10n.trainingRoutines),
+                          ),
+                          const ButtonSegment(
+                            value: _SessionMode.flow,
+                            label: Text('Flow'),
+                          ),
                         ],
                         selected: {_sessionMode},
                         onSelectionChanged: (selected) => setState(() {
                           _sessionMode = selected.first;
-                          if (_sessionMode == _SessionMode.flow && _duration > 60) _duration = 60;
+                          if (_sessionMode == _SessionMode.flow &&
+                              _duration > 60) {
+                            _duration = 60;
+                          }
                         }),
                         showSelectedIcon: false,
                       ),
@@ -1322,7 +1440,9 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                     alignment: Alignment.topCenter,
                     child: _advancedExpanded
                         ? Padding(
-                            padding: const EdgeInsets.only(top: VigorSpacing.md),
+                            padding: const EdgeInsets.only(
+                              top: VigorSpacing.md,
+                            ),
                             child: _buildAdvancedContent(),
                           )
                         : const SizedBox.shrink(),
