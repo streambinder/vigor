@@ -104,6 +104,9 @@ type TrainingGenerationRequest struct {
 	// Derived caches the derivation across generator retries: the pre-step
 	// fills it on first run, later attempts reuse it without a new LLM call
 	Derived *pipeline.DerivedParams
+	// DerivedStep carries the derivation step when the service layer derived
+	// upfront (so the generated execution still reports the pre-step)
+	DerivedStep *model.LLMStep
 }
 
 // reasoning effort levels, as understood by openrouter.

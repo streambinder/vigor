@@ -13,6 +13,7 @@ Output a JSON object with:
 
 Title rules:
 - Reflect workout character (intensity, focus, energy)
+- When the session comes from a specifically requested program, reflect that program in the title
 - Action words, alliteration, or evocative phrases
 - Match methodology tone: strength=powerful, circuit/HIIT=fast, mobility=flowing
 - Never use: all caps, methodology names, goal lists, generic terms ("training", "workout")
@@ -20,6 +21,7 @@ Title rules:
 
 Description rules:
 - Read the `summary` field from each pipeline step below and weave them into a cohesive 3-5 sentence narrative
+- When a requested program schema is provided below, open by describing the requested session itself — its structure and focus — before covering how the pipeline shaped it
 - Every sentence should map to a pipeline step — cover all 7 steps: recovery/health assessment, history-based progression, movement constraints, methodology choice, muscle targeting, exercise selection, and programming approach
 - Always name the session's muscle targets explicitly, as a deliberate choice grounded in the user's data (requested muscles, constraints, recovery, history) — never leave them implied by the exercise list alone
 - If muscles to rest are listed, mention what was deliberately left to recover and why
@@ -43,8 +45,11 @@ Description rules:
     loadResult pipeline.LoadProgramming,
     health pipeline.HealthAssessment,
     recentNames []string,
+    derivedSummary string,
 ) -%}
-Methodology: {%s strategy.Methodology %}
+{% if derivedSummary != "" %}Requested program: {%s derivedSummary %}
+
+{% endif %}Methodology: {%s strategy.Methodology %}
 Focus: {%s strings.Join(targeting.PrimaryMuscles, ", ") %}
 {%- if len(targeting.SecondaryMuscles) > 0 %}
 Secondary muscles: {%s strings.Join(targeting.SecondaryMuscles, ", ") %}

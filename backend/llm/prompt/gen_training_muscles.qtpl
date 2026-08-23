@@ -5,7 +5,7 @@
 {% import "strings" %}
 {% import "github.com/streambinder/vigor/model" %}
 
-{% func NodeMusclesSystem(coverage map[string]int) -%}
+{% func NodeMusclesSystem(coverage map[string]int, explicitProgram bool) -%}
 You are a muscle targeting specialist. Decide which muscles a training session should emphasize, which to maintain, and which to rest.
 
 Output a JSON object with:
@@ -21,6 +21,7 @@ Rules:
 - Prefer higher-count muscles for primary emphasis
 - avoid_muscles should reflect reported injuries or limitations, poor recovery, or recent overuse — leave it empty rather than resting muscles without reason
 - When the user explicitly requests muscles, treat them as the session's target: primary_muscles will be enforced to that set, so shape secondary_muscles and avoid_muscles around it
+{% if explicitProgram %}- The user's request fully specifies this session's program. Never rest or avoid a muscle the requested program trains: avoid_muscles only covers recovery or contraindication needs, and secondary/primary emphasis must follow the program{% endif %}
 
 Trainable muscles with the available equipment (muscle: exercise count):
 {% code muscles := make([]string, 0, len(coverage)); for m := range coverage { muscles = append(muscles, m) }; sort.Slice(muscles, func(i, j int) bool { if coverage[muscles[i]] != coverage[muscles[j]] { return coverage[muscles[i]] > coverage[muscles[j]] }; return muscles[i] < muscles[j] }) %}{% for _, m := range muscles %}{%s m %}: {%d coverage[m] %}, {% endfor %}

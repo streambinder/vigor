@@ -32,6 +32,7 @@ type DerivedParams struct {
 	Muscles            []string `json:"muscles"`
 	Equipment          []string `json:"equipment"`
 	SkipWarmupCooldown bool     `json:"skip_warmup_cooldown"`
+	ExplicitProgram    bool     `json:"explicit_program"`
 }
 
 // Summarizable is the embedded base for all pipeline node outputs.

@@ -18,7 +18,7 @@ var (
 	_ = qt422016.AcquireByteBuffer
 )
 
-func StreamNodeExercisesSystem(qw422016 *qt422016.Writer, skipWarmupCooldown bool, minWork int, maxWork int) {
+func StreamNodeExercisesSystem(qw422016 *qt422016.Writer, skipWarmupCooldown bool, minWork int, maxWork int, explicitProgram bool, requestSchema string) {
 	qw422016.N().S(`You are an exercise selection specialist. Pick exercises from the provided pools for a training session.
 
 Output a JSON object with:
@@ -36,29 +36,39 @@ Rules:
 - Prefer non-recent exercises over recent ones for variety
 - Avoid exercises listed in avoid_exercises
 `)
+	if explicitProgram {
+		qw422016.N().S(`- The user request fully specifies this session's program: `)
+		qw422016.E().S(requestSchema)
+		qw422016.N().S(`
+- Map each requested movement to its closest exercise from the [WORK] pool — that is the session, do not redesign it, do not add alternative work exercises, and never rest muscles it trains
+- Substitute a movement only when it matches a contraindicated pattern, picking the closest safe pool exercise and noting the substitution in its rationale`)
+	} else {
+		qw422016.N().S(`- Select `)
+		qw422016.N().D(minWork)
+		qw422016.N().S(`-`)
+		qw422016.N().D(maxWork)
+		qw422016.N().S(` distinct work exercises (band scaled to methodology density and session duration)`)
+	}
+	qw422016.N().S(`
+`)
 	if !skipWarmupCooldown {
 		qw422016.N().S(`- Include 3-4 warmup exercises and 4-6 cooldown exercises covering worked muscles`)
 	}
 	qw422016.N().S(`
-- Select `)
-	qw422016.N().D(minWork)
-	qw422016.N().S(`-`)
-	qw422016.N().D(maxWork)
-	qw422016.N().S(` distinct work exercises (band scaled to methodology density and session duration)
 - Keep rationale to 3-8 words per exercise
 - Keep excluded reasons to 3-6 words each, plain language — the user may read them
 `)
 }
 
-func WriteNodeExercisesSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool, minWork int, maxWork int) {
+func WriteNodeExercisesSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool, minWork int, maxWork int, explicitProgram bool, requestSchema string) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeExercisesSystem(qw422016, skipWarmupCooldown, minWork, maxWork)
+	StreamNodeExercisesSystem(qw422016, skipWarmupCooldown, minWork, maxWork, explicitProgram, requestSchema)
 	qt422016.ReleaseWriter(qw422016)
 }
 
-func NodeExercisesSystem(skipWarmupCooldown bool, minWork int, maxWork int) string {
+func NodeExercisesSystem(skipWarmupCooldown bool, minWork int, maxWork int, explicitProgram bool, requestSchema string) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeExercisesSystem(qb422016, skipWarmupCooldown, minWork, maxWork)
+	WriteNodeExercisesSystem(qb422016, skipWarmupCooldown, minWork, maxWork, explicitProgram, requestSchema)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

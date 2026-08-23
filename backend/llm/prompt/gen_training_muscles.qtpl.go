@@ -22,7 +22,7 @@ var (
 	_ = qt422016.AcquireByteBuffer
 )
 
-func StreamNodeMusclesSystem(qw422016 *qt422016.Writer, coverage map[string]int) {
+func StreamNodeMusclesSystem(qw422016 *qt422016.Writer, coverage map[string]int, explicitProgram bool) {
 	qw422016.N().S(`You are a muscle targeting specialist. Decide which muscles a training session should emphasize, which to maintain, and which to rest.
 
 Output a JSON object with:
@@ -38,6 +38,11 @@ Rules:
 - Prefer higher-count muscles for primary emphasis
 - avoid_muscles should reflect reported injuries or limitations, poor recovery, or recent overuse — leave it empty rather than resting muscles without reason
 - When the user explicitly requests muscles, treat them as the session's target: primary_muscles will be enforced to that set, so shape secondary_muscles and avoid_muscles around it
+`)
+	if explicitProgram {
+		qw422016.N().S(`- The user's request fully specifies this session's program. Never rest or avoid a muscle the requested program trains: avoid_muscles only covers recovery or contraindication needs, and secondary/primary emphasis must follow the program`)
+	}
+	qw422016.N().S(`
 
 Trainable muscles with the available equipment (muscle: exercise count):
 `)
@@ -62,15 +67,15 @@ Trainable muscles with the available equipment (muscle: exercise count):
 `)
 }
 
-func WriteNodeMusclesSystem(qq422016 qtio422016.Writer, coverage map[string]int) {
+func WriteNodeMusclesSystem(qq422016 qtio422016.Writer, coverage map[string]int, explicitProgram bool) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeMusclesSystem(qw422016, coverage)
+	StreamNodeMusclesSystem(qw422016, coverage, explicitProgram)
 	qt422016.ReleaseWriter(qw422016)
 }
 
-func NodeMusclesSystem(coverage map[string]int) string {
+func NodeMusclesSystem(coverage map[string]int, explicitProgram bool) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeMusclesSystem(qb422016, coverage)
+	WriteNodeMusclesSystem(qb422016, coverage, explicitProgram)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016
