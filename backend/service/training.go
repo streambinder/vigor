@@ -12,6 +12,7 @@ import (
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/event"
 	"github.com/streambinder/vigor/llm"
+	"github.com/streambinder/vigor/llm/pipeline"
 	"github.com/streambinder/vigor/llm/rag"
 	"github.com/streambinder/vigor/model"
 	"github.com/streambinder/vigor/util"
@@ -51,6 +52,83 @@ var (
 	ErrFetchResource        = errors.New("could not fetch linked resource")
 )
 
+// freeTextDerivation holds the result of deriving the tuning parameters of a
+// free text request upfront, along with the catalogs the DAG needs to apply
+// and reference the derivation.
+type freeTextDerivation struct {
+	derived        pipeline.DerivedParams
+	step           model.LLMStep
+	allGoals       []model.Goal
+	validMuscles   []string
+	validEquipment []string
+}
+
+// deriveFreeTextParams runs the DAG derive params node before pool retrieval,
+// so the derivation drives the exercise search rather than following it.
+func deriveFreeTextParams(freeText string, articles []string, onProgress llm.DAGProgressFunc) (*freeTextDerivation, error) {
+	methodologies, err := rag.RetrieveAllMethodologies()
+	if err != nil {
+		return nil, err
+	}
+	var allGoals []model.Goal
+	if err := database.Knowledge.Find(&allGoals).Error; err != nil {
+		return nil, err
+	}
+	var allMuscles []model.Muscle
+	if err := database.Knowledge.Find(&allMuscles).Error; err != nil {
+		return nil, err
+	}
+	var allEquipment []model.Equipment
+	if err := database.Knowledge.Find(&allEquipment).Error; err != nil {
+		return nil, err
+	}
+
+	derivation := &freeTextDerivation{
+		allGoals:       allGoals,
+		validMuscles:   make([]string, len(allMuscles)),
+		validEquipment: make([]string, len(allEquipment)),
+	}
+	for i, m := range allMuscles {
+		derivation.validMuscles[i] = m.ID
+	}
+	for i, e := range allEquipment {
+		derivation.validEquipment[i] = e.ID
+	}
+
+	derivation.derived, derivation.step, err = llm.DeriveFreeTextParams(llm.DeriveRequest{
+		FreeText:       freeText,
+		Articles:       articles,
+		Methodologies:  methodologies,
+		AllGoals:       allGoals,
+		ValidMuscles:   derivation.validMuscles,
+		ValidEquipment: derivation.validEquipment,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if onProgress != nil {
+		onProgress(pipeline.StepDeriveParams)
+	}
+	return derivation, nil
+}
+
+// freeTextRetrievalQuery builds the exercise pool retrieval text for a free
+// text request: the derived program schema plus the distilled text of any
+// linked articles. the raw request only carries retrieval weight when no
+// article was fetched.
+func freeTextRetrievalQuery(summary string, articles []string, freeText string) string {
+	var parts []string
+	if summary != "" {
+		parts = append(parts, summary)
+	}
+	if len(articles) > 0 {
+		parts = append(parts, articles...)
+	} else if freeText != "" {
+		parts = append(parts, freeText)
+	}
+	return strings.Join(parts, "\n\n")
+}
+
 // GenerateTraining creates a new training for a user.
 // onProgress is called after each DAG node completes (may be nil).
 func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt, freeText string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string, loc *time.Location, onProgress llm.DAGProgressFunc) (*model.Training, error) {
@@ -84,8 +162,12 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	}
 
 	// free text mode: fetch any linked articles (every failure is fatal to the
-	// request), then hand the raw request to the DAG, whose derive params
-	// pre-step deduces the tuning parameters a guided request would carry
+	// request), then deduce the tuning parameters a guided request would carry.
+	// this happens before pool retrieval so the candidate pools already
+	// reflect the requested program: the retrieval text embeds the derived
+	// schema instead of the raw request, and the equipment/muscle filters
+	// come from the derivation
+	var derivation *freeTextDerivation
 	var articles []string
 	if freeMode {
 		for _, url := range util.ExtractURLs(freeText) {
@@ -96,8 +178,28 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			}
 			articles = append(articles, text)
 		}
-		// the raw request doubles as the retrieval prompt
-		prompt = freeText
+
+		var err error
+		derivation, err = deriveFreeTextParams(freeText, articles, onProgress)
+		if err != nil {
+			return nil, err
+		}
+		prompt = freeTextRetrievalQuery(derivation.derived.Summary, articles, freeText)
+		if len(derivation.derived.Equipment) > 0 {
+			equipment = derivation.derived.Equipment
+		}
+		if len(derivation.derived.Muscles) > 0 {
+			muscles = derivation.derived.Muscles
+		}
+		if len(derivation.derived.Goals) > 0 {
+			goals = derivation.derived.Goals
+		}
+		if derivation.derived.Methodology != "" {
+			methodology = derivation.derived.Methodology
+		}
+		if derivation.derived.SkipWarmupCooldown {
+			skipWarmupCooldown = true
+		}
 	}
 
 	var requestorProfile model.Profile
@@ -432,30 +534,15 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		RecentExerciseIDs:    recentExerciseIDs,
 	}
 	if freeMode {
-		var allGoals []model.Goal
-		if err := database.Knowledge.Find(&allGoals).Error; err != nil {
-			return nil, err
-		}
-		var allMuscles []model.Muscle
-		if err := database.Knowledge.Find(&allMuscles).Error; err != nil {
-			return nil, err
-		}
-		var allEquipment []model.Equipment
-		if err := database.Knowledge.Find(&allEquipment).Error; err != nil {
-			return nil, err
-		}
-
+		// the params were derived upfront (before pool retrieval); hand both
+		// the derivation and its step to the DAG so it skips re-deriving
 		dagRequest.FreeText = freeText
 		dagRequest.Articles = articles
-		dagRequest.AllGoals = allGoals
-		dagRequest.ValidMuscles = make([]string, len(allMuscles))
-		for i, m := range allMuscles {
-			dagRequest.ValidMuscles[i] = m.ID
-		}
-		dagRequest.ValidEquipment = make([]string, len(allEquipment))
-		for i, e := range allEquipment {
-			dagRequest.ValidEquipment[i] = e.ID
-		}
+		dagRequest.AllGoals = derivation.allGoals
+		dagRequest.ValidMuscles = derivation.validMuscles
+		dagRequest.ValidEquipment = derivation.validEquipment
+		dagRequest.Derived = &derivation.derived
+		dagRequest.DerivedStep = &derivation.step
 	}
 
 	llmStart := time.Now()
@@ -643,11 +730,9 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	training.Goals = effectiveGoals
 	training.Muscles = actualMuscles
 	// in free text mode the derived parameters stand in for the guided request
-	if freeMode && dagRequest.Derived != nil {
-		training.Equipment = append(training.Equipment, dagRequest.Derived.Equipment...)
-		if len(dagRequest.Derived.Goals) > 0 {
-			training.Goals = dagRequest.Derived.Goals
-		}
+	// (equipment is already there: it drove pool retrieval above)
+	if freeMode && dagRequest.Derived != nil && len(dagRequest.Derived.Goals) > 0 {
+		training.Goals = dagRequest.Derived.Goals
 	}
 	training.Request = prompt
 	if freeMode {

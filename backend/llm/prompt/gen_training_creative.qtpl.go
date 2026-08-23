@@ -30,6 +30,7 @@ Output a JSON object with:
 
 Title rules:
 - Reflect workout character (intensity, focus, energy)
+- When the session comes from a specifically requested program, reflect that program in the title
 - Action words, alliteration, or evocative phrases
 - Match methodology tone: strength=powerful, circuit/HIIT=fast, mobility=flowing
 - Never use: all caps, methodology names, goal lists, generic terms ("training", "workout")
@@ -41,6 +42,7 @@ Description rules:
 	qw422016.N().S(`summary`)
 	qw422016.N().S("`")
 	qw422016.N().S(` field from each pipeline step below and weave them into a cohesive 3-5 sentence narrative
+- When a requested program schema is provided below, open by describing the requested session itself — its structure and focus — before covering how the pipeline shaped it
 - Every sentence should map to a pipeline step — cover all 7 steps: recovery/health assessment, history-based progression, movement constraints, methodology choice, muscle targeting, exercise selection, and programming approach
 - Always name the session's muscle targets explicitly, as a deliberate choice grounded in the user's data (requested muscles, constraints, recovery, history) — never leave them implied by the exercise list alone
 - If muscles to rest are listed, mention what was deliberately left to recover and why
@@ -79,7 +81,15 @@ func StreamNodeCreativeUser(qw422016 *qt422016.Writer,
 	loadResult pipeline.LoadProgramming,
 	health pipeline.HealthAssessment,
 	recentNames []string,
+	derivedSummary string,
 ) {
+	if derivedSummary != "" {
+		qw422016.N().S(`Requested program: `)
+		qw422016.E().S(derivedSummary)
+		qw422016.N().S(`
+
+`)
+	}
 	qw422016.N().S(`Methodology: `)
 	qw422016.E().S(strategy.Methodology)
 	qw422016.N().S(`
@@ -244,9 +254,10 @@ func WriteNodeCreativeUser(qq422016 qtio422016.Writer,
 	loadResult pipeline.LoadProgramming,
 	health pipeline.HealthAssessment,
 	recentNames []string,
+	derivedSummary string,
 ) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeCreativeUser(qw422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames)
+	StreamNodeCreativeUser(qw422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames, derivedSummary)
 	qt422016.ReleaseWriter(qw422016)
 }
 
@@ -259,9 +270,10 @@ func NodeCreativeUser(
 	loadResult pipeline.LoadProgramming,
 	health pipeline.HealthAssessment,
 	recentNames []string,
+	derivedSummary string,
 ) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeCreativeUser(qb422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames)
+	WriteNodeCreativeUser(qb422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames, derivedSummary)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

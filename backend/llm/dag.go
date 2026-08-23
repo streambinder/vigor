@@ -15,6 +15,7 @@ import (
 	"github.com/streambinder/vigor/llm/pipeline"
 	"github.com/streambinder/vigor/llm/prompt"
 	"github.com/streambinder/vigor/model"
+	"github.com/streambinder/vigor/util"
 )
 
 // DAGProgressFunc is called after each node completes.
@@ -44,16 +45,26 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	// pre-conditional step, free text mode only: the tuning parameters a guided
 	// request would carry are deduced from the raw request (and any linked
 	// articles) before every other layer. the derivation is cached on the
-	// request so generator retries reuse it instead of paying for it again.
+	// request so generator retries — and a service layer that derived upfront —
+	// reuse it instead of paying for it again.
 	if req.FreeText != "" {
 		if req.Derived == nil {
-			derived, deriveStep, err := runDeriveParamsNode(req)
+			derived, deriveStep, err := DeriveFreeTextParams(DeriveRequest{
+				FreeText:       req.FreeText,
+				Articles:       req.Articles,
+				Methodologies:  req.Methodologies,
+				AllGoals:       req.AllGoals,
+				ValidMuscles:   req.ValidMuscles,
+				ValidEquipment: req.ValidEquipment,
+			})
 			if err != nil {
 				return nil, dagToLegacyExecution(execution), fmt.Errorf("derive params node: %w", err)
 			}
 			req.Derived = &derived
 			execution.Nodes[pipeline.StepDeriveParams] = deriveStep
 			progress(pipeline.StepDeriveParams)
+		} else if req.DerivedStep != nil {
+			execution.Nodes[pipeline.StepDeriveParams] = *req.DerivedStep
 		}
 		applyDerivedParams(&req)
 	}
@@ -105,6 +116,15 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	}
 
 	// layer 1: strategy and muscle targeting in parallel — both depend on layer 0 only
+	// explicit program mode engages when the derivation marks the request as a
+	// fully specified session: downstream nodes follow its schema faithfully
+	// instead of redesigning it
+	explicitProgram := req.Derived != nil && req.Derived.ExplicitProgram
+	derivedSummary := ""
+	if req.Derived != nil {
+		derivedSummary = req.Derived.Summary
+	}
+
 	var (
 		strategyResult              pipeline.Strategy
 		targetingResult             pipeline.MuscleTargeting
@@ -130,6 +150,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		targetingResult, targetingStep, targetingErr = runMuscleTargetingNode(
 			req.Muscles, req.Goals, muscleCoverage(req.WorkExercises),
 			constraintResult, healthResult, historyResult, req.UserPrompt,
+			explicitProgram,
 		)
 		progress(pipeline.StepTargetMuscles)
 	}()
@@ -168,6 +189,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		req.WorkExercises, req.WarmupExercises, req.CooldownExercises,
 		req.FavoriteExercises, req.RecentExerciseIDs,
 		resolvedMethodology, req.SkipWarmupCooldown, req.Duration,
+		explicitProgram, derivedSummary,
 	)
 	execution.Nodes[pipeline.StepSelectExercises] = exerciseStep
 	if err != nil {
@@ -215,7 +237,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	}
 	creativeResult, creativeStep, err := runCreativeNode(
 		language, strategyResult, targetingResult, exerciseResult, historyResult, constraintResult,
-		loadResult, healthResult,
+		loadResult, healthResult, derivedSummary,
 	)
 	execution.Nodes[pipeline.StepWriteCopy] = creativeStep
 	if err != nil {
@@ -237,12 +259,24 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 // maxDerivedSummaryLen caps the derived program schema flowing downstream.
 const maxDerivedSummaryLen = 2000
 
-// runDeriveParamsNode executes the free text param derivation node: from the
+// DeriveRequest carries the inputs of the free text param derivation, so it
+// can run both as the DAG pre-step and upfront in the service layer (where
+// the derived filters drive exercise retrieval).
+type DeriveRequest struct {
+	FreeText       string
+	Articles       []string
+	Methodologies  []model.Methodology
+	AllGoals       []model.Goal
+	ValidMuscles   []string
+	ValidEquipment []string
+}
+
+// DeriveFreeTextParams executes the free text param derivation node: from the
 // raw request (and the distilled text of any linked articles) deduce the
 // tuning parameters a guided request would carry. an unusable LLM response
 // degrades to plain defaults rather than failing the generation — the free
 // text itself still flows downstream.
-func runDeriveParamsNode(req TrainingGenerationRequest) (pipeline.DerivedParams, model.LLMStep, error) {
+func DeriveFreeTextParams(req DeriveRequest) (pipeline.DerivedParams, model.LLMStep, error) {
 	validGoals := make([]string, len(req.AllGoals))
 	for i, g := range req.AllGoals {
 		validGoals[i] = g.ID
@@ -333,29 +367,15 @@ func normalizeDerivedParams(
 		derived.Methodology = ""
 	}
 
-	derived.Muscles = filterToValidIDs(derived.Muscles, validMuscles)
-	derived.Goals = filterToValidIDs(derived.Goals, validGoals)
-	derived.Equipment = filterToValidIDs(derived.Equipment, validEquipment)
+	derived.Muscles = util.FilterToValidIDs(derived.Muscles, validMuscles)
+	derived.Goals = util.FilterToValidIDs(derived.Goals, validGoals)
+	derived.Equipment = util.FilterToValidIDs(derived.Equipment, validEquipment)
 
 	if len(derived.Summary) > maxDerivedSummaryLen {
 		derived.Summary = derived.Summary[:maxDerivedSummaryLen]
 	}
-	return derived
-}
 
-// filterToValidIDs keeps only entries that match a valid ID, resolving
-// case-insensitive matches to the canonical form.
-func filterToValidIDs(entries, valid []string) []string {
-	var kept []string
-	for _, entry := range entries {
-		for _, id := range valid {
-			if strings.EqualFold(entry, id) {
-				kept = append(kept, id)
-				break
-			}
-		}
-	}
-	return kept
+	return derived
 }
 
 // runHealthNode executes the health assessment node.
@@ -507,13 +527,14 @@ func runMuscleTargetingNode(
 	health pipeline.HealthAssessment,
 	history pipeline.HistoryAnalysis,
 	userPrompt string,
+	explicitProgram bool,
 ) (pipeline.MuscleTargeting, model.LLMStep, error) {
 	if len(coverage) == 0 {
 		return pipeline.MuscleTargeting{}, model.LLMStep{}, fmt.Errorf("no trainable muscles in the exercise pool")
 	}
 
 	p := model.LLMPrompt{
-		System: prompt.NodeMusclesSystem(coverage),
+		System: prompt.NodeMusclesSystem(coverage, explicitProgram),
 		User: prompt.NodeMusclesUser(
 			userMuscles, goals,
 			constraints.ContraindicatedPatterns, constraints.Accommodations,
@@ -597,10 +618,12 @@ func runExercisesNode(
 	methodology *model.Methodology,
 	skipWarmupCooldown bool,
 	duration int,
+	explicitProgram bool,
+	derivedSummary string,
 ) (pipeline.ExerciseSelection, model.LLMStep, error) {
 	minExercises, maxExercises := exerciseCountBand(methodology, duration)
 	p := model.LLMPrompt{
-		System: prompt.NodeExercisesSystem(skipWarmupCooldown, minExercises, maxExercises),
+		System: prompt.NodeExercisesSystem(skipWarmupCooldown, minExercises, maxExercises, explicitProgram, derivedSummary),
 		User: prompt.NodeExercisesUser(
 			strategy.Methodology,
 			targeting.PrimaryMuscles, targeting.SecondaryMuscles, targeting.AvoidMuscles,
@@ -708,11 +731,12 @@ func runCreativeNode(
 	constraints pipeline.ConstraintExtraction,
 	loadResult pipeline.LoadProgramming,
 	health pipeline.HealthAssessment,
+	derivedSummary string,
 ) (pipeline.CreativeCopy, model.LLMStep, error) {
 	p := model.LLMPrompt{
 		System: prompt.NodeCreativeSystem(language),
 		User: prompt.NodeCreativeUser(
-			strategy, targeting, exercises, history, constraints, loadResult, health, history.RecentNames,
+			strategy, targeting, exercises, history, constraints, loadResult, health, history.RecentNames, derivedSummary,
 		),
 	}
 
