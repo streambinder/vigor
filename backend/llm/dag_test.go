@@ -6,6 +6,7 @@ import (
 
 	"github.com/streambinder/vigor/llm/pipeline"
 	"github.com/streambinder/vigor/model"
+	"gorm.io/datatypes"
 )
 
 func TestExerciseCountBand(t *testing.T) {
@@ -253,6 +254,45 @@ func TestNormalizeDerivedParams(t *testing.T) {
 		derived := normalizeDerivedParams(input, methodologies, validMuscles, validGoals, validEquipment)
 		if derived.Methodology != "circuit" || !derived.SkipWarmupCooldown || derived.Summary == "" {
 			t.Fatalf("valid derivation mangled: %+v", derived)
+		}
+	})
+}
+
+func TestOrderedSteps(t *testing.T) {
+	node := func(output string) model.LLMStep {
+		return model.LLMStep{Model: "m", Output: datatypes.NewJSONType(output)}
+	}
+
+	t.Run("canonical round order with compact positions", func(t *testing.T) {
+		steps := orderedSteps(map[pipeline.GenerationStep]model.LLMStep{
+			pipeline.StepWriteCopy:       node("copy"),
+			pipeline.StepAnalyzeRecovery: node("health"),
+			pipeline.StepPickStrategy:    node("strategy"),
+		})
+		want := []pipeline.GenerationStep{
+			pipeline.StepAnalyzeRecovery,
+			pipeline.StepPickStrategy,
+			pipeline.StepWriteCopy,
+		}
+		if len(steps) != len(want) {
+			t.Fatalf("orderedSteps() = %d steps, want %d", len(steps), len(want))
+		}
+		for i, genStep := range want {
+			if steps[i].Step != string(genStep) {
+				t.Errorf("steps[%d].Step = %q, want %q", i, steps[i].Step, genStep)
+			}
+			if steps[i].Position != i {
+				t.Errorf("steps[%d].Position = %d, want %d", i, steps[i].Position, i)
+			}
+		}
+	})
+
+	t.Run("guided runs skip the derive pre-step without position gaps", func(t *testing.T) {
+		steps := orderedSteps(map[pipeline.GenerationStep]model.LLMStep{
+			pipeline.StepSelectExercises: node("exercises"),
+		})
+		if len(steps) != 1 || steps[0].Position != 0 || steps[0].Step != string(pipeline.StepSelectExercises) {
+			t.Errorf("orderedSteps() = %+v, want single SELECT_EXERCISES step at position 0", steps)
 		}
 	})
 }

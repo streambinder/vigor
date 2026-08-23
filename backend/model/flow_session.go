@@ -8,6 +8,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/streambinder/vigor/encoder"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 var FlowSessionSchema JSONSchemaFormat
@@ -43,7 +44,10 @@ type FlowSession struct {
 	References  datatypes.JSONType[[]TrainingReference] `gorm:"type:jsonb" json:"references" prompt:"-"`
 	FactIndices []int                                   `gorm:"-" json:"fact_indices" prompt:"Indices of [FACTS] used (0-based)"`
 	Poses       datatypes.JSON                          `gorm:"type:jsonb" json:"poses" dart:"List<FlowPose>" prompt:"-"`
-	Prompt      datatypes.JSONType[TrainingPrompt]      `gorm:"type:jsonb" json:"prompt" prompt:"-"`
+	LLMSteps    []LLMStep                               `gorm:"foreignKey:FlowSessionID;constraint:OnDelete:CASCADE" json:"llm_steps" prompt:"-"`
+	// Prompt is a deprecated read-only projection of LLMSteps, computed by
+	// AfterFind; it is not a column and must never be written to.
+	Prompt TrainingPrompt `gorm:"-" json:"prompt" prompt:"-"`
 
 	CompletedAt *time.Time `gorm:"type:timestamptz" json:"completed_at" prompt:"-"`
 	CreatedAt   time.Time  `gorm:"type:timestamptz;default:now()" json:"created_at" prompt:"-"`
@@ -58,6 +62,13 @@ type FlowPose struct {
 	Duration   int             `json:"duration" prompt:"Hold duration in seconds (10-60)"`
 	Rest       int             `json:"rest" prompt:"Rest after pose in seconds (5-15)"`
 	Detail     json.RawMessage `json:"detail" dart:"Map<String, dynamic>" prompt:"-"`
+}
+
+// AfterFind derives the deprecated two-stage prompt projection from the
+// loaded steps, so legacy readers keep their shape without a prompt column.
+func (s *FlowSession) AfterFind(_ *gorm.DB) error {
+	s.Prompt = LegacyPrompt(s.LLMSteps)
+	return nil
 }
 
 // GetPoses unmarshals the JSONB poses field into a typed slice.

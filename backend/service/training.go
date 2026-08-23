@@ -547,20 +547,23 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 
 	llmStart := time.Now()
 	var training *model.Training
-	var execution model.TrainingPrompt
+	var steps []model.LLMStep
 	var actualMuscles []string
 	// totalled across attempts, like llmStart, so a retried generation reports what it really cost
 	var usage model.LLMUsage
 
 	for attempt := 0; attempt <= maxGenerationRetries; attempt++ {
 		var err error
-		training, execution, err = llm.GenTrainingDAG(dagRequest, onProgress)
-		usage.Add(execution.Reasoning.Usage)
+		training, steps, err = llm.GenTrainingDAG(dagRequest, onProgress)
+		for _, step := range steps {
+			usage.Add(step.Usage.Data())
+		}
 		if err != nil {
+			legacy := model.LegacyPrompt(steps)
 			failureEvent := event.TrainingGenerationFailureEvent{
 				Event:            event.Event{Time: time.Now()},
-				ReasoningModel:   execution.Reasoning.Model,
-				StructuringModel: execution.Structuring.Model,
+				ReasoningModel:   legacy.Reasoning.Model,
+				StructuringModel: legacy.Structuring.Model,
 				Reason:           "llm_error",
 				Message:          err.Error(),
 			}
@@ -663,10 +666,11 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		}
 
 		ve := validationErr.(*model.ValidationError)
+		legacy := model.LegacyPrompt(steps)
 		failureEvent := event.TrainingGenerationFailureEvent{
 			Event:            event.Event{Time: time.Now()},
-			ReasoningModel:   execution.Reasoning.Model,
-			StructuringModel: execution.Structuring.Model,
+			ReasoningModel:   legacy.Reasoning.Model,
+			StructuringModel: legacy.Structuring.Model,
 			Reason:           ve.Reason(),
 			Message:          ve.Error(),
 		}
@@ -686,14 +690,15 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		return nil, ErrMalformedTraining
 	}
 
+	legacy := model.LegacyPrompt(steps)
 	log.Info().
 		Interface("event", event.TrainingGenerationEvent{
 			LatencyEvent: event.LatencyEvent{
 				Event:   event.Event{Time: time.Now()},
 				Latency: time.Since(llmStart),
 			},
-			ReasoningModel:   execution.Reasoning.Model,
-			StructuringModel: execution.Structuring.Model,
+			ReasoningModel:   legacy.Reasoning.Model,
+			StructuringModel: legacy.Structuring.Model,
 			PromptTokens:     usage.PromptTokens,
 			CachedTokens:     usage.CachedTokens,
 			CompletionTokens: usage.CompletionTokens,
@@ -718,7 +723,8 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	training.References = datatypes.NewJSONType(refs)
 	training.FactIndices = nil // clear after resolution
 
-	training.Prompt = datatypes.NewJSONType(execution)
+	training.LLMSteps = steps
+	training.Prompt = legacy
 	if gym != nil {
 		training.GymID = &gym.ID
 		training.Gym = gym
@@ -795,6 +801,7 @@ func GetTrainings(userID uuid.UUID) ([]model.Training, error) {
 		Preload("Routines", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Preload("Routines.Blocks", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Preload("Routines.Blocks.Activities", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("LLMSteps", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Where("user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?)", userID, userID).
 		Order("(completed_at IS NOT NULL), COALESCE(completed_at, created_at) desc").
 		Find(&trainings).Error
@@ -885,6 +892,8 @@ func CompleteTraining(userID uuid.UUID, trainingID string, quality *bool, qualit
 		log.Error().Err(err).Msg("failed to record proficiencies")
 	}
 
+	loadTrainingSteps(&training)
+
 	return &training, nil
 }
 
@@ -921,7 +930,19 @@ func UpdateTrainingFeedback(userID uuid.UUID, trainingID string, quality *bool, 
 		log.Error().Err(err).Msg("failed to record proficiencies")
 	}
 
+	loadTrainingSteps(&training)
+
 	return &training, nil
+}
+
+// loadTrainingSteps fills the training's ordered steps and deprecated prompt
+// projection for endpoints returning the training after a write, where the
+// initial fetch skipped preloads to keep Save side-effect free.
+func loadTrainingSteps(training *model.Training) {
+	if err := database.DB.Order("position").Where("training_id = ?", training.ID).Find(&training.LLMSteps).Error; err != nil {
+		log.Error().Err(err).Str("training", training.ID.String()).Msg("failed to load training llm steps")
+	}
+	training.Prompt = model.LegacyPrompt(training.LLMSteps)
 }
 
 // upsertTrainingFeedback creates or updates a per-user feedback row.

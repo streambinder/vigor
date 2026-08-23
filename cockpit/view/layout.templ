@@ -250,6 +250,51 @@ templ Layout(title string) {
 					white-space: pre-wrap;
 					word-break: break-word;
 				}
+				.btn-json:disabled {
+					opacity: 0.4;
+					cursor: default;
+				}
+				.btn-json:disabled:hover {
+					border-color: var(--border);
+					color: var(--text-muted);
+				}
+				.trajectory-step {
+					border: 1px solid var(--border);
+					border-radius: 6px;
+					margin-bottom: 1rem;
+				}
+				.trajectory-step-header {
+					padding: 0.5rem 0.75rem;
+					font-weight: 600;
+					letter-spacing: 0.03em;
+					color: var(--accent);
+					border-bottom: 1px solid var(--border);
+					font-family: ui-monospace, monospace;
+				}
+				.trajectory-field {
+					padding: 0.5rem 0.75rem;
+					display: flex;
+					gap: 0.75rem;
+					align-items: baseline;
+				}
+				.trajectory-label {
+					flex: 0 0 7rem;
+					color: var(--text-muted);
+					font-size: 0.7rem;
+					text-transform: uppercase;
+					letter-spacing: 0.05em;
+				}
+				.trajectory-value {
+					margin: 0;
+					font-size: 0.75rem;
+					color: var(--text);
+					white-space: pre-wrap;
+					word-break: break-word;
+					font-family: ui-monospace, monospace;
+				}
+				.trajectory-empty {
+					color: var(--text-muted);
+				}
 				.pagination {
 					display: flex;
 					align-items: center;

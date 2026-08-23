@@ -1,6 +1,9 @@
 package database
 
-import "github.com/streambinder/vigor/model"
+import (
+	"github.com/streambinder/vigor/model"
+	"gorm.io/gorm"
+)
 
 type countResult struct {
 	Count int64
@@ -77,6 +80,7 @@ func GetReports() ([]model.Report, error) {
 	err := DB.Order("created_at DESC").Limit(100).
 		Preload("User").
 		Preload("Training.Routines.Blocks.Activities").
+		Preload("Training.LLMSteps", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Preload("Activity").
 		Find(&reports).Error
 	return reports, err
@@ -90,6 +94,7 @@ func GetTrainings() ([]model.Training, error) {
 	err := DB.Order("created_at DESC").Limit(100).
 		Preload("User").
 		Preload("Routines.Blocks.Activities").
+		Preload("LLMSteps", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Find(&trainings).Error
 	return trainings, err
 }
@@ -116,12 +121,13 @@ func GetBadQualityPerModel() ([]ModelQualityPoint, error) {
 	}
 	var results []ModelQualityPoint
 	err := DB.Raw(`
-		SELECT prompt->'reasoning'->>'model' AS model, COUNT(*) AS count
-		FROM trainings
-		WHERE feedback->>'quality' = 'false'
-		  AND prompt->'reasoning'->>'model' IS NOT NULL
-		  AND prompt->'reasoning'->>'model' != ''
-		GROUP BY prompt->'reasoning'->>'model'
+		SELECT s.model AS model, COUNT(DISTINCT f.training_id) AS count
+		FROM training_feedbacks f
+		JOIN llm_steps s ON s.training_id = f.training_id AND s.position = 0
+		WHERE f.quality = false
+		  AND s.model IS NOT NULL
+		  AND s.model != ''
+		GROUP BY s.model
 		ORDER BY count DESC
 	`).Scan(&results).Error
 	return results, err

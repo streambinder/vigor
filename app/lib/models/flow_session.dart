@@ -4,6 +4,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'training_reference.dart';
 import 'flow_pose.dart';
+import 'llm_step.dart';
 import 'training_prompt.dart';
 
 part 'flow_session.g.dart';
@@ -28,6 +29,8 @@ class FlowSession {
   final List<int> factIndices;
   @JsonKey(name: 'poses', defaultValue: [])
   final List<FlowPose> poses;
+  @JsonKey(name: 'llm_steps', defaultValue: [])
+  final List<LLMStep> lLMSteps;
   @JsonKey(name: 'prompt')
   final TrainingPrompt prompt;
   @JsonKey(name: 'completed_at', toJson: _nullableDateTimeToJson)
@@ -49,6 +52,7 @@ class FlowSession {
     required this.references,
     required this.factIndices,
     required this.poses,
+    required this.lLMSteps,
     required this.prompt,
     this.completedAt,
     required this.createdAt,

@@ -21,14 +21,40 @@ import (
 // DAGProgressFunc is called after each node completes.
 type DAGProgressFunc func(step pipeline.GenerationStep)
 
-// DAGExecution captures the full multi-node execution trace for debugging/storage.
-type DAGExecution struct {
-	Nodes map[pipeline.GenerationStep]model.LLMStep `json:"nodes"`
+// dagStepOrder is the canonical DAG round order used to flatten node results
+// into steps: position is assigned compactly across the executed nodes only,
+// so the first executed node always sits at position zero.
+var dagStepOrder = []pipeline.GenerationStep{
+	pipeline.StepDeriveParams,
+	pipeline.StepAnalyzeRecovery,
+	pipeline.StepReviewHistory,
+	pipeline.StepCheckConstraints,
+	pipeline.StepPickStrategy,
+	pipeline.StepTargetMuscles,
+	pipeline.StepSelectExercises,
+	pipeline.StepProgramLoad,
+	pipeline.StepWriteCopy,
+	pipeline.StepStructure,
+}
+
+// orderedSteps flattens executed DAG nodes into steps ordered by round.
+func orderedSteps(nodes map[pipeline.GenerationStep]model.LLMStep) []model.LLMStep {
+	steps := make([]model.LLMStep, 0, len(nodes))
+	for _, genStep := range dagStepOrder {
+		node, ok := nodes[genStep]
+		if !ok {
+			continue
+		}
+		node.Step = string(genStep)
+		node.Position = len(steps)
+		steps = append(steps, node)
+	}
+	return steps
 }
 
 // GenTrainingDAG generates a training using a multi-node DAG instead of a single monolith.
 // onProgress is called after each node completes (may be nil).
-func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (*model.Training, model.TrainingPrompt, error) {
+func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (*model.Training, []model.LLMStep, error) {
 	progress := func(step pipeline.GenerationStep) {
 		if onProgress != nil {
 			onProgress(step)
@@ -40,7 +66,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		goalIDs[i] = g.ID
 	}
 
-	execution := DAGExecution{Nodes: make(map[pipeline.GenerationStep]model.LLMStep)}
+	nodes := make(map[pipeline.GenerationStep]model.LLMStep)
 
 	// pre-conditional step, free text mode only: the tuning parameters a guided
 	// request would carry are deduced from the raw request (and any linked
@@ -58,13 +84,13 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 				ValidEquipment: req.ValidEquipment,
 			})
 			if err != nil {
-				return nil, dagToLegacyExecution(execution), fmt.Errorf("derive params node: %w", err)
+				return nil, orderedSteps(nodes), fmt.Errorf("derive params node: %w", err)
 			}
 			req.Derived = &derived
-			execution.Nodes[pipeline.StepDeriveParams] = deriveStep
+			nodes[pipeline.StepDeriveParams] = deriveStep
 			progress(pipeline.StepDeriveParams)
 		} else if req.DerivedStep != nil {
-			execution.Nodes[pipeline.StepDeriveParams] = *req.DerivedStep
+			nodes[pipeline.StepDeriveParams] = *req.DerivedStep
 		}
 		applyDerivedParams(&req)
 	}
@@ -101,18 +127,18 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 
 	wg.Wait()
 
-	execution.Nodes[pipeline.StepAnalyzeRecovery] = healthStep
-	execution.Nodes[pipeline.StepReviewHistory] = historyStep
-	execution.Nodes[pipeline.StepCheckConstraints] = constraintStep
+	nodes[pipeline.StepAnalyzeRecovery] = healthStep
+	nodes[pipeline.StepReviewHistory] = historyStep
+	nodes[pipeline.StepCheckConstraints] = constraintStep
 
 	if healthErr != nil {
-		return nil, dagToLegacyExecution(execution), fmt.Errorf("health node: %w", healthErr)
+		return nil, orderedSteps(nodes), fmt.Errorf("health node: %w", healthErr)
 	}
 	if historyErr != nil {
-		return nil, dagToLegacyExecution(execution), fmt.Errorf("history node: %w", historyErr)
+		return nil, orderedSteps(nodes), fmt.Errorf("history node: %w", historyErr)
 	}
 	if constraintErr != nil {
-		return nil, dagToLegacyExecution(execution), fmt.Errorf("constraints node: %w", constraintErr)
+		return nil, orderedSteps(nodes), fmt.Errorf("constraints node: %w", constraintErr)
 	}
 
 	// layer 1: strategy and muscle targeting in parallel — both depend on layer 0 only
@@ -157,14 +183,14 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 
 	wg.Wait()
 
-	execution.Nodes[pipeline.StepPickStrategy] = strategyStep
-	execution.Nodes[pipeline.StepTargetMuscles] = targetingStep
+	nodes[pipeline.StepPickStrategy] = strategyStep
+	nodes[pipeline.StepTargetMuscles] = targetingStep
 
 	if strategyErr != nil {
-		return nil, dagToLegacyExecution(execution), fmt.Errorf("strategy node: %w", strategyErr)
+		return nil, orderedSteps(nodes), fmt.Errorf("strategy node: %w", strategyErr)
 	}
 	if targetingErr != nil {
-		return nil, dagToLegacyExecution(execution), fmt.Errorf("muscle targeting node: %w", targetingErr)
+		return nil, orderedSteps(nodes), fmt.Errorf("muscle targeting node: %w", targetingErr)
 	}
 
 	// resolve the strategy's chosen methodology to the full knowledge object.
@@ -180,7 +206,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		}
 	}
 	if resolvedMethodology == nil {
-		return nil, dagToLegacyExecution(execution), fmt.Errorf("strategy picked unknown methodology: %s", strategyResult.Methodology)
+		return nil, orderedSteps(nodes), fmt.Errorf("strategy picked unknown methodology: %s", strategyResult.Methodology)
 	}
 
 	// layer 2: exercise selection
@@ -191,9 +217,9 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		resolvedMethodology, req.SkipWarmupCooldown, req.Duration,
 		explicitProgram, derivedSummary,
 	)
-	execution.Nodes[pipeline.StepSelectExercises] = exerciseStep
+	nodes[pipeline.StepSelectExercises] = exerciseStep
 	if err != nil {
-		return nil, dagToLegacyExecution(execution), fmt.Errorf("exercises node: %w", err)
+		return nil, orderedSteps(nodes), fmt.Errorf("exercises node: %w", err)
 	}
 	progress(pipeline.StepSelectExercises)
 
@@ -224,9 +250,9 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		req.EquipmentIDs, req.FavoriteEquipmentIDs,
 		req.SkipWarmupCooldown, req.Duration,
 	)
-	execution.Nodes[pipeline.StepProgramLoad] = loadStep
+	nodes[pipeline.StepProgramLoad] = loadStep
 	if err != nil {
-		return nil, dagToLegacyExecution(execution), fmt.Errorf("load node: %w", err)
+		return nil, orderedSteps(nodes), fmt.Errorf("load node: %w", err)
 	}
 	progress(pipeline.StepProgramLoad)
 
@@ -239,21 +265,20 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		language, strategyResult, targetingResult, exerciseResult, historyResult, constraintResult,
 		loadResult, healthResult, derivedSummary,
 	)
-	execution.Nodes[pipeline.StepWriteCopy] = creativeStep
+	nodes[pipeline.StepWriteCopy] = creativeStep
 	if err != nil {
-		return nil, dagToLegacyExecution(execution), fmt.Errorf("creative node: %w", err)
+		return nil, orderedSteps(nodes), fmt.Errorf("creative node: %w", err)
 	}
 	progress(pipeline.StepWriteCopy)
 
 	// assemble training from load programming + creative copy
 	training := assembleTraining(loadResult, creativeResult, strategyResult)
 
-	// structuring is now optional — we already have structured output from the load node.
-	// keep structuring step as a pass-through for the legacy TrainingPrompt format.
-	legacyExecution := dagToLegacyExecution(execution)
+	// structure is a progress-only stage: the load node already emits structured
+	// output, so no dedicated step row is persisted for it
 	progress(pipeline.StepStructure)
 
-	return training, legacyExecution, nil
+	return training, orderedSteps(nodes), nil
 }
 
 // maxDerivedSummaryLen caps the derived program schema flowing downstream.
@@ -295,8 +320,8 @@ func DeriveFreeTextParams(req DeriveRequest) (pipeline.DerivedParams, model.LLMS
 	}
 
 	var result pipeline.DerivedParams
-	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
-		log.Warn().Err(err).Str("raw", step.Output).Msg("derive params unmarshal failed, using defaults")
+	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
+		log.Warn().Err(err).Str("raw", step.Output.Data()).Msg("derive params unmarshal failed, using defaults")
 		return pipeline.DerivedParams{}, step, nil
 	}
 	return normalizeDerivedParams(result, req.Methodologies, req.ValidMuscles, validGoals, req.ValidEquipment), step, nil
@@ -402,8 +427,8 @@ func runHealthNode(healthSnapshot *model.HealthSnapshot) (pipeline.HealthAssessm
 	}
 
 	var result pipeline.HealthAssessment
-	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
-		log.Warn().Err(err).Str("raw", step.Output).Msg("health node unmarshal failed, using defaults")
+	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
+		log.Warn().Err(err).Str("raw", step.Output.Data()).Msg("health node unmarshal failed, using defaults")
 		return pipeline.HealthAssessment{VolumeModifier: 1.0, IntensityModifier: 1.0}, step, nil
 	}
 	return result, step, nil
@@ -432,8 +457,8 @@ func runHistoryNode(
 	}
 
 	var result pipeline.HistoryAnalysis
-	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
-		log.Warn().Err(err).Str("raw", step.Output).Msg("history node unmarshal failed, using empty")
+	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
+		log.Warn().Err(err).Str("raw", step.Output.Data()).Msg("history node unmarshal failed, using empty")
 		return pipeline.HistoryAnalysis{}, step, nil
 	}
 	return result, step, nil
@@ -466,8 +491,8 @@ func runConstraintsNode(profiles []model.Profile) (pipeline.ConstraintExtraction
 	}
 
 	var result pipeline.ConstraintExtraction
-	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
-		log.Warn().Err(err).Str("raw", step.Output).Msg("constraints node unmarshal failed, using empty")
+	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
+		log.Warn().Err(err).Str("raw", step.Output.Data()).Msg("constraints node unmarshal failed, using empty")
 		return pipeline.ConstraintExtraction{}, step, nil
 	}
 	return result, step, nil
@@ -505,7 +530,7 @@ func runStrategyNode(
 	}
 
 	var result pipeline.Strategy
-	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
+	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
 		return pipeline.Strategy{}, step, fmt.Errorf("strategy unmarshal: %w", err)
 	}
 
@@ -552,7 +577,7 @@ func runMuscleTargetingNode(
 	}
 
 	var result pipeline.MuscleTargeting
-	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
+	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
 		return pipeline.MuscleTargeting{}, step, fmt.Errorf("muscle targeting unmarshal: %w", err)
 	}
 
@@ -642,7 +667,7 @@ func runExercisesNode(
 	}
 
 	var result pipeline.ExerciseSelection
-	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
+	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
 		return pipeline.ExerciseSelection{}, step, fmt.Errorf("exercises unmarshal: %w", err)
 	}
 
@@ -697,7 +722,7 @@ func runLoadNode(
 	}
 
 	var result pipeline.LoadProgramming
-	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
+	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
 		return pipeline.LoadProgramming{}, step, fmt.Errorf("load unmarshal: %w", err)
 	}
 	return result, step, nil
@@ -748,7 +773,7 @@ func runCreativeNode(
 	}
 
 	var result pipeline.CreativeCopy
-	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
+	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
 		return pipeline.CreativeCopy{}, step, fmt.Errorf("creative unmarshal: %w", err)
 	}
 	return result, step, nil
@@ -783,39 +808,6 @@ func assembleTraining(load pipeline.LoadProgramming, creative pipeline.CreativeC
 	}
 
 	return training
-}
-
-// dagToLegacyExecution converts DAG execution data to the legacy TrainingPrompt format.
-// combines all node outputs into a single "reasoning" step for backwards compatibility.
-func dagToLegacyExecution(dag DAGExecution) model.TrainingPrompt {
-	// concatenate all node outputs as the "reasoning" output
-	var reasoningOutput string
-	for step, node := range dag.Nodes {
-		if node.Output != "" {
-			reasoningOutput += fmt.Sprintf("[%s]\n%s\n\n", step, node.Output)
-		}
-	}
-
-	// use the first node's model as the reasoning model (they're all from the same pool),
-	// and total the usage across nodes so a generation reports one figure
-	var reasoningModel string
-	var usage model.LLMUsage
-	for _, node := range dag.Nodes {
-		if reasoningModel == "" && node.Model != "" {
-			reasoningModel = node.Model
-		}
-		usage.Add(node.Usage)
-	}
-
-	return model.TrainingPrompt{
-		Reasoning: model.LLMStep{
-			Model:  reasoningModel,
-			Output: reasoningOutput,
-			Usage:  usage,
-		},
-		// structuring stage is no longer needed — the DAG produces structured output directly
-		Structuring: model.LLMStep{},
-	}
 }
 
 // extractJSON finds the first JSON object or array in LLM output.

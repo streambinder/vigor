@@ -192,8 +192,13 @@ type flowLLMOutput struct {
 
 // GenFlow generates a personalized flow/yoga/stretching session using the same two-stage approach
 // as GenTraining: reasoning at high temp, then deterministic schema extraction.
-func GenFlow(req FlowGenerationRequest) (*model.FlowSession, model.TrainingPrompt, error) {
-	var execution model.TrainingPrompt
+func GenFlow(req FlowGenerationRequest) (*model.FlowSession, []model.LLMStep, error) {
+	var steps []model.LLMStep
+	pushStep := func(name string, step model.LLMStep) {
+		step.Step = name
+		step.Position = len(steps)
+		steps = append(steps, step)
+	}
 
 	// stage 1: reasoning — creative flow design
 	reasoningUserMessage := prompt.GenFlowReasoning(
@@ -218,18 +223,18 @@ func GenFlow(req FlowGenerationRequest) (*model.FlowSession, model.TrainingPromp
 		reasoningPrompt,
 		queryOpts{temperature: 0.8, maxTokens: 10000, topP: 0.9, effort: effortLow, timeout: 120 * time.Second},
 	)
-	execution.Reasoning = reasoningStep
+	pushStep(model.StepReasoning, reasoningStep)
 	if err != nil {
-		return nil, execution, fmt.Errorf("%w (reasoning stage): %w", ErrLLMQuery, err)
+		return nil, steps, fmt.Errorf("%w (reasoning stage): %w", ErrLLMQuery, err)
 	}
-	if strings.TrimSpace(reasoningStep.Output) == "" {
-		return nil, execution, fmt.Errorf("%w (reasoning stage): empty response", ErrLLMQuery)
+	if strings.TrimSpace(reasoningStep.Output.Data()) == "" {
+		return nil, steps, fmt.Errorf("%w (reasoning stage): empty response", ErrLLMQuery)
 	}
 
 	// stage 2: structuring — extract JSON from reasoning
 	structuringPrompt := model.LLMPrompt{
 		System: prompt.FlowSystem(),
-		User:   prompt.GenFlowStructuring(reasoningStep.Output),
+		User:   prompt.GenFlowStructuring(reasoningStep.Output.Data()),
 	}
 
 	structuringStep, err := getLLM(StageStructuring, req.LastStructuringModel).query(
@@ -238,20 +243,20 @@ func GenFlow(req FlowGenerationRequest) (*model.FlowSession, model.TrainingPromp
 		// transcribes the reasoning output into the schema — keep it deterministic
 		queryOpts{temperature: 0.0, maxTokens: 3000, schema: &model.FlowSessionSchema, timeout: 90 * time.Second},
 	)
-	execution.Structuring = structuringStep
+	pushStep(model.StepStructure, structuringStep)
 	if err != nil {
-		return nil, execution, fmt.Errorf("%w (structuring stage): %w", ErrLLMQuery, err)
+		return nil, steps, fmt.Errorf("%w (structuring stage): %w", ErrLLMQuery, err)
 	}
 
 	var output flowLLMOutput
-	if err := json.Unmarshal([]byte(structuringStep.Output), &output); err != nil {
-		return nil, execution, fmt.Errorf("%w: %s", ErrLLMUnmarshal, err)
+	if err := json.Unmarshal([]byte(structuringStep.Output.Data()), &output); err != nil {
+		return nil, steps, fmt.Errorf("%w: %s", ErrLLMUnmarshal, err)
 	}
 
 	// marshal poses to JSONB right away — service will hydrate names/details from knowledge DB
 	posesJSON, err := json.Marshal(output.Poses)
 	if err != nil {
-		return nil, execution, fmt.Errorf("%w: marshaling poses: %s", ErrLLMUnmarshal, err)
+		return nil, steps, fmt.Errorf("%w: marshaling poses: %s", ErrLLMUnmarshal, err)
 	}
 
 	// map LLM output → FlowSession; caller populates UserID, Muscles, Request, etc.
@@ -262,5 +267,5 @@ func GenFlow(req FlowGenerationRequest) (*model.FlowSession, model.TrainingPromp
 		Poses:       datatypes.JSON(posesJSON),
 	}
 
-	return session, execution, nil
+	return session, steps, nil
 }

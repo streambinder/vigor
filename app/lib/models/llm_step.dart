@@ -8,20 +8,46 @@ part 'llm_step.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class LLMStep {
+  @JsonKey(name: 'id', defaultValue: '')
+  final String id;
+  @JsonKey(name: 'training_id')
+  final String? trainingId;
+  @JsonKey(name: 'flow_session_id')
+  final String? flowSessionId;
+  @JsonKey(name: 'step', defaultValue: '')
+  final String step;
+  @JsonKey(name: 'position')
+  final int position;
   @JsonKey(name: 'model', defaultValue: '')
   final String model;
   @JsonKey(name: 'prompt')
   final LLMPrompt prompt;
   @JsonKey(name: 'output')
   final String? output;
+  @JsonKey(name: 'usage', defaultValue: {})
+  final Map<String, dynamic> usage;
+  @JsonKey(name: 'created_at', toJson: _dateTimeToJson)
+  final DateTime createdAt;
+  @JsonKey(name: 'updated_at', toJson: _dateTimeToJson)
+  final DateTime updatedAt;
 
   LLMStep({
+    required this.id,
+    this.trainingId,
+    this.flowSessionId,
+    required this.step,
+    required this.position,
     required this.model,
     required this.prompt,
     this.output,
+    required this.usage,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   factory LLMStep.fromJson(Map<String, dynamic> json) => _$LLMStepFromJson(json);
 
   Map<String, dynamic> toJson() => _$LLMStepToJson(this);
+
+  static String _dateTimeToJson(DateTime dt) => dt.toUtc().toIso8601String();
 }

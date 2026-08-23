@@ -129,9 +129,20 @@ class _FlowIntervalController extends IntervalController {
   _FlowIntervalController({required List<FlowPose> poses})
       : super(training: _syntheticTraining(poses));
 
+  static final _emptyStep = LLMStep(
+    id: '',
+    step: '',
+    position: 0,
+    model: '',
+    prompt: LLMPrompt(system: '', user: ''),
+    usage: const {},
+    createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+    updatedAt: DateTime.fromMillisecondsSinceEpoch(0),
+  );
+
   static final _emptyPrompt = TrainingPrompt(
-    reasoning: LLMStep(model: '', prompt: LLMPrompt(system: '', user: '')),
-    structuring: LLMStep(model: '', prompt: LLMPrompt(system: '', user: '')),
+    reasoning: _emptyStep,
+    structuring: _emptyStep,
   );
 
   // minimal Training shell — only `routines` matters for interval building
@@ -177,6 +188,7 @@ class _FlowIntervalController extends IntervalController {
             ],
           ),
         ],
+        lLMSteps: const [],
         prompt: _emptyPrompt,
         completedAt: null,
         completedIn: null,
