@@ -23,7 +23,7 @@ import '../utils/platform_helper.dart';
 
 enum EquipmentMode { bodyweight, gym, custom }
 
-enum _SessionMode { training, flow }
+enum _SessionMode { training, flow, freeText }
 
 class TrainingGenerationModal extends StatefulWidget {
   final List<Gym> gyms;
@@ -45,6 +45,7 @@ class TrainingGenerationModal extends StatefulWidget {
 class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   final _formKey = GlobalKey<FormState>();
   final _promptController = TextEditingController();
+  final _freeTextController = TextEditingController();
   final _random = Random();
 
   late int _duration; // minutes, range: 10-180
@@ -163,6 +164,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   void dispose() {
     _messageTimer?.cancel();
     _promptController.dispose();
+    _freeTextController.dispose();
     super.dispose();
   }
 
@@ -297,6 +299,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       'PROGRAM_LOAD' => l10n.generationStepProgramLoad,
       'WRITE_COPY' => l10n.generationStepWriteCopy,
       'STRUCTURE' => l10n.generationStepStructure,
+      'DERIVE_PARAMS' => l10n.generationStepDeriveParams,
       _ => null,
     };
   }
@@ -977,10 +980,13 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     });
     _startMessageRotation();
 
-    if (_sessionMode == _SessionMode.flow) {
-      await _generateFlow();
-    } else {
-      await _generateTrainingSession();
+    switch (_sessionMode) {
+      case _SessionMode.flow:
+        await _generateFlow();
+      case _SessionMode.freeText:
+        await _generateFreeTextSession();
+      case _SessionMode.training:
+        await _generateTrainingSession();
     }
   }
 
@@ -1031,6 +1037,91 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     }
   }
 
+  void Function(String step) _stepHandler() => (step) {
+        if (!mounted || !_isGenerating) return;
+        final msg = _stepMessage(step);
+        if (msg != null) {
+          _stopMessageRotation();
+          setState(() {
+            _showingRetryMessage = false;
+            _currentStepMessage = msg;
+          });
+        }
+      };
+
+  void Function(int attempt) _retryHandler() => (attempt) {
+        if (!mounted) return;
+        setState(() {
+          _retryAttempt = attempt;
+          _showingRetryMessage = true;
+          _currentStepMessage = null;
+        });
+        _stopMessageRotation();
+        final callbackId = ++_retryCallbackId;
+        Timer(const Duration(seconds: 4), () {
+          if (!mounted || !_isGenerating || callbackId != _retryCallbackId) return;
+          setState(() => _showingRetryMessage = false);
+          _startMessageRotation();
+        });
+      };
+
+  // free text mode: the program itself (and any links in it) drives generation
+  // tuning parameters are derived backend-side
+  Future<void> _generateFreeTextSession() async {
+    final trainingService = context.read<ServiceLocator>().trainingService;
+    final freeText = _freeTextController.text.trim();
+
+    if (freeText.isEmpty) {
+      _stopMessageRotation();
+      setState(() => _isGenerating = false);
+      AdaptiveNotification.showError(
+        context: context,
+        message: AppLocalizations.of(context).freeTextRequired,
+      );
+      return;
+    }
+
+    final response = await trainingService.generateTraining(
+      freeText: freeText,
+      onStep: _stepHandler(),
+      onRetry: _retryHandler(),
+    );
+
+    _stopMessageRotation();
+
+    if (mounted) {
+      setState(() => _isGenerating = false);
+
+      if (response.isSuccess) {
+        Navigator.of(context).pop();
+        AdaptiveNotification.show(
+          context: context,
+          message: AppLocalizations.of(context).trainingGeneratedSuccessfully,
+        );
+        widget.onSuccess?.call(response.data!);
+      } else {
+        AdaptiveNotification.showError(
+          context: context,
+          message: AppLocalizations.of(context).failedToGenerateTraining,
+          rawError: response.error,
+        );
+      }
+    }
+  }
+
+  Widget _buildFreeTextSection() {
+    final l10n = AppLocalizations.of(context);
+    return AdaptiveTextField(
+      controller: _freeTextController,
+      labelText: l10n.freeTextLabel,
+      placeholder: l10n.freeTextHint,
+      minLines: 6,
+      maxLines: 10,
+      maxLength: 4000,
+      onChanged: (_) => setState(() {}),
+    );
+  }
+
   Future<void> _generateTrainingSession() async {
     final trainingService = context.read<ServiceLocator>().trainingService;
 
@@ -1061,34 +1152,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       methodology: _methodology,
       goals: _selectedGoals.isEmpty ? null : _selectedGoals.toList(),
       muscles: _selectedMuscles.isEmpty ? null : _selectedMuscles.toList(),
-      onStep: (step) {
-        if (!mounted || !_isGenerating) return;
-        final msg = _stepMessage(step);
-        if (msg != null) {
-          _stopMessageRotation();
-          setState(() {
-            _showingRetryMessage = false;
-            _currentStepMessage = msg;
-          });
-        }
-      },
-      onRetry: (attempt) {
-        if (!mounted) return;
-        setState(() {
-          _retryAttempt = attempt;
-          _showingRetryMessage = true;
-          _currentStepMessage = null;
-        });
-        _stopMessageRotation();
-        final callbackId = ++_retryCallbackId;
-        Timer(const Duration(seconds: 4), () {
-          if (!mounted || !_isGenerating || callbackId != _retryCallbackId) {
-            return;
-          }
-          setState(() => _showingRetryMessage = false);
-          _startMessageRotation();
-        });
-      },
+      onStep: _stepHandler(),
+      onRetry: _retryHandler(),
     );
 
     _stopMessageRotation();
@@ -1403,6 +1468,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                             value: _SessionMode.flow,
                             label: Text('Flow'),
                           ),
+                          ButtonSegment(
+                            value: _SessionMode.freeText,
+                            label: Text(l10n.freeTextMode),
+                          ),
                         ],
                         selected: {_sessionMode},
                         onSelectionChanged: (selected) => setState(() {
@@ -1418,35 +1487,39 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                   ),
                   const SizedBox(height: VigorSpacing.md),
 
-                  // Duration slider with recommended range
-                  _buildDurationSlider(l10n),
-                  const SizedBox(height: VigorSpacing.md),
-
-                  // Equipment mode selection (training only)
-                  if (_sessionMode == _SessionMode.training) ...[
-                    _buildEquipmentSection(),
+                  if (_sessionMode == _SessionMode.freeText) ...[
+                    // the program (and any links in it) drives generation;
+                    // the backend derives every tuning parameter from it
+                    _buildFreeTextSection(),
+                  ] else ...[
+                    // Duration slider with recommended range
+                    _buildDurationSlider(l10n),
                     const SizedBox(height: VigorSpacing.md),
 
-                    // Partners section
-                    _buildPartnersSection(),
-                    const SizedBox(height: VigorSpacing.md),
+                    // Equipment mode selection (training only)
+                    if (_sessionMode == _SessionMode.training) ...[
+                      _buildEquipmentSection(),
+                      const SizedBox(height: VigorSpacing.md),
+
+                      // Partners section
+                      _buildPartnersSection(),
+                      const SizedBox(height: VigorSpacing.md),
+                    ],
+
+                    // Advanced settings collapsible
+                    _buildAdvancedHeader(),
+                    AnimatedSize(
+                      duration: VigorAnimation.medium,
+                      curve: VigorAnimation.defaultCurve,
+                      alignment: Alignment.topCenter,
+                      child: _advancedExpanded
+                          ? Padding(
+                              padding: const EdgeInsets.only(top: VigorSpacing.md),
+                              child: _buildAdvancedContent(),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
                   ],
-
-                  // Advanced settings collapsible
-                  _buildAdvancedHeader(),
-                  AnimatedSize(
-                    duration: VigorAnimation.medium,
-                    curve: VigorAnimation.defaultCurve,
-                    alignment: Alignment.topCenter,
-                    child: _advancedExpanded
-                        ? Padding(
-                            padding: const EdgeInsets.only(
-                              top: VigorSpacing.md,
-                            ),
-                            child: _buildAdvancedContent(),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
                 ],
               ),
             ),
@@ -1463,7 +1536,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 ),
                 const SizedBox(width: VigorSpacing.sm),
                 AdaptiveButton(
-                  onPressed: _generateTraining,
+                  onPressed: _sessionMode == _SessionMode.freeText &&
+                          _freeTextController.text.trim().isEmpty
+                      ? null
+                      : _generateTraining,
                   accentColor: _sessionMode == _SessionMode.flow
                       ? VigorColors.byakurokuAdaptive(context)
                       : null,

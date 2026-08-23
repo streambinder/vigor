@@ -787,6 +787,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get failedToGenerateTraining => '生成训练失败';
 
   @override
+  String get freeTextMode => '自由文本';
+
+  @override
+  String get freeTextLabel => '你的训练计划';
+
+  @override
+  String get freeTextHint => '粘贴训练计划或其链接，或简单描述你想做什么...';
+
+  @override
+  String get freeTextRequired => '请先粘贴或描述你的训练计划';
+
+  @override
   String get generate => '生成';
 
   @override
@@ -812,6 +824,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get generationStepStructure => '正在完成...';
+
+  @override
+  String get generationStepDeriveParams => '正在规划训练课程...';
 
   @override
   String get generationStepTargetMuscles => '正在确定目标肌肉...';

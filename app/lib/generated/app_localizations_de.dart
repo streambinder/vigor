@@ -811,6 +811,20 @@ class AppLocalizationsDe extends AppLocalizations {
       'Training konnte nicht erstellt werden';
 
   @override
+  String get freeTextMode => 'Freitext';
+
+  @override
+  String get freeTextLabel => 'Dein Programm';
+
+  @override
+  String get freeTextHint =>
+      'Füge ein Trainingsprogramm oder einen Link ein, oder beschreibe, was du tun möchtest...';
+
+  @override
+  String get freeTextRequired =>
+      'Füge zuerst dein Trainingsprogramm ein oder beschreibe es';
+
+  @override
   String get generate => 'Erstellen';
 
   @override
@@ -840,6 +854,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get generationStepStructure => 'Finalisierung...';
+
+  @override
+  String get generationStepDeriveParams => 'Session wird geplant...';
 
   @override
   String get generationStepTargetMuscles => 'Zielmuskeln werden bestimmt...';

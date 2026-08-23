@@ -809,6 +809,20 @@ class AppLocalizationsIt extends AppLocalizations {
   String get failedToGenerateTraining => 'Impossibile generare l\'allenamento';
 
   @override
+  String get freeTextMode => 'Testo libero';
+
+  @override
+  String get freeTextLabel => 'Il tuo programma';
+
+  @override
+  String get freeTextHint =>
+      'Incolla un programma di allenamento o un link, o descrivi cosa vuoi fare...';
+
+  @override
+  String get freeTextRequired =>
+      'Incolla o descrivi prima il tuo programma di allenamento';
+
+  @override
   String get generate => 'Genera';
 
   @override
@@ -834,6 +848,9 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get generationStepStructure => 'Finalizzazione...';
+
+  @override
+  String get generationStepDeriveParams => 'Sto pianificando la sessione...';
 
   @override
   String get generationStepTargetMuscles => 'Scelgo i muscoli da allenare...';

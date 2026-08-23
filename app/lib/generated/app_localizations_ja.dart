@@ -787,6 +787,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get failedToGenerateTraining => 'トレーニングの生成に失敗しました';
 
   @override
+  String get freeTextMode => 'フリーテキスト';
+
+  @override
+  String get freeTextLabel => 'あなたのプログラム';
+
+  @override
+  String get freeTextHint => 'トレーニングプログラムやそのリンクを貼り付けるか、やりたいことを説明してください...';
+
+  @override
+  String get freeTextRequired => 'まずトレーニングプログラムを貼り付けるか説明してください';
+
+  @override
   String get generate => '生成';
 
   @override
@@ -812,6 +824,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get generationStepStructure => '最終処理中...';
+
+  @override
+  String get generationStepDeriveParams => 'セッションを計画中...';
 
   @override
   String get generationStepTargetMuscles => '対象筋肉を決定中...';

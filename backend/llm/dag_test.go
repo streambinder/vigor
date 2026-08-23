@@ -1,6 +1,7 @@
 package llm
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/streambinder/vigor/llm/pipeline"
@@ -186,4 +187,72 @@ func TestSanitizeSelection(t *testing.T) {
 	if selection.Exercises[1].ExerciseID != "pull-up" {
 		t.Errorf("clean id must stay untouched, got %q", selection.Exercises[1].ExerciseID)
 	}
+}
+
+func TestNormalizeDerivedParams(t *testing.T) {
+	methodologies := []model.Methodology{{ID: "strength"}, {ID: "circuit"}}
+	validMuscles := []string{"chest", "quads"}
+	validGoals := []string{"strength", "hypertrophy"}
+	validEquipment := []string{"barbell", "dumbbell"}
+
+	t.Run("invalid ids are dropped", func(t *testing.T) {
+		derived := normalizeDerivedParams(pipeline.DerivedParams{
+			Methodology: "crossfit",
+			Muscles:     []string{"chest", "abs"},
+			Goals:       []string{"strength", "flying"},
+			Equipment:   []string{"barbell", "jetpack"},
+		}, methodologies, validMuscles, validGoals, validEquipment)
+
+		if derived.Methodology != "" {
+			t.Fatalf("unknown methodology should be dropped, got %q", derived.Methodology)
+		}
+		if len(derived.Muscles) != 1 || derived.Muscles[0] != "chest" {
+			t.Fatalf("unexpected muscles: %v", derived.Muscles)
+		}
+		if len(derived.Goals) != 1 || derived.Goals[0] != "strength" {
+			t.Fatalf("unexpected goals: %v", derived.Goals)
+		}
+		if len(derived.Equipment) != 1 || derived.Equipment[0] != "barbell" {
+			t.Fatalf("unexpected equipment: %v", derived.Equipment)
+		}
+	})
+
+	t.Run("case-insensitive matches resolve to canonical ids", func(t *testing.T) {
+		derived := normalizeDerivedParams(pipeline.DerivedParams{
+			Methodology: "Strength",
+			Muscles:     []string{"QUADS"},
+		}, methodologies, validMuscles, validGoals, validEquipment)
+
+		if derived.Methodology != "strength" {
+			t.Fatalf("expected canonical methodology id, got %q", derived.Methodology)
+		}
+		if len(derived.Muscles) != 1 || derived.Muscles[0] != "quads" {
+			t.Fatalf("expected canonical muscle id, got %v", derived.Muscles)
+		}
+	})
+
+	t.Run("derived summary is capped", func(t *testing.T) {
+		derived := normalizeDerivedParams(pipeline.DerivedParams{
+			Summarizable: pipeline.Summarizable{Summary: strings.Repeat("x", maxDerivedSummaryLen+100)},
+		}, methodologies, validMuscles, validGoals, validEquipment)
+
+		if len(derived.Summary) != maxDerivedSummaryLen {
+			t.Fatalf("expected summary cap at %d, got %d", maxDerivedSummaryLen, len(derived.Summary))
+		}
+	})
+
+	t.Run("valid derivation survives untouched", func(t *testing.T) {
+		input := pipeline.DerivedParams{
+			Methodology:        "circuit",
+			Goals:              []string{"hypertrophy"},
+			Muscles:            []string{"chest"},
+			Equipment:          []string{"dumbbell"},
+			SkipWarmupCooldown: true,
+			Summarizable:       pipeline.Summarizable{Summary: "3 rounds of 5x10"},
+		}
+		derived := normalizeDerivedParams(input, methodologies, validMuscles, validGoals, validEquipment)
+		if derived.Methodology != "circuit" || !derived.SkipWarmupCooldown || derived.Summary == "" {
+			t.Fatalf("valid derivation mangled: %+v", derived)
+		}
+	})
 }

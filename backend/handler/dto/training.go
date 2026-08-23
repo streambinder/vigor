@@ -13,6 +13,10 @@ type PostTrainingRequest struct {
 	Methodology        string   `json:"methodology"`
 	Goals              []string `json:"goals"`
 	Muscles            []string `json:"muscles"`
+	// FreeText switches generation to free text mode: the full request in one
+	// prompt, optionally with linked http(s) articles. when set, every other
+	// tuning parameter above is ignored.
+	FreeText string `json:"freeText"`
 }
 
 // PostTrainingResponse represents the response for POST /training

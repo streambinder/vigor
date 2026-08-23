@@ -7,6 +7,7 @@ package pipeline
 type GenerationStep string
 
 const (
+	StepDeriveParams     GenerationStep = "DERIVE_PARAMS"
 	StepAnalyzeRecovery  GenerationStep = "ANALYZE_RECOVERY"
 	StepReviewHistory    GenerationStep = "REVIEW_HISTORY"
 	StepCheckConstraints GenerationStep = "CHECK_CONSTRAINTS"
@@ -17,6 +18,21 @@ const (
 	StepWriteCopy        GenerationStep = "WRITE_COPY"
 	StepStructure        GenerationStep = "STRUCTURE"
 )
+
+// DerivedParams is the output of the free text param derivation node.
+// deduced from the user's free text (and any linked articles), these stand in
+// for the classic tuning knobs of a guided request. the embedded summary
+// carries the compact schema of the requested program, and flows downstream
+// to the strategy and muscle nodes. the session length is not derived: it is
+// computed deterministically from the generated program.
+type DerivedParams struct {
+	Summarizable
+	Methodology        string   `json:"methodology"`
+	Goals              []string `json:"goals"`
+	Muscles            []string `json:"muscles"`
+	Equipment          []string `json:"equipment"`
+	SkipWarmupCooldown bool     `json:"skip_warmup_cooldown"`
+}
 
 // Summarizable is the embedded base for all pipeline node outputs.
 // embed it in any response struct to get a Summary field.

@@ -41,6 +41,23 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 
 	execution := DAGExecution{Nodes: make(map[pipeline.GenerationStep]model.LLMStep)}
 
+	// pre-conditional step, free text mode only: the tuning parameters a guided
+	// request would carry are deduced from the raw request (and any linked
+	// articles) before every other layer. the derivation is cached on the
+	// request so generator retries reuse it instead of paying for it again.
+	if req.FreeText != "" {
+		if req.Derived == nil {
+			derived, deriveStep, err := runDeriveParamsNode(req)
+			if err != nil {
+				return nil, dagToLegacyExecution(execution), fmt.Errorf("derive params node: %w", err)
+			}
+			req.Derived = &derived
+			execution.Nodes[pipeline.StepDeriveParams] = deriveStep
+			progress(pipeline.StepDeriveParams)
+		}
+		applyDerivedParams(&req)
+	}
+
 	// layer 0: parallel fan-out — health, history, constraints are independent
 	var (
 		healthResult                            pipeline.HealthAssessment
@@ -215,6 +232,130 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	progress(pipeline.StepStructure)
 
 	return training, legacyExecution, nil
+}
+
+// maxDerivedSummaryLen caps the derived program schema flowing downstream.
+const maxDerivedSummaryLen = 2000
+
+// runDeriveParamsNode executes the free text param derivation node: from the
+// raw request (and the distilled text of any linked articles) deduce the
+// tuning parameters a guided request would carry. an unusable LLM response
+// degrades to plain defaults rather than failing the generation — the free
+// text itself still flows downstream.
+func runDeriveParamsNode(req TrainingGenerationRequest) (pipeline.DerivedParams, model.LLMStep, error) {
+	validGoals := make([]string, len(req.AllGoals))
+	for i, g := range req.AllGoals {
+		validGoals[i] = g.ID
+	}
+
+	p := model.LLMPrompt{
+		System: prompt.NodeDeriveParamsSystem(req.Methodologies, req.ValidMuscles, validGoals, req.ValidEquipment),
+		User:   prompt.NodeDeriveParamsUser(req.FreeText, req.Articles),
+	}
+
+	// mapping prose onto validated enums — extraction, not reasoning
+	step, err := getLLM(StageReasoning, "").query(p,
+		queryOpts{temperature: 0.1, maxTokens: 1500, effort: effortLow, timeout: 45 * time.Second})
+	if err != nil {
+		return pipeline.DerivedParams{}, step, err
+	}
+
+	var result pipeline.DerivedParams
+	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
+		log.Warn().Err(err).Str("raw", step.Output).Msg("derive params unmarshal failed, using defaults")
+		return pipeline.DerivedParams{}, step, nil
+	}
+	return normalizeDerivedParams(result, req.Methodologies, req.ValidMuscles, validGoals, req.ValidEquipment), step, nil
+}
+
+// applyDerivedParams overlays the derived tuning parameters on the DAG
+// request, so every downstream layer sees the free text request as a
+// guided one. the raw request (plus the derived program schema) becomes
+// the user prompt driving strategy and muscle targeting.
+func applyDerivedParams(req *TrainingGenerationRequest) {
+	derived := req.Derived
+	if derived.Methodology != "" {
+		for i := range req.Methodologies {
+			if req.Methodologies[i].ID == derived.Methodology {
+				req.Methodology = &req.Methodologies[i]
+				break
+			}
+		}
+	}
+	if len(derived.Muscles) > 0 {
+		req.Muscles = derived.Muscles
+	}
+	if len(derived.Equipment) > 0 {
+		req.EquipmentIDs = derived.Equipment
+	}
+	if derived.SkipWarmupCooldown {
+		req.SkipWarmupCooldown = true
+	}
+	if len(derived.Goals) > 0 {
+		wanted := make(map[string]bool, len(derived.Goals))
+		for _, id := range derived.Goals {
+			wanted[id] = true
+		}
+		var goals []model.Goal
+		for _, g := range req.AllGoals {
+			if wanted[g.ID] {
+				goals = append(goals, g)
+			}
+		}
+		if len(goals) > 0 {
+			req.Goals = goals
+		}
+	}
+	if derived.Summary != "" {
+		req.UserPrompt = strings.TrimSpace(derived.Summary + "\n\n" + req.FreeText)
+	} else {
+		req.UserPrompt = req.FreeText
+	}
+}
+
+// normalizeDerivedParams is the guardrail of the derivation node: anything the
+// model output that is not a known ID is dropped, and the program summary is
+// capped before flowing downstream.
+func normalizeDerivedParams(
+	derived pipeline.DerivedParams,
+	methodologies []model.Methodology,
+	validMuscles, validGoals, validEquipment []string,
+) pipeline.DerivedParams {
+	known := false
+	for _, m := range methodologies {
+		if strings.EqualFold(m.ID, derived.Methodology) {
+			derived.Methodology = m.ID
+			known = true
+			break
+		}
+	}
+	if !known {
+		derived.Methodology = ""
+	}
+
+	derived.Muscles = filterToValidIDs(derived.Muscles, validMuscles)
+	derived.Goals = filterToValidIDs(derived.Goals, validGoals)
+	derived.Equipment = filterToValidIDs(derived.Equipment, validEquipment)
+
+	if len(derived.Summary) > maxDerivedSummaryLen {
+		derived.Summary = derived.Summary[:maxDerivedSummaryLen]
+	}
+	return derived
+}
+
+// filterToValidIDs keeps only entries that match a valid ID, resolving
+// case-insensitive matches to the canonical form.
+func filterToValidIDs(entries, valid []string) []string {
+	var kept []string
+	for _, entry := range entries {
+		for _, id := range valid {
+			if strings.EqualFold(entry, id) {
+				kept = append(kept, id)
+				break
+			}
+		}
+	}
+	return kept
 }
 
 // runHealthNode executes the health assessment node.
