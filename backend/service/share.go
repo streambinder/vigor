@@ -7,7 +7,6 @@ import (
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/model"
 	"github.com/streambinder/vigor/token"
-	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -72,7 +71,8 @@ func GetSharedTraining(tokenStr string) (*model.Training, *model.Profile, error)
 
 	// strip sensitive fields
 	training.Request = ""
-	training.Prompt = datatypes.NewJSONType(model.TrainingPrompt{})
+	training.LLMSteps = nil
+	training.Prompt = model.LegacyPrompt(nil)
 
 	return &training, &profile, nil
 }

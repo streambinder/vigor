@@ -10,6 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/util"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 const WeightActivityDurationPerRep = 4 // NSCA/ACSM controlled tempo (2-0-2-0)
@@ -45,7 +46,7 @@ type LLMPrompt struct {
 
 // LLMUsage is the token accounting openrouter returns on every response.
 // reasoning tokens are a subset of completion tokens, not additional to them.
-// codegen:skip — server side telemetry, never reaches the app
+// codegen:skip — telemetry reaches the app only as an untyped map inside LLMStep
 type LLMUsage struct {
 	PromptTokens     int64   `json:"prompt_tokens"`
 	CachedTokens     int64   `json:"cached_tokens"`
@@ -63,16 +64,10 @@ func (usage *LLMUsage) Add(other LLMUsage) {
 	usage.Cost += other.Cost
 }
 
-// LLMStep represents a single LLM query with its model and prompt.
-type LLMStep struct {
-	Model  string    `json:"model"`
-	Prompt LLMPrompt `json:"prompt"`
-	Output string    `json:"output,omitempty"`
-	// telemetry only: goes to the metrics event, never to the client or the training jsonb
-	Usage LLMUsage `json:"-"`
-}
-
-// TrainingPrompt captures the two-stage LLM execution.
+// TrainingPrompt is the deprecated two-stage view of the LLM execution,
+// derived from the owner's LLMStep rows via LegacyPrompt. the persisted
+// source of truth is the llm_steps table: this shape only survives in the
+// read API until clients move to the steps array.
 type TrainingPrompt struct {
 	Reasoning   LLMStep `json:"reasoning"`
 	Structuring LLMStep `json:"structuring"`
@@ -126,7 +121,10 @@ type Training struct {
 	References  datatypes.JSONType[[]TrainingReference] `gorm:"type:jsonb" json:"references" prompt:"-"`
 	FactIndices []int                                   `gorm:"-" json:"fact_indices" prompt:"Indices of [FACTS] used (e.g. [0,2]), empty if none"`
 	Routines    []Routine                               `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"routines" prompt:"Training routines"`
-	Prompt      datatypes.JSONType[TrainingPrompt]      `gorm:"type:jsonb,not null" json:"prompt" prompt:"-"`
+	LLMSteps    []LLMStep                               `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"llm_steps" prompt:"-"`
+	// Prompt is a deprecated read-only projection of LLMSteps, computed by
+	// AfterFind; it is not a column and must never be written to.
+	Prompt TrainingPrompt `gorm:"-" json:"prompt" prompt:"-"`
 
 	CompletedAt      *time.Time `gorm:"type:timestamptz" json:"completed_at" prompt:"-"`
 	CompletedIn      *int       `json:"completed_in" prompt:"-"`
@@ -187,6 +185,13 @@ type Activity struct {
 
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
+}
+
+// AfterFind derives the deprecated two-stage prompt projection from the
+// loaded steps, so legacy readers keep their shape without a prompt column.
+func (t *Training) AfterFind(_ *gorm.DB) error {
+	t.Prompt = LegacyPrompt(t.LLMSteps)
+	return nil
 }
 
 func (t Training) DaysSince() int {
@@ -356,7 +361,9 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 	clone.ID = uuid.UUID{}
 	clone.UserID = newUserID
 	clone.ParentID = &t.ID
-	clone.Prompt = datatypes.NewJSONType(TrainingPrompt{})
+	// steps belong to the original generation run: the clone starts with none
+	clone.LLMSteps = nil
+	clone.Prompt = LegacyPrompt(nil)
 	clone.CompletedAt = nil
 	clone.CompletedIn = nil
 	clone.CreatedAt = time.Time{}

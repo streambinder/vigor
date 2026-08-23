@@ -120,6 +120,11 @@ templ Dashboard(data DashboardData) {
 								<td>{ formatCompleted(t.CompletedAt) }</td>
 								<td>
 									<button class="btn-json" onclick={ showTrainingJSON(i) }>JSON</button>
+									if len(t.LLMSteps) == 0 {
+										<button class="btn-json" disabled title="No LLM steps recorded">Trajectory</button>
+									} else {
+										<button class="btn-json" onclick={ showTrainingTrajectory(i) }>Trajectory</button>
+									}
 								</td>
 							</tr>
 						}
@@ -141,7 +146,7 @@ templ Dashboard(data DashboardData) {
 		<div id="modal" class="modal" onclick="closeModal(event)">
 			<div class="modal-content" onclick="event.stopPropagation()">
 				<div class="modal-header">
-					<span class="modal-title">JSON</span>
+					<span class="modal-title" id="modal-title">JSON</span>
 					<div class="modal-actions">
 						<button class="modal-copy" onclick="copyModalJSON(this)">Copy</button>
 						<button class="modal-close" onclick="closeModal()">&times;</button>
@@ -242,7 +247,7 @@ templ Dashboard(data DashboardData) {
 }
 
 type multiSeriesData struct {
-	Labels []string         `json:"labels"`
+	Labels []string          `json:"labels"`
 	Series []seriesChartData `json:"series"`
 }
 
@@ -501,6 +506,7 @@ func formatCompleted(t *time.Time) string {
 script showTrainingJSON(index int) {
 	var el = document.getElementById('training-' + index);
 	var data = JSON.parse(el.textContent);
+	document.getElementById('modal-title').textContent = 'JSON';
 	document.getElementById('modal-json').textContent = JSON.stringify(data, null, 2);
 	document.getElementById('modal').classList.add('open');
 }
@@ -508,7 +514,41 @@ script showTrainingJSON(index int) {
 script showReportJSON(index int, kind string) {
 	var el = document.getElementById('report-' + index + '-' + kind);
 	var data = JSON.parse(el.textContent);
+	document.getElementById('modal-title').textContent = 'JSON';
 	document.getElementById('modal-json').textContent = JSON.stringify(data, null, 2);
+	document.getElementById('modal').classList.add('open');
+}
+
+script showTrainingTrajectory(index int) {
+	var el = document.getElementById('training-' + index);
+	var data = JSON.parse(el.textContent);
+	var steps = (data.llm_steps || []).slice().sort(function(a, b) { return a.position - b.position; });
+	var out = document.getElementById('modal-json');
+	function esc(value) {
+		return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	}
+	function field(label, value, pre) {
+		var body = value === '' || value == null ? '<span class="trajectory-empty">-</span>' : (pre ? '<pre class="trajectory-value">' + esc(value) + '</pre>' : esc(value));
+		return '<div class="trajectory-field"><div class="trajectory-label">' + label + '</div>' + body + '</div>';
+	}
+	var html = '';
+	for (var i = 0; i < steps.length; i++) {
+		var step = steps[i];
+		var prompt = step.prompt || {};
+		html += '<div class="trajectory-step">'
+			+ '<div class="trajectory-step-header">' + esc(step.position) + ' · ' + esc(step.step || 'STEP') + '</div>'
+			+ field('Model', step.model, false)
+			+ field('ID', step.id, false)
+			+ field('Created', step.created_at, false)
+			+ field('Updated', step.updated_at, false)
+			+ field('Usage', JSON.stringify(step.usage || {}, null, 2), true)
+			+ field('System prompt', prompt.system || '', true)
+			+ field('User prompt', prompt.user || '', true)
+			+ field('Output', typeof step.output === 'string' ? step.output : JSON.stringify(step.output, null, 2), true)
+			+ '</div>';
+	}
+	document.getElementById('modal-title').textContent = 'Trajectory';
+	out.innerHTML = html;
 	document.getElementById('modal').classList.add('open');
 }
 
