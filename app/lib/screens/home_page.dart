@@ -18,6 +18,7 @@ import '../services/preferences_service.dart';
 import '../services/secure_storage_service.dart';
 import '../utils/knowledge_labels.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../widgets/animated_number_text.dart';
 import '../widgets/progress/progress.dart';
 import '../models/progress.dart';
 import '../services/progress_service.dart';
@@ -354,11 +355,11 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
 
     // always show all tiles — use — for missing values
     final tiles = <Widget>[
-      _buildMetricTile(l10n.healthDailySleep, sleepHours > 0 ? _formatSleepHours(sleepHours) : '—', 'h'),
-      _buildMetricTile(l10n.healthDailyRestingHr, restingHR > 0 ? '$restingHR' : '—', 'bpm'),
-      _buildMetricTile(l10n.healthDailyHrv, hrv > 0 ? '${hrv.toInt()}' : '—', 'ms'),
-      _buildMetricTile(l10n.healthDailySteps, steps > 0 ? _formatSteps(steps) : '—', ''),
-      _buildMetricTile(l10n.healthDailyCalories, calories > 0 ? '${calories.toInt()}' : '—', 'kcal'),
+      _buildMetricTile(l10n.healthDailySleep, sleepHours > 0 ? sleepHours : null, 'h', _formatSleepHours),
+      _buildMetricTile(l10n.healthDailyRestingHr, restingHR > 0 ? restingHR.toDouble() : null, 'bpm', (v) => '${v.toInt()}'),
+      _buildMetricTile(l10n.healthDailyHrv, hrv > 0 ? hrv : null, 'ms', (v) => '${v.toInt()}'),
+      _buildMetricTile(l10n.healthDailySteps, steps > 0 ? steps.toDouble() : null, '', (v) => _formatSteps(v.round())),
+      _buildMetricTile(l10n.healthDailyCalories, calories > 0 ? calories : null, 'kcal', (v) => '${v.toInt()}'),
     ];
 
     return Column(
@@ -389,7 +390,12 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     );
   }
 
-  Widget _buildMetricTile(String label, String value, String unit) {
+  Widget _buildMetricTile(String label, double? value, String unit, String Function(double) formatValue) {
+    final valueStyle = VigorTypography.data.copyWith(
+      fontSize: 20,
+      fontWeight: FontWeight.w600,
+      color: VigorColors.textPrimary(context),
+    );
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -398,11 +404,11 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
-            Text(value, style: VigorTypography.data.copyWith(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: VigorColors.textPrimary(context),
-            )),
+            AnimatedNumberText(
+              value: value,
+              formatValue: formatValue,
+              style: valueStyle,
+            ),
             if (unit.isNotEmpty) ...[
               const SizedBox(width: 2),
               Text(unit, style: VigorTypography.caption.copyWith(
