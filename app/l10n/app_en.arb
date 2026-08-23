@@ -789,6 +789,10 @@
   "healthOnboardingDescription": "Connect your health data and Vigor will adapt your training to how you sleep, recover, and move.",
   "healthOnboardingConnect": "Connect",
   "healthOnboardingDismiss": "Maybe later",
+  "readinessTitle": "Today's readiness",
+  "readinessGreen": "Train today!",
+  "readinessYellow": "Go easy today",
+  "readinessRed": "Rest — you're drained",
 
   "healthInstallHcTitle": "Health Connect Required",
   "healthInstallHcDescription": "Health Connect is needed to sync your wearable data. Install it from the Play Store to continue.",

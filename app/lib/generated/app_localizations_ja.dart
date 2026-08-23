@@ -1647,6 +1647,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get healthOnboardingDismiss => 'あとで';
 
   @override
+  String get readinessTitle => '今日のコンディション';
+
+  @override
+  String get readinessGreen => '今日はトレーニングしよう！';
+
+  @override
+  String get readinessYellow => '今日は軽めに';
+
+  @override
+  String get readinessRed => '今日は休息を — お疲れ気味です';
+
+  @override
   String get healthInstallHcTitle => 'Health Connectが必要です';
 
   @override

@@ -3210,6 +3210,30 @@ abstract class AppLocalizations {
   /// **'Maybe later'**
   String get healthOnboardingDismiss;
 
+  /// No description provided for @readinessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s readiness'**
+  String get readinessTitle;
+
+  /// No description provided for @readinessGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Train today!'**
+  String get readinessGreen;
+
+  /// No description provided for @readinessYellow.
+  ///
+  /// In en, this message translates to:
+  /// **'Go easy today'**
+  String get readinessYellow;
+
+  /// No description provided for @readinessRed.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest — you\'re drained'**
+  String get readinessRed;
+
   /// No description provided for @healthInstallHcTitle.
   ///
   /// In en, this message translates to:

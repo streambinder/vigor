@@ -1641,6 +1641,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get healthOnboardingDismiss => '以后再说';
 
   @override
+  String get readinessTitle => '今日状态';
+
+  @override
+  String get readinessGreen => '今天适合训练！';
+
+  @override
+  String get readinessYellow => '今天轻松一点';
+
+  @override
+  String get readinessRed => '今天休息吧，你很疲惫';
+
+  @override
   String get healthInstallHcTitle => '需要Health Connect';
 
   @override

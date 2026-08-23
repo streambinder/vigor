@@ -36,6 +36,25 @@ func initHealth(app *fiber.App) {
 	app.Get("/health/daily", middleware.Authorized(), getHealthDaily)
 	app.Get("/health/session/:id", middleware.Authorized(), getHealthSession)
 	app.Get("/health/manifest", middleware.Authorized(), getHealthManifest)
+	app.Get("/health/readiness/today", middleware.Authorized(), getReadinessToday)
+}
+
+func getReadinessToday(c *fiber.Ctx) error {
+	loc, err := service.ParseTimezone(c.Get("X-Timezone"))
+	if err != nil {
+		middleware.Log(c).Warn().Err(err).Msg("invalid timezone header")
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": fmt.Sprintf("invalid timezone: %v", err)})
+	}
+
+	resp, err := service.GetReadinessToday(c.Locals("userID").(uuid.UUID), loc, c.Query("refresh") == "1")
+	if err != nil {
+		middleware.Log(c).Error().Err(err).Msg("failed to get readiness")
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to get readiness"})
+	}
+	if resp == nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "no recovery data available"})
+	}
+	return c.JSON(resp)
 }
 
 func postHealthSync(c *fiber.Ctx) error {

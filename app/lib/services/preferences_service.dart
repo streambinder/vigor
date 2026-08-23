@@ -24,6 +24,8 @@ class PreferencesService {
   static const String _hcMetricsToKey = 'hc_metrics_to';
   static const String _hcSessionsFromKey = 'hc_sessions_from';
   static const String _hcSessionsToKey = 'hc_sessions_to';
+  static const String _readinessDateKey = 'readiness_date';
+  static const String _readinessJsonKey = 'readiness_json';
   static const int defaultDurationFallback = 60;
 
   SharedPreferences? _prefs;
@@ -157,8 +159,33 @@ class PreferencesService {
   Future<void> setHcSessionsFrom(String? v) async { if (v == null) { await _prefs?.remove(_hcSessionsFromKey); } else { await _prefs?.setString(_hcSessionsFromKey, v); } }
   Future<void> setHcSessionsTo(String? v) async { if (v == null) { await _prefs?.remove(_hcSessionsToKey); } else { await _prefs?.setString(_hcSessionsToKey, v); } }
 
+  /// readiness hint cached per calendar day (yyyy-mm-dd device-local date)
+  String? get readinessDate => _prefs?.getString(_readinessDateKey);
+
+  Map<String, dynamic>? get readinessJson {
+    final raw = _prefs?.getString(_readinessJsonKey);
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(raw);
+      return decoded is Map<String, dynamic> ? decoded : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> setReadiness(String date, Map<String, dynamic>? json) async {
+    await _prefs?.setString(_readinessDateKey, date);
+    if (json == null) {
+      await _prefs?.remove(_readinessJsonKey);
+    } else {
+      await _prefs?.setString(_readinessJsonKey, jsonEncode(json));
+    }
+  }
+
   /// clear all health-related keys (called on logout for multi-user scoping)
   Future<void> clearHealthData() async {
+    await _prefs?.remove(_readinessDateKey);
+    await _prefs?.remove(_readinessJsonKey);
     await _prefs?.remove(_hcChangesTokenKey);
     await _prefs?.remove(_hcLastSyncMsKey);
     await _prefs?.remove(_hcConnectedKey);

@@ -1692,6 +1692,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get healthOnboardingDismiss => 'Quizás después';
 
   @override
+  String get readinessTitle => 'Forma de hoy';
+
+  @override
+  String get readinessGreen => '¡Entrena hoy!';
+
+  @override
+  String get readinessYellow => 'Hoy tómatelo suave';
+
+  @override
+  String get readinessRed => 'Descansa, estás sin energía';
+
+  @override
   String get healthInstallHcTitle => 'Health Connect requerido';
 
   @override
