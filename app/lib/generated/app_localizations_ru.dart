@@ -1677,6 +1677,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get healthOnboardingDismiss => 'Может быть позже';
 
   @override
+  String get readinessTitle => 'Готовность на сегодня';
+
+  @override
+  String get readinessGreen => 'Тренируйся сегодня!';
+
+  @override
+  String get readinessYellow => 'Сегодня полегче';
+
+  @override
+  String get readinessRed => 'Отдохни — ты вымотан';
+
+  @override
   String get healthInstallHcTitle => 'Требуется Health Connect';
 
   @override

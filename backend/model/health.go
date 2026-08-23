@@ -137,6 +137,14 @@ type HealthDailyResponse struct {
 	Sessions []HealthExerciseSession `json:"sessions"`
 }
 
+// ReadinessResponse is the response for GET /health/readiness/today.
+// score runs 0-100; level is the user-facing severity bucket derived from it.
+type ReadinessResponse struct {
+	Score   int    `json:"score"`
+	Level   string `json:"level"`
+	Summary string `json:"summary"`
+}
+
 // HealthSyncRequest is the DTO for POST /health/sync.
 // timestamps are unix milliseconds, HR values in bpm, sleep in hours, steps as count
 type HealthSyncRequest struct {

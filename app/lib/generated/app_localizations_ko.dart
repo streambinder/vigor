@@ -1647,6 +1647,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get healthOnboardingDismiss => '나중에 하기';
 
   @override
+  String get readinessTitle => '오늘의 컨디션';
+
+  @override
+  String get readinessGreen => '오늘 운동하세요!';
+
+  @override
+  String get readinessYellow => '오늘은 가볍게';
+
+  @override
+  String get readinessRed => '피로가 쌓였어요, 쉬세요';
+
+  @override
   String get healthInstallHcTitle => 'Health Connect 필요';
 
   @override

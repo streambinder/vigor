@@ -36,6 +36,7 @@ class ServiceLocator extends ChangeNotifier {
   final ValueNotifier<List<Training>?> trainingsNotifier = ValueNotifier(null);
   final ValueNotifier<bool> isCalibratingNotifier = ValueNotifier(false);
   final ValueNotifier<Map<String, dynamic>?> healthDailyNotifier = ValueNotifier(null);
+  final ValueNotifier<Map<String, dynamic>?> readinessNotifier = ValueNotifier(null);
   final ValueNotifier<List<FlowSession>?> flowSessionsNotifier = ValueNotifier(null);
 
   // pending share token to process after login completes
@@ -160,6 +161,27 @@ class ServiceLocator extends ChangeNotifier {
     });
   }
 
+  /// daily readiness hint. the probe runs at most once per calendar day per
+  /// device — after that the cached value from prefs is served until the day
+  /// rolls over. force (pull-to-refresh) asks the backend to recompute.
+  Future<void> refreshReadiness({bool force = false}) async {
+    final now = DateTime.now();
+    final today = '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    if (!force && _prefs.readinessDate == today) {
+      readinessNotifier.value ??= _prefs.readinessJson;
+      return;
+    }
+    final response = await trainingService.getReadinessToday(force: force);
+    if (response.isSuccess) {
+      readinessNotifier.value = response.data;
+      // cache positive results only: a 404 often just means the morning
+      // sleep sync has not landed yet — the next app open must retry
+      if (response.data != null) {
+        await _prefs.setReadiness(today, response.data);
+      }
+    }
+  }
+
   /// Pre-load homepage data so splash stays until everything is ready
   /// Note: health daily fetch is intentionally NOT included here because it
   /// triggers backend sync which can block on expensive database joins.
@@ -206,6 +228,7 @@ class ServiceLocator extends ChangeNotifier {
     trainingsNotifier.value = null;
     isCalibratingNotifier.value = false;
     healthDailyNotifier.value = null;
+    readinessNotifier.value = null;
     flowSessionsNotifier.value = null;
     pendingShareToken = null;
     pendingShareAutoClaim = false;
@@ -225,6 +248,7 @@ class ServiceLocator extends ChangeNotifier {
     trainingsNotifier.dispose();
     isCalibratingNotifier.dispose();
     healthDailyNotifier.dispose();
+    readinessNotifier.dispose();
     flowSessionsNotifier.dispose();
     super.dispose();
   }

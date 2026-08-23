@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
+import '../widgets/readiness_hint_card.dart';
 import '../models/family_progress.dart';
 import '../models/muscle_impact.dart';
 import '../models/weekly_target.dart';
@@ -43,6 +44,8 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
   bool _consumedInitialData = false;
   bool _subscribedToEvents = false;
   ValueNotifier<Map<String, dynamic>?>? _healthDailyNotifier;
+  Map<String, dynamic>? _readiness;
+  ValueNotifier<Map<String, dynamic>?>? _readinessNotifier;
 
   void _consumePreloadedData() {
     if (_consumedInitialData) return;
@@ -52,6 +55,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
       _progress = serviceLocator.initialProgress;
       _weeklyTarget = serviceLocator.initialWeeklyTarget;
       _healthDaily = serviceLocator.healthDailyNotifier.value;
+      _readiness = serviceLocator.readinessNotifier.value;
       _hasLoadedOnce = true;
       serviceLocator.initialProgress = null;
       serviceLocator.initialWeeklyTarget = null;
@@ -62,6 +66,8 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
       // listen directly to the notifier so background refreshHealthDaily() updates propagate
       _healthDailyNotifier = serviceLocator.healthDailyNotifier;
       _healthDailyNotifier!.addListener(_onHealthDailyChanged);
+      _readinessNotifier = serviceLocator.readinessNotifier;
+      _readinessNotifier!.addListener(_onReadinessChanged);
     }
   }
 
@@ -71,9 +77,16 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     if (updated != null && updated != _healthDaily) setState(() => _healthDaily = updated);
   }
 
+  void _onReadinessChanged() {
+    if (!mounted) return;
+    final updated = _readinessNotifier?.value;
+    if (updated != _readiness) setState(() => _readiness = updated);
+  }
+
   @override
   void dispose() {
     _healthDailyNotifier?.removeListener(_onHealthDailyChanged);
+    _readinessNotifier?.removeListener(_onReadinessChanged);
     super.dispose();
   }
 
@@ -84,7 +97,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     }
   }
 
-  Future<void> _loadProgress({int retryCount = 0}) async {
+  Future<void> _loadProgress({int retryCount = 0, bool userRefresh = false}) async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
     _hasLoadedOnce = true;
@@ -126,8 +139,11 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
       // trigger incremental health metrics sync (fire-and-forget, server-throttled)
       if (locator.healthDataService != null) {
         AppLogger.debug('[HomePage] triggering health sync on refresh');
+        // readiness hint only after the sync has landed: the backend answers
+        // 404 until this morning's sleep is in the database, so probing in
+        // parallel would race the sync and grade stale data
+        locator.healthDataService!.syncToBackend().whenComplete(() => locator.refreshReadiness(force: userRefresh));
       }
-      locator.healthDataService?.syncToBackend();
 
       if (mounted) {
         final progressResponse = results[0];
@@ -187,7 +203,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
         actions: const [],
       ),
       body: RefreshIndicator(
-        onRefresh: _loadProgress,
+        onRefresh: () => _loadProgress(userRefresh: true),
         color: VigorColors.stone,
         // only show full-screen spinner on initial load; during refresh keep
         // existing data visible so the pull-to-refresh bubble is the only indicator
@@ -216,6 +232,16 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     context.read<ServiceLocator>().updateCalibrationFromProgress(families);
 
     final sections = <Widget>[
+      // daily readiness hint — only when a score exists for today
+      if (_readiness != null)
+        Padding(
+          padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+          child: ReadinessHintCard(
+            score: (_readiness!['score'] as num?)?.toInt() ?? 0,
+            level: _readiness!['level'] as String? ?? 'red',
+            summary: _readiness!['summary'] as String? ?? '',
+          ),
+        ),
       // hero stats
       Padding(
         padding: const EdgeInsets.only(bottom: VigorSpacing.xl),

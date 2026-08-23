@@ -272,6 +272,19 @@ class TrainingService {
     return ApiResponse.error(response.error ?? 'Failed to fetch health daily', response.statusCode);
   }
 
+  /// daily training-readiness hint. a 404 (no recovery data available) is not
+  /// an error for the caller: it simply means the hint must stay hidden.
+  Future<ApiResponse<Map<String, dynamic>?>> getReadinessToday({bool force = false}) async {
+    final response = await _apiService.get('/health/readiness/today${force ? '?refresh=1' : ''}');
+    if (response.isSuccess) {
+      return ApiResponse.success(response.data, response.statusCode);
+    }
+    if (response.statusCode == 404) {
+      return ApiResponse.success(null, response.statusCode);
+    }
+    return ApiResponse.error(response.error ?? 'Failed to fetch readiness', response.statusCode);
+  }
+
   Future<ApiResponse<String>> addPartner(String trainingId, String partner) async {
     AppLogger.debug('[TrainingService] Adding partner to training: $trainingId');
 
