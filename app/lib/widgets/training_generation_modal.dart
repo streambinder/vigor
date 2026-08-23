@@ -346,32 +346,20 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 spacing: VigorSpacing.sm,
                 runSpacing: VigorSpacing.sm,
                 children: [
-                  ChoiceChip(
-                    avatar: const Icon(Icons.accessibility_new, size: 16),
-                    label: Text(l10n.bodyweight),
-                    selected: _equipmentMode == EquipmentMode.bodyweight,
-                    onSelected: (_) => setState(() {
-                      _equipmentMode = EquipmentMode.bodyweight;
-                    }),
-                    showCheckmark: false,
+                  _equipmentModeChip(
+                    mode: EquipmentMode.bodyweight,
+                    icon: Icons.accessibility_new,
+                    label: l10n.bodyweight,
                   ),
-                  ChoiceChip(
-                    avatar: const Icon(Icons.fitness_center, size: 16),
-                    label: Text(l10n.gym),
-                    selected: _equipmentMode == EquipmentMode.gym,
-                    onSelected: (_) => setState(() {
-                      _equipmentMode = EquipmentMode.gym;
-                    }),
-                    showCheckmark: false,
+                  _equipmentModeChip(
+                    mode: EquipmentMode.gym,
+                    icon: Icons.fitness_center,
+                    label: l10n.gym,
                   ),
-                  ChoiceChip(
-                    avatar: const Icon(Icons.build, size: 16),
-                    label: Text(l10n.custom),
-                    selected: _equipmentMode == EquipmentMode.custom,
-                    onSelected: (_) => setState(() {
-                      _equipmentMode = EquipmentMode.custom;
-                    }),
-                    showCheckmark: false,
+                  _equipmentModeChip(
+                    mode: EquipmentMode.custom,
+                    icon: Icons.build,
+                    label: l10n.custom,
                   ),
                 ],
               );
@@ -411,6 +399,33 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         // mode-specific content
         _buildEquipmentModeContent(),
       ],
+    );
+  }
+
+  ChoiceChip _equipmentModeChip({
+    required EquipmentMode mode,
+    required IconData icon,
+    required String label,
+  }) {
+    final isSelected = _equipmentMode == mode;
+    return ChoiceChip(
+      avatar: Icon(
+        icon,
+        size: 16,
+        color: isSelected ? Colors.white : VigorColors.textPrimary(context),
+      ),
+      label: Text(
+        label,
+        style: VigorTypography.caption.copyWith(
+          color: isSelected ? Colors.white : VigorColors.textPrimary(context),
+        ),
+      ),
+      selected: isSelected,
+      selectedColor: VigorColors.indigo,
+      onSelected: (_) => setState(() {
+        _equipmentMode = mode;
+      }),
+      showCheckmark: false,
     );
   }
 
