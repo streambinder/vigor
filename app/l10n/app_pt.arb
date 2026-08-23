@@ -242,6 +242,10 @@
   "generationFailedRetrying": "Geração falhou, tentativa #{attempt}...",
   "trainingGeneratedSuccessfully": "Treino gerado com sucesso!",
   "failedToGenerateTraining": "Falha ao gerar o treino",
+  "freeTextMode": "Texto livre",
+  "freeTextLabel": "Seu programa",
+  "freeTextHint": "Cole um programa de treino ou um link para ele, ou simplesmente descreva o que quer fazer...",
+  "freeTextRequired": "Cole ou descreva primeiro seu programa de treino",
   "generate": "Gerar",
 
   "generationStepAnalyzeRecovery": "Analisando dados de recuperação...",
@@ -252,6 +256,7 @@
   "generationStepProgramLoad": "Programando séries e repetições...",
   "generationStepWriteCopy": "Escrevendo detalhes da sessão...",
   "generationStepStructure": "Finalizando...",
+  "generationStepDeriveParams": "Planejando sua sessão...",
   "generationStepTargetMuscles": "Definindo músculos-alvo...",
   "editGym": "Editar Ginásio",
   "gymName": "Nome do Ginásio",

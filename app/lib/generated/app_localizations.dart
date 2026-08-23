@@ -1566,6 +1566,30 @@ abstract class AppLocalizations {
   /// **'Failed to generate training'**
   String get failedToGenerateTraining;
 
+  /// No description provided for @freeTextMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Free text'**
+  String get freeTextMode;
+
+  /// No description provided for @freeTextLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your program'**
+  String get freeTextLabel;
+
+  /// No description provided for @freeTextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a workout program or a link to it, or just describe what you want to do...'**
+  String get freeTextHint;
+
+  /// No description provided for @freeTextRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste or describe your workout program first'**
+  String get freeTextRequired;
+
   /// No description provided for @generate.
   ///
   /// In en, this message translates to:
@@ -1619,6 +1643,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Finalizing...'**
   String get generationStepStructure;
+
+  /// No description provided for @generationStepDeriveParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Planning your session...'**
+  String get generationStepDeriveParams;
 
   /// No description provided for @generationStepTargetMuscles.
   ///

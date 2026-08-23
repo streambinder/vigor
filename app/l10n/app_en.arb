@@ -409,6 +409,10 @@
   },
   "trainingGeneratedSuccessfully": "Training generated successfully!",
   "failedToGenerateTraining": "Failed to generate training",
+  "freeTextMode": "Free text",
+  "freeTextLabel": "Your program",
+  "freeTextHint": "Paste a workout program or a link to it, or just describe what you want to do...",
+  "freeTextRequired": "Paste or describe your workout program first",
   "generate": "Generate",
 
   "generationStepAnalyzeRecovery": "Analyzing recovery data...",
@@ -419,6 +423,7 @@
   "generationStepProgramLoad": "Programming sets & reps...",
   "generationStepWriteCopy": "Writing session details...",
   "generationStepStructure": "Finalizing...",
+  "generationStepDeriveParams": "Planning your session...",
   "generationStepTargetMuscles": "Targeting muscles...",
 
   "editGym": "Edit Gym",

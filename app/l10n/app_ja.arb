@@ -242,6 +242,10 @@
   "generationFailedRetrying": "生成に失敗しました、リトライ #{attempt}...",
   "trainingGeneratedSuccessfully": "トレーニングが正常に生成されました！",
   "failedToGenerateTraining": "トレーニングの生成に失敗しました",
+  "freeTextMode": "フリーテキスト",
+  "freeTextLabel": "あなたのプログラム",
+  "freeTextHint": "トレーニングプログラムやそのリンクを貼り付けるか、やりたいことを説明してください...",
+  "freeTextRequired": "まずトレーニングプログラムを貼り付けるか説明してください",
   "generate": "生成",
 
   "generationStepAnalyzeRecovery": "回復データを分析中...",
@@ -252,6 +256,7 @@
   "generationStepProgramLoad": "セットとレップを設定中...",
   "generationStepWriteCopy": "セッション詳細を作成中...",
   "generationStepStructure": "最終処理中...",
+  "generationStepDeriveParams": "セッションを計画中...",
   "generationStepTargetMuscles": "対象筋肉を決定中...",
   "editGym": "ジムを編集",
   "gymName": "ジム名",

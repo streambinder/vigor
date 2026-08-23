@@ -800,6 +800,20 @@ class AppLocalizationsRu extends AppLocalizations {
   String get failedToGenerateTraining => 'Не удалось создать тренировку';
 
   @override
+  String get freeTextMode => 'Свободный текст';
+
+  @override
+  String get freeTextLabel => 'Ваша программа';
+
+  @override
+  String get freeTextHint =>
+      'Вставьте программу тренировок или ссылку на неё, либо просто опишите, что хотите сделать...';
+
+  @override
+  String get freeTextRequired =>
+      'Сначала вставьте или опишите вашу программу тренировок';
+
+  @override
   String get generate => 'Создать';
 
   @override
@@ -826,6 +840,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get generationStepStructure => 'Завершение...';
+
+  @override
+  String get generationStepDeriveParams => 'Планирование тренировки...';
 
   @override
   String get generationStepTargetMuscles => 'Определение целевых мышц...';

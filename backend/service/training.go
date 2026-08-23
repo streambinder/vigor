@@ -28,6 +28,14 @@ const (
 
 const maxPromptLength = 500
 
+const (
+	// maxFreeTextLength caps a free text generation request
+	maxFreeTextLength = 4000
+	// freeTextNominalMinutes sizes candidate pools in free text mode only:
+	// the session length itself is computed from the generated program
+	freeTextNominalMinutes = 60
+)
+
 var (
 	ErrTrainingNotFound     = errors.New("training not found")
 	ErrUserNotFound         = errors.New("user not found")
@@ -40,19 +48,56 @@ var (
 	ErrPromptTooLong        = errors.New("prompt exceeds maximum length")
 	ErrMalformedTraining    = errors.New("malformed generated training")
 	ErrTrainingNotCompleted = errors.New("training not completed")
+	ErrFetchResource        = errors.New("could not fetch linked resource")
 )
 
 // GenerateTraining creates a new training for a user.
 // onProgress is called after each DAG node completes (may be nil).
-func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string, loc *time.Location, onProgress llm.DAGProgressFunc) (*model.Training, error) {
-	if duration <= 0 {
-		return nil, ErrDurationRequired
-	}
-	if duration < 10 || duration > 180 {
-		return nil, ErrDurationOutOfRange
+func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt, freeText string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string, loc *time.Location, onProgress llm.DAGProgressFunc) (*model.Training, error) {
+	freeMode := strings.TrimSpace(freeText) != ""
+	if freeMode {
+		if len(freeText) > maxFreeTextLength {
+			return nil, ErrPromptTooLong
+		}
+		// every classic tuning parameter is ignored in free text mode; values are
+		// derived from the request instead, with the session length computed
+		// deterministically from the generated program
+		duration = freeTextNominalMinutes
+		equipment = nil
+		gymID = ""
+		prompt = ""
+		partners = nil
+		skipWarmupCooldown = false
+		methodology = ""
+		goals = nil
+		muscles = nil
+	} else {
+		if duration <= 0 {
+			return nil, ErrDurationRequired
+		}
+		if duration < 10 || duration > 180 {
+			return nil, ErrDurationOutOfRange
+		}
 	}
 	if len(prompt) > maxPromptLength {
 		return nil, ErrPromptTooLong
+	}
+
+	// free text mode: fetch any linked articles (every failure is fatal to the
+	// request), then hand the raw request to the DAG, whose derive params
+	// pre-step deduces the tuning parameters a guided request would carry
+	var articles []string
+	if freeMode {
+		for _, url := range util.ExtractURLs(freeText) {
+			text, err := util.FetchResource(url)
+			if err != nil {
+				log.Warn().Err(err).Str("url", url).Msg("free text resource fetch failed")
+				return nil, ErrFetchResource
+			}
+			articles = append(articles, text)
+		}
+		// the raw request doubles as the retrieval prompt
+		prompt = freeText
 	}
 
 	var requestorProfile model.Profile
@@ -361,6 +406,58 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		modifierVariants = gym.ModifierVariants.Data()
 	}
 
+	dagRequest := llm.TrainingGenerationRequest{
+		Profiles:             profiles,
+		Goals:                goalData,
+		WorkExercises:        workExercises,
+		WarmupExercises:      warmupExercises,
+		CooldownExercises:    cooldownExercises,
+		EquipmentIDs:         equipmentIDs,
+		Modifiers:            llmModifiers,
+		ModifierVariants:     modifierVariants,
+		FavoriteExercises:    favoriteExercises,
+		FavoriteEquipmentIDs: favoriteEquipmentIDs,
+		Methodology:          methodologyData,
+		Methodologies:        methodologies,
+		Muscles:              muscles,
+		UserPrompt:           prompt,
+		Duration:             duration,
+		RecentTrainings:      recentTrainings,
+		RecentFeedback:       recentFeedback,
+		Facts:                facts,
+		SkipWarmupCooldown:   skipWarmupCooldown,
+		CalibrationGaps:      calibrationGaps,
+		HealthSnapshot:       healthSnapshot,
+		RecentHR:             recentHR,
+		RecentExerciseIDs:    recentExerciseIDs,
+	}
+	if freeMode {
+		var allGoals []model.Goal
+		if err := database.Knowledge.Find(&allGoals).Error; err != nil {
+			return nil, err
+		}
+		var allMuscles []model.Muscle
+		if err := database.Knowledge.Find(&allMuscles).Error; err != nil {
+			return nil, err
+		}
+		var allEquipment []model.Equipment
+		if err := database.Knowledge.Find(&allEquipment).Error; err != nil {
+			return nil, err
+		}
+
+		dagRequest.FreeText = freeText
+		dagRequest.Articles = articles
+		dagRequest.AllGoals = allGoals
+		dagRequest.ValidMuscles = make([]string, len(allMuscles))
+		for i, m := range allMuscles {
+			dagRequest.ValidMuscles[i] = m.ID
+		}
+		dagRequest.ValidEquipment = make([]string, len(allEquipment))
+		for i, e := range allEquipment {
+			dagRequest.ValidEquipment[i] = e.ID
+		}
+	}
+
 	llmStart := time.Now()
 	var training *model.Training
 	var execution model.TrainingPrompt
@@ -370,31 +467,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 
 	for attempt := 0; attempt <= maxGenerationRetries; attempt++ {
 		var err error
-		training, execution, err = llm.GenTrainingDAG(llm.TrainingGenerationRequest{
-			Profiles:             profiles,
-			Goals:                goalData,
-			WorkExercises:        workExercises,
-			WarmupExercises:      warmupExercises,
-			CooldownExercises:    cooldownExercises,
-			EquipmentIDs:         equipmentIDs,
-			Modifiers:            llmModifiers,
-			ModifierVariants:     modifierVariants,
-			FavoriteExercises:    favoriteExercises,
-			FavoriteEquipmentIDs: favoriteEquipmentIDs,
-			Methodology:          methodologyData,
-			Methodologies:        methodologies,
-			Muscles:              muscles,
-			UserPrompt:           prompt,
-			Duration:             duration,
-			RecentTrainings:      recentTrainings,
-			RecentFeedback:       recentFeedback,
-			Facts:                facts,
-			SkipWarmupCooldown:   skipWarmupCooldown,
-			CalibrationGaps:      calibrationGaps,
-			HealthSnapshot:       healthSnapshot,
-			RecentHR:             recentHR,
-			RecentExerciseIDs:    recentExerciseIDs,
-		}, onProgress)
+		training, execution, err = llm.GenTrainingDAG(dagRequest, onProgress)
 		usage.Add(execution.Reasoning.Usage)
 		if err != nil {
 			failureEvent := event.TrainingGenerationFailureEvent{
@@ -489,7 +562,11 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		// structural validation only — muscle coverage is owned by the strategy node, not the validator
 		validationErr := training.Validate(validExerciseIDs, exerciseModes, validModifierIDs, validRoutineTypes, weightedModifierIDs, weightedExerciseIDs, !skipWarmupCooldown)
 
-		if validationErr == nil {
+		// the stored session length always mirrors the generated program; guided
+		// requests additionally scale repeats to the requested length and enforce
+		// the duration match band
+		training.Duration = training.CalculateDuration()
+		if validationErr == nil && !freeMode {
 			training.SetDuration(duration)
 			validationErr = training.ValidateDuration(duration)
 		}
@@ -565,7 +642,17 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	}
 	training.Goals = effectiveGoals
 	training.Muscles = actualMuscles
+	// in free text mode the derived parameters stand in for the guided request
+	if freeMode && dagRequest.Derived != nil {
+		training.Equipment = append(training.Equipment, dagRequest.Derived.Equipment...)
+		if len(dagRequest.Derived.Goals) > 0 {
+			training.Goals = dagRequest.Derived.Goals
+		}
+	}
 	training.Request = prompt
+	if freeMode {
+		training.Request = freeText
+	}
 
 	for i := range training.Routines {
 		training.Routines[i].Position = i

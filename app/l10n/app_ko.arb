@@ -242,6 +242,10 @@
   "generationFailedRetrying": "생성 실패, 재시도 #{attempt}...",
   "trainingGeneratedSuccessfully": "트레이닝이 성공적으로 생성되었습니다!",
   "failedToGenerateTraining": "트레이닝 생성 실패",
+  "freeTextMode": "자유 텍스트",
+  "freeTextLabel": "내 프로그램",
+  "freeTextHint": "운동 프로그램이나 링크를 붙여넣거나 원하는 운동을 설명해 주세요...",
+  "freeTextRequired": "먼저 운동 프로그램을 붙여넣거나 설명해 주세요",
   "generate": "생성",
 
   "generationStepAnalyzeRecovery": "회복 데이터 분석 중...",
@@ -252,6 +256,7 @@
   "generationStepProgramLoad": "세트와 반복 수 설정 중...",
   "generationStepWriteCopy": "세션 세부 사항 작성 중...",
   "generationStepStructure": "마무리 중...",
+  "generationStepDeriveParams": "세션 계획 중...",
   "generationStepTargetMuscles": "목표 근육 결정 중...",
   "editGym": "헬스장 수정",
   "gymName": "헬스장 이름",

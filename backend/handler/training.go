@@ -49,7 +49,7 @@ func postTrainingJSON(c *fiber.Ctx) error {
 
 	training, err := service.GenerateTraining(
 		c.Locals("userID").(uuid.UUID),
-		req.Duration, req.Equipment, req.Gym, req.Prompt, req.Partners,
+		req.Duration, req.Equipment, req.Gym, req.Prompt, req.FreeText, req.Partners,
 		req.SkipWarmupCooldown, req.Methodology, req.Goals, req.Muscles,
 		loc, nil,
 	)
@@ -89,7 +89,7 @@ func postTrainingSSE(c *fiber.Ctx) error {
 
 		training, genErr := service.GenerateTraining(
 			userID,
-			req.Duration, req.Equipment, req.Gym, req.Prompt, req.Partners,
+			req.Duration, req.Equipment, req.Gym, req.Prompt, req.FreeText, req.Partners,
 			req.SkipWarmupCooldown, req.Methodology, req.Goals, req.Muscles,
 			loc, onProgress,
 		)
@@ -118,6 +118,8 @@ func trainingError(c *fiber.Ctx, err error) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "duration must be between 10 and 180 minutes"})
 	case errors.Is(err, service.ErrPromptTooLong):
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "prompt exceeds maximum length"})
+	case errors.Is(err, service.ErrFetchResource):
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "could not fetch linked resource"})
 	case errors.Is(err, service.ErrUserNotFound):
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
 	case errors.Is(err, service.ErrInvalidGym):
@@ -134,6 +136,8 @@ func trainingError(c *fiber.Ctx, err error) error {
 // trainingErrorMessage extracts a user-facing error message from a generation error.
 func trainingErrorMessage(err error) string {
 	switch {
+	case errors.Is(err, service.ErrFetchResource):
+		return "could not fetch linked resource"
 	case errors.Is(err, service.ErrMalformedTraining):
 		return "malformed generated training"
 	case errors.Is(err, service.ErrDurationRequired):

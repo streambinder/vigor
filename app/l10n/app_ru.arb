@@ -242,6 +242,10 @@
   "generationFailedRetrying": "Генерация не удалась, попытка #{attempt}...",
   "trainingGeneratedSuccessfully": "Тренировка успешно создана!",
   "failedToGenerateTraining": "Не удалось создать тренировку",
+  "freeTextMode": "Свободный текст",
+  "freeTextLabel": "Ваша программа",
+  "freeTextHint": "Вставьте программу тренировок или ссылку на неё, либо просто опишите, что хотите сделать...",
+  "freeTextRequired": "Сначала вставьте или опишите вашу программу тренировок",
   "generate": "Создать",
 
   "generationStepAnalyzeRecovery": "Анализ данных восстановления...",
@@ -252,6 +256,7 @@
   "generationStepProgramLoad": "Программирование подходов и повторений...",
   "generationStepWriteCopy": "Создание описания тренировки...",
   "generationStepStructure": "Завершение...",
+  "generationStepDeriveParams": "Планирование тренировки...",
   "generationStepTargetMuscles": "Определение целевых мышц...",
   "editGym": "Редактировать Зал",
   "gymName": "Название Зала",
