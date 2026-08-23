@@ -422,7 +422,7 @@ func Dashboard(data DashboardData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, " <div id=\"modal\" class=\"modal\" onclick=\"closeModal(event)\"><div class=\"modal-content\" onclick=\"event.stopPropagation()\"><div class=\"modal-header\"><span class=\"modal-title\">JSON</span> <button class=\"modal-close\" onclick=\"closeModal()\">&times;</button></div><pre id=\"modal-json\"></pre></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, " <div id=\"modal\" class=\"modal\" onclick=\"closeModal(event)\"><div class=\"modal-content\" onclick=\"event.stopPropagation()\"><div class=\"modal-header\"><span class=\"modal-title\">JSON</span><div class=\"modal-actions\"><button class=\"modal-copy\" onclick=\"copyModalJSON(this)\">Copy</button> <button class=\"modal-close\" onclick=\"closeModal()\">&times;</button></div></div><pre id=\"modal-json\"></pre></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -442,7 +442,7 @@ func Dashboard(data DashboardData) templ.Component {
 				var templ_7745c5c3_Var22 string
 				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.ResolveAttributeValue("report-" + r.ID.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 168, Col: 60}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 171, Col: 60}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var22)
 				if templ_7745c5c3_Err != nil {
@@ -455,7 +455,7 @@ func Dashboard(data DashboardData) templ.Component {
 				var templ_7745c5c3_Var23 string
 				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(r.CreatedAt.Format("Jan 2, 15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 169, Col: 48}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 172, Col: 48}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 				if templ_7745c5c3_Err != nil {
@@ -468,7 +468,7 @@ func Dashboard(data DashboardData) templ.Component {
 				var templ_7745c5c3_Var24 string
 				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(r.ID.String()[:8])
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 170, Col: 31}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 173, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 				if templ_7745c5c3_Err != nil {
@@ -481,7 +481,7 @@ func Dashboard(data DashboardData) templ.Component {
 				var templ_7745c5c3_Var25 string
 				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(r.User.Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 171, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 174, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 				if templ_7745c5c3_Err != nil {
@@ -494,7 +494,7 @@ func Dashboard(data DashboardData) templ.Component {
 				var templ_7745c5c3_Var26 string
 				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(r.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 172, Col: 44}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 175, Col: 44}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {
@@ -507,7 +507,7 @@ func Dashboard(data DashboardData) templ.Component {
 				var templ_7745c5c3_Var27 string
 				templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(uuidPtrToStr(r.TrainingID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 173, Col: 40}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 176, Col: 40}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 				if templ_7745c5c3_Err != nil {
@@ -520,7 +520,7 @@ func Dashboard(data DashboardData) templ.Component {
 				var templ_7745c5c3_Var28 string
 				templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(ptrToStr(r.ActivityID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 174, Col: 36}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 177, Col: 36}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 				if templ_7745c5c3_Err != nil {
@@ -630,7 +630,7 @@ func Dashboard(data DashboardData) templ.Component {
 				var templ_7745c5c3_Var32 string
 				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(u.CreatedAt.Format("Jan 2, 15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 219, Col: 48}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 222, Col: 48}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 				if templ_7745c5c3_Err != nil {
@@ -643,7 +643,7 @@ func Dashboard(data DashboardData) templ.Component {
 				var templ_7745c5c3_Var33 string
 				templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(u.ID.String()[:8])
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 220, Col: 31}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 223, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 				if templ_7745c5c3_Err != nil {
@@ -656,7 +656,7 @@ func Dashboard(data DashboardData) templ.Component {
 				var templ_7745c5c3_Var34 string
 				templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(u.Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 221, Col: 21}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 224, Col: 21}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 				if templ_7745c5c3_Err != nil {
@@ -669,7 +669,7 @@ func Dashboard(data DashboardData) templ.Component {
 				var templ_7745c5c3_Var35 string
 				templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(u.Profile.FirstName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 222, Col: 33}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 225, Col: 33}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 				if templ_7745c5c3_Err != nil {
@@ -682,7 +682,7 @@ func Dashboard(data DashboardData) templ.Component {
 				var templ_7745c5c3_Var36 string
 				templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(u.Profile.LastName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 222, Col: 56}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/dashboard.templ`, Line: 225, Col: 56}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 				if templ_7745c5c3_Err != nil {
@@ -901,7 +901,7 @@ func modalScript() templ.Component {
 			templ_7745c5c3_Var38 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "<script>\n\t\tfunction closeModal(event) {\n\t\t\tif (event && event.target !== document.getElementById('modal')) return;\n\t\t\tdocument.getElementById('modal').classList.remove('open');\n\t\t}\n\t\tdocument.addEventListener('keydown', function(e) {\n\t\t\tif (e.key === 'Escape') closeModal();\n\t\t});\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 71, "<script>\n\t\tfunction closeModal(event) {\n\t\t\tif (event && event.target !== document.getElementById('modal')) return;\n\t\t\tdocument.getElementById('modal').classList.remove('open');\n\t\t}\n\t\tfunction copyModalJSON(btn) {\n\t\t\tvar text = document.getElementById('modal-json').textContent;\n\t\t\tfunction confirmCopied() {\n\t\t\t\tbtn.classList.add('copied');\n\t\t\t\tbtn.textContent = 'Copied';\n\t\t\t\tsetTimeout(function() {\n\t\t\t\t\tbtn.classList.remove('copied');\n\t\t\t\t\tbtn.textContent = 'Copy';\n\t\t\t\t}, 1500);\n\t\t\t}\n\t\t\tif (navigator.clipboard && navigator.clipboard.writeText) {\n\t\t\t\tnavigator.clipboard.writeText(text).then(confirmCopied);\n\t\t\t} else {\n\t\t\t\tvar helper = document.createElement('textarea');\n\t\t\t\thelper.value = text;\n\t\t\t\tdocument.body.appendChild(helper);\n\t\t\t\thelper.select();\n\t\t\t\ttry { document.execCommand('copy'); confirmCopied(); } catch (e) {}\n\t\t\t\tdocument.body.removeChild(helper);\n\t\t\t}\n\t\t}\n\t\tdocument.addEventListener('keydown', function(e) {\n\t\t\tif (e.key === 'Escape') closeModal();\n\t\t});\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
