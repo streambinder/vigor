@@ -1238,6 +1238,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       controller: _freeTextController,
       labelText: l10n.freeTextLabel,
       placeholder: l10n.freeTextHint,
+      alignLabelWithHint: true,
       minLines: 6,
       maxLines: 10,
       maxLength: 4000,

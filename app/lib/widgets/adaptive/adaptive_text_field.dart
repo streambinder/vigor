@@ -26,6 +26,7 @@ class AdaptiveTextField extends StatelessWidget {
   final VoidCallback? onTap;
   final FocusNode? focusNode;
   final TextStyle? style;
+  final bool alignLabelWithHint;
 
   const AdaptiveTextField({
     super.key,
@@ -47,6 +48,7 @@ class AdaptiveTextField extends StatelessWidget {
     this.onTap,
     this.focusNode,
     this.style,
+    this.alignLabelWithHint = false,
   });
 
   @override
@@ -140,6 +142,7 @@ class AdaptiveTextField extends StatelessWidget {
         errorText: errorText,
         prefixIcon: prefix,
         suffixIcon: suffix,
+        alignLabelWithHint: alignLabelWithHint,
       ),
       style: style,
       keyboardType: keyboardType,
