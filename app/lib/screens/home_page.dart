@@ -766,7 +766,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: VigorSpacing.md,
-      runSpacing: VigorSpacing.xs,
+      runSpacing: VigorSpacing.md,
       children: [
         _buildLegendItem(context, Colors.transparent, l10n.heatResting, showBorder: true),
         _buildLegendItem(context, VigorColors.persimmon.withValues(alpha: 0.90), l10n.heatHot),
@@ -924,7 +924,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
                             child: Wrap(
                               alignment: WrapAlignment.start,
                               spacing: 6,
-                              runSpacing: 4,
+                              runSpacing: 6,
                               children: weeklyTarget.goals.map((g) => Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(

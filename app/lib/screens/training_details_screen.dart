@@ -1415,7 +1415,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
     final l10n = AppLocalizations.of(context);
     return Wrap(
       spacing: VigorSpacing.sm,
-      runSpacing: VigorSpacing.xs,
+      runSpacing: VigorSpacing.sm,
       children: [
         if (exercise.muscles.isNotEmpty) _buildDetailChip(Icons.accessibility_new, exercise.muscles.take(2).map((m) => KnowledgeLabels.muscleLabel(m, l10n)).join(' · ')),
         if (exercise.equipment.isNotEmpty) _buildDetailChip(Icons.fitness_center, exercise.equipment.map((e) => KnowledgeLabels.equipmentLabel(e, l10n)).join(' · ')),
