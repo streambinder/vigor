@@ -223,7 +223,7 @@ Routine structure:
 				qw422016.N().D(r.Rest)
 				qw422016.N().S(`s rest after routine`)
 			}
-			qw422016.N().S(`}
+			qw422016.N().S(`
 `)
 		}
 	}

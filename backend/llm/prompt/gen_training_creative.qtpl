@@ -83,7 +83,7 @@ Contraindications:
 {% endif %}
 {% if len(loadResult.Routines) > 0 %}
 Routine structure:
-{% for _, r := range loadResult.Routines %}- {%s r.Type %}: {%d len(r.Blocks) %} block(s), {%d r.Rest %}s rest between blocks{% if r.Rest > 0 %}, {%d r.Rest %}s rest after routine{% endif %}}
+{% for _, r := range loadResult.Routines %}- {%s r.Type %}: {%d len(r.Blocks) %} block(s), {%d r.Rest %}s rest between blocks{% if r.Rest > 0 %}, {%d r.Rest %}s rest after routine{% endif %}
 {% endfor %}{% endif %}
 {% if history.BadSessionNotes != "" %}
 Recent issue: {%s history.BadSessionNotes %}{% endif %}
