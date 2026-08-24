@@ -33,6 +33,10 @@ type DerivedParams struct {
 	Equipment          []string `json:"equipment"`
 	SkipWarmupCooldown bool     `json:"skip_warmup_cooldown"`
 	ExplicitProgram    bool     `json:"explicit_program"`
+	// Movements are the program's exercises in the request's own vocabulary
+	// ("pull-up", "push-up"); populated only when the request pins a concrete
+	// set, and matched against the exercise catalog downstream — never IDs
+	Movements []string `json:"movements"`
 }
 
 // Summarizable is the embedded base for all pipeline node outputs.
