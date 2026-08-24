@@ -44,8 +44,6 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
   bool _consumedInitialData = false;
   bool _subscribedToEvents = false;
   ValueNotifier<Map<String, dynamic>?>? _healthDailyNotifier;
-  Map<String, dynamic>? _readiness;
-  ValueNotifier<Map<String, dynamic>?>? _readinessNotifier;
 
   void _consumePreloadedData() {
     if (_consumedInitialData) return;
@@ -55,7 +53,6 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
       _progress = serviceLocator.initialProgress;
       _weeklyTarget = serviceLocator.initialWeeklyTarget;
       _healthDaily = serviceLocator.healthDailyNotifier.value;
-      _readiness = serviceLocator.readinessNotifier.value;
       _hasLoadedOnce = true;
       serviceLocator.initialProgress = null;
       serviceLocator.initialWeeklyTarget = null;
@@ -66,8 +63,6 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
       // listen directly to the notifier so background refreshHealthDaily() updates propagate
       _healthDailyNotifier = serviceLocator.healthDailyNotifier;
       _healthDailyNotifier!.addListener(_onHealthDailyChanged);
-      _readinessNotifier = serviceLocator.readinessNotifier;
-      _readinessNotifier!.addListener(_onReadinessChanged);
     }
   }
 
@@ -77,16 +72,9 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     if (updated != null && updated != _healthDaily) setState(() => _healthDaily = updated);
   }
 
-  void _onReadinessChanged() {
-    if (!mounted) return;
-    final updated = _readinessNotifier?.value;
-    if (updated != _readiness) setState(() => _readiness = updated);
-  }
-
   @override
   void dispose() {
     _healthDailyNotifier?.removeListener(_onHealthDailyChanged);
-    _readinessNotifier?.removeListener(_onReadinessChanged);
     super.dispose();
   }
 
@@ -232,16 +220,21 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     context.read<ServiceLocator>().updateCalibrationFromProgress(families);
 
     final sections = <Widget>[
-      // daily readiness hint — only when a score exists for today
-      if (_readiness != null)
-        Padding(
-          padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
-          child: ReadinessHintCard(
-            score: (_readiness!['score'] as num?)?.toInt() ?? 0,
-            level: _readiness!['level'] as String? ?? 'red',
-            summary: _readiness!['summary'] as String? ?? '',
-          ),
-        ),
+      // daily readiness hint — rebuilds in place the moment a score lands
+      ValueListenableBuilder<Map<String, dynamic>?>(
+        valueListenable: context.read<ServiceLocator>().readinessNotifier,
+        builder: (context, readiness, _) {
+          if (readiness == null) return const SizedBox.shrink();
+          return Padding(
+            padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
+            child: ReadinessHintCard(
+              score: (readiness['score'] as num?)?.toInt() ?? 0,
+              level: readiness['level'] as String? ?? 'red',
+              summary: readiness['summary'] as String? ?? '',
+            ),
+          );
+        },
+      ),
       // hero stats
       Padding(
         padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
