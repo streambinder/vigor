@@ -499,7 +499,7 @@ class _SharedTrainingScreenState extends State<SharedTrainingScreen> {
   Widget _buildExerciseDetails(Exercise exercise, List<String> modifiers) {
     return Wrap(
       spacing: VigorSpacing.sm,
-      runSpacing: VigorSpacing.xs,
+      runSpacing: VigorSpacing.sm,
       children: [
         if (exercise.muscles.isNotEmpty) _buildDetailChip(Icons.accessibility_new, exercise.muscles.take(2).join(' · ')),
         if (exercise.equipment.isNotEmpty) _buildDetailChip(Icons.fitness_center, exercise.equipment.join(' · ')),
