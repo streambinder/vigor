@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
-import '../widgets/readiness_hint_card.dart';
 import '../models/family_progress.dart';
 import '../models/muscle_impact.dart';
 import '../models/weekly_target.dart';
@@ -220,22 +219,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     context.read<ServiceLocator>().updateCalibrationFromProgress(families);
 
     final sections = <Widget>[
-      // daily readiness hint — rebuilds in place the moment a score lands
-      ValueListenableBuilder<Map<String, dynamic>?>(
-        valueListenable: context.read<ServiceLocator>().readinessNotifier,
-        builder: (context, readiness, _) {
-          if (readiness == null) return const SizedBox.shrink();
-          return Padding(
-            padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
-            child: ReadinessHintCard(
-              score: (readiness['score'] as num?)?.toInt() ?? 0,
-              level: readiness['level'] as String? ?? 'red',
-              summary: readiness['summary'] as String? ?? '',
-            ),
-          );
-        },
-      ),
-      // hero stats
+      // hero stats — readiness glows on the counter circle itself
       Padding(
         padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
         child: _buildHeroStats(l10n, families),
@@ -538,92 +522,151 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
           // size circle based on content height, not viewport width
           const minSize = 220.0;
           final size = minSize;
-          return SizedBox(
-            width: size,
-            height: size,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Container(
-                  padding: VigorSpacing.paddingLg,
-                  decoration: BoxDecoration(
-                    color: VigorColors.surface(context),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // main stat — JetBrains Mono for data
-                      Text(
-                        '$trainings',
-                        style: VigorTypography.dataDisplay.copyWith(
-                          fontSize: 72,
-                          fontWeight: FontWeight.w700,
-                          color: VigorColors.persimmon,
-                          height: 1,
+          // the readiness glow overflows the circle edge; reserve paint room
+          const glowPad = 28.0;
+          return ValueListenableBuilder<Map<String, dynamic>?>(
+            valueListenable: context.read<ServiceLocator>().readinessNotifier,
+            builder: (context, readiness, _) {
+              final level = readiness?['level'] as String? ?? 'red';
+              final score = (readiness?['score'] as num?)?.toInt() ?? 0;
+              final summary = readiness?['summary'] as String? ?? '';
+              final glowColor = readiness == null ? null : _readinessStyle(l10n, level).$1;
+              return SizedBox(
+                width: size + glowPad * 2,
+                height: size + glowPad * 2,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    if (glowColor != null)
+                      Positioned.fill(
+                        child: _ReadinessGlow(
+                          color: glowColor,
+                          circleRadius: size / 2,
                         ),
                       ),
-                      const SizedBox(height: VigorSpacing.xs),
-                      Text(
-                        l10n.completedTrainings,
-                        style: VigorTypography.body.copyWith(
-                          color: VigorColors.textSecondary(context),
-                          fontWeight: FontWeight.w500,
+                    Center(
+                      child: Container(
+                        width: size,
+                        height: size,
+                        padding: VigorSpacing.paddingLg,
+                        decoration: BoxDecoration(
+                          color: VigorColors.surface(context),
+                          shape: BoxShape.circle,
                         ),
-                      ),
-                      const SizedBox(height: VigorSpacing.sm),
-                      // secondary stat - compact
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.people, color: VigorColors.indigoAdaptive(context), size: 18),
-                          const SizedBox(width: VigorSpacing.xs),
-                          Text(
-                            '$partnered',
-                            style: VigorTypography.data.copyWith(
-                              color: VigorColors.indigoAdaptive(context),
-                              fontSize: 18,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // main stat — JetBrains Mono for data
+                            Text(
+                              '$trainings',
+                              style: VigorTypography.dataDisplay.copyWith(
+                                fontSize: 72,
+                                fontWeight: FontWeight.w700,
+                                color: VigorColors.persimmon,
+                                height: 1,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                // calibration badge - top right
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: GestureDetector(
-                    onTap: () => _showCalibrationModal(context, l10n, families, calibration),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: VigorColors.surface(context),
-                        borderRadius: VigorRadius.radiusFull,
-                        border: Border.all(color: VigorColors.border(context)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.tune, size: 14, color: VigorColors.indigoAdaptive(context)),
-                          const SizedBox(width: 4),
-                          Text(
-                            calibration > 0 ? '${calibration.toInt()}%' : '–',
-                            style: VigorTypography.caption.copyWith(
-                              color: VigorColors.indigoAdaptive(context),
-                              fontWeight: FontWeight.w600,
+                            const SizedBox(height: VigorSpacing.xs),
+                            Text(
+                              l10n.completedTrainings,
+                              style: VigorTypography.body.copyWith(
+                                color: VigorColors.textSecondary(context),
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 2),
-                          const Icon(Icons.help_outline, size: 12, color: VigorColors.stone),
-                        ],
+                            const SizedBox(height: VigorSpacing.sm),
+                            // secondary stat - compact
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.people, color: VigorColors.indigoAdaptive(context), size: 18),
+                                const SizedBox(width: VigorSpacing.xs),
+                                Text(
+                                  '$partnered',
+                                  style: VigorTypography.data.copyWith(
+                                    color: VigorColors.indigoAdaptive(context),
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
+                    // calibration + readiness badge - top right
+                    Positioned(
+                      top: glowPad + 8,
+                      right: glowPad + 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: VigorColors.surface(context),
+                          borderRadius: VigorRadius.radiusFull,
+                          border: Border.all(color: VigorColors.border(context)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            GestureDetector(
+                              onTap: () => _showCalibrationModal(context, l10n, families, calibration),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.tune, size: 14, color: VigorColors.indigoAdaptive(context)),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    calibration > 0 ? '${calibration.toInt()}%' : '–',
+                                    style: VigorTypography.caption.copyWith(
+                                      color: VigorColors.indigoAdaptive(context),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 2),
+                                  const Icon(Icons.help_outline, size: 12, color: VigorColors.stone),
+                                ],
+                              ),
+                            ),
+                            if (readiness != null) ...[
+                              Container(
+                                width: 1,
+                                height: 14,
+                                margin: const EdgeInsets.symmetric(horizontal: 6),
+                                color: VigorColors.border(context),
+                              ),
+                              GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () => _showReadinessModal(context, l10n, score: score, level: level, summary: summary),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      _readinessStyle(l10n, level).$2,
+                                      size: 14,
+                                      color: _readinessStyle(l10n, level).$1,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      _readinessStyle(l10n, level).$3,
+                                      style: VigorTypography.caption.copyWith(
+                                        color: VigorColors.textPrimary(context),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 2),
+                                    const Icon(Icons.help_outline, size: 12, color: VigorColors.stone),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           );
         },
       ),
@@ -738,6 +781,26 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
         l10n: l10n,
         families: families,
         calibration: calibration,
+      ),
+    );
+  }
+
+  void _showReadinessModal(
+    BuildContext context,
+    AppLocalizations l10n, {
+    required int score,
+    required String level,
+    required String summary,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _ReadinessModal(
+        l10n: l10n,
+        score: score,
+        level: level,
+        summary: summary,
       ),
     );
   }
@@ -1848,4 +1911,212 @@ class _CalibrationRingPainter extends CustomPainter {
       !listEquals(segments, oldDelegate.segments) ||
       activeColor != oldDelegate.activeColor ||
       inactiveColor != oldDelegate.inactiveColor;
+}
+
+/// Shared color/icon/shortline mapping for a readiness level.
+(Color, IconData, String) _readinessStyle(AppLocalizations l10n, String level) => switch (level) {
+      'green' => (
+          VigorColors.success,
+          Icons.check_circle_outline,
+          l10n.readinessGreen,
+        ),
+      'yellow' => (VigorColors.warning, Icons.speed, l10n.readinessYellow),
+      _ => (VigorColors.error, Icons.hotel_outlined, l10n.readinessRed),
+    };
+
+/// Readiness glow painted around the training counter circle: concentric
+/// rings brighten on the circle edge and fade outward, while a blurred
+/// highlight keeps sweeping the perimeter.
+class _ReadinessGlow extends StatefulWidget {
+  final Color color;
+  final double circleRadius;
+
+  const _ReadinessGlow({required this.color, required this.circleRadius});
+
+  @override
+  State<_ReadinessGlow> createState() => _ReadinessGlowState();
+}
+
+class _ReadinessGlowState extends State<_ReadinessGlow> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) => CustomPaint(
+        painter: _ReadinessGlowPainter(
+          color: widget.color,
+          circleRadius: widget.circleRadius,
+          angle: _controller.value * 2 * pi,
+        ),
+      ),
+    );
+  }
+}
+
+class _ReadinessGlowPainter extends CustomPainter {
+  final Color color;
+  final double circleRadius;
+  final double angle;
+
+  _ReadinessGlowPainter({
+    required this.color,
+    required this.circleRadius,
+    required this.angle,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+
+    // rings start on the circle edge and fade the further out they go
+    for (var i = 0; i < 6; i++) {
+      final t = i / 5;
+      canvas.drawCircle(
+        center,
+        circleRadius + 2 + i * 4,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 5
+          ..color = color.withValues(alpha: 0.32 * (1 - t))
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+      );
+    }
+
+    // blurred bright arc traveling around the perimeter
+    canvas.drawCircle(
+      center,
+      circleRadius + 10,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 8
+        ..strokeCap = StrokeCap.round
+        ..shader = SweepGradient(
+          colors: [
+            color.withValues(alpha: 0),
+            color,
+            color.withValues(alpha: 0),
+          ],
+          stops: const [0.0, 0.12, 0.24],
+          transform: GradientRotation(angle),
+        ).createShader(Rect.fromCircle(center: center, radius: circleRadius + 10))
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ReadinessGlowPainter oldDelegate) =>
+      color != oldDelegate.color ||
+      circleRadius != oldDelegate.circleRadius ||
+      angle != oldDelegate.angle;
+}
+
+/// Modal for readiness details, sibling of [_CalibrationModal]
+class _ReadinessModal extends StatelessWidget {
+  final AppLocalizations l10n;
+  final int score;
+  final String level;
+  final String summary;
+
+  const _ReadinessModal({
+    required this.l10n,
+    required this.score,
+    required this.level,
+    required this.summary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final (color, icon, label) = _readinessStyle(l10n, level);
+
+    return Container(
+      margin: const EdgeInsets.all(VigorSpacing.md),
+      decoration: BoxDecoration(
+        color: VigorColors.surface(context),
+        borderRadius: VigorRadius.radiusLg,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // header
+          Padding(
+            padding: VigorSpacing.paddingMd,
+            child: Row(
+              children: [
+                Icon(icon, color: color, size: 24),
+                const SizedBox(width: VigorSpacing.sm),
+                Text(
+                  l10n.readinessTitle,
+                  style: VigorTypography.headline.copyWith(
+                    color: VigorColors.textPrimary(context),
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: const Icon(Icons.close, color: VigorColors.stone, size: 24),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: VigorColors.border(context)),
+          // score + shortline verdict
+          Padding(
+            padding: VigorSpacing.paddingMd,
+            child: Row(
+              children: [
+                Text(
+                  '$score/100',
+                  style: VigorTypography.dataDisplay.copyWith(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                    height: 1,
+                  ),
+                ),
+                const SizedBox(width: VigorSpacing.md),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: VigorTypography.body.copyWith(
+                      color: VigorColors.textPrimary(context),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (summary.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md),
+              child: Text(
+                summary,
+                style: VigorTypography.body.copyWith(
+                  color: VigorColors.textSecondary(context),
+                ),
+              ),
+            ),
+          const SizedBox(height: VigorSpacing.lg),
+        ],
+      ),
+    );
+  }
 }
