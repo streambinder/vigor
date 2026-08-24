@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/netip"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -239,6 +240,76 @@ func TestExtractMainText(t *testing.T) {
 func TestExtractMainTextEmpty(t *testing.T) {
 	if _, err := extractMainText(`<html><body><script>only()</script></body></html>`); err != ErrNoProgramContent {
 		t.Fatalf("expected ErrNoProgramContent, got %v", err)
+	}
+}
+
+func TestExtractMainTextJSONLDBody(t *testing.T) {
+	// regression: torinocronaca.it wraps promo widgets in bare <article> tags,
+	// so the DOM walk only found nav bylines — the real body lives in JSON-LD
+	page, err := os.ReadFile("testdata/torinocronaca.txt")
+	if err != nil {
+		t.Fatalf("failed to read fixture: %v", err)
+	}
+
+	lines, err := extractMainText(string(page))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	joined := strings.Join(lines, "\n")
+	for _, want := range []string{"1 trazione alla sbarra", "50 squat"} {
+		if !strings.Contains(joined, want) {
+			t.Fatalf("expected %q in extracted lines: %q", want, joined)
+		}
+	}
+	for _, unwanted := range []string{"l'editoriale", "Il Borghese", "Abbonamenti"} {
+		if strings.Contains(joined, unwanted) {
+			t.Fatalf("promo box text must not leak into extraction: %q", joined)
+		}
+	}
+}
+
+func TestExtractMainTextPicksRichestContainer(t *testing.T) {
+	var realBody strings.Builder
+	realBody.WriteString("Back squat 5x5 at 80%, rest 3 minutes between heavy sets.")
+	for range 20 {
+		realBody.WriteString(" Volume and intensity notes carry the rest of the article")
+	}
+
+	page := `<html><body>
+<article><h2>Newsletter</h2><p>Iscriviti</p></article>
+<article><h1>Il programma</h1><p>` + realBody.String() + `</p></article>
+<article><h2>Shop</h2><p>Abbonamenti digitali</p></article>
+</body></html>`
+
+	lines, err := extractMainText(page)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	joined := strings.Join(lines, "\n")
+	if !strings.Contains(joined, "Back squat 5x5 at 80%") {
+		t.Fatalf("expected the richest container to win: %q", joined)
+	}
+	for _, unwanted := range []string{"Newsletter", "Abbonamenti"} {
+		if strings.Contains(joined, unwanted) {
+			t.Fatalf("promo container text must not leak into extraction: %q", joined)
+		}
+	}
+}
+
+func TestExtractMainTextThinExtraction(t *testing.T) {
+	// no JSON-LD and no meaningful container: extraction must surface the
+	// thinness so the caller can treat it as a failed extraction
+	page := `<html><body>
+<article><h2>l'editoriale</h2></article>
+<article><h2>Il Borghese</h2></article>
+</body></html>`
+
+	lines, err := extractMainText(page)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got := len(strings.Join(lines, "\n")); got >= MinArticleLength {
+		t.Fatalf("expected extraction under %d chars, got %d", MinArticleLength, got)
 	}
 }
 

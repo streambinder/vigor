@@ -5,7 +5,7 @@
 {% import "github.com/streambinder/vigor/model" %}
 {% import "github.com/streambinder/vigor/llm/pipeline" %}
 
-{% func NodeLoadSystem(methodology *model.Methodology, hasModifiers bool, hasModifierVariants bool) -%}
+{% func NodeLoadSystem(methodology *model.Methodology, hasModifiers bool, hasModifierVariants bool, explicitProgram bool) -%}
 You are a strength & conditioning programmer. Given selected exercises and context, assign exact reps/duration, weight, rest, modifiers, and block structure.
 
 Output a JSON object with:
@@ -25,6 +25,10 @@ Rules:
 {% if hasModifierVariants %}- For modifiers with listed weight variants, use only those values{% endif %}
 - modifiers: only IDs from the [MODIFIERS] list — never invent modifiers or use instructions like "per side", "each side", "slow tempo" as modifier IDs
 - Duration is adjusted server-side by scaling block repeats — focus on structure quality
+{% if explicitProgram %}- The [REQUESTED PROGRAM] section is this session's spec, not inspiration: reproduce its rep schemes, progressions and round structure verbatim
+- When reps vary between rounds (pyramids, ladders), emit one block per round with repeats=1 instead of one block with repeats=N, so the block order carries the progression — a "skip every other round" modification given by the source is fine
+- Recovery and health adjustments only scale the scheme at its edges (lower the peak, drop rounds): never flatten it into a uniform rep circuit
+{% endif %}
 
 Methodology: {%s methodology.ID %}
 {%s methodology.Description %}
@@ -53,8 +57,13 @@ Progression adjustments:
     favoriteEquipmentIDs []string,
     skipWarmupCooldown bool,
     duration int,
+    requestedProgram string,
 ) -%}
 Duration: {%d duration %} minutes. Volume: {%s volumeTarget %}. Intensity: {%s intensityTarget %}.
+{% if requestedProgram != "" %}
+[REQUESTED PROGRAM]
+{%s requestedProgram %}
+{% endif %}
 
 Exercises to program:
 {% for _, ex := range exercises %}{% code mode := exerciseModes[ex.ExerciseID] %}- {%s ex.ExerciseID %} ({%s ex.Phase %}{% if mode == "duration" %}, timer-only{% endif %}{% if mode == "reps" %}, reps-only{% endif %}{% if weightedExercises[ex.ExerciseID] %}, weighted{% endif %})

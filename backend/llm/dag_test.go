@@ -232,6 +232,30 @@ func TestNormalizeDerivedParams(t *testing.T) {
 		}
 	})
 
+	t.Run("movements are sanitized but their wording is kept", func(t *testing.T) {
+		derived := normalizeDerivedParams(pipeline.DerivedParams{
+			Movements: []string{" pull-up ", "PULL-UP", "sit-up", ""},
+		}, methodologies, validMuscles, validGoals, validEquipment)
+
+		if len(derived.Movements) != 2 || derived.Movements[0] != "pull-up" || derived.Movements[1] != "sit-up" {
+			t.Fatalf("unexpected movements: %v", derived.Movements)
+		}
+	})
+
+	t.Run("movements are capped", func(t *testing.T) {
+		movements := make([]string, maxDerivedMovements+3)
+		for i := range movements {
+			movements[i] = strings.Repeat("m", i+1)
+		}
+		derived := normalizeDerivedParams(pipeline.DerivedParams{
+			Movements: movements,
+		}, methodologies, validMuscles, validGoals, validEquipment)
+
+		if len(derived.Movements) != maxDerivedMovements {
+			t.Fatalf("expected movements cap at %d, got %d", maxDerivedMovements, len(derived.Movements))
+		}
+	})
+
 	t.Run("derived summary is capped", func(t *testing.T) {
 		derived := normalizeDerivedParams(pipeline.DerivedParams{
 			Summarizable: pipeline.Summarizable{Summary: strings.Repeat("x", maxDerivedSummaryLen+100)},

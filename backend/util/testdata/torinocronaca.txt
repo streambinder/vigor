@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<title>L'allenamento di Tom Holland - Torino Cronaca</title>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "headline": "L'allenamento di Tom Holland",
+  "author": { "@type": "Person", "name": "Alice Amerio" },
+  "publisher": { "@type": "Organization", "name": "Torino Cronaca" },
+  "articleBody": "Dietro le acrobazie spettacolari di Spider-Man non ci sono soltanto effetti speciali. Tom Holland ha seguito un programma di allenamento a corpo libero: un circuito da 1.500 ripetizioni complessive che combina forza e resistenza. La scalata fino a 1.500 ripetizioni La formula dell'allenamento è apparentemente elementare. Si parte con: 1 trazione alla sbarra 2 dip 3 push-up 4 addominali 5 squat Poi, a ogni round, il numero cresce progressivamente fino ad arrivare al picco massimo: 10 trazioni 20 dip 30 push-up 40 addominali 50 squat Dopo aver raggiunto la vetta, il percorso torna indietro fino alla prima ripetizione. Il risultato? Un totale di circa 1.500 movimenti, un vero test di resistenza muscolare.",
+  "image": { "@type": "ImageObject", "url": "https://www.torinocronaca.it/img/tom-holland.jpg" }
+}
+</script>
+</head>
+<body>
+<header class="top"><p>Pagina Facebook Pagina Twitter Pagina Instagram</p></header>
+<nav class="menu"><ul><li>Cerca</li><li>Edizione Digitale</li></ul></nav>
+<section class="side">
+<article>
+<a href="/redazione/l-editoriale"><h2>l'editoriale</h2></a>
+<a href="/autori/il-borghese"><h2>Il Borghese</h2></a>
+</article>
+<article>
+<a href="/abbonamenti"><h2>Abbonamenti</h2></a>
+</article>
+</section>
+<div class="content">
+<h1>L'allenamento di Tom Holland</h1>
+</div>
+</body>
+</html>

@@ -249,6 +249,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		req.Modifiers, req.ModifierVariants, req.Facts,
 		req.EquipmentIDs, req.FavoriteEquipmentIDs,
 		req.SkipWarmupCooldown, req.Duration,
+		explicitProgram, derivedSummary,
 	)
 	nodes[pipeline.StepProgramLoad] = loadStep
 	if err != nil {
@@ -283,6 +284,9 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 
 // maxDerivedSummaryLen caps the derived program schema flowing downstream.
 const maxDerivedSummaryLen = 2000
+
+// maxDerivedMovements caps the movement names an explicit program may carry.
+const maxDerivedMovements = 12
 
 // DeriveRequest carries the inputs of the free text param derivation, so it
 // can run both as the DAG pre-step and upfront in the service layer (where
@@ -395,12 +399,34 @@ func normalizeDerivedParams(
 	derived.Muscles = util.FilterToValidIDs(derived.Muscles, validMuscles)
 	derived.Goals = util.FilterToValidIDs(derived.Goals, validGoals)
 	derived.Equipment = util.FilterToValidIDs(derived.Equipment, validEquipment)
+	derived.Movements = sanitizeMovements(derived.Movements)
 
 	if len(derived.Summary) > maxDerivedSummaryLen {
 		derived.Summary = derived.Summary[:maxDerivedSummaryLen]
 	}
 
 	return derived
+}
+
+// sanitizeMovements trims, dedupes and caps the movement names of an explicit
+// program. they are matched against the exercise catalog, not validated as
+// IDs, so the request's own wording is kept.
+func sanitizeMovements(movements []string) []string {
+	seen := make(map[string]bool, len(movements))
+	var kept []string
+	for _, movement := range movements {
+		movement = strings.TrimSpace(movement)
+		key := strings.ToLower(movement)
+		if movement == "" || seen[key] {
+			continue
+		}
+		seen[key] = true
+		kept = append(kept, movement)
+		if len(kept) >= maxDerivedMovements {
+			break
+		}
+	}
+	return kept
 }
 
 // runHealthNode executes the health assessment node.
@@ -686,6 +712,13 @@ func sanitizeSelection(selection *pipeline.ExerciseSelection) {
 	}
 }
 
+// load token budgets: compact sessions on the left, an explicit program's full
+// scheme expansion on the right
+const (
+	loadMaxTokens                = 6000
+	loadMaxTokensExplicitProgram = 12000
+)
+
 // runLoadNode executes the load programming node.
 func runLoadNode(
 	strategy pipeline.Strategy,
@@ -701,22 +734,30 @@ func runLoadNode(
 	equipmentIDs, favoriteEquipmentIDs []string,
 	skipWarmupCooldown bool,
 	duration int,
+	explicitProgram bool,
+	requestedProgram string,
 ) (pipeline.LoadProgramming, model.LLMStep, error) {
 	p := model.LLMPrompt{
-		System: prompt.NodeLoadSystem(methodology, len(modifiers) > 0, len(modifierVariants) > 0),
+		System: prompt.NodeLoadSystem(methodology, len(modifiers) > 0, len(modifierVariants) > 0, explicitProgram),
 		User: prompt.NodeLoadUser(
 			exercises.Exercises, exerciseModes, weightedExercises,
 			history.Progressions,
 			strategy.VolumeTarget, strategy.IntensityTarget,
 			modifiers, modifierVariants, facts,
 			equipmentIDs, favoriteEquipmentIDs,
-			skipWarmupCooldown, duration,
+			skipWarmupCooldown, duration, requestedProgram,
 		),
 	}
 
-	// sets/reps/load per exercise under methodology rules — arithmetic, and wrong answers show
+	// sets/reps/load per exercise under methodology rules — arithmetic, and wrong answers show.
+	// a verbatim ladder/pyramid serializes to one block per rung, so an explicit
+	// scheme gets the room of ~19 blocks instead of the compact default
+	maxTokens := loadMaxTokens
+	if explicitProgram {
+		maxTokens = loadMaxTokensExplicitProgram
+	}
 	step, err := getLLM(StageReasoning, "").query(p,
-		queryOpts{temperature: 0.2, maxTokens: 6000, effort: effortMedium, timeout: 90 * time.Second})
+		queryOpts{temperature: 0.2, maxTokens: maxTokens, effort: effortMedium, timeout: 90 * time.Second})
 	if err != nil {
 		return pipeline.LoadProgramming{}, step, err
 	}

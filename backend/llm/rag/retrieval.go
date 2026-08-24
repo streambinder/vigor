@@ -12,6 +12,7 @@ import (
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/llm/embedding"
 	"github.com/streambinder/vigor/model"
+	"github.com/streambinder/vigor/util"
 )
 
 const (
@@ -145,6 +146,99 @@ func RetrieveWorkExercises(
 	return retrieveBalancedByMuscle(exerciseEmbedding, keywordQuery, methodology, equipment, targetMuscles, methodologyFamilies, proficiencies, proficiencyMargin, favoriteIDs, excludeIDs, calibrationGaps, durationMin), nil
 }
 
+// explicitProgramMovementNeighbors caps the semantic neighbors each pinned
+// movement brings into an explicit program work pool.
+const explicitProgramMovementNeighbors = 4
+
+// RetrieveExplicitProgramExercises builds the work pool for a request whose
+// derivation flagged the program as fully specified: the request is a scheme
+// to reproduce, so every filter layered onto the classic fetch (equipment,
+// muscles, methodology families, proficiency, recency) becomes a way to starve
+// a requested movement out of the pool. step one pins the closest catalog
+// exercise for every named movement off-quota, step two gathers unfiltered
+// semantic neighbors per movement, so the selection node substitutes or
+// regresses a movement against real catalog options instead of hallucinating one.
+func RetrieveExplicitProgramExercises(movements []string) ([]model.Exercise, error) {
+	if len(movements) == 0 {
+		return nil, nil
+	}
+
+	var catalog []model.Exercise
+	if err := database.Knowledge.Order("id").Find(&catalog).Error; err != nil {
+		return nil, fmt.Errorf("failed to load exercise catalog: %w", err)
+	}
+	pins := pinProgramMovements(movements, catalog)
+
+	vectors, err := embedding.GenVectors(movements)
+	if err != nil {
+		return nil, fmt.Errorf("failed to embed program movements: %w", err)
+	}
+
+	seen := make(map[string]bool, len(pins))
+	pool := make([]model.Exercise, 0, len(pins)+len(movements)*explicitProgramMovementNeighbors)
+	for _, ex := range pins {
+		seen[ex.ID] = true
+		pool = append(pool, ex)
+	}
+	for i, vector := range vectors {
+		neighbors, err := retrieveBySimilarity(vector, movements[i], nil, nil, nil, nil, explicitProgramMovementNeighbors, true)
+		if err != nil {
+			log.Warn().Err(err).Str("movement", movements[i]).Msg("explicit program: neighbor retrieval failed")
+			continue
+		}
+		added := 0
+		for _, ex := range neighbors {
+			if seen[ex.ID] {
+				continue
+			}
+			seen[ex.ID] = true
+			pool = append(pool, ex)
+			added++
+			if added >= explicitProgramMovementNeighbors {
+				break
+			}
+		}
+	}
+	log.Info().
+		Strs("movements", movements).
+		Int("pins", len(pins)).
+		Int("count", len(pool)).
+		Msg("queried explicit program exercises from database")
+	return pool, nil
+}
+
+// pinProgramMovements resolves each named program movement to the closest
+// catalog exercise by normalized ID/name matching — exact, then token, then
+// distance — so the canonical exercise is always present for the selection node.
+func pinProgramMovements(movements []string, catalog []model.Exercise) []model.Exercise {
+	candidates := make([]util.MatchCandidate, len(catalog))
+	byID := make(map[string]model.Exercise, len(catalog))
+	for i, ex := range catalog {
+		candidates[i] = util.MatchCandidate{
+			Match: ex.ID,
+			Keys:  []string{util.NormalizeIDText(ex.ID), util.NormalizeIDText(ex.Name)},
+		}
+		byID[ex.ID] = ex
+	}
+
+	var pins []model.Exercise
+	seen := make(map[string]bool, len(movements))
+	for _, movement := range movements {
+		id, ok := util.FuzzyLookup(movement, candidates)
+		if !ok {
+			log.Warn().Str("movement", movement).Msg("explicit program: movement matches no catalog exercise")
+			continue
+		}
+		if seen[id] {
+			continue
+		}
+		seen[id] = true
+		pins = append(pins, byID[id])
+		log.Debug().Str("movement", movement).Str("exercise", id).Msg("explicit program: pinned exercise for movement")
+	}
+	return pins
+}
+
 // retrieveBalancedByMuscle queries and filters exercises per muscle group independently,
 // then assembles a balanced final list. Each muscle group gets its own proficiency filtering
 // with graceful degradation, so equipment/proficiency constraints on one group can't starve it.
@@ -188,7 +282,7 @@ func retrieveBalancedByMuscle(
 	seen := make(map[string]bool)
 
 	for _, muscle := range muscles {
-		candidates, err := retrieveBySimilarity(exerciseEmbedding, keywordQuery, equipment, []string{muscle}, methodologyFamilies, excludeIDs, maxWork)
+		candidates, err := retrieveBySimilarity(exerciseEmbedding, keywordQuery, equipment, []string{muscle}, methodologyFamilies, excludeIDs, maxWork, false)
 		if err != nil {
 			log.Warn().Err(err).Str("muscle", muscle).Msg("failed to retrieve exercises for muscle group")
 			continue
@@ -261,7 +355,7 @@ func filterByProficiencyPerMuscle(exercises []model.Exercise, proficiencies map[
 // retrieveBySimilarity performs hybrid search combining embedding cosine similarity
 // with full-text keyword relevance. When keywordQuery is non-empty, scores are fused
 // (0.7 vector + 0.3 keyword) to surface both semantically and lexically relevant exercises.
-func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equipment []string, muscles []string, families []string, excludeIDs []string, maxWork int) ([]model.Exercise, error) {
+func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equipment []string, muscles []string, families []string, excludeIDs []string, maxWork int, unfiltered bool) ([]model.Exercise, error) {
 	var results []struct {
 		ExerciseID string
 		Text       string
@@ -296,54 +390,60 @@ func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equi
 		Select(selectClause, selectArgs...).
 		Joins("JOIN exercises ON exercises.id = exercise_embeddings.exercise_id")
 
-	// filter by methodology families: exercise must belong to at least one
-	// uses fmt.Sprintf because JSONB ? operator conflicts with GORM's ? placeholder
-	if len(families) > 0 {
-		var familyClauses []string
-		for _, f := range families {
-			if !validFamilyName.MatchString(f) {
-				continue
-			}
-			familyClauses = append(familyClauses, fmt.Sprintf("exercises.progressions ? '%s'", f))
-		}
-		if len(familyClauses) > 0 {
-			query = query.Where("(" + strings.Join(familyClauses, " OR ") + ")")
-		}
+	if unfiltered {
+		// explicit program retrieval: the request itself is the spec, so no
+		// catalog constraint applies — families, equipment, muscles and recency
+		// filters are exactly what can starve a requested movement out of the pool
 	} else {
-		// auto methodology: exclude mobility-only exercises from work candidates
-		// (exercises with mobility + another family are kept)
-		query = query.Where(`NOT (exercises.progressions ? 'mobility' AND (SELECT count(*) FROM jsonb_each(exercises.progressions) AS kv) = 1)`)
-	}
+		// filter by methodology families: exercise must belong to at least one
+		// uses fmt.Sprintf because JSONB ? operator conflicts with GORM's ? placeholder
+		if len(families) > 0 {
+			var familyClauses []string
+			for _, f := range families {
+				if !validFamilyName.MatchString(f) {
+					continue
+				}
+				familyClauses = append(familyClauses, fmt.Sprintf("exercises.progressions ? '%s'", f))
+			}
+			if len(familyClauses) > 0 {
+				query = query.Where("(" + strings.Join(familyClauses, " OR ") + ")")
+			}
+		} else {
+			// auto methodology: exclude mobility-only exercises from work candidates
+			// (exercises with mobility + another family are kept)
+			query = query.Where(`NOT (exercises.progressions ? 'mobility' AND (SELECT count(*) FROM jsonb_each(exercises.progressions) AS kv) = 1)`)
+		}
 
-	// filter by user equipment
-	if len(equipment) > 0 {
-		query = query.Where(`(
-			NOT EXISTS (
+		// filter by user equipment
+		if len(equipment) > 0 {
+			query = query.Where(`(
+				NOT EXISTS (
+					SELECT 1 FROM exercise_equipment
+					WHERE exercise_equipment.exercise_id = exercises.id
+				)
+				OR
+				NOT EXISTS (
+					SELECT 1 FROM exercise_equipment ee
+					WHERE ee.exercise_id = exercises.id
+					AND ee.equipment_id NOT IN ?
+				)
+			)`, equipment)
+		} else {
+			query = query.Where(`NOT EXISTS (
 				SELECT 1 FROM exercise_equipment
 				WHERE exercise_equipment.exercise_id = exercises.id
-			)
-			OR
-			NOT EXISTS (
-				SELECT 1 FROM exercise_equipment ee
-				WHERE ee.exercise_id = exercises.id
-				AND ee.equipment_id NOT IN ?
-			)
-		)`, equipment)
-	} else {
-		query = query.Where(`NOT EXISTS (
-			SELECT 1 FROM exercise_equipment
-			WHERE exercise_equipment.exercise_id = exercises.id
-		)`)
-	}
+			)`)
+		}
 
-	// filter by target muscles if specified (primary muscle only - first element)
-	if len(muscles) > 0 {
-		query = query.Where("exercises.muscles[1] = ANY(?)", pq.Array(muscles))
-	}
+		// filter by target muscles if specified (primary muscle only - first element)
+		if len(muscles) > 0 {
+			query = query.Where("exercises.muscles[1] = ANY(?)", pq.Array(muscles))
+		}
 
-	// exclude recently used exercises to avoid repetition across sessions
-	if len(excludeIDs) > 0 {
-		query = query.Where("exercises.id NOT IN ?", excludeIDs)
+		// exclude recently used exercises to avoid repetition across sessions
+		if len(excludeIDs) > 0 {
+			query = query.Where("exercises.id NOT IN ?", excludeIDs)
+		}
 	}
 
 	// hybrid scoring: fuse vector similarity with keyword relevance, then randomize.
