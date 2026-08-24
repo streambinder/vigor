@@ -269,7 +269,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(l10n.recommended, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
+                  Expanded(
+                    child: Text(
+                      l10n.recommended,
+                      style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                   Switch(
                     value: _useRecommendedDuration,
                     activeThumbColor: VigorColors.indigo,
@@ -302,7 +309,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(l10n.warmupCooldown, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+                  Expanded(
+                    child: Text(
+                      l10n.warmupCooldown,
+                      style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                   Switch(
                     value: _warmupCooldown,
                     activeThumbColor: VigorColors.indigo,

@@ -137,11 +137,19 @@ class _ExerciseModalContentState extends State<_ExerciseModalContent> {
                             segments: [
                               ButtonSegment(
                                 value: _ExerciseTab.cues,
-                                label: Text(l10n.cues),
+                                label: Text(
+                                  l10n.cues,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                               ButtonSegment(
                                 value: _ExerciseTab.instructions,
-                                label: Text(l10n.instructions),
+                                label: Text(
+                                  l10n.instructions,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ],
                             selected: {_selectedTab},

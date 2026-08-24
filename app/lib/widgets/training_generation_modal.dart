@@ -370,17 +370,29 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 segments: [
                   ButtonSegment(
                     value: EquipmentMode.bodyweight,
-                    label: Text(l10n.bodyweight),
+                    label: Text(
+                      l10n.bodyweight,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     icon: const Icon(Icons.accessibility_new, size: 16),
                   ),
                   ButtonSegment(
                     value: EquipmentMode.gym,
-                    label: Text(l10n.gym),
+                    label: Text(
+                      l10n.gym,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     icon: const Icon(Icons.fitness_center, size: 16),
                   ),
                   ButtonSegment(
                     value: EquipmentMode.custom,
-                    label: Text(l10n.custom),
+                    label: Text(
+                      l10n.custom,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     icon: const Icon(Icons.build, size: 16),
                   ),
                 ],
@@ -915,7 +927,14 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(l10n.includeWarmupCooldown, style: VigorTypography.body),
+            Expanded(
+              child: Text(
+                l10n.includeWarmupCooldown,
+                style: VigorTypography.body,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             AdaptiveSwitch(
               value: _includeWarmupCooldown,
               onChanged: (value) =>
@@ -1477,15 +1496,27 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                         segments: [
                           ButtonSegment(
                             value: _SessionMode.training,
-                            label: Text(l10n.trainingRoutines),
+                            label: Text(
+                              l10n.trainingRoutines,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           const ButtonSegment(
                             value: _SessionMode.flow,
-                            label: Text('Flow'),
+                            label: Text(
+                              'Flow',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           ButtonSegment(
                             value: _SessionMode.freeText,
-                            label: Text(l10n.freeTextMode),
+                            label: Text(
+                              l10n.freeTextMode,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                         selected: {_sessionMode},
