@@ -530,20 +530,21 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
               final level = readiness?['level'] as String? ?? 'red';
               final score = (readiness?['score'] as num?)?.toInt() ?? 0;
               final summary = readiness?['summary'] as String? ?? '';
-              final glowColor = readiness == null ? null : _readinessStyle(l10n, level).$1;
+              // before readiness lands the effect runs in grey instead of hiding
+              final glowColor =
+                  readiness == null ? VigorColors.stone : _readinessStyle(l10n, level).$1;
               return SizedBox(
                 width: size + glowPad * 2,
                 height: size + glowPad * 2,
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    if (glowColor != null)
-                      Positioned.fill(
-                        child: _ReadinessGlow(
-                          color: glowColor,
-                          circleRadius: size / 2,
-                        ),
+                    Positioned.fill(
+                      child: _ReadinessGlow(
+                        color: glowColor,
+                        circleRadius: size / 2,
                       ),
+                    ),
                     Center(
                       child: Container(
                         width: size,
@@ -1957,13 +1958,27 @@ class _ReadinessGlowState extends State<_ReadinessGlow> with SingleTickerProvide
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) => CustomPaint(
-        painter: _ReadinessGlowPainter(
-          color: widget.color,
-          circleRadius: widget.circleRadius,
-          angle: _controller.value * 2 * pi,
+    // fade the effect in on first paint, then cross-fade the color whenever
+    // the target changes (grey placeholder -> readiness level color)
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOut,
+      builder: (context, fade, _) => Opacity(
+        opacity: fade,
+        child: TweenAnimationBuilder<Color?>(
+          tween: ColorTween(begin: widget.color, end: widget.color),
+          duration: const Duration(milliseconds: 600),
+          builder: (context, color, _) => AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) => CustomPaint(
+              painter: _ReadinessGlowPainter(
+                color: color ?? widget.color,
+                circleRadius: widget.circleRadius,
+                angle: _controller.value * 2 * pi,
+              ),
+            ),
+          ),
         ),
       ),
     );
