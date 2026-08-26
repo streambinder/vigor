@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
@@ -8,35 +9,53 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
+
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/llm"
 	"github.com/streambinder/vigor/model"
 	"gorm.io/gorm"
 )
 
-// readiness is request-oriented: no table, just a per-process cache keyed by
-// user and calendar day. the first call of the day pays for the LLM probe,
-// later opens of the homepage are served from memory until the day rolls over
-// (or the process restarts, in which case the probe simply runs again).
-var (
-	readinessCache    sync.Map // userID|date → *model.ReadinessResponse
-	readinessInflight sync.Map // userID|date → *sync.Mutex
-)
+// readiness is day-keyed: the probe of the day is persisted as a daily
+// snapshot, so homepage opens reuse it until the day rolls over and backend
+// restarts never force a fresh LLM call. nothing is cached in-process; the
+// store round-trip is milliseconds against seconds of LLM latency.
+var readinessInflight sync.Map // userID|date → *sync.Mutex
 
 // genReadiness is the LLM probe seam: swapped out in tests.
 var genReadiness = llm.GenReadiness
 
+// loadReadinessSnapshot reads today's snapshot; a store failure never blocks
+// the flow, the probe just runs again.
+func loadReadinessSnapshot(userID uuid.UUID, now time.Time, loc *time.Location) *model.ReadinessResponse {
+	raw, err := database.DailyLoad(database.TableReadiness, userID, now, loc)
+	if err != nil {
+		log.Warn().Err(err).Str("user", userID.String()).Msg("daily readiness load failed")
+		return nil
+	}
+	if raw == nil {
+		return nil
+	}
+	var resp model.ReadinessResponse
+	if err := json.Unmarshal(raw, &resp); err != nil {
+		log.Warn().Err(err).Str("user", userID.String()).Msg("daily readiness decode failed")
+		return nil
+	}
+	return &resp
+}
+
 // GetReadinessToday returns the readiness hint for the user's current day,
 // or nil when there is no recovery data to judge from (caller maps that to a
 // 404: the app hides the hint rather than showing an invented one).
-// force recomputes the probe and overwrites the cached value for the day.
+// force recomputes the probe and overwrites the stored value for the day.
 func GetReadinessToday(userID uuid.UUID, loc *time.Location, force bool) (*model.ReadinessResponse, error) {
-	today := time.Now().UTC().In(loc).Format("2006-01-02")
+	now := time.Now().UTC()
+	today := now.In(loc).Format("2006-01-02")
 	key := userID.String() + "|" + today
 
 	if !force {
-		if cached, ok := readinessCache.Load(key); ok {
-			return cached.(*model.ReadinessResponse), nil
+		if resp := loadReadinessSnapshot(userID, now, loc); resp != nil {
+			return resp, nil
 		}
 	}
 
@@ -49,8 +68,8 @@ func GetReadinessToday(userID uuid.UUID, loc *time.Location, force bool) (*model
 		readinessInflight.Delete(key)
 	}()
 	if !force {
-		if cached, ok := readinessCache.Load(key); ok {
-			return cached.(*model.ReadinessResponse), nil
+		if resp := loadReadinessSnapshot(userID, now, loc); resp != nil {
+			return resp, nil
 		}
 	}
 
@@ -96,18 +115,13 @@ func GetReadinessToday(userID uuid.UUID, loc *time.Location, force bool) (*model
 
 	resp, _, err := genReadiness(snapshot, trainings, language)
 	if err != nil {
-		// failed probes are not cached: the next homepage open retries once
+		// failed probes are not stored: the next homepage open retries once
 		log.Warn().Err(err).Str("user", userID.String()).Msg("readiness probe failed")
 		return nil, fmt.Errorf("readiness inference: %w", err)
 	}
 
-	readinessCache.Store(key, resp)
-	// day rollover GC: drop keys from previous days
-	readinessCache.Range(func(k, _ any) bool {
-		if ks, ok := k.(string); ok && len(ks) > len(today) && ks[len(ks)-len(today):] != today {
-			readinessCache.Delete(k)
-		}
-		return true
-	})
+	if err := database.DailySave(database.TableReadiness, userID, now, loc, resp); err != nil {
+		log.Warn().Err(err).Str("user", userID.String()).Msg("daily readiness save failed")
+	}
 	return resp, nil
 }

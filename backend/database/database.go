@@ -58,5 +58,9 @@ func Init() error {
 		return fmt.Errorf("failed to migrate database: %w", err)
 	}
 
+	if err := bootDaily(DB); err != nil {
+		return fmt.Errorf("failed to set up daily snapshots: %w", err)
+	}
+
 	return nil
 }
