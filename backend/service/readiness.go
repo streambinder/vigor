@@ -12,12 +12,13 @@ import (
 	"github.com/streambinder/vigor/llm"
 	"github.com/streambinder/vigor/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
-// readiness is request-oriented: no table, just a per-process cache keyed by
-// user and calendar day. the first call of the day pays for the LLM probe,
-// later opens of the homepage are served from memory until the day rolls over
-// (or the process restarts, in which case the probe simply runs again).
+// readiness is request-oriented: the first probe of the day pays for the LLM
+// call, then the verdict is cached per user and calendar day — in memory for
+// the hot path and in the readiness_hints table so a process restart does not
+// force a new probe on the next homepage open. entries roll over with the day.
 var (
 	readinessCache    sync.Map // userID|date → *model.ReadinessResponse
 	readinessInflight sync.Map // userID|date → *sync.Mutex
@@ -51,6 +52,18 @@ func GetReadinessToday(userID uuid.UUID, loc *time.Location, force bool) (*model
 	if !force {
 		if cached, ok := readinessCache.Load(key); ok {
 			return cached.(*model.ReadinessResponse), nil
+		}
+		// durable copy survives process restarts: a hit here still skips the
+		// LLM probe entirely and warms the in-memory cache for next time
+		var hint model.ReadinessHint
+		err := database.DB.Where("user_id = ? AND date = ?", userID, today).First(&hint).Error
+		switch {
+		case err == nil:
+			cached := &model.ReadinessResponse{Score: hint.Score, Level: hint.Level, Summary: hint.Summary}
+			readinessCache.Store(key, cached)
+			return cached, nil
+		case !errors.Is(err, gorm.ErrRecordNotFound):
+			log.Warn().Err(err).Str("user", userID.String()).Msg("readiness cache lookup failed")
 		}
 	}
 
@@ -102,12 +115,29 @@ func GetReadinessToday(userID uuid.UUID, loc *time.Location, force bool) (*model
 	}
 
 	readinessCache.Store(key, resp)
-	// day rollover GC: drop keys from previous days
+	if err := database.DB.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "user_id"}, {Name: "date"}},
+		DoUpdates: clause.AssignmentColumns([]string{"score", "level", "summary", "updated_at"}),
+	}).Create(&model.ReadinessHint{
+		UserID:  userID,
+		Date:    today,
+		Score:   resp.Score,
+		Level:   resp.Level,
+		Summary: resp.Summary,
+	}).Error; err != nil {
+		// persistence is best-effort: the in-memory copy still serves this
+		// process, the next open simply probes again after a restart
+		log.Warn().Err(err).Str("user", userID.String()).Msg("readiness persist failed")
+	}
+	// day rollover GC: drop entries from previous days
 	readinessCache.Range(func(k, _ any) bool {
 		if ks, ok := k.(string); ok && len(ks) > len(today) && ks[len(ks)-len(today):] != today {
 			readinessCache.Delete(k)
 		}
 		return true
 	})
+	if err := database.DB.Where("user_id = ? AND date <> ?", userID, today).Delete(&model.ReadinessHint{}).Error; err != nil {
+		log.Warn().Err(err).Str("user", userID.String()).Msg("readiness rollover GC failed")
+	}
 	return resp, nil
 }

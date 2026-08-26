@@ -49,6 +49,13 @@ func setupReadinessDB(t *testing.T) {
 		)`,
 		`CREATE TABLE trainings (id TEXT PRIMARY KEY, user_id TEXT, name TEXT, duration INTEGER, created_at DATETIME)`,
 		`CREATE TABLE profiles (user_id TEXT PRIMARY KEY, language TEXT)`,
+		`CREATE TABLE readiness_hints (
+			user_id TEXT NOT NULL,
+			date TEXT NOT NULL,
+			score INTEGER, level TEXT, summary TEXT,
+			created_at DATETIME, updated_at DATETIME,
+			PRIMARY KEY (user_id, date)
+		)`,
 	} {
 		if err := db.Exec(stmt).Error; err != nil {
 			t.Fatalf("create schema: %v", err)
@@ -216,5 +223,64 @@ func TestGetReadinessToday_ProbeFailureNotCached(t *testing.T) {
 	}
 	if calls.Load() != 2 {
 		t.Fatalf("failed probe must not be cached, expected 2 calls, got %d", calls.Load())
+	}
+}
+
+func TestGetReadinessToday_SurvivesCacheWipe(t *testing.T) {
+	setupReadinessDB(t)
+	userID := uuid.New()
+	insertHealthMetric(t, userID, time.Now().UTC())
+	calls := stubReadinessProbe(t, &model.ReadinessResponse{Score: 80, Level: "green", Summary: "go"}, nil)
+
+	first, err := GetReadinessToday(userID, time.UTC, false)
+	if err != nil {
+		t.Fatalf("first call: %v", err)
+	}
+	if first == nil || first.Score != 80 {
+		t.Fatalf("unexpected first response: %+v", first)
+	}
+
+	// simulate a process restart: the in-memory cache is gone, the durable
+	// hint must be served without paying for a second probe
+	readinessCache = sync.Map{}
+
+	second, err := GetReadinessToday(userID, time.UTC, false)
+	if err != nil {
+		t.Fatalf("post-restart call: %v", err)
+	}
+	if second == nil || second.Score != 80 || second.Level != "green" {
+		t.Fatalf("unexpected persisted response: %+v", second)
+	}
+	if calls.Load() != 1 {
+		t.Fatalf("persisted hint must not re-run the probe, ran %d times", calls.Load())
+	}
+}
+
+func TestGetReadinessToday_ForceUpdatesPersistedHint(t *testing.T) {
+	setupReadinessDB(t)
+	userID := uuid.New()
+	insertHealthMetric(t, userID, time.Now().UTC())
+	stubReadinessProbe(t, &model.ReadinessResponse{Score: 80, Level: "green", Summary: "go"}, nil)
+
+	if _, err := GetReadinessToday(userID, time.UTC, false); err != nil {
+		t.Fatalf("first call: %v", err)
+	}
+
+	genReadiness = func(_ *model.HealthSnapshot, _ []model.Training, _ string) (*model.ReadinessResponse, model.LLMStep, error) {
+		return &model.ReadinessResponse{Score: 40, Level: "yellow", Summary: "slow"}, model.LLMStep{}, nil
+	}
+	if _, err := GetReadinessToday(userID, time.UTC, true); err != nil {
+		t.Fatalf("forced call: %v", err)
+	}
+
+	// the forced probe must overwrite the durable hint too
+	readinessCache = sync.Map{}
+
+	resp, err := GetReadinessToday(userID, time.UTC, false)
+	if err != nil {
+		t.Fatalf("post-restart call: %v", err)
+	}
+	if resp == nil || resp.Score != 40 || resp.Level != "yellow" {
+		t.Fatalf("expected updated persisted hint, got %+v", resp)
 	}
 }

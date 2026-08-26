@@ -145,6 +145,22 @@ type ReadinessResponse struct {
 	Summary string `json:"summary"`
 }
 
+// ReadinessHint is the durable form of the daily readiness probe: one row per
+// user and calendar day (in the user's timezone), so a process restart does
+// not force a fresh LLM probe on the next homepage open.
+//
+// codegen:skip — the hint reaches the app only as ReadinessResponse
+type ReadinessHint struct {
+	UserID    uuid.UUID `gorm:"type:uuid;not null;primaryKey" json:"user_id"`
+	User      User      `gorm:"constraint:OnDelete:CASCADE;" json:"-"`
+	Date      string    `gorm:"type:date;not null;primaryKey" json:"date"`
+	Score     int       `json:"score"`
+	Level     string    `json:"level"`
+	Summary   string    `json:"summary"`
+	CreatedAt time.Time `gorm:"type:timestamptz;default:now()" json:"created_at"`
+	UpdatedAt time.Time `gorm:"type:timestamptz;default:now()" json:"updated_at"`
+}
+
 // HealthSyncRequest is the DTO for POST /health/sync.
 // timestamps are unix milliseconds, HR values in bpm, sleep in hours, steps as count
 type HealthSyncRequest struct {

@@ -167,8 +167,12 @@ class ServiceLocator extends ChangeNotifier {
   Future<void> refreshReadiness({bool force = false}) async {
     final now = DateTime.now();
     final today = '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-    if (!force && _prefs.readinessDate == today) {
-      readinessNotifier.value ??= _prefs.readinessJson;
+    final cached = _prefs.readinessDate == today ? _prefs.readinessJson : null;
+    // the day marker alone is not enough: an interrupted write can leave it
+    // without its payload, and honoring it would keep the hint hidden until
+    // the day rolls over with no chance of recovery
+    if (!force && cached != null) {
+      readinessNotifier.value ??= cached;
       return;
     }
     final response = await trainingService.getReadinessToday(force: force);

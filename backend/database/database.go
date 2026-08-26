@@ -50,6 +50,7 @@ func Init() error {
 		&model.SharedLink{},
 		&model.TrainingFeedback{},
 		&model.HealthMetric{},
+		&model.ReadinessHint{},
 		&model.HealthWeight{},
 		&model.HealthExerciseSession{},
 		&model.FlowSession{},
