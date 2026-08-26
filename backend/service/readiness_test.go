@@ -49,6 +49,15 @@ func setupReadinessDB(t *testing.T) {
 		)`,
 		`CREATE TABLE trainings (id TEXT PRIMARY KEY, user_id TEXT, name TEXT, duration INTEGER, created_at DATETIME)`,
 		`CREATE TABLE profiles (user_id TEXT PRIMARY KEY, language TEXT)`,
+		// daily fallback tables carry no schema; the partition machinery is
+		// postgres-only and skipped on sqlite
+		`CREATE TABLE daily_readiness (
+			user_id TEXT NOT NULL,
+			day DATE NOT NULL,
+			payload TEXT NOT NULL,
+			updated_at DATETIME,
+			PRIMARY KEY (user_id, day)
+		)`,
 	} {
 		if err := db.Exec(stmt).Error; err != nil {
 			t.Fatalf("create schema: %v", err)
@@ -59,7 +68,6 @@ func setupReadinessDB(t *testing.T) {
 	database.DB = db
 	t.Cleanup(func() { database.DB = prevDB })
 
-	readinessCache = sync.Map{}
 	readinessInflight = sync.Map{}
 }
 
@@ -216,5 +224,33 @@ func TestGetReadinessToday_ProbeFailureNotCached(t *testing.T) {
 	}
 	if calls.Load() != 2 {
 		t.Fatalf("failed probe must not be cached, expected 2 calls, got %d", calls.Load())
+	}
+}
+
+func TestGetReadinessToday_StoredSurvivesRestarts(t *testing.T) {
+	setupReadinessDB(t)
+	userID := uuid.New()
+	insertHealthMetric(t, userID, time.Now().UTC())
+	calls := stubReadinessProbe(t, &model.ReadinessResponse{Score: 72, Level: "yellow", Summary: "steady"}, nil)
+
+	first, err := GetReadinessToday(userID, time.UTC, false)
+	if err != nil {
+		t.Fatalf("first call: %v", err)
+	}
+	if first == nil || first.Score != 72 {
+		t.Fatalf("unexpected first response: %+v", first)
+	}
+
+	// emulate a process restart: the only state left is the daily snapshot
+	readinessInflight = sync.Map{}
+	second, err := GetReadinessToday(userID, time.UTC, false)
+	if err != nil {
+		t.Fatalf("post-restart call: %v", err)
+	}
+	if second == nil || second.Score != 72 || second.Summary != "steady" {
+		t.Fatalf("unexpected stored response: %+v", second)
+	}
+	if calls.Load() != 1 {
+		t.Fatalf("stored snapshot must serve without a new probe, ran %d times", calls.Load())
 	}
 }
