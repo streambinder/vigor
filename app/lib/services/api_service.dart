@@ -26,7 +26,6 @@ class ApiService {
     try {
       final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
       AppLogger.debug('[ApiService] GET ${url.toString()}');
-      AppLogger.debug('[ApiService] Headers: $headers');
       final response = await _client.get(
         url,
         headers: _buildHeaders(headers),
