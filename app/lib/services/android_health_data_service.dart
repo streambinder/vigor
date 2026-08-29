@@ -103,6 +103,23 @@ class AndroidHealthDataService extends HealthDataService
   }
 
   @override
+  Future<HealthSyncPayload> readForDate(DateTime date) async {
+    await _ensureConfigured();
+    final start = DateTime(date.year, date.month, date.day, 0, 0, 0);
+    final end = DateTime(date.year, date.month, date.day, 23, 59, 59, 999);
+    AppLogger.debug('[AndroidHealth] readForDate $date: ${start.toIso8601String()} → ${end.toIso8601String()}');
+    final dataPoints = await _health.getHealthDataFromTypes(
+      types: healthPermissionTypes,
+      startTime: start,
+      endTime: end,
+    );
+    final deduped = Health().removeDuplicates(dataPoints);
+    final hrPoints = await _fetchCorrelatedHR(deduped, start, end);
+    final combined = hrPoints.isEmpty ? deduped : [...deduped, ...hrPoints];
+    return buildSyncPayload(Health().removeDuplicates(combined));
+  }
+
+  @override
   Future<HealthSyncPayload> readNewData() async {
     await _ensureConfigured();
 
@@ -121,7 +138,11 @@ class AndroidHealthDataService extends HealthDataService
     final deduped = Health().removeDuplicates(dataPoints);
     AppLogger.debug('[AndroidHealth] after dedup: ${deduped.length} data points (removed ${dataPoints.length - deduped.length})');
 
-    return buildSyncPayload(deduped);
+    // tier 2: fetch HR only around workout windows to avoid 200k bulk read
+    final hrPoints = await _fetchCorrelatedHR(deduped, sevenDaysAgo, now);
+    final combined = hrPoints.isEmpty ? deduped : [...deduped, ...hrPoints];
+
+    return buildSyncPayload(Health().removeDuplicates(combined));
   }
 
   /// full 30-day read for manual/force sync
@@ -141,7 +162,46 @@ class AndroidHealthDataService extends HealthDataService
     final deduped = Health().removeDuplicates(dataPoints);
     AppLogger.debug('[AndroidHealth] after dedup: ${deduped.length} data points (removed ${dataPoints.length - deduped.length})');
 
-    return buildSyncPayload(deduped);
+    final hrPoints = await _fetchCorrelatedHR(deduped, thirtyDaysAgo, now);
+    final combined = hrPoints.isEmpty ? deduped : [...deduped, ...hrPoints];
+
+    return buildSyncPayload(Health().removeDuplicates(combined));
+  }
+
+  Future<List<HealthDataPoint>> _fetchCorrelatedHR(
+    List<HealthDataPoint> allPoints,
+    DateTime rangeStart,
+    DateTime rangeEnd,
+  ) async {
+    final workouts = allPoints.where((p) => p.type == HealthDataType.WORKOUT).toList();
+    if (workouts.isEmpty) return [];
+
+    final hrPoints = <HealthDataPoint>[];
+    // cap to 20 most recent workouts to avoid excessive HC calls
+    final recentWorkouts = workouts.length > 20 ? workouts.sublist(workouts.length - 20) : workouts;
+
+    for (final w in recentWorkouts) {
+      try {
+        final start = w.dateFrom.subtract(const Duration(minutes: 5)).isBefore(rangeStart)
+            ? rangeStart
+            : w.dateFrom.subtract(const Duration(minutes: 5));
+        final end = w.dateTo.add(const Duration(minutes: 5)).isAfter(rangeEnd) ? rangeEnd : w.dateTo.add(const Duration(minutes: 5));
+
+        final points = await _health.getHealthDataFromTypes(
+          types: [HealthDataType.HEART_RATE],
+          startTime: start,
+          endTime: end,
+        );
+        if (points.isNotEmpty) hrPoints.addAll(points);
+      } catch (e) {
+        AppLogger.debug('[AndroidHealth] HR window fetch failed for workout ${w.uuid}: $e');
+      }
+    }
+
+    if (hrPoints.isNotEmpty) {
+      AppLogger.info('[AndroidHealth] correlated HR fetched: ${hrPoints.length} samples for ${recentWorkouts.length} workouts');
+    }
+    return hrPoints;
   }
 
   @override

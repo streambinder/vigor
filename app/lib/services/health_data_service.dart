@@ -110,11 +110,21 @@ class HealthSyncPayload {
 }
 
 /// all android-supported health connect permission types
+/// tier 1 (core): STEPS, CALORIES, SLEEP_SESSION, WEIGHT — lightweight, always synced
+/// tier 2 (exercise): WORKOUT, RESTING_HR, HRV, SLEEP stages — small, valuable
+/// HEART_RATE is fetched windowed around workouts only, not as bulk 7-day read
 const healthPermissionTypes = [
   HealthDataType.STEPS,
   HealthDataType.TOTAL_CALORIES_BURNED,
   HealthDataType.SLEEP_SESSION,
   HealthDataType.WEIGHT,
+  HealthDataType.WORKOUT,
+  HealthDataType.RESTING_HEART_RATE,
+  HealthDataType.HEART_RATE_VARIABILITY_RMSSD,
+  HealthDataType.SLEEP_DEEP,
+  HealthDataType.SLEEP_LIGHT,
+  HealthDataType.SLEEP_REM,
+  HealthDataType.SLEEP_ASLEEP,
 ];
 
 abstract class HealthDataService {
@@ -128,6 +138,9 @@ abstract class HealthDataService {
   Future<HealthSyncPayload> readAllData();
   ValueNotifier<bool> get syncing;
   ValueNotifier<HealthSyncResult?> get lastSyncResult;
+
+  /// read a single calendar day (local timezone midnight to midnight)
+  Future<HealthSyncPayload> readForDate(DateTime date);
 
   /// trigger sync: read new data, POST to backend, persist tokens.
   /// returns true if sync completed successfully.
@@ -297,95 +310,11 @@ mixin HealthDataServiceMixin on HealthDataService {
           return false;
         }
         AppLogger.debug('[HealthDataService] permissions confirmed');
+        return await _syncFull();
       }
 
-      // server-driven delta sync: ask backend what dates it has, then only sync missing data
-      // full rescan reads the entire 30-day window to handle edge cases
-      AppLogger.debug(
-        '[HealthDataService] reading health data (${fullRescan ? 'full 30-day' : 'server-driven delta'})',
-      );
-      final payload = fullRescan ? await readAllData() : await _readDeltaSync();
-      AppLogger.info(
-        '[HealthDataService] read complete: ${payload.metrics.length} metrics, ${payload.sessions.length} sessions, ${payload.weights.length} weights, ${payload.hrSamples.length} HR samples, ${payload.deletedRecordIds.length} deletions',
-      );
-
-      if (payload.isEmpty) {
-        AppLogger.debug('[HealthDataService] no new data to sync');
-        // still fetch backend stats so totals stay current
-        await _fetchStatsOnly();
-        await prefs.setHcLastSyncMs(DateTime.now().millisecondsSinceEpoch);
-        return true;
-      }
-
-      // single POST instead of batching — server can handle large payloads
-      int totalMetricsSynced = 0;
-      int totalSessionsSynced = 0;
-      Map<String, dynamic>? lastResponseData;
-      ApiResponse? response;
-
-      // retry on 429 with backoff sized for server's 1/min rate limit window
-      int attempts = 0;
-      const maxAttempts = 3;
-
-      while (attempts < maxAttempts) {
-        response = await apiService
-            .post('/health/sync', body: payload.toJson())
-            .timeout(_syncTimeout);
-
-        if (response.isSuccess || response.statusCode != 429) break;
-
-        attempts++;
-        if (attempts < maxAttempts) {
-          final backoffMs = 30000 * attempts; // 30s, 60s — match server window
-          AppLogger.warning(
-            '[HealthDataService] rate limited, retrying in ${backoffMs}ms (attempt $attempts/$maxAttempts)',
-          );
-          await Future.delayed(Duration(milliseconds: backoffMs));
-        }
-      }
-
-      if (response == null || !response.isSuccess) {
-        AppLogger.error(
-          '[HealthDataService] sync POST failed: ${response?.error} (status=${response?.statusCode})',
-        );
-        _lastSyncResult.value = HealthSyncResult(
-          metricsSynced: 0,
-          sessionsSynced: 0,
-          totalMetrics: _lastSyncResult.value?.totalMetrics ?? 0,
-          totalSessions: _lastSyncResult.value?.totalSessions ?? 0,
-          syncedAt: DateTime.now(),
-          wasForced: fullRescan,
-          deviceSources: payload.sourceApps,
-          syncError: response?.error ?? 'Upload failed',
-        );
-        return false;
-      }
-
-      totalMetricsSynced += (response.data?['metrics_synced'] as int?) ?? 0;
-      totalSessionsSynced += (response.data?['sessions_synced'] as int?) ?? 0;
-      lastResponseData = response.data;
-
-      AppLogger.info(
-        '[HealthDataService] sync completed ($totalMetricsSynced metrics, $totalSessionsSynced sessions)',
-      );
-      if (lastResponseData != null) {
-        final result = HealthSyncResult.fromJson(
-          {
-            ...lastResponseData,
-            'metrics_synced': totalMetricsSynced,
-            'sessions_synced': totalSessionsSynced,
-          },
-          wasForced: fullRescan,
-          deviceSources: payload.sourceApps,
-        );
-        _lastSyncResult.value = result;
-        await _persistStats(result);
-      }
-      // persist tokens/timestamps only after successful POST (H3)
-      await onSyncSuccess();
-      await prefs.setHcLastSyncMs(DateTime.now().millisecondsSinceEpoch);
-      emitEvent?.call(HealthSyncCompleted());
-      return true;
+      // incremental: stream one date at a time, smallest pieces possible
+      return await _streamIncrementalSync();
     } catch (e) {
       AppLogger.error('[HealthDataService] sync failed', e);
       return false;
@@ -394,86 +323,228 @@ mixin HealthDataServiceMixin on HealthDataService {
     }
   }
 
-  /// helper to convert epoch ms to date string key
-  String _dateKeyFromMs(int ms) {
-    final dt = DateTime.fromMillisecondsSinceEpoch(ms);
-    return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
+  /// full 30-day sync — single POST, used by manual Settings action
+  Future<bool> _syncFull() async {
+    AppLogger.debug('[HealthDataService] reading full 30-day');
+    final payload = await readAllData();
+    AppLogger.info(
+      '[HealthDataService] full read: ${payload.metrics.length} metrics, ${payload.sessions.length} sessions, ${payload.weights.length} weights, ${payload.hrSamples.length} HR samples',
+    );
+    if (payload.isEmpty) {
+      await _fetchStatsOnly();
+      await prefs.setHcLastSyncMs(DateTime.now().millisecondsSinceEpoch);
+      return true;
+    }
+    return await _postPayload(payload, wasForced: true);
   }
 
-  /// server-driven delta sync: backend tells us what dates it has, we only send missing data
-  /// this is extremely efficient and handles corrections automatically
-  Future<HealthSyncPayload> _readDeltaSync() async {
-    try {
-      // ask backend what dates it has
-      final response = await apiService
-          .get('/health/manifest')
+  /// shared POST with 429 retry — returns true on success
+  Future<bool> _postPayload(HealthSyncPayload payload, {required bool wasForced}) async {
+    int totalMetricsSynced = 0;
+    int totalSessionsSynced = 0;
+    Map<String, dynamic>? lastResponseData;
+    ApiResponse? response;
+    int attempts = 0;
+    const maxAttempts = 3;
+
+    while (attempts < maxAttempts) {
+      response = await apiService
+          .post('/health/sync', body: payload.toJson())
           .timeout(_syncTimeout);
-      if (!response.isSuccess || response.data == null) {
+
+      if (response.isSuccess || response.statusCode != 429) break;
+
+      attempts++;
+      if (attempts < maxAttempts) {
+        final backoffMs = 30000 * attempts;
         AppLogger.warning(
-          '[HealthDataService] failed to get manifest, falling back to 7-day sync',
+          '[HealthDataService] rate limited, retrying in ${backoffMs}ms (attempt $attempts/$maxAttempts)',
         );
-        return await readNewData();
+        await Future.delayed(Duration(milliseconds: backoffMs));
       }
-
-      final serverDates = Set<String>.from(
-        (response.data!['dates_with_data'] as List?)?.cast<String>() ?? [],
-      );
-      AppLogger.debug(
-        '[HealthDataService] server has ${serverDates.length} dates with data',
-      );
-
-      // read last 7 days of local data (efficient, recent)
-      final now = DateTime.now();
-      final allPayload =
-          await readNewData(); // delegates to platform's 7-day read
-
-      if (allPayload.isEmpty) return allPayload;
-
-      // filter to only missing dates + last 3 days (today, yesterday, 2 days ago)
-      // this ensures recent data stays fresh even if devices sync late updates
-      final recentDates = <String>{};
-      for (int i = 0; i < 3; i++) {
-        final date = now.subtract(Duration(days: i));
-        recentDates.add(
-          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
-        );
-      }
-
-      final filteredMetrics = allPayload.metrics.where((m) {
-        final date = m['date'] as String;
-        return !serverDates.contains(date) || recentDates.contains(date);
-      }).toList();
-
-      final filteredSessions = allPayload.sessions.where((s) {
-        final date = _dateKeyFromMs(s['started_at'] as int);
-        return !serverDates.contains(date) || recentDates.contains(date);
-      }).toList();
-
-      final filteredWeights = allPayload.weights.where((w) {
-        final date = _dateKeyFromMs(w['measured_at'] as int);
-        return !serverDates.contains(date) || recentDates.contains(date);
-      }).toList();
-
-      final filteredHR = allPayload.hrSamples.where((hr) {
-        final date = _dateKeyFromMs(hr['timestamp'] as int);
-        return !serverDates.contains(date) || recentDates.contains(date);
-      }).toList();
-
-      AppLogger.info(
-        '[HealthDataService] delta sync: ${filteredMetrics.length} metrics, ${filteredSessions.length} sessions, ${filteredWeights.length} weights, ${filteredHR.length} HR samples (filtered from ${allPayload.metrics.length}/${allPayload.sessions.length}/${allPayload.weights.length}/${allPayload.hrSamples.length})',
-      );
-
-      return HealthSyncPayload(
-        metrics: filteredMetrics,
-        sessions: filteredSessions,
-        weights: filteredWeights,
-        hrSamples: filteredHR,
-        deletedRecordIds: allPayload.deletedRecordIds,
-      );
-    } catch (e) {
-      AppLogger.error('[HealthDataService] delta sync failed, falling back', e);
-      return readNewData();
     }
+
+    if (response == null || !response.isSuccess) {
+      AppLogger.error(
+        '[HealthDataService] sync POST failed: ${response?.error} (status=${response?.statusCode})',
+      );
+      _lastSyncResult.value = HealthSyncResult(
+        metricsSynced: 0,
+        sessionsSynced: 0,
+        totalMetrics: _lastSyncResult.value?.totalMetrics ?? 0,
+        totalSessions: _lastSyncResult.value?.totalSessions ?? 0,
+        syncedAt: DateTime.now(),
+        wasForced: wasForced,
+        deviceSources: payload.sourceApps,
+        syncError: response?.error ?? 'Upload failed',
+      );
+      return false;
+    }
+
+    totalMetricsSynced += (response.data?['metrics_synced'] as int?) ?? 0;
+    totalSessionsSynced += (response.data?['sessions_synced'] as int?) ?? 0;
+    lastResponseData = response.data;
+
+    AppLogger.info(
+      '[HealthDataService] sync completed ($totalMetricsSynced metrics, $totalSessionsSynced sessions)',
+    );
+    if (lastResponseData != null) {
+      final result = HealthSyncResult.fromJson(
+        {
+          ...lastResponseData,
+          'metrics_synced': totalMetricsSynced,
+          'sessions_synced': totalSessionsSynced,
+        },
+        wasForced: wasForced,
+        deviceSources: payload.sourceApps,
+      );
+      _lastSyncResult.value = result;
+      await _persistStats(result);
+    }
+    await onSyncSuccess();
+    await prefs.setHcLastSyncMs(DateTime.now().millisecondsSinceEpoch);
+    emitEvent?.call(HealthSyncCompleted());
+    return true;
+  }
+
+  /// incremental streaming: one date per POST, smallest pieces first
+  Future<bool> _streamIncrementalSync() async {
+    Set<String> serverDates = {};
+    try {
+      final manifestResp = await apiService.get('/health/manifest').timeout(_syncTimeout);
+      if (manifestResp.isSuccess && manifestResp.data != null) {
+        serverDates = Set<String>.from(
+          (manifestResp.data!['dates_with_data'] as List?)?.cast<String>() ?? [],
+        );
+        AppLogger.debug('[HealthDataService] server has ${serverDates.length} dates');
+      } else {
+        AppLogger.warning('[HealthDataService] manifest failed, falling back to 7-day single POST');
+        final payload = await readNewData();
+        if (payload.isEmpty) {
+          await _fetchStatsOnly();
+          await prefs.setHcLastSyncMs(DateTime.now().millisecondsSinceEpoch);
+          return true;
+        }
+        return await _postPayload(payload, wasForced: false);
+      }
+    } catch (e) {
+      AppLogger.error('[HealthDataService] manifest fetch failed, fallback', e);
+      final payload = await readNewData();
+      if (payload.isEmpty) {
+        await _fetchStatsOnly();
+        return true;
+      }
+      return await _postPayload(payload, wasForced: false);
+    }
+
+    final now = DateTime.now();
+    // target dates: last 30 days that are missing on server + always last 3 days (freshness)
+    final targetDates = <DateTime>[];
+    final recentKeys = <String>{};
+    for (int i = 0; i < 3; i++) {
+      final d = now.subtract(Duration(days: i));
+      final k = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+      recentKeys.add(k);
+    }
+
+    for (int i = 0; i < 30; i++) {
+      final d = now.subtract(Duration(days: i));
+      final k = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+      if (!serverDates.contains(k) || recentKeys.contains(k)) {
+        targetDates.add(DateTime(d.year, d.month, d.day));
+      }
+    }
+
+    // oldest first so backend converges forward, but recent 3 will be re-synced anyway
+    targetDates.sort((a, b) => a.compareTo(b));
+
+    AppLogger.info('[HealthDataService] incremental stream: ${targetDates.length} dates to check');
+
+    int totalMetricsSynced = 0;
+    int totalSessionsSynced = 0;
+    final mergedSources = <String, ({int metrics, int sessions})>{};
+    bool anyPosted = false;
+    Map<String, dynamic>? lastResponseData;
+
+    for (int idx = 0; idx < targetDates.length; idx++) {
+      final date = targetDates[idx];
+      HealthSyncPayload payload;
+      try {
+        payload = await readForDate(date);
+      } catch (e) {
+        AppLogger.warning('[HealthDataService] readForDate failed for $date: $e');
+        continue;
+      }
+
+      if (payload.isEmpty) continue;
+
+      // merge source counts
+      payload.sourceApps.forEach((k, v) {
+        final prev = mergedSources[k];
+        if (prev == null) {
+          mergedSources[k] = v;
+        } else {
+          mergedSources[k] = (metrics: prev.metrics + v.metrics, sessions: prev.sessions + v.sessions);
+        }
+      });
+
+      ApiResponse? response;
+      int attempts = 0;
+      const maxAttempts = 3;
+      while (attempts < maxAttempts) {
+        response = await apiService.post('/health/sync', body: payload.toJson()).timeout(_syncTimeout);
+        if (response.isSuccess || response.statusCode != 429) break;
+        attempts++;
+        if (attempts < maxAttempts) {
+          final backoffMs = 30000 * attempts;
+          AppLogger.warning('[HealthDataService] 429 on $date, retry in ${backoffMs}ms');
+          await Future.delayed(Duration(milliseconds: backoffMs));
+        }
+      }
+
+      if (response == null || !response.isSuccess) {
+        AppLogger.error('[HealthDataService] POST failed for $date: ${response?.error}');
+        // don't block remaining dates — continue to next, will retry on next sync trigger
+        continue;
+      }
+
+      anyPosted = true;
+      totalMetricsSynced += (response.data?['metrics_synced'] as int?) ?? 0;
+      totalSessionsSynced += (response.data?['sessions_synced'] as int?) ?? 0;
+      lastResponseData = response.data;
+      await onSyncSuccess();
+
+      // gentle pacing: 1.2s + jitter 0-800ms between dates to avoid hammering
+      if (idx < targetDates.length - 1) {
+        final jitter = (DateTime.now().millisecond % 800);
+        await Future.delayed(Duration(milliseconds: 1200 + jitter));
+      }
+    }
+
+    if (!anyPosted) {
+      AppLogger.debug('[HealthDataService] incremental stream: no new data');
+      await _fetchStatsOnly();
+      await prefs.setHcLastSyncMs(DateTime.now().millisecondsSinceEpoch);
+      return true;
+    }
+
+    if (lastResponseData != null) {
+      final result = HealthSyncResult.fromJson(
+        {
+          ...lastResponseData,
+          'metrics_synced': totalMetricsSynced,
+          'sessions_synced': totalSessionsSynced,
+        },
+        wasForced: false,
+        deviceSources: mergedSources,
+      );
+      _lastSyncResult.value = result;
+      await _persistStats(result);
+    }
+    await prefs.setHcLastSyncMs(DateTime.now().millisecondsSinceEpoch);
+    emitEvent?.call(HealthSyncCompleted());
+    AppLogger.info('[HealthDataService] incremental stream done ($totalMetricsSynced metrics, $totalSessionsSynced sessions across dates)');
+    return true;
   }
 
   /// called after successful backend POST — persist platform-specific tokens

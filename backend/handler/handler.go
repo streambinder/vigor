@@ -10,7 +10,9 @@ import (
 // Init initializes the Fiber application with middleware and routes.
 // This function must be called before starting the server.
 func Init() *fiber.App {
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		BodyLimit: 10 * 1024 * 1024, // allow windowed HR samples + sessions
+	})
 
 	// Register route handlers with no middleware
 	initStatus(app)
