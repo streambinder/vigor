@@ -107,19 +107,18 @@ func maintain(db *gorm.DB, table string) {
 	for i := -1; i <= 1; i++ {
 		day := utcDay(time.Now()).AddDate(0, 0, i)
 		name := partitionName(table, day)
-		stmt := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS daily.%s
-			PARTITION OF daily.%s FOR VALUES FROM (?) TO (?)`,
-			name, table)
-		if err := db.Exec(stmt, day.Format("2006-01-02"), day.AddDate(0, 0, 1).Format("2006-01-02")).Error; err != nil {
+		stmt := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS daily.%s PARTITION OF daily.%s FOR VALUES FROM ('%s') TO ('%s')`,
+			name, table, day.Format("2006-01-02"), day.AddDate(0, 0, 1).Format("2006-01-02"))
+		if err := db.Exec(stmt).Error; err != nil {
 			log.Warn().Err(err).Str("partition", name).Msg("daily partition creation failed")
 		}
 	}
 
 	cutoff := utcDay(time.Now().AddDate(0, 0, -retentionDays))
 	var partitions []string
-	if err := db.Raw(`SELECT inhrelid::regclass::text
+	if err := db.Raw(fmt.Sprintf(`SELECT inhrelid::regclass::text
 			FROM pg_inherits
-			WHERE inhparent = ?`, "daily."+table).
+			WHERE inhparent = 'daily.%s'::regclass`, table)).
 		Scan(&partitions).Error; err != nil {
 		log.Warn().Err(err).Str("table", table).Msg("daily partition listing failed")
 		return
