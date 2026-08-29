@@ -450,13 +450,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   style: VigorTypography.caption.copyWith(color: VigorColors.stone.withValues(alpha: 0.6)),
                                 ),
                               ),
-                            // sync now
+                            // sync now — full 30-day rescan
                             Divider(height: 1, color: VigorColors.border(context)),
                             ListTile(
                               leading: Icon(Icons.sync, color: isSyncing ? VigorColors.stone : VigorColors.indigoAdaptive(context), size: 22),
                               title: Text(l10n.healthSynchronize, style: VigorTypography.body.copyWith(color: isSyncing ? VigorColors.stone : VigorColors.textPrimary(context))),
+                              subtitle: Text(l10n.healthSyncTypeFull, style: VigorTypography.caption.copyWith(color: VigorColors.stone.withValues(alpha: 0.6))),
                               onTap: isSyncing ? null : () {
-                                AppLogger.info('[Settings] manual sync triggered');
+                                AppLogger.info('[Settings] full resync triggered');
                                 final healthService = context.read<ServiceLocator>().healthDataService;
                                 if (healthService == null) return;
                                 healthService.syncToBackend(fullRescan: true);
