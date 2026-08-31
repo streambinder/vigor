@@ -3563,6 +3563,492 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Generate your first flow session to start recovering and stretching.'**
   String get generateFirstFlow;
+
+  /// No description provided for @exerciseTypeAmericanFootball.
+  ///
+  /// In en, this message translates to:
+  /// **'American Football'**
+  String get exerciseTypeAmericanFootball;
+
+  /// No description provided for @exerciseTypeArchery.
+  ///
+  /// In en, this message translates to:
+  /// **'Archery'**
+  String get exerciseTypeArchery;
+
+  /// No description provided for @exerciseTypeAustralianFootball.
+  ///
+  /// In en, this message translates to:
+  /// **'Australian Football'**
+  String get exerciseTypeAustralianFootball;
+
+  /// No description provided for @exerciseTypeBadminton.
+  ///
+  /// In en, this message translates to:
+  /// **'Badminton'**
+  String get exerciseTypeBadminton;
+
+  /// No description provided for @exerciseTypeBaseball.
+  ///
+  /// In en, this message translates to:
+  /// **'Baseball'**
+  String get exerciseTypeBaseball;
+
+  /// No description provided for @exerciseTypeBasketball.
+  ///
+  /// In en, this message translates to:
+  /// **'Basketball'**
+  String get exerciseTypeBasketball;
+
+  /// No description provided for @exerciseTypeBoxing.
+  ///
+  /// In en, this message translates to:
+  /// **'Boxing'**
+  String get exerciseTypeBoxing;
+
+  /// No description provided for @exerciseTypeCardioDance.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardio Dance'**
+  String get exerciseTypeCardioDance;
+
+  /// No description provided for @exerciseTypeCricket.
+  ///
+  /// In en, this message translates to:
+  /// **'Cricket'**
+  String get exerciseTypeCricket;
+
+  /// No description provided for @exerciseTypeCrossCountrySkiing.
+  ///
+  /// In en, this message translates to:
+  /// **'Cross-Country Skiing'**
+  String get exerciseTypeCrossCountrySkiing;
+
+  /// No description provided for @exerciseTypeCurling.
+  ///
+  /// In en, this message translates to:
+  /// **'Curling'**
+  String get exerciseTypeCurling;
+
+  /// No description provided for @exerciseTypeDownhillSkiing.
+  ///
+  /// In en, this message translates to:
+  /// **'Downhill Skiing'**
+  String get exerciseTypeDownhillSkiing;
+
+  /// No description provided for @exerciseTypeFencing.
+  ///
+  /// In en, this message translates to:
+  /// **'Fencing'**
+  String get exerciseTypeFencing;
+
+  /// No description provided for @exerciseTypeGolf.
+  ///
+  /// In en, this message translates to:
+  /// **'Golf'**
+  String get exerciseTypeGolf;
+
+  /// No description provided for @exerciseTypeGymnastics.
+  ///
+  /// In en, this message translates to:
+  /// **'Gymnastics'**
+  String get exerciseTypeGymnastics;
+
+  /// No description provided for @exerciseTypeHandball.
+  ///
+  /// In en, this message translates to:
+  /// **'Handball'**
+  String get exerciseTypeHandball;
+
+  /// No description provided for @exerciseTypeHighIntensityIntervalTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'HIIT'**
+  String get exerciseTypeHighIntensityIntervalTraining;
+
+  /// No description provided for @exerciseTypeHockey.
+  ///
+  /// In en, this message translates to:
+  /// **'Hockey'**
+  String get exerciseTypeHockey;
+
+  /// No description provided for @exerciseTypeJumpRope.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump Rope'**
+  String get exerciseTypeJumpRope;
+
+  /// No description provided for @exerciseTypeKickboxing.
+  ///
+  /// In en, this message translates to:
+  /// **'Kickboxing'**
+  String get exerciseTypeKickboxing;
+
+  /// No description provided for @exerciseTypeMartialArts.
+  ///
+  /// In en, this message translates to:
+  /// **'Martial Arts'**
+  String get exerciseTypeMartialArts;
+
+  /// No description provided for @exerciseTypeRacquetball.
+  ///
+  /// In en, this message translates to:
+  /// **'Racquetball'**
+  String get exerciseTypeRacquetball;
+
+  /// No description provided for @exerciseTypeRugby.
+  ///
+  /// In en, this message translates to:
+  /// **'Rugby'**
+  String get exerciseTypeRugby;
+
+  /// No description provided for @exerciseTypeSailing.
+  ///
+  /// In en, this message translates to:
+  /// **'Sailing'**
+  String get exerciseTypeSailing;
+
+  /// No description provided for @exerciseTypeSkating.
+  ///
+  /// In en, this message translates to:
+  /// **'Skating'**
+  String get exerciseTypeSkating;
+
+  /// No description provided for @exerciseTypeSnowboarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Snowboarding'**
+  String get exerciseTypeSnowboarding;
+
+  /// No description provided for @exerciseTypeSoccer.
+  ///
+  /// In en, this message translates to:
+  /// **'Soccer'**
+  String get exerciseTypeSoccer;
+
+  /// No description provided for @exerciseTypeSoftball.
+  ///
+  /// In en, this message translates to:
+  /// **'Softball'**
+  String get exerciseTypeSoftball;
+
+  /// No description provided for @exerciseTypeSquash.
+  ///
+  /// In en, this message translates to:
+  /// **'Squash'**
+  String get exerciseTypeSquash;
+
+  /// No description provided for @exerciseTypeTableTennis.
+  ///
+  /// In en, this message translates to:
+  /// **'Table Tennis'**
+  String get exerciseTypeTableTennis;
+
+  /// No description provided for @exerciseTypeTennis.
+  ///
+  /// In en, this message translates to:
+  /// **'Tennis'**
+  String get exerciseTypeTennis;
+
+  /// No description provided for @exerciseTypeVolleyball.
+  ///
+  /// In en, this message translates to:
+  /// **'Volleyball'**
+  String get exerciseTypeVolleyball;
+
+  /// No description provided for @exerciseTypeWaterPolo.
+  ///
+  /// In en, this message translates to:
+  /// **'Water Polo'**
+  String get exerciseTypeWaterPolo;
+
+  /// No description provided for @exerciseTypeBarre.
+  ///
+  /// In en, this message translates to:
+  /// **'Barre'**
+  String get exerciseTypeBarre;
+
+  /// No description provided for @exerciseTypeBowling.
+  ///
+  /// In en, this message translates to:
+  /// **'Bowling'**
+  String get exerciseTypeBowling;
+
+  /// No description provided for @exerciseTypeClimbing.
+  ///
+  /// In en, this message translates to:
+  /// **'Climbing'**
+  String get exerciseTypeClimbing;
+
+  /// No description provided for @exerciseTypeCooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooldown'**
+  String get exerciseTypeCooldown;
+
+  /// No description provided for @exerciseTypeCoreTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Core Training'**
+  String get exerciseTypeCoreTraining;
+
+  /// No description provided for @exerciseTypeCrossTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Cross Training'**
+  String get exerciseTypeCrossTraining;
+
+  /// No description provided for @exerciseTypeDiscSports.
+  ///
+  /// In en, this message translates to:
+  /// **'Disc Sports'**
+  String get exerciseTypeDiscSports;
+
+  /// No description provided for @exerciseTypeEquestrianSports.
+  ///
+  /// In en, this message translates to:
+  /// **'Equestrian Sports'**
+  String get exerciseTypeEquestrianSports;
+
+  /// No description provided for @exerciseTypeFishing.
+  ///
+  /// In en, this message translates to:
+  /// **'Fishing'**
+  String get exerciseTypeFishing;
+
+  /// No description provided for @exerciseTypeFitnessGaming.
+  ///
+  /// In en, this message translates to:
+  /// **'Fitness Gaming'**
+  String get exerciseTypeFitnessGaming;
+
+  /// No description provided for @exerciseTypeFlexibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexibility'**
+  String get exerciseTypeFlexibility;
+
+  /// No description provided for @exerciseTypeHandCycling.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand Cycling'**
+  String get exerciseTypeHandCycling;
+
+  /// No description provided for @exerciseTypeHunting.
+  ///
+  /// In en, this message translates to:
+  /// **'Hunting'**
+  String get exerciseTypeHunting;
+
+  /// No description provided for @exerciseTypeLacrosse.
+  ///
+  /// In en, this message translates to:
+  /// **'Lacrosse'**
+  String get exerciseTypeLacrosse;
+
+  /// No description provided for @exerciseTypeMindAndBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Mind and Body'**
+  String get exerciseTypeMindAndBody;
+
+  /// No description provided for @exerciseTypeMixedCardio.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed Cardio'**
+  String get exerciseTypeMixedCardio;
+
+  /// No description provided for @exerciseTypePaddleSports.
+  ///
+  /// In en, this message translates to:
+  /// **'Paddle Sports'**
+  String get exerciseTypePaddleSports;
+
+  /// No description provided for @exerciseTypePickleball.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickleball'**
+  String get exerciseTypePickleball;
+
+  /// No description provided for @exerciseTypePlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get exerciseTypePlay;
+
+  /// No description provided for @exerciseTypePreparationAndRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery'**
+  String get exerciseTypePreparationAndRecovery;
+
+  /// No description provided for @exerciseTypeSnowSports.
+  ///
+  /// In en, this message translates to:
+  /// **'Snow Sports'**
+  String get exerciseTypeSnowSports;
+
+  /// No description provided for @exerciseTypeSocialDance.
+  ///
+  /// In en, this message translates to:
+  /// **'Social Dance'**
+  String get exerciseTypeSocialDance;
+
+  /// No description provided for @exerciseTypeStairs.
+  ///
+  /// In en, this message translates to:
+  /// **'Stairs'**
+  String get exerciseTypeStairs;
+
+  /// No description provided for @exerciseTypeStepTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Step Training'**
+  String get exerciseTypeStepTraining;
+
+  /// No description provided for @exerciseTypeSurfing.
+  ///
+  /// In en, this message translates to:
+  /// **'Surfing'**
+  String get exerciseTypeSurfing;
+
+  /// No description provided for @exerciseTypeTaiChi.
+  ///
+  /// In en, this message translates to:
+  /// **'Tai Chi'**
+  String get exerciseTypeTaiChi;
+
+  /// No description provided for @exerciseTypeTrackAndField.
+  ///
+  /// In en, this message translates to:
+  /// **'Track and Field'**
+  String get exerciseTypeTrackAndField;
+
+  /// No description provided for @exerciseTypeWaterFitness.
+  ///
+  /// In en, this message translates to:
+  /// **'Water Fitness'**
+  String get exerciseTypeWaterFitness;
+
+  /// No description provided for @exerciseTypeWaterSports.
+  ///
+  /// In en, this message translates to:
+  /// **'Water Sports'**
+  String get exerciseTypeWaterSports;
+
+  /// No description provided for @exerciseTypeWheelchairRunPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheelchair Run'**
+  String get exerciseTypeWheelchairRunPace;
+
+  /// No description provided for @exerciseTypeWheelchairWalkPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheelchair Walk'**
+  String get exerciseTypeWheelchairWalkPace;
+
+  /// No description provided for @exerciseTypeWrestling.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrestling'**
+  String get exerciseTypeWrestling;
+
+  /// No description provided for @exerciseTypeUnderwaterDiving.
+  ///
+  /// In en, this message translates to:
+  /// **'Underwater Diving'**
+  String get exerciseTypeUnderwaterDiving;
+
+  /// No description provided for @exerciseTypeCalisthenics.
+  ///
+  /// In en, this message translates to:
+  /// **'Calisthenics'**
+  String get exerciseTypeCalisthenics;
+
+  /// No description provided for @exerciseTypeFrisbeeDisc.
+  ///
+  /// In en, this message translates to:
+  /// **'Frisbee'**
+  String get exerciseTypeFrisbeeDisc;
+
+  /// No description provided for @exerciseTypeGuidedBreathing.
+  ///
+  /// In en, this message translates to:
+  /// **'Breathing'**
+  String get exerciseTypeGuidedBreathing;
+
+  /// No description provided for @exerciseTypeIceSkating.
+  ///
+  /// In en, this message translates to:
+  /// **'Ice Skating'**
+  String get exerciseTypeIceSkating;
+
+  /// No description provided for @exerciseTypeParagliding.
+  ///
+  /// In en, this message translates to:
+  /// **'Paragliding'**
+  String get exerciseTypeParagliding;
+
+  /// No description provided for @exerciseTypeRockClimbing.
+  ///
+  /// In en, this message translates to:
+  /// **'Rock Climbing'**
+  String get exerciseTypeRockClimbing;
+
+  /// No description provided for @exerciseTypeRowingMachine.
+  ///
+  /// In en, this message translates to:
+  /// **'Rowing Machine'**
+  String get exerciseTypeRowingMachine;
+
+  /// No description provided for @exerciseTypeScubaDiving.
+  ///
+  /// In en, this message translates to:
+  /// **'Scuba Diving'**
+  String get exerciseTypeScubaDiving;
+
+  /// No description provided for @exerciseTypeSkiing.
+  ///
+  /// In en, this message translates to:
+  /// **'Skiing'**
+  String get exerciseTypeSkiing;
+
+  /// No description provided for @exerciseTypeSnowshoeing.
+  ///
+  /// In en, this message translates to:
+  /// **'Snowshoeing'**
+  String get exerciseTypeSnowshoeing;
+
+  /// No description provided for @exerciseTypeStairClimbingMachine.
+  ///
+  /// In en, this message translates to:
+  /// **'Stair Machine'**
+  String get exerciseTypeStairClimbingMachine;
+
+  /// No description provided for @exerciseTypeSwimmingOpenWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Water Swimming'**
+  String get exerciseTypeSwimmingOpenWater;
+
+  /// No description provided for @exerciseTypeSwimmingPool.
+  ///
+  /// In en, this message translates to:
+  /// **'Pool Swimming'**
+  String get exerciseTypeSwimmingPool;
+
+  /// No description provided for @exerciseTypeWeightlifting.
+  ///
+  /// In en, this message translates to:
+  /// **'Weightlifting'**
+  String get exerciseTypeWeightlifting;
+
+  /// No description provided for @exerciseTypeWheelchair.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheelchair'**
+  String get exerciseTypeWheelchair;
 }
 
 class _AppLocalizationsDelegate

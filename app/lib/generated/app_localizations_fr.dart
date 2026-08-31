@@ -1881,4 +1881,247 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get generateFirstFlow =>
       'Génère ta première séance flow pour commencer à récupérer et t\'étirer.';
+
+  @override
+  String get exerciseTypeAmericanFootball => 'American Football';
+
+  @override
+  String get exerciseTypeArchery => 'Archery';
+
+  @override
+  String get exerciseTypeAustralianFootball => 'Australian Football';
+
+  @override
+  String get exerciseTypeBadminton => 'Badminton';
+
+  @override
+  String get exerciseTypeBaseball => 'Baseball';
+
+  @override
+  String get exerciseTypeBasketball => 'Basketball';
+
+  @override
+  String get exerciseTypeBoxing => 'Boxing';
+
+  @override
+  String get exerciseTypeCardioDance => 'Cardio Dance';
+
+  @override
+  String get exerciseTypeCricket => 'Cricket';
+
+  @override
+  String get exerciseTypeCrossCountrySkiing => 'Cross-Country Skiing';
+
+  @override
+  String get exerciseTypeCurling => 'Curling';
+
+  @override
+  String get exerciseTypeDownhillSkiing => 'Downhill Skiing';
+
+  @override
+  String get exerciseTypeFencing => 'Fencing';
+
+  @override
+  String get exerciseTypeGolf => 'Golf';
+
+  @override
+  String get exerciseTypeGymnastics => 'Gymnastics';
+
+  @override
+  String get exerciseTypeHandball => 'Handball';
+
+  @override
+  String get exerciseTypeHighIntensityIntervalTraining => 'HIIT';
+
+  @override
+  String get exerciseTypeHockey => 'Hockey';
+
+  @override
+  String get exerciseTypeJumpRope => 'Jump Rope';
+
+  @override
+  String get exerciseTypeKickboxing => 'Kickboxing';
+
+  @override
+  String get exerciseTypeMartialArts => 'Martial Arts';
+
+  @override
+  String get exerciseTypeRacquetball => 'Racquetball';
+
+  @override
+  String get exerciseTypeRugby => 'Rugby';
+
+  @override
+  String get exerciseTypeSailing => 'Sailing';
+
+  @override
+  String get exerciseTypeSkating => 'Skating';
+
+  @override
+  String get exerciseTypeSnowboarding => 'Snowboarding';
+
+  @override
+  String get exerciseTypeSoccer => 'Soccer';
+
+  @override
+  String get exerciseTypeSoftball => 'Softball';
+
+  @override
+  String get exerciseTypeSquash => 'Squash';
+
+  @override
+  String get exerciseTypeTableTennis => 'Table Tennis';
+
+  @override
+  String get exerciseTypeTennis => 'Tennis';
+
+  @override
+  String get exerciseTypeVolleyball => 'Volleyball';
+
+  @override
+  String get exerciseTypeWaterPolo => 'Water Polo';
+
+  @override
+  String get exerciseTypeBarre => 'Barre';
+
+  @override
+  String get exerciseTypeBowling => 'Bowling';
+
+  @override
+  String get exerciseTypeClimbing => 'Climbing';
+
+  @override
+  String get exerciseTypeCooldown => 'Cooldown';
+
+  @override
+  String get exerciseTypeCoreTraining => 'Core Training';
+
+  @override
+  String get exerciseTypeCrossTraining => 'Cross Training';
+
+  @override
+  String get exerciseTypeDiscSports => 'Disc Sports';
+
+  @override
+  String get exerciseTypeEquestrianSports => 'Equestrian Sports';
+
+  @override
+  String get exerciseTypeFishing => 'Fishing';
+
+  @override
+  String get exerciseTypeFitnessGaming => 'Fitness Gaming';
+
+  @override
+  String get exerciseTypeFlexibility => 'Flexibility';
+
+  @override
+  String get exerciseTypeHandCycling => 'Hand Cycling';
+
+  @override
+  String get exerciseTypeHunting => 'Hunting';
+
+  @override
+  String get exerciseTypeLacrosse => 'Lacrosse';
+
+  @override
+  String get exerciseTypeMindAndBody => 'Mind and Body';
+
+  @override
+  String get exerciseTypeMixedCardio => 'Mixed Cardio';
+
+  @override
+  String get exerciseTypePaddleSports => 'Paddle Sports';
+
+  @override
+  String get exerciseTypePickleball => 'Pickleball';
+
+  @override
+  String get exerciseTypePlay => 'Play';
+
+  @override
+  String get exerciseTypePreparationAndRecovery => 'Recovery';
+
+  @override
+  String get exerciseTypeSnowSports => 'Snow Sports';
+
+  @override
+  String get exerciseTypeSocialDance => 'Social Dance';
+
+  @override
+  String get exerciseTypeStairs => 'Stairs';
+
+  @override
+  String get exerciseTypeStepTraining => 'Step Training';
+
+  @override
+  String get exerciseTypeSurfing => 'Surfing';
+
+  @override
+  String get exerciseTypeTaiChi => 'Tai Chi';
+
+  @override
+  String get exerciseTypeTrackAndField => 'Track and Field';
+
+  @override
+  String get exerciseTypeWaterFitness => 'Water Fitness';
+
+  @override
+  String get exerciseTypeWaterSports => 'Water Sports';
+
+  @override
+  String get exerciseTypeWheelchairRunPace => 'Wheelchair Run';
+
+  @override
+  String get exerciseTypeWheelchairWalkPace => 'Wheelchair Walk';
+
+  @override
+  String get exerciseTypeWrestling => 'Wrestling';
+
+  @override
+  String get exerciseTypeUnderwaterDiving => 'Underwater Diving';
+
+  @override
+  String get exerciseTypeCalisthenics => 'Calisthenics';
+
+  @override
+  String get exerciseTypeFrisbeeDisc => 'Frisbee';
+
+  @override
+  String get exerciseTypeGuidedBreathing => 'Breathing';
+
+  @override
+  String get exerciseTypeIceSkating => 'Ice Skating';
+
+  @override
+  String get exerciseTypeParagliding => 'Paragliding';
+
+  @override
+  String get exerciseTypeRockClimbing => 'Rock Climbing';
+
+  @override
+  String get exerciseTypeRowingMachine => 'Rowing Machine';
+
+  @override
+  String get exerciseTypeScubaDiving => 'Scuba Diving';
+
+  @override
+  String get exerciseTypeSkiing => 'Skiing';
+
+  @override
+  String get exerciseTypeSnowshoeing => 'Snowshoeing';
+
+  @override
+  String get exerciseTypeStairClimbingMachine => 'Stair Machine';
+
+  @override
+  String get exerciseTypeSwimmingOpenWater => 'Open Water Swimming';
+
+  @override
+  String get exerciseTypeSwimmingPool => 'Pool Swimming';
+
+  @override
+  String get exerciseTypeWeightlifting => 'Weightlifting';
+
+  @override
+  String get exerciseTypeWheelchair => 'Wheelchair';
 }

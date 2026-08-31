@@ -1,24 +1,22 @@
 {
   "@@locale": "en",
-
   "appName": "Vigor",
   "appTagline": "Ex Sapientia Vis",
-
   "navHome": "Home",
   "navActivity": "Activity",
   "navProfile": "Profile",
-
   "storageErrorTitle": "Vigor - Storage Error",
   "storageUnavailable": "Storage Unavailable",
   "storageErrorMessage": "Secure storage required. Check browser settings.",
-
   "signInWithGoogle": "Sign in with Google",
   "signingIn": "Signing in...",
   "failedToInitializeGoogleSignIn": "Failed to initialize Google Sign In",
   "signInError": "Sign-in error: {message}",
   "@signInError": {
     "placeholders": {
-      "message": {"type": "String"}
+      "message": {
+        "type": "String"
+      }
     }
   },
   "googleSignInFailed": "Google sign-in failed",
@@ -26,27 +24,28 @@
   "errorProcessingSignIn": "Error processing sign-in: {message}",
   "@errorProcessingSignIn": {
     "placeholders": {
-      "message": {"type": "String"}
+      "message": {
+        "type": "String"
+      }
     }
   },
   "googleSignInInitializing": "Google Sign In is still initializing...",
-
   "readyToTrain": "Ready to train?",
   "generateTrainingDescription": "Create a workout tailored to your goals",
   "generateTraining": "Generate Training",
-
   "refresh": "Refresh",
   "logout": "Logout",
   "userDataRefreshed": "User data refreshed",
   "editProfile": "Edit Profile",
   "settings": "Settings",
   "other": "Other",
-
   "deleteGym": "Delete Gym",
   "deleteGymConfirmation": "Delete \"{name}\"?",
   "@deleteGymConfirmation": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "cancel": "Cancel",
@@ -56,7 +55,6 @@
   "deleteAccountConfirmation": "Delete your account? This cannot be undone.",
   "accountDeletedSuccessfully": "Account deleted successfully",
   "failedToDeleteAccount": "Failed to delete account",
-
   "failedToLoadGyms": "Failed to load gyms",
   "gymAddedSuccessfully": "Gym added successfully",
   "failedToAddGym": "Failed to add gym",
@@ -64,7 +62,6 @@
   "failedToUpdateGym": "Failed to update gym",
   "gymDeletedSuccessfully": "Gym deleted successfully",
   "failedToDeleteGym": "Failed to delete gym",
-
   "birthdate": "Birthdate",
   "gender": "Gender",
   "language": "Language",
@@ -75,16 +72,19 @@
   "heightWithUnit": "{value} cm",
   "@heightWithUnit": {
     "placeholders": {
-      "value": {"type": "double"}
+      "value": {
+        "type": "double"
+      }
     }
   },
   "weightWithUnit": "{value} kg",
   "@weightWithUnit": {
     "placeholders": {
-      "value": {"type": "double"}
+      "value": {
+        "type": "double"
+      }
     }
   },
-
   "goals": "Goals",
   "injuries": "Injuries",
   "limitations": "Limitations",
@@ -97,16 +97,19 @@
   "startedDate": "Started: {date}",
   "@startedDate": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "yearLabel": "Year: {year}",
   "@yearLabel": {
     "placeholders": {
-      "year": {"type": "int"}
+      "year": {
+        "type": "int"
+      }
     }
   },
-
   "myGyms": "Gyms",
   "addGym": "Add Gym",
   "noGymsAddedYet": "No gyms added yet",
@@ -114,10 +117,8 @@
   "removeDefault": "Remove Default",
   "setAsDefault": "Set as Default",
   "edit": "Edit",
-
   "quickActions": "Quick Actions",
   "dangerZone": "Danger Zone",
-
   "completeYourProfile": "Complete Your Profile",
   "updateYourProfileInfo": "Update your info below.",
   "pleaseCompleteProfile": "Complete your profile. * = required.",
@@ -129,13 +130,11 @@
   "selectLanguage": "Select language",
   "heightCm": "Height (cm)",
   "weightKg": "Weight (kg)",
-
   "required": "Required",
   "invalid": "Invalid",
   "pleaseSelectBirthDate": "Please select your birth date",
   "pleaseAddAtLeastOneGoal": "Please add at least one goal",
   "pleaseSelectLanguage": "Please select your language",
-
   "addAGoal": "Add a goal",
   "injuryDescription": "Injury description",
   "year": "Year",
@@ -143,10 +142,8 @@
   "addACondition": "Add a condition",
   "favoriteExercisesHint": "e.g., squats, pull-ups, running",
   "favoriteEquipmentHint": "e.g., dumbbells, barbell, kettlebell",
-
   "saveChanges": "Save Changes",
   "saveProfile": "Save Profile",
-
   "optionalLeaveEmpty": "(Optional)",
   "optionalExercisesPrefer": "(Optional)",
   "optionalEquipmentPrefer": "(Optional)",
@@ -172,16 +169,13 @@
   "workoutTypeEnduranceDescription": "Sustained effort at moderate intensity for aerobic capacity",
   "workoutTypeMobility": "Mobility",
   "workoutTypeMobilityDescription": "Improve range of motion and joint health",
-
   "methodologyOptional": "Methodology (optional)",
   "methodologyAuto": "Auto",
   "goalsOptional": "Goals (optional)",
   "musclesOptional": "Muscles (optional)",
   "musclesAuto": "Auto",
   "advancedSettings": "Advanced",
-
   "failedToUpdateProfile": "Failed to update profile",
-
   "activity": "Activity",
   "noTrainingsYet": "No trainings yet",
   "generateFirstTraining": "Create your first training from Home",
@@ -194,7 +188,9 @@
   "daysAgo": "{count}d ago",
   "@daysAgo": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "available": "Available",
@@ -205,25 +201,32 @@
   "durationMin": "{minutes} min",
   "@durationMin": {
     "placeholders": {
-      "minutes": {"type": "int"}
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "durationHr": "{hours} hr",
   "@durationHr": {
     "placeholders": {
-      "hours": {"type": "int"}
+      "hours": {
+        "type": "int"
+      }
     }
   },
   "durationHrMin": "{hours} hr {minutes} min",
   "@durationHrMin": {
     "placeholders": {
-      "hours": {"type": "int"},
-      "minutes": {"type": "int"}
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "failedToLoadTrainings": "Failed to load trainings",
   "startTraining": "Start Training",
-
   "cloneTraining": "Clone Training",
   "addPartner": "Add Partner",
   "shareWithUser": "Share with User",
@@ -231,40 +234,52 @@
   "leaveTraining": "Leave Training",
   "showAiReasoning": "Show AI reasoning",
   "reportIssue": "Report issue",
-
   "deleteTrainingConfirmation": "Delete \"{name}\"? This cannot be undone.",
   "@deleteTrainingConfirmation": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "leaveTrainingConfirmation": "Leave \"{name}\"? You won't see it anymore.",
   "@leaveTrainingConfirmation": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "addPartnerConfirmation": "Add {userName} as a partner to \"{trainingName}\"?",
   "@addPartnerConfirmation": {
     "placeholders": {
-      "userName": {"type": "String"},
-      "trainingName": {"type": "String"}
+      "userName": {
+        "type": "String"
+      },
+      "trainingName": {
+        "type": "String"
+      }
     }
   },
   "cloneTrainingConfirmation": "Clone \"{name}\" to your trainings?",
   "@cloneTrainingConfirmation": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shareTrainingConfirmation": "Share \"{trainingName}\" with {userName}?",
   "@shareTrainingConfirmation": {
     "placeholders": {
-      "trainingName": {"type": "String"},
-      "userName": {"type": "String"}
+      "trainingName": {
+        "type": "String"
+      },
+      "userName": {
+        "type": "String"
+      }
     }
   },
-
   "trainingDeletedSuccessfully": "Training deleted successfully",
   "failedToDeleteTraining": "Failed to delete training",
   "leftTrainingSuccessfully": "Left training successfully",
@@ -284,7 +299,6 @@
   "shuffleExercise": "Shuffle exercise",
   "exerciseShuffled": "Exercise shuffled",
   "failedToShuffleExercise": "Failed to shuffle exercise",
-
   "reasoning": "Reasoning",
   "strategy": "Strategy",
   "typeSelection": "Type Selection",
@@ -293,43 +307,54 @@
   "researchApplied": "Research Applied",
   "targetMuscles": "Target Muscles",
   "naming": "Naming",
-
   "trainingRoutines": "Training",
   "noEquipment": "No equipment",
   "blockNumber": "Block {number}",
   "@blockNumber": {
     "placeholders": {
-      "number": {"type": "int"}
+      "number": {
+        "type": "int"
+      }
     }
   },
   "repeatsCount": "{count}x",
   "@repeatsCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "durationSeconds": "{seconds}s",
   "@durationSeconds": {
     "placeholders": {
-      "seconds": {"type": "int"}
+      "seconds": {
+        "type": "int"
+      }
     }
   },
   "restSeconds": "{seconds}s rest",
   "@restSeconds": {
     "placeholders": {
-      "seconds": {"type": "int"}
+      "seconds": {
+        "type": "int"
+      }
     }
   },
   "repsCount": "{count} reps",
   "@repsCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "weightKgValue": "{value} kg",
   "@weightKgValue": {
     "placeholders": {
-      "value": {"type": "double"}
+      "value": {
+        "type": "double"
+      }
     }
   },
   "markAsComplete": "Mark as Complete",
@@ -345,14 +370,15 @@
   "clone": "Clone",
   "share": "Share",
   "leave": "Leave",
-
   "tapToStart": "Tap to start",
   "tapWhenDone": "Tap when done",
   "trainingCompleted": "Training Completed!",
   "greatJobCompleting": "Great job completing {name}",
   "@greatJobCompleting": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "done": "Done",
@@ -360,18 +386,25 @@
   "routineCounter": "Routine {current}/{total}",
   "@routineCounter": {
     "placeholders": {
-      "current": {"type": "int"},
-      "total": {"type": "int"}
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "blockCounter": "Block {current}/{total}",
   "@blockCounter": {
     "placeholders": {
-      "current": {"type": "int"},
-      "total": {"type": "int"}
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
-
   "exitTraining": "Exit Training?",
   "whatWouldYouLikeToDo": "What next?",
   "exit": "Exit",
@@ -379,9 +412,7 @@
   "stop": "Stop",
   "stopTraining": "Stop Training?",
   "stopTrainingConfirm": "Timer progress will be lost.",
-
   "failedToMarkComplete": "Failed to complete training",
-
   "durationMinutes": "Duration (minutes)",
   "bodyweight": "Bodyweight",
   "gym": "Gym",
@@ -396,7 +427,6 @@
   "customPromptOptional": "Custom Prompt (optional)",
   "focusOnUpperBody": "e.g., Focus on upper body",
   "trainingPartnersOptional": "Partner",
-
   "generatingTraining": "Generating your training...",
   "thisMayTakeAMoment": "This may take a moment",
   "generationFailedRetrying": "Generation failed, retrying #{attempt}...",
@@ -414,7 +444,6 @@
   "freeTextHint": "Paste a workout program or a link to it, or just describe what you want to do...",
   "freeTextRequired": "Paste or describe your workout program first",
   "generate": "Generate",
-
   "generationStepAnalyzeRecovery": "Analyzing recovery data...",
   "generationStepReviewHistory": "Reviewing training history...",
   "generationStepCheckConstraints": "Checking constraints...",
@@ -425,7 +454,6 @@
   "generationStepStructure": "Finalizing...",
   "generationStepDeriveParams": "Planning your session...",
   "generationStepTargetMuscles": "Targeting muscles...",
-
   "editGym": "Edit Gym",
   "gymName": "Gym Name",
   "gymNamePlaceholder": "e.g., Home Gym, LA Fitness",
@@ -435,16 +463,13 @@
   "pleaseEnterGymName": "Please enter a gym name",
   "addAllEquipment": "Add All",
   "failedToLoadEquipment": "Failed to load equipment",
-
   "selectUser": "Select User",
   "searchByName": "Search by name",
   "noUsersAvailable": "No users available",
   "noMatchingUsers": "No matching users",
   "noMatchingEquipment": "No matching equipment",
-
   "instructions": "Instructions",
   "cues": "Cues",
-
   "howWasYourTraining": "How was your training?",
   "anyAdditionalComments": "Any additional comments?",
   "actualDuration": "Actual duration (min)",
@@ -454,9 +479,7 @@
   "easy": "Easy",
   "tooEasy": "Too easy",
   "flag": "Flag",
-
   "profile": "Profile",
-
   "languageEnglish": "English",
   "languageItaliano": "Italiano",
   "languageEspanol": "Español",
@@ -467,21 +490,23 @@
   "languageChinese": "中文",
   "languageJapanese": "日本語",
   "languageKorean": "한국어",
-
   "nextExercise": "Next: {name}",
   "@nextExercise": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "rest": "Rest",
   "upcoming": "Upcoming",
-
   "yourProgress": "Your Progress",
   "trainingsCompleted": "{count} trainings completed",
   "@trainingsCompleted": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "completedTrainings": "completed trainings",
@@ -499,8 +524,12 @@
   "calibrationFamiliesLearned": "{calibrated}/{total} movement patterns learned",
   "@calibrationFamiliesLearned": {
     "placeholders": {
-      "calibrated": {"type": "int"},
-      "total": {"type": "int"}
+      "calibrated": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "capabilities": "Capabilities",
@@ -511,25 +540,21 @@
   "heatWarm": "Warm",
   "heatHot": "Hot",
   "noTrainingsCompletedYet": "Start training to see something here",
-
   "theme": "Theme",
   "themeAuto": "Auto",
   "themeLight": "Light",
   "themeDark": "Dark",
   "themeAutoDescription": "Follow system settings",
   "appearance": "Appearance",
-
   "trainingDefaults": "Defaults",
   "defaultDuration": "Training Duration",
   "warmupCooldown": "Warmup and cooldown",
-
   "timer": "Timer",
   "intervalJingle": "Whistle at interval change",
   "duckOtherAudio": "Lower other audio",
   "duckOtherAudioDescription": "Reduce volume of music and other apps during whistle",
   "liveTimerNotification": "Live timer notification",
   "liveTimerNotificationDescription": "Show elapsed time and controls in the status bar during training",
-
   "goalHypertrophy": "Muscle Building",
   "goalHypertrophyDescription": "Build muscle size with targeted resistance training",
   "goalFatLoss": "Fat Loss",
@@ -546,7 +571,6 @@
   "goalFlexibilityDescription": "Improve range of motion with stretching and mobility",
   "goalSports": "Sports Performance",
   "goalSportsDescription": "Boost athletic ability with power and agility training",
-
   "thisWeek": "This Week",
   "trainingPlan": "Training Plan",
   "sessionsPerWeek": "Sessions per week",
@@ -559,12 +583,13 @@
   "daysLeft": "{count} days left",
   "@daysLeft": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "recommended": "Recommended",
   "duration": "Duration",
-
   "familyHorizontalPush": "Push",
   "familyHorizontalPull": "Pull",
   "familyVerticalPush": "Overhead",
@@ -576,13 +601,11 @@
   "familyCardio": "Cardio",
   "familyMobility": "Mobility",
   "familyBalance": "Balance",
-
   "trainingQuality": "How did you like this training?",
   "trainingQualityHint": "Helps us evaluate AI training quality",
   "qualityReasonHint": "What could be improved?",
   "good": "Good",
   "bad": "Bad",
-
   "loadingMsg1": "Analyzing your profile...",
   "loadingMsg2": "Selecting exercises...",
   "loadingMsg3": "Building your routine...",
@@ -603,11 +626,12 @@
   "loadingMsg18": "Evaluating load distribution...",
   "loadingMsg19": "Personalizing your session...",
   "loadingMsg20": "Almost ready...",
-
   "loadingMsgGoal": "Optimizing for {goal}...",
   "@loadingMsgGoal": {
     "placeholders": {
-      "goal": {"type": "String"}
+      "goal": {
+        "type": "String"
+      }
     }
   },
   "loadingMsgInjuries": "Adapting around your injuries...",
@@ -616,46 +640,53 @@
   "loadingMsgMethodology": "Designing a {methodology} session...",
   "@loadingMsgMethodology": {
     "placeholders": {
-      "methodology": {"type": "String"}
+      "methodology": {
+        "type": "String"
+      }
     }
   },
   "loadingMsgPartners": "Coordinating partner workout...",
   "loadingMsgGym": "Loading {gym} equipment...",
   "@loadingMsgGym": {
     "placeholders": {
-      "gym": {"type": "String"}
+      "gym": {
+        "type": "String"
+      }
     }
   },
   "loadingMsgHistory": "Analyzing your recent sessions...",
-
   "loadingRetryMsg1": "hmm, that didn't come out right — retrying",
   "loadingRetryMsg2": "let me try that again...",
   "loadingRetryMsg3": "not quite — giving it another shot",
   "loadingRetryMsg4": "one more try, hang tight",
   "loadingRetryMsg5": "oops, recalibrating...",
   "loadingRetryMsg6": "almost had it — trying again",
-
   "nSelected": "{count} selected",
   "@nSelected": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "deleteSelectedTrainings": "Delete {count} trainings?",
   "@deleteSelectedTrainings": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "trainingsDeletedSuccessfully": "Trainings deleted successfully",
-
   "shareByLink": "Share Link",
   "addToMyTrainings": "Add to My Trainings",
   "goToTraining": "Go to Training",
   "sharedBy": "Shared by {name}",
   "@sharedBy": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "linkCopied": "Link copied to clipboard",
@@ -665,7 +696,6 @@
   "loginToAdd": "Log in to add this training",
   "pendingFeedbacks": "Pending feedbacks",
   "pendingFeedbacksDescription": "Some of your trainings are marked as complete but have no feedback from you. Feedback helps improve your future training recommendations.",
-
   "equipmentPartner": "Partner",
   "equipmentBalanceBoard": "Balance Board",
   "equipmentBand": "Band",
@@ -701,7 +731,6 @@
   "equipmentTrx": "TRX",
   "equipmentUpperBodyErgometer": "Upper Body Ergometer",
   "equipmentWheelRoller": "Ab Wheel",
-
   "muscleChest": "Chest",
   "muscleBack": "Back",
   "muscleShoulders": "Shoulders",
@@ -709,7 +738,6 @@
   "muscleCore": "Core",
   "muscleGlutes": "Glutes",
   "muscleLegs": "Legs",
-
   "modifierWeightedVest": "Weighted Vest",
   "modifierParallettes": "Parallettes",
   "modifierAnkleWeights": "Ankle Weights",
@@ -718,7 +746,6 @@
   "modifierResistanceBands": "Resistance Bands",
   "modifierWeight": "Weight",
   "modifierWristWeights": "Wrist Weights",
-
   "healthData": "Health Data",
   "healthConnected": "Connected",
   "healthSynchronizing": "Synchronizing...",
@@ -729,7 +756,9 @@
   "healthBuildingBaselines": "Building your personal baselines ({days}/14 days)",
   "@healthBuildingBaselines": {
     "placeholders": {
-      "days": {"type": "int"}
+      "days": {
+        "type": "int"
+      }
     }
   },
   "healthSyncNoData": "No health data found on device",
@@ -737,7 +766,9 @@
   "healthSyncFailedDetail": "Data read from device but upload failed: {error}",
   "@healthSyncFailedDetail": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "healthSyncTypeFull": "Full",
@@ -745,23 +776,35 @@
   "healthSourceData": "{metrics} metrics · {sessions} sessions",
   "@healthSourceData": {
     "placeholders": {
-      "metrics": {"type": "int"},
-      "sessions": {"type": "int"}
+      "metrics": {
+        "type": "int"
+      },
+      "sessions": {
+        "type": "int"
+      }
     }
   },
   "healthBackend": "Backend",
   "healthBackendData": "{days} days · {sessions} sessions",
   "@healthBackendData": {
     "placeholders": {
-      "days": {"type": "int"},
-      "sessions": {"type": "int"}
+      "days": {
+        "type": "int"
+      },
+      "sessions": {
+        "type": "int"
+      }
     }
   },
   "healthDateRange": "{from} – {to}",
   "@healthDateRange": {
     "placeholders": {
-      "from": {"type": "String"},
-      "to": {"type": "String"}
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
     }
   },
   "healthDisconnect": "Disconnect & Delete Data",
@@ -771,7 +814,6 @@
   "healthConnect": "Connect",
   "healthMetrics": "Health Metrics",
   "healthAdjustment": "Health Adjustment",
-
   "healthPermissionsTitle": "Connect Your Wearable",
   "healthPermissionsDescription": "Vigor reads your health data to personalize your workouts. Better sleep data, recovery metrics, and activity history mean smarter training recommendations.",
   "healthPermissionsReadOnly": "Height & weight sync with Health",
@@ -784,7 +826,6 @@
   "healthPermissionsSkip": "Not now",
   "healthPermissionsGranted": "Health data connected",
   "healthPermissionsDenied": "Permissions were not granted",
-
   "healthOnboardingTitle": "Connect your wearable",
   "healthOnboardingDescription": "Connect your health data and Vigor will adapt your training to how you sleep, recover, and move.",
   "healthOnboardingConnect": "Connect",
@@ -793,11 +834,9 @@
   "readinessGreen": "Train today!",
   "readinessYellow": "Go easy today",
   "readinessRed": "Rest — you're drained",
-
   "healthInstallHcTitle": "Health Connect Required",
   "healthInstallHcDescription": "Health Connect is needed to sync your wearable data. Install it from the Play Store to continue.",
   "healthInstallHc": "Install Health Connect",
-
   "heartRate": "Heart Rate",
   "avgHr": "Avg HR",
   "maxHr": "Max HR",
@@ -808,7 +847,6 @@
   "hrZone3": "Zone 3",
   "hrZone4": "Zone 4",
   "hrZone5": "Zone 5",
-
   "healthDailySleep": "Sleep",
   "healthDailyRestingHr": "Resting HR",
   "healthDailyHrv": "HRV",
@@ -834,7 +872,6 @@
   "exerciseTypeElliptical": "Elliptical",
   "exerciseTypeStairClimbing": "Stair Climbing",
   "exerciseTypeOther": "Workout",
-
   "appLogs": "App Logs",
   "viewLogs": "View Logs",
   "exportLogs": "Export Logs",
@@ -844,10 +881,11 @@
   "logEntries": "{count} log entries",
   "@logEntries": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "generateSession": "Generate Session",
   "flowSession": "Flow Session",
   "flowSessionDescription": "Yoga, stretching & mobility for recovery and wellbeing",
@@ -857,5 +895,86 @@
   "loadingMsgFlow4": "Checking for injury-safe movements...",
   "loadingMsgFlow5": "Curating your mindful movement sequence...",
   "noFlowSessionsYet": "No flow sessions yet",
-  "generateFirstFlow": "Generate your first flow session to start recovering and stretching."
+  "generateFirstFlow": "Generate your first flow session to start recovering and stretching.",
+  "exerciseTypeAmericanFootball": "American Football",
+  "exerciseTypeArchery": "Archery",
+  "exerciseTypeAustralianFootball": "Australian Football",
+  "exerciseTypeBadminton": "Badminton",
+  "exerciseTypeBaseball": "Baseball",
+  "exerciseTypeBasketball": "Basketball",
+  "exerciseTypeBoxing": "Boxing",
+  "exerciseTypeCardioDance": "Cardio Dance",
+  "exerciseTypeCricket": "Cricket",
+  "exerciseTypeCrossCountrySkiing": "Cross-Country Skiing",
+  "exerciseTypeCurling": "Curling",
+  "exerciseTypeDownhillSkiing": "Downhill Skiing",
+  "exerciseTypeFencing": "Fencing",
+  "exerciseTypeGolf": "Golf",
+  "exerciseTypeGymnastics": "Gymnastics",
+  "exerciseTypeHandball": "Handball",
+  "exerciseTypeHighIntensityIntervalTraining": "HIIT",
+  "exerciseTypeHockey": "Hockey",
+  "exerciseTypeJumpRope": "Jump Rope",
+  "exerciseTypeKickboxing": "Kickboxing",
+  "exerciseTypeMartialArts": "Martial Arts",
+  "exerciseTypeRacquetball": "Racquetball",
+  "exerciseTypeRugby": "Rugby",
+  "exerciseTypeSailing": "Sailing",
+  "exerciseTypeSkating": "Skating",
+  "exerciseTypeSnowboarding": "Snowboarding",
+  "exerciseTypeSoccer": "Soccer",
+  "exerciseTypeSoftball": "Softball",
+  "exerciseTypeSquash": "Squash",
+  "exerciseTypeTableTennis": "Table Tennis",
+  "exerciseTypeTennis": "Tennis",
+  "exerciseTypeVolleyball": "Volleyball",
+  "exerciseTypeWaterPolo": "Water Polo",
+  "exerciseTypeBarre": "Barre",
+  "exerciseTypeBowling": "Bowling",
+  "exerciseTypeClimbing": "Climbing",
+  "exerciseTypeCooldown": "Cooldown",
+  "exerciseTypeCoreTraining": "Core Training",
+  "exerciseTypeCrossTraining": "Cross Training",
+  "exerciseTypeDiscSports": "Disc Sports",
+  "exerciseTypeEquestrianSports": "Equestrian Sports",
+  "exerciseTypeFishing": "Fishing",
+  "exerciseTypeFitnessGaming": "Fitness Gaming",
+  "exerciseTypeFlexibility": "Flexibility",
+  "exerciseTypeHandCycling": "Hand Cycling",
+  "exerciseTypeHunting": "Hunting",
+  "exerciseTypeLacrosse": "Lacrosse",
+  "exerciseTypeMindAndBody": "Mind and Body",
+  "exerciseTypeMixedCardio": "Mixed Cardio",
+  "exerciseTypePaddleSports": "Paddle Sports",
+  "exerciseTypePickleball": "Pickleball",
+  "exerciseTypePlay": "Play",
+  "exerciseTypePreparationAndRecovery": "Recovery",
+  "exerciseTypeSnowSports": "Snow Sports",
+  "exerciseTypeSocialDance": "Social Dance",
+  "exerciseTypeStairs": "Stairs",
+  "exerciseTypeStepTraining": "Step Training",
+  "exerciseTypeSurfing": "Surfing",
+  "exerciseTypeTaiChi": "Tai Chi",
+  "exerciseTypeTrackAndField": "Track and Field",
+  "exerciseTypeWaterFitness": "Water Fitness",
+  "exerciseTypeWaterSports": "Water Sports",
+  "exerciseTypeWheelchairRunPace": "Wheelchair Run",
+  "exerciseTypeWheelchairWalkPace": "Wheelchair Walk",
+  "exerciseTypeWrestling": "Wrestling",
+  "exerciseTypeUnderwaterDiving": "Underwater Diving",
+  "exerciseTypeCalisthenics": "Calisthenics",
+  "exerciseTypeFrisbeeDisc": "Frisbee",
+  "exerciseTypeGuidedBreathing": "Breathing",
+  "exerciseTypeIceSkating": "Ice Skating",
+  "exerciseTypeParagliding": "Paragliding",
+  "exerciseTypeRockClimbing": "Rock Climbing",
+  "exerciseTypeRowingMachine": "Rowing Machine",
+  "exerciseTypeScubaDiving": "Scuba Diving",
+  "exerciseTypeSkiing": "Skiing",
+  "exerciseTypeSnowshoeing": "Snowshoeing",
+  "exerciseTypeStairClimbingMachine": "Stair Machine",
+  "exerciseTypeSwimmingOpenWater": "Open Water Swimming",
+  "exerciseTypeSwimmingPool": "Pool Swimming",
+  "exerciseTypeWeightlifting": "Weightlifting",
+  "exerciseTypeWheelchair": "Wheelchair"
 }
