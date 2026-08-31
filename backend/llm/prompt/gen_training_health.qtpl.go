@@ -31,7 +31,7 @@ Rules:
 - HRV deviation <= -15%: reduce both volume and intensity
 - RHR deviation >= +15%: reduce intensity
 - Low step count vs baseline: extend warmup
-- External workouts in last 48h: reduce volume for overlapping muscle groups
+- External workouts in last 7 days: reduce volume for overlapping muscle groups, more aggressive if within 48h. Football/soccer, running, cycling count as high leg load
 - Multiple negative deviations compound: reduce more aggressively
 - Extreme values (sleep < 5h, HRV < 15ms RMSSD): significant reduction regardless of baseline
 - If baselines not established (< 7 days): only apply extreme-value rules
@@ -117,7 +117,7 @@ func StreamNodeHealthUser(qw422016 *qt422016.Writer, healthSnapshot *model.Healt
 		qw422016.N().S(`
 `)
 		if len(healthSnapshot.ExternalWorkouts) > 0 {
-			qw422016.N().S(`External workouts (last 3 days):
+			qw422016.N().S(`External workouts (last 7 days):
 `)
 			for _, w := range healthSnapshot.ExternalWorkouts {
 				qw422016.N().S(`  - `)
