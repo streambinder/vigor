@@ -2,6 +2,7 @@ package util
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -190,6 +191,12 @@ func SafeFetch(rawURL string, opts SafeFetchOptions) ([]byte, string, error) {
 const (
 	// MaxResourceURLs caps the links extracted from a single request
 	MaxResourceURLs = 3
+
+	// MinArticleLength is the floor for usable article content: a distilled
+	// text shorter than this carries no program signal, so callers treat it
+	// as a failed extraction rather than a thin article.
+	MinArticleLength = 200
+
 	// maxCleanLength caps the residual program text handed to the LLM
 	maxCleanLength = 4000
 	// fallbackLength is kept when no clear program signal survives filtering
@@ -273,43 +280,73 @@ func FetchResource(rawURL string) (string, error) {
 	return FilterProgram(lines), nil
 }
 
-// mainContainer finds the element most likely to hold the article body,
-// preferring semantic containers over the whole page.
+// mainContainer picks the semantic container holding the article body by
+// text volume: the first article/main element in document order is often a
+// promo box rather than the body, so the richest candidate wins, and when
+// none reaches MinArticleLength the whole document is scanned instead.
 func mainContainer(doc *html.Node) *html.Node {
-	var picked *html.Node
-	var walk func(n *html.Node) bool
-	walk = func(n *html.Node) bool {
+	var candidates []*html.Node
+	var walk func(n *html.Node)
+	walk = func(n *html.Node) {
 		if n.Type == html.ElementNode {
-			if n.Data == "article" || n.Data == "main" {
-				picked = n
-				return true
-			}
-			for _, attr := range n.Attr {
-				if attr.Key == "role" && attr.Val == "main" {
-					picked = n
-					return true
-				}
+			if n.Data == "article" || n.Data == "main" || hasAttr(n, "role", "main") {
+				candidates = append(candidates, n)
+				return
 			}
 		}
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			if walk(c) {
-				return true
-			}
+			walk(c)
 		}
-		return false
 	}
-	if walk(doc) {
-		return picked
+	walk(doc)
+
+	best := doc
+	bestLen := MinArticleLength
+	for _, candidate := range candidates {
+		if length := textLength(candidate); length > bestLen {
+			best, bestLen = candidate, length
+		}
 	}
-	return doc
+	return best
+}
+
+// hasAttr reports whether an element carries the attribute value (compared
+// case-insensitively).
+func hasAttr(n *html.Node, key, value string) bool {
+	for _, attr := range n.Attr {
+		if attr.Key == key && strings.EqualFold(strings.TrimSpace(attr.Val), value) {
+			return true
+		}
+	}
+	return false
+}
+
+// textLength sums the visible text characters of a subtree.
+func textLength(n *html.Node) int {
+	var text strings.Builder
+	collectText(n, &text)
+	return text.Len()
 }
 
 // extractMainText parses an HTML page and returns its main text as one line
-// per block-level element, skipping chrome (nav, scripts, footers...).
+// per block-level element, skipping chrome (nav, scripts, footers...). A
+// publisher-declared JSON-LD articleBody is authoritative when present.
 func extractMainText(page string) ([]string, error) {
 	doc, err := html.Parse(strings.NewReader(page))
 	if err != nil {
 		return nil, err
+	}
+
+	if body := ldArticleBody(doc); len(body) >= MinArticleLength {
+		var lines []string
+		for _, line := range strings.Split(body, "\n") {
+			if line = normalizeLine(line); line != "" {
+				lines = append(lines, line)
+			}
+		}
+		if len(lines) > 0 {
+			return lines, nil
+		}
 	}
 
 	var lines []string
@@ -338,6 +375,87 @@ func extractMainText(page string) ([]string, error) {
 		return nil, ErrNoProgramContent
 	}
 	return lines, nil
+}
+
+// articleTypes names the JSON-LD @type values expected to carry an articleBody.
+var articleTypes = map[string]bool{
+	"Article": true, "NewsArticle": true, "BlogPosting": true,
+	"Report": true, "ScholarlyArticle": true, "SocialMediaPosting": true,
+}
+
+// ldArticleBody returns the publisher-declared article body from the page's
+// JSON-LD metadata blocks, or the empty string when none is present.
+func ldArticleBody(doc *html.Node) string {
+	var body string
+	var walk func(n *html.Node)
+	walk = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "script" && hasAttr(n, "type", "application/ld+json") {
+			var blob strings.Builder
+			for c := n.FirstChild; c != nil; c = c.NextSibling {
+				if c.Type == html.TextNode {
+					blob.WriteString(c.Data)
+				}
+			}
+			if found := longestArticleBody(blob.String()); len(found) > len(body) {
+				body = found
+			}
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			walk(c)
+		}
+	}
+	walk(doc)
+	return body
+}
+
+// longestArticleBody parses a JSON-LD blob (object, array, or @graph) and
+// returns the longest articleBody carried by an article-family node.
+func longestArticleBody(blob string) string {
+	var value any
+	if err := json.Unmarshal([]byte(strings.TrimSpace(blob)), &value); err != nil {
+		return ""
+	}
+	return deepestArticleBody(value)
+}
+
+func deepestArticleBody(value any) string {
+	best := ""
+	switch node := value.(type) {
+	case []any:
+		for _, item := range node {
+			if body := deepestArticleBody(item); len(body) > len(best) {
+				best = body
+			}
+		}
+	case map[string]any:
+		if articleFamily(node["@type"]) {
+			if body, ok := node["articleBody"].(string); ok && len(body) > len(best) {
+				best = body
+			}
+		}
+		for _, item := range node {
+			if body := deepestArticleBody(item); len(body) > len(best) {
+				best = body
+			}
+		}
+	}
+	return best
+}
+
+// articleFamily reports whether a JSON-LD @type (single or list) names an
+// article-family schema.
+func articleFamily(value any) bool {
+	switch typed := value.(type) {
+	case string:
+		return articleTypes[typed]
+	case []any:
+		for _, item := range typed {
+			if name, ok := item.(string); ok && articleTypes[name] {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // collectText appends the full text content of a subtree.

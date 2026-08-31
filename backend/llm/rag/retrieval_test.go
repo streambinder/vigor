@@ -106,3 +106,32 @@ func TestFilterByProficiencyPerMuscle(t *testing.T) {
 		}
 	})
 }
+
+func TestPinProgramMovements(t *testing.T) {
+	catalog := []model.Exercise{
+		{ID: "pull-up", Name: "Pull Up"},
+		{ID: "bodyweight-squat", Name: "Bodyweight Squat"},
+		{ID: "diamond-push-up", Name: "Diamond Push-Up"},
+	}
+
+	t.Run("exact ID and display name matches", func(t *testing.T) {
+		pins := pinProgramMovements([]string{"pull-up", "Bodyweight Squat"}, catalog)
+		if len(pins) != 2 || pins[0].ID != "pull-up" || pins[1].ID != "bodyweight-squat" {
+			t.Fatalf("unexpected pins: %+v", pins)
+		}
+	})
+
+	t.Run("fuzzy and empty matches are handled", func(t *testing.T) {
+		pins := pinProgramMovements([]string{"diamond pushup", "jetpack fly"}, catalog)
+		if len(pins) != 1 || pins[0].ID != "diamond-push-up" {
+			t.Fatalf("unexpected pins: %+v", pins)
+		}
+	})
+
+	t.Run("same exercise pinned once", func(t *testing.T) {
+		pins := pinProgramMovements([]string{"pull-up", "Pull Up"}, catalog)
+		if len(pins) != 1 {
+			t.Fatalf("unexpected pins: %+v", pins)
+		}
+	})
+}

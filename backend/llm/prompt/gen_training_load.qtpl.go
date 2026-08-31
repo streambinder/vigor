@@ -22,7 +22,7 @@ var (
 	_ = qt422016.AcquireByteBuffer
 )
 
-func StreamNodeLoadSystem(qw422016 *qt422016.Writer, methodology *model.Methodology, hasModifiers bool, hasModifierVariants bool) {
+func StreamNodeLoadSystem(qw422016 *qt422016.Writer, methodology *model.Methodology, hasModifiers bool, hasModifierVariants bool, explicitProgram bool) {
 	qw422016.N().S(`You are a strength & conditioning programmer. Given selected exercises and context, assign exact reps/duration, weight, rest, modifiers, and block structure.
 
 Output a JSON object with:
@@ -50,6 +50,14 @@ Rules:
 	qw422016.N().S(`
 - modifiers: only IDs from the [MODIFIERS] list — never invent modifiers or use instructions like "per side", "each side", "slow tempo" as modifier IDs
 - Duration is adjusted server-side by scaling block repeats — focus on structure quality
+`)
+	if explicitProgram {
+		qw422016.N().S(`- The [REQUESTED PROGRAM] section is this session's spec, not inspiration: reproduce its rep schemes, progressions and round structure verbatim
+- When reps vary between rounds (pyramids, ladders), emit one block per round with repeats=1 instead of one block with repeats=N, so the block order carries the progression — a "skip every other round" modification given by the source is fine
+- Recovery and health adjustments only scale the scheme at its edges (lower the peak, drop rounds): never flatten it into a uniform rep circuit
+`)
+	}
+	qw422016.N().S(`
 
 Methodology: `)
 	qw422016.E().S(methodology.ID)
@@ -73,15 +81,15 @@ Progression adjustments:
 `)
 }
 
-func WriteNodeLoadSystem(qq422016 qtio422016.Writer, methodology *model.Methodology, hasModifiers bool, hasModifierVariants bool) {
+func WriteNodeLoadSystem(qq422016 qtio422016.Writer, methodology *model.Methodology, hasModifiers bool, hasModifierVariants bool, explicitProgram bool) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeLoadSystem(qw422016, methodology, hasModifiers, hasModifierVariants)
+	StreamNodeLoadSystem(qw422016, methodology, hasModifiers, hasModifierVariants, explicitProgram)
 	qt422016.ReleaseWriter(qw422016)
 }
 
-func NodeLoadSystem(methodology *model.Methodology, hasModifiers bool, hasModifierVariants bool) string {
+func NodeLoadSystem(methodology *model.Methodology, hasModifiers bool, hasModifierVariants bool, explicitProgram bool) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeLoadSystem(qb422016, methodology, hasModifiers, hasModifierVariants)
+	WriteNodeLoadSystem(qb422016, methodology, hasModifiers, hasModifierVariants, explicitProgram)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016
@@ -101,6 +109,7 @@ func StreamNodeLoadUser(qw422016 *qt422016.Writer,
 	favoriteEquipmentIDs []string,
 	skipWarmupCooldown bool,
 	duration int,
+	requestedProgram string,
 ) {
 	qw422016.N().S(`Duration: `)
 	qw422016.N().D(duration)
@@ -109,6 +118,16 @@ func StreamNodeLoadUser(qw422016 *qt422016.Writer,
 	qw422016.N().S(`. Intensity: `)
 	qw422016.E().S(intensityTarget)
 	qw422016.N().S(`.
+`)
+	if requestedProgram != "" {
+		qw422016.N().S(`
+[REQUESTED PROGRAM]
+`)
+		qw422016.E().S(requestedProgram)
+		qw422016.N().S(`
+`)
+	}
+	qw422016.N().S(`
 
 Exercises to program:
 `)
@@ -245,9 +264,10 @@ func WriteNodeLoadUser(qq422016 qtio422016.Writer,
 	favoriteEquipmentIDs []string,
 	skipWarmupCooldown bool,
 	duration int,
+	requestedProgram string,
 ) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeLoadUser(qw422016, exercises, exerciseModes, weightedExercises, progressions, volumeTarget, intensityTarget, modifiers, modifierVariants, facts, equipmentIDs, favoriteEquipmentIDs, skipWarmupCooldown, duration)
+	StreamNodeLoadUser(qw422016, exercises, exerciseModes, weightedExercises, progressions, volumeTarget, intensityTarget, modifiers, modifierVariants, facts, equipmentIDs, favoriteEquipmentIDs, skipWarmupCooldown, duration, requestedProgram)
 	qt422016.ReleaseWriter(qw422016)
 }
 
@@ -265,9 +285,10 @@ func NodeLoadUser(
 	favoriteEquipmentIDs []string,
 	skipWarmupCooldown bool,
 	duration int,
+	requestedProgram string,
 ) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeLoadUser(qb422016, exercises, exerciseModes, weightedExercises, progressions, volumeTarget, intensityTarget, modifiers, modifierVariants, facts, equipmentIDs, favoriteEquipmentIDs, skipWarmupCooldown, duration)
+	WriteNodeLoadUser(qb422016, exercises, exerciseModes, weightedExercises, progressions, volumeTarget, intensityTarget, modifiers, modifierVariants, facts, equipmentIDs, favoriteEquipmentIDs, skipWarmupCooldown, duration, requestedProgram)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

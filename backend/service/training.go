@@ -161,12 +161,12 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		return nil, ErrPromptTooLong
 	}
 
-	// free text mode: fetch any linked articles (every failure is fatal to the
-	// request), then deduce the tuning parameters a guided request would carry.
-	// this happens before pool retrieval so the candidate pools already
-	// reflect the requested program: the retrieval text embeds the derived
-	// schema instead of the raw request, and the equipment/muscle filters
-	// come from the derivation
+	// free text mode: fetch any linked articles (hard fetch failures are fatal
+	// to the request), then deduce the tuning parameters a guided request
+	// would carry. this happens before pool retrieval so the candidate pools
+	// already reflect the requested program: the retrieval text embeds the
+	// derived schema instead of the raw request, and the equipment/muscle
+	// filters come from the derivation
 	var derivation *freeTextDerivation
 	var articles []string
 	if freeMode {
@@ -175,6 +175,10 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			if err != nil {
 				log.Warn().Err(err).Str("url", url).Msg("free text resource fetch failed")
 				return nil, ErrFetchResource
+			}
+			if len(text) < util.MinArticleLength {
+				log.Warn().Str("url", url).Int("length", len(text)).Msg("article extraction yielded no usable content; deriving from request alone")
+				continue
 			}
 			articles = append(articles, text)
 		}
@@ -345,7 +349,16 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		}
 	}
 
-	workExercises, err := rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles, prompt, allFavoriteExercises, recentExerciseIDs, calibrationGaps, duration)
+	// an explicit program retrieves its own pool: the named movements drive the
+	// search (pinned catalog matches plus unfiltered semantic neighbors), while
+	// every classic filter — equipment, muscles, methodology, proficiency,
+	// recency — becomes a way to starve a requested movement out of the pool
+	var workExercises []model.Exercise
+	if freeMode && derivation.derived.ExplicitProgram && len(derivation.derived.Movements) > 0 {
+		workExercises, err = rag.RetrieveExplicitProgramExercises(derivation.derived.Movements)
+	} else {
+		workExercises, err = rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles, prompt, allFavoriteExercises, recentExerciseIDs, calibrationGaps, duration)
+	}
 	if err != nil {
 		return nil, err
 	}
