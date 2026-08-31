@@ -19,7 +19,7 @@ import (
 const (
 	baselineWindowDays     = 14
 	dataRecencyMaxDays     = 3
-	externalWorkoutDays    = 3
+	externalWorkoutDays    = 7
 	enrichmentMaxDays      = 30
 	maxHRSamplesPerSession = 15000
 )
@@ -342,6 +342,7 @@ func GetHealthStats(userID uuid.UUID) (*model.HealthStatsResponse, error) {
 
 // GetHealthManifest returns list of dates with health data (last 30 days) for delta sync.
 // client compares local data against this manifest and only syncs missing/changed dates.
+// Includes both metric dates and exercise session dates to avoid false-miss detection.
 func GetHealthManifest(userID uuid.UUID) (*model.HealthManifestResponse, error) {
 	thirtyDaysAgo := time.Now().UTC().AddDate(0, 0, -30)
 
@@ -356,9 +357,31 @@ func GetHealthManifest(userID uuid.UUID) (*model.HealthManifestResponse, error) 
 		return nil, err
 	}
 
-	datesWithData := make([]string, len(dates))
-	for i, d := range dates {
-		datesWithData[i] = d.Date.Format("2006-01-02")
+	datesWithData := make([]string, 0, len(dates))
+	seen := make(map[string]struct{}, len(dates))
+	for _, d := range dates {
+		k := d.Date.Format("2006-01-02")
+		if _, ok := seen[k]; !ok {
+			seen[k] = struct{}{}
+			datesWithData = append(datesWithData, k)
+		}
+	}
+
+	// also include dates that have exercise sessions but no metrics yet
+	var sessionDates []struct {
+		StartedAt time.Time `gorm:"column:started_at"`
+	}
+	if err := database.DB.Model(&model.HealthExerciseSession{}).
+		Where("user_id = ? AND started_at > ?", userID, thirtyDaysAgo).
+		Select("started_at").
+		Scan(&sessionDates).Error; err == nil {
+		for _, s := range sessionDates {
+			k := s.StartedAt.UTC().Format("2006-01-02")
+			if _, ok := seen[k]; !ok {
+				seen[k] = struct{}{}
+				datesWithData = append(datesWithData, k)
+			}
+		}
 	}
 
 	return &model.HealthManifestResponse{

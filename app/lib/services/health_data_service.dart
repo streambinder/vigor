@@ -438,10 +438,13 @@ mixin HealthDataServiceMixin on HealthDataService {
     }
 
     final now = DateTime.now();
-    // target dates: last 30 days that are missing on server + always last 3 days (freshness)
+    // target dates: last 30 days missing on server + always last 7 days (freshness)
+    // 7-day window ensures late Health Connect workouts (e.g. Fitbit sync delayed,
+    // or workout added after metrics) are re-synced even when metric date already
+    // exists on server — manifest only tracks metric dates, not session dates.
     final targetDates = <DateTime>[];
     final recentKeys = <String>{};
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 7; i++) {
       final d = now.subtract(Duration(days: i));
       final k = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
       recentKeys.add(k);
@@ -455,7 +458,7 @@ mixin HealthDataServiceMixin on HealthDataService {
       }
     }
 
-    // oldest first so backend converges forward, but recent 3 will be re-synced anyway
+    // oldest first so backend converges forward, recent 7 will be re-synced anyway
     targetDates.sort((a, b) => a.compareTo(b));
 
     AppLogger.info('[HealthDataService] incremental stream: ${targetDates.length} dates to check');
