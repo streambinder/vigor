@@ -26,7 +26,6 @@ Output a JSON object with:
 - methodology_reason: one sentence
 - volume_target: "low" | "moderate" | "high"
 - intensity_target: "low" | "moderate" | "high"
-- calibration_families: array of movement families to prioritize (empty if not calibrating)
 - summary: one-sentence plain-language description of why this methodology was chosen (e.g. "chosen for its focus on controlled, progressive compound work"), written conversationally
 
 `)
@@ -80,7 +79,6 @@ func NodeStrategySystem(methodology *model.Methodology, methodologies []model.Me
 
 func StreamNodeStrategyUser(qw422016 *qt422016.Writer,
 	goals []model.Goal,
-	calibrationGaps map[string]int,
 	healthVolumeModifier float64,
 	healthIntensityModifier float64,
 	healthRationale string,
@@ -151,26 +149,10 @@ User request: `)
 	}
 	qw422016.N().S(`
 `)
-	if len(calibrationGaps) > 0 {
-		qw422016.N().S(`
-Calibration override: prioritize these under-sampled movement families over goals:
-`)
-		for family, count := range calibrationGaps {
-			qw422016.N().S(`- `)
-			qw422016.E().S(family)
-			qw422016.N().S(` (`)
-			qw422016.N().D(count)
-			qw422016.N().S(`/5 sessions)
-`)
-		}
-	}
-	qw422016.N().S(`
-`)
 }
 
 func WriteNodeStrategyUser(qq422016 qtio422016.Writer,
 	goals []model.Goal,
-	calibrationGaps map[string]int,
 	healthVolumeModifier float64,
 	healthIntensityModifier float64,
 	healthRationale string,
@@ -181,13 +163,12 @@ func WriteNodeStrategyUser(qq422016 qtio422016.Writer,
 	skipWarmupCooldown bool,
 ) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeStrategyUser(qw422016, goals, calibrationGaps, healthVolumeModifier, healthIntensityModifier, healthRationale, historyPatternNotes, historyBadSessionNotes, userPrompt, duration, skipWarmupCooldown)
+	StreamNodeStrategyUser(qw422016, goals, healthVolumeModifier, healthIntensityModifier, healthRationale, historyPatternNotes, historyBadSessionNotes, userPrompt, duration, skipWarmupCooldown)
 	qt422016.ReleaseWriter(qw422016)
 }
 
 func NodeStrategyUser(
 	goals []model.Goal,
-	calibrationGaps map[string]int,
 	healthVolumeModifier float64,
 	healthIntensityModifier float64,
 	healthRationale string,
@@ -198,7 +179,7 @@ func NodeStrategyUser(
 	skipWarmupCooldown bool,
 ) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeStrategyUser(qb422016, goals, calibrationGaps, healthVolumeModifier, healthIntensityModifier, healthRationale, historyPatternNotes, historyBadSessionNotes, userPrompt, duration, skipWarmupCooldown)
+	WriteNodeStrategyUser(qb422016, goals, healthVolumeModifier, healthIntensityModifier, healthRationale, historyPatternNotes, historyBadSessionNotes, userPrompt, duration, skipWarmupCooldown)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

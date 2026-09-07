@@ -40,7 +40,6 @@ Rules:
     cooldownExercises []model.Exercise,
     favoriteExercises []model.Exercise,
     recentExerciseIDs []string,
-    calibrationFamilies []string,
     skipWarmupCooldown bool,
 ) -%}
 Methodology: {%s methodology %}
@@ -54,9 +53,6 @@ Avoid these patterns: {%s strings.Join(contraindicatedPatterns, "; ") %}
 {% endif %}
 {% if len(avoidExercises) > 0 %}
 Avoid these exercises: {%s strings.Join(avoidExercises, ", ") %}
-{% endif %}
-{% if len(calibrationFamilies) > 0 %}
-Calibration priority — include exercises from: {%s strings.Join(calibrationFamilies, ", ") %}
 {% endif %}
 {% if len(favoriteExercises) > 0 %}
 Favorites: {% for i, ex := range favoriteExercises %}{%s ex.ID %}{% if i < len(favoriteExercises)-1 %}, {% endif %}{% endfor %}

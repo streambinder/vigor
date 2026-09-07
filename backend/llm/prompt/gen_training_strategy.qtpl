@@ -11,7 +11,6 @@ Output a JSON object with:
 - methodology_reason: one sentence
 - volume_target: "low" | "moderate" | "high"
 - intensity_target: "low" | "moderate" | "high"
-- calibration_families: array of movement families to prioritize (empty if not calibrating)
 - summary: one-sentence plain-language description of why this methodology was chosen (e.g. "chosen for its focus on controlled, progressive compound work"), written conversationally
 
 {% if methodology != nil %}
@@ -28,7 +27,6 @@ Prefer methodologies with higher compatible exercise counts unless goals require
 
 {% func NodeStrategyUser(
     goals []model.Goal,
-    calibrationGaps map[string]int,
     healthVolumeModifier float64,
     healthIntensityModifier float64,
     healthRationale string,
@@ -54,8 +52,4 @@ Recent issue: {%s historyBadSessionNotes %}{% endif %}
 {% if userPrompt != "" %}
 User request: {%s userPrompt %}
 {% endif %}
-{% if len(calibrationGaps) > 0 %}
-Calibration override: prioritize these under-sampled movement families over goals:
-{% for family, count := range calibrationGaps %}- {%s family %} ({%d count %}/5 sessions)
-{% endfor %}{% endif %}
 {% endfunc %}

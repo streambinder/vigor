@@ -165,7 +165,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		strategyResult, strategyStep, strategyErr = runStrategyNode(
 			req.Goals, req.Methodology, req.Methodologies,
 			methodologyCoverage(req.WorkExercises, req.Methodologies),
-			req.CalibrationGaps, healthResult, historyResult,
+			healthResult, historyResult,
 			req.UserPrompt, req.Duration, req.SkipWarmupCooldown,
 		)
 		progress(pipeline.StepPickStrategy)
@@ -222,6 +222,16 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		return nil, orderedSteps(nodes), fmt.Errorf("exercises node: %w", err)
 	}
 	progress(pipeline.StepSelectExercises)
+
+	// deterministic calibration: guarantee gap-family coverage by construction
+	// instead of nudging the model through the prompt
+	exerciseResult = injectCalibrationExercises(
+		exerciseResult,
+		req.CalibrationGaps,
+		req.WorkExercises,
+		req.RecentExerciseIDs,
+		explicitProgram,
+	)
 
 	// build exercise metadata maps for the load node (mode tags, weighted flags)
 	exerciseModes := make(map[string]string)
@@ -504,7 +514,6 @@ func runStrategyNode(
 	methodology *model.Methodology,
 	methodologies []model.Methodology,
 	coverage map[string]int,
-	calibrationGaps map[string]int,
 	health pipeline.HealthAssessment,
 	history pipeline.HistoryAnalysis,
 	userPrompt string,
@@ -514,7 +523,7 @@ func runStrategyNode(
 	p := model.LLMPrompt{
 		System: prompt.NodeStrategySystem(methodology, methodologies, coverage),
 		User: prompt.NodeStrategyUser(
-			goals, calibrationGaps,
+			goals,
 			health.VolumeModifier, health.IntensityModifier, health.Rationale,
 			history.PatternNotes, history.BadSessionNotes,
 			userPrompt, duration, skipWarmupCooldown,
@@ -655,7 +664,7 @@ func runExercisesNode(
 			constraints.ContraindicatedPatterns, history.AvoidExercises,
 			workExercises, warmupExercises, cooldownExercises,
 			favoriteExercises, recentExerciseIDs,
-			strategy.CalibrationFamilies, skipWarmupCooldown,
+			skipWarmupCooldown,
 		),
 	}
 

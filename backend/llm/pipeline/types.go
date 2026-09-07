@@ -80,11 +80,10 @@ type ConstraintExtraction struct {
 // Strategy is the output of the strategy node.
 type Strategy struct {
 	Summarizable
-	Methodology         string   `json:"methodology"` // chosen methodology ID
-	MethodologyReason   string   `json:"methodology_reason"`
-	VolumeTarget        string   `json:"volume_target"`                  // low, moderate, high
-	IntensityTarget     string   `json:"intensity_target"`               // low, moderate, high
-	CalibrationFamilies []string `json:"calibration_families,omitempty"` // families to prioritize for calibration
+	Methodology       string `json:"methodology"` // chosen methodology ID
+	MethodologyReason string `json:"methodology_reason"`
+	VolumeTarget      string `json:"volume_target"`    // low, moderate, high
+	IntensityTarget   string `json:"intensity_target"` // low, moderate, high
 }
 
 // MuscleTargeting is the output of the muscle targeting node.
