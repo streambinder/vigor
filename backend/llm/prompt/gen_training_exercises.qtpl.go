@@ -86,7 +86,6 @@ func StreamNodeExercisesUser(qw422016 *qt422016.Writer,
 	cooldownExercises []model.Exercise,
 	favoriteExercises []model.Exercise,
 	recentExerciseIDs []string,
-	calibrationFamilies []string,
 	skipWarmupCooldown bool,
 ) {
 	qw422016.N().S(`Methodology: `)
@@ -124,15 +123,6 @@ Avoid these patterns: `)
 		qw422016.N().S(`
 Avoid these exercises: `)
 		qw422016.E().S(strings.Join(avoidExercises, ", "))
-		qw422016.N().S(`
-`)
-	}
-	qw422016.N().S(`
-`)
-	if len(calibrationFamilies) > 0 {
-		qw422016.N().S(`
-Calibration priority — include exercises from: `)
-		qw422016.E().S(strings.Join(calibrationFamilies, ", "))
 		qw422016.N().S(`
 `)
 	}
@@ -238,11 +228,10 @@ func WriteNodeExercisesUser(qq422016 qtio422016.Writer,
 	cooldownExercises []model.Exercise,
 	favoriteExercises []model.Exercise,
 	recentExerciseIDs []string,
-	calibrationFamilies []string,
 	skipWarmupCooldown bool,
 ) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeExercisesUser(qw422016, methodology, primaryMuscles, secondaryMuscles, avoidMuscles, contraindicatedPatterns, avoidExercises, workExercises, warmupExercises, cooldownExercises, favoriteExercises, recentExerciseIDs, calibrationFamilies, skipWarmupCooldown)
+	StreamNodeExercisesUser(qw422016, methodology, primaryMuscles, secondaryMuscles, avoidMuscles, contraindicatedPatterns, avoidExercises, workExercises, warmupExercises, cooldownExercises, favoriteExercises, recentExerciseIDs, skipWarmupCooldown)
 	qt422016.ReleaseWriter(qw422016)
 }
 
@@ -258,11 +247,10 @@ func NodeExercisesUser(
 	cooldownExercises []model.Exercise,
 	favoriteExercises []model.Exercise,
 	recentExerciseIDs []string,
-	calibrationFamilies []string,
 	skipWarmupCooldown bool,
 ) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeExercisesUser(qb422016, methodology, primaryMuscles, secondaryMuscles, avoidMuscles, contraindicatedPatterns, avoidExercises, workExercises, warmupExercises, cooldownExercises, favoriteExercises, recentExerciseIDs, calibrationFamilies, skipWarmupCooldown)
+	WriteNodeExercisesUser(qb422016, methodology, primaryMuscles, secondaryMuscles, avoidMuscles, contraindicatedPatterns, avoidExercises, workExercises, warmupExercises, cooldownExercises, favoriteExercises, recentExerciseIDs, skipWarmupCooldown)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016
