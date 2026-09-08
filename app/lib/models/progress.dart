@@ -8,8 +8,8 @@ part 'progress.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Progress {
-  @JsonKey(name: 'families', defaultValue: {})
-  final Map<String, dynamic> families;
+  @JsonKey(name: 'muscle_proficiency', defaultValue: {})
+  final Map<String, dynamic> muscleProficiency;
   @JsonKey(name: 'muscles', defaultValue: {})
   final Map<String, dynamic> muscles;
   @JsonKey(name: 'trainings')
@@ -20,7 +20,7 @@ class Progress {
   final List<PendingFeedbackTraining> pendingFeedback;
 
   Progress({
-    required this.families,
+    required this.muscleProficiency,
     required this.muscles,
     required this.trainings,
     required this.trainingsPartnered,

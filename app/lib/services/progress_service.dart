@@ -1,7 +1,7 @@
 import '../models/api_response.dart';
 import '../models/progress.dart';
 import '../models/weekly_target.dart';
-import '../models/family_progress.dart';
+import '../models/muscle_progress.dart';
 import '../models/muscle_impact.dart';
 import 'app_logger.dart';
 import 'authenticated_api_service.dart';
@@ -39,11 +39,11 @@ class ProgressService {
     }
   }
 
-  /// Parse family progress map from dynamic JSON
-  static Map<String, FamilyProgress> parseFamilies(Map<String, dynamic> families) {
-    return families.map((key, value) => MapEntry(
+  /// Parse muscle proficiency map from dynamic JSON
+  static Map<String, MuscleProgress> parseMuscleProficiency(Map<String, dynamic> muscles) {
+    return muscles.map((key, value) => MapEntry(
       key,
-      FamilyProgress.fromJson(value as Map<String, dynamic>),
+      MuscleProgress.fromJson(value as Map<String, dynamic>),
     ));
   }
 

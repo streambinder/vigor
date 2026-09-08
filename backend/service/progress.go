@@ -39,47 +39,43 @@ func GetProgress(userID uuid.UUID) (model.Progress, error) {
 		return model.Progress{}, err
 	}
 
-	// load exercises to get familyMaxes and muscle list
+	// load exercises to get muscle max difficulties and muscle list
 	var allExercises []model.Exercise
 	if err := database.Knowledge.Find(&allExercises).Error; err != nil {
 		return model.Progress{}, err
 	}
 
 	exerciseMap := make(map[string]*model.Exercise, len(allExercises))
-	familyMaxes := make(map[string]float64)
+	muscleMaxes := make(map[string]int)
 	allMuscles := make(map[string]bool)
 
 	for i := range allExercises {
 		ex := &allExercises[i]
 		exerciseMap[ex.ID] = ex
-		if progs := ex.GetProgressions(); progs != nil {
-			for family, order := range progs {
-				if order > familyMaxes[family] {
-					familyMaxes[family] = order
-				}
-			}
+		if len(ex.Muscles) > 0 && ex.Difficulty > muscleMaxes[ex.Muscles[0]] {
+			muscleMaxes[ex.Muscles[0]] = ex.Difficulty
 		}
 		for _, muscle := range ex.Muscles {
 			allMuscles[muscle] = true
 		}
 	}
 
-	// build family progress from stored proficiencies
-	families := make(map[string]model.FamilyProgress)
-	for family, maxOrder := range familyMaxes {
-		prof := proficiencies[family]
-		profPercent := (prof / maxOrder) * 100
+	// build muscle progress from stored proficiencies
+	muscleProficiency := make(map[string]model.MuscleProgress)
+	for muscle, maxDifficulty := range muscleMaxes {
+		prof := proficiencies[muscle]
+		profPercent := (prof / float64(maxDifficulty)) * 100
 		if profPercent > 100 {
 			profPercent = 100
 		}
 
-		calCount := calibration[family]
+		calCount := calibration[muscle]
 		calPercent := (float64(calCount) / float64(CalibrationThreshold)) * 100
 		if calPercent > 100 {
 			calPercent = 100
 		}
 
-		families[family] = model.FamilyProgress{
+		muscleProficiency[muscle] = model.MuscleProgress{
 			Proficiency: profPercent,
 			Calibration: calPercent,
 		}
@@ -98,7 +94,7 @@ func GetProgress(userID uuid.UUID) (model.Progress, error) {
 	`, userID, userID, userID).Scan(&pendingFeedback)
 
 	return model.Progress{
-		Families:           families,
+		MuscleProficiency:  muscleProficiency,
 		Muscles:            muscles,
 		Trainings:          trainingsComplete,
 		TrainingsPartnered: partneredTrainings,

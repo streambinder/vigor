@@ -14,24 +14,24 @@ const (
 	MinProficiencyRetention = 0.3  // minimum fraction of proficiency retained (floor)
 )
 
-// GetProficiencies returns decayed proficiencies per movement family for a user.
+// GetProficiencies returns decayed proficiencies per muscle group for a user.
 func GetProficiencies(userID uuid.UUID) (map[string]float64, error) {
 	var records []struct {
-		MovementFamily string
-		MaxValue       float64
-		LastSeenAt     time.Time
+		Muscle     string
+		MaxValue   float64
+		LastSeenAt time.Time
 	}
 
 	// decay from most-recent demonstration, not from when the peak was achieved.
-	// a user who keeps training core at score 40 (below their peak of 60) should
+	// a user who keeps training chest at difficulty 40 (below their peak of 60) should
 	// not have their peak treated as 60+ days stale just because they never re-hit it.
 	err := database.DB.Raw(`
-		SELECT movement_family,
+		SELECT muscle,
 		       MAX(value)      AS max_value,
 		       MAX(created_at) AS last_seen_at
 		FROM proficiencies
 		WHERE user_id = ?
-		GROUP BY movement_family
+		GROUP BY muscle
 	`, userID).Scan(&records).Error
 	if err != nil {
 		return nil, err
@@ -40,12 +40,12 @@ func GetProficiencies(userID uuid.UUID) (map[string]float64, error) {
 	now := time.Now()
 	result := make(map[string]float64)
 	for _, r := range records {
-		result[r.MovementFamily] = DecayProficiency(r.MaxValue, r.LastSeenAt, now)
+		result[r.Muscle] = DecayProficiency(r.MaxValue, r.LastSeenAt, now)
 	}
 	return result, nil
 }
 
-// GetAverageProficiencies returns the average proficiency per movement family across multiple users.
+// GetAverageProficiencies returns the average proficiency per muscle group across multiple users.
 // for partnered workouts this balances exercises for mixed proficiency levels.
 func GetAverageProficiencies(userIDs []uuid.UUID) (map[string]float64, error) {
 	if len(userIDs) == 0 {
@@ -66,40 +66,40 @@ func GetAverageProficiencies(userIDs []uuid.UUID) (map[string]float64, error) {
 	return averageProficiencies(allProficiencies), nil
 }
 
-// averageProficiencies computes the average proficiency per movement family,
-// only including families where all users have proficiency data.
+// averageProficiencies computes the average proficiency per muscle group,
+// only including muscles where all users have proficiency data.
 func averageProficiencies(allProficiencies []map[string]float64) map[string]float64 {
-	familySums := make(map[string]float64)
-	familyCounts := make(map[string]int)
+	muscleSums := make(map[string]float64)
+	muscleCounts := make(map[string]int)
 	for _, proficiencies := range allProficiencies {
-		for family, value := range proficiencies {
-			familySums[family] += value
-			familyCounts[family]++
+		for muscle, value := range proficiencies {
+			muscleSums[muscle] += value
+			muscleCounts[muscle]++
 		}
 	}
 
 	result := make(map[string]float64)
-	for family, sum := range familySums {
-		if familyCounts[family] == len(allProficiencies) {
-			result[family] = sum / float64(len(allProficiencies))
+	for muscle, sum := range muscleSums {
+		if muscleCounts[muscle] == len(allProficiencies) {
+			result[muscle] = sum / float64(len(allProficiencies))
 		}
 	}
 	return result
 }
 
-// GetProficiencyCalibration returns calibration count per movement family
-// as distinct completed trainings that produced proficiency records for each family.
+// GetProficiencyCalibration returns calibration count per muscle group
+// as distinct completed trainings that produced proficiency records for each muscle.
 func GetProficiencyCalibration(userID uuid.UUID) (map[string]int, error) {
 	var counts []struct {
-		MovementFamily string
-		Count          int
+		Muscle string
+		Count  int
 	}
 
 	err := database.DB.Raw(`
-		SELECT movement_family, COUNT(DISTINCT training_id) as count
+		SELECT muscle, COUNT(DISTINCT training_id) as count
 		FROM proficiencies
 		WHERE user_id = ?
-		GROUP BY movement_family
+		GROUP BY muscle
 	`, userID).Scan(&counts).Error
 	if err != nil {
 		return nil, err
@@ -107,7 +107,7 @@ func GetProficiencyCalibration(userID uuid.UUID) (map[string]int, error) {
 
 	result := make(map[string]int)
 	for _, c := range counts {
-		result[c.MovementFamily] = c.Count
+		result[c.Muscle] = c.Count
 	}
 	return result, nil
 }
@@ -207,8 +207,8 @@ func IsPositiveFeedback(feedback string) bool {
 
 // RecordProficiencies writes proficiency records for a user based on training activities.
 func RecordProficiencies(userID, trainingID uuid.UUID, activities []*model.Activity, activityFeedback map[string]string, exerciseMap map[string]*model.Exercise, modifierMap map[string]*model.Modifier) error {
-	// process activities — collect max effective score per family within this training
-	familyMax := make(map[string]float64)
+	// process activities — collect max effective difficulty per primary muscle within this training
+	muscleMax := make(map[string]float64)
 	for _, activity := range activities {
 		feedback := activityFeedback[activity.ExerciseID]
 		if !IsPositiveFeedback(feedback) {
@@ -216,33 +216,28 @@ func RecordProficiencies(userID, trainingID uuid.UUID, activities []*model.Activ
 		}
 
 		exercise := exerciseMap[activity.ExerciseID]
-		if exercise == nil {
+		if exercise == nil || len(exercise.Muscles) == 0 {
 			continue
 		}
-		progressions := exercise.GetProgressions()
-		if progressions == nil {
-			continue
-		}
+		muscle := exercise.Muscles[0]
 
 		impact := ModifierImpact(activity.Modifiers, activity.WeightKg, modifierMap)
-		for family, baseOrder := range progressions {
-			effective := baseOrder + impact
-			if effective > familyMax[family] {
-				familyMax[family] = effective
-			}
+		effective := float64(exercise.Difficulty) + impact
+		if effective > muscleMax[muscle] {
+			muscleMax[muscle] = effective
 		}
 	}
 
-	// write one record per family: always write to update recency, even if below all-time peak.
+	// write one record per muscle: always write to update recency, even if below all-time peak.
 	// GetProficiencies uses MAX(value) for the score and MAX(created_at) for decay — so writing
 	// a below-peak row is harmless for the score but correctly refreshes the decay clock.
-	toInsert := make([]model.Proficiency, 0, len(familyMax))
-	for family, effective := range familyMax {
+	toInsert := make([]model.Proficiency, 0, len(muscleMax))
+	for muscle, effective := range muscleMax {
 		toInsert = append(toInsert, model.Proficiency{
-			UserID:         userID,
-			TrainingID:     trainingID,
-			MovementFamily: family,
-			Value:          effective,
+			UserID:     userID,
+			TrainingID: trainingID,
+			Muscle:     muscle,
+			Value:      effective,
 		})
 	}
 

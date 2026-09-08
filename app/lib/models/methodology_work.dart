@@ -7,14 +7,17 @@ part 'methodology_work.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class MethodologyWork {
-  @JsonKey(name: 'min')
-  final int min;
-  @JsonKey(name: 'max')
-  final int? max;
+  @JsonKey(name: 'min_difficulty')
+  final int minDifficulty;
+  @JsonKey(name: 'max_difficulty')
+  final int? maxDifficulty;
+  @JsonKey(name: 'mobility_only')
+  final bool? mobilityOnly;
 
   MethodologyWork({
-    required this.min,
-    this.max,
+    required this.minDifficulty,
+    this.maxDifficulty,
+    this.mobilityOnly,
   });
 
   factory MethodologyWork.fromJson(Map<String, dynamic> json) => _$MethodologyWorkFromJson(json);

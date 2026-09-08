@@ -1,12 +1,10 @@
 package model
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/lib/pq"
 	"github.com/pgvector/pgvector-go"
-	"gorm.io/datatypes"
 )
 
 type Exercise struct {
@@ -18,10 +16,14 @@ type Exercise struct {
 	Instructions pq.StringArray `gorm:"type:text[]" json:"instructions"`
 	Cues         pq.StringArray `gorm:"type:text[]" json:"cues"`
 
-	// Progressions maps movement families to progression order (0-100).
-	// Higher values indicate more advanced exercises within that family.
-	// e.g., {"horizontal_push": 50, "core": 30} for push-up
-	Progressions datatypes.JSON `gorm:"type:jsonb;default:'{}'" json:"progressions"`
+	// Difficulty is the exercise difficulty on a 0-100 scale.
+	// Higher values indicate more advanced exercises.
+	Difficulty int `gorm:"not null;default:0" json:"difficulty"`
+
+	// IsMobility marks mobility-only exercises (stretches). They are excluded
+	// from the work pool of non-mobility methodologies and form the pool of
+	// the mobility methodology.
+	IsMobility bool `gorm:"not null;default:false" json:"is_mobility"`
 
 	// Mode declares how the exercise is measured.
 	// "duration": timer-only (holds, stretches, isometrics, cardio bouts) — activity must set duration > 0
@@ -33,15 +35,6 @@ type Exercise struct {
 	UpdatedAt time.Time `json:"-"`
 
 	EquipmentList []Equipment `gorm:"many2many:exercise_equipment;" json:"-"`
-}
-
-// GetProgressions returns the progressions map from JSONB field.
-func (e *Exercise) GetProgressions() map[string]float64 {
-	var progressions map[string]float64
-	if err := json.Unmarshal(e.Progressions, &progressions); err != nil {
-		return nil
-	}
-	return progressions
 }
 
 type ExerciseEmbedding struct {

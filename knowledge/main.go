@@ -50,7 +50,6 @@ func main() {
 		&model.FactEmbedding{},
 		&model.Methodology{},
 		&model.Muscle{},
-		&model.MovementFamily{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %s", err)
 	}
@@ -69,10 +68,6 @@ func main() {
 
 	if err := bootstrapMuscles(gormDB); err != nil {
 		log.Fatalf("Failed to inject muscles: %s", err)
-	}
-
-	if err := bootstrapMovementFamilies(gormDB); err != nil {
-		log.Fatalf("Failed to inject movement families: %s", err)
 	}
 
 	if err := bootstrapEquipment(gormDB); err != nil {
@@ -376,14 +371,14 @@ func boostrapFacts(gormDB *gorm.DB) error {
 	return nil
 }
 
-// methodologyJSON mirrors the JSON structure for unmarshaling work map directly.
+// methodologyJSON mirrors the JSON structure for unmarshaling work constraints directly.
 type methodologyJSON struct {
-	ID               string                           `json:"id"`
-	Name             string                           `json:"name"`
-	Description      string                           `json:"description"`
-	DurationBased    bool                             `json:"duration_based"`
-	ExercisesPerHour model.ExerciseDensity            `json:"exercises_per_hour"`
-	Work             map[string]model.MethodologyWork `json:"work"`
+	ID               string                `json:"id"`
+	Name             string                `json:"name"`
+	Description      string                `json:"description"`
+	DurationBased    bool                  `json:"duration_based"`
+	ExercisesPerHour model.ExerciseDensity `json:"exercises_per_hour"`
+	Work             model.MethodologyWork `json:"work"`
 }
 
 func bootstrapMethodologies(gormDB *gorm.DB) error {
@@ -411,26 +406,6 @@ func bootstrapMethodologies(gormDB *gorm.DB) error {
 			return err
 		}
 		if err := gormDB.Save(&methodology).Error; err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func bootstrapMovementFamilies(gormDB *gorm.DB) error {
-	bytes, err := os.ReadFile(filepath.Join("features", "movement_families.json"))
-	if err != nil {
-		return err
-	}
-
-	var rows []model.MovementFamily
-	if err := json.Unmarshal(bytes, &rows); err != nil {
-		return err
-	}
-
-	for _, row := range rows {
-		if err := gormDB.Save(&row).Error; err != nil {
 			return err
 		}
 	}

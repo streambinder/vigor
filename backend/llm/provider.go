@@ -23,18 +23,14 @@ var (
 )
 
 // methodologyCoverage counts how many work exercises are compatible with each methodology.
-// an exercise is compatible if it belongs to at least one of the methodology's required families.
+// an exercise is compatible if its mobility scope matches the methodology's.
 func methodologyCoverage(exercises []model.Exercise, methodologies []model.Methodology) map[string]int {
 	counts := make(map[string]int, len(methodologies))
 	for _, m := range methodologies {
-		families := m.GetWork()
+		work := m.GetWork()
 		for _, ex := range exercises {
-			progressions := ex.GetProgressions()
-			for family := range families {
-				if _, ok := progressions[family]; ok {
-					counts[m.ID]++
-					break
-				}
+			if ex.IsMobility == work.MobilityOnly {
+				counts[m.ID]++
 			}
 		}
 	}

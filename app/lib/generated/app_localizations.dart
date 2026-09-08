@@ -1914,12 +1914,6 @@ abstract class AppLocalizations {
   /// **'partnered trainings'**
   String get partneredTrainings;
 
-  /// No description provided for @movementFamilies.
-  ///
-  /// In en, this message translates to:
-  /// **'Movement Families'**
-  String get movementFamilies;
-
   /// No description provided for @muscleActivity.
   ///
   /// In en, this message translates to:
@@ -1980,11 +1974,11 @@ abstract class AppLocalizations {
   /// **'This training may not fully match your goals — the system is still learning your fitness level and prioritizing movement variety to build a complete profile'**
   String get calibrationTrainingNote;
 
-  /// No description provided for @calibrationFamiliesLearned.
+  /// No description provided for @calibrationMusclesLearned.
   ///
   /// In en, this message translates to:
-  /// **'{calibrated}/{total} movement patterns learned'**
-  String calibrationFamiliesLearned(int calibrated, int total);
+  /// **'{calibrated}/{total} muscle groups calibrated'**
+  String calibrationMusclesLearned(int calibrated, int total);
 
   /// No description provided for @capabilities.
   ///
@@ -2483,12 +2477,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Designing warm-up sequence...'**
   String get loadingMsg16;
-
-  /// No description provided for @loadingMsg17.
-  ///
-  /// In en, this message translates to:
-  /// **'Mapping movement families...'**
-  String get loadingMsg17;
 
   /// No description provided for @loadingMsg18.
   ///

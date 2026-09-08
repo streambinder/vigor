@@ -96,55 +96,55 @@ func TestCalibrationGenerationAllowed(t *testing.T) {
 }
 
 func TestIsCalibrating(t *testing.T) {
-	families := []model.MovementFamily{{ID: "push"}, {ID: "pull"}, {ID: "legs"}}
+	muscles := []model.Muscle{{ID: "chest"}, {ID: "back"}, {ID: "legs"}}
 
 	tests := []struct {
 		name        string
 		calibration map[string]int
-		families    []model.MovementFamily
+		muscles     []model.Muscle
 		want        bool
 	}{
 		{
-			name:        "no families calibrated yet",
+			name:        "no muscles calibrated yet",
 			calibration: map[string]int{},
-			families:    families,
+			muscles:     muscles,
 			want:        true,
 		},
 		{
-			name:        "one family below threshold",
-			calibration: map[string]int{"push": 2, "pull": 1, "legs": 5},
-			families:    families,
+			name:        "one muscle below threshold",
+			calibration: map[string]int{"chest": 2, "back": 1, "legs": 5},
+			muscles:     muscles,
 			want:        true,
 		},
 		{
-			name:        "missing family counts as uncalibrated",
-			calibration: map[string]int{"push": 2, "pull": 2},
-			families:    families,
+			name:        "missing muscle counts as uncalibrated",
+			calibration: map[string]int{"chest": 2, "back": 2},
+			muscles:     muscles,
 			want:        true,
 		},
 		{
-			name:        "all families at threshold",
-			calibration: map[string]int{"push": 2, "pull": 2, "legs": 2},
-			families:    families,
+			name:        "all muscles at threshold",
+			calibration: map[string]int{"chest": 2, "back": 2, "legs": 2},
+			muscles:     muscles,
 			want:        false,
 		},
 		{
-			name:        "all families above threshold",
-			calibration: map[string]int{"push": 7, "pull": 3, "legs": 12},
-			families:    families,
+			name:        "all muscles above threshold",
+			calibration: map[string]int{"chest": 7, "back": 3, "legs": 12},
+			muscles:     muscles,
 			want:        false,
 		},
 		{
-			name:        "no families means nothing to calibrate",
+			name:        "no muscles means nothing to calibrate",
 			calibration: map[string]int{},
-			families:    nil,
+			muscles:     nil,
 			want:        false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := isCalibrating(tt.calibration, tt.families); got != tt.want {
+			if got := isCalibrating(tt.calibration, tt.muscles); got != tt.want {
 				t.Errorf("isCalibrating() = %v, want %v", got, tt.want)
 			}
 		})

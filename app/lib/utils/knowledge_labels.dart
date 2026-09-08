@@ -150,38 +150,15 @@ class KnowledgeLabels {
     };
   }
 
-  // -- movement families --
-
-  static String familyLabel(String id, AppLocalizations l10n) {
-    return switch (id) {
-      'horizontal_push' => l10n.familyHorizontalPush,
-      'horizontal_pull' => l10n.familyHorizontalPull,
-      'vertical_push' => l10n.familyVerticalPush,
-      'vertical_pull' => l10n.familyVerticalPull,
-      'squat' => l10n.familySquat,
-      'hinge' => l10n.familyHinge,
-      'core' => l10n.familyCore,
-      'carry' => l10n.familyCarry,
-      'cardio' => l10n.familyCardio,
-      'mobility' => l10n.familyMobility,
-      'balance' => l10n.familyBalance,
-      _ => _titleCase(id, '_'),
-    };
-  }
-
-  /// preferred UI display order for movement families
-  static const familyDisplayOrder = [
-    'horizontal_push',
-    'horizontal_pull',
-    'vertical_push',
-    'vertical_pull',
-    'squat',
-    'hinge',
+  /// preferred UI display order for muscle groups
+  static const muscleDisplayOrder = [
+    'chest',
+    'back',
+    'shoulders',
+    'arms',
     'core',
-    'cardio',
-    'mobility',
-    'balance',
-    'carry',
+    'glutes',
+    'legs',
   ];
 
   static String _titleCase(String s, String separator) {

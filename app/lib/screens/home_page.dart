@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
-import '../models/family_progress.dart';
+import '../models/muscle_progress.dart';
 import '../models/muscle_impact.dart';
 import '../models/weekly_target.dart';
 import '../models/week_progress.dart';
@@ -246,7 +246,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
       return _buildEmptyState(l10n);
     }
 
-    final families = ProgressService.parseFamilies(_progress!.families);
+    final muscleProficiency = ProgressService.parseMuscleProficiency(_progress!.muscleProficiency);
     final muscles = ProgressService.parseMuscles(_progress!.muscles);
     final trainings = _progress!.trainings;
 
@@ -254,9 +254,9 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
       return _buildWelcomeState(l10n);
     }
 
-    // check if any family is still under 100% calibration
-    final isCalibrating = families.values.any((fp) => fp.calibration < 100.0);
-    context.read<ServiceLocator>().updateCalibrationFromProgress(families);
+    // check if any muscle is still under 100% calibration
+    final isCalibrating = muscleProficiency.values.any((mp) => mp.calibration < 100.0);
+    context.read<ServiceLocator>().updateCalibrationFromProgress(muscleProficiency);
 
     final sections = <Widget>[
       // hero stats — readiness glows on the counter circle itself
@@ -274,7 +274,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
       if (isCalibrating)
         Padding(
           padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
-          child: _buildCalibrationCard(l10n, families),
+          child: _buildCalibrationCard(l10n, muscleProficiency),
         ),
       // health onboarding card — post-first-training, non-blocking
       if (_shouldShowHealthOnboarding())
@@ -302,7 +302,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
       // capabilities section
       Padding(
         padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
-        child: _buildCapabilitiesSection(l10n, families),
+        child: _buildCapabilitiesSection(l10n, muscleProficiency),
       ),
     ];
 
@@ -677,25 +677,24 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     );
   }
 
-  Widget _buildCalibrationCard(AppLocalizations l10n, Map<String, FamilyProgress> families) {
-    final total = families.length;
-    final calibrated = families.values.where((fp) => fp.calibration >= 100.0).length;
-    final overallCalibration = families.values.fold(0.0, (acc, fp) => acc + fp.calibration) / total;
+  Widget _buildCalibrationCard(AppLocalizations l10n, Map<String, MuscleProgress> muscles) {
+    final total = muscles.length;
+    final calibrated = muscles.values.where((mp) => mp.calibration >= 100.0).length;
 
     // build segment data in display order
-    final segments = KnowledgeLabels.familyDisplayOrder
-        .where((f) => families.containsKey(f))
-        .map((f) => families[f]!.calibration >= 100.0)
+    final segments = KnowledgeLabels.muscleDisplayOrder
+        .where((m) => muscles.containsKey(m))
+        .map((m) => muscles[m]!.calibration >= 100.0)
         .toList();
-    // append any families not in the predefined order
-    for (final entry in families.entries) {
-      if (!KnowledgeLabels.familyDisplayOrder.contains(entry.key)) {
+    // append any muscles not in the predefined order
+    for (final entry in muscles.entries) {
+      if (!KnowledgeLabels.muscleDisplayOrder.contains(entry.key)) {
         segments.add(entry.value.calibration >= 100.0);
       }
     }
 
     return GestureDetector(
-      onTap: () => _showCalibrationModal(context, l10n, families, overallCalibration),
+      onTap: () => _showCalibrationModal(context, l10n, muscles),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -724,7 +723,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        l10n.calibrationFamiliesLearned(calibrated, total),
+                        l10n.calibrationMusclesLearned(calibrated, total),
                         style: VigorTypography.data.copyWith(
                           color: VigorColors.textPrimary(context),
                           fontWeight: FontWeight.w600,
@@ -776,15 +775,14 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     );
   }
 
-  void _showCalibrationModal(BuildContext context, AppLocalizations l10n, Map<String, FamilyProgress> families, double calibration) {
+  void _showCalibrationModal(BuildContext context, AppLocalizations l10n, Map<String, MuscleProgress> muscles) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => _CalibrationModal(
         l10n: l10n,
-        families: families,
-        calibration: calibration,
+        muscles: muscles,
       ),
     );
   }
@@ -884,7 +882,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     );
   }
 
-  Widget _buildCapabilitiesSection(AppLocalizations l10n, Map<String, FamilyProgress> families) {
+  Widget _buildCapabilitiesSection(AppLocalizations l10n, Map<String, MuscleProgress> muscles) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -904,7 +902,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
         const SizedBox(height: VigorSpacing.sm),
         AdaptiveCard(
           padding: VigorSpacing.paddingMd,
-          child: FamilyProgressWidget(families: families),
+          child: MuscleProgressWidget(muscles: muscles),
         ),
       ],
     );
@@ -1193,7 +1191,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
         _buildInfoCard(
           icon: Icons.trending_up,
           title: 'Track Progress',
-          description: 'Monitor your capabilities across movement families as you train',
+          description: 'Monitor your capabilities across muscle groups as you train',
         ),
         const SizedBox(height: VigorSpacing.md),
         _buildInfoCard(
@@ -1258,18 +1256,19 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
 /// Modal for calibration details
 class _CalibrationModal extends StatelessWidget {
   final AppLocalizations l10n;
-  final Map<String, FamilyProgress> families;
-  final double calibration;
+  final Map<String, MuscleProgress> muscles;
 
   const _CalibrationModal({
     required this.l10n,
-    required this.families,
-    required this.calibration,
+    required this.muscles,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final total = muscles.length;
+    final calibrated = muscles.values.where((mp) => mp.calibration >= 100.0).length;
+    final overallCalibration = total == 0 ? 0.0 : calibrated / total * 100.0;
 
     return Container(
       margin: const EdgeInsets.all(VigorSpacing.md),
@@ -1327,13 +1326,13 @@ class _CalibrationModal extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: _buildProgressBar(context, calibration, isDark),
+                  child: _buildProgressBar(context, overallCalibration, isDark),
                 ),
                 const SizedBox(width: 8),
                 SizedBox(
-                  width: 36,
+                  width: 44,
                   child: Text(
-                    calibration > 0 ? '${calibration.toInt()}%' : '–',
+                    '$calibrated/$total',
                     textAlign: TextAlign.right,
                     style: VigorTypography.data.copyWith(
                       color: VigorColors.textPrimary(context),
@@ -1347,11 +1346,11 @@ class _CalibrationModal extends StatelessWidget {
           const SizedBox(height: VigorSpacing.md),
           Divider(height: 1, color: VigorColors.border(context)),
           const SizedBox(height: VigorSpacing.md),
-          // per-family bars
+          // per-muscle bars
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md),
             child: Column(
-              children: _buildFamilyBars(context, isDark),
+              children: _buildMuscleBars(context, isDark),
             ),
           ),
           const SizedBox(height: VigorSpacing.lg),
@@ -1384,21 +1383,21 @@ class _CalibrationModal extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildFamilyBars(BuildContext context, bool isDark) {
-    final sortedFamilies = KnowledgeLabels.familyDisplayOrder
-        .where((f) => families.containsKey(f))
-        .map((f) => MapEntry(f, families[f]!))
+  List<Widget> _buildMuscleBars(BuildContext context, bool isDark) {
+    final sortedMuscles = KnowledgeLabels.muscleDisplayOrder
+        .where((m) => muscles.containsKey(m))
+        .map((m) => MapEntry(m, muscles[m]!))
         .toList();
 
-    // add any families not in the predefined order
-    for (final entry in families.entries) {
-      if (!KnowledgeLabels.familyDisplayOrder.contains(entry.key)) {
-        sortedFamilies.add(entry);
+    // add any muscles not in the predefined order
+    for (final entry in muscles.entries) {
+      if (!KnowledgeLabels.muscleDisplayOrder.contains(entry.key)) {
+        sortedMuscles.add(entry);
       }
     }
 
-    return sortedFamilies.map((entry) {
-      final label = KnowledgeLabels.familyLabel(entry.key, l10n);
+    return sortedMuscles.map((entry) {
+      final label = KnowledgeLabels.muscleLabel(entry.key, l10n);
       final cal = entry.value.calibration.clamp(0.0, 100.0);
 
       return Padding(
@@ -1863,7 +1862,7 @@ class _WeeklyTargetModal extends StatelessWidget {
   }
 }
 
-/// Draws a segmented ring where each segment represents a movement family.
+/// Draws a segmented ring where each segment represents a muscle group.
 /// Calibrated segments use [activeColor], uncalibrated use [inactiveColor].
 class _CalibrationRingPainter extends CustomPainter {
   final List<bool> segments;

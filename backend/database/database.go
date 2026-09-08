@@ -15,7 +15,10 @@ var DB *gorm.DB
 // Knowledge is the dedicated database connection for exercise data.
 var Knowledge *gorm.DB
 
-func Init() error {
+// Connect opens the application and knowledge database connections
+// without running any migration. One-off tools (e.g. backfill) use it
+// when the schema must be left untouched.
+func Connect() error {
 	var err error
 	knowledgeURL := os.Getenv("KNOWLEDGE_URL")
 	Knowledge, err = gorm.Open(postgres.Open(knowledgeURL), &gorm.Config{})
@@ -27,6 +30,14 @@ func Init() error {
 	DB, err = gorm.Open(postgres.Open(dbURL), &gorm.Config{})
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
+	}
+
+	return nil
+}
+
+func Init() error {
+	if err := Connect(); err != nil {
+		return err
 	}
 
 	if err := DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";").Error; err != nil {

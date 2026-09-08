@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import '../models/family_progress.dart';
+import '../models/muscle_progress.dart';
 import '../models/gym.dart';
 import '../models/progress.dart';
 import '../models/flow_session.dart';
@@ -227,13 +227,13 @@ class ServiceLocator extends ChangeNotifier {
 
   void _updateCalibrationState() {
     if (initialProgress == null) return;
-    final families = ProgressService.parseFamilies(initialProgress!.families);
-    isCalibratingNotifier.value = families.values.any((fp) => fp.calibration < 100.0);
+    final muscles = ProgressService.parseMuscleProficiency(initialProgress!.muscleProficiency);
+    isCalibratingNotifier.value = muscles.values.any((mp) => mp.calibration < 100.0);
   }
 
   /// Update calibration state from fresh progress data
-  void updateCalibrationFromProgress(Map<String, FamilyProgress> families) {
-    isCalibratingNotifier.value = families.values.any((fp) => fp.calibration < 100.0);
+  void updateCalibrationFromProgress(Map<String, MuscleProgress> muscles) {
+    isCalibratingNotifier.value = muscles.values.any((mp) => mp.calibration < 100.0);
   }
 
   /// Clear cached services (e.g., on logout)

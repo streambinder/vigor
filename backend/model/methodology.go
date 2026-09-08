@@ -7,10 +7,13 @@ import (
 	"gorm.io/datatypes"
 )
 
-// MethodologyWork defines score constraints for a movement family within a methodology.
+// MethodologyWork defines the difficulty constraints for the work pool of a methodology.
 type MethodologyWork struct {
-	Min int `json:"min"`
-	Max int `json:"max,omitempty"` // 0 = no upper limit (use capability)
+	MinDifficulty int `json:"min_difficulty"`
+	// MaxDifficulty caps the work pool difficulty, 0 = no upper limit.
+	MaxDifficulty int `json:"max_difficulty,omitempty"`
+	// MobilityOnly restricts the work pool to mobility exercises.
+	MobilityOnly bool `json:"mobility_only,omitempty"`
 }
 
 // ExerciseDensity is the target count of distinct work exercises per hour of session,
@@ -21,7 +24,7 @@ type ExerciseDensity struct {
 	Max int `json:"max"`
 }
 
-// Methodology defines a training methodology with associated movement families and score ranges.
+// Methodology defines a training methodology with difficulty constraints for its work pool.
 type Methodology struct {
 	ID          string         `gorm:"type:varchar(64);primaryKey" json:"id"`
 	Name        string         `gorm:"type:varchar(128);not null" json:"name"`
@@ -38,17 +41,17 @@ type Methodology struct {
 	UpdatedAt time.Time `json:"-"`
 }
 
-// GetWork returns the work families map from JSONB field.
-func (m *Methodology) GetWork() map[string]MethodologyWork {
-	var work map[string]MethodologyWork
+// GetWork returns the work constraints from JSONB field.
+func (m *Methodology) GetWork() MethodologyWork {
+	var work MethodologyWork
 	if err := json.Unmarshal(m.Work, &work); err != nil {
-		return nil
+		return MethodologyWork{}
 	}
 	return work
 }
 
-// SetWork serializes the work map to JSONB for storage.
-func (m *Methodology) SetWork(work map[string]MethodologyWork) error {
+// SetWork serializes the work constraints to JSONB for storage.
+func (m *Methodology) SetWork(work MethodologyWork) error {
 	data, err := json.Marshal(work)
 	if err != nil {
 		return err

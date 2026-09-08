@@ -993,9 +993,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get partneredTrainings => 'entrenamientos en pareja';
 
   @override
-  String get movementFamilies => 'Familias de movimiento';
-
-  @override
   String get muscleActivity => 'Actividad muscular';
 
   @override
@@ -1031,8 +1028,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'Este entrenamiento puede no coincidir completamente con tus objetivos — el sistema aún está aprendiendo tu nivel y prioriza la variedad de movimientos para construir un perfil completo';
 
   @override
-  String calibrationFamiliesLearned(int calibrated, int total) {
-    return '$calibrated/$total patrones de movimiento aprendidos';
+  String calibrationMusclesLearned(int calibrated, int total) {
+    return '$calibrated/$total grupos musculares calibrados';
   }
 
   @override
@@ -1296,9 +1293,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get loadingMsg16 => 'Diseñando calentamiento...';
-
-  @override
-  String get loadingMsg17 => 'Mapeando familias de movimiento...';
 
   @override
   String get loadingMsg18 => 'Evaluando distribución de carga...';

@@ -223,9 +223,10 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	}
 	progress(pipeline.StepSelectExercises)
 
-	// deterministic calibration: guarantee gap-family coverage by construction
-	// instead of nudging the model through the prompt
-	exerciseResult = injectCalibrationExercises(
+	// deterministic calibration: guarantee gap-muscle coverage by construction.
+	// the work pool is built per muscle with quotas, so gap muscles always have
+	// candidates; this only appends the ones the selection missed.
+	exerciseResult = ensureMuscleCoverage(
 		exerciseResult,
 		req.CalibrationGaps,
 		req.WorkExercises,
