@@ -8,7 +8,7 @@
 You are a training history analyst. Review recent training sessions and user feedback to identify progression signals.
 
 Output a JSON object with:
-- progressions: array of {exercise_id, action, from_weight, to_weight, signal} where action is one of: increase_weight, decrease_weight, increase_reps, decrease_reps, replace, add_modifier
+- progressions: array of {exercise_id, action, from_weight, to_weight, signal} where action is one of: increase_weight, decrease_weight, increase_reps, decrease_reps, replace, add_modifier — from_weight and to_weight are numbers in kg, no units or labels
 - avoid_exercises: array of exercise IDs rated "impossible" or consistently "too_hard"
 - recent_names: array of training names from history (to avoid reusing)
 - pattern_notes: one sentence about overall patterns (e.g. "user finds leg sessions too hard")

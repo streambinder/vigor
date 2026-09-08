@@ -2,6 +2,14 @@
 // these are internal to the LLM pipeline — not DB models, not DTOs.
 package pipeline
 
+import (
+	"encoding/json"
+	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
+)
+
 // GenerationStep identifies a DAG node for progress reporting.
 // the app maps these to localized strings client-side.
 type GenerationStep string
@@ -57,11 +65,42 @@ type HealthAssessment struct {
 
 // ProgressionSignal captures a single feedback-driven adjustment from history.
 type ProgressionSignal struct {
-	ExerciseID string  `json:"exercise_id"`
-	Action     string  `json:"action"` // increase_weight, decrease_weight, increase_reps, decrease_reps, replace, add_modifier
-	FromWeight float64 `json:"from_weight,omitempty"`
-	ToWeight   float64 `json:"to_weight,omitempty"`
-	Signal     string  `json:"signal"` // the feedback that triggered it (too_easy, too_hard, impossible, quality_bad)
+	ExerciseID string      `json:"exercise_id"`
+	Action     string      `json:"action"` // increase_weight, decrease_weight, increase_reps, decrease_reps, replace, add_modifier
+	FromWeight FlexFloat64 `json:"from_weight,omitempty"`
+	ToWeight   FlexFloat64 `json:"to_weight,omitempty"`
+	Signal     string      `json:"signal"` // the feedback that triggered it (too_easy, too_hard, impossible, quality_bad)
+}
+
+var flexFloatPrefix = regexp.MustCompile(`^[+-]?(\d+\.?\d*|\.\d+)`)
+
+// FlexFloat64 unmarshals a JSON number or a string carrying a numeric value
+// with an optional unit suffix (e.g. "5kg", "7.5 kg"), because LLM nodes
+// occasionally emit weights as labeled strings instead of bare numbers.
+type FlexFloat64 float64
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (f *FlexFloat64) UnmarshalJSON(data []byte) error {
+	var num float64
+	if err := json.Unmarshal(data, &num); err == nil {
+		*f = FlexFloat64(num)
+		return nil
+	}
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return fmt.Errorf("flex float: expected number or string, got %s", strings.TrimSpace(string(data)))
+	}
+	s = strings.TrimSpace(s)
+	if s == "" || s == "null" {
+		*f = 0
+		return nil
+	}
+	num, err := strconv.ParseFloat(flexFloatPrefix.FindString(s), 64)
+	if err != nil {
+		return fmt.Errorf("flex float: no numeric value in %q", s)
+	}
+	*f = FlexFloat64(num)
+	return nil
 }
 
 // HistoryAnalysis is the output of the history analysis node.
