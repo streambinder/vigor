@@ -1269,7 +1269,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     final response = await trainingService.generateTraining(
       duration: _duration,
       gym: gymId,
-      prompt: prompt.isEmpty ? null : prompt,
+      // prompt, methodology, goals and muscles are locked during calibration:
+      // send nothing so the backend default applies instead of tripping the
+      // calibration gate (the modal preselects the user's profile goals)
+      prompt: _isCalibrating ? null : (prompt.isEmpty ? null : prompt),
       equipment: equipment,
       partners: _partners.isEmpty ? null : _partners.map((p) => p.id).toList(),
       // warmup/cooldown tuning is locked during calibration: send nothing so
@@ -1277,9 +1280,13 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       skipWarmupCooldown: _isCalibrating
           ? null
           : (!_includeWarmupCooldown ? true : null),
-      methodology: _methodology,
-      goals: _selectedGoals.isEmpty ? null : _selectedGoals.toList(),
-      muscles: _selectedMuscles.isEmpty ? null : _selectedMuscles.toList(),
+      methodology: _isCalibrating ? null : _methodology,
+      goals: _isCalibrating
+          ? null
+          : (_selectedGoals.isEmpty ? null : _selectedGoals.toList()),
+      muscles: _isCalibrating
+          ? null
+          : (_selectedMuscles.isEmpty ? null : _selectedMuscles.toList()),
       onStep: _stepHandler(),
       onRetry: _retryHandler(),
     );

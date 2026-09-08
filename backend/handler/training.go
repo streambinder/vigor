@@ -61,7 +61,10 @@ func postTrainingJSON(c *fiber.Ctx) error {
 }
 
 // postTrainingSSE streams generation progress via SSE, then sends the final training.
-// events: "step" with {"step":"STEP_NAME"}, "done" with full training JSON, "error" with {"error":"msg"}.
+// events: "step" with {"step":"STEP_NAME"}, "done" with full training JSON,
+// "error" with {"error":"msg","code":"code"} where code is a machine-readable
+// failure class (empty for unknown errors) so clients can decide whether a
+// retry is worthwhile.
 func postTrainingSSE(c *fiber.Ctx) error {
 	var req dto.PostTrainingRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -96,7 +99,7 @@ func postTrainingSSE(c *fiber.Ctx) error {
 
 		if genErr != nil {
 			errMsg := trainingErrorMessage(genErr)
-			fmt.Fprintf(w, "event: error\ndata: {\"error\":%q}\n\n", errMsg)
+			fmt.Fprintf(w, "event: error\ndata: {\"error\":%q,\"code\":%q}\n\n", errMsg, trainingErrorCode(genErr))
 			w.Flush()
 			return
 		}
@@ -132,6 +135,21 @@ func trainingError(c *fiber.Ctx, err error) error {
 	default:
 		middleware.Log(c).Error().Err(err).Msg("failed to generate training")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+}
+
+// trainingErrorCode returns a machine-readable class for a generation error,
+// sent alongside the message in SSE error events. Clients retry only transient
+// codes; deterministic client-side rejections carry their own code so a retry
+// is never attempted. Empty means unknown (legacy behavior: retry).
+func trainingErrorCode(err error) string {
+	switch {
+	case errors.Is(err, service.ErrCalibrationAutoOnly):
+		return "calibration_auto_only"
+	case errors.Is(err, service.ErrMalformedTraining):
+		return "malformed_training"
+	default:
+		return ""
 	}
 }
 
