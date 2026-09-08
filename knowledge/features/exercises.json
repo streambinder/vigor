@@ -236,6 +236,23 @@
     "mode": "duration"
   },
   {
+    "id": "air-squat",
+    "name": "Air Squat",
+    "equipment": [],
+    "muscles": ["legs", "glutes"],
+    "reference": "",
+    "instructions": [
+      "Stand with feet shoulder-width apart, toes slightly out",
+      "Push hips back and bend knees to lower into a squat",
+      "Keep chest up and weight through the whole foot",
+      "Drive through heels to stand back up"
+    ],
+    "difficulty": 25,
+    "is_mobility": false,
+    "cues": ["Push knees out over toes", "Keep chest up and core braced"],
+    "mode": "reps"
+  },
+  {
     "id": "all-fours-squad-stretch",
     "name": "All Fours Squad Stretch",
     "equipment": [],
