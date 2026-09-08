@@ -167,6 +167,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 			methodologyCoverage(req.WorkExercises, req.Methodologies),
 			healthResult, historyResult,
 			req.UserPrompt, req.Duration, req.SkipWarmupCooldown,
+			explicitProgram,
 		)
 		progress(pipeline.StepPickStrategy)
 	}()
@@ -553,9 +554,10 @@ func runStrategyNode(
 	userPrompt string,
 	duration int,
 	skipWarmupCooldown bool,
+	explicitProgram bool,
 ) (pipeline.Strategy, model.LLMStep, error) {
 	p := model.LLMPrompt{
-		System: prompt.NodeStrategySystem(methodology, methodologies, coverage),
+		System: prompt.NodeStrategySystem(methodology, methodologies, coverage, explicitProgram),
 		User: prompt.NodeStrategyUser(
 			goals,
 			health.VolumeModifier, health.IntensityModifier, health.Rationale,

@@ -59,11 +59,18 @@ Rules:
 	}
 	qw422016.N().S(`
 
-Methodology: `)
+Methodology label: `)
 	qw422016.E().S(methodology.ID)
 	qw422016.N().S(`
 `)
-	qw422016.E().S(methodology.Description)
+	if explicitProgram {
+		qw422016.N().S(`- the methodology description below is background only: the [REQUESTED PROGRAM] is this session's spec and overrides any generic recipe detail (block counts, rounds, rep ranges)
+`)
+	} else {
+		qw422016.E().S(methodology.Description)
+		qw422016.N().S(`
+`)
+	}
 	qw422016.N().S(`
 
 `)

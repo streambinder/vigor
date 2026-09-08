@@ -53,3 +53,19 @@ func TestNodeLoadRequestedProgramSection(t *testing.T) {
 		t.Fatal("non-explicit load user prompt carries the requested program section")
 	}
 }
+
+func TestNodeLoadExplicitProgramHidesRecipe(t *testing.T) {
+	recipe := "Create ONE block of 2-3 rounds. Rep ranges: 10-20 per station."
+	explicit := NodeLoadSystem(&model.Methodology{ID: "circuit", Description: recipe}, false, false, true)
+	if strings.Contains(explicit, recipe) {
+		t.Fatal("explicit load system prompt still carries the generic recipe")
+	}
+	if !strings.Contains(explicit, "overrides any generic recipe detail") {
+		t.Fatal("explicit load system prompt misses the recipe-override line")
+	}
+
+	generic := NodeLoadSystem(&model.Methodology{ID: "circuit", Description: recipe}, false, false, false)
+	if !strings.Contains(generic, recipe) {
+		t.Fatal("non-explicit load system prompt lost the methodology recipe")
+	}
+}

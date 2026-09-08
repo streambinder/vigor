@@ -18,7 +18,7 @@ var (
 	_ = qt422016.AcquireByteBuffer
 )
 
-func StreamNodeStrategySystem(qw422016 *qt422016.Writer, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int) {
+func StreamNodeStrategySystem(qw422016 *qt422016.Writer, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, explicitProgram bool) {
 	qw422016.N().S(`You are a training program strategist. Choose a methodology and define the session's volume and intensity targets.
 
 Output a JSON object with:
@@ -37,8 +37,14 @@ Methodology is preselected: `)
 `)
 		qw422016.E().S(methodology.Description)
 		qw422016.N().S(`
-Use this methodology. Focus on volume/intensity targets.
 `)
+		if explicitProgram {
+			qw422016.N().S(`The methodology description is background only: a requested program overrides its generic recipe — focus on volume/intensity targets, not its structure.
+`)
+		} else {
+			qw422016.N().S(`Use this methodology. Focus on volume/intensity targets.
+`)
+		}
 	} else {
 		qw422016.N().S(`
 Available methodologies (pick one):
@@ -63,15 +69,15 @@ Prefer methodologies with higher compatible exercise counts unless goals require
 `)
 }
 
-func WriteNodeStrategySystem(qq422016 qtio422016.Writer, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int) {
+func WriteNodeStrategySystem(qq422016 qtio422016.Writer, methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, explicitProgram bool) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeStrategySystem(qw422016, methodology, methodologies, methodologyCoverage)
+	StreamNodeStrategySystem(qw422016, methodology, methodologies, methodologyCoverage, explicitProgram)
 	qt422016.ReleaseWriter(qw422016)
 }
 
-func NodeStrategySystem(methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int) string {
+func NodeStrategySystem(methodology *model.Methodology, methodologies []model.Methodology, methodologyCoverage map[string]int, explicitProgram bool) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeStrategySystem(qb422016, methodology, methodologies, methodologyCoverage)
+	WriteNodeStrategySystem(qb422016, methodology, methodologies, methodologyCoverage, explicitProgram)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

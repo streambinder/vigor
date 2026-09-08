@@ -30,8 +30,10 @@ Rules:
 - Recovery and health adjustments only scale the scheme at its edges (lower the peak, drop rounds): never flatten it into a uniform rep circuit
 {% endif %}
 
-Methodology: {%s methodology.ID %}
-{%s methodology.Description %}
+Methodology label: {%s methodology.ID %}
+{% if explicitProgram %}- the methodology description below is background only: the [REQUESTED PROGRAM] is this session's spec and overrides any generic recipe detail (block counts, rounds, rep ranges)
+{% else %}{%s methodology.Description %}
+{% endif %}
 
 {% if hasModifiers %}
 Modifiers: add modifier IDs to activities to push intensity. Triggers: "too_easy" feedback, progressive overload. Never add if feedback shows "too_hard". Never invent modifier IDs.
