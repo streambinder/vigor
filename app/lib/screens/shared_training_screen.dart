@@ -14,6 +14,7 @@ import '../providers/auth_provider.dart';
 import '../services/service_locator.dart';
 import '../services/share_service.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../widgets/default_avatar.dart';
 import '../widgets/cached_exercise_image.dart';
 import '../widgets/marquee_text.dart';
 import '../utils/exercise_modal.dart';
@@ -291,10 +292,20 @@ class _SharedTrainingScreenState extends State<SharedTrainingScreen> {
       child: Row(
         children: [
           if (_ownerUserId != null)
-            CircleAvatar(
-              radius: 18,
-              backgroundImage: CachedNetworkImageProvider(ApiConfig.avatarUrl(_ownerUserId!)),
-              backgroundColor: VigorColors.stone.withValues(alpha: 0.2),
+            CachedNetworkImage(
+              imageUrl: ApiConfig.avatarUrl(_ownerUserId!),
+              imageBuilder: (context, imageProvider) => CircleAvatar(
+                radius: 18,
+                backgroundImage: imageProvider,
+              ),
+              placeholder: (context, url) => const DefaultAvatar(
+                name: '',
+                radius: 18,
+              ),
+              errorWidget: (context, url, error) => DefaultAvatar(
+                name: _ownerName,
+                radius: 18,
+              ),
             ),
           const SizedBox(width: VigorSpacing.sm),
           Text(
