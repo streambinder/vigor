@@ -1012,7 +1012,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get calibrationAutoOnlyHint =>
-      'Pendant la calibration, seule la génération automatique est disponible — tu peux toujours ajouter un partenaire ou modifier la durée';
+      'Pendant la calibration, seule la génération automatique est disponible — tu peux toujours ajouter un partenaire, changer la durée ou choisir ta salle et ton équipement';
 
   @override
   String get calibrationGlobal => 'Global';

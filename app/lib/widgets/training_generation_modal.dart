@@ -106,8 +106,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     _refreshCalibrationState();
   }
 
-  /// locks generation to Auto-only: training mode, bodyweight, and every
-  /// tuning parameter cleared but partners and duration
+  /// locks generation to Auto-only: training mode and every tuning
+  /// parameter cleared but partners, duration and gym/equipment
   void _applyCalibrationLocks() {
     _sessionMode = _SessionMode.training;
     _equipmentMode = EquipmentMode.bodyweight;
@@ -1646,9 +1646,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                     const SizedBox(height: VigorSpacing.md),
 
                     // Equipment mode selection (training only)
-                    // locked during calibration: Auto generation is bodyweight
+                    // stays enabled during calibration: gym and custom
+                    // equipment are allowed alongside partner and duration
                     if (_sessionMode == _SessionMode.training) ...[
-                      _buildLockedSection(child: _buildEquipmentSection()),
+                      _buildEquipmentSection(),
                       const SizedBox(height: VigorSpacing.md),
 
                       // Partners section — stays enabled during calibration
