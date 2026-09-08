@@ -19,6 +19,7 @@ Rules:
 - "too_easy" → increase_weight or increase_reps or add_modifier
 - "too_hard" → decrease_weight or decrease_reps
 - "impossible" → replace (add to avoid_exercises)
+- "ok" means the load was right: never emit a progression for it — ok signals maintain, not progress
 - If quality was rated bad, note the reason
 - Be concise — only report actionable signals
 {% endfunc %}

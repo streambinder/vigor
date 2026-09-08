@@ -491,3 +491,36 @@ func equalStrings(a, b []string) bool {
 	}
 	return true
 }
+
+func TestDropProgressionsWithoutSignal(t *testing.T) {
+	mk := func(exerciseID, action, signal string) pipeline.ProgressionSignal {
+		return pipeline.ProgressionSignal{ExerciseID: exerciseID, Action: action, Signal: signal}
+	}
+
+	t.Run("progressions on ok are dropped", func(t *testing.T) {
+		result := pipeline.HistoryAnalysis{Progressions: []pipeline.ProgressionSignal{
+			mk("chest-dip", "increase_weight", "ok"),
+			mk("pull-up", "increase_weight", "too_easy"),
+			mk("air-squat", "decrease_reps", "too_hard"),
+			mk("push-up", "replace", "impossible"),
+			mk("plank", "increase_reps", "quality_bad"),
+			mk("row", "increase_weight", ""),
+		}}
+		dropProgressionsWithoutSignal(&result)
+		var ids []string
+		for _, p := range result.Progressions {
+			ids = append(ids, p.ExerciseID)
+		}
+		if !equalStrings(ids, []string{"pull-up", "air-squat", "push-up", "plank"}) {
+			t.Errorf("progressions = %v, want only documented signals kept", ids)
+		}
+	})
+
+	t.Run("empty progressions stay empty", func(t *testing.T) {
+		result := pipeline.HistoryAnalysis{}
+		dropProgressionsWithoutSignal(&result)
+		if len(result.Progressions) != 0 {
+			t.Errorf("progressions = %v, want empty", result.Progressions)
+		}
+	})
+}
