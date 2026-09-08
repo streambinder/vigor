@@ -206,10 +206,11 @@ func RetrieveExplicitProgramExercises(movements []string) (pool []model.Exercise
 // pinProgramMovements resolves each named program movement to the closest
 // catalog exercise: exact normalized ID/name match first, then the plainest
 // token-subset match, then the Levenshtein fallback. "Plainest" ranks toward
-// the fewest extra tokens beyond the movement, no assisted variant and the
-// least required equipment, so "dip" pins chest-dip rather than
-// assisted-chest-dip-kneeling and a pin never drags in gear the source
-// program never mentioned.
+// the fewest extra tokens beyond the movement, no assisted variant, a muscle
+// qualifier naming one of the exercise's own muscles, and the least required
+// equipment, so "dip" pins chest-dip rather than assisted-chest-dip-kneeling
+// or the equipment-free reverse-dip variation, and a pin never drags in gear
+// the source program never mentioned.
 func pinProgramMovements(movements []string, catalog []model.Exercise) []model.Exercise {
 	byID := make(map[string]model.Exercise, len(catalog))
 	for _, ex := range catalog {
@@ -238,9 +239,11 @@ func pinProgramMovements(movements []string, catalog []model.Exercise) []model.E
 // An exact normalized ID or name match wins outright. Otherwise every
 // token-subset candidate — the same recall gate util.FuzzyLookup applies —
 // is ranked toward the plainest variant: fewest tokens beyond the movement,
-// non-assisted before assisted, least required equipment, then ID order for
-// determinism. With no token-subset candidate the lookup falls back to
-// util.FuzzyLookup's edit-distance matching.
+// non-assisted before assisted, a qualifier naming one of the exercise's own
+// muscles (the canonical pattern, e.g. chest-dip) before other variations
+// (e.g. the equipment-free reverse-dip), least required equipment, then ID
+// order for determinism. With no token-subset candidate the lookup falls back
+// to util.FuzzyLookup's edit-distance matching.
 func plainestProgramMatch(movement string, catalog []model.Exercise) (string, bool) {
 	norm := util.NormalizeIDText(movement)
 	if norm == "" {
@@ -253,9 +256,14 @@ func plainestProgramMatch(movement string, catalog []model.Exercise) (string, bo
 	}
 
 	movementTokens := strings.Split(norm, "-")
+	movementSet := make(map[string]bool, len(movementTokens))
+	for _, t := range movementTokens {
+		movementSet[t] = true
+	}
 	best := ""
 	bestExtra, bestEquipment := 0, 0
 	bestAssisted := false
+	bestCanonical := false
 	found := false
 	for _, ex := range catalog {
 		tokens := strings.Split(util.NormalizeIDText(ex.ID), "-")
@@ -265,11 +273,27 @@ func plainestProgramMatch(movement string, catalog []model.Exercise) (string, bo
 		extra := tokenSymmetricDiff(movementTokens, tokens)
 		assisted := len(tokens) > 0 && tokens[0] == "assisted"
 		equipment := len(ex.Equipment)
+		// canonical pattern: every qualifier token beyond the movement names
+		// one of the exercise's own muscles (e.g. "chest" in chest-dip).
+		// variation qualifiers (e.g. "reverse" in reverse-dip) must not win
+		// on equipment count over the canonical form.
+		muscles := make(map[string]bool, len(ex.Muscles))
+		for _, m := range ex.Muscles {
+			muscles[util.NormalizeIDText(m)] = true
+		}
+		canonical := true
+		for _, t := range tokens {
+			if !movementSet[t] && !muscles[t] {
+				canonical = false
+				break
+			}
+		}
 		if !found || extra < bestExtra ||
 			(extra == bestExtra && !assisted && bestAssisted) ||
-			(extra == bestExtra && assisted == bestAssisted && equipment < bestEquipment) ||
-			(extra == bestExtra && assisted == bestAssisted && equipment == bestEquipment && ex.ID < best) {
-			best, bestExtra, bestAssisted, bestEquipment, found = ex.ID, extra, assisted, equipment, true
+			(extra == bestExtra && assisted == bestAssisted && canonical && !bestCanonical) ||
+			(extra == bestExtra && assisted == bestAssisted && canonical == bestCanonical && equipment < bestEquipment) ||
+			(extra == bestExtra && assisted == bestAssisted && canonical == bestCanonical && equipment == bestEquipment && ex.ID < best) {
+			best, bestExtra, bestAssisted, bestCanonical, bestEquipment, found = ex.ID, extra, assisted, canonical, equipment, true
 		}
 	}
 	if found {
