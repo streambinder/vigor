@@ -1009,7 +1009,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get calibrationAutoOnlyHint =>
-      'Durante la calibración, solo está disponible la generación automática de entrenamientos — aún puedes añadir un compañero o cambiar la duración';
+      'Durante la calibración, solo está disponible la generación automática de entrenamientos — aún puedes añadir un compañero, cambiar la duración o elegir tu gimnasio y equipamiento';
 
   @override
   String get calibrationGlobal => 'Global';

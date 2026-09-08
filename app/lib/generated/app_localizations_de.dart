@@ -1013,7 +1013,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get calibrationAutoOnlyHint =>
-      'Während der Kalibrierung ist nur die automatische Trainingsgenerierung verfügbar — du kannst weiterhin einen Partner hinzufügen oder die Dauer ändern';
+      'Während der Kalibrierung ist nur die automatische Trainingsgenerierung verfügbar — du kannst weiterhin einen Partner hinzufügen, die Dauer ändern oder Fitnessstudio und Ausrüstung wählen';
 
   @override
   String get calibrationGlobal => 'Gesamt';

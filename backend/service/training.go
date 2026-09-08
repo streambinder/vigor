@@ -159,14 +159,14 @@ func isCalibrating(calibration map[string]int, families []model.MovementFamily) 
 
 // calibrationGenerationAllowed reports whether a generation request is
 // allowed during calibration: only Auto generation (no free text, no explicit
-// methodology) carrying at most partner and duration tuning.
+// methodology) carrying at most partner, duration and gym/equipment tuning.
 func calibrationGenerationAllowed(freeMode bool, equipment []string, gymID, prompt, methodology string, goals, muscles []string, skipWarmupCooldown bool) bool {
 	if freeMode || strings.TrimSpace(methodology) != "" {
 		return false
 	}
-	return len(equipment) == 0 &&
-		strings.TrimSpace(gymID) == "" &&
-		strings.TrimSpace(prompt) == "" &&
+	// gym and custom equipment are allowed during calibration: only the
+	// remaining tuning parameters are gated.
+	return strings.TrimSpace(prompt) == "" &&
 		len(goals) == 0 &&
 		len(muscles) == 0 &&
 		!skipWarmupCooldown
@@ -176,8 +176,8 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	freeMode := strings.TrimSpace(freeText) != ""
 
 	// during calibration only Auto generation is allowed, restricted to
-	// partner and duration tuning: reject anything else before any expensive
-	// work (article fetch, LLM derivation, retrieval) happens.
+	// partner, duration and gym/equipment tuning: reject anything else before
+	// any expensive work (article fetch, LLM derivation, retrieval) happens.
 	if calibrating, err := isUserCalibrating(userID); err != nil {
 		return nil, err
 	} else if calibrating && !calibrationGenerationAllowed(freeMode, equipment, gymID, prompt, methodology, goals, muscles, skipWarmupCooldown) {

@@ -516,7 +516,7 @@
   "failedToLoadProgress": "Failed to load progress",
   "noProgressYet": "Complete trainings to see your progress",
   "calibration": "Calibration",
-  "calibrationAutoOnlyHint": "During calibration, only Auto training generation is available — you can still add a partner or change the duration",
+  "calibrationAutoOnlyHint": "During calibration, only Auto training generation is available — you can still add a partner, change the duration, or pick your gym and equipment",
   "calibrationGlobal": "Global",
   "calibrationNeeded": "Complete your first training for Vigor to calibrate recommendations to your level",
   "calibrationDescription": "During calibration, the platform collects data from your feedback to make an initial assessment of your fitness level",

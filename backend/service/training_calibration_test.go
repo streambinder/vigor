@@ -39,14 +39,26 @@ func TestCalibrationGenerationAllowed(t *testing.T) {
 			want:        false,
 		},
 		{
-			name:      "equipment tuning is blocked",
+			name:      "equipment tuning is allowed",
 			equipment: []string{"dumbbell"},
-			want:      false,
+			want:      true,
 		},
 		{
-			name:  "gym tuning is blocked",
+			name:  "gym tuning is allowed",
 			gymID: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-			want:  false,
+			want:  true,
+		},
+		{
+			name:      "equipment and gym together are allowed",
+			equipment: []string{"dumbbell", "barbell"},
+			gymID:     "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+			want:      true,
+		},
+		{
+			name:      "equipment does not bypass other blocked params",
+			equipment: []string{"dumbbell"},
+			goals:     []string{"hypertrophy"},
+			want:      false,
 		},
 		{
 			name:   "prompt tuning is blocked",

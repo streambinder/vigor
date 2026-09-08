@@ -1947,7 +1947,7 @@ abstract class AppLocalizations {
   /// No description provided for @calibrationAutoOnlyHint.
   ///
   /// In en, this message translates to:
-  /// **'During calibration, only Auto training generation is available — you can still add a partner or change the duration'**
+  /// **'During calibration, only Auto training generation is available — you can still add a partner, change the duration, or pick your gym and equipment'**
   String get calibrationAutoOnlyHint;
 
   /// No description provided for @calibrationGlobal.

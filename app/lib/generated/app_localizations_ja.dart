@@ -981,7 +981,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get calibrationAutoOnlyHint =>
-      'キャリブレーション中は自動トレーニング生成のみ利用できます — パートナーの追加や時間の変更は可能です';
+      'キャリブレーション中は自動トレーニング生成のみ利用できます — パートナーの追加、時間の変更、ジムや器具の選択は可能です';
 
   @override
   String get calibrationGlobal => '全体';
