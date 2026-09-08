@@ -797,6 +797,10 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	for _, m := range modifiers {
 		training.Equipment = append(training.Equipment, m.ID)
 	}
+	// the selection can pin exercises whose gear was never declared —
+	// explicit programs bypass equipment filtering at retrieval — so merge
+	// the selected exercises' required equipment in, keeping the record honest.
+	training.Equipment = mergeSelectedExerciseEquipment(training, training.Equipment)
 	training.Goals = effectiveGoals
 	training.Muscles = actualMuscles
 	// in free text mode the derived parameters stand in for the guided request
@@ -1141,6 +1145,49 @@ func filterApplicableModifiers(modifiers []model.Modifier, exercises []model.Exe
 		}
 	}
 	return applicable
+}
+
+// mergeSelectedExerciseEquipment appends to equipmentIDs any gear the
+// training's selected exercises require but the declared list omits, so the
+// persisted record never silently drops equipment the session actually
+// needs. When nothing is missing the list is returned unchanged.
+func mergeSelectedExerciseEquipment(training *model.Training, equipmentIDs []string) []string {
+	declared := make(map[string]bool, len(equipmentIDs))
+	for _, id := range equipmentIDs {
+		declared[id] = true
+	}
+	seen := make(map[string]bool)
+	var exerciseIDs []string
+	for _, r := range training.Routines {
+		for _, b := range r.Blocks {
+			for _, a := range b.Activities {
+				if a.ExerciseID == "" || seen[a.ExerciseID] {
+					continue
+				}
+				seen[a.ExerciseID] = true
+				exerciseIDs = append(exerciseIDs, a.ExerciseID)
+			}
+		}
+	}
+	if len(exerciseIDs) == 0 {
+		return equipmentIDs
+	}
+	var exercises []model.Exercise
+	if err := database.Knowledge.Where("id IN ?", exerciseIDs).Find(&exercises).Error; err != nil {
+		log.Warn().Err(err).Msg("equipment coverage: failed to load selected exercises")
+		return equipmentIDs
+	}
+	merged := append([]string{}, equipmentIDs...)
+	for _, ex := range exercises {
+		for _, eq := range ex.Equipment {
+			if !declared[eq] {
+				declared[eq] = true
+				merged = append(merged, eq)
+				log.Debug().Str("exercise", ex.ID).Str("equipment", eq).Msg("equipment coverage: merged undeclared gear")
+			}
+		}
+	}
+	return merged
 }
 
 func modifierMatchesAnyExercise(mod model.Modifier, exercises []model.Exercise) bool {
