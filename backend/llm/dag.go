@@ -223,6 +223,14 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	}
 	progress(pipeline.StepSelectExercises)
 
+	if explicitProgram {
+		// the selection node may still swap a pinned movement for a pool
+		// neighbor; restore pins deterministically, keeping only grounded
+		// contraindication substitutions.
+		enforceExplicitPins(&exerciseResult, req.PinnedExercises,
+			constraintResult.ContraindicatedPatterns, historyResult.AvoidExercises)
+	}
+
 	// deterministic calibration: guarantee gap-muscle coverage by construction.
 	// the work pool is built per muscle with quotas, so gap muscles always have
 	// candidates; this only appends the ones the work selection missed.
@@ -741,6 +749,99 @@ func sanitizeSelection(selection *pipeline.ExerciseSelection) {
 	for i := range selection.Excluded {
 		selection.Excluded[i].ExerciseID = stripExerciseTags(selection.Excluded[i].ExerciseID)
 	}
+}
+
+// enforceExplicitPins restores pinned explicit-program movements the selection
+// node swapped for pool neighbors: a pin is mandatory, so a missing pin takes
+// back the first non-pin work slot (or is appended when the selection holds
+// pins only). the only exception is a grounded contraindication — a matching
+// contraindicated pattern or avoid-list entry — where the LLM's substitution
+// stands untouched.
+func enforceExplicitPins(
+	selection *pipeline.ExerciseSelection,
+	pins []model.Exercise,
+	contraindicatedPatterns []string,
+	avoidExercises []string,
+) {
+	if len(pins) == 0 || selection == nil {
+		return
+	}
+	avoid := make(map[string]bool, len(avoidExercises))
+	for _, id := range avoidExercises {
+		avoid[id] = true
+	}
+	pinIDs := make(map[string]bool, len(pins))
+	selected := make(map[string]bool, len(selection.Exercises))
+	for _, ex := range selection.Exercises {
+		selected[ex.ExerciseID] = true
+	}
+	for _, pin := range pins {
+		pinIDs[pin.ID] = true
+	}
+	for _, pin := range pins {
+		if selected[pin.ID] {
+			continue
+		}
+		if avoid[pin.ID] || matchesContraindicatedPattern(pin, contraindicatedPatterns) {
+			log.Debug().Str("exercise", pin.ID).
+				Msg("explicit pin left substituted: grounded contraindication")
+			continue
+		}
+		restored := false
+		for i := range selection.Exercises {
+			if selection.Exercises[i].Phase != "work" || pinIDs[selection.Exercises[i].ExerciseID] {
+				continue
+			}
+			log.Info().Str("pin", pin.ID).Str("replaced", selection.Exercises[i].ExerciseID).
+				Msg("explicit pin enforced over selection swap")
+			selection.Exercises[i].ExerciseID = pin.ID
+			selection.Exercises[i].Rationale = "pinned by the requested program"
+			restored = true
+			break
+		}
+		if !restored {
+			selection.Exercises = append(selection.Exercises, pipeline.SelectedExercise{
+				ExerciseID: pin.ID,
+				Rationale:  "pinned by the requested program",
+				Phase:      "work",
+			})
+		}
+		selected[pin.ID] = true
+	}
+}
+
+// matchesContraindicatedPattern reports whether a free-text contraindicated
+// pattern (e.g. "overhead press") covers the exercise, by substring or
+// token-subset match against its normalized ID and name.
+func matchesContraindicatedPattern(ex model.Exercise, patterns []string) bool {
+	keys := []string{util.NormalizeIDText(ex.ID), util.NormalizeIDText(ex.Name)}
+	for _, pattern := range patterns {
+		norm := util.NormalizeIDText(pattern)
+		if norm == "" {
+			continue
+		}
+		patternTokens := strings.Split(norm, "-")
+		for _, key := range keys {
+			if strings.Contains(key, norm) || isTokenSubset(patternTokens, strings.Split(key, "-")) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// isTokenSubset reports whether every token of needle appears in haystack.
+func isTokenSubset(needle, haystack []string) bool {
+	set := make(map[string]bool, len(haystack))
+	for _, t := range haystack {
+		set[t] = true
+	}
+	for _, t := range needle {
+		if !set[t] {
+			return false
+		}
+	}
+	return true
 }
 
 // load token budgets: compact sessions on the left, an explicit program's full

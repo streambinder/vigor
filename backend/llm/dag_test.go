@@ -320,3 +320,82 @@ func TestOrderedSteps(t *testing.T) {
 		}
 	})
 }
+
+func TestEnforceExplicitPins(t *testing.T) {
+	pins := []model.Exercise{
+		{ID: "reverse-dip", Name: "Reverse Dip"},
+		{ID: "34-sit-up", Name: "3/4 Sit-Up"},
+	}
+	work := func(id, rationale string) pipeline.SelectedExercise {
+		return pipeline.SelectedExercise{ExerciseID: id, Rationale: rationale, Phase: "work"}
+	}
+
+	t.Run("swapped pin takes back a non-pin work slot", func(t *testing.T) {
+		sel := &pipeline.ExerciseSelection{Exercises: []pipeline.SelectedExercise{
+			work("triceps-dip", "chosen over reverse-dip for recency"),
+			work("34-sit-up", "core work"),
+		}}
+		enforceExplicitPins(sel, pins, nil, nil)
+		ids := []string{sel.Exercises[0].ExerciseID, sel.Exercises[1].ExerciseID}
+		if ids[0] != "reverse-dip" || ids[1] != "34-sit-up" {
+			t.Errorf("exercises = %v, want [reverse-dip 34-sit-up]", ids)
+		}
+		if sel.Exercises[0].Rationale != "pinned by the requested program" {
+			t.Errorf("rationale = %q, want deterministic pin rationale", sel.Exercises[0].Rationale)
+		}
+		if sel.Exercises[0].Phase != "work" {
+			t.Errorf("phase = %q, want work", sel.Exercises[0].Phase)
+		}
+	})
+
+	t.Run("pin appended when selection holds pins only", func(t *testing.T) {
+		sel := &pipeline.ExerciseSelection{Exercises: []pipeline.SelectedExercise{
+			work("reverse-dip", "back work"),
+		}}
+		enforceExplicitPins(sel, pins, nil, nil)
+		if len(sel.Exercises) != 2 || sel.Exercises[1].ExerciseID != "34-sit-up" {
+			t.Errorf("exercises = %+v, want 34-sit-up appended", sel.Exercises)
+		}
+	})
+
+	t.Run("contraindicated pin keeps the LLM substitution", func(t *testing.T) {
+		sel := &pipeline.ExerciseSelection{Exercises: []pipeline.SelectedExercise{
+			work("triceps-dip", "reverse-dip contraindicated"),
+		}}
+		enforceExplicitPins(sel, []model.Exercise{{ID: "reverse-dip", Name: "Reverse Dip"}}, []string{"reverse dip"}, nil)
+		if sel.Exercises[0].ExerciseID != "triceps-dip" {
+			t.Errorf("exercises = %+v, want substitution to stand", sel.Exercises)
+		}
+	})
+
+	t.Run("avoid-listed pin keeps the LLM substitution", func(t *testing.T) {
+		sel := &pipeline.ExerciseSelection{Exercises: []pipeline.SelectedExercise{
+			work("triceps-dip", "reverse-dip on avoid list"),
+		}}
+		enforceExplicitPins(sel, []model.Exercise{{ID: "reverse-dip", Name: "Reverse Dip"}}, nil, []string{"reverse-dip"})
+		if sel.Exercises[0].ExerciseID != "triceps-dip" {
+			t.Errorf("exercises = %+v, want substitution to stand", sel.Exercises)
+		}
+	})
+
+	t.Run("all pins present is a no-op", func(t *testing.T) {
+		sel := &pipeline.ExerciseSelection{Exercises: []pipeline.SelectedExercise{
+			work("reverse-dip", "back work"),
+			work("34-sit-up", "core work"),
+		}}
+		enforceExplicitPins(sel, pins, nil, nil)
+		if len(sel.Exercises) != 2 || sel.Exercises[0].Rationale != "back work" {
+			t.Errorf("exercises = %+v, want untouched", sel.Exercises)
+		}
+	})
+
+	t.Run("no pins is a no-op", func(t *testing.T) {
+		sel := &pipeline.ExerciseSelection{Exercises: []pipeline.SelectedExercise{
+			work("triceps-dip", "push work"),
+		}}
+		enforceExplicitPins(sel, nil, nil, nil)
+		if len(sel.Exercises) != 1 || sel.Exercises[0].ExerciseID != "triceps-dip" {
+			t.Errorf("exercises = %+v, want untouched", sel.Exercises)
+		}
+	})
+}
