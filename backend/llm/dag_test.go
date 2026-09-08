@@ -398,6 +398,38 @@ func TestEnforceExplicitPins(t *testing.T) {
 			t.Errorf("exercises = %+v, want untouched", sel.Exercises)
 		}
 	})
+
+	t.Run("restored pin exclusion is dropped", func(t *testing.T) {
+		sel := &pipeline.ExerciseSelection{
+			Exercises: []pipeline.SelectedExercise{
+				work("triceps-dip", "chosen over reverse-dip for recency"),
+				work("34-sit-up", "core work"),
+			},
+			Excluded: []pipeline.ExcludedExercise{
+				{ExerciseID: "reverse-dip", Reason: "recent"},
+				{ExerciseID: "burpee", Reason: "contraindicated"},
+			},
+		}
+		enforceExplicitPins(sel, pins, nil, nil)
+		if len(sel.Excluded) != 1 || sel.Excluded[0].ExerciseID != "burpee" {
+			t.Errorf("excluded = %+v, want only burpee", sel.Excluded)
+		}
+	})
+
+	t.Run("exclusion stands when pin keeps substitution", func(t *testing.T) {
+		sel := &pipeline.ExerciseSelection{
+			Exercises: []pipeline.SelectedExercise{
+				work("triceps-dip", "reverse-dip contraindicated"),
+			},
+			Excluded: []pipeline.ExcludedExercise{
+				{ExerciseID: "reverse-dip", Reason: "recent"},
+			},
+		}
+		enforceExplicitPins(sel, []model.Exercise{{ID: "reverse-dip", Name: "Reverse Dip"}}, []string{"reverse dip"}, nil)
+		if len(sel.Excluded) != 1 || sel.Excluded[0].ExerciseID != "reverse-dip" {
+			t.Errorf("excluded = %+v, want reverse-dip kept", sel.Excluded)
+		}
+	})
 }
 
 func TestNormalizeBlockActivityOrder(t *testing.T) {
