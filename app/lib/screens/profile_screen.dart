@@ -407,11 +407,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required List<Widget> children,
   }) {
     // seijaku: calm interface, stone for all section icons
-    return Container(
-      decoration: BoxDecoration(
-        color: VigorColors.surface(context),
-        borderRadius: VigorRadius.radiusMd,
-      ),
+    return Material(
+      color: VigorColors.surface(context),
+      borderRadius: VigorRadius.radiusMd,
+      clipBehavior: Clip.antiAlias,
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
