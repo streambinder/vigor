@@ -45,7 +45,6 @@ class TrainingService {
     int duration = 0,
     String gym = '',
     String? prompt,
-    String? freeText,
     List<String>? equipment,
     List<String>? partners,
     bool? skipWarmupCooldown,
@@ -55,22 +54,18 @@ class TrainingService {
     void Function(int attempt)? onRetry,
     void Function(String step)? onStep,
   }) async {
-    // free text mode asks the backend to derive every tuning parameter from the
-    // program text itself, so it carries freeText and nothing else
+    // a non-empty prompt runs through the backend analyzer, which fills only
+    // the tuning parameters left unset: everything rides in one body
     final body = <String, dynamic>{};
-    if (freeText != null && freeText.isNotEmpty) {
-      body['freeText'] = freeText;
-    } else {
-      body['duration'] = duration;
-      body['gym'] = gym;
-      if (prompt != null && prompt.isNotEmpty) body['prompt'] = prompt;
-      if (equipment != null && equipment.isNotEmpty) body['equipment'] = equipment;
-      if (partners != null && partners.isNotEmpty) body['partners'] = partners;
-      if (skipWarmupCooldown == true) body['skipWarmupCooldown'] = true;
-      if (methodology != null && methodology.isNotEmpty) body['methodology'] = methodology;
-      if (goals != null && goals.isNotEmpty) body['goals'] = goals;
-      if (muscles != null && muscles.isNotEmpty) body['muscles'] = muscles;
-    }
+    body['duration'] = duration;
+    body['gym'] = gym;
+    if (prompt != null && prompt.isNotEmpty) body['prompt'] = prompt;
+    if (equipment != null && equipment.isNotEmpty) body['equipment'] = equipment;
+    if (partners != null && partners.isNotEmpty) body['partners'] = partners;
+    if (skipWarmupCooldown == true) body['skipWarmupCooldown'] = true;
+    if (methodology != null && methodology.isNotEmpty) body['methodology'] = methodology;
+    if (goals != null && goals.isNotEmpty) body['goals'] = goals;
+    if (muscles != null && muscles.isNotEmpty) body['muscles'] = muscles;
     AppLogger.debug('[TrainingService] Generating training: ${body.keys.join(', ')}');
 
     const maxRetries = 2;
