@@ -41,7 +41,7 @@ Rules:
 		qw422016.E().S(requestSchema)
 		qw422016.N().S(`
 - Map each requested movement to its closest exercise from the [WORK] pool — that is the session, do not redesign it, do not add alternative work exercises, and never rest muscles it trains
-- Substitute a movement only when it matches a contraindicated pattern, picking the closest safe pool exercise and noting the substitution in its rationale`)
+- Pinned movements are mandatory: never swap one for a different exercise for recency or variety — the "prefer non-recent" rule does not apply to them; substitute only on contraindication as above and state the real reason in the rationale`)
 	} else {
 		qw422016.N().S(`- Select `)
 		qw422016.N().D(minWork)
