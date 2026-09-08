@@ -3,11 +3,9 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"slices"
 
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/model"
 	"gorm.io/gorm"
@@ -69,8 +67,8 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		return model.Activity{}, ErrTrainingCompleted
 	}
 
-	// reject shuffle when any participant has uncalibrated families: shuffling
-	// undermines calibration-driven family coverage by swapping a deliberately
+	// reject shuffle when any participant has uncalibrated muscles: shuffling
+	// undermines calibration-driven muscle coverage by swapping a deliberately
 	// selected gap-filling exercise for an unconstrained alternative.
 	allUserIDs := []uuid.UUID{training.UserID}
 	for _, p := range partners {
@@ -81,38 +79,30 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		if err != nil {
 			return model.Activity{}, err
 		}
-		families, err := GetMovementFamilies()
-		if err != nil {
+		var allMuscles []model.Muscle
+		if err := database.Knowledge.Find(&allMuscles).Error; err != nil {
 			return model.Activity{}, err
 		}
-		for _, family := range families {
-			if calibration[family] < CalibrationThreshold {
+		for _, muscle := range allMuscles {
+			if calibration[muscle.ID] < CalibrationThreshold {
 				return model.Activity{}, ErrCalibrating
 			}
 		}
 	}
 
 	var currentExercise struct {
-		ID           string             `json:"id"`
-		Muscles      []string           `json:"muscles"`
-		Progressions map[string]float64 `json:"progressions"`
+		ID      string   `json:"id"`
+		Muscles []string `json:"muscles"`
 	}
 	if err := json.Unmarshal(activity.Detail, &currentExercise); err != nil {
 		return model.Activity{}, ErrInvalidExercise
 	}
 
-	// find primary family (highest score)
-	var primaryFamily string
-	var maxScore float64
-	for family, score := range currentExercise.Progressions {
-		if score > maxScore {
-			primaryFamily = family
-			maxScore = score
-		}
-	}
-	if primaryFamily == "" {
+	// find primary muscle (first listed)
+	if len(currentExercise.Muscles) == 0 {
 		return model.Activity{}, ErrInvalidExercise
 	}
+	primaryMuscle := currentExercise.Muscles[0]
 
 	// use average proficiency across owner + partners
 	proficiencies, err := GetAverageProficiencies(allUserIDs)
@@ -125,9 +115,8 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 	}
 	margin := ProgressiveMargin(trainingsComplete) * 1.5 // wider margin for shuffle: user explicitly wants alternatives
 
-	// calculate max allowed score based on lowest proficiency
-	profForFamily := proficiencies[primaryFamily]
-	maxAllowed := profForFamily + margin
+	// calculate max allowed difficulty based on primary muscle proficiency
+	maxAllowed := proficiencies[primaryMuscle] + margin
 
 	// collect all exercise IDs from other activities in training
 	var excludeIDs []string
@@ -154,12 +143,12 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 		}
 	}
 
-	// build base query matching by family with proficiency-based upper bound
+	// build base query matching by primary muscle with proficiency-based upper bound
 	baseQuery := func() *gorm.DB {
 		q := database.Knowledge.
 			Model(&model.Exercise{}).
-			Where(fmt.Sprintf("exercises.progressions ? '%s'", primaryFamily)).
-			Where(fmt.Sprintf("(exercises.progressions->>'%s')::float <= ?", primaryFamily), maxAllowed)
+			Where("exercises.muscles[1] = ?", primaryMuscle).
+			Where("exercises.difficulty <= ?", maxAllowed)
 		if len(excludeIDs) > 0 {
 			q = q.Where("id NOT IN ?", excludeIDs)
 		}
@@ -185,25 +174,8 @@ func ShuffleActivity(userID uuid.UUID, activityID string) (model.Activity, error
 
 	var newExercise model.Exercise
 
-	if len(currentExercise.Muscles) > 0 {
-		// try exact muscle match or primary muscle match
-		err := baseQuery().
-			Where("(muscles @> ? AND muscles <@ ?) OR muscles[1] = ?",
-				pq.Array(currentExercise.Muscles), pq.Array(currentExercise.Muscles),
-				currentExercise.Muscles[0]).
-			Order(orderClause).First(&newExercise).Error
-		if err != nil {
-			// primary muscle must still match — don't drop muscle constraint entirely
-			if err := baseQuery().
-				Where("muscles[1] = ?", currentExercise.Muscles[0]).
-				Order(orderClause).First(&newExercise).Error; err != nil {
-				return model.Activity{}, ErrNoAlternativeFound
-			}
-		}
-	} else {
-		if err := baseQuery().Order(orderClause).First(&newExercise).Error; err != nil {
-			return model.Activity{}, ErrNoAlternativeFound
-		}
+	if err := baseQuery().Order(orderClause).First(&newExercise).Error; err != nil {
+		return model.Activity{}, ErrNoAlternativeFound
 	}
 
 	exerciseJSON, err := json.Marshal(newExercise)

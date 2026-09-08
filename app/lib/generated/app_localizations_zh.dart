@@ -965,9 +965,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get partneredTrainings => '合作训练';
 
   @override
-  String get movementFamilies => '动作类别';
-
-  @override
   String get muscleActivity => '肌肉活动';
 
   @override
@@ -1000,8 +997,8 @@ class AppLocalizationsZh extends AppLocalizations {
       '此训练可能与您的目标不完全一致——系统仍在了解您的健身水平，优先考虑运动多样性以建立完整的用户画像';
 
   @override
-  String calibrationFamiliesLearned(int calibrated, int total) {
-    return '$calibrated/$total 运动模式已学习';
+  String calibrationMusclesLearned(int calibrated, int total) {
+    return '$calibrated/$total 肌肉群已校准';
   }
 
   @override
@@ -1254,9 +1251,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get loadingMsg16 => '设计热身方案...';
-
-  @override
-  String get loadingMsg17 => '映射动作家族...';
 
   @override
   String get loadingMsg18 => '评估负荷分布...';

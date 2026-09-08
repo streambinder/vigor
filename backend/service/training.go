@@ -132,25 +132,25 @@ func freeTextRetrievalQuery(summary string, articles []string, freeText string) 
 
 // GenerateTraining creates a new training for a user.
 // onProgress is called after each DAG node completes (may be nil).
-// isUserCalibrating reports whether any of the user's movement families is
+// isUserCalibrating reports whether any of the user's muscle groups is
 // still below the calibration threshold.
 func isUserCalibrating(userID uuid.UUID) (bool, error) {
 	calibration, err := GetProficiencyCalibration(userID)
 	if err != nil {
 		return false, err
 	}
-	var allFamilies []model.MovementFamily
-	if err := database.Knowledge.Find(&allFamilies).Error; err != nil {
+	var allMuscles []model.Muscle
+	if err := database.Knowledge.Find(&allMuscles).Error; err != nil {
 		return false, err
 	}
-	return isCalibrating(calibration, allFamilies), nil
+	return isCalibrating(calibration, allMuscles), nil
 }
 
-// isCalibrating reports whether any movement family is below the calibration
+// isCalibrating reports whether any muscle group is below the calibration
 // threshold.
-func isCalibrating(calibration map[string]int, families []model.MovementFamily) bool {
-	for _, family := range families {
-		if calibration[family.ID] < CalibrationThreshold {
+func isCalibrating(calibration map[string]int, muscles []model.Muscle) bool {
+	for _, muscle := range muscles {
+		if calibration[muscle.ID] < CalibrationThreshold {
 			return true
 		}
 	}
@@ -332,22 +332,22 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		return nil, err
 	}
 
-	// when methodology is auto, compute calibration gaps to guide LLM toward uncalibrated families
+	// when methodology is auto, compute calibration gaps to guide LLM toward uncalibrated muscles
 	var calibrationGaps map[string]int
 	if methodology == "" {
 		calibration, err := GetProficiencyCalibration(userID)
 		if err != nil {
 			return nil, err
 		}
-		var allFamilies []model.MovementFamily
-		if err := database.Knowledge.Find(&allFamilies).Error; err != nil {
+		var allMuscles []model.Muscle
+		if err := database.Knowledge.Find(&allMuscles).Error; err != nil {
 			return nil, err
 		}
 		calibrationGaps = make(map[string]int)
-		for _, family := range allFamilies {
-			count := calibration[family.ID]
+		for _, muscle := range allMuscles {
+			count := calibration[muscle.ID]
 			if count < CalibrationThreshold {
-				calibrationGaps[family.ID] = count
+				calibrationGaps[muscle.ID] = count
 			}
 		}
 		// nothing to nudge if fully calibrated

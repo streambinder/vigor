@@ -21,8 +21,10 @@ class Exercise {
   final List<String> instructions;
   @JsonKey(name: 'cues', defaultValue: [])
   final List<String> cues;
-  @JsonKey(name: 'progressions', defaultValue: {})
-  final Map<String, dynamic> progressions;
+  @JsonKey(name: 'difficulty')
+  final int difficulty;
+  @JsonKey(name: 'is_mobility')
+  final bool isMobility;
   @JsonKey(name: 'mode', defaultValue: '')
   final String mode;
 
@@ -34,7 +36,8 @@ class Exercise {
     required this.reference,
     required this.instructions,
     required this.cues,
-    required this.progressions,
+    required this.difficulty,
+    required this.isMobility,
     required this.mode,
   });
 

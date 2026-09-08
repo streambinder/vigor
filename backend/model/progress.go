@@ -6,9 +6,9 @@ import (
 	"github.com/google/uuid"
 )
 
-// FamilyProgress represents user progress within a movement family.
-type FamilyProgress struct {
-	Proficiency float64 `json:"proficiency"` // 0-100% of family max
+// MuscleProgress represents user progress within a muscle group.
+type MuscleProgress struct {
+	Proficiency float64 `json:"proficiency"` // 0-100% of muscle max difficulty
 	Calibration float64 `json:"calibration"` // 0-100% confidence in proficiency estimate
 }
 
@@ -26,7 +26,7 @@ type PendingFeedbackTraining struct {
 
 // Progress represents the user's overall training progress.
 type Progress struct {
-	Families           map[string]FamilyProgress `json:"families"`
+	MuscleProficiency  map[string]MuscleProgress `json:"muscle_proficiency"`
 	Muscles            map[string]MuscleImpact   `json:"muscles"`
 	Trainings          int                       `json:"trainings"`
 	TrainingsPartnered int                       `json:"trainings_partnered"`

@@ -13,8 +13,8 @@ class Proficiency {
   final String userId;
   @JsonKey(name: 'training_id', defaultValue: '')
   final String trainingId;
-  @JsonKey(name: 'movement_family', defaultValue: '')
-  final String movementFamily;
+  @JsonKey(name: 'muscle', defaultValue: '')
+  final String muscle;
   @JsonKey(name: 'value')
   final double value;
   @JsonKey(name: 'created_at', toJson: _dateTimeToJson)
@@ -24,7 +24,7 @@ class Proficiency {
     required this.id,
     required this.userId,
     required this.trainingId,
-    required this.movementFamily,
+    required this.muscle,
     required this.value,
     required this.createdAt,
   });

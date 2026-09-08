@@ -128,8 +128,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     final response = await locator.progressService.getProgress();
     if (!mounted) return;
     if (response.isSuccess && response.data != null) {
-      final families = ProgressService.parseFamilies(response.data!.families);
-      locator.updateCalibrationFromProgress(families);
+      final muscles = ProgressService.parseMuscleProficiency(response.data!.muscleProficiency);
+      locator.updateCalibrationFromProgress(muscles);
       final calibrating = locator.isCalibratingNotifier.value;
       if (calibrating != _isCalibrating) {
         setState(() {
@@ -245,7 +245,6 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       l10n.loadingMsg14,
       l10n.loadingMsg15,
       l10n.loadingMsg16,
-      l10n.loadingMsg17,
       l10n.loadingMsg18,
       l10n.loadingMsg19,
       l10n.loadingMsg20,

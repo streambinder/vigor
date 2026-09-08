@@ -3,21 +3,21 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
-part 'family_progress.g.dart';
+part 'muscle_progress.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-class FamilyProgress {
+class MuscleProgress {
   @JsonKey(name: 'proficiency')
   final double proficiency;
   @JsonKey(name: 'calibration')
   final double calibration;
 
-  FamilyProgress({
+  MuscleProgress({
     required this.proficiency,
     required this.calibration,
   });
 
-  factory FamilyProgress.fromJson(Map<String, dynamic> json) => _$FamilyProgressFromJson(json);
+  factory MuscleProgress.fromJson(Map<String, dynamic> json) => _$MuscleProgressFromJson(json);
 
-  Map<String, dynamic> toJson() => _$FamilyProgressToJson(this);
+  Map<String, dynamic> toJson() => _$MuscleProgressToJson(this);
 }

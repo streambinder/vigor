@@ -982,9 +982,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get partneredTrainings => 'совместных тренировок';
 
   @override
-  String get movementFamilies => 'Семейства движений';
-
-  @override
   String get muscleActivity => 'Мышечная активность';
 
   @override
@@ -1020,8 +1017,8 @@ class AppLocalizationsRu extends AppLocalizations {
       'Эта тренировка может не полностью соответствовать вашим целям — система ещё изучает ваш уровень и отдаёт приоритет разнообразию движений для построения полного профиля';
 
   @override
-  String calibrationFamiliesLearned(int calibrated, int total) {
-    return '$calibrated/$total двигательных паттернов изучено';
+  String calibrationMusclesLearned(int calibrated, int total) {
+    return '$calibrated/$total групп мышц откалибровано';
   }
 
   @override
@@ -1285,9 +1282,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get loadingMsg16 => 'Планирование разминки...';
-
-  @override
-  String get loadingMsg17 => 'Маппинг двигательных семейств...';
 
   @override
   String get loadingMsg18 => 'Оценка распределения нагрузки...';

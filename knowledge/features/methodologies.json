@@ -6,13 +6,7 @@
     "duration_based": false,
     "exercises_per_hour": { "min": 5, "max": 8 },
     "work": {
-      "horizontal_push": { "min": 25 },
-      "horizontal_pull": { "min": 25 },
-      "vertical_push": { "min": 25 },
-      "vertical_pull": { "min": 25 },
-      "squat": { "min": 25 },
-      "hinge": { "min": 25 },
-      "core": { "min": 20 }
+      "min_difficulty": 25
     }
   },
   {
@@ -22,13 +16,7 @@
     "duration_based": false,
     "exercises_per_hour": { "min": 6, "max": 10 },
     "work": {
-      "horizontal_push": { "min": 25 },
-      "horizontal_pull": { "min": 25 },
-      "vertical_push": { "min": 20 },
-      "vertical_pull": { "min": 20 },
-      "squat": { "min": 20 },
-      "hinge": { "min": 20 },
-      "core": { "min": 15 }
+      "min_difficulty": 25
     }
   },
   {
@@ -38,12 +26,7 @@
     "duration_based": false,
     "exercises_per_hour": { "min": 12, "max": 20 },
     "work": {
-      "horizontal_push": { "min": 20 },
-      "horizontal_pull": { "min": 20 },
-      "squat": { "min": 20 },
-      "hinge": { "min": 20 },
-      "core": { "min": 15 },
-      "cardio": { "min": 15 }
+      "min_difficulty": 20
     }
   },
   {
@@ -53,11 +36,7 @@
     "duration_based": false,
     "exercises_per_hour": { "min": 10, "max": 16 },
     "work": {
-      "horizontal_push": { "min": 20 },
-      "horizontal_pull": { "min": 20 },
-      "squat": { "min": 20 },
-      "core": { "min": 15 },
-      "cardio": { "min": 15 }
+      "min_difficulty": 20
     }
   },
   {
@@ -67,11 +46,7 @@
     "duration_based": false,
     "exercises_per_hour": { "min": 8, "max": 14 },
     "work": {
-      "horizontal_push": { "min": 20 },
-      "horizontal_pull": { "min": 20 },
-      "squat": { "min": 20 },
-      "hinge": { "min": 20 },
-      "core": { "min": 15 }
+      "min_difficulty": 20
     }
   },
   {
@@ -81,9 +56,7 @@
     "duration_based": true,
     "exercises_per_hour": { "min": 8, "max": 16 },
     "work": {
-      "cardio": { "min": 20 },
-      "squat": { "min": 20 },
-      "core": { "min": 15 }
+      "min_difficulty": 20
     }
   },
   {
@@ -93,10 +66,7 @@
     "duration_based": false,
     "exercises_per_hour": { "min": 8, "max": 14 },
     "work": {
-      "horizontal_push": { "min": 20 },
-      "horizontal_pull": { "min": 20 },
-      "squat": { "min": 20 },
-      "cardio": { "min": 15 }
+      "min_difficulty": 20
     }
   },
   {
@@ -106,8 +76,7 @@
     "duration_based": true,
     "exercises_per_hour": { "min": 3, "max": 6 },
     "work": {
-      "cardio": { "min": 15 },
-      "core": { "min": 10 }
+      "min_difficulty": 15
     }
   },
   {
@@ -117,7 +86,9 @@
     "duration_based": true,
     "exercises_per_hour": { "min": 12, "max": 24 },
     "work": {
-      "mobility": { "min": 15, "max": 70 }
+      "min_difficulty": 15,
+      "max_difficulty": 70,
+      "mobility_only": true
     }
   }
 ]

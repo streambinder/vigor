@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import '../../design/tokens.dart';
 import '../../generated/app_localizations.dart';
-import '../../models/family_progress.dart';
+import '../../models/muscle_progress.dart';
 import '../../theme/liquid_glass_theme.dart';
 import '../../utils/knowledge_labels.dart';
 import '../../utils/platform_helper.dart';
 
-/// Shows overall calibration as an expandable bar.
-/// When collapsed: single bar with averaged calibration across all families.
-/// When expanded: per-family calibration bars.
+/// Shows calibration progress as calibrated muscles out of total (x/7).
+/// When collapsed: single bar with the calibrated fraction.
+/// When expanded: per-muscle calibration bars.
 class CalibrationWidget extends StatefulWidget {
-  final Map<String, FamilyProgress> families;
+  final Map<String, MuscleProgress> muscles;
 
-  const CalibrationWidget({super.key, required this.families});
+  const CalibrationWidget({super.key, required this.muscles});
 
   @override
   State<CalibrationWidget> createState() => _CalibrationWidgetState();
@@ -21,10 +21,12 @@ class CalibrationWidget extends StatefulWidget {
 class _CalibrationWidgetState extends State<CalibrationWidget> {
   bool _expanded = false;
 
+  int get _calibratedCount =>
+      widget.muscles.values.where((mp) => mp.calibration >= 100.0).length;
+
   double get _overallCalibration {
-    if (widget.families.isEmpty) return 0;
-    final sum = widget.families.values.fold(0.0, (acc, fp) => acc + fp.calibration);
-    return (sum / widget.families.length).clamp(0.0, 100.0);
+    if (widget.muscles.isEmpty) return 0;
+    return (_calibratedCount / widget.muscles.length).clamp(0.0, 1.0);
   }
 
   @override
@@ -75,7 +77,7 @@ class _CalibrationWidgetState extends State<CalibrationWidget> {
                 Row(
                   children: [
                     Text(
-                      '${calibration.toInt()}%',
+                      '$_calibratedCount/${widget.muscles.length}',
                       style: PlatformHelper.useLiquidGlass
                           ? LiquidGlassTheme.bodyStyle.copyWith(fontWeight: FontWeight.w600)
                           : Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -110,12 +112,12 @@ class _CalibrationWidgetState extends State<CalibrationWidget> {
             // main calibration bar
             _buildProgressBar(calibration),
 
-            // expanded per-family view
+            // expanded per-muscle view
             if (_expanded) ...[
               const SizedBox(height: 16),
               const Divider(),
               const SizedBox(height: 12),
-              ..._buildFamilyBars(),
+              ..._buildMuscleBars(),
             ],
           ],
         ),
@@ -139,7 +141,7 @@ class _CalibrationWidgetState extends State<CalibrationWidget> {
           ),
         ),
         FractionallySizedBox(
-          widthFactor: value / 100,
+          widthFactor: value,
           child: Container(
             height: 8,
             decoration: BoxDecoration(
@@ -152,14 +154,22 @@ class _CalibrationWidgetState extends State<CalibrationWidget> {
     );
   }
 
-  List<Widget> _buildFamilyBars() {
-    final sorted = widget.families.entries.toList()
-      ..sort((a, b) => b.value.calibration.compareTo(a.value.calibration));
+  List<Widget> _buildMuscleBars() {
+    final sorted = KnowledgeLabels.muscleDisplayOrder
+        .where((m) => widget.muscles.containsKey(m))
+        .map((m) => MapEntry(m, widget.muscles[m]!))
+        .toList();
+    for (final entry in widget.muscles.entries) {
+      if (!KnowledgeLabels.muscleDisplayOrder.contains(entry.key)) {
+        sorted.add(entry);
+      }
+    }
 
     final l10n = AppLocalizations.of(context);
     return sorted.map((entry) {
-      final label = KnowledgeLabels.familyLabel(entry.key, l10n);
-      final cal = entry.value.calibration.clamp(0.0, 100.0);
+      final label = KnowledgeLabels.muscleLabel(entry.key, l10n);
+      final cal = (entry.value.calibration / 100.0).clamp(0.0, 1.0);
+      final calibrated = entry.value.calibration >= 100.0;
 
       return Padding(
         padding: const EdgeInsets.only(bottom: 8),
@@ -180,13 +190,15 @@ class _CalibrationWidgetState extends State<CalibrationWidget> {
             const SizedBox(width: 8),
             SizedBox(
               width: 36,
-              child: Text(
-                '${cal.toInt()}%',
-                textAlign: TextAlign.right,
-                style: PlatformHelper.useLiquidGlass
-                    ? LiquidGlassTheme.captionStyle
-                    : Theme.of(context).textTheme.bodySmall,
-              ),
+              child: calibrated
+                  ? const Icon(Icons.check_circle, size: 18, color: Colors.green)
+                  : Text(
+                      '${entry.value.calibration.toInt()}%',
+                      textAlign: TextAlign.right,
+                      style: PlatformHelper.useLiquidGlass
+                          ? LiquidGlassTheme.captionStyle
+                          : Theme.of(context).textTheme.bodySmall,
+                    ),
             ),
           ],
         ),

@@ -965,9 +965,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get partneredTrainings => '파트너 훈련';
 
   @override
-  String get movementFamilies => '동작 카테고리';
-
-  @override
   String get muscleActivity => '근육 활동';
 
   @override
@@ -1002,8 +999,8 @@ class AppLocalizationsKo extends AppLocalizations {
       '이 운동은 목표와 완전히 일치하지 않을 수 있습니다 — 시스템이 아직 당신의 피트니스 수준을 학습 중이며, 완전한 프로필을 구축하기 위해 동작 다양성을 우선시하고 있습니다';
 
   @override
-  String calibrationFamiliesLearned(int calibrated, int total) {
-    return '$calibrated/$total 동작 패턴 학습됨';
+  String calibrationMusclesLearned(int calibrated, int total) {
+    return '$calibrated/$total 근육 그룹 보정됨';
   }
 
   @override
@@ -1257,9 +1254,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get loadingMsg16 => '워밍업 설계 중...';
-
-  @override
-  String get loadingMsg17 => '동작 패밀리 매핑 중...';
 
   @override
   String get loadingMsg18 => '부하 분배 평가 중...';

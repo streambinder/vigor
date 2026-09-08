@@ -1,40 +1,40 @@
 import 'package:flutter/material.dart';
 import '../../generated/app_localizations.dart';
-import '../../models/family_progress.dart';
+import '../../models/muscle_progress.dart';
 import '../../theme/liquid_glass_theme.dart';
 import '../../utils/knowledge_labels.dart';
 import '../../utils/platform_helper.dart';
 
-/// Displays proficiency progress bars for each movement family.
-class FamilyProgressWidget extends StatelessWidget {
-  final Map<String, FamilyProgress> families;
+/// Displays proficiency progress bars for each muscle group.
+class MuscleProgressWidget extends StatelessWidget {
+  final Map<String, MuscleProgress> muscles;
 
-  const FamilyProgressWidget({super.key, required this.families});
+  const MuscleProgressWidget({super.key, required this.muscles});
 
   @override
   Widget build(BuildContext context) {
-    final sortedFamilies = KnowledgeLabels.familyDisplayOrder
-        .where((f) => families.containsKey(f))
-        .map((f) => MapEntry(f, families[f]!))
+    final sortedMuscles = KnowledgeLabels.muscleDisplayOrder
+        .where((m) => muscles.containsKey(m))
+        .map((m) => MapEntry(m, muscles[m]!))
         .toList();
 
-    // add any families not in the predefined order
-    for (final entry in families.entries) {
-      if (!KnowledgeLabels.familyDisplayOrder.contains(entry.key)) {
-        sortedFamilies.add(entry);
+    // add any muscles not in the predefined order
+    for (final entry in muscles.entries) {
+      if (!KnowledgeLabels.muscleDisplayOrder.contains(entry.key)) {
+        sortedMuscles.add(entry);
       }
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: sortedFamilies.map((entry) {
-        return _buildFamilyRow(context, entry.key, entry.value);
+      children: sortedMuscles.map((entry) {
+        return _buildMuscleRow(context, entry.key, entry.value);
       }).toList(),
     );
   }
 
-  Widget _buildFamilyRow(BuildContext context, String family, FamilyProgress progress) {
-    final label = KnowledgeLabels.familyLabel(family, AppLocalizations.of(context));
+  Widget _buildMuscleRow(BuildContext context, String muscle, MuscleProgress progress) {
+    final label = KnowledgeLabels.muscleLabel(muscle, AppLocalizations.of(context));
     final proficiency = progress.proficiency.clamp(0.0, 100.0);
 
     final primaryColor = PlatformHelper.useLiquidGlass
