@@ -405,8 +405,9 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	// every classic filter — equipment, muscles, methodology, proficiency,
 	// recency — becomes a way to starve a requested movement out of the pool
 	var workExercises []model.Exercise
+	var pinnedExercises []model.Exercise
 	if freeMode && derivation.derived.ExplicitProgram && len(derivation.derived.Movements) > 0 {
-		workExercises, err = rag.RetrieveExplicitProgramExercises(derivation.derived.Movements)
+		workExercises, pinnedExercises, err = rag.RetrieveExplicitProgramExercises(derivation.derived.Movements)
 	} else {
 		workExercises, err = rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles, prompt, allFavoriteExercises, recentExerciseIDs, calibrationGaps, duration)
 	}
@@ -578,6 +579,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		WorkExercises:        workExercises,
 		WarmupExercises:      warmupExercises,
 		CooldownExercises:    cooldownExercises,
+		PinnedExercises:      pinnedExercises,
 		EquipmentIDs:         equipmentIDs,
 		Modifiers:            llmModifiers,
 		ModifierVariants:     modifierVariants,

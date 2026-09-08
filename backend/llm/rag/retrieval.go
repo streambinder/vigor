@@ -152,24 +152,26 @@ const explicitProgramMovementNeighbors = 4
 // exercise for every named movement off-quota, step two gathers unfiltered
 // semantic neighbors per movement, so the selection node substitutes or
 // regresses a movement against real catalog options instead of hallucinating one.
-func RetrieveExplicitProgramExercises(movements []string) ([]model.Exercise, error) {
+// it returns the full pool first and the pins alone second, so callers can
+// enforce the pins deterministically after the LLM selection.
+func RetrieveExplicitProgramExercises(movements []string) (pool []model.Exercise, pins []model.Exercise, err error) {
 	if len(movements) == 0 {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	var catalog []model.Exercise
 	if err := database.Knowledge.Order("id").Find(&catalog).Error; err != nil {
-		return nil, fmt.Errorf("failed to load exercise catalog: %w", err)
+		return nil, nil, fmt.Errorf("failed to load exercise catalog: %w", err)
 	}
-	pins := pinProgramMovements(movements, catalog)
+	pins = pinProgramMovements(movements, catalog)
 
 	vectors, err := embedding.GenVectors(movements)
 	if err != nil {
-		return nil, fmt.Errorf("failed to embed program movements: %w", err)
+		return nil, nil, fmt.Errorf("failed to embed program movements: %w", err)
 	}
 
 	seen := make(map[string]bool, len(pins))
-	pool := make([]model.Exercise, 0, len(pins)+len(movements)*explicitProgramMovementNeighbors)
+	pool = make([]model.Exercise, 0, len(pins)+len(movements)*explicitProgramMovementNeighbors)
 	for _, ex := range pins {
 		seen[ex.ID] = true
 		pool = append(pool, ex)
@@ -198,7 +200,7 @@ func RetrieveExplicitProgramExercises(movements []string) ([]model.Exercise, err
 		Int("pins", len(pins)).
 		Int("count", len(pool)).
 		Msg("queried explicit program exercises from database")
-	return pool, nil
+	return pool, pins, nil
 }
 
 // pinProgramMovements resolves each named program movement to the closest

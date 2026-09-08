@@ -70,6 +70,7 @@ type TrainingGenerationRequest struct {
 	WorkExercises        []model.Exercise
 	WarmupExercises      []model.Exercise
 	CooldownExercises    []model.Exercise
+	PinnedExercises      []model.Exercise // explicit-program pins, subset of WorkExercises
 	EquipmentIDs         []string
 	Modifiers            []model.Modifier
 	ModifierVariants     map[string][]float64
