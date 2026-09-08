@@ -222,7 +222,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
       // hero stats — readiness glows on the counter circle itself
       Padding(
         padding: const EdgeInsets.only(bottom: VigorSpacing.xl),
-        child: _buildHeroStats(l10n, families),
+        child: _buildHeroStats(l10n),
       ),
       // pending feedback card for partnered trainings missing user feedback
       if (_progress!.pendingFeedback.isNotEmpty)
@@ -505,16 +505,9 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     );
   }
 
-  Widget _buildHeroStats(AppLocalizations l10n, Map<String, FamilyProgress> families) {
+  Widget _buildHeroStats(AppLocalizations l10n) {
     final trainings = _progress?.trainings ?? 0;
     final partnered = _progress?.trainingsPartnered ?? 0;
-
-    // calculate overall calibration
-    double calibration = 0;
-    if (families.isNotEmpty) {
-      final sum = families.values.fold(0.0, (acc, fp) => acc + fp.calibration);
-      calibration = (sum / families.length).clamp(0.0, 100.0);
-    }
 
     return Center(
       child: LayoutBuilder(
@@ -595,75 +588,45 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
                         ),
                       ),
                     ),
-                    // calibration + readiness badge - top right
-                    Positioned(
-                      top: glowPad + 8,
-                      right: glowPad + 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: VigorColors.surface(context),
-                          borderRadius: VigorRadius.radiusFull,
-                          border: Border.all(color: VigorColors.border(context)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            GestureDetector(
-                              onTap: () => _showCalibrationModal(context, l10n, families, calibration),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.tune, size: 14, color: VigorColors.indigoAdaptive(context)),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    calibration > 0 ? '${calibration.toInt()}%' : '–',
-                                    style: VigorTypography.caption.copyWith(
-                                      color: VigorColors.indigoAdaptive(context),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 2),
-                                  const Icon(Icons.help_outline, size: 12, color: VigorColors.stone),
-                                ],
-                              ),
-                            ),
-                            if (readiness != null) ...[
-                              Container(
-                                width: 1,
-                                height: 14,
-                                margin: const EdgeInsets.symmetric(horizontal: 6),
-                                color: VigorColors.border(context),
-                              ),
-                              GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () => _showReadinessModal(context, l10n, score: score, level: level, summary: summary),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      _readinessStyle(l10n, level).$2,
-                                      size: 14,
-                                      color: _readinessStyle(l10n, level).$1,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      _readinessStyle(l10n, level).$3,
-                                      style: VigorTypography.caption.copyWith(
-                                        color: VigorColors.textPrimary(context),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 2),
-                                    const Icon(Icons.help_outline, size: 12, color: VigorColors.stone),
-                                  ],
+                    // readiness badge - top right
+                    // (no calibration badge: the dedicated calibration card covers it)
+                    if (readiness != null)
+                      Positioned(
+                        top: glowPad + 8,
+                        right: glowPad + 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: VigorColors.surface(context),
+                            borderRadius: VigorRadius.radiusFull,
+                            border: Border.all(color: VigorColors.border(context)),
+                          ),
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => _showReadinessModal(context, l10n, score: score, level: level, summary: summary),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _readinessStyle(l10n, level).$2,
+                                  size: 14,
+                                  color: _readinessStyle(l10n, level).$1,
                                 ),
-                              ),
-                            ],
-                          ],
+                                const SizedBox(width: 4),
+                                Text(
+                                  _readinessStyle(l10n, level).$3,
+                                  style: VigorTypography.caption.copyWith(
+                                    color: VigorColors.textPrimary(context),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(width: 2),
+                                const Icon(Icons.help_outline, size: 12, color: VigorColors.stone),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               );
