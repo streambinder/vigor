@@ -55,6 +55,11 @@ Rules:
 		qw422016.N().S(`- Include 3-4 warmup exercises and 4-6 cooldown exercises covering worked muscles`)
 	}
 	qw422016.N().S(`
+`)
+	if skipWarmupCooldown {
+		qw422016.N().S(`- Emit work exercises only: every exercise must have phase "work"`)
+	}
+	qw422016.N().S(`
 - Keep rationale to 3-8 words per exercise
 - Keep excluded reasons to 3-6 words each, plain language — the user may read them
 `)

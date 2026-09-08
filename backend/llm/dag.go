@@ -715,6 +715,20 @@ func runExercisesNode(
 	}
 
 	sanitizeSelection(&result)
+	if skipWarmupCooldown {
+		// the node occasionally emits warmup/cooldown phases anyway; the
+		// request asked for work only, so drop them here instead of burning
+		// tokens on phases the load node discards.
+		workOnly := result.Exercises[:0]
+		for _, ex := range result.Exercises {
+			if ex.Phase == "work" {
+				workOnly = append(workOnly, ex)
+			} else {
+				log.Debug().Str("exercise", ex.ExerciseID).Str("phase", ex.Phase).Msg("exercises node: dropped non-work phase on skip")
+			}
+		}
+		result.Exercises = workOnly
+	}
 	return result, step, nil
 }
 
