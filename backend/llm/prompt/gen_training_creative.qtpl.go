@@ -212,12 +212,18 @@ Contraindications:
 Routine structure:
 `)
 		for _, r := range loadResult.Routines {
+			betweenBlocks := 0
+
+			if len(r.Blocks) > 0 {
+				betweenBlocks = r.Blocks[0].Rest
+
+			}
 			qw422016.N().S(`- `)
 			qw422016.E().S(r.Type)
 			qw422016.N().S(`: `)
 			qw422016.N().D(len(r.Blocks))
 			qw422016.N().S(` block(s), `)
-			qw422016.N().D(r.Rest)
+			qw422016.N().D(betweenBlocks)
 			qw422016.N().S(`s rest between blocks`)
 			if r.Rest > 0 {
 				qw422016.N().S(`, `)

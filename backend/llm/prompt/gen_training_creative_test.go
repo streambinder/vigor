@@ -16,7 +16,7 @@ func TestNodeCreativeUserRoutineStructure(t *testing.T) {
 		pipeline.ConstraintExtraction{},
 		pipeline.LoadProgramming{
 			Routines: []pipeline.ProgrammedRoutine{
-				{Type: "work", Blocks: make([]pipeline.ProgrammedBlock, 2), Rest: 90},
+				{Type: "work", Blocks: []pipeline.ProgrammedBlock{{Rest: 60}, {Rest: 60}}, Rest: 90},
 			},
 		},
 		pipeline.HealthAssessment{},
@@ -26,8 +26,32 @@ func TestNodeCreativeUserRoutineStructure(t *testing.T) {
 	if strings.Contains(out, "blocks}") {
 		t.Fatalf("routine structure line carries stray brace: %q", out)
 	}
-	if !strings.Contains(out, "- work: 2 block(s), 90s rest between blocks, 90s rest after routine") {
+	if !strings.Contains(out, "- work: 2 block(s), 60s rest between blocks, 90s rest after routine") {
 		t.Fatalf("unexpected routine structure line: %q", out)
+	}
+}
+
+func TestNodeCreativeUserBlockRestBeatsRoutineRest(t *testing.T) {
+	out := NodeCreativeUser(
+		pipeline.Strategy{},
+		pipeline.MuscleTargeting{},
+		pipeline.ExerciseSelection{},
+		pipeline.HistoryAnalysis{},
+		pipeline.ConstraintExtraction{},
+		pipeline.LoadProgramming{
+			Routines: []pipeline.ProgrammedRoutine{
+				{Type: "work", Blocks: []pipeline.ProgrammedBlock{{Rest: 60}, {Rest: 60}}},
+			},
+		},
+		pipeline.HealthAssessment{},
+		nil,
+		"",
+	)
+	if !strings.Contains(out, "- work: 2 block(s), 60s rest between blocks") {
+		t.Fatalf("between-blocks rest not read from blocks: %q", out)
+	}
+	if strings.Contains(out, "rest after routine") {
+		t.Fatalf("zero routine rest should not be reported: %q", out)
 	}
 }
 
