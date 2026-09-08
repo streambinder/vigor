@@ -79,15 +79,22 @@ type TrainingGenerationRequest struct {
 	Methodologies        []model.Methodology
 	Muscles              []string // user-selected target muscles, empty when not specified
 	UserPrompt           string
-	Duration             int
-	RecentTrainings      []model.Training
-	RecentFeedback       map[uuid.UUID]model.TrainingFeedback
-	Facts                []model.Fact
-	SkipWarmupCooldown   bool
-	CalibrationGaps      map[string]int
-	HealthSnapshot       *model.HealthSnapshot
-	RecentHR             map[uuid.UUID]*model.HealthExerciseSession
-	RecentExerciseIDs    []string
+	// Duration sizes candidate pools; in free text mode it is the nominal
+	// default, not a user request. Use ExplicitDuration for prompts.
+	Duration int
+	// ExplicitDuration is the session length shown to the strategy and load
+	// prompts: the user-indicated duration in free text mode (0 when unstated —
+	// the generated program then dictates the duration), the requested duration
+	// in guided mode.
+	ExplicitDuration   int
+	RecentTrainings    []model.Training
+	RecentFeedback     map[uuid.UUID]model.TrainingFeedback
+	Facts              []model.Fact
+	SkipWarmupCooldown bool
+	CalibrationGaps    map[string]int
+	HealthSnapshot     *model.HealthSnapshot
+	RecentHR           map[uuid.UUID]*model.HealthExerciseSession
+	RecentExerciseIDs  []string
 
 	// FreeText, when non-empty, switches the DAG to free text mode: the derive
 	// params pre-step deduces the tuning parameters from the raw request

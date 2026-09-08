@@ -220,6 +220,10 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	// filters come from the derivation
 	var derivation *freeTextDerivation
 	var articles []string
+	// explicitDurationMinutes carries a user-indicated session length from
+	// free text (0 when the request states none — the generated program then
+	// dictates the duration)
+	explicitDurationMinutes := 0
 	if freeMode {
 		for _, url := range util.ExtractURLs(freeText) {
 			text, err := util.FetchResource(url)
@@ -254,6 +258,9 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		}
 		if derivation.derived.SkipWarmupCooldown {
 			skipWarmupCooldown = true
+		}
+		if d := derivation.derived.DurationMinutes; d >= 10 && d <= 180 {
+			explicitDurationMinutes = d
 		}
 	}
 
@@ -572,6 +579,13 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		modifierVariants = gym.ModifierVariants.Data()
 	}
 
+	// the strategy/load prompts see only an explicitly stated session length:
+	// in free text mode the nominal pool-sizing duration must not leak as a target
+	explicitDuration := duration
+	if freeMode {
+		explicitDuration = explicitDurationMinutes
+	}
+
 	dagRequest := llm.TrainingGenerationRequest{
 		Profiles:             profiles,
 		Goals:                goalData,
@@ -588,6 +602,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		Muscles:              muscles,
 		UserPrompt:           prompt,
 		Duration:             duration,
+		ExplicitDuration:     explicitDuration,
 		RecentTrainings:      recentTrainings,
 		RecentFeedback:       recentFeedback,
 		Facts:                facts,
@@ -716,13 +731,21 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		// structural validation only — muscle coverage is owned by the strategy node, not the validator
 		validationErr := training.Validate(validExerciseIDs, exerciseModes, validModifierIDs, validRoutineTypes, weightedModifierIDs, weightedExerciseIDs, !skipWarmupCooldown)
 
-		// the stored session length always mirrors the generated program; guided
-		// requests additionally scale repeats to the requested length and enforce
-		// the duration match band
+		// the stored session length always mirrors the generated program; when
+		// the user indicated a session length — always in guided requests,
+		// only when explicitly stated in free text — scale repeats to it and
+		// enforce the duration match band, otherwise the program structure
+		// dictates the duration
 		training.Duration = training.CalculateDuration()
-		if validationErr == nil && !freeMode {
-			training.SetDuration(duration)
-			validationErr = training.ValidateDuration(duration)
+		targetDuration := duration
+		if freeMode {
+			// 0 when the request states no session length: no scaling,
+			// the program structure dictates the duration
+			targetDuration = explicitDurationMinutes
+		}
+		if validationErr == nil && targetDuration > 0 {
+			training.SetDuration(targetDuration)
+			validationErr = training.ValidateDuration(targetDuration)
 		}
 
 		if validationErr == nil {

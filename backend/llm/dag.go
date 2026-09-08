@@ -166,7 +166,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 			req.Goals, req.Methodology, req.Methodologies,
 			methodologyCoverage(req.WorkExercises, req.Methodologies),
 			healthResult, historyResult,
-			req.UserPrompt, req.Duration, req.SkipWarmupCooldown,
+			req.UserPrompt, req.ExplicitDuration, req.SkipWarmupCooldown,
 		)
 		progress(pipeline.StepPickStrategy)
 	}()
@@ -261,7 +261,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		exerciseModes, weightedExercises, resolvedMethodology,
 		req.Modifiers, req.ModifierVariants, req.Facts,
 		req.EquipmentIDs, req.FavoriteEquipmentIDs,
-		req.SkipWarmupCooldown, req.Duration,
+		req.SkipWarmupCooldown, req.ExplicitDuration,
 		explicitProgram, derivedSummary,
 	)
 	nodes[pipeline.StepProgramLoad] = loadStep

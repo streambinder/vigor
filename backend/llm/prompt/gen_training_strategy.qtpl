@@ -35,8 +35,7 @@ Prefer methodologies with higher compatible exercise counts unless goals require
     userPrompt string,
     duration int,
     skipWarmupCooldown bool,
-) -%}
-Duration: {%d duration %} minutes{% if skipWarmupCooldown %} (work only, no warmup/cooldown){% endif %}
+) -%}{% if duration > 0 %}Duration: {%d duration %} minutes{% else %}Duration: not specified — do not assume a session length; the generated program determines it{% endif %}{% if skipWarmupCooldown %} (work only, no warmup/cooldown){% endif %}
 
 {% if len(goals) > 0 %}
 Goals:

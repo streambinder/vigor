@@ -32,6 +32,7 @@ Output a JSON object with:
 - muscles: list of muscle IDs the session should emphasize
 - equipment: list of equipment IDs the program calls for
 - skip_warmup_cooldown: boolean, true only when the request clearly implies a work-only session
+- duration_minutes: integer session length in minutes, only when the request explicitly states one (e.g. "30 minutes", "versione da 45 minuti") — 0 when not indicated; never infer it from the article's own length or from program volume
 - explicit_program: boolean, true only when the request (typically a linked article) fully specifies the session structure — specific movements with their sets/reps/durations scheme
 - movements: the program's exercises as plain movement names in the request's own words (e.g. "pull-up", "sit-up"), in exercise order — only when the request names a concrete set, otherwise an empty list
 - summary: compact plain-text schema of the requested program (session structure, sets x reps or durations per block, progression rules, focus). this is what downstream nodes design the session from, so keep it faithful to the source and under 1200 characters

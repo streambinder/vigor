@@ -58,8 +58,7 @@ Progression adjustments:
     skipWarmupCooldown bool,
     duration int,
     requestedProgram string,
-) -%}
-Duration: {%d duration %} minutes. Volume: {%s volumeTarget %}. Intensity: {%s intensityTarget %}.
+) -%}{% if duration > 0 %}Duration: {%d duration %} minutes.{% else %}Duration: not specified — do not assume a session length; the generated program determines it.{% endif %} Volume: {%s volumeTarget %}. Intensity: {%s intensityTarget %}.
 {% if requestedProgram != "" %}
 [REQUESTED PROGRAM]
 {%s requestedProgram %}

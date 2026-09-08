@@ -53,3 +53,21 @@ func TestNodeLoadRequestedProgramSection(t *testing.T) {
 		t.Fatal("non-explicit load user prompt carries the requested program section")
 	}
 }
+
+func TestNodeLoadUnstatedDurationHonest(t *testing.T) {
+	user := NodeLoadUser(
+		[]pipeline.SelectedExercise{}, map[string]string{}, map[string]bool{},
+		nil,
+		"medium", "high",
+		nil, nil, nil,
+		nil, nil,
+		false, 0,
+		"",
+	)
+	if !strings.Contains(user, "Duration: not specified") {
+		t.Fatalf("unstated load duration not honest: %q", user)
+	}
+	if strings.Contains(user, "Duration: 0 minutes") {
+		t.Fatalf("unstated load duration leaks a zero target: %q", user)
+	}
+}

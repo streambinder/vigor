@@ -88,9 +88,13 @@ func StreamNodeStrategyUser(qw422016 *qt422016.Writer,
 	duration int,
 	skipWarmupCooldown bool,
 ) {
-	qw422016.N().S(`Duration: `)
-	qw422016.N().D(duration)
-	qw422016.N().S(` minutes`)
+	if duration > 0 {
+		qw422016.N().S(`Duration: `)
+		qw422016.N().D(duration)
+		qw422016.N().S(` minutes`)
+	} else {
+		qw422016.N().S(`Duration: not specified — do not assume a session length; the generated program determines it`)
+	}
 	if skipWarmupCooldown {
 		qw422016.N().S(` (work only, no warmup/cooldown)`)
 	}

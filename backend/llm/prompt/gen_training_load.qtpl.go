@@ -111,9 +111,14 @@ func StreamNodeLoadUser(qw422016 *qt422016.Writer,
 	duration int,
 	requestedProgram string,
 ) {
-	qw422016.N().S(`Duration: `)
-	qw422016.N().D(duration)
-	qw422016.N().S(` minutes. Volume: `)
+	if duration > 0 {
+		qw422016.N().S(`Duration: `)
+		qw422016.N().D(duration)
+		qw422016.N().S(` minutes.`)
+	} else {
+		qw422016.N().S(`Duration: not specified — do not assume a session length; the generated program determines it.`)
+	}
+	qw422016.N().S(` Volume: `)
 	qw422016.E().S(volumeTarget)
 	qw422016.N().S(`. Intensity: `)
 	qw422016.E().S(intensityTarget)

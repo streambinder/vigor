@@ -31,8 +31,9 @@ const (
 // deduced from the user's free text (and any linked articles), these stand in
 // for the classic tuning knobs of a guided request. the embedded summary
 // carries the compact schema of the requested program, and flows downstream
-// to the strategy and muscle nodes. the session length is not derived: it is
-// computed deterministically from the generated program.
+// to the strategy and muscle nodes. the session length is not derived from
+// the program: when the request states one explicitly it is honored,
+// otherwise it is computed deterministically from the generated program.
 type DerivedParams struct {
 	Summarizable
 	Methodology        string   `json:"methodology"`
@@ -41,6 +42,10 @@ type DerivedParams struct {
 	Equipment          []string `json:"equipment"`
 	SkipWarmupCooldown bool     `json:"skip_warmup_cooldown"`
 	ExplicitProgram    bool     `json:"explicit_program"`
+	// DurationMinutes is the session length in minutes when the request states
+	// one explicitly (0 when not indicated — the generated program then
+	// dictates the duration).
+	DurationMinutes int `json:"duration_minutes"`
 	// Movements are the program's exercises in the request's own vocabulary
 	// ("pull-up", "push-up"); populated only when the request pins a concrete
 	// set, and matched against the exercise catalog downstream — never IDs
