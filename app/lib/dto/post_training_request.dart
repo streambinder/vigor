@@ -25,8 +25,6 @@ class PostTrainingRequest {
   final List<String> goals;
   @JsonKey(name: 'muscles', defaultValue: [])
   final List<String> muscles;
-  @JsonKey(name: 'freeText', defaultValue: '')
-  final String freeText;
 
   PostTrainingRequest({
     required this.duration,
@@ -38,7 +36,6 @@ class PostTrainingRequest {
     required this.methodology,
     required this.goals,
     required this.muscles,
-    required this.freeText,
   });
 
   factory PostTrainingRequest.fromJson(Map<String, dynamic> json) => _$PostTrainingRequestFromJson(json);

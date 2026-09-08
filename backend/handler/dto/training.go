@@ -4,19 +4,18 @@ import "github.com/streambinder/vigor/model"
 
 // PostTrainingRequest represents the request for POST /training
 type PostTrainingRequest struct {
-	Duration           int      `json:"duration"`
-	Equipment          []string `json:"equipment"`
-	Gym                string   `json:"gym"`
+	Duration  int      `json:"duration"`
+	Equipment []string `json:"equipment"`
+	Gym       string   `json:"gym"`
+	// Prompt is analyzed by the derivation node: it fills only the tuning
+	// parameters the request left unset, explicit choices stay authoritative.
+	// linked http(s) articles are fetched and folded into the derivation.
 	Prompt             string   `json:"prompt"`
 	Partners           []string `json:"partners"`
 	SkipWarmupCooldown bool     `json:"skipWarmupCooldown"`
 	Methodology        string   `json:"methodology"`
 	Goals              []string `json:"goals"`
 	Muscles            []string `json:"muscles"`
-	// FreeText switches generation to free text mode: the full request in one
-	// prompt, optionally with linked http(s) articles. when set, every other
-	// tuning parameter above is ignored.
-	FreeText string `json:"freeText"`
 }
 
 // PostTrainingResponse represents the response for POST /training
