@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -23,6 +24,7 @@ import '../widgets/progress/progress.dart';
 import '../models/progress.dart';
 import '../services/progress_service.dart';
 import '../services/service_locator.dart';
+import '../services/readiness_retry.dart';
 import '../widgets/vigor_logo.dart';
 import 'health_permissions_screen.dart';
 import 'training_details_screen.dart';
@@ -43,6 +45,10 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
   bool _consumedInitialData = false;
   bool _subscribedToEvents = false;
   ValueNotifier<Map<String, dynamic>?>? _healthDailyNotifier;
+  // bounded automatic retries for the readiness hint while the backend
+  // answers 404 (this morning's sleep has not synced yet)
+  Timer? _readinessRetryTimer;
+  final ReadinessRetryPolicy _readinessRetryPolicy = ReadinessRetryPolicy();
 
   void _consumePreloadedData() {
     if (_consumedInitialData) return;
@@ -73,6 +79,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
 
   @override
   void dispose() {
+    _readinessRetryTimer?.cancel();
     _healthDailyNotifier?.removeListener(_onHealthDailyChanged);
     super.dispose();
   }
@@ -91,8 +98,15 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
 
     // on web, storage may need a moment to persist after login
     final storage = context.read<SecureStorageService>();
-    final progressService = context.read<ServiceLocator>().progressService;
     final locator = context.read<ServiceLocator>();
+    final progressService = locator.progressService;
+    // show the device-cached readiness hint immediately instead of waiting
+    // for the health sync to complete; the post-sync refresh updates it
+    locator.serveCachedReadiness();
+    // automatic readiness retries belong to a single load: restart them here
+    _readinessRetryPolicy.reset();
+    _readinessRetryTimer?.cancel();
+    _readinessRetryTimer = null;
     if (!await storage.hasTokens()) {
       if (retryCount < 3) {
         await Future.delayed(const Duration(milliseconds: 100));
@@ -129,7 +143,12 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
         // readiness hint only after the sync has landed: the backend answers
         // 404 until this morning's sleep is in the database, so probing in
         // parallel would race the sync and grade stale data
-        locator.healthDataService!.syncToBackend().whenComplete(() => locator.refreshReadiness(force: userRefresh));
+        locator.healthDataService!.syncToBackend().whenComplete(() async {
+          final ready = await locator.refreshReadiness(force: userRefresh);
+          // no recovery data yet: retry on a bounded backoff instead of
+          // leaving a manual pull-to-refresh as the only way to see the hint
+          if (!ready && !userRefresh) _scheduleReadinessRetry();
+        });
       }
 
       if (mounted) {
@@ -164,6 +183,27 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
         );
       }
     }
+  }
+
+  /// Automatic bounded retries for the readiness hint while the backend has
+  /// no recovery data yet (this morning's sleep has not synced). Stops at
+  /// the first success, when the attempts run out, or when the day rolls over.
+  void _scheduleReadinessRetry() {
+    _readinessRetryTimer?.cancel();
+    _readinessRetryTimer = null;
+    if (!mounted) return;
+    final day = ServiceLocator.readinessDayKey();
+    final delay = _readinessRetryPolicy.nextDelay();
+    if (delay == null) return;
+    _readinessRetryTimer = Timer(delay, () async {
+      _readinessRetryTimer = null;
+      if (!mounted) return;
+      if (ServiceLocator.readinessDayKey() != day) return;
+      final locator = context.read<ServiceLocator>();
+      if (locator.readinessNotifier.value != null) return;
+      final ready = await locator.refreshReadiness();
+      if (!ready) _scheduleReadinessRetry();
+    });
   }
 
   @override

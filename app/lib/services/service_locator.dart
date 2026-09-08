@@ -161,15 +161,32 @@ class ServiceLocator extends ChangeNotifier {
     });
   }
 
+  /// device-local calendar day key (yyyy-MM-dd) used for the readiness cache.
+  static String readinessDayKey([DateTime? at]) {
+    final now = at ?? DateTime.now();
+    return '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+  }
+
+  /// serve the device-cached readiness hint immediately, without any backend
+  /// call. used on homepage open so a cached hint shows instantly instead
+  /// of waiting for the health sync to complete; the post-sync refresh then
+  /// updates it when fresher data is available.
+  void serveCachedReadiness() {
+    if (_prefs.readinessDate == readinessDayKey()) {
+      readinessNotifier.value ??= _prefs.readinessJson;
+    }
+  }
+
   /// daily readiness hint. the probe runs at most once per calendar day per
   /// device — after that the cached value from prefs is served until the day
   /// rolls over. force (pull-to-refresh) asks the backend to recompute.
-  Future<void> refreshReadiness({bool force = false}) async {
-    final now = DateTime.now();
-    final today = '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+  /// returns true when the hint is available, false when the backend has no
+  /// recovery data yet (404): the caller may schedule a bounded retry.
+  Future<bool> refreshReadiness({bool force = false}) async {
+    final today = readinessDayKey();
     if (!force && _prefs.readinessDate == today) {
       readinessNotifier.value ??= _prefs.readinessJson;
-      return;
+      return readinessNotifier.value != null;
     }
     final response = await trainingService.getReadinessToday(force: force);
     if (response.isSuccess) {
@@ -178,8 +195,11 @@ class ServiceLocator extends ChangeNotifier {
       // sleep sync has not landed yet — the next app open must retry
       if (response.data != null) {
         await _prefs.setReadiness(today, response.data);
+        return true;
       }
+      return false;
     }
+    return false;
   }
 
   /// Pre-load homepage data so splash stays until everything is ready
