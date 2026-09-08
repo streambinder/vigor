@@ -202,23 +202,22 @@ func RetrieveExplicitProgramExercises(movements []string) ([]model.Exercise, err
 }
 
 // pinProgramMovements resolves each named program movement to the closest
-// catalog exercise by normalized ID/name matching — exact, then token, then
-// distance — so the canonical exercise is always present for the selection node.
+// catalog exercise: exact normalized ID/name match first, then the plainest
+// token-subset match, then the Levenshtein fallback. "Plainest" ranks toward
+// the fewest extra tokens beyond the movement, no assisted variant and the
+// least required equipment, so "dip" pins chest-dip rather than
+// assisted-chest-dip-kneeling and a pin never drags in gear the source
+// program never mentioned.
 func pinProgramMovements(movements []string, catalog []model.Exercise) []model.Exercise {
-	candidates := make([]util.MatchCandidate, len(catalog))
 	byID := make(map[string]model.Exercise, len(catalog))
-	for i, ex := range catalog {
-		candidates[i] = util.MatchCandidate{
-			Match: ex.ID,
-			Keys:  []string{util.NormalizeIDText(ex.ID), util.NormalizeIDText(ex.Name)},
-		}
+	for _, ex := range catalog {
 		byID[ex.ID] = ex
 	}
 
 	var pins []model.Exercise
 	seen := make(map[string]bool, len(movements))
 	for _, movement := range movements {
-		id, ok := util.FuzzyLookup(movement, candidates)
+		id, ok := plainestProgramMatch(movement, catalog)
 		if !ok {
 			log.Warn().Str("movement", movement).Msg("explicit program: movement matches no catalog exercise")
 			continue
@@ -231,6 +230,96 @@ func pinProgramMovements(movements []string, catalog []model.Exercise) []model.E
 		log.Debug().Str("movement", movement).Str("exercise", id).Msg("explicit program: pinned exercise for movement")
 	}
 	return pins
+}
+
+// plainestProgramMatch resolves a program movement to one catalog exercise ID.
+// An exact normalized ID or name match wins outright. Otherwise every
+// token-subset candidate — the same recall gate util.FuzzyLookup applies —
+// is ranked toward the plainest variant: fewest tokens beyond the movement,
+// non-assisted before assisted, least required equipment, then ID order for
+// determinism. With no token-subset candidate the lookup falls back to
+// util.FuzzyLookup's edit-distance matching.
+func plainestProgramMatch(movement string, catalog []model.Exercise) (string, bool) {
+	norm := util.NormalizeIDText(movement)
+	if norm == "" {
+		return "", false
+	}
+	for _, ex := range catalog {
+		if util.NormalizeIDText(ex.ID) == norm || util.NormalizeIDText(ex.Name) == norm {
+			return ex.ID, true
+		}
+	}
+
+	movementTokens := strings.Split(norm, "-")
+	best := ""
+	bestExtra, bestEquipment := 0, 0
+	bestAssisted := false
+	found := false
+	for _, ex := range catalog {
+		tokens := strings.Split(util.NormalizeIDText(ex.ID), "-")
+		if !tokenSubset(movementTokens, tokens) && !tokenSubset(tokens, movementTokens) {
+			continue
+		}
+		extra := tokenSymmetricDiff(movementTokens, tokens)
+		assisted := len(tokens) > 0 && tokens[0] == "assisted"
+		equipment := len(ex.Equipment)
+		if !found || extra < bestExtra ||
+			(extra == bestExtra && !assisted && bestAssisted) ||
+			(extra == bestExtra && assisted == bestAssisted && equipment < bestEquipment) ||
+			(extra == bestExtra && assisted == bestAssisted && equipment == bestEquipment && ex.ID < best) {
+			best, bestExtra, bestAssisted, bestEquipment, found = ex.ID, extra, assisted, equipment, true
+		}
+	}
+	if found {
+		return best, true
+	}
+
+	candidates := make([]util.MatchCandidate, len(catalog))
+	for i, ex := range catalog {
+		candidates[i] = util.MatchCandidate{
+			Match: ex.ID,
+			Keys:  []string{util.NormalizeIDText(ex.ID), util.NormalizeIDText(ex.Name)},
+		}
+	}
+	return util.FuzzyLookup(movement, candidates)
+}
+
+// tokenSubset reports whether every token of needle appears in haystack.
+func tokenSubset(needle, haystack []string) bool {
+	set := make(map[string]bool, len(haystack))
+	for _, t := range haystack {
+		set[t] = true
+	}
+	for _, t := range needle {
+		if !set[t] {
+			return false
+		}
+	}
+	return true
+}
+
+// tokenSymmetricDiff counts tokens present in exactly one of the two sets.
+func tokenSymmetricDiff(a, b []string) int {
+	inB := make(map[string]bool, len(b))
+	for _, t := range b {
+		inB[t] = true
+	}
+	inA := make(map[string]bool, len(a))
+	for _, t := range a {
+		inA[t] = true
+	}
+	diff := 0
+	for _, t := range a {
+		if !inB[t] {
+			diff++
+		}
+	}
+	for _, t := range b {
+		if !inA[t] {
+			diff++
+		}
+	}
+	return diff
 }
 
 // retrieveBalancedByMuscle queries and filters exercises per muscle group independently,
