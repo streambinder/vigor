@@ -217,4 +217,16 @@ func TestPinProgramMovements(t *testing.T) {
 			t.Fatalf("unexpected pins: %+v", pins)
 		}
 	})
+
+	t.Run("muscle qualifier beats equipment-free variation", func(t *testing.T) {
+		catalog := []model.Exercise{
+			{ID: "reverse-dip", Name: "Reverse Dip", Muscles: []string{"arms", "chest", "shoulders"}},
+			{ID: "chest-dip", Name: "Chest Dip", Muscles: []string{"arms", "chest", "shoulders"}, Equipment: []string{"dip station"}},
+			{ID: "triceps-dip", Name: "Triceps Dip", Muscles: []string{"arms", "chest", "shoulders"}, Equipment: []string{"dip station"}},
+		}
+		pins := pinProgramMovements([]string{"dip"}, catalog)
+		if len(pins) != 1 || pins[0].ID != "chest-dip" {
+			t.Fatalf("unexpected pins: %+v", pins)
+		}
+	})
 }
