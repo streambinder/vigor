@@ -9,7 +9,28 @@ import 'app_logger.dart';
 import 'authenticated_api_service.dart';
 import 'secure_storage_service.dart';
 
+/// Thrown when the backend reports a generation failure via an SSE error event.
+/// [retryable] is false for deterministic client-side rejections (e.g. the
+/// calibration gate) that would fail identically on every retry.
+class TrainingGenerationException implements Exception {
+  final String message;
+  final bool retryable;
+  const TrainingGenerationException(this.message, {this.retryable = true});
+
+  @override
+  String toString() => 'TrainingGenerationException: $message';
+}
+
 class TrainingService {
+  /// SSE error codes worth retrying. Any other explicit code is a
+  /// deterministic rejection; an absent code means a legacy backend, which
+  /// keeps the previous always-retry behavior.
+  static const _retryableErrorCodes = {'malformed_training'};
+
+  /// Reports whether an SSE error event carrying [code] is worth retrying.
+  static bool isRetryableErrorCode(String? code) =>
+      code == null || code.isEmpty || _retryableErrorCodes.contains(code);
+
   final AuthenticatedApiService _apiService;
   final void Function(AppEvent)? emitEvent;
 
@@ -61,7 +82,16 @@ class TrainingService {
           emitEvent?.call(TrainingListChanged());
           return ApiResponse.success(result, 200);
         }
-        // SSE returned an error event — treat as retryable
+        // stream ended without a result — treat as transient
+        AppLogger.warning('[TrainingService] SSE stream ended without result');
+      } on TrainingGenerationException catch (e) {
+        if (!e.retryable) {
+          // deterministic rejection (e.g. calibration gate): fail fast
+          // instead of pointlessly retrying
+          AppLogger.error('[TrainingService] Non-retryable error: ${e.message}');
+          return ApiResponse.error(e.message, 422);
+        }
+        AppLogger.warning('[TrainingService] Retryable SSE error: ${e.message}');
       } catch (e) {
         AppLogger.warning('[TrainingService] SSE attempt failed: $e');
       }
@@ -77,7 +107,8 @@ class TrainingService {
   }
 
   /// streams SSE events from POST /training, calls onStep for each step event,
-  /// returns the training on "done" or null on "error".
+  /// returns the training on "done", throws [TrainingGenerationException] on
+  /// "error", returns null when the stream ends without a result.
   Future<Training?> _generateViaSSE(
     Map<String, dynamic> body, {
     void Function(String step)? onStep,
@@ -95,8 +126,12 @@ class TrainingService {
           AppLogger.info('[TrainingService] Generated training: ${training.id}');
           return training;
         case 'error':
-          AppLogger.error('[TrainingService] SSE error: ${event.data['error']}');
-          return null;
+          final msg = event.data['error'] as String? ?? 'Unknown error';
+          final code = event.data['code'] as String?;
+          throw TrainingGenerationException(
+            msg,
+            retryable: isRetryableErrorCode(code),
+          );
       }
     }
     return null;
