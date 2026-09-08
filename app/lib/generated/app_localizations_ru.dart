@@ -997,6 +997,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get calibration => 'Калибровка';
 
   @override
+  String get calibrationAutoOnlyHint =>
+      'Во время калибровки доступна только автоматическая генерация тренировок — вы по-прежнему можете добавить партнёра или изменить длительность';
+
+  @override
   String get calibrationGlobal => 'Общий';
 
   @override

@@ -12,6 +12,7 @@ import '../models/profile_data.dart' as profile_models;
 import '../models/training.dart';
 import '../providers/auth_provider.dart';
 import '../services/service_locator.dart';
+import '../services/progress_service.dart';
 import '../services/preferences_service.dart';
 import '../services/user_service.dart';
 import '../widgets/adaptive/adaptive.dart';
@@ -68,6 +69,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   List<int>? _recommendedDurationRange;
   late bool _useRecommendedDuration;
 
+  // during calibration only Auto generation is available: every tuning
+  // parameter but partners and duration is locked, and a hint banner explains why
+  bool _isCalibrating = false;
+
   // rotating status message state
   Timer? _messageTimer;
   int _currentMessageIndex = 0;
@@ -95,6 +100,44 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     _loadMuscles();
     _loadMethodologies();
     _loadRecommendedDuration();
+    _isCalibrating =
+        context.read<ServiceLocator>().isCalibratingNotifier.value;
+    if (_isCalibrating) _applyCalibrationLocks();
+    _refreshCalibrationState();
+  }
+
+  /// locks generation to Auto-only: training mode, bodyweight, and every
+  /// tuning parameter cleared but partners and duration
+  void _applyCalibrationLocks() {
+    _sessionMode = _SessionMode.training;
+    _equipmentMode = EquipmentMode.bodyweight;
+    _selectedGym = null;
+    _equipment = [];
+    _methodology = null;
+    _selectedGoals.clear();
+    _selectedMuscles.clear();
+    _promptController.clear();
+    _freeTextController.clear();
+    _advancedExpanded = false;
+  }
+
+  /// re-checks calibration from fresh progress so the locks never rely on
+  /// stale cached state (e.g. modal opened from the activity tab)
+  Future<void> _refreshCalibrationState() async {
+    final locator = context.read<ServiceLocator>();
+    final response = await locator.progressService.getProgress();
+    if (!mounted) return;
+    if (response.isSuccess && response.data != null) {
+      final families = ProgressService.parseFamilies(response.data!.families);
+      locator.updateCalibrationFromProgress(families);
+      final calibrating = locator.isCalibratingNotifier.value;
+      if (calibrating != _isCalibrating) {
+        setState(() {
+          _isCalibrating = calibrating;
+          if (calibrating) _applyCalibrationLocks();
+        });
+      }
+    }
   }
 
   Future<void> _loadGoals() async {
@@ -946,6 +989,47 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     );
   }
 
+  /// hint banner shown at the top of the modal while calibrating
+  Widget _buildCalibrationHint(AppLocalizations l10n) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: VigorSpacing.md,
+        vertical: VigorSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: VigorColors.indigo.withValues(alpha: 0.12),
+        borderRadius: VigorRadius.radiusMd,
+        border: Border.all(
+          color: VigorColors.indigo.withValues(alpha: 0.4),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.info_outline, size: 18, color: VigorColors.indigo),
+          const SizedBox(width: VigorSpacing.sm),
+          Expanded(
+            child: Text(
+              l10n.calibrationAutoOnlyHint,
+              style: VigorTypography.caption.copyWith(
+                color: VigorColors.textPrimary(context),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// greys out and disables a section locked during calibration
+  Widget _buildLockedSection({required Widget child}) {
+    if (!_isCalibrating) return child;
+    return IgnorePointer(
+      ignoring: true,
+      child: Opacity(opacity: 0.45, child: child),
+    );
+  }
+
   Widget _buildPartnersSection() {
     final l10n = AppLocalizations.of(context);
     return Column(
@@ -1004,6 +1088,12 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   Future<void> _generateTraining() async {
     if (!_formKey.currentState!.validate()) {
       return;
+    }
+
+    // last-resort guard: the UI locks every non-Auto option during
+    // calibration, but never trust the client alone (the backend rejects too)
+    if (_isCalibrating) {
+      _sessionMode = _SessionMode.training;
     }
 
     setState(() {
@@ -1182,7 +1272,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       prompt: prompt.isEmpty ? null : prompt,
       equipment: equipment,
       partners: _partners.isEmpty ? null : _partners.map((p) => p.id).toList(),
-      skipWarmupCooldown: !_includeWarmupCooldown ? true : null,
+      // warmup/cooldown tuning is locked during calibration: send nothing so
+      // the backend default applies instead of tripping the calibration gate
+      skipWarmupCooldown: _isCalibrating
+          ? null
+          : (!_includeWarmupCooldown ? true : null),
       methodology: _methodology,
       goals: _selectedGoals.isEmpty ? null : _selectedGoals.toList(),
       muscles: _selectedMuscles.isEmpty ? null : _selectedMuscles.toList(),
@@ -1474,7 +1568,14 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // calibration hint — always at the very top while calibrating
+                  if (_isCalibrating) ...[
+                    _buildCalibrationHint(l10n),
+                    const SizedBox(height: VigorSpacing.md),
+                  ],
+
                   // session mode toggle — accent color follows selected mode
+                  // (flow and free text are locked during calibration)
                   SizedBox(
                     width: double.infinity,
                     child: AnimatedTheme(
@@ -1502,9 +1603,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const ButtonSegment(
+                          ButtonSegment(
                             value: _SessionMode.flow,
-                            label: Text(
+                            enabled: !_isCalibrating,
+                            label: const Text(
                               'Flow',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -1512,6 +1614,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                           ),
                           ButtonSegment(
                             value: _SessionMode.freeText,
+                            enabled: !_isCalibrating,
                             label: Text(
                               l10n.freeTextMode,
                               maxLines: 1,
@@ -1543,27 +1646,40 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                     const SizedBox(height: VigorSpacing.md),
 
                     // Equipment mode selection (training only)
+                    // locked during calibration: Auto generation is bodyweight
                     if (_sessionMode == _SessionMode.training) ...[
-                      _buildEquipmentSection(),
+                      _buildLockedSection(child: _buildEquipmentSection()),
                       const SizedBox(height: VigorSpacing.md),
 
-                      // Partners section
+                      // Partners section — stays enabled during calibration
                       _buildPartnersSection(),
                       const SizedBox(height: VigorSpacing.md),
                     ],
 
                     // Advanced settings collapsible
-                    _buildAdvancedHeader(),
-                    AnimatedSize(
-                      duration: VigorAnimation.medium,
-                      curve: VigorAnimation.defaultCurve,
-                      alignment: Alignment.topCenter,
-                      child: _advancedExpanded
-                          ? Padding(
-                              padding: const EdgeInsets.only(top: VigorSpacing.md),
-                              child: _buildAdvancedContent(),
-                            )
-                          : const SizedBox.shrink(),
+                    // (prompt, warmup, muscles, methodology, goals)
+                    // locked during calibration
+                    _buildLockedSection(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildAdvancedHeader(),
+                          AnimatedSize(
+                            duration: VigorAnimation.medium,
+                            curve: VigorAnimation.defaultCurve,
+                            alignment: Alignment.topCenter,
+                            child: _advancedExpanded
+                                ? Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: VigorSpacing.md,
+                                    ),
+                                    child: _buildAdvancedContent(),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ],

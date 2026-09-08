@@ -1012,6 +1012,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get calibration => 'Kalibrierung';
 
   @override
+  String get calibrationAutoOnlyHint =>
+      'Während der Kalibrierung ist nur die automatische Trainingsgenerierung verfügbar — du kannst weiterhin einen Partner hinzufügen oder die Dauer ändern';
+
+  @override
   String get calibrationGlobal => 'Gesamt';
 
   @override

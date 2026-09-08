@@ -980,6 +980,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calibration => '보정';
 
   @override
+  String get calibrationAutoOnlyHint =>
+      '캘리브레이션 중에는 자동 운동 생성만 사용할 수 있습니다 — 파트너 추가나 시간 변경은 가능합니다';
+
+  @override
   String get calibrationGlobal => '전체';
 
   @override

@@ -305,6 +305,7 @@
   "failedToLoadProgress": "加载进度失败",
   "noProgressYet": "完成训练以查看您的进度",
   "calibration": "校准",
+  "calibrationAutoOnlyHint": "校准期间仅可使用自动训练生成功能 — 你仍然可以添加伙伴或更改时长",
   "calibrationGlobal": "整体",
   "calibrationNeeded": "完成您的第一次训练，让Vigor根据您的水平校准推荐",
   "calibrationDescription": "在校准期间，平台会收集您的反馈数据，对您的健身状态和水平进行初步评估",

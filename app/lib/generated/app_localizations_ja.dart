@@ -980,6 +980,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get calibration => 'キャリブレーション';
 
   @override
+  String get calibrationAutoOnlyHint =>
+      'キャリブレーション中は自動トレーニング生成のみ利用できます — パートナーの追加や時間の変更は可能です';
+
+  @override
   String get calibrationGlobal => '全体';
 
   @override
