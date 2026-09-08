@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"image/png"
 	"strings"
 	"testing"
 
@@ -15,36 +14,6 @@ import (
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
 )
-
-func TestDefaultAvatarDeterministic(t *testing.T) {
-	userID := uuid.MustParse("123e4567-e89b-12d3-a456-426614174000")
-
-	data1, etag1 := DefaultAvatar(userID)
-	data2, etag2 := DefaultAvatar(userID)
-
-	if !bytes.Equal(data1, data2) {
-		t.Fatal("DefaultAvatar is not deterministic for the same user ID")
-	}
-	if etag1 == "" || etag1 != etag2 {
-		t.Fatalf("etag unstable: %q vs %q", etag1, etag2)
-	}
-
-	cfg, err := png.DecodeConfig(bytes.NewReader(data1))
-	if err != nil {
-		t.Fatalf("default avatar is not a valid PNG: %v", err)
-	}
-	if cfg.Width != defaultAvatarDimension || cfg.Height != defaultAvatarDimension {
-		t.Fatalf("default avatar = %dx%d, want %dx%d", cfg.Width, cfg.Height, defaultAvatarDimension, defaultAvatarDimension)
-	}
-}
-
-func TestDefaultAvatarDistinctPerUser(t *testing.T) {
-	data1, _ := DefaultAvatar(uuid.MustParse("123e4567-e89b-12d3-a456-426614174000"))
-	data2, _ := DefaultAvatar(uuid.MustParse("123e4567-e89b-12d3-a456-426614174001"))
-	if bytes.Equal(data1, data2) {
-		t.Fatal("expected distinct default avatars for distinct user IDs")
-	}
-}
 
 // setupAvatarDB opens an in-memory DB with the avatars table, wires it into
 // database.DB, and captures every GORM log line into buf.
@@ -101,7 +70,7 @@ func TestGetAvatarRoundTrip(t *testing.T) {
 	setupAvatarDB(t, &logs)
 
 	userID := uuid.New()
-	data, _ := DefaultAvatar(userID)
+	data := []byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A}
 	if err := database.DB.Create(&model.Avatar{
 		UserID:      userID,
 		Data:        data,
