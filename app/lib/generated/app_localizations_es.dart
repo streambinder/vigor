@@ -809,20 +809,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get failedToGenerateTraining => 'Error al generar el entrenamiento';
 
   @override
-  String get freeTextMode => 'Texto libre';
-
-  @override
-  String get freeTextLabel => 'Tu programa';
-
-  @override
-  String get freeTextHint =>
-      'Pega un programa de entrenamiento o un enlace, o simplemente describe lo que quieres hacer...';
-
-  @override
-  String get freeTextRequired =>
-      'Pega o describe primero tu programa de entrenamiento';
-
-  @override
   String get generate => 'Generar';
 
   @override

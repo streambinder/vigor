@@ -800,20 +800,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get failedToGenerateTraining => 'Не удалось создать тренировку';
 
   @override
-  String get freeTextMode => 'Свободный текст';
-
-  @override
-  String get freeTextLabel => 'Ваша программа';
-
-  @override
-  String get freeTextHint =>
-      'Вставьте программу тренировок или ссылку на неё, либо просто опишите, что хотите сделать...';
-
-  @override
-  String get freeTextRequired =>
-      'Сначала вставьте или опишите вашу программу тренировок';
-
-  @override
   String get generate => 'Создать';
 
   @override
