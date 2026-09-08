@@ -30,3 +30,13 @@ func TestNodeCreativeUserRoutineStructure(t *testing.T) {
 		t.Fatalf("unexpected routine structure line: %q", out)
 	}
 }
+
+func TestNodeCreativeSystemNoFabrication(t *testing.T) {
+	out := NodeCreativeSystem("it")
+	if strings.Contains(out, "every decision made during generation was based on their data") {
+		t.Fatalf("copy prompt still incentivizes fabrication")
+	}
+	if !strings.Contains(out, "Never invent reasons for a decision") {
+		t.Fatalf("copy prompt missing honesty rule:\n%s", out)
+	}
+}
