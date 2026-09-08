@@ -254,3 +254,57 @@ func TestGetReadinessToday_StoredSurvivesRestarts(t *testing.T) {
 		t.Fatalf("stored snapshot must serve without a new probe, ran %d times", calls.Load())
 	}
 }
+
+func TestGetReadinessToday_DayRolloverReprobes(t *testing.T) {
+	setupReadinessDB(t)
+	userID := uuid.New()
+	insertHealthMetric(t, userID, time.Now().UTC())
+
+	// seed yesterday's snapshot directly: it must not serve today
+	yesterday := time.Now().UTC().AddDate(0, 0, -1)
+	if err := database.DailySave(database.TableReadiness, userID, yesterday, time.UTC,
+		&model.ReadinessResponse{Score: 10, Level: "red"}); err != nil {
+		t.Fatalf("seed yesterday snapshot: %v", err)
+	}
+	calls := stubReadinessProbe(t, &model.ReadinessResponse{Score: 80, Level: "green"}, nil)
+
+	resp, err := GetReadinessToday(userID, time.UTC, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp == nil || resp.Score != 80 {
+		t.Fatalf("expected a fresh probe for the new day, got %+v", resp)
+	}
+	if calls.Load() != 1 {
+		t.Fatalf("day rollover must re-run the probe, ran %d times", calls.Load())
+	}
+}
+
+func TestGetReadinessToday_ForceOverwritesStored(t *testing.T) {
+	setupReadinessDB(t)
+	userID := uuid.New()
+	insertHealthMetric(t, userID, time.Now().UTC())
+	callsFirst := stubReadinessProbe(t, &model.ReadinessResponse{Score: 80, Level: "green"}, nil)
+
+	if _, err := GetReadinessToday(userID, time.UTC, false); err != nil {
+		t.Fatalf("first call: %v", err)
+	}
+
+	// forced recompute overwrites the stored snapshot for the day
+	callsSecond := stubReadinessProbe(t, &model.ReadinessResponse{Score: 42, Level: "yellow"}, nil)
+	if _, err := GetReadinessToday(userID, time.UTC, true); err != nil {
+		t.Fatalf("forced call: %v", err)
+	}
+
+	third, err := GetReadinessToday(userID, time.UTC, false)
+	if err != nil {
+		t.Fatalf("third call: %v", err)
+	}
+	if third == nil || third.Score != 42 {
+		t.Fatalf("expected the overwritten snapshot (42), got %+v", third)
+	}
+	if callsFirst.Load() != 1 || callsSecond.Load() != 1 {
+		t.Fatalf("expected exactly one probe per generation, got %d and %d",
+			callsFirst.Load(), callsSecond.Load())
+	}
+}

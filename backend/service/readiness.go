@@ -55,8 +55,11 @@ func GetReadinessToday(userID uuid.UUID, loc *time.Location, force bool) (*model
 
 	if !force {
 		if resp := loadReadinessSnapshot(userID, now, loc); resp != nil {
+			log.Info().Str("user", userID.String()).Str("day", today).Msg("daily readiness cache hit")
 			return resp, nil
 		}
+	} else {
+		log.Info().Str("user", userID.String()).Str("day", today).Msg("daily readiness forced refresh")
 	}
 
 	// coalesce concurrent probes for the same user-day behind one LLM call
@@ -69,8 +72,10 @@ func GetReadinessToday(userID uuid.UUID, loc *time.Location, force bool) (*model
 	}()
 	if !force {
 		if resp := loadReadinessSnapshot(userID, now, loc); resp != nil {
+			log.Info().Str("user", userID.String()).Str("day", today).Msg("daily readiness cache hit after coalescing")
 			return resp, nil
 		}
+		log.Info().Str("user", userID.String()).Str("day", today).Msg("daily readiness cache miss, running probe")
 	}
 
 	snapshot, err := GetHealthSnapshot(userID, loc)
