@@ -26,22 +26,30 @@ func getAvatar(c *fiber.Ctx) error {
 	}
 
 	avatar, err := service.GetAvatar(userID)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "avatar not found"})
-		}
+	var (
+		data        []byte
+		contentType string
+		etag        string
+	)
+	switch {
+	case err == nil:
+		data, contentType = avatar.Data, avatar.ContentType
+		etag = fmt.Sprintf(`"%d"`, avatar.UpdatedAt.UnixNano())
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		data, etag = service.DefaultAvatar(userID)
+		contentType = "image/png"
+	default:
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch avatar"})
 	}
 
-	etag := fmt.Sprintf(`"%d"`, avatar.UpdatedAt.UnixNano())
 	if c.Get("If-None-Match") == etag {
 		return c.SendStatus(http.StatusNotModified)
 	}
 
-	c.Set("Content-Type", avatar.ContentType)
+	c.Set("Content-Type", contentType)
 	c.Set("Cache-Control", "public, max-age=86400")
 	c.Set("ETag", etag)
-	return c.Send(avatar.Data)
+	return c.Send(data)
 }
 
 func postAvatar(c *fiber.Ctx) error {
