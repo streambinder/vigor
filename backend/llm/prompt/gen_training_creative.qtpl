@@ -33,6 +33,7 @@ Description rules:
 - If recovery was adjusted, mention the rationale without naming metrics
 - If no warmup/cooldown, skip structural mentions of them
 - Never invent reasons for a decision: report only motives stated in the pipeline inputs — a substitution "replacing recent X" stays exactly that, never upgrade it to a medical or protective claim — and describe what was done without a why when no reason is given
+- When accommodations are listed, repeat them literally and neutrally — never reinterpret them as protection, treatment, prevention, diagnosis, or medical advice
 
 {% endfunc %}
 

@@ -40,3 +40,15 @@ func TestNodeCreativeSystemNoFabrication(t *testing.T) {
 		t.Fatalf("copy prompt missing honesty rule:\n%s", out)
 	}
 }
+
+func TestNodeCreativeSystemLiteralAccommodations(t *testing.T) {
+	out := NodeCreativeSystem("it")
+	if !strings.Contains(out, "repeat them literally and neutrally") {
+		t.Fatalf("copy prompt missing literal-accommodation rule:\n%s", out)
+	}
+	for _, term := range []string{"protection", "treatment", "prevention", "diagnosis", "medical advice"} {
+		if !strings.Contains(out, term) {
+			t.Fatalf("copy prompt rule does not name forbidden reinterpretation %q:\n%s", term, out)
+		}
+	}
+}
