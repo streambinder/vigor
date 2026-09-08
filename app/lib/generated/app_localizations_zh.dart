@@ -980,6 +980,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get calibration => '校准';
 
   @override
+  String get calibrationAutoOnlyHint => '校准期间仅可使用自动训练生成功能 — 你仍然可以添加伙伴或更改时长';
+
+  @override
   String get calibrationGlobal => '整体';
 
   @override

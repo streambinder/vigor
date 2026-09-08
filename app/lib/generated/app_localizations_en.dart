@@ -997,6 +997,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calibration => 'Calibration';
 
   @override
+  String get calibrationAutoOnlyHint =>
+      'During calibration, only Auto training generation is available — you can still add a partner or change the duration';
+
+  @override
   String get calibrationGlobal => 'Global';
 
   @override

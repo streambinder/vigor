@@ -50,6 +50,7 @@ var (
 	ErrMalformedTraining    = errors.New("malformed generated training")
 	ErrTrainingNotCompleted = errors.New("training not completed")
 	ErrFetchResource        = errors.New("could not fetch linked resource")
+	ErrCalibrationAutoOnly  = errors.New("non-Auto training generation is blocked during calibration")
 )
 
 // freeTextDerivation holds the result of deriving the tuning parameters of a
@@ -131,8 +132,58 @@ func freeTextRetrievalQuery(summary string, articles []string, freeText string) 
 
 // GenerateTraining creates a new training for a user.
 // onProgress is called after each DAG node completes (may be nil).
+// isUserCalibrating reports whether any of the user's movement families is
+// still below the calibration threshold.
+func isUserCalibrating(userID uuid.UUID) (bool, error) {
+	calibration, err := GetProficiencyCalibration(userID)
+	if err != nil {
+		return false, err
+	}
+	var allFamilies []model.MovementFamily
+	if err := database.Knowledge.Find(&allFamilies).Error; err != nil {
+		return false, err
+	}
+	return isCalibrating(calibration, allFamilies), nil
+}
+
+// isCalibrating reports whether any movement family is below the calibration
+// threshold.
+func isCalibrating(calibration map[string]int, families []model.MovementFamily) bool {
+	for _, family := range families {
+		if calibration[family.ID] < CalibrationThreshold {
+			return true
+		}
+	}
+	return false
+}
+
+// calibrationGenerationAllowed reports whether a generation request is
+// allowed during calibration: only Auto generation (no free text, no explicit
+// methodology) carrying at most partner and duration tuning.
+func calibrationGenerationAllowed(freeMode bool, equipment []string, gymID, prompt, methodology string, goals, muscles []string, skipWarmupCooldown bool) bool {
+	if freeMode || strings.TrimSpace(methodology) != "" {
+		return false
+	}
+	return len(equipment) == 0 &&
+		strings.TrimSpace(gymID) == "" &&
+		strings.TrimSpace(prompt) == "" &&
+		len(goals) == 0 &&
+		len(muscles) == 0 &&
+		!skipWarmupCooldown
+}
+
 func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt, freeText string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string, loc *time.Location, onProgress llm.DAGProgressFunc) (*model.Training, error) {
 	freeMode := strings.TrimSpace(freeText) != ""
+
+	// during calibration only Auto generation is allowed, restricted to
+	// partner and duration tuning: reject anything else before any expensive
+	// work (article fetch, LLM derivation, retrieval) happens.
+	if calibrating, err := isUserCalibrating(userID); err != nil {
+		return nil, err
+	} else if calibrating && !calibrationGenerationAllowed(freeMode, equipment, gymID, prompt, methodology, goals, muscles, skipWarmupCooldown) {
+		return nil, ErrCalibrationAutoOnly
+	}
+
 	if freeMode {
 		if len(freeText) > maxFreeTextLength {
 			return nil, ErrPromptTooLong

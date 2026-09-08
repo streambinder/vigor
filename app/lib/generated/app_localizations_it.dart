@@ -1007,6 +1007,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get calibration => 'Calibrazione';
 
   @override
+  String get calibrationAutoOnlyHint =>
+      'Durante la calibrazione è disponibile solo la generazione automatica — puoi comunque aggiungere un partner o modificare la durata';
+
+  @override
   String get calibrationGlobal => 'Globale';
 
   @override

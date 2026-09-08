@@ -127,6 +127,8 @@ func trainingError(c *fiber.Ctx, err error) error {
 	case errors.Is(err, service.ErrMalformedTraining):
 		c.Set("Retry-After", "3")
 		return c.Status(http.StatusServiceUnavailable).JSON(fiber.Map{"error": "malformed generated training"})
+	case errors.Is(err, service.ErrCalibrationAutoOnly):
+		return c.Status(http.StatusUnprocessableEntity).JSON(fiber.Map{"error": "non-Auto training generation is blocked during calibration"})
 	default:
 		middleware.Log(c).Error().Err(err).Msg("failed to generate training")
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
@@ -144,6 +146,8 @@ func trainingErrorMessage(err error) string {
 		return "duration is required"
 	case errors.Is(err, service.ErrDurationOutOfRange):
 		return "duration must be between 10 and 180 minutes"
+	case errors.Is(err, service.ErrCalibrationAutoOnly):
+		return "non-Auto training generation is blocked during calibration"
 	default:
 		return err.Error()
 	}

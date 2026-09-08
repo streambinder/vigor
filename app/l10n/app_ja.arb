@@ -305,6 +305,7 @@
   "failedToLoadProgress": "進捗の読み込みに失敗しました",
   "noProgressYet": "トレーニングを完了して進捗を確認",
   "calibration": "キャリブレーション",
+  "calibrationAutoOnlyHint": "キャリブレーション中は自動トレーニング生成のみ利用できます — パートナーの追加や時間の変更は可能です",
   "calibrationGlobal": "全体",
   "calibrationNeeded": "最初のトレーニングを完了して、Vigorがあなたのレベルに合わせた推奨を調整できるようにしましょう",
   "calibrationDescription": "キャリブレーション中、プラットフォームはフィードバックからデータを収集し、あなたのフィットネス状態とレベルの初期評価を行います",
