@@ -279,6 +279,12 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	}
 	progress(pipeline.StepProgramLoad)
 
+	if explicitProgram {
+		// the load node occasionally rotates exercises between rounds of an
+		// explicit program; pin every work block to the selection's own order.
+		normalizeBlockActivityOrder(&loadResult, exerciseResult)
+	}
+
 	// the load node is an LLM and may drop injected exercises when building
 	// routines; deterministically re-add any gap muscle left without a work
 	// activity so calibration completes by construction.
@@ -750,6 +756,52 @@ func sanitizeSelection(selection *pipeline.ExerciseSelection) {
 	}
 	for i := range selection.Excluded {
 		selection.Excluded[i].ExerciseID = stripExerciseTags(selection.Excluded[i].ExerciseID)
+	}
+}
+
+// normalizeBlockActivityOrder aligns every work block's activity order to the
+// work-phase exercise order of the selection node. the load node occasionally
+// rotates exercises between rounds of an explicit program, so blocks are
+// reordered deterministically to the program's own order instead of the
+// rotated one; activities unknown to the selection keep their relative order
+// at the end.
+func normalizeBlockActivityOrder(load *pipeline.LoadProgramming, selection pipeline.ExerciseSelection) {
+	if load == nil {
+		return
+	}
+	var order []string
+	for _, ex := range selection.Exercises {
+		if ex.Phase == "work" {
+			order = append(order, ex.ExerciseID)
+		}
+	}
+	if len(order) == 0 {
+		return
+	}
+	rank := make(map[string]int, len(order))
+	for i, id := range order {
+		if _, ok := rank[id]; !ok {
+			rank[id] = i
+		}
+	}
+	for i := range load.Routines {
+		if load.Routines[i].Type != "work" {
+			continue
+		}
+		for j := range load.Routines[i].Blocks {
+			acts := load.Routines[i].Blocks[j].Activities
+			sorted := make([]pipeline.ProgrammedActivity, len(acts))
+			copy(sorted, acts)
+			sort.SliceStable(sorted, func(a, b int) bool {
+				ra, oka := rank[sorted[a].ExerciseID]
+				rb, okb := rank[sorted[b].ExerciseID]
+				if oka && okb {
+					return ra < rb
+				}
+				return oka && !okb
+			})
+			load.Routines[i].Blocks[j].Activities = sorted
+		}
 	}
 }
 
