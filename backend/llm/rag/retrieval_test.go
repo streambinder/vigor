@@ -193,4 +193,28 @@ func TestPinProgramMovements(t *testing.T) {
 			t.Fatalf("unexpected pins: %+v", pins)
 		}
 	})
+
+	t.Run("plainest token match wins over assisted variants", func(t *testing.T) {
+		catalog := []model.Exercise{
+			{ID: "assisted-chest-dip-kneeling", Name: "Assisted Chest Dip (Kneeling)", Equipment: []string{"leverage machine"}},
+			{ID: "chest-dip", Name: "Chest Dip", Equipment: []string{"dip station"}},
+			{ID: "triceps-dip", Name: "Triceps Dip", Equipment: []string{"dip station"}},
+		}
+		pins := pinProgramMovements([]string{"dip"}, catalog)
+		if len(pins) != 1 || pins[0].ID != "chest-dip" {
+			t.Fatalf("unexpected pins: %+v", pins)
+		}
+	})
+
+	t.Run("plainest match prefers no equipment on ties", func(t *testing.T) {
+		catalog := []model.Exercise{
+			{ID: "assisted-sit-up", Name: "Assisted Sit-Up", Equipment: []string{"partner"}},
+			{ID: "34-sit-up", Name: "3/4 Sit-Up"},
+			{ID: "sit-up-with-arms-on-chest", Name: "Sit-Up With Arms On Chest"},
+		}
+		pins := pinProgramMovements([]string{"sit-up"}, catalog)
+		if len(pins) != 1 || pins[0].ID != "34-sit-up" {
+			t.Fatalf("unexpected pins: %+v", pins)
+		}
+	})
 }
