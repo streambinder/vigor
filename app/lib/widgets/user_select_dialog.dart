@@ -9,6 +9,7 @@ import '../services/secure_storage_service.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 import 'adaptive/adaptive.dart';
+import 'default_avatar.dart';
 
 /// shows a searchable user select dialog and returns the selected user id
 Future<UserInfo?> showUserSelectDialog({
@@ -202,13 +203,8 @@ class _UserSelectDialogState extends State<_UserSelectDialog> {
               backgroundColor: VigorColors.indigo.withValues(alpha: 0.2),
               child: const AdaptiveLoadingIndicator(),
             ),
-            errorWidget: (context, url, error) => CircleAvatar(
-              backgroundColor: VigorColors.indigo.withValues(alpha: 0.2),
-              child: Text(
-                user.firstName.isNotEmpty ? user.firstName[0].toUpperCase() : '?',
-                style: const TextStyle(color: VigorColors.indigo),
-              ),
-            ),
+            errorWidget: (context, url, error) =>
+                DefaultAvatar(name: user.displayName),
           ),
           title: Text(
             user.displayName,

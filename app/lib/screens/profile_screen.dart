@@ -7,6 +7,7 @@ import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../widgets/default_avatar.dart';
 import '../models/injury.dart';
 import '../models/gym.dart';
 import '../models/user.dart';
@@ -230,10 +231,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       backgroundColor: VigorColors.surface(context),
                       child: const AdaptiveLoadingIndicator(),
                     ),
-                    errorWidget: (context, url, error) => CircleAvatar(
+                    errorWidget: (context, url, error) => DefaultAvatar(
+                      name: '${user.profile.firstName} ${user.profile.lastName}',
+                      email: user.email,
                       radius: 36,
-                      backgroundColor: VigorColors.surface(context),
-                      child: const Icon(Icons.person, size: 40, color: VigorColors.stone),
                     ),
                   ),
                 ),
