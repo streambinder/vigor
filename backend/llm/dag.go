@@ -885,6 +885,20 @@ func enforceExplicitPins(
 		}
 		selected[pin.ID] = true
 	}
+	// a restored pin is selected by definition; drop its exclusion entry so
+	// downstream context never sees it as both chosen and left out.
+	if len(selection.Excluded) > 0 {
+		kept := selection.Excluded[:0]
+		for _, e := range selection.Excluded {
+			if pinIDs[e.ExerciseID] && selected[e.ExerciseID] {
+				log.Debug().Str("exercise", e.ExerciseID).
+					Msg("explicit pin exclusion dropped after restore")
+				continue
+			}
+			kept = append(kept, e)
+		}
+		selection.Excluded = kept
+	}
 }
 
 // matchesContraindicatedPattern reports whether a free-text contraindicated
