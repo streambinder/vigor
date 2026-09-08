@@ -399,3 +399,95 @@ func TestEnforceExplicitPins(t *testing.T) {
 		}
 	})
 }
+
+func TestNormalizeBlockActivityOrder(t *testing.T) {
+	selection := pipeline.ExerciseSelection{Exercises: []pipeline.SelectedExercise{
+		{ExerciseID: "pull-up", Phase: "work"},
+		{ExerciseID: "chest-dip", Phase: "work"},
+		{ExerciseID: "push-up", Phase: "work"},
+		{ExerciseID: "34-sit-up", Phase: "work"},
+		{ExerciseID: "air-squat", Phase: "work"},
+	}}
+	acts := func(ids ...string) []pipeline.ProgrammedActivity {
+		var out []pipeline.ProgrammedActivity
+		for _, id := range ids {
+			out = append(out, pipeline.ProgrammedActivity{ExerciseID: id, Reps: 10})
+		}
+		return out
+	}
+	idsOf := func(acts []pipeline.ProgrammedActivity) []string {
+		var ids []string
+		for _, a := range acts {
+			ids = append(ids, a.ExerciseID)
+		}
+		return ids
+	}
+	want := []string{"pull-up", "chest-dip", "push-up", "34-sit-up", "air-squat"}
+
+	t.Run("rotated blocks are pinned to the selection order", func(t *testing.T) {
+		load := &pipeline.LoadProgramming{Routines: []pipeline.ProgrammedRoutine{
+			{Type: "work", Blocks: []pipeline.ProgrammedBlock{
+				{Activities: acts("pull-up", "chest-dip", "push-up", "34-sit-up", "air-squat")},
+				{Activities: acts("air-squat", "pull-up", "chest-dip", "push-up", "34-sit-up")},
+				{Activities: acts("34-sit-up", "air-squat", "pull-up", "chest-dip", "push-up")},
+			}},
+		}}
+		normalizeBlockActivityOrder(load, selection)
+		for i, b := range load.Routines[0].Blocks {
+			if got := idsOf(b.Activities); !equalStrings(got, want) {
+				t.Errorf("block %d = %v, want %v", i, got, want)
+			}
+		}
+	})
+
+	t.Run("unknown exercises keep relative order at the end", func(t *testing.T) {
+		load := &pipeline.LoadProgramming{Routines: []pipeline.ProgrammedRoutine{
+			{Type: "work", Blocks: []pipeline.ProgrammedBlock{
+				{Activities: acts("zzz-custom", "push-up", "pull-up", "yyy-custom")},
+			}},
+		}}
+		normalizeBlockActivityOrder(load, selection)
+		want := []string{"pull-up", "push-up", "zzz-custom", "yyy-custom"}
+		if got := idsOf(load.Routines[0].Blocks[0].Activities); !equalStrings(got, want) {
+			t.Errorf("activities = %v, want %v", got, want)
+		}
+	})
+
+	t.Run("non-work routines are untouched", func(t *testing.T) {
+		load := &pipeline.LoadProgramming{Routines: []pipeline.ProgrammedRoutine{
+			{Type: "warmup", Blocks: []pipeline.ProgrammedBlock{
+				{Activities: acts("air-squat", "pull-up")},
+			}},
+		}}
+		normalizeBlockActivityOrder(load, selection)
+		want := []string{"air-squat", "pull-up"}
+		if got := idsOf(load.Routines[0].Blocks[0].Activities); !equalStrings(got, want) {
+			t.Errorf("activities = %v, want %v", got, want)
+		}
+	})
+
+	t.Run("empty selection order is a no-op", func(t *testing.T) {
+		load := &pipeline.LoadProgramming{Routines: []pipeline.ProgrammedRoutine{
+			{Type: "work", Blocks: []pipeline.ProgrammedBlock{
+				{Activities: acts("air-squat", "pull-up")},
+			}},
+		}}
+		normalizeBlockActivityOrder(load, pipeline.ExerciseSelection{})
+		want := []string{"air-squat", "pull-up"}
+		if got := idsOf(load.Routines[0].Blocks[0].Activities); !equalStrings(got, want) {
+			t.Errorf("activities = %v, want %v", got, want)
+		}
+	})
+}
+
+func equalStrings(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
