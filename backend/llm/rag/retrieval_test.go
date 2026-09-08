@@ -106,3 +106,62 @@ func TestFilterByProficiencyPerMuscle(t *testing.T) {
 		}
 	})
 }
+
+func TestInterleaveBuckets(t *testing.T) {
+	mk := func(muscle string, n int) []model.Exercise {
+		out := make([]model.Exercise, n)
+		for i := range out {
+			out[i] = model.Exercise{ID: muscle + string(rune('a'+i)), Muscles: []string{muscle}}
+		}
+		return out
+	}
+	primaryCounts := func(exs []model.Exercise) map[string]int {
+		counts := make(map[string]int)
+		for _, ex := range exs {
+			counts[ex.Muscles[0]]++
+		}
+		return counts
+	}
+
+	t.Run("trailing bucket survives trim", func(t *testing.T) {
+		// 7 buckets of 5 like the calibration pool; maxWork 20 must not wipe
+		// out the trailing muscles the way a plain head trim did.
+		var buckets [][]model.Exercise
+		for _, m := range []string{"chest", "back", "shoulders", "arms", "core", "glutes", "legs"} {
+			buckets = append(buckets, mk(m, 5))
+		}
+		got := interleaveBuckets(buckets, 20)
+		if len(got) != 20 {
+			t.Fatalf("got %d exercises, want 20", len(got))
+		}
+		counts := primaryCounts(got)
+		for _, m := range []string{"chest", "back", "shoulders", "arms", "core", "glutes", "legs"} {
+			if counts[m] < 2 {
+				t.Errorf("muscle %s has %d exercises, want at least 2", m, counts[m])
+			}
+		}
+	})
+
+	t.Run("short buckets are skipped in later rounds", func(t *testing.T) {
+		buckets := [][]model.Exercise{mk("chest", 3), mk("back", 1), mk("legs", 2)}
+		got := interleaveBuckets(buckets, 10)
+		if len(got) != 6 {
+			t.Fatalf("got %d exercises, want 6", len(got))
+		}
+		// round-robin order: chest-a, back-a, legs-a, chest-b, legs-b, chest-c
+		wantIDs := []string{"chesta", "backa", "legsa", "chestb", "legsb", "chestc"}
+		for i, want := range wantIDs {
+			if got[i].ID != want {
+				t.Errorf("position %d: got %s, want %s", i, got[i].ID, want)
+			}
+		}
+	})
+
+	t.Run("no trim when under maxWork", func(t *testing.T) {
+		buckets := [][]model.Exercise{mk("chest", 2), mk("legs", 2)}
+		got := interleaveBuckets(buckets, 10)
+		if len(got) != 4 {
+			t.Fatalf("got %d exercises, want 4", len(got))
+		}
+	})
+}

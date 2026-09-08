@@ -173,8 +173,8 @@ func retrieveBalancedByMuscle(
 
 	// track how many exercises each primary muscle has in the final list
 	muscleCounts := make(map[string]int)
-	var combined []model.Exercise
 	seen := make(map[string]bool)
+	var buckets [][]model.Exercise
 
 	for _, muscle := range muscles {
 		candidates, err := retrieveBySimilarity(exerciseEmbedding, keywordQuery, equipment, []string{muscle}, work, excludeIDs, maxWork)
@@ -185,6 +185,7 @@ func retrieveBalancedByMuscle(
 
 		filtered := filterByProficiencyPerMuscle(candidates, proficiencies, work, proficiencyMargin, calibrationGaps)
 
+		var bucket []model.Exercise
 		added := 0
 		for _, ex := range filtered {
 			primaryMuscle := muscle
@@ -194,19 +195,18 @@ func retrieveBalancedByMuscle(
 			if !seen[ex.ID] && muscleCounts[primaryMuscle] < maxPerMuscle {
 				seen[ex.ID] = true
 				muscleCounts[primaryMuscle]++
-				combined = append(combined, ex)
+				bucket = append(bucket, ex)
 				added++
 				if added >= perMuscleQuota {
 					break
 				}
 			}
 		}
+		buckets = append(buckets, bucket)
 		log.Debug().Str("muscle", muscle).Int("candidates", len(candidates)).Int("filtered", len(filtered)).Int("added", added).Int("quota", perMuscleQuota).Msg("retrieved exercises for muscle group")
 	}
 
-	if len(combined) > maxWork {
-		combined = combined[:maxWork]
-	}
+	combined := interleaveBuckets(buckets, maxWork)
 
 	// sort: favorites first (exploit recency bias at list head), shuffle the rest
 	favSet := make(map[string]bool, len(favoriteIDs))
@@ -223,6 +223,31 @@ func retrieveBalancedByMuscle(
 	}
 	rand.Shuffle(len(rest), func(i, j int) { rest[i], rest[j] = rest[j], rest[i] })
 	return append(favorites, rest...)
+}
+
+// interleaveBuckets merges per-muscle exercise buckets round-robin and trims
+// the result to maxWork. Buckets arrive in muscle iteration order, so a plain
+// head trim would systematically wipe out the trailing muscle groups (e.g.
+// legs) and starve them of pool representation; interleaving first keeps every
+// muscle represented after the trim.
+func interleaveBuckets(buckets [][]model.Exercise, maxWork int) []model.Exercise {
+	var combined []model.Exercise
+	for round := 0; ; round++ {
+		progress := false
+		for _, bucket := range buckets {
+			if round < len(bucket) {
+				combined = append(combined, bucket[round])
+				progress = true
+			}
+		}
+		if !progress {
+			break
+		}
+	}
+	if len(combined) > maxWork {
+		combined = combined[:maxWork]
+	}
+	return combined
 }
 
 // filterByProficiencyPerMuscle applies proficiency filtering for a single muscle group's candidates.

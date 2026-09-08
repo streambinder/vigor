@@ -225,8 +225,8 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 
 	// deterministic calibration: guarantee gap-muscle coverage by construction.
 	// the work pool is built per muscle with quotas, so gap muscles always have
-	// candidates; this only appends the ones the selection missed.
-	exerciseResult = ensureMuscleCoverage(
+	// candidates; this only appends the ones the work selection missed.
+	exerciseResult, injectedCoverage := ensureMuscleCoverage(
 		exerciseResult,
 		req.CalibrationGaps,
 		req.WorkExercises,
@@ -237,8 +237,10 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	// build exercise metadata maps for the load node (mode tags, weighted flags)
 	exerciseModes := make(map[string]string)
 	weightedExercises := make(map[string]bool)
+	workByID := make(map[string]model.Exercise, len(req.WorkExercises))
 	for _, ex := range req.WorkExercises {
 		exerciseModes[ex.ID] = ex.Mode
+		workByID[ex.ID] = ex
 		for _, eq := range ex.Equipment {
 			if prompt.IsLoadableEquipment(eq) {
 				weightedExercises[ex.ID] = true
@@ -266,6 +268,11 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		return nil, orderedSteps(nodes), fmt.Errorf("load node: %w", err)
 	}
 	progress(pipeline.StepProgramLoad)
+
+	// the load node is an LLM and may drop injected exercises when building
+	// routines; deterministically re-add any gap muscle left without a work
+	// activity so calibration completes by construction.
+	loadResult = enforceMuscleCoverage(loadResult, injectedCoverage, workByID, exerciseModes)
 
 	// layer 4: creative copy (language-native)
 	language := "English"
