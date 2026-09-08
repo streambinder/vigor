@@ -520,7 +520,30 @@ func runHistoryNode(
 		log.Warn().Err(err).Str("raw", step.Output.Data()).Msg("history node unmarshal failed, using empty")
 		return pipeline.HistoryAnalysis{}, step, nil
 	}
+	dropProgressionsWithoutSignal(&result)
 	return result, step, nil
+}
+
+// validProgressionSignals are the only feedback values a progression may be
+// attributed to: "ok" means the load was right and never triggers one.
+var validProgressionSignals = map[string]bool{
+	"too_easy": true, "too_hard": true, "impossible": true, "quality_bad": true,
+}
+
+// dropProgressionsWithoutSignal removes progression signals the LLM attributed
+// to anything outside the documented feedback vocabulary (e.g. "ok"), which
+// by definition means the load was appropriate and triggers no progression.
+func dropProgressionsWithoutSignal(result *pipeline.HistoryAnalysis) {
+	kept := result.Progressions[:0]
+	for _, p := range result.Progressions {
+		if validProgressionSignals[p.Signal] {
+			kept = append(kept, p)
+		} else {
+			log.Warn().Str("exercise", p.ExerciseID).Str("signal", p.Signal).
+				Msg("history node: dropped progression on undocumented signal")
+		}
+	}
+	result.Progressions = kept
 }
 
 // runConstraintsNode executes the constraint extraction node.
