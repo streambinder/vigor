@@ -68,11 +68,11 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 
 	nodes := make(map[pipeline.GenerationStep]model.LLMStep)
 
-	// pre-conditional step, free text mode only: the tuning parameters a guided
-	// request would carry are deduced from the raw request (and any linked
-	// articles) before every other layer. the derivation is cached on the
-	// request so generator retries — and a service layer that derived upfront —
-	// reuse it instead of paying for it again.
+	// pre-conditional step, prompted requests only: the tuning parameters a
+	// guided request would carry are deduced from the raw prompt (and any
+	// linked articles) before every other layer. the derivation is cached on
+	// the request so generator retries — and a service layer that derived
+	// upfront — reuse it instead of paying for it again.
 	if req.FreeText != "" {
 		if req.Derived == nil {
 			derived, deriveStep, err := DeriveFreeTextParams(DeriveRequest{
@@ -321,7 +321,7 @@ const maxDerivedSummaryLen = 2000
 // maxDerivedMovements caps the movement names an explicit program may carry.
 const maxDerivedMovements = 12
 
-// DeriveRequest carries the inputs of the free text param derivation, so it
+// DeriveRequest carries the inputs of the prompt param derivation, so it
 // can run both as the DAG pre-step and upfront in the service layer (where
 // the derived filters drive exercise retrieval).
 type DeriveRequest struct {
@@ -333,11 +333,11 @@ type DeriveRequest struct {
 	ValidEquipment []string
 }
 
-// DeriveFreeTextParams executes the free text param derivation node: from the
-// raw request (and the distilled text of any linked articles) deduce the
+// DeriveFreeTextParams executes the prompt param derivation node: from the
+// raw prompt (and the distilled text of any linked articles) deduce the
 // tuning parameters a guided request would carry. an unusable LLM response
-// degrades to plain defaults rather than failing the generation — the free
-// text itself still flows downstream.
+// degrades to plain defaults rather than failing the generation — the prompt
+// itself still flows downstream.
 func DeriveFreeTextParams(req DeriveRequest) (pipeline.DerivedParams, model.LLMStep, error) {
 	validGoals := make([]string, len(req.AllGoals))
 	for i, g := range req.AllGoals {
@@ -370,7 +370,7 @@ func DeriveFreeTextParams(req DeriveRequest) (pipeline.DerivedParams, model.LLMS
 // the user prompt driving strategy and muscle targeting.
 func applyDerivedParams(req *TrainingGenerationRequest) {
 	derived := req.Derived
-	if derived.Methodology != "" {
+	if derived.Methodology != "" && req.Methodology == nil {
 		for i := range req.Methodologies {
 			if req.Methodologies[i].ID == derived.Methodology {
 				req.Methodology = &req.Methodologies[i]
@@ -378,16 +378,16 @@ func applyDerivedParams(req *TrainingGenerationRequest) {
 			}
 		}
 	}
-	if len(derived.Muscles) > 0 {
+	if len(derived.Muscles) > 0 && len(req.Muscles) == 0 {
 		req.Muscles = derived.Muscles
 	}
-	if len(derived.Equipment) > 0 {
+	if len(derived.Equipment) > 0 && len(req.EquipmentIDs) == 0 {
 		req.EquipmentIDs = derived.Equipment
 	}
 	if derived.SkipWarmupCooldown {
 		req.SkipWarmupCooldown = true
 	}
-	if len(derived.Goals) > 0 {
+	if len(derived.Goals) > 0 && len(req.Goals) == 0 {
 		wanted := make(map[string]bool, len(derived.Goals))
 		for _, id := range derived.Goals {
 			wanted[id] = true
@@ -402,10 +402,15 @@ func applyDerivedParams(req *TrainingGenerationRequest) {
 			req.Goals = goals
 		}
 	}
-	if derived.Summary != "" {
-		req.UserPrompt = strings.TrimSpace(derived.Summary + "\n\n" + req.FreeText)
-	} else {
-		req.UserPrompt = req.FreeText
+	// the service layer owns the retrieval query composition (derived schema
+	// + articles + raw prompt): only fall back to the derivation here when the
+	// request carries no prompt of its own
+	if req.UserPrompt == "" {
+		if derived.Summary != "" {
+			req.UserPrompt = strings.TrimSpace(derived.Summary + "\n\n" + req.FreeText)
+		} else {
+			req.UserPrompt = req.FreeText
+		}
 	}
 }
 

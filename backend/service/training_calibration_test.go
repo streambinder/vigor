@@ -9,7 +9,7 @@ import (
 func TestCalibrationGenerationAllowed(t *testing.T) {
 	tests := []struct {
 		name               string
-		freeMode           bool
+		analyze            bool
 		equipment          []string
 		gymID              string
 		prompt             string
@@ -29,9 +29,9 @@ func TestCalibrationGenerationAllowed(t *testing.T) {
 			want:   true,
 		},
 		{
-			name:     "free text generation is blocked",
-			freeMode: true,
-			want:     false,
+			name:    "analyzed prompt generation is blocked",
+			analyze: true,
+			want:    false,
 		},
 		{
 			name:        "explicit methodology is blocked",
@@ -85,7 +85,7 @@ func TestCalibrationGenerationAllowed(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := calibrationGenerationAllowed(
-				tt.freeMode, tt.equipment, tt.gymID, tt.prompt,
+				tt.analyze, tt.equipment, tt.gymID, tt.prompt,
 				tt.methodology, tt.goals, tt.muscles, tt.skipWarmupCooldown,
 			)
 			if got != tt.want {

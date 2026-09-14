@@ -787,18 +787,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get failedToGenerateTraining => '트레이닝 생성 실패';
 
   @override
-  String get freeTextMode => '자유 텍스트';
-
-  @override
-  String get freeTextLabel => '내 프로그램';
-
-  @override
-  String get freeTextHint => '운동 프로그램이나 링크를 붙여넣거나 원하는 운동을 설명해 주세요...';
-
-  @override
-  String get freeTextRequired => '먼저 운동 프로그램을 붙여넣거나 설명해 주세요';
-
-  @override
   String get generate => '생성';
 
   @override

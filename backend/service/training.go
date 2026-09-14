@@ -29,14 +29,6 @@ const (
 
 const maxPromptLength = 500
 
-const (
-	// maxFreeTextLength caps a free text generation request
-	maxFreeTextLength = 4000
-	// freeTextNominalMinutes sizes candidate pools in free text mode only:
-	// the session length itself is computed from the generated program
-	freeTextNominalMinutes = 60
-)
-
 var (
 	ErrTrainingNotFound     = errors.New("training not found")
 	ErrUserNotFound         = errors.New("user not found")
@@ -53,10 +45,10 @@ var (
 	ErrCalibrationAutoOnly  = errors.New("non-Auto training generation is blocked during calibration")
 )
 
-// freeTextDerivation holds the result of deriving the tuning parameters of a
-// free text request upfront, along with the catalogs the DAG needs to apply
+// promptDerivation holds the result of deriving the tuning parameters of a
+// prompted request upfront, along with the catalogs the DAG needs to apply
 // and reference the derivation.
-type freeTextDerivation struct {
+type promptDerivation struct {
 	derived        pipeline.DerivedParams
 	step           model.LLMStep
 	allGoals       []model.Goal
@@ -64,9 +56,9 @@ type freeTextDerivation struct {
 	validEquipment []string
 }
 
-// deriveFreeTextParams runs the DAG derive params node before pool retrieval,
+// derivePromptParams runs the DAG derive params node before pool retrieval,
 // so the derivation drives the exercise search rather than following it.
-func deriveFreeTextParams(freeText string, articles []string, onProgress llm.DAGProgressFunc) (*freeTextDerivation, error) {
+func derivePromptParams(promptText string, articles []string, onProgress llm.DAGProgressFunc) (*promptDerivation, error) {
 	methodologies, err := rag.RetrieveAllMethodologies()
 	if err != nil {
 		return nil, err
@@ -84,7 +76,7 @@ func deriveFreeTextParams(freeText string, articles []string, onProgress llm.DAG
 		return nil, err
 	}
 
-	derivation := &freeTextDerivation{
+	derivation := &promptDerivation{
 		allGoals:       allGoals,
 		validMuscles:   make([]string, len(allMuscles)),
 		validEquipment: make([]string, len(allEquipment)),
@@ -97,7 +89,7 @@ func deriveFreeTextParams(freeText string, articles []string, onProgress llm.DAG
 	}
 
 	derivation.derived, derivation.step, err = llm.DeriveFreeTextParams(llm.DeriveRequest{
-		FreeText:       freeText,
+		FreeText:       promptText,
 		Articles:       articles,
 		Methodologies:  methodologies,
 		AllGoals:       allGoals,
@@ -113,19 +105,17 @@ func deriveFreeTextParams(freeText string, articles []string, onProgress llm.DAG
 	return derivation, nil
 }
 
-// freeTextRetrievalQuery builds the exercise pool retrieval text for a free
-// text request: the derived program schema plus the distilled text of any
-// linked articles. the raw request only carries retrieval weight when no
-// article was fetched.
-func freeTextRetrievalQuery(summary string, articles []string, freeText string) string {
+// promptRetrievalQuery builds the exercise pool retrieval text for a prompted
+// request: the derived program schema plus the distilled text of any linked
+// articles, with the user's own prompt keeping retrieval weight.
+func promptRetrievalQuery(summary string, articles []string, prompt string) string {
 	var parts []string
 	if summary != "" {
 		parts = append(parts, summary)
 	}
-	if len(articles) > 0 {
-		parts = append(parts, articles...)
-	} else if freeText != "" {
-		parts = append(parts, freeText)
+	parts = append(parts, articles...)
+	if prompt != "" {
+		parts = append(parts, prompt)
 	}
 	return strings.Join(parts, "\n\n")
 }
@@ -158,10 +148,11 @@ func isCalibrating(calibration map[string]int, muscles []model.Muscle) bool {
 }
 
 // calibrationGenerationAllowed reports whether a generation request is
-// allowed during calibration: only Auto generation (no free text, no explicit
-// methodology) carrying at most partner, duration and gym/equipment tuning.
-func calibrationGenerationAllowed(freeMode bool, equipment []string, gymID, prompt, methodology string, goals, muscles []string, skipWarmupCooldown bool) bool {
-	if freeMode || strings.TrimSpace(methodology) != "" {
+// allowed during calibration: only Auto generation (no prompt analysis, no
+// explicit methodology) carrying at most partner, duration and gym/equipment
+// tuning.
+func calibrationGenerationAllowed(analyze bool, equipment []string, gymID, prompt, methodology string, goals, muscles []string, skipWarmupCooldown bool) bool {
+	if analyze || strings.TrimSpace(methodology) != "" {
 		return false
 	}
 	// gym and custom equipment are allowed during calibration: only the
@@ -172,89 +163,75 @@ func calibrationGenerationAllowed(freeMode bool, equipment []string, gymID, prom
 		!skipWarmupCooldown
 }
 
-func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt, freeText string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string, loc *time.Location, onProgress llm.DAGProgressFunc) (*model.Training, error) {
-	freeMode := strings.TrimSpace(freeText) != ""
+func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string, loc *time.Location, onProgress llm.DAGProgressFunc) (*model.Training, error) {
+	// a non-empty prompt runs through the analyzer, which fills only the
+	// tuning parameters the user left unset; explicit choices stay
+	// authoritative
+	analyze := strings.TrimSpace(prompt) != ""
 
 	// during calibration only Auto generation is allowed, restricted to
 	// partner, duration and gym/equipment tuning: reject anything else before
 	// any expensive work (article fetch, LLM derivation, retrieval) happens.
 	if calibrating, err := isUserCalibrating(userID); err != nil {
 		return nil, err
-	} else if calibrating && !calibrationGenerationAllowed(freeMode, equipment, gymID, prompt, methodology, goals, muscles, skipWarmupCooldown) {
+	} else if calibrating && !calibrationGenerationAllowed(analyze, equipment, gymID, prompt, methodology, goals, muscles, skipWarmupCooldown) {
 		return nil, ErrCalibrationAutoOnly
 	}
 
-	if freeMode {
-		if len(freeText) > maxFreeTextLength {
-			return nil, ErrPromptTooLong
-		}
-		// every classic tuning parameter is ignored in free text mode; values are
-		// derived from the request instead, with the session length computed
-		// deterministically from the generated program
-		duration = freeTextNominalMinutes
-		equipment = nil
-		gymID = ""
-		prompt = ""
-		partners = nil
-		skipWarmupCooldown = false
-		methodology = ""
-		goals = nil
-		muscles = nil
-	} else {
-		if duration <= 0 {
-			return nil, ErrDurationRequired
-		}
-		if duration < 10 || duration > 180 {
-			return nil, ErrDurationOutOfRange
-		}
+	if duration <= 0 {
+		return nil, ErrDurationRequired
+	}
+	if duration < 10 || duration > 180 {
+		return nil, ErrDurationOutOfRange
 	}
 	if len(prompt) > maxPromptLength {
 		return nil, ErrPromptTooLong
 	}
 
-	// free text mode: fetch any linked articles (hard fetch failures are fatal
-	// to the request), then deduce the tuning parameters a guided request
-	// would carry. this happens before pool retrieval so the candidate pools
-	// already reflect the requested program: the retrieval text embeds the
-	// derived schema instead of the raw request, and the equipment/muscle
-	// filters come from the derivation
-	var derivation *freeTextDerivation
+	// prompted requests: fetch any linked articles (hard fetch failures are
+	// fatal to the request), then deduce the tuning parameters the user did
+	// not set. this happens before pool retrieval so the candidate pools
+	// already reflect the analyzed request: the retrieval text embeds the
+	// derived schema alongside the raw prompt, and the equipment/muscle
+	// filters come from the derivation where the user left gaps
+	var derivation *promptDerivation
 	var articles []string
-	if freeMode {
-		for _, url := range util.ExtractURLs(freeText) {
+	originalPrompt := prompt
+	if analyze {
+		for _, url := range util.ExtractURLs(prompt) {
 			text, err := util.FetchResource(url)
 			if err != nil {
-				log.Warn().Err(err).Str("url", url).Msg("free text resource fetch failed")
+				log.Warn().Err(err).Str("url", url).Msg("prompt resource fetch failed")
 				return nil, ErrFetchResource
 			}
 			if len(text) < util.MinArticleLength {
-				log.Warn().Str("url", url).Int("length", len(text)).Msg("article extraction yielded no usable content; deriving from request alone")
+				log.Warn().Str("url", url).Int("length", len(text)).Msg("article extraction yielded no usable content; deriving from prompt alone")
 				continue
 			}
 			articles = append(articles, text)
 		}
 
 		var err error
-		derivation, err = deriveFreeTextParams(freeText, articles, onProgress)
+		derivation, err = derivePromptParams(prompt, articles, onProgress)
 		if err != nil {
 			return nil, err
 		}
-		prompt = freeTextRetrievalQuery(derivation.derived.Summary, articles, freeText)
-		if len(derivation.derived.Equipment) > 0 {
+		if len(equipment) == 0 && gymID == "" && len(derivation.derived.Equipment) > 0 {
 			equipment = derivation.derived.Equipment
 		}
-		if len(derivation.derived.Muscles) > 0 {
+		if len(muscles) == 0 && len(derivation.derived.Muscles) > 0 {
 			muscles = derivation.derived.Muscles
 		}
-		if len(derivation.derived.Goals) > 0 {
+		if len(goals) == 0 && len(derivation.derived.Goals) > 0 {
 			goals = derivation.derived.Goals
 		}
-		if derivation.derived.Methodology != "" {
+		if methodology == "" && derivation.derived.Methodology != "" {
 			methodology = derivation.derived.Methodology
 		}
 		if derivation.derived.SkipWarmupCooldown {
 			skipWarmupCooldown = true
 		}
+		prompt = promptRetrievalQuery(derivation.derived.Summary, articles, originalPrompt)
 	}
 
 	var requestorProfile model.Profile
@@ -406,7 +383,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	// recency — becomes a way to starve a requested movement out of the pool
 	var workExercises []model.Exercise
 	var pinnedExercises []model.Exercise
-	if freeMode && derivation.derived.ExplicitProgram && len(derivation.derived.Movements) > 0 {
+	if analyze && derivation.derived.ExplicitProgram && len(derivation.derived.Movements) > 0 {
 		workExercises, pinnedExercises, err = rag.RetrieveExplicitProgramExercises(derivation.derived.Movements)
 	} else {
 		workExercises, err = rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles, prompt, allFavoriteExercises, recentExerciseIDs, calibrationGaps, duration)
@@ -599,10 +576,11 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		RecentHR:             recentHR,
 		RecentExerciseIDs:    recentExerciseIDs,
 	}
-	if freeMode {
-		// the params were derived upfront (before pool retrieval); hand both
-		// the derivation and its step to the DAG so it skips re-deriving
-		dagRequest.FreeText = freeText
+	if analyze {
+		// the params were derived upfront (before pool retrieval), filling
+		// only the gaps the user left; hand both the derivation and its step
+		// to the DAG so it skips re-deriving
+		dagRequest.FreeText = originalPrompt
 		dagRequest.Articles = articles
 		dagRequest.AllGoals = derivation.allGoals
 		dagRequest.ValidMuscles = derivation.validMuscles
@@ -718,11 +696,11 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		// structural validation only — muscle coverage is owned by the strategy node, not the validator
 		validationErr := training.Validate(validExerciseIDs, exerciseModes, validModifierIDs, validRoutineTypes, weightedModifierIDs, weightedExerciseIDs, !skipWarmupCooldown)
 
-		// the stored session length always mirrors the generated program; guided
-		// requests additionally scale repeats to the requested length and enforce
-		// the duration match band
+		// the stored session length always mirrors the generated program; the
+		// requested duration additionally scales repeats and enforces the
+		// duration match band
 		training.Duration = training.CalculateDuration()
-		if validationErr == nil && !freeMode {
+		if validationErr == nil {
 			training.SetDuration(duration)
 			validationErr = training.ValidateDuration(duration)
 		}
@@ -805,15 +783,9 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	training.Equipment = mergeSelectedExerciseEquipment(training, training.Equipment)
 	training.Goals = effectiveGoals
 	training.Muscles = actualMuscles
-	// in free text mode the derived parameters stand in for the guided request
-	// (equipment is already there: it drove pool retrieval above)
-	if freeMode && dagRequest.Derived != nil && len(dagRequest.Derived.Goals) > 0 {
-		training.Goals = dagRequest.Derived.Goals
-	}
-	training.Request = prompt
-	if freeMode {
-		training.Request = freeText
-	}
+	// the stored request is the user's own prompt: the retrieval query
+	// enriched with the derivation is an internal detail
+	training.Request = originalPrompt
 
 	for i := range training.Routines {
 		training.Routines[i].Position = i
