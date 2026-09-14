@@ -109,11 +109,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
         const SizedBox(height: VigorSpacing.md),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
-            borderRadius: VigorRadius.radiusMd,
-          ),
+        Material(
+          color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+          borderRadius: VigorRadius.radiusMd,
+          clipBehavior: Clip.antiAlias,
           child: Column(
             children: [
               _buildThemeOption(
@@ -170,11 +169,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
         const SizedBox(height: VigorSpacing.md),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
-            borderRadius: VigorRadius.radiusMd,
-          ),
+        Material(
+          color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+          borderRadius: VigorRadius.radiusMd,
+          clipBehavior: Clip.antiAlias,
           child: Column(
             children: [
               SwitchListTile(
@@ -365,11 +363,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: AnimatedOpacity(
             opacity: isNative ? 1.0 : 0.3,
             duration: VigorAnimation.fast,
-            child: Container(
-              decoration: BoxDecoration(
-                color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
-                borderRadius: VigorRadius.radiusMd,
-              ),
+            child: Material(
+              color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+              borderRadius: VigorRadius.radiusMd,
+              clipBehavior: Clip.antiAlias,
               child: Column(
                 children: [
                   if (isConnected && healthService != null)
@@ -553,11 +550,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
         const SizedBox(height: VigorSpacing.md),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
-            borderRadius: VigorRadius.radiusMd,
-          ),
+        Material(
+          color: isDark ? VigorColors.darkSurface : VigorColors.lightSurface,
+          borderRadius: VigorRadius.radiusMd,
+          clipBehavior: Clip.antiAlias,
           child: Column(
             children: [
               ListTile(
