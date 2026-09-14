@@ -14,7 +14,7 @@ require (
 	go.uber.org/goleak v1.3.0
 	golang.org/x/crypto v0.56.0
 	golang.org/x/net v0.58.0
-	google.golang.org/api v0.295.0
+	google.golang.org/api v0.297.0
 	gorm.io/driver/postgres v1.6.2
 	gorm.io/gorm v1.31.2
 )
