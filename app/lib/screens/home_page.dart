@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -680,97 +679,56 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
   Widget _buildCalibrationCard(AppLocalizations l10n, Map<String, MuscleProgress> muscles) {
     final total = muscles.length;
     final calibrated = muscles.values.where((mp) => mp.calibration >= 100.0).length;
+    final fraction = total == 0 ? 0.0 : (calibrated / total).clamp(0.0, 1.0);
+    final percent = (fraction * 100).round();
 
-    // build segment data in display order
-    final segments = KnowledgeLabels.muscleDisplayOrder
-        .where((m) => muscles.containsKey(m))
-        .map((m) => muscles[m]!.calibration >= 100.0)
-        .toList();
-    // append any muscles not in the predefined order
-    for (final entry in muscles.entries) {
-      if (!KnowledgeLabels.muscleDisplayOrder.contains(entry.key)) {
-        segments.add(entry.value.calibration >= 100.0);
-      }
-    }
-
-    return GestureDetector(
+    return AdaptiveCard(
       onTap: () => _showCalibrationModal(context, l10n, muscles),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Icon(Icons.tune, color: VigorColors.indigoAdaptive(context), size: 24),
-              const SizedBox(width: VigorSpacing.sm),
-              Text(
-                l10n.calibration,
-                style: VigorTypography.headline.copyWith(
-                  fontSize: 18,
-                  color: VigorColors.textPrimary(context),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: VigorSpacing.sm),
-          AdaptiveCard(
-            padding: VigorSpacing.paddingMd,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+          Icon(Icons.tune, color: VigorColors.indigoAdaptive(context), size: 20),
+          const SizedBox(width: VigorSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // left column: text + click icon
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.calibrationMusclesLearned(calibrated, total),
-                        style: VigorTypography.data.copyWith(
-                          color: VigorColors.textPrimary(context),
-                          fontWeight: FontWeight.w600,
-                        ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n.calibration,
+                      style: VigorTypography.caption.copyWith(
+                        color: VigorColors.textSecondary(context),
                       ),
-                      const SizedBox(height: VigorSpacing.xs),
-                      Text(
-                        l10n.calibrationDescription,
-                        style: VigorTypography.caption.copyWith(
-                          color: VigorColors.textSecondary(context),
-                        ),
+                    ),
+                    Text(
+                      '$percent%',
+                      style: VigorTypography.body.copyWith(
+                        color: VigorColors.textPrimary(context),
+                        fontWeight: FontWeight.w600,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: VigorSpacing.lg),
-                // segmented arc on right
-                Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: _buildCalibrationRing(context, segments),
+                const SizedBox(height: VigorSpacing.xs),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: fraction,
+                    minHeight: 8,
+                    backgroundColor: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : VigorColors.stone.withValues(alpha: 0.2),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      VigorColors.indigoAdaptive(context),
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCalibrationRing(BuildContext context, List<bool> segments) {
-    const size = 72.0;
-    const strokeWidth = 6.0;
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(
-        painter: _CalibrationRingPainter(
-          segments: segments,
-          activeColor: VigorColors.indigoAdaptive(context),
-          inactiveColor: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white.withValues(alpha: 0.1)
-              : VigorColors.stone.withValues(alpha: 0.2),
-          strokeWidth: strokeWidth,
-        ),
-        child: Center(
-          child: Icon(Icons.tune, size: 20, color: VigorColors.indigoAdaptive(context)),
-        ),
       ),
     );
   }
@@ -1860,60 +1818,6 @@ class _WeeklyTargetModal extends StatelessWidget {
   Map<String, double> _toDoubleMap(Map<String, dynamic> map) {
     return map.map((k, v) => MapEntry(k, (v as num).toDouble()));
   }
-}
-
-/// Draws a segmented ring where each segment represents a muscle group.
-/// Calibrated segments use [activeColor], uncalibrated use [inactiveColor].
-class _CalibrationRingPainter extends CustomPainter {
-  final List<bool> segments;
-  final Color activeColor;
-  final Color inactiveColor;
-  final double strokeWidth;
-
-  _CalibrationRingPainter({
-    required this.segments,
-    required this.activeColor,
-    required this.inactiveColor,
-    required this.strokeWidth,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (segments.isEmpty) return;
-
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.shortestSide - strokeWidth) / 2;
-    final count = segments.length;
-
-    // gap between segments in radians
-    const gapRadians = 0.06;
-    final sweepPerSegment = (2 * pi - count * gapRadians) / count;
-    // start from top (-pi/2)
-    var startAngle = -pi / 2;
-
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    for (var i = 0; i < count; i++) {
-      paint.color = segments[i] ? activeColor : inactiveColor;
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        startAngle,
-        sweepPerSegment,
-        false,
-        paint,
-      );
-      startAngle += sweepPerSegment + gapRadians;
-    }
-  }
-
-  @override
-  bool shouldRepaint(_CalibrationRingPainter oldDelegate) =>
-      !listEquals(segments, oldDelegate.segments) ||
-      activeColor != oldDelegate.activeColor ||
-      inactiveColor != oldDelegate.inactiveColor;
 }
 
 /// Shared color/icon/shortline mapping for a readiness level.
