@@ -25,7 +25,6 @@ PostTrainingRequest _$PostTrainingRequestFromJson(
   muscles:
       (json['muscles'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       [],
-  freeText: json['freeText'] as String? ?? '',
 );
 
 Map<String, dynamic> _$PostTrainingRequestToJson(
@@ -40,5 +39,4 @@ Map<String, dynamic> _$PostTrainingRequestToJson(
   'methodology': instance.methodology,
   'goals': instance.goals,
   'muscles': instance.muscles,
-  'freeText': instance.freeText,
 };
