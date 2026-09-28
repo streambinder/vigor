@@ -90,9 +90,10 @@ type TrainingGenerationRequest struct {
 	RecentHR             map[uuid.UUID]*model.HealthExerciseSession
 	RecentExerciseIDs    []string
 
-	// FreeText, when non-empty, switches the DAG to free text mode: the derive
-	// params pre-step deduces the tuning parameters from the raw request
+	// FreeText, when non-empty, marks the request as prompt-analyzed: the derive
+	// params pre-step deduces the tuning parameters from the raw prompt
 	// (and the distilled text of any linked articles) before the other layers.
+	// the derivation only fills the parameters the request left unset.
 	FreeText       string
 	Articles       []string
 	AllGoals       []model.Goal // full goal catalog, to resolve derived goal IDs

@@ -49,7 +49,7 @@ func postTrainingJSON(c *fiber.Ctx) error {
 
 	training, err := service.GenerateTraining(
 		c.Locals("userID").(uuid.UUID),
-		req.Duration, req.Equipment, req.Gym, req.Prompt, req.FreeText, req.Partners,
+		req.Duration, req.Equipment, req.Gym, req.Prompt, req.Partners,
 		req.SkipWarmupCooldown, req.Methodology, req.Goals, req.Muscles,
 		loc, nil,
 	)
@@ -92,7 +92,7 @@ func postTrainingSSE(c *fiber.Ctx) error {
 
 		training, genErr := service.GenerateTraining(
 			userID,
-			req.Duration, req.Equipment, req.Gym, req.Prompt, req.FreeText, req.Partners,
+			req.Duration, req.Equipment, req.Gym, req.Prompt, req.Partners,
 			req.SkipWarmupCooldown, req.Methodology, req.Goals, req.Muscles,
 			loc, onProgress,
 		)
