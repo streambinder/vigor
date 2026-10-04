@@ -139,6 +139,15 @@ type MuscleTargeting struct {
 	Rationale        string   `json:"rationale"`                   // internal, not user-facing
 }
 
+// CalibrationCoverage is a deterministically injected gap-muscle exercise.
+// it records which exercise was forced into the program to close a
+// calibration gap, so downstream nodes can narrate it as light calibration
+// work instead of contradicting the targeting rest decision.
+type CalibrationCoverage struct {
+	Muscle     string
+	ExerciseID string
+}
+
 // SelectedExercise is a single exercise picked by the exercise selection node.
 type SelectedExercise struct {
 	ExerciseID string `json:"exercise_id"`

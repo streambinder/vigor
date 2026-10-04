@@ -46,6 +46,7 @@ Description rules:
 - Every sentence should map to a pipeline step — cover all 7 steps: recovery/health assessment, history-based progression, movement constraints, methodology choice, muscle targeting, exercise selection, and programming approach
 - Always name the session's muscle targets explicitly — never leave them implied by the exercise list alone
 - If muscles to rest are listed, mention what was deliberately left to recover and why
+- If a calibration coverage section is present, those muscles are trained by construction: never describe a muscle with forced calibration coverage as resting or recovering — describe it as light calibration work alongside the session focus
 - If a step's summary is empty or states "no adjustment"/"no change", skip it naturally — do NOT invent coverage
 - Write conversationally, as if explaining the workout to the user
 - Do NOT use raw data labels like "too_easy", "too_hard", or technical metric names
@@ -83,6 +84,7 @@ func StreamNodeCreativeUser(qw422016 *qt422016.Writer,
 	health pipeline.HealthAssessment,
 	recentNames []string,
 	derivedSummary string,
+	calibrationCoverage []pipeline.CalibrationCoverage,
 ) {
 	if derivedSummary != "" {
 		qw422016.N().S(`Requested program: `)
@@ -111,6 +113,23 @@ Secondary muscles: `)
 		qw422016.N().S(`
 Muscles to rest: `)
 		qw422016.E().S(strings.Join(targeting.AvoidMuscles, ", "))
+		qw422016.N().S(`
+`)
+	}
+	qw422016.N().S(`
+`)
+	if len(calibrationCoverage) > 0 {
+		qw422016.N().S(`
+Calibration coverage (required, already in the program):
+`)
+		for _, c := range calibrationCoverage {
+			qw422016.N().S(`- `)
+			qw422016.E().S(c.Muscle)
+			qw422016.N().S(` via `)
+			qw422016.E().S(c.ExerciseID)
+			qw422016.N().S(` — light calibration work, not a rest day for this muscle
+`)
+		}
 		qw422016.N().S(`
 `)
 	}
@@ -262,9 +281,10 @@ func WriteNodeCreativeUser(qq422016 qtio422016.Writer,
 	health pipeline.HealthAssessment,
 	recentNames []string,
 	derivedSummary string,
+	calibrationCoverage []pipeline.CalibrationCoverage,
 ) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeCreativeUser(qw422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames, derivedSummary)
+	StreamNodeCreativeUser(qw422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames, derivedSummary, calibrationCoverage)
 	qt422016.ReleaseWriter(qw422016)
 }
 
@@ -278,9 +298,10 @@ func NodeCreativeUser(
 	health pipeline.HealthAssessment,
 	recentNames []string,
 	derivedSummary string,
+	calibrationCoverage []pipeline.CalibrationCoverage,
 ) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeCreativeUser(qb422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames, derivedSummary)
+	WriteNodeCreativeUser(qb422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames, derivedSummary, calibrationCoverage)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

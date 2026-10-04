@@ -290,14 +290,20 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	// activity so calibration completes by construction.
 	loadResult = enforceMuscleCoverage(loadResult, injectedCoverage, workByID, exerciseModes)
 
+	// copy-facing targeting: a muscle with forced calibration coverage is
+	// trained by construction, so it must not reach the copy node as a
+	// muscle to rest. The persisted targeting step keeps the original.
+	copyTargeting := reconcileTargetingForCopy(targetingResult, injectedCoverage)
+	calibrationCoverage := sortedCalibrationCoverage(injectedCoverage)
+
 	// layer 4: creative copy (language-native)
 	language := "English"
 	if len(req.Profiles) > 0 && req.Profiles[0].Language != "" {
 		language = req.Profiles[0].Language
 	}
 	creativeResult, creativeStep, err := runCreativeNode(
-		language, strategyResult, targetingResult, exerciseResult, historyResult, constraintResult,
-		loadResult, healthResult, derivedSummary,
+		language, strategyResult, copyTargeting, exerciseResult, historyResult, constraintResult,
+		loadResult, healthResult, derivedSummary, calibrationCoverage,
 	)
 	nodes[pipeline.StepWriteCopy] = creativeStep
 	if err != nil {
@@ -1026,11 +1032,12 @@ func runCreativeNode(
 	loadResult pipeline.LoadProgramming,
 	health pipeline.HealthAssessment,
 	derivedSummary string,
+	calibrationCoverage []pipeline.CalibrationCoverage,
 ) (pipeline.CreativeCopy, model.LLMStep, error) {
 	p := model.LLMPrompt{
 		System: prompt.NodeCreativeSystem(language),
 		User: prompt.NodeCreativeUser(
-			strategy, targeting, exercises, history, constraints, loadResult, health, history.RecentNames, derivedSummary,
+			strategy, targeting, exercises, history, constraints, loadResult, health, history.RecentNames, derivedSummary, calibrationCoverage,
 		),
 	}
 

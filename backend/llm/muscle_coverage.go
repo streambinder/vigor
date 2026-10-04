@@ -97,6 +97,52 @@ func ensureMuscleCoverage(
 	return selection, injected
 }
 
+// sortedCalibrationCoverage flattens the injected muscle -> exercise map
+// into a deterministically ordered slice (muscle name) for copy generation,
+// where map iteration order must never leak into the prompt.
+func sortedCalibrationCoverage(injected map[string]string) []pipeline.CalibrationCoverage {
+	if len(injected) == 0 {
+		return nil
+	}
+	muscles := make([]string, 0, len(injected))
+	for muscle := range injected {
+		muscles = append(muscles, muscle)
+	}
+	sort.Strings(muscles)
+	coverage := make([]pipeline.CalibrationCoverage, 0, len(muscles))
+	for _, muscle := range muscles {
+		coverage = append(coverage, pipeline.CalibrationCoverage{
+			Muscle:     muscle,
+			ExerciseID: injected[muscle],
+		})
+	}
+	return coverage
+}
+
+// reconcileTargetingForCopy returns the copy-facing view of the muscle
+// targeting: any muscle with forced calibration coverage is removed from
+// AvoidMuscles, because the generated program trains it and the copy must
+// not narrate it as resting. The original targeting is left untouched for
+// step persistence; only the creative node sees the reconciled view.
+func reconcileTargetingForCopy(
+	targeting pipeline.MuscleTargeting,
+	injected map[string]string,
+) pipeline.MuscleTargeting {
+	if len(injected) == 0 || len(targeting.AvoidMuscles) == 0 {
+		return targeting
+	}
+	reconciled := targeting
+	kept := make([]string, 0, len(targeting.AvoidMuscles))
+	for _, muscle := range targeting.AvoidMuscles {
+		if _, forced := injected[muscle]; forced {
+			continue
+		}
+		kept = append(kept, muscle)
+	}
+	reconciled.AvoidMuscles = kept
+	return reconciled
+}
+
 // enforceMuscleCoverage deterministically guarantees that every gap muscle
 // injected by ensureMuscleCoverage survives program load. The load node is an
 // LLM and may drop exercises when building routines; any injected muscle left
