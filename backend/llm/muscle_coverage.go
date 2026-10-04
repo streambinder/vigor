@@ -11,11 +11,14 @@ import (
 // ensureMuscleCoverage deterministically appends one pool exercise per
 // calibration-gap muscle the LLM's work selection does not already cover. It
 // picks the first pool candidate with that primary muscle, skipping
-// already-selected, recently used and excluded exercises. Only work-phase
-// selections count as coverage: proficiency is recorded from work activities
-// alone, so a gap muscle appearing only in warmup/cooldown still needs a work
-// exercise to calibrate. Explicit programs are left untouched: they must
-// transcribe their source schema faithfully.
+// already-selected, recently used and deterministically excluded exercises:
+// the selection's own exclusion list is an LLM opinion and cannot veto a
+// calibration requirement, while the same contraindicated-pattern and
+// avoid-list filters that guard the selection itself always apply. Only
+// work-phase selections count as coverage: proficiency is recorded from work
+// activities alone, so a gap muscle appearing only in warmup/cooldown still
+// needs a work exercise to calibrate. Explicit programs are left untouched:
+// they must transcribe their source schema faithfully.
 //
 // It returns the updated selection plus the injected muscle -> exercise ID map,
 // used downstream to enforce that the injected exercises survive program load.
@@ -25,6 +28,8 @@ func ensureMuscleCoverage(
 	candidates []model.Exercise,
 	recentExerciseIDs []string,
 	explicitProgram bool,
+	contraindicatedPatterns []string,
+	avoidExercises []string,
 ) (pipeline.ExerciseSelection, map[string]string) {
 	injected := make(map[string]string)
 	if explicitProgram || len(gaps) == 0 || len(candidates) == 0 {
@@ -50,9 +55,9 @@ func ensureMuscleCoverage(
 		}
 	}
 
-	excluded := make(map[string]bool, len(selection.Excluded))
-	for _, e := range selection.Excluded {
-		excluded[e.ExerciseID] = true
+	excluded := make(map[string]bool, len(avoidExercises))
+	for _, id := range avoidExercises {
+		excluded[id] = true
 	}
 	recent := make(map[string]bool, len(recentExerciseIDs))
 	for _, id := range recentExerciseIDs {
@@ -80,6 +85,9 @@ func ensureMuscleCoverage(
 				continue
 			}
 			if selected[ex.ID] || excluded[ex.ID] || recent[ex.ID] {
+				continue
+			}
+			if matchesContraindicatedPattern(ex, contraindicatedPatterns) {
 				continue
 			}
 			selection.Exercises = append(selection.Exercises, pipeline.SelectedExercise{

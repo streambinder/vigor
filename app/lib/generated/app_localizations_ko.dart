@@ -2054,4 +2054,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get exerciseTypeWheelchair => 'Wheelchair';
+
+  @override
+  String get trajectory => '궤적';
 }

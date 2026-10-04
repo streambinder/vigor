@@ -39,6 +39,8 @@ const (
 )
 
 // LLMPrompt holds the system/user prompt pair sent to the LLM.
+//
+// codegen:skip
 type LLMPrompt struct {
 	System string `json:"system"`
 	User   string `json:"user"`
@@ -64,10 +66,11 @@ func (usage *LLMUsage) Add(other LLMUsage) {
 	usage.Cost += other.Cost
 }
 
-// TrainingPrompt is the deprecated two-stage view of the LLM execution,
-// derived from the owner's LLM steps via LegacyPrompt. The persisted
-// source of truth is the model_steps table: this shape only survives in
-// the read API until clients move to the steps array.
+// TrainingPrompt is the two-stage view of the LLM execution folded from
+// a trajectory's steps by LegacyPrompt, kept for the generation
+// telemetry events that still report reasoning and structuring models.
+//
+// codegen:skip — pipeline internals never reach the app.
 type TrainingPrompt struct {
 	Reasoning   LLMStep `json:"reasoning"`
 	Structuring LLMStep `json:"structuring"`
@@ -121,10 +124,7 @@ type Training struct {
 	References  datatypes.JSONType[[]TrainingReference] `gorm:"type:jsonb" json:"references" prompt:"-"`
 	FactIndices []int                                   `gorm:"-" json:"fact_indices" prompt:"Indices of [FACTS] used (e.g. [0,2]), empty if none"`
 	Routines    []Routine                               `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"routines" prompt:"Training routines"`
-	ModelSteps  []ModelStep                             `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"model_steps" dart:"List<Map<String, dynamic>>" prompt:"-"`
-	// Prompt is a deprecated read-only projection of ModelSteps, computed by
-	// AfterFind; it is not a column and must never be written to.
-	Prompt TrainingPrompt `gorm:"-" json:"prompt" prompt:"-"`
+	Trajectory  *Trajectory                             `gorm:"foreignKey:TrainingID;constraint:OnDelete:SET NULL" json:"trajectory" prompt:"-"`
 
 	CompletedAt      *time.Time `gorm:"type:timestamptz" json:"completed_at" prompt:"-"`
 	CompletedIn      *int       `json:"completed_in" prompt:"-"`
@@ -187,10 +187,10 @@ type Activity struct {
 	UpdatedAt time.Time `json:"-"`
 }
 
-// AfterFind derives the deprecated two-stage prompt projection from the
-// loaded steps, so legacy readers keep their shape without a prompt column.
+// AfterFind folds the loaded trajectory steps into the trajectory
+// accounting, so readers get models and costs without a second pass.
 func (t *Training) AfterFind(_ *gorm.DB) error {
-	t.Prompt = LegacyPrompt(t.ModelSteps)
+	t.Trajectory.Summarize()
 	return nil
 }
 
@@ -362,8 +362,7 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 	clone.UserID = newUserID
 	clone.ParentID = &t.ID
 	// steps belong to the original generation run: the clone starts with none
-	clone.ModelSteps = nil
-	clone.Prompt = LegacyPrompt(nil)
+	clone.Trajectory = nil
 	clone.CompletedAt = nil
 	clone.CompletedIn = nil
 	clone.CreatedAt = time.Time{}

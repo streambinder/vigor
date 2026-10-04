@@ -4,7 +4,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'training_reference.dart';
 import 'routine.dart';
-import 'training_prompt.dart';
+import 'trajectory.dart';
 import 'gym.dart';
 
 part 'training.g.dart';
@@ -35,10 +35,8 @@ class Training {
   final List<int> factIndices;
   @JsonKey(name: 'routines', defaultValue: [])
   final List<Routine> routines;
-  @JsonKey(name: 'model_steps', defaultValue: [])
-  final List<Map<String, dynamic>> modelSteps;
-  @JsonKey(name: 'prompt')
-  final TrainingPrompt prompt;
+  @JsonKey(name: 'trajectory')
+  final Trajectory? trajectory;
   @JsonKey(name: 'completed_at', toJson: _nullableDateTimeToJson)
   final DateTime? completedAt;
   @JsonKey(name: 'completed_in')
@@ -69,8 +67,7 @@ class Training {
     required this.references,
     required this.factIndices,
     required this.routines,
-    required this.modelSteps,
-    required this.prompt,
+    this.trajectory,
     this.completedAt,
     this.completedIn,
     required this.hasHealthSession,

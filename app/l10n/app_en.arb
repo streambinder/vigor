@@ -971,5 +971,6 @@
   "exerciseTypeSwimmingOpenWater": "Open Water Swimming",
   "exerciseTypeSwimmingPool": "Pool Swimming",
   "exerciseTypeWeightlifting": "Weightlifting",
-  "exerciseTypeWheelchair": "Wheelchair"
+  "exerciseTypeWheelchair": "Wheelchair",
+  "trajectory": "Trajectory"
 }

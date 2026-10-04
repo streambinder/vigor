@@ -14,6 +14,8 @@ const (
 
 // LLMStep is the payload of a model step produced by a language model:
 // the prompt that was sent, the raw output, and the token accounting.
+//
+// codegen:skip — the app reads step payloads as untyped maps.
 type LLMStep struct {
 	Model  string    `json:"model"`
 	Prompt LLMPrompt `json:"prompt"`

@@ -780,8 +780,8 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	training.References = datatypes.NewJSONType(refs)
 	training.FactIndices = nil // clear after resolution
 
-	training.ModelSteps = steps
-	training.Prompt = legacy
+	training.Trajectory = &model.Trajectory{Steps: steps}
+	training.Trajectory.Summarize()
 	if gym != nil {
 		training.GymID = &gym.ID
 		training.Gym = gym
@@ -856,7 +856,7 @@ func GetTrainings(userID uuid.UUID) ([]model.Training, error) {
 		Preload("Routines", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Preload("Routines.Blocks", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Preload("Routines.Blocks.Activities", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
-		Preload("ModelSteps", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Trajectory.Steps", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Where("user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?)", userID, userID).
 		Order("(completed_at IS NOT NULL), COALESCE(completed_at, created_at) desc").
 		Find(&trainings).Error
@@ -947,7 +947,7 @@ func CompleteTraining(userID uuid.UUID, trainingID string, quality *bool, qualit
 		log.Error().Err(err).Msg("failed to record proficiencies")
 	}
 
-	loadTrainingSteps(&training)
+	loadTrainingTrajectory(&training)
 
 	return &training, nil
 }
@@ -985,19 +985,25 @@ func UpdateTrainingFeedback(userID uuid.UUID, trainingID string, quality *bool, 
 		log.Error().Err(err).Msg("failed to record proficiencies")
 	}
 
-	loadTrainingSteps(&training)
+	loadTrainingTrajectory(&training)
 
 	return &training, nil
 }
 
-// loadTrainingSteps fills the training's ordered steps and deprecated prompt
-// projection for endpoints returning the training after a write, where the
-// initial fetch skipped preloads to keep Save side-effect free.
-func loadTrainingSteps(training *model.Training) {
-	if err := database.DB.Order("position").Where("training_id = ?", training.ID).Find(&training.ModelSteps).Error; err != nil {
-		log.Error().Err(err).Str("training", training.ID.String()).Msg("failed to load training model steps")
+// loadTrainingTrajectory fills the training's trajectory (with its
+// ordered steps) for endpoints returning the training after a write,
+// where the initial fetch skipped preloads to keep Save side-effect free.
+func loadTrainingTrajectory(training *model.Training) {
+	var trajectory model.Trajectory
+	if err := database.DB.
+		Preload("Steps", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Where("training_id = ?", training.ID).
+		First(&trajectory).Error; err != nil {
+		log.Error().Err(err).Str("training", training.ID.String()).Msg("failed to load training trajectory")
+		return
 	}
-	training.Prompt = model.LegacyPrompt(training.ModelSteps)
+	trajectory.Summarize()
+	training.Trajectory = &trajectory
 }
 
 // upsertTrainingFeedback creates or updates a per-user feedback row.

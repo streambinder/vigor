@@ -7,9 +7,6 @@ import '../models/training.dart';
 import '../models/routine.dart';
 import '../models/block.dart';
 import '../models/activity.dart';
-import '../models/training_prompt.dart';
-import '../models/llm_step.dart';
-import '../models/llm_prompt.dart';
 import 'base_timer_notifier.dart';
 import 'interval_controller.dart';
 import 'timer_controller.dart';
@@ -129,17 +126,6 @@ class _FlowIntervalController extends IntervalController {
   _FlowIntervalController({required List<FlowPose> poses})
       : super(training: _syntheticTraining(poses));
 
-  static final _emptyStep = LLMStep(
-    model: '',
-    prompt: LLMPrompt(system: '', user: ''),
-    usage: const {},
-  );
-
-  static final _emptyPrompt = TrainingPrompt(
-    reasoning: _emptyStep,
-    structuring: _emptyStep,
-  );
-
   // minimal Training shell — only `routines` matters for interval building
   static Training _syntheticTraining(List<FlowPose> poses) => Training(
         id: '',
@@ -183,8 +169,6 @@ class _FlowIntervalController extends IntervalController {
             ],
           ),
         ],
-        modelSteps: const [],
-        prompt: _emptyPrompt,
         completedAt: null,
         completedIn: null,
         hasHealthSession: false,

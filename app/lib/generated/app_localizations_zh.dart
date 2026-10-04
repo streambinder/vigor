@@ -2048,4 +2048,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get exerciseTypeWheelchair => 'Wheelchair';
+
+  @override
+  String get trajectory => '轨迹';
 }
