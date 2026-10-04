@@ -78,7 +78,6 @@ class HealthSyncPayload {
   final List<Map<String, dynamic>> metrics;
   final List<Map<String, dynamic>> sessions;
   final List<Map<String, dynamic>> weights;
-  final List<Map<String, dynamic>> hrSamples;
   final List<String> deletedRecordIds;
 
   /// per-source-app breakdown: source name -> (metrics, sessions) counts
@@ -88,7 +87,6 @@ class HealthSyncPayload {
     required this.metrics,
     required this.sessions,
     required this.weights,
-    required this.hrSamples,
     this.deletedRecordIds = const [],
     this.sourceApps = const {},
   });
@@ -96,34 +94,29 @@ class HealthSyncPayload {
   bool get isEmpty =>
       metrics.isEmpty &&
       sessions.isEmpty &&
-      weights.isEmpty &&
-      hrSamples.isEmpty &&
-      deletedRecordIds.isEmpty;
+      weights.isEmpty && deletedRecordIds.isEmpty;
 
   Map<String, dynamic> toJson() => {
     'metrics': metrics,
     'sessions': sessions,
     'weights': weights,
-    'hr_samples': hrSamples,
     if (deletedRecordIds.isNotEmpty) 'deleted_record_ids': deletedRecordIds,
   };
 }
 
-/// all android-supported health connect permission types
-/// tier 1 (core): STEPS, CALORIES, SLEEP_SESSION, WEIGHT — lightweight, always synced
-/// tier 2 (exercise): WORKOUT, RESTING_HR, HRV, SLEEP stages — small, valuable
-/// HEART_RATE is fetched windowed around workouts only, not as bulk 7-day read
+/// health permission types, one group per metric the server keeps:
+/// sleep (30 days), recovery — resting HR and HRV (60 days), workouts
+/// (10 days) and weight (latest value only). Sleep stages are read
+/// locally (SLEEP_ASLEEP) only to derive the nightly total when the
+/// device reports no session; they never leave the device.
+/// HEART_RATE is fetched windowed around workouts only, to compute
+/// per-session avg/max on device — raw samples are never uploaded.
 const healthPermissionTypes = [
-  HealthDataType.STEPS,
-  HealthDataType.TOTAL_CALORIES_BURNED,
   HealthDataType.SLEEP_SESSION,
   HealthDataType.WEIGHT,
   HealthDataType.WORKOUT,
   HealthDataType.RESTING_HEART_RATE,
   HealthDataType.HEART_RATE_VARIABILITY_RMSSD,
-  HealthDataType.SLEEP_DEEP,
-  HealthDataType.SLEEP_LIGHT,
-  HealthDataType.SLEEP_REM,
   HealthDataType.SLEEP_ASLEEP,
 ];
 
@@ -134,7 +127,7 @@ abstract class HealthDataService {
   Future<void> revokePermissions();
   Future<HealthSyncPayload> readNewData();
 
-  /// full 30-day read ignoring incremental tokens — used by manual sync
+  /// full read over the widest metric window (60 days) — used by manual sync
   Future<HealthSyncPayload> readAllData();
   ValueNotifier<bool> get syncing;
   ValueNotifier<HealthSyncResult?> get lastSyncResult;
@@ -323,12 +316,12 @@ mixin HealthDataServiceMixin on HealthDataService {
     }
   }
 
-  /// full 30-day sync — single POST, used by manual Settings action
+  /// full sync — single POST, used by manual Settings action
   Future<bool> _syncFull() async {
-    AppLogger.debug('[HealthDataService] reading full 30-day');
+    AppLogger.debug('[HealthDataService] reading full 60-day');
     final payload = await readAllData();
     AppLogger.info(
-      '[HealthDataService] full read: ${payload.metrics.length} metrics, ${payload.sessions.length} sessions, ${payload.weights.length} weights, ${payload.hrSamples.length} HR samples',
+      '[HealthDataService] full read: ${payload.metrics.length} metrics, ${payload.sessions.length} sessions, ${payload.weights.length} weights',
     );
     if (payload.isEmpty) {
       await _fetchStatsOnly();
@@ -409,14 +402,22 @@ mixin HealthDataServiceMixin on HealthDataService {
 
   /// incremental streaming: one date per POST, smallest pieces first
   Future<bool> _streamIncrementalSync() async {
-    Set<String> serverDates = {};
+    Set<String> sleepDates = {};
+    Set<String> recoveryDates = {};
+    Set<String> sessionDates = {};
     try {
       final manifestResp = await apiService.get('/health/manifest').timeout(_syncTimeout);
       if (manifestResp.isSuccess && manifestResp.data != null) {
-        serverDates = Set<String>.from(
-          (manifestResp.data!['dates_with_data'] as List?)?.cast<String>() ?? [],
+        sleepDates = Set<String>.from(
+          (manifestResp.data!['sleep_dates'] as List?)?.cast<String>() ?? [],
         );
-        AppLogger.debug('[HealthDataService] server has ${serverDates.length} dates');
+        recoveryDates = Set<String>.from(
+          (manifestResp.data!['recovery_dates'] as List?)?.cast<String>() ?? [],
+        );
+        sessionDates = Set<String>.from(
+          (manifestResp.data!['session_dates'] as List?)?.cast<String>() ?? [],
+        );
+        AppLogger.debug('[HealthDataService] server dates — sleep: ${sleepDates.length}, recovery: ${recoveryDates.length}, sessions: ${sessionDates.length}');
       } else {
         AppLogger.warning('[HealthDataService] manifest failed, falling back to 7-day single POST');
         final payload = await readNewData();
@@ -438,25 +439,25 @@ mixin HealthDataServiceMixin on HealthDataService {
     }
 
     final now = DateTime.now();
-    // target dates: last 30 days missing on server + always last 7 days (freshness)
-    // 7-day window ensures late Health Connect workouts (e.g. Fitbit sync delayed,
-    // or workout added after metrics) are re-synced even when metric date already
-    // exists on server — manifest only tracks metric dates, not session dates.
-    final targetDates = <DateTime>[];
-    final recentKeys = <String>{};
-    for (int i = 0; i < 7; i++) {
-      final d = now.subtract(Duration(days: i));
-      final k = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-      recentKeys.add(k);
-    }
-
-    for (int i = 0; i < 30; i++) {
-      final d = now.subtract(Duration(days: i));
-      final k = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-      if (!serverDates.contains(k) || recentKeys.contains(k)) {
-        targetDates.add(DateTime(d.year, d.month, d.day));
+    // target dates per metric window: sleep 30 days, recovery 60 days,
+    // sessions 10 days — each group only pulls its own missing dates.
+    // the last 7 days are always re-checked (freshness: late Health
+    // Connect workouts, e.g. delayed Fitbit sync, land there).
+    String keyOf(DateTime d) =>
+        '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    final targetKeys = <String>{};
+    void collect(Set<String> server, int windowDays) {
+      for (int i = 0; i < windowDays; i++) {
+        final d = now.subtract(Duration(days: i));
+        final k = keyOf(d);
+        if (!server.contains(k) || i < 7) targetKeys.add(k);
       }
     }
+
+    collect(sleepDates, 30);
+    collect(recoveryDates, 60);
+    collect(sessionDates, 10);
+    final targetDates = targetKeys.map((k) => DateTime.parse(k)).toList();
 
     // oldest first so backend converges forward, recent 7 will be re-synced anyway
     targetDates.sort((a, b) => a.compareTo(b));
@@ -567,8 +568,9 @@ class _MetricInterval {
 }
 
 /// transforms raw HealthDataPoints into the structured format the backend expects.
-/// groups metrics by date, maps workouts to sessions, extracts HR samples.
-/// uses interval-overlap-aware dedup for additive metrics (steps, calories, sleep stages)
+/// groups metrics by date and maps workouts to sessions, computing each
+/// session's avg/max HR from windowed heart-rate points on device.
+/// uses interval-overlap-aware dedup for additive metrics (sleep stages)
 /// so non-overlapping intervals from different sources sum correctly while overlapping
 /// intervals keep only the higher-rate source.
 HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
@@ -578,7 +580,8 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
   final dailyMetrics = <String, Map<String, dynamic>>{};
   final sessions = <Map<String, dynamic>>[];
   final weights = <Map<String, dynamic>>[];
-  final hrSamples = <Map<String, dynamic>>[];
+  // heart-rate points stay on device: only per-session avg/max is sent
+  final hrPoints = <({int ts, int bpm})>[];
   // track per-source-app data point counts (metrics vs sessions)
   final sourceMetricCounts = <String, int>{};
   final sourceSessionCounts = <String, int>{};
@@ -587,8 +590,6 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
   final additiveIntervals = <String, List<_MetricInterval>>{};
 
   const additiveTypes = {
-    HealthDataType.STEPS,
-    HealthDataType.TOTAL_CALORIES_BURNED,
     HealthDataType.SLEEP_DEEP,
     HealthDataType.SLEEP_LIGHT,
     HealthDataType.SLEEP_REM,
@@ -620,18 +621,16 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
         'exercise_type': workoutValue?.workoutActivityType.name ?? 'other',
         'started_at': point.dateFrom.millisecondsSinceEpoch,
         'ended_at': point.dateTo.millisecondsSinceEpoch,
-        if (workoutValue?.totalEnergyBurned != null)
-          'calories': workoutValue!.totalEnergyBurned!.toDouble(),
       });
       sourceSessionCounts[point.sourceName] =
           (sourceSessionCounts[point.sourceName] ?? 0) + 1;
     } else if (point.type == HealthDataType.HEART_RATE) {
       final bpm = _numericValue(point);
       if (bpm > 0) {
-        hrSamples.add({
-          'timestamp': point.dateFrom.millisecondsSinceEpoch,
-          'bpm': bpm.round(),
-        });
+        hrPoints.add((
+          ts: point.dateFrom.millisecondsSinceEpoch,
+          bpm: bpm.round(),
+        ));
       }
     } else if (point.type == HealthDataType.WEIGHT) {
       final value = _numericValue(point);
@@ -695,12 +694,6 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
     final resolved = _resolveOverlaps(intervals);
 
     switch (typeName) {
-      case 'STEPS':
-        bucket['steps'] = resolved.round();
-        break;
-      case 'TOTAL_CALORIES_BURNED':
-        bucket['total_calories'] = resolved;
-        break;
       case 'SLEEP_DEEP':
         bucket['sleep_deep_hours'] = resolved;
         break;
@@ -749,17 +742,47 @@ HealthSyncPayload buildSyncPayload(List<HealthDataPoint> dataPoints) {
       ),
   };
 
+  // correlate HR points to workout windows on device: avg/max only
+  for (final session in sessions) {
+    final start = session['started_at'] as int;
+    final end = session['ended_at'] as int;
+    var sum = 0;
+    var count = 0;
+    var max = 0;
+    for (final hr in hrPoints) {
+      if (hr.ts >= start && hr.ts <= end) {
+        sum += hr.bpm;
+        count++;
+        if (hr.bpm > max) max = hr.bpm;
+      }
+    }
+    if (count > 0) {
+      session['avg_hr'] = (sum / count).round();
+      session['max_hr'] = max;
+    }
+  }
+
+  // keep only the latest weight: the server stores no weight history
+  if (weights.length > 1) {
+    weights.sort(
+      (a, b) => (a['measured_at'] as int).compareTo(b['measured_at'] as int),
+    );
+    final latest = weights.last;
+    weights
+      ..clear()
+      ..add(latest);
+  }
+
   final sourceSummary = sourceApps.entries
       .map((e) => '${e.key}(${e.value.metrics}m/${e.value.sessions}s)')
       .join(', ');
   AppLogger.info(
-    '[HealthDataService] payload built: ${dailyMetrics.length} daily buckets, ${sessions.length} sessions, ${weights.length} weights, ${hrSamples.length} HR samples, sources: $sourceSummary',
+    '[HealthDataService] payload built: ${dailyMetrics.length} daily buckets, ${sessions.length} sessions, ${weights.length} weights, sources: $sourceSummary',
   );
   return HealthSyncPayload(
     metrics: dailyMetrics.values.toList(),
     sessions: sessions,
     weights: weights,
-    hrSamples: hrSamples,
     sourceApps: sourceApps,
   );
 }

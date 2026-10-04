@@ -97,7 +97,7 @@ class AndroidHealthDataService extends HealthDataService
 
   @override
   Future<HealthSyncPayload> readAllData() async {
-    AppLogger.info('[AndroidHealth] readAllData — full 30-day read');
+    AppLogger.info('[AndroidHealth] readAllData — full 60-day read');
     await _ensureConfigured();
     return _doFullRead();
   }
@@ -145,15 +145,15 @@ class AndroidHealthDataService extends HealthDataService
     return buildSyncPayload(Health().removeDuplicates(combined));
   }
 
-  /// full 30-day read for manual/force sync
+  /// full 60-day read for manual/force sync (widest metric window)
   Future<HealthSyncPayload> _doFullRead() async {
     final now = DateTime.now();
-    final thirtyDaysAgo = now.subtract(const Duration(days: 30));
+    final sixtyDaysAgo = now.subtract(const Duration(days: 60));
 
-    AppLogger.debug('[AndroidHealth] full read: ${thirtyDaysAgo.toIso8601String()} to ${now.toIso8601String()}');
+    AppLogger.debug('[AndroidHealth] full read: ${sixtyDaysAgo.toIso8601String()} to ${now.toIso8601String()}');
     final dataPoints = await _health.getHealthDataFromTypes(
       types: healthPermissionTypes,
-      startTime: thirtyDaysAgo,
+      startTime: sixtyDaysAgo,
       endTime: now,
     );
     AppLogger.info('[AndroidHealth] full read returned ${dataPoints.length} data points');
@@ -162,7 +162,7 @@ class AndroidHealthDataService extends HealthDataService
     final deduped = Health().removeDuplicates(dataPoints);
     AppLogger.debug('[AndroidHealth] after dedup: ${deduped.length} data points (removed ${dataPoints.length - deduped.length})');
 
-    final hrPoints = await _fetchCorrelatedHR(deduped, thirtyDaysAgo, now);
+    final hrPoints = await _fetchCorrelatedHR(deduped, sixtyDaysAgo, now);
     final combined = hrPoints.isEmpty ? deduped : [...deduped, ...hrPoints];
 
     return buildSyncPayload(Health().removeDuplicates(combined));

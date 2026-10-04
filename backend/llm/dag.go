@@ -1177,9 +1177,10 @@ func runHealthNode(healthSnapshot *model.HealthSnapshot) (pipeline.HealthAssessm
 			ID:   "recovery",
 			Kind: dm.KindScore,
 			Instructions: "Rate the user's overall recovery state for today's training. " +
-				"Sleep deviation at or below -15% implies fatigue; HRV deviation at or below -15% implies fatigue affecting both volume and intensity; " +
-				"resting heart rate deviation at or above +15% implies strain; external workouts in the last 48 hours (especially football, running, cycling) add leg fatigue; " +
-				"multiple negative deviations compound; sleep under 5 hours or HRV under 15ms RMSSD means severely compromised regardless of baseline; " +
+				"Sleep under 7 hours implies caution, under 6 strong fatigue, under 5 severe fatigue; sleep deviation at or below -15% from baseline also implies fatigue; " +
+				"HRV 7-day average more than 0.5 SD below the 28-day reference implies fatigue affecting both volume and intensity, more than 1 SD is severe — never judge HRV by an absolute ms value; " +
+				"resting heart rate 3-day average +3 to +5 bpm above baseline implies strain; external workouts in the last 48 hours (especially football, running, cycling) add strong leg fatigue, moderate at 48-72 hours, light at 72-96 hours; " +
+				"multiple negative deviations compound; " +
 				"when baselines are not established, only extreme values count; negligible deviations mean fully recovered. " +
 				"Judge only the metrics present in the state: an absent metric was not measured.",
 			Levels: recoveryLevels,
@@ -1187,7 +1188,7 @@ func runHealthNode(healthSnapshot *model.HealthSnapshot) (pipeline.HealthAssessm
 		{
 			ID:           "extend_warmup",
 			Kind:         dm.KindNoul,
-			Instructions: "An extended warmup is advisable today (low daily step count, stiffness, or significant fatigue).",
+			Instructions: "An extended warmup is advisable today (stiffness or significant fatigue).",
 		},
 	})
 	if err != nil {

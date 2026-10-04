@@ -3,12 +3,12 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
-part 'health_sync_metric.g.dart';
+part 'health_daily_metric.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-class HealthSyncMetric {
-  @JsonKey(name: 'date', defaultValue: '')
-  final String date;
+class HealthDailyMetric {
+  @JsonKey(name: 'date', toJson: _dateTimeToJson)
+  final DateTime date;
   @JsonKey(name: 'sleep_hours')
   final double sleepHours;
   @JsonKey(name: 'resting_hr')
@@ -16,14 +16,16 @@ class HealthSyncMetric {
   @JsonKey(name: 'hrv_rmssd')
   final double hRVRMSSD;
 
-  HealthSyncMetric({
+  HealthDailyMetric({
     required this.date,
     required this.sleepHours,
     required this.restingHR,
     required this.hRVRMSSD,
   });
 
-  factory HealthSyncMetric.fromJson(Map<String, dynamic> json) => _$HealthSyncMetricFromJson(json);
+  factory HealthDailyMetric.fromJson(Map<String, dynamic> json) => _$HealthDailyMetricFromJson(json);
 
-  Map<String, dynamic> toJson() => _$HealthSyncMetricToJson(this);
+  Map<String, dynamic> toJson() => _$HealthDailyMetricToJson(this);
+
+  static String _dateTimeToJson(DateTime dt) => dt.toUtc().toIso8601String();
 }

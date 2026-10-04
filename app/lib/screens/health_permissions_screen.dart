@@ -36,7 +36,6 @@ class HealthPermissionsScreen extends StatelessWidget {
             _buildPermissionItem(context, Icons.bedtime_outlined, l10n.healthPermissionsSleep),
             _buildPermissionItem(context, Icons.show_chart, l10n.healthPermissionsHrv),
             _buildPermissionItem(context, Icons.favorite_outline, l10n.healthPermissionsRhr),
-            _buildPermissionItem(context, Icons.directions_walk, l10n.healthPermissionsSteps),
             _buildPermissionItem(context, Icons.fitness_center, l10n.healthPermissionsWorkouts),
             const Spacer(flex: 2),
             // read-only disclaimer — centered, right above connect button

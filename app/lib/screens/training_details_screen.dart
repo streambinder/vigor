@@ -1000,13 +1000,12 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
     );
   }
 
-  /// avg/max HR, duration, and calories from linked health session
+  /// avg/max HR and duration from linked health session
   Widget _buildHealthSessionSection(AppLocalizations l10n, bool isDark) {
     if (_healthSessionData == null) return const SizedBox.shrink();
     final data = _healthSessionData!;
     final avgHr = data['avg_hr'] as int?;
     final maxHr = data['max_hr'] as int?;
-    final calories = data['calories'] as num?;
     final startedAt = data['started_at'] as String?;
     final endedAt = data['ended_at'] as String?;
     final accentColor = VigorColors.indigoAdaptive(context);
@@ -1025,7 +1024,6 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
     if (avgHr != null) stats.add(Expanded(child: _buildHrStat(l10n.avgHr, '$avgHr', l10n.bpm, accentColor)));
     if (maxHr != null) stats.add(Expanded(child: _buildHrStat(l10n.maxHr, '$maxHr', l10n.bpm, VigorColors.persimmon)));
     if (durationMins != null && durationMins > 0) stats.add(Expanded(child: _buildHrStat(l10n.duration, '$durationMins', 'min', VigorColors.stone)));
-    if (calories != null && calories > 0) stats.add(Expanded(child: _buildHrStat(l10n.healthDailyCalories, '${calories.round()}', 'kcal', VigorColors.stone)));
 
     if (stats.isEmpty) return const SizedBox.shrink();
 

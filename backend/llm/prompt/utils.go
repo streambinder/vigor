@@ -64,6 +64,14 @@ func formatDeviation(pct float64) string {
 	return fmt.Sprintf("%.0f%%", pct)
 }
 
+// formatSD renders a standard-deviation deviation with sign (e.g. "-1.2").
+func formatSD(sd float64) string {
+	if sd >= 0 {
+		return fmt.Sprintf("+%.1f", sd)
+	}
+	return fmt.Sprintf("%.1f", sd)
+}
+
 // groupExercisesByMuscle groups exercises by their primary muscle for structured [WORK] prompt output.
 func groupExercisesByMuscle(exercises []model.Exercise) map[string][]model.Exercise {
 	groups := make(map[string][]model.Exercise)

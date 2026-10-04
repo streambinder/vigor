@@ -17,8 +17,10 @@ class HealthSyncSession {
   final int startedAt;
   @JsonKey(name: 'ended_at')
   final int endedAt;
-  @JsonKey(name: 'calories')
-  final double? calories;
+  @JsonKey(name: 'avg_hr')
+  final int? avgHR;
+  @JsonKey(name: 'max_hr')
+  final int? maxHR;
 
   HealthSyncSession({
     required this.hCRecordId,
@@ -26,7 +28,8 @@ class HealthSyncSession {
     required this.exerciseType,
     required this.startedAt,
     required this.endedAt,
-    this.calories,
+    this.avgHR,
+    this.maxHR,
   });
 
   factory HealthSyncSession.fromJson(Map<String, dynamic> json) => _$HealthSyncSessionFromJson(json);

@@ -18,26 +18,19 @@ var (
 
 func StreamNodeHealthUser(qw422016 *qt422016.Writer, healthSnapshot *model.HealthSnapshot) {
 	if healthSnapshot == nil || !healthSnapshot.HasRecoverySignal() {
-		qw422016.N().S(`No recovery metrics available. Return volume_modifier=1.0, intensity_modifier=1.0, extend_warmup=false, rationale="no data".
+		qw422016.N().S(`No recovery metrics available.
 `)
 	} else {
 		qw422016.N().S(`
 `)
 		if healthSnapshot.SleepPresent {
-			qw422016.N().S(`Sleep: `)
+			qw422016.N().S(`Sleep last night: `)
 			qw422016.N().FPrec(healthSnapshot.SleepHours, 1)
-			qw422016.N().S(`h (baseline: `)
+			qw422016.N().S(`h (30-day baseline: `)
 			qw422016.N().FPrec(healthSnapshot.SleepBaseline, 1)
 			qw422016.N().S(`h, deviation: `)
 			qw422016.E().S(formatDeviation(healthSnapshot.SleepDeviation))
 			qw422016.N().S(`)
-  Deep: `)
-			qw422016.N().FPrec(healthSnapshot.SleepDeepHours, 1)
-			qw422016.N().S(`h, Light: `)
-			qw422016.N().FPrec(healthSnapshot.SleepLightHours, 1)
-			qw422016.N().S(`h, REM: `)
-			qw422016.N().FPrec(healthSnapshot.SleepREMHours, 1)
-			qw422016.N().S(`h
 `)
 		}
 		qw422016.N().S(`
@@ -45,35 +38,35 @@ func StreamNodeHealthUser(qw422016 *qt422016.Writer, healthSnapshot *model.Healt
 		if healthSnapshot.HRVPresent {
 			qw422016.N().S(`HRV: `)
 			qw422016.N().FPrec(healthSnapshot.HRVRMSSD, 0)
-			qw422016.N().S(`ms RMSSD (baseline: `)
-			qw422016.N().FPrec(healthSnapshot.HRVBaseline, 0)
-			qw422016.N().S(`ms, deviation: `)
-			qw422016.E().S(formatDeviation(healthSnapshot.HRVDeviation))
-			qw422016.N().S(`)
+			qw422016.N().S(`ms RMSSD today; 7-day average `)
+			qw422016.N().FPrec(healthSnapshot.HRVRecentAvg, 0)
+			qw422016.N().S(`ms`)
+			if healthSnapshot.HRVHasZScore {
+				qw422016.N().S(` vs 28-day reference `)
+				qw422016.N().FPrec(healthSnapshot.HRVBaseline, 0)
+				qw422016.N().S(`ms (`)
+				qw422016.E().S(formatSD(healthSnapshot.HRVZScore))
+				qw422016.N().S(` SD)`)
+			} else {
+				qw422016.N().S(` (reference: `)
+				qw422016.N().FPrec(healthSnapshot.HRVBaseline, 0)
+				qw422016.N().S(`ms, deviation: `)
+				qw422016.E().S(formatDeviation(healthSnapshot.HRVDeviation))
+				qw422016.N().S(`)`)
+			}
+			qw422016.N().S(`
 `)
 		}
 		qw422016.N().S(`
 `)
 		if healthSnapshot.RHRPresent {
-			qw422016.N().S(`RHR: `)
+			qw422016.N().S(`Resting HR: `)
 			qw422016.N().D(healthSnapshot.RestingHR)
 			qw422016.N().S(`bpm (baseline: `)
 			qw422016.N().FPrec(healthSnapshot.RHRBaseline, 0)
-			qw422016.N().S(`bpm, deviation: `)
-			qw422016.E().S(formatDeviation(healthSnapshot.RHRDeviation))
-			qw422016.N().S(`)
-`)
-		}
-		qw422016.N().S(`
-`)
-		if healthSnapshot.StepsPresent {
-			qw422016.N().S(`Steps yesterday: `)
-			qw422016.E().S(formatNumber(healthSnapshot.Steps))
-			qw422016.N().S(` (baseline: `)
-			qw422016.E().S(formatNumber(int(healthSnapshot.StepsBaseline)))
-			qw422016.N().S(`, deviation: `)
-			qw422016.E().S(formatDeviation(healthSnapshot.StepsDeviation))
-			qw422016.N().S(`)
+			qw422016.N().S(`bpm, 3-day average deviation: `)
+			qw422016.E().S(formatSD(healthSnapshot.RHRDeviationBpm))
+			qw422016.N().S(` bpm)
 `)
 		}
 		qw422016.N().S(`
@@ -97,19 +90,11 @@ func StreamNodeHealthUser(qw422016 *qt422016.Writer, healthSnapshot *model.Healt
 			}
 		}
 		qw422016.N().S(`
-`)
-		if healthSnapshot.BaselineDays >= 7 {
-			qw422016.N().S(`Baselines from `)
-			qw422016.N().D(healthSnapshot.BaselineDays)
-			qw422016.N().S(`-day rolling averages.
-`)
-		} else {
-			qw422016.N().S(`Baselines not established (`)
-			qw422016.N().D(healthSnapshot.BaselineDays)
-			qw422016.N().S(`/7 days) — extreme-value rules only.
-`)
-		}
-		qw422016.N().S(`
+Sleep baseline from `)
+		qw422016.N().D(healthSnapshot.BaselineDays)
+		qw422016.N().S(` days (30-day window); recovery reference from `)
+		qw422016.N().D(healthSnapshot.RecoveryDays)
+		qw422016.N().S(` days (60-day window).
 `)
 	}
 	qw422016.N().S(`
