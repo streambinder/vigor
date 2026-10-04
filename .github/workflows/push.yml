@@ -250,6 +250,21 @@ jobs:
         with:
           channel: stable
           flutter-version: 3.47.0
+          cache: true
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('app/pubspec.lock') }}
+          restore-keys: |
+            pub-${{ runner.os }}-
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('app/pubspec.lock', 'app/android/**/*.gradle.kts', 'app/android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
       - run: |
           echo "${{ secrets.APK_KEYSTORE }}" | base64 -d > app/android/app/vigor-release.jks
           cat <<EOF > app/android/key.properties
@@ -261,7 +276,6 @@ jobs:
       - run: |
           cd app
           flutter pub get
-          dart run build_runner build --delete-conflicting-outputs
           flutter build apk --release --dart-define=API_URL=${{ secrets.API_URL }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
