@@ -3,22 +3,17 @@
 {% import "github.com/streambinder/vigor/model" %}
 
 {% func NodeHealthUser(healthSnapshot *model.HealthSnapshot) -%}
-{% if healthSnapshot == nil || !healthSnapshot.HasRecoverySignal() %}No recovery metrics available. Return volume_modifier=1.0, intensity_modifier=1.0, extend_warmup=false, rationale="no data".
+{% if healthSnapshot == nil || !healthSnapshot.HasRecoverySignal() %}No recovery metrics available.
 {% else %}
-{% if healthSnapshot.SleepPresent %}Sleep: {%f.1 healthSnapshot.SleepHours %}h (baseline: {%f.1 healthSnapshot.SleepBaseline %}h, deviation: {%s formatDeviation(healthSnapshot.SleepDeviation) %})
-  Deep: {%f.1 healthSnapshot.SleepDeepHours %}h, Light: {%f.1 healthSnapshot.SleepLightHours %}h, REM: {%f.1 healthSnapshot.SleepREMHours %}h
+{% if healthSnapshot.SleepPresent %}Sleep last night: {%f.1 healthSnapshot.SleepHours %}h (30-day baseline: {%f.1 healthSnapshot.SleepBaseline %}h, deviation: {%s formatDeviation(healthSnapshot.SleepDeviation) %})
 {% endif %}
-{% if healthSnapshot.HRVPresent %}HRV: {%f.0 healthSnapshot.HRVRMSSD %}ms RMSSD (baseline: {%f.0 healthSnapshot.HRVBaseline %}ms, deviation: {%s formatDeviation(healthSnapshot.HRVDeviation) %})
+{% if healthSnapshot.HRVPresent %}HRV: {%f.0 healthSnapshot.HRVRMSSD %}ms RMSSD today; 7-day average {%f.0 healthSnapshot.HRVRecentAvg %}ms{% if healthSnapshot.HRVHasZScore %} vs 28-day reference {%f.0 healthSnapshot.HRVBaseline %}ms ({%s formatSD(healthSnapshot.HRVZScore) %} SD){% else %} (reference: {%f.0 healthSnapshot.HRVBaseline %}ms, deviation: {%s formatDeviation(healthSnapshot.HRVDeviation) %}){% endif %}
 {% endif %}
-{% if healthSnapshot.RHRPresent %}RHR: {%d healthSnapshot.RestingHR %}bpm (baseline: {%f.0 healthSnapshot.RHRBaseline %}bpm, deviation: {%s formatDeviation(healthSnapshot.RHRDeviation) %})
-{% endif %}
-{% if healthSnapshot.StepsPresent %}Steps yesterday: {%s formatNumber(healthSnapshot.Steps) %} (baseline: {%s formatNumber(int(healthSnapshot.StepsBaseline)) %}, deviation: {%s formatDeviation(healthSnapshot.StepsDeviation) %})
+{% if healthSnapshot.RHRPresent %}Resting HR: {%d healthSnapshot.RestingHR %}bpm (baseline: {%f.0 healthSnapshot.RHRBaseline %}bpm, 3-day average deviation: {%s formatSD(healthSnapshot.RHRDeviationBpm) %} bpm)
 {% endif %}
 {% if len(healthSnapshot.ExternalWorkouts) > 0 %}External workouts (last 7 days):
 {% for _, w := range healthSnapshot.ExternalWorkouts %}  - {%d w.DaysAgo %} day{% if w.DaysAgo != 1 %}s{% endif %} ago: {%s w.ExerciseType %}, {%d w.DurationMins %}min
 {% endfor %}{% endif %}
-{% if healthSnapshot.BaselineDays >= 7 %}Baselines from {%d healthSnapshot.BaselineDays %}-day rolling averages.
-{% else %}Baselines not established ({%d healthSnapshot.BaselineDays %}/7 days) — extreme-value rules only.
-{% endif %}
+Sleep baseline from {%d healthSnapshot.BaselineDays %} days (30-day window); recovery reference from {%d healthSnapshot.RecoveryDays %} days (60-day window).
 {% endif %}
 {% endfunc %}

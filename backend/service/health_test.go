@@ -202,8 +202,9 @@ func TestEnrichTrainings_LinksPartnerTraining(t *testing.T) {
 	}
 }
 
-// setupHealthMetricsDB creates an in-memory DB with the health_metrics and
-// health_exercise_sessions tables and swaps it into the global database.DB.
+// setupHealthMetricsDB creates an in-memory DB with the health_sleep_daily,
+// health_recovery_daily and health_exercise_sessions tables and swaps it
+// into the global database.DB.
 func setupHealthMetricsDB(t *testing.T) *gorm.DB {
 	t.Helper()
 	db, err := gorm.Open(sqlite.Open("file:"+uuid.NewString()+"?mode=memory&cache=shared"), &gorm.Config{})
@@ -216,17 +217,18 @@ func setupHealthMetricsDB(t *testing.T) *gorm.DB {
 		}
 	})
 	for _, stmt := range []string{
-		`CREATE TABLE health_metrics (
+		`CREATE TABLE health_sleep_daily (
 			user_id TEXT NOT NULL,
 			date DATE NOT NULL,
 			sleep_hours REAL,
-			sleep_deep_hours REAL,
-			sleep_light_hours REAL,
-			sleep_rem_hours REAL,
+			synced_at DATETIME,
+			PRIMARY KEY (user_id, date)
+		)`,
+		`CREATE TABLE health_recovery_daily (
+			user_id TEXT NOT NULL,
+			date DATE NOT NULL,
 			resting_hr INTEGER,
 			hrv_rmssd REAL,
-			steps INTEGER,
-			total_calories REAL,
 			synced_at DATETIME,
 			PRIMARY KEY (user_id, date)
 		)`,
@@ -257,29 +259,35 @@ func TestGetHealthSnapshot_MissingHRVNotTreatedAsPresent(t *testing.T) {
 	loc := time.UTC
 	userID := uuid.New()
 
-	insert := func(daysAgo int, sleep, hrv float64, rhr, steps int) {
+	insert := func(daysAgo int, sleep, hrv float64, rhr int) {
 		date := time.Now().UTC().AddDate(0, 0, -daysAgo).Format("2006-01-02")
 		if err := db.Exec(
-			`INSERT INTO health_metrics (user_id, date, sleep_hours, hrv_rmssd, resting_hr, steps) VALUES (?, ?, ?, ?, ?, ?)`,
-			userID.String(), date, sleep, hrv, rhr, steps,
+			`INSERT INTO health_sleep_daily (user_id, date, sleep_hours) VALUES (?, ?, ?)`,
+			userID.String(), date, sleep,
 		).Error; err != nil {
-			t.Fatalf("insert metric: %v", err)
+			t.Fatalf("insert sleep: %v", err)
+		}
+		if err := db.Exec(
+			`INSERT INTO health_recovery_daily (user_id, date, hrv_rmssd, resting_hr) VALUES (?, ?, ?, ?)`,
+			userID.String(), date, hrv, rhr,
+		).Error; err != nil {
+			t.Fatalf("insert recovery: %v", err)
 		}
 	}
 
-	// today + last 2 days: sleep/steps present, HRV/RHR missing (0)
-	insert(0, 7.2, 0, 0, 9000)
-	insert(1, 7.6, 0, 0, 10000)
+	// today + last 2 days: sleep present, HRV/RHR missing (0)
+	insert(0, 7.2, 0, 0)
+	insert(1, 7.6, 0, 0)
 	// older days DO carry a real HRV/RHR baseline
-	insert(5, 7.0, 40, 58, 8000)
-	insert(6, 7.5, 42, 57, 8500)
+	insert(5, 7.0, 40, 58)
+	insert(6, 7.5, 42, 57)
 
 	snapshot, err := GetHealthSnapshot(userID, loc)
 	if err != nil {
 		t.Fatalf("GetHealthSnapshot: %v", err)
 	}
 	if snapshot == nil {
-		t.Fatal("expected non-nil snapshot (sleep/steps are recent)")
+		t.Fatal("expected non-nil snapshot (sleep is recent)")
 	}
 
 	if snapshot.HRVPresent {
@@ -291,11 +299,8 @@ func TestGetHealthSnapshot_MissingHRVNotTreatedAsPresent(t *testing.T) {
 	if !snapshot.SleepPresent {
 		t.Error("SleepPresent = false, want true")
 	}
-	if !snapshot.StepsPresent {
-		t.Error("StepsPresent = false, want true")
-	}
 	if !snapshot.HasRecoverySignal() {
-		t.Error("HasRecoverySignal() = false, want true (sleep+steps present)")
+		t.Error("HasRecoverySignal() = false, want true (sleep present)")
 	}
 }
 
@@ -308,10 +313,16 @@ func TestGetHealthSnapshot_NoRecoverySignal(t *testing.T) {
 
 	date := time.Now().UTC().Format("2006-01-02")
 	if err := db.Exec(
-		`INSERT INTO health_metrics (user_id, date, sleep_hours, hrv_rmssd, resting_hr, steps) VALUES (?, ?, 0, 0, 0, 0)`,
+		`INSERT INTO health_sleep_daily (user_id, date, sleep_hours) VALUES (?, ?, 0)`,
 		userID.String(), date,
 	).Error; err != nil {
-		t.Fatalf("insert metric: %v", err)
+		t.Fatalf("insert sleep: %v", err)
+	}
+	if err := db.Exec(
+		`INSERT INTO health_recovery_daily (user_id, date, hrv_rmssd, resting_hr) VALUES (?, ?, 0, 0)`,
+		userID.String(), date,
+	).Error; err != nil {
+		t.Fatalf("insert recovery: %v", err)
 	}
 
 	snapshot, err := GetHealthSnapshot(userID, time.UTC)

@@ -1,11 +1,9 @@
 package service
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,11 +15,12 @@ import (
 )
 
 const (
-	baselineWindowDays     = 14
-	dataRecencyMaxDays     = 3
-	externalWorkoutDays    = 7
-	enrichmentMaxDays      = 30
-	maxHRSamplesPerSession = 15000
+	sleepWindowDays     = 30
+	recoveryWindowDays  = 60
+	sessionWindowDays   = 10
+	dataRecencyMaxDays  = 3
+	externalWorkoutDays = 7
+	enrichmentMaxDays   = 10
 )
 
 // ParseTimezone parses an IANA timezone string into a *time.Location.
@@ -36,17 +35,6 @@ func ParseTimezone(tz string) (*time.Location, error) {
 		return nil, fmt.Errorf("invalid timezone %q: %w", tz, err)
 	}
 	return loc, nil
-}
-
-// estimateMaxHR uses modern formulas: Tanaka (2001) for general population,
-// Gulati (2010) for women. more accurate than the outdated 220-age formula.
-func estimateMaxHR(age int, gender string) int {
-	if gender == "female" {
-		// gulati formula: 206 - (0.88 × age)
-		return clampInt(206-int(0.88*float64(age)), 100, 220)
-	}
-	// tanaka formula: 208 - (0.7 × age)
-	return clampInt(208-int(0.7*float64(age)), 100, 220)
 }
 
 func median(values []float64) float64 {
@@ -101,13 +89,16 @@ func clampIntOrZero(v, min, max int) int {
 // loc is the client's timezone (from X-Timezone header) used for date attribution.
 func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Location) (*model.HealthSyncResponse, error) {
 	now := time.Now().UTC()
-	thirtyDaysAgo := now.AddDate(0, 0, -30)
+	sleepCutoff := now.AddDate(0, 0, -sleepWindowDays)
+	recoveryCutoff := now.AddDate(0, 0, -recoveryWindowDays)
+	sessionCutoff := now.AddDate(0, 0, -sessionWindowDays)
+
+	database.MaintainHealth(database.DB)
 
 	// payload size limits — silently truncate oversized payloads
-	const maxMetrics = 31
+	const maxMetrics = 61
 	const maxSessions = 100
-	const maxWeights = 100
-	const maxHRSamples = 100000
+	const maxWeights = 1
 	if len(req.Metrics) > maxMetrics {
 		req.Metrics = req.Metrics[:maxMetrics]
 	}
@@ -117,32 +108,12 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Loc
 	if len(req.Weights) > maxWeights {
 		req.Weights = req.Weights[:maxWeights]
 	}
-	if len(req.HRSamples) > maxHRSamples {
-		req.HRSamples = req.HRSamples[:maxHRSamples]
-	}
 
 	log.Info().
 		Int("metrics", len(req.Metrics)).
 		Int("sessions", len(req.Sessions)).
 		Int("weights", len(req.Weights)).
-		Int("hr_samples", len(req.HRSamples)).
 		Msg("health sync request received")
-
-	// fetch user's profile for max HR calculation (uses modern Tanaka/Gulati formulas)
-	var profile model.Profile
-	estimatedMaxHR := 190 // fallback
-	var restingHR *int
-	if err := database.DB.Where("user_id = ?", userID).First(&profile).Error; err == nil {
-		estimatedMaxHR = estimateMaxHR(profile.Age(), profile.Gender)
-
-		// fetch recent resting HR for HRR method
-		var recentMetric model.HealthMetric
-		if err := database.DB.Where("user_id = ? AND resting_hr > 0", userID).
-			Order("date DESC").
-			First(&recentMetric).Error; err == nil {
-			restingHR = &recentMetric.RestingHR
-		}
-	}
 
 	resp := &model.HealthSyncResponse{
 		MetricsSynced:  len(req.Metrics),
@@ -150,145 +121,94 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Loc
 	}
 
 	if err := database.DB.Transaction(func(tx *gorm.DB) error {
-		// 1. upsert daily metrics
+		// 1. upsert daily metrics, split per metric group so each table
+		// only ever holds its own retention window
 		for _, m := range req.Metrics {
 			date, err := time.Parse("2006-01-02", m.Date)
 			if err != nil {
 				log.Warn().Str("date", m.Date).Msg("invalid metric date, skipping")
 				continue
 			}
-			if date.After(now) || date.Before(thirtyDaysAgo) {
+			if date.After(now) {
 				log.Warn().Str("date", m.Date).Msg("metric date out of bounds, skipping")
 				continue
 			}
-
-			metric := model.HealthMetric{
-				UserID:          userID,
-				Date:            date,
-				SleepHours:      clampFloatOrZero(m.SleepHours, 0, 16),
-				SleepDeepHours:  clampFloat(m.SleepDeepHours, 0, 16),
-				SleepLightHours: clampFloat(m.SleepLightHours, 0, 16),
-				SleepREMHours:   clampFloat(m.SleepREMHours, 0, 16),
-				RestingHR:       clampIntOrZero(m.RestingHR, 25, 220),
-				HRVRMSSD:        clampFloatOrZero(m.HRVRMSSD, 1, 300),
-				Steps:           clampInt(m.Steps, 0, 200000),
-				TotalCalories:   clampFloat(m.TotalCalories, 0, 50000),
-				SyncedAt:        now,
+			if !date.Before(sleepCutoff) {
+				sleep := model.HealthSleepDaily{
+					UserID:     userID,
+					Date:       date,
+					SleepHours: clampFloatOrZero(m.SleepHours, 0, 16),
+					SyncedAt:   now,
+				}
+				if err := tx.Clauses(clause.OnConflict{
+					Columns: []clause.Column{{Name: "user_id"}, {Name: "date"}},
+					DoUpdates: clause.Set{
+						{Column: clause.Column{Name: "sleep_hours"}, Value: gorm.Expr("GREATEST(EXCLUDED.sleep_hours, health_sleep_daily.sleep_hours)")},
+						{Column: clause.Column{Name: "synced_at"}, Value: gorm.Expr("EXCLUDED.synced_at")},
+					},
+				}).Create(&sleep).Error; err != nil {
+					return err
+				}
 			}
-
-			// use GREATEST to preserve existing non-zero values when the incoming
-			// payload has zeros (happens on incremental syncs that only capture a
-			// subset of metric types for the day)
-			if err := tx.Clauses(clause.OnConflict{
-				Columns: []clause.Column{{Name: "user_id"}, {Name: "date"}},
-				DoUpdates: clause.Set{
-					{Column: clause.Column{Name: "sleep_hours"}, Value: gorm.Expr("GREATEST(EXCLUDED.sleep_hours, health_metrics.sleep_hours)")},
-					{Column: clause.Column{Name: "sleep_deep_hours"}, Value: gorm.Expr("GREATEST(EXCLUDED.sleep_deep_hours, health_metrics.sleep_deep_hours)")},
-					{Column: clause.Column{Name: "sleep_light_hours"}, Value: gorm.Expr("GREATEST(EXCLUDED.sleep_light_hours, health_metrics.sleep_light_hours)")},
-					{Column: clause.Column{Name: "sleep_rem_hours"}, Value: gorm.Expr("GREATEST(EXCLUDED.sleep_rem_hours, health_metrics.sleep_rem_hours)")},
-					{Column: clause.Column{Name: "resting_hr"}, Value: gorm.Expr("GREATEST(EXCLUDED.resting_hr, health_metrics.resting_hr)")},
-					{Column: clause.Column{Name: "hrv_rmssd"}, Value: gorm.Expr("GREATEST(EXCLUDED.hrv_rmssd, health_metrics.hrv_rmssd)")},
-					{Column: clause.Column{Name: "steps"}, Value: gorm.Expr("GREATEST(EXCLUDED.steps, health_metrics.steps)")},
-					{Column: clause.Column{Name: "total_calories"}, Value: gorm.Expr("GREATEST(EXCLUDED.total_calories, health_metrics.total_calories)")},
-					{Column: clause.Column{Name: "synced_at"}, Value: gorm.Expr("EXCLUDED.synced_at")},
-				},
-			}).Create(&metric).Error; err != nil {
-				return err
+			if !date.Before(recoveryCutoff) {
+				recovery := model.HealthRecoveryDaily{
+					UserID:    userID,
+					Date:      date,
+					RestingHR: clampIntOrZero(m.RestingHR, 25, 220),
+					HRVRMSSD:  clampFloatOrZero(m.HRVRMSSD, 1, 300),
+					SyncedAt:  now,
+				}
+				if err := tx.Clauses(clause.OnConflict{
+					Columns: []clause.Column{{Name: "user_id"}, {Name: "date"}},
+					DoUpdates: clause.Set{
+						{Column: clause.Column{Name: "resting_hr"}, Value: gorm.Expr("GREATEST(EXCLUDED.resting_hr, health_recovery_daily.resting_hr)")},
+						{Column: clause.Column{Name: "hrv_rmssd"}, Value: gorm.Expr("GREATEST(EXCLUDED.hrv_rmssd, health_recovery_daily.hrv_rmssd)")},
+						{Column: clause.Column{Name: "synced_at"}, Value: gorm.Expr("EXCLUDED.synced_at")},
+					},
+				}).Create(&recovery).Error; err != nil {
+					return err
+				}
 			}
 		}
 
-		// 2. upsert exercise sessions with HR correlation
-		for _, s := range req.Sessions {
-			if s.HCRecordID == "" {
+		// 2. upsert exercise sessions; the client sends avg/max HR only,
+		// raw HR samples never leave the device
+		for _, sess := range req.Sessions {
+			if sess.HCRecordID == "" {
 				continue
 			}
-			startedAt := time.UnixMilli(s.StartedAt)
-			endedAt := time.UnixMilli(s.EndedAt)
-
-			if startedAt.After(now) || startedAt.Before(thirtyDaysAgo) {
-				log.Warn().Str("record_id", s.HCRecordID).Msg("session timestamp out of bounds, skipping")
+			startedAt := time.UnixMilli(sess.StartedAt).UTC()
+			endedAt := time.UnixMilli(sess.EndedAt).UTC()
+			if startedAt.After(now) || startedAt.Before(sessionCutoff) {
+				log.Warn().Str("record_id", sess.HCRecordID).Msg("session timestamp out of bounds, skipping")
 				continue
 			}
 			if endedAt.Before(startedAt) {
-				log.Warn().Str("record_id", s.HCRecordID).Msg("session ended_at before started_at, skipping")
+				log.Warn().Str("record_id", sess.HCRecordID).Msg("session ended_at before started_at, skipping")
 				continue
 			}
-
-			session := model.HealthExerciseSession{
+			entry := model.HealthExerciseSession{
+				ID:           uuid.New(),
 				UserID:       userID,
-				SourceApp:    s.SourceApp,
-				ExerciseType: strings.ToLower(s.ExerciseType),
-				StartedAt:    startedAt.UTC(),
-				EndedAt:      endedAt.UTC(),
-				Calories:     s.Calories,
-				HCRecordID:   s.HCRecordID,
+				SourceApp:    sess.SourceApp,
+				ExerciseType: sess.ExerciseType,
+				StartedAt:    startedAt,
+				EndedAt:      endedAt,
+				AvgHR:        sess.AvgHR,
+				MaxHR:        sess.MaxHR,
+				HCRecordID:   sess.HCRecordID,
 				SyncedAt:     now,
 			}
-
-			// correlate HR samples by time overlap
-			var matchedSamples []model.HealthSyncHRSample
-			for _, hr := range req.HRSamples {
-				ts := time.UnixMilli(hr.Timestamp)
-				if ts.Before(startedAt) || ts.After(endedAt) {
-					continue
-				}
-				if hr.BPM < 25 || hr.BPM > 250 {
-					continue
-				}
-				matchedSamples = append(matchedSamples, hr)
-			}
-
-			// sort by timestamp so truncation keeps the earliest samples
-			sort.Slice(matchedSamples, func(i, j int) bool {
-				return matchedSamples[i].Timestamp < matchedSamples[j].Timestamp
-			})
-
-			if len(matchedSamples) > maxHRSamplesPerSession {
-				log.Warn().Int("total", len(matchedSamples)).Int("kept", maxHRSamplesPerSession).Msg("HR samples truncated")
-				matchedSamples = matchedSamples[:maxHRSamplesPerSession]
-			}
-
-			if len(matchedSamples) > 0 {
-				sumHR, maxHR := 0, 0
-				for _, hr := range matchedSamples {
-					sumHR += hr.BPM
-					if hr.BPM > maxHR {
-						maxHR = hr.BPM
-					}
-				}
-				avgHR := sumHR / len(matchedSamples)
-				session.AvgHR = &avgHR
-				session.MaxHR = &maxHR
-
-				zones := computeHRZones(matchedSamples, estimatedMaxHR, restingHR)
-				if zonesJSON, err := json.Marshal(zones); err == nil {
-					session.HRZoneDistributionJSON = zonesJSON
-				}
-
-				// store HR samples as [[unix_ms, bpm], ...]
-				samplesArray := make([][2]int64, len(matchedSamples))
-				for i, hr := range matchedSamples {
-					samplesArray[i] = [2]int64{hr.Timestamp, int64(hr.BPM)}
-				}
-				if samplesJSON, err := json.Marshal(samplesArray); err == nil {
-					session.HRSamplesJSON = samplesJSON
-				}
-			}
-
 			if err := tx.Clauses(clause.OnConflict{
-				Columns: []clause.Column{{Name: "user_id"}, {Name: "hc_record_id"}},
-				DoUpdates: clause.AssignmentColumns([]string{
-					"source_app", "exercise_type", "started_at", "ended_at",
-					"avg_hr", "max_hr", "calories",
-					"hr_zone_distribution_json", "hr_samples_json", "synced_at",
-				}),
-			}).Create(&session).Error; err != nil {
+				Columns:   []clause.Column{{Name: "user_id"}, {Name: "hc_record_id"}},
+				DoUpdates: clause.AssignmentColumns([]string{"source_app", "exercise_type", "started_at", "ended_at", "avg_hr", "max_hr", "synced_at"}),
+			}).Create(&entry).Error; err != nil {
 				return err
 			}
 		}
 
-		// 3. upsert weight measurements
-		if err := upsertHealthWeightEntries(tx, userID, req.Weights, now, thirtyDaysAgo); err != nil {
+		// 3. keep only the latest weight, straight on the profile
+		if err := applyLatestWeight(tx, userID, req.Weights, now); err != nil {
 			return err
 		}
 
@@ -298,15 +218,13 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Loc
 				Delete(&model.HealthExerciseSession{}).Error; err != nil {
 				return err
 			}
-			if err := deleteHealthWeightEntries(tx, userID, req.DeletedRecordIDs); err != nil {
-				return err
-			}
 		}
 
-		if len(req.Weights) > 0 || len(req.DeletedRecordIDs) > 0 {
-			if err := syncProfileWeightFromHistory(tx, userID); err != nil {
-				return err
-			}
+		// unlinked external workouts age out after the session window;
+		// sessions linked to a Vigor training stay with the training
+		if err := tx.Where("user_id = ? AND training_id IS NULL AND started_at < ?", userID, sessionCutoff).
+			Delete(&model.HealthExerciseSession{}).Error; err != nil {
+			return err
 		}
 
 		// 5. training enrichment
@@ -316,10 +234,9 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Loc
 	}
 
 	// count totals and date ranges stored in DB
-	var totalMetrics, totalSessions int64
-	database.DB.Model(&model.HealthMetric{}).Where("user_id = ?", userID).Count(&totalMetrics)
+	var totalSessions int64
 	database.DB.Model(&model.HealthExerciseSession{}).Where("user_id = ?", userID).Count(&totalSessions)
-	resp.TotalMetrics = int(totalMetrics)
+	resp.TotalMetrics = countHealthDays(userID)
 	resp.TotalSessions = int(totalSessions)
 
 	populateDateRanges(userID, &resp.MetricsFrom, &resp.MetricsTo, &resp.SessionsFrom, &resp.SessionsTo)
@@ -329,70 +246,72 @@ func SyncHealthData(userID uuid.UUID, req model.HealthSyncRequest, loc *time.Loc
 
 // GetHealthStats returns total counts of stored metrics and sessions for a user.
 func GetHealthStats(userID uuid.UUID) (*model.HealthStatsResponse, error) {
-	var totalMetrics, totalSessions int64
-	database.DB.Model(&model.HealthMetric{}).Where("user_id = ?", userID).Count(&totalMetrics)
+	var totalSessions int64
 	database.DB.Model(&model.HealthExerciseSession{}).Where("user_id = ?", userID).Count(&totalSessions)
 	resp := &model.HealthStatsResponse{
-		TotalMetrics:  int(totalMetrics),
+		TotalMetrics:  countHealthDays(userID),
 		TotalSessions: int(totalSessions),
 	}
 	populateDateRanges(userID, &resp.MetricsFrom, &resp.MetricsTo, &resp.SessionsFrom, &resp.SessionsTo)
 	return resp, nil
 }
 
-// GetHealthManifest returns list of dates with health data (last 30 days) for delta sync.
-// client compares local data against this manifest and only syncs missing/changed dates.
-// Includes both metric dates and exercise session dates to avoid false-miss detection.
+// GetHealthManifest returns, per metric group, the dates already on the
+// server inside that group's window, so the client only pulls what is
+// missing for each metric.
 func GetHealthManifest(userID uuid.UUID) (*model.HealthManifestResponse, error) {
-	thirtyDaysAgo := time.Now().UTC().AddDate(0, 0, -30)
-
-	var dates []struct {
-		Date time.Time
+	now := time.Now().UTC()
+	datesFor := func(modelObj any, days int) ([]string, error) {
+		var dates []struct{ Date time.Time }
+		if err := database.DB.Model(modelObj).
+			Where("user_id = ? AND date > ?", userID, now.AddDate(0, 0, -days)).
+			Select("date").Order("date DESC").Scan(&dates).Error; err != nil {
+			return nil, err
+		}
+		out := make([]string, 0, len(dates))
+		for _, d := range dates {
+			out = append(out, d.Date.Format("2006-01-02"))
+		}
+		return out, nil
 	}
-	if err := database.DB.Model(&model.HealthMetric{}).
-		Where("user_id = ? AND date > ?", userID, thirtyDaysAgo).
-		Select("date").
-		Order("date DESC").
-		Scan(&dates).Error; err != nil {
+
+	sleepDates, err := datesFor(&model.HealthSleepDaily{}, sleepWindowDays)
+	if err != nil {
+		return nil, err
+	}
+	recoveryDates, err := datesFor(&model.HealthRecoveryDaily{}, recoveryWindowDays)
+	if err != nil {
 		return nil, err
 	}
 
-	datesWithData := make([]string, 0, len(dates))
-	seen := make(map[string]struct{}, len(dates))
-	for _, d := range dates {
-		k := d.Date.Format("2006-01-02")
-		if _, ok := seen[k]; !ok {
-			seen[k] = struct{}{}
-			datesWithData = append(datesWithData, k)
-		}
-	}
-
-	// also include dates that have exercise sessions but no metrics yet
 	var sessionDates []struct {
 		StartedAt time.Time `gorm:"column:started_at"`
 	}
+	sessionSet := make([]string, 0)
 	if err := database.DB.Model(&model.HealthExerciseSession{}).
-		Where("user_id = ? AND started_at > ?", userID, thirtyDaysAgo).
-		Select("started_at").
-		Scan(&sessionDates).Error; err == nil {
-		for _, s := range sessionDates {
-			k := s.StartedAt.UTC().Format("2006-01-02")
+		Where("user_id = ? AND started_at > ?", userID, now.AddDate(0, 0, -sessionWindowDays)).
+		Select("started_at").Scan(&sessionDates).Error; err == nil {
+		seen := make(map[string]struct{})
+		for _, sd := range sessionDates {
+			k := sd.StartedAt.UTC().Format("2006-01-02")
 			if _, ok := seen[k]; !ok {
 				seen[k] = struct{}{}
-				datesWithData = append(datesWithData, k)
+				sessionSet = append(sessionSet, k)
 			}
 		}
 	}
 
 	return &model.HealthManifestResponse{
-		DatesWithData: datesWithData,
+		SleepDates:    sleepDates,
+		RecoveryDates: recoveryDates,
+		SessionDates:  sessionSet,
 	}, nil
 }
 
 // populateDateRanges queries min/max dates for metrics and sessions
 func populateDateRanges(userID uuid.UUID, metricsFrom, metricsTo, sessionsFrom, sessionsTo *string) {
 	var mRange struct{ MinDate, MaxDate *time.Time }
-	database.DB.Model(&model.HealthMetric{}).
+	database.DB.Model(&model.HealthRecoveryDaily{}).
 		Where("user_id = ?", userID).
 		Select("MIN(date) as min_date, MAX(date) as max_date").
 		Scan(&mRange)
@@ -412,75 +331,14 @@ func populateDateRanges(userID uuid.UUID, metricsFrom, metricsTo, sessionsFrom, 
 	}
 }
 
-// hrZoneDistribution holds percentage distribution across 5 HR zones.
-type hrZoneDistribution struct {
-	Zone1Pct float64 `json:"zone1_pct"`
-	Zone2Pct float64 `json:"zone2_pct"`
-	Zone3Pct float64 `json:"zone3_pct"`
-	Zone4Pct float64 `json:"zone4_pct"`
-	Zone5Pct float64 `json:"zone5_pct"`
-}
-
-// computeHRZones calculates zone distribution using Heart Rate Reserve (HRR) method when
-// resting HR is available, falling back to %MaxHR if not. HRR is more accurate as it
-// personalizes zones based on fitness level: (MaxHR - RestingHR) × intensity% + RestingHR
-func computeHRZones(samples []model.HealthSyncHRSample, maxHR int, restingHR *int) hrZoneDistribution {
-	if maxHR == 0 || len(samples) == 0 {
-		return hrZoneDistribution{}
+func countHealthDays(userID uuid.UUID) int {
+	var sleepCount, recoveryCount int64
+	database.DB.Model(&model.HealthSleepDaily{}).Where("user_id = ?", userID).Count(&sleepCount)
+	database.DB.Model(&model.HealthRecoveryDaily{}).Where("user_id = ?", userID).Count(&recoveryCount)
+	if recoveryCount > sleepCount {
+		return int(recoveryCount)
 	}
-
-	var counts [5]int
-	if restingHR != nil && *restingHR > 0 && *restingHR < maxHR {
-		// use HRR method: zones at 50-60%, 60-70%, 70-80%, 80-90%, 90-100% of reserve
-		hrr := float64(maxHR - *restingHR)
-		rhr := float64(*restingHR)
-		zone1Max := rhr + hrr*0.60
-		zone2Max := rhr + hrr*0.70
-		zone3Max := rhr + hrr*0.80
-		zone4Max := rhr + hrr*0.90
-
-		for _, hr := range samples {
-			bpm := float64(hr.BPM)
-			switch {
-			case bpm < zone1Max:
-				counts[0]++
-			case bpm < zone2Max:
-				counts[1]++
-			case bpm < zone3Max:
-				counts[2]++
-			case bpm < zone4Max:
-				counts[3]++
-			default:
-				counts[4]++
-			}
-		}
-	} else {
-		// fallback to %MaxHR method (less accurate but works without resting HR)
-		for _, hr := range samples {
-			pct := float64(hr.BPM) / float64(maxHR) * 100
-			switch {
-			case pct < 60:
-				counts[0]++
-			case pct < 70:
-				counts[1]++
-			case pct < 80:
-				counts[2]++
-			case pct < 90:
-				counts[3]++
-			default:
-				counts[4]++
-			}
-		}
-	}
-
-	total := float64(len(samples))
-	return hrZoneDistribution{
-		Zone1Pct: math.Round(float64(counts[0])/total*100*10) / 10,
-		Zone2Pct: math.Round(float64(counts[1])/total*100*10) / 10,
-		Zone3Pct: math.Round(float64(counts[2])/total*100*10) / 10,
-		Zone4Pct: math.Round(float64(counts[3])/total*100*10) / 10,
-		Zone5Pct: math.Round(float64(counts[4])/total*100*10) / 10,
-	}
+	return int(sleepCount)
 }
 
 // enrichTrainings matches unlinked exercise sessions to completed Vigor trainings.
@@ -489,10 +347,10 @@ func computeHRZones(samples []model.HealthSyncHRSample, maxHR int, restingHR *in
 // the training methodology. this is resilient to timezone mismatches between the
 // health data source (e.g. Fitbit) and the Vigor completion timestamp.
 func enrichTrainings(tx *gorm.DB, userID uuid.UUID, loc *time.Location) error {
-	thirtyDaysAgo := time.Now().UTC().AddDate(0, 0, -enrichmentMaxDays)
+	enrichmentCutoff := time.Now().UTC().AddDate(0, 0, -enrichmentMaxDays)
 
 	var unlinkedSessions []model.HealthExerciseSession
-	if err := tx.Where("user_id = ? AND training_id IS NULL AND started_at > ?", userID, thirtyDaysAgo).
+	if err := tx.Where("user_id = ? AND training_id IS NULL AND started_at > ?", userID, enrichmentCutoff).
 		Find(&unlinkedSessions).Error; err != nil {
 		return err
 	}
@@ -504,7 +362,7 @@ func enrichTrainings(tx *gorm.DB, userID uuid.UUID, loc *time.Location) error {
 		`(user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?))
 		AND completed_at IS NOT NULL AND completed_at > ?
 		AND id NOT IN (SELECT training_id FROM health_exercise_sessions WHERE training_id IS NOT NULL AND user_id = ?)`,
-		userID, userID, thirtyDaysAgo, userID,
+		userID, userID, enrichmentCutoff, userID,
 	).Find(&trainings).Error; err != nil {
 		return err
 	}
@@ -571,7 +429,10 @@ func DisconnectHealth(userID uuid.UUID) error {
 		if err := tx.Where("user_id = ?", userID).Delete(&model.HealthExerciseSession{}).Error; err != nil {
 			return err
 		}
-		if err := tx.Where("user_id = ?", userID).Delete(&model.HealthMetric{}).Error; err != nil {
+		if err := tx.Where("user_id = ?", userID).Delete(&model.HealthSleepDaily{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("user_id = ?", userID).Delete(&model.HealthRecoveryDaily{}).Error; err != nil {
 			return err
 		}
 		return tx.Model(&model.Profile{}).Where("user_id = ?", userID).Update("health_disconnected", true).Error
@@ -581,69 +442,155 @@ func DisconnectHealth(userID uuid.UUID) error {
 // GetHealthSnapshot computes on-demand baselines and returns a snapshot for prompt injection.
 // Returns nil when no data is available or data is stale (>3 days old).
 func GetHealthSnapshot(userID uuid.UUID, loc *time.Location) (*model.HealthSnapshot, error) {
-	var metrics []model.HealthMetric
-	cutoff := time.Now().UTC().In(loc).AddDate(0, 0, -baselineWindowDays).Format("2006-01-02")
-	if err := database.DB.Where("user_id = ? AND date > ?", userID, cutoff).
-		Order("date DESC").
-		Find(&metrics).Error; err != nil {
+	nowLocal := time.Now().UTC().In(loc)
+	sleepCutoff := nowLocal.AddDate(0, 0, -sleepWindowDays).Format("2006-01-02")
+	recoveryCutoff := nowLocal.AddDate(0, 0, -recoveryWindowDays).Format("2006-01-02")
+
+	var sleepRows []model.HealthSleepDaily
+	if err := database.DB.Where("user_id = ? AND date > ?", userID, sleepCutoff).
+		Order("date DESC").Find(&sleepRows).Error; err != nil {
 		return nil, err
 	}
-
-	if len(metrics) == 0 {
+	var recoveryRows []model.HealthRecoveryDaily
+	if err := database.DB.Where("user_id = ? AND date > ?", userID, recoveryCutoff).
+		Order("date DESC").Find(&recoveryRows).Error; err != nil {
+		return nil, err
+	}
+	if len(sleepRows) == 0 && len(recoveryRows) == 0 {
 		return nil, nil
 	}
 
-	// data recency check: most recent metric must be within 3 days
-	if time.Since(metrics[0].Date).Hours()/24 > float64(dataRecencyMaxDays) {
+	// data recency check: the freshest row of either group must be within 3 days
+	freshest := time.Time{}
+	if len(sleepRows) > 0 {
+		freshest = sleepRows[0].Date
+	}
+	if len(recoveryRows) > 0 && recoveryRows[0].Date.After(freshest) {
+		freshest = recoveryRows[0].Date
+	}
+	if time.Since(freshest).Hours()/24 > float64(dataRecencyMaxDays) {
 		return nil, nil
 	}
 
-	// compute baselines from all available days using median (robust to outliers)
-	var sleepSamples, hrvSamples, stepSamples, rhrSamples []float64
-	for _, m := range metrics {
-		if m.SleepHours > 0 {
-			sleepSamples = append(sleepSamples, m.SleepHours)
+	byDate := make(map[string]*model.HealthDailyMetric)
+	merge := func(date time.Time) *model.HealthDailyMetric {
+		k := date.Format("2006-01-02")
+		m, ok := byDate[k]
+		if !ok {
+			m = &model.HealthDailyMetric{Date: date}
+			byDate[k] = m
 		}
-		if m.HRVRMSSD > 0 {
-			hrvSamples = append(hrvSamples, m.HRVRMSSD)
-		}
-		if m.Steps > 0 {
-			stepSamples = append(stepSamples, float64(m.Steps))
-		}
-		if m.RestingHR > 0 {
-			rhrSamples = append(rhrSamples, float64(m.RestingHR))
-		}
+		return m
+	}
+	for _, r := range sleepRows {
+		merge(r.Date).SleepHours = r.SleepHours
+	}
+	for _, r := range recoveryRows {
+		m := merge(r.Date)
+		m.RestingHR = r.RestingHR
+		m.HRVRMSSD = r.HRVRMSSD
 	}
 
-	today := metrics[0]
+	// today = freshest merged day; presence comes from that day's values,
+	// so a metric the device stopped reporting reads as absent, not as
+	// its last known value
+	var today *model.HealthDailyMetric
+	for _, m := range byDate {
+		if today == nil || m.Date.After(today.Date) {
+			today = m
+		}
+	}
+	if today == nil {
+		return nil, nil
+	}
+
 	snapshot := &model.HealthSnapshot{
-		SleepHours:      today.SleepHours,
-		SleepDeepHours:  today.SleepDeepHours,
-		SleepLightHours: today.SleepLightHours,
-		SleepREMHours:   today.SleepREMHours,
-		HRVRMSSD:        today.HRVRMSSD,
-		RestingHR:       today.RestingHR,
-		Steps:           today.Steps,
-		BaselineDays:    len(metrics),
+		SleepHours:   today.SleepHours,
+		HRVRMSSD:     today.HRVRMSSD,
+		RestingHR:    today.RestingHR,
+		BaselineDays: len(sleepRows),
+		RecoveryDays: len(recoveryRows),
 		// 0 means "not reported" for these metrics (see ingest clamp), not a real reading —
-		// devices often sync steps/sleep but omit HRV/RHR. mark presence so the prompt can
+		// devices often sync sleep but omit HRV/RHR. mark presence so the prompt can
 		// skip absent metrics instead of rendering a spurious extreme "0".
 		SleepPresent: today.SleepHours > 0,
 		HRVPresent:   today.HRVRMSSD > 0,
 		RHRPresent:   today.RestingHR > 0,
-		StepsPresent: today.Steps > 0,
 	}
 
+	var sleepSamples []float64
+	for _, r := range sleepRows {
+		if r.SleepHours > 0 {
+			sleepSamples = append(sleepSamples, r.SleepHours)
+		}
+	}
 	if len(sleepSamples) > 0 {
 		snapshot.SleepBaseline = median(sleepSamples)
 		if snapshot.SleepBaseline > 0 {
 			snapshot.SleepDeviation = (snapshot.SleepHours - snapshot.SleepBaseline) / snapshot.SleepBaseline * 100
 		}
 	}
-	if len(hrvSamples) > 0 {
-		snapshot.HRVBaseline = median(hrvSamples)
-		if snapshot.HRVBaseline > 0 {
-			snapshot.HRVDeviation = (snapshot.HRVRMSSD - snapshot.HRVBaseline) / snapshot.HRVBaseline * 100
+
+	// HRV: log-transform daily RMSSD, compare the trailing 7-day average
+	// against the preceding 28-day reference in SD units
+	type hrvPoint struct {
+		daysAgo int
+		ln      float64
+		raw     float64
+	}
+	var points []hrvPoint
+	todayDate := today.Date
+	for _, r := range recoveryRows {
+		if r.HRVRMSSD <= 0 {
+			continue
+		}
+		points = append(points, hrvPoint{
+			daysAgo: int(todayDate.Sub(r.Date).Hours() / 24),
+			ln:      math.Log(r.HRVRMSSD),
+			raw:     r.HRVRMSSD,
+		})
+	}
+	if len(points) > 0 {
+		var recentLn, refLn []float64
+		var recentRaw, allRaw []float64
+		for _, pt := range points {
+			allRaw = append(allRaw, pt.raw)
+			if pt.daysAgo < 7 {
+				recentLn = append(recentLn, pt.ln)
+				recentRaw = append(recentRaw, pt.raw)
+			} else if pt.daysAgo < 35 {
+				refLn = append(refLn, pt.ln)
+			}
+		}
+		snapshot.HRVBaseline = median(allRaw)
+		if len(recentRaw) > 0 {
+			snapshot.HRVRecentAvg = median(recentRaw)
+			if snapshot.HRVBaseline > 0 {
+				snapshot.HRVDeviation = (snapshot.HRVRecentAvg - snapshot.HRVBaseline) / snapshot.HRVBaseline * 100
+			}
+		}
+		if len(recentLn) >= 3 && len(refLn) >= 7 {
+			meanRecent := mean(recentLn)
+			meanRef := mean(refLn)
+			sd := stdDev(refLn, meanRef)
+			if sd > 0 {
+				snapshot.HRVZScore = (meanRecent - meanRef) / sd
+				snapshot.HRVHasZScore = true
+				snapshot.HRVBaseline = math.Exp(meanRef)
+			}
+		}
+	}
+
+	// RHR: baseline median over the recovery window, deviation of the
+	// trailing 3-day average in bpm
+	var rhrSamples, rhrRecent []float64
+	for _, r := range recoveryRows {
+		if r.RestingHR <= 0 {
+			continue
+		}
+		rhrSamples = append(rhrSamples, float64(r.RestingHR))
+		if int(todayDate.Sub(r.Date).Hours()/24) < 3 {
+			rhrRecent = append(rhrRecent, float64(r.RestingHR))
 		}
 	}
 	if len(rhrSamples) > 0 {
@@ -651,15 +598,12 @@ func GetHealthSnapshot(userID uuid.UUID, loc *time.Location) (*model.HealthSnaps
 		if snapshot.RHRBaseline > 0 {
 			snapshot.RHRDeviation = (float64(snapshot.RestingHR) - snapshot.RHRBaseline) / snapshot.RHRBaseline * 100
 		}
-	}
-	if len(stepSamples) > 0 {
-		snapshot.StepsBaseline = median(stepSamples)
-		if snapshot.StepsBaseline > 0 {
-			snapshot.StepsDeviation = (float64(snapshot.Steps) - snapshot.StepsBaseline) / snapshot.StepsBaseline * 100
+		if len(rhrRecent) > 0 {
+			snapshot.RHRDeviationBpm = mean(rhrRecent) - snapshot.RHRBaseline
 		}
 	}
 
-	// external workouts (last 3 days, unlinked to Vigor trainings)
+	// external workouts (last 7 days, unlinked to Vigor trainings)
 	externalCutoff := time.Now().UTC().AddDate(0, 0, -externalWorkoutDays)
 	var externalSessions []model.HealthExerciseSession
 	if err := database.DB.Where("user_id = ? AND training_id IS NULL AND started_at > ?", userID, externalCutoff).
@@ -668,12 +612,12 @@ func GetHealthSnapshot(userID uuid.UUID, loc *time.Location) (*model.HealthSnaps
 		log.Warn().Err(err).Msg("failed to query external workouts")
 	}
 
-	for _, s := range externalSessions {
-		daysAgo := int(time.Since(s.StartedAt).Hours() / 24)
-		durationMins := int(s.EndedAt.Sub(s.StartedAt).Minutes())
+	for _, sess := range externalSessions {
+		daysAgo := int(time.Since(sess.StartedAt).Hours() / 24)
+		durationMins := int(sess.EndedAt.Sub(sess.StartedAt).Minutes())
 		snapshot.ExternalWorkouts = append(snapshot.ExternalWorkouts, model.ExternalWorkoutSummary{
 			DaysAgo:      daysAgo,
-			ExerciseType: s.ExerciseType,
+			ExerciseType: sess.ExerciseType,
 			DurationMins: durationMins,
 		})
 	}
@@ -681,8 +625,30 @@ func GetHealthSnapshot(userID uuid.UUID, loc *time.Location) (*model.HealthSnaps
 	return snapshot, nil
 }
 
+func mean(values []float64) float64 {
+	if len(values) == 0 {
+		return 0
+	}
+	sum := 0.0
+	for _, v := range values {
+		sum += v
+	}
+	return sum / float64(len(values))
+}
+
+func stdDev(values []float64, meanValue float64) float64 {
+	if len(values) < 2 {
+		return 0
+	}
+	sum := 0.0
+	for _, v := range values {
+		d := v - meanValue
+		sum += d * d
+	}
+	return math.Sqrt(sum / float64(len(values)-1))
+}
+
 // GetExerciseSessionForTraining returns the linked exercise session for a training, if any.
-// If multiple sessions are linked (multi-device), picks the one with the densest HR samples.
 func GetExerciseSessionForTraining(trainingID, userID uuid.UUID) (*model.HealthExerciseSession, error) {
 	var sessions []model.HealthExerciseSession
 	if err := database.DB.Where("training_id = ? AND user_id = ?", trainingID, userID).Find(&sessions).Error; err != nil {
@@ -696,28 +662,53 @@ func GetExerciseSessionForTraining(trainingID, userID uuid.UUID) (*model.HealthE
 		return &sessions[0], nil
 	}
 
-	// pick session with densest hr_samples_json
-	sort.Slice(sessions, func(i, j int) bool {
-		return len(sessions[i].HRSamplesJSON) > len(sessions[j].HRSamplesJSON)
-	})
 	return &sessions[0], nil
 }
 
 // GetHealthDaily returns the last 7 days of health metrics and unlinked exercise sessions.
 func GetHealthDaily(userID uuid.UUID, loc *time.Location) (*model.HealthDailyResponse, error) {
 	now := time.Now().UTC().In(loc)
-	// format as date string to avoid timezone offset issues with PostgreSQL date columns
 	today := now.Format("2006-01-02")
 
-	var metrics []model.HealthMetric
+	var sleepRows []model.HealthSleepDaily
 	if err := database.DB.Where("user_id = ? AND date >= ?", userID, today).
-		Order("date DESC").
-		Find(&metrics).Error; err != nil {
+		Order("date DESC").Find(&sleepRows).Error; err != nil {
+		return nil, err
+	}
+	var recoveryRows []model.HealthRecoveryDaily
+	if err := database.DB.Where("user_id = ? AND date >= ?", userID, today).
+		Order("date DESC").Find(&recoveryRows).Error; err != nil {
 		return nil, err
 	}
 
+	byDate := make(map[string]*model.HealthDailyMetric)
+	order := make([]string, 0)
+	merge := func(date time.Time) *model.HealthDailyMetric {
+		k := date.Format("2006-01-02")
+		m, ok := byDate[k]
+		if !ok {
+			m = &model.HealthDailyMetric{Date: date}
+			byDate[k] = m
+			order = append(order, k)
+		}
+		return m
+	}
+	for _, r := range sleepRows {
+		merge(r.Date).SleepHours = r.SleepHours
+	}
+	for _, r := range recoveryRows {
+		m := merge(r.Date)
+		m.RestingHR = r.RestingHR
+		m.HRVRMSSD = r.HRVRMSSD
+	}
+	sort.Strings(order)
+	metrics := make([]model.HealthDailyMetric, 0, len(order))
+	for i := len(order) - 1; i >= 0; i-- {
+		metrics = append(metrics, *byDate[order[i]])
+	}
+
 	var sessions []model.HealthExerciseSession
-	if err := database.DB.Where("user_id = ? AND training_id IS NULL AND started_at > ?", userID, now.AddDate(0, 0, -7)).
+	if err := database.DB.Where("user_id = ? AND training_id IS NULL AND started_at > ?", userID, now.AddDate(0, 0, -sessionWindowDays)).
 		Order("started_at DESC").
 		Find(&sessions).Error; err != nil {
 		return nil, err

@@ -579,6 +579,45 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 		}
 	})
 
+	t.Run("hrv z-score fatigue shapes the session", func(t *testing.T) {
+		req := baseRequest()
+		req.Methodology = &strength
+		req.Muscles = []string{"chest"}
+		// sleep is fine: only the HRV 7-day average sits 1.4 SD below the
+		// 28-day reference and resting HR runs +4 bpm — the recovery node
+		// must read the SD signal, not the absolute 52ms value.
+		req.HealthSnapshot = &model.HealthSnapshot{
+			SleepHours: 7.4, SleepBaseline: 7.5, SleepDeviation: -1, SleepPresent: true,
+			HRVRMSSD: 52, HRVRecentAvg: 41, HRVBaseline: 55, HRVZScore: -1.4, HRVHasZScore: true, HRVPresent: true,
+			RestingHR: 62, RHRBaseline: 58, RHRDeviationBpm: 4, RHRPresent: true,
+			BaselineDays: 28, RecoveryDays: 45,
+		}
+		req.UserPrompt = "Chest strength session."
+
+		_, steps := run(t, req)
+
+		byStep := map[string]model.ModelStep{}
+		for _, step := range steps {
+			byStep[step.Step] = step
+		}
+		health := byStep[string(pipeline.StepAnalyzeRecovery)].DM.Data()
+		if !strings.Contains(health.State, "SD") {
+			t.Errorf("health state carries no SD-based HRV signal: %q", health.State)
+		}
+		recoveryFound := false
+		for _, answer := range health.Answers {
+			if answer.ID == "recovery" {
+				recoveryFound = true
+				if answer.Score < 0.5 {
+					t.Errorf("recovery score = %v on an HRV z-score of -1.4 SD, want registered fatigue", answer.Score)
+				}
+			}
+		}
+		if !recoveryFound {
+			t.Error("health step carries no recovery answer on a snapshot with recovery signal")
+		}
+	})
+
 	t.Run("recovery and history decisions shape the session", func(t *testing.T) {
 		req := baseRequest()
 		req.Methodology = &strength

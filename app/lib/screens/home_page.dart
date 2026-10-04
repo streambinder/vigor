@@ -392,16 +392,12 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     final sleepHours = (today?['sleep_hours'] as num?)?.toDouble() ?? 0;
     final restingHR = (today?['resting_hr'] as num?)?.toInt() ?? 0;
     final hrv = (today?['hrv_rmssd'] as num?)?.toDouble() ?? 0;
-    final steps = (today?['steps'] as num?)?.toInt() ?? 0;
-    final calories = (today?['total_calories'] as num?)?.toDouble() ?? 0;
 
     // always show all tiles — use — for missing values
     final tiles = <Widget>[
       _buildMetricTile(l10n.healthDailySleep, sleepHours > 0 ? sleepHours : null, 'h', _formatSleepHours),
       _buildMetricTile(l10n.healthDailyRestingHr, restingHR > 0 ? restingHR.toDouble() : null, 'bpm', (v) => '${v.toInt()}'),
       _buildMetricTile(l10n.healthDailyHrv, hrv > 0 ? hrv : null, 'ms', (v) => '${v.toInt()}'),
-      _buildMetricTile(l10n.healthDailySteps, steps > 0 ? steps.toDouble() : null, '', (v) => _formatSteps(v.round())),
-      _buildMetricTile(l10n.healthDailyCalories, calories > 0 ? calories : null, 'kcal', (v) => '${v.toInt()}'),
     ];
 
     return Column(
@@ -472,11 +468,6 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     final h = hours.toInt();
     final m = ((hours - h) * 60).round();
     return '$h:${m.toString().padLeft(2, '0')}';
-  }
-
-  String _formatSteps(int steps) {
-    if (steps >= 1000) return '${(steps / 1000).toStringAsFixed(1)}k';
-    return '$steps';
   }
 
   Widget _buildPendingFeedbackCard(AppLocalizations l10n) {

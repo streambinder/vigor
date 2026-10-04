@@ -29,11 +29,17 @@ func setupReadinessDB(t *testing.T) {
 	// raw schema: AutoMigrate would cascade into postgres-only types sqlite
 	// can't parse (gen_random_uuid, arrays, jsonb defaults)
 	for _, stmt := range []string{
-		`CREATE TABLE health_metrics (
+		`CREATE TABLE health_sleep_daily (
 			user_id TEXT NOT NULL,
 			date DATE NOT NULL,
-			sleep_hours REAL, sleep_deep_hours REAL, sleep_light_hours REAL, sleep_rem_hours REAL,
-			resting_hr INTEGER, hrv_rmssd REAL, steps INTEGER, total_calories REAL,
+			sleep_hours REAL,
+			synced_at DATETIME,
+			PRIMARY KEY (user_id, date)
+		)`,
+		`CREATE TABLE health_recovery_daily (
+			user_id TEXT NOT NULL,
+			date DATE NOT NULL,
+			resting_hr INTEGER, hrv_rmssd REAL,
 			synced_at DATETIME,
 			PRIMARY KEY (user_id, date)
 		)`,
@@ -86,11 +92,18 @@ func stubReadinessProbe(t *testing.T, resp *model.ReadinessResponse, err error) 
 func insertHealthMetric(t *testing.T, userID uuid.UUID, date time.Time) {
 	t.Helper()
 	if err := database.DB.Exec(
-		`INSERT INTO health_metrics (user_id, date, sleep_hours, hrv_rmssd, resting_hr, steps, synced_at)
-		 VALUES (?, ?, 7.5, 45, 58, 8000, ?)`,
+		`INSERT INTO health_sleep_daily (user_id, date, sleep_hours, synced_at)
+		 VALUES (?, ?, 7.5, ?)`,
 		userID.String(), date.Format("2006-01-02"), time.Now().UTC(),
 	).Error; err != nil {
-		t.Fatalf("insert health metric: %v", err)
+		t.Fatalf("insert sleep metric: %v", err)
+	}
+	if err := database.DB.Exec(
+		`INSERT INTO health_recovery_daily (user_id, date, hrv_rmssd, resting_hr, synced_at)
+		 VALUES (?, ?, 45, 58, ?)`,
+		userID.String(), date.Format("2006-01-02"), time.Now().UTC(),
+	).Error; err != nil {
+		t.Fatalf("insert recovery metric: %v", err)
 	}
 }
 
@@ -152,13 +165,20 @@ func TestGetReadinessToday_TodayRowWithoutSleep(t *testing.T) {
 	setupReadinessDB(t)
 	userID := uuid.New()
 	// today row exists (sync landed) but sleep is not in it yet — e.g. the
-	// watch only pushed steps. no sleep, no hint.
+	// watch only pushed recovery metrics. no sleep, no hint.
 	if err := database.DB.Exec(
-		`INSERT INTO health_metrics (user_id, date, sleep_hours, hrv_rmssd, resting_hr, steps, synced_at)
-		 VALUES (?, ?, 0, 45, 58, 1200, ?)`,
+		`INSERT INTO health_sleep_daily (user_id, date, sleep_hours, synced_at)
+		 VALUES (?, ?, 0, ?)`,
 		userID.String(), time.Now().UTC().Format("2006-01-02"), time.Now().UTC(),
 	).Error; err != nil {
-		t.Fatalf("insert health metric: %v", err)
+		t.Fatalf("insert sleep metric: %v", err)
+	}
+	if err := database.DB.Exec(
+		`INSERT INTO health_recovery_daily (user_id, date, hrv_rmssd, resting_hr, synced_at)
+		 VALUES (?, ?, 45, 58, ?)`,
+		userID.String(), time.Now().UTC().Format("2006-01-02"), time.Now().UTC(),
+	).Error; err != nil {
+		t.Fatalf("insert recovery metric: %v", err)
 	}
 	calls := stubReadinessProbe(t, &model.ReadinessResponse{Score: 80, Level: "green"}, nil)
 

@@ -60,8 +60,6 @@ func Init() error {
 		&model.Avatar{},
 		&model.SharedLink{},
 		&model.TrainingFeedback{},
-		&model.HealthMetric{},
-		&model.HealthWeight{},
 		&model.HealthExerciseSession{},
 		&model.FlowSession{},
 		&model.Trajectory{},
@@ -72,6 +70,10 @@ func Init() error {
 
 	if err := bootDaily(DB); err != nil {
 		return fmt.Errorf("failed to set up daily snapshots: %w", err)
+	}
+
+	if err := bootHealthDaily(DB); err != nil {
+		return fmt.Errorf("failed to set up health daily tables: %w", err)
 	}
 
 	return nil

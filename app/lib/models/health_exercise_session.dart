@@ -25,12 +25,6 @@ class HealthExerciseSession {
   final int? avgHR;
   @JsonKey(name: 'max_hr')
   final int? maxHR;
-  @JsonKey(name: 'calories')
-  final double? calories;
-  @JsonKey(name: 'hr_zone_distribution_json', defaultValue: {})
-  final Map<String, dynamic> hRZoneDistributionJSON;
-  @JsonKey(name: 'hr_samples_json', defaultValue: {})
-  final Map<String, dynamic> hRSamplesJSON;
   @JsonKey(name: 'hc_record_id', defaultValue: '')
   final String hCRecordId;
   @JsonKey(name: 'synced_at', toJson: _dateTimeToJson)
@@ -46,9 +40,6 @@ class HealthExerciseSession {
     required this.endedAt,
     this.avgHR,
     this.maxHR,
-    this.calories,
-    required this.hRZoneDistributionJSON,
-    required this.hRSamplesJSON,
     required this.hCRecordId,
     required this.syncedAt,
   });

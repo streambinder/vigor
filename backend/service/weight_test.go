@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func TestUpdateProfile_InsertsWeightHistoryWhenWeightChanges(t *testing.T) {
+func TestUpdateProfile_UpdatesWeightWithoutHistory(t *testing.T) {
 	db := setupWeightTestDB(t)
 	restoreDatabase := database.DB
 	database.DB = db
@@ -32,24 +32,9 @@ func TestUpdateProfile_InsertsWeightHistoryWhenWeightChanges(t *testing.T) {
 	if profile.Weight != 72.4 {
 		t.Fatalf("profile weight = %.1f, want 72.4", profile.Weight)
 	}
-
-	var history []model.HealthWeight
-	if err := db.Order("measured_at ASC").Find(&history).Error; err != nil {
-		t.Fatalf("load weight history: %v", err)
-	}
-
-	if len(history) != 1 {
-		t.Fatalf("history rows = %d, want 1", len(history))
-	}
-	if history[0].Source != weightSourceProfileEdit {
-		t.Fatalf("history source = %q, want %q", history[0].Source, weightSourceProfileEdit)
-	}
-	if history[0].Weight != 72.4 {
-		t.Fatalf("history weight = %.1f, want 72.4", history[0].Weight)
-	}
 }
 
-func TestHealthWeightSyncUpdatesProfileToLatestRemainingMeasurement(t *testing.T) {
+func TestApplyLatestWeight_ProfileTakesNewestMeasurement(t *testing.T) {
 	db := setupWeightTestDB(t)
 
 	userID := uuid.New()
@@ -60,50 +45,26 @@ func TestHealthWeightSyncUpdatesProfileToLatestRemainingMeasurement(t *testing.T
 	newer := now.Add(-1 * time.Hour)
 
 	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := upsertHealthWeightEntries(tx, userID, []model.HealthSyncWeight{
-			{
-				HCRecordID: "older-record",
-				SourceApp:  "Health Connect",
-				MeasuredAt: older.UnixMilli(),
-				Weight:     71.1,
-			},
+		return applyLatestWeight(tx, userID, []model.HealthSyncWeight{
 			{
 				HCRecordID: "newer-record",
 				SourceApp:  "Health Connect",
 				MeasuredAt: newer.UnixMilli(),
 				Weight:     72.3,
 			},
-		}, now, now.AddDate(0, 0, -30)); err != nil {
-			return err
-		}
-
-		return syncProfileWeightFromHistory(tx, userID)
+			{
+				HCRecordID: "older-record",
+				SourceApp:  "Health Connect",
+				MeasuredAt: older.UnixMilli(),
+				Weight:     71.1,
+			},
+		}, now)
 	})
 	if err != nil {
-		t.Fatalf("initial sync transaction: %v", err)
+		t.Fatalf("apply latest weight: %v", err)
 	}
 
 	assertProfileWeight(t, db, userID, 72.3)
-
-	var historyCount int64
-	if err := db.Model(&model.HealthWeight{}).Count(&historyCount).Error; err != nil {
-		t.Fatalf("count weight history: %v", err)
-	}
-	if historyCount != 2 {
-		t.Fatalf("history rows = %d, want 2", historyCount)
-	}
-
-	err = db.Transaction(func(tx *gorm.DB) error {
-		if err := deleteHealthWeightEntries(tx, userID, []string{"newer-record"}); err != nil {
-			return err
-		}
-		return syncProfileWeightFromHistory(tx, userID)
-	})
-	if err != nil {
-		t.Fatalf("delete transaction: %v", err)
-	}
-
-	assertProfileWeight(t, db, userID, 71.1)
 }
 
 func setupWeightTestDB(t *testing.T) *gorm.DB {
@@ -133,19 +94,6 @@ func setupWeightTestDB(t *testing.T) *gorm.DB {
 			data TEXT,
 			created_at DATETIME,
 			updated_at DATETIME
-		)`,
-		`CREATE TABLE health_weight (
-			id TEXT PRIMARY KEY,
-			user_id TEXT NOT NULL,
-			weight REAL NOT NULL,
-			source TEXT NOT NULL,
-			source_app TEXT,
-			measured_at DATETIME NOT NULL,
-			hc_record_id TEXT,
-			synced_at DATETIME,
-			created_at DATETIME,
-			updated_at DATETIME,
-			UNIQUE(user_id, hc_record_id)
 		)`,
 	} {
 		if err := db.Exec(stmt).Error; err != nil {

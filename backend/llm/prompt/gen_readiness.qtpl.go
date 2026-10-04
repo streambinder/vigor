@@ -25,12 +25,12 @@ Output a JSON object with:
 - summary: 1-2 conversational sentences telling the user whether to train today and why. State the reasoning without naming raw metric values (e.g. "you slept poorly" not "sleep was 5.1h"). Direct, warm, never preachy.
 
 Rules:
-- Sleep deviation <= -15% or sleep < 5h: significant score reduction
-- HRV deviation <= -15%: significant score reduction
-- RHR deviation >= +15%: moderate score reduction
-- A demanding session in the last 24-48h (Vigor or external): moderate reduction for the same muscle stress
+- Sleep under 7h: caution; under 6h: strong reduction; under 5h: very strong reduction. Sleep deviation <= -15% from the user's own baseline also reduces the score
+- HRV 7-day average more than 0.5 SD below the 28-day reference: caution; more than 1 SD below: strong reduction. Judge HRV by the SD deviation when present, never by an absolute ms value
+- Resting HR 3-day average +3 to +5 bpm above baseline or more: moderate reduction, stronger when sustained or combined with poor sleep or low HRV
+- A demanding session in the last 24-48h (Vigor or external): moderate reduction for the same muscle stress; 48-72h: light; beyond that, context only
 - Multiple negative deviations compound
-- Baselines not established (< 7 days): judge on absolute values only, avoid extreme scores
+- Baselines not established: judge on absolute values only, avoid extreme scores
 - Solid recovery with recent rest or light activity: score 75+
 - Only reason about metrics explicitly listed below. A metric that is absent was NOT measured — never treat a missing metric as a bad value, and never reduce because of it.
 
