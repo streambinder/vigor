@@ -31,8 +31,7 @@ Prefer methodologies with higher compatible exercise counts unless goals require
     healthVolumeModifier float64,
     healthIntensityModifier float64,
     healthRationale string,
-    historyPatternNotes string,
-    historyBadSessionNotes string,
+    historyFacts string,
     userPrompt string,
     duration int,
     skipWarmupCooldown bool,
@@ -47,9 +46,7 @@ Goals:
 {% if healthVolumeModifier < 1.0 || healthIntensityModifier < 1.0 %}
 Recovery status: volume at {%s fmt.Sprintf("%.0f%%", healthVolumeModifier*100) %}, intensity at {%s fmt.Sprintf("%.0f%%", healthIntensityModifier*100) %}. {%s healthRationale %}
 {% endif %}
-{% if historyPatternNotes != "" %}History: {%s historyPatternNotes %}{% endif %}
-{% if historyBadSessionNotes != "" %}
-Recent issue: {%s historyBadSessionNotes %}{% endif %}
+{% if historyFacts != "" %}History: {%s historyFacts %}{% endif %}
 {% if userPrompt != "" %}
 User request: {%s userPrompt %}
 {% endif %}

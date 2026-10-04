@@ -49,7 +49,7 @@ func GenReadiness(snapshot *model.HealthSnapshot, recentTrainings []model.Traini
 	}
 
 	var out readinessOutput
-	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &out); err != nil {
+	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &out); err != nil {
 		return nil, step, fmt.Errorf("%w: %s", ErrLLMUnmarshal, err)
 	}
 

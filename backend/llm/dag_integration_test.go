@@ -9,9 +9,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/streambinder/vigor/llm/pipeline"
 	"github.com/streambinder/vigor/model"
 	"github.com/streambinder/vigor/util"
+	"gorm.io/datatypes"
 )
 
 // Integration trajectories for GenTrainingDAG, run against the real LLM.
@@ -164,18 +166,29 @@ func exercisesByID(pool []model.Exercise, ids ...string) []model.Exercise {
 // doses). Visible with -v; it is the first thing to read both when a
 // scenario assertion fails and when reviewing a passing trajectory
 // for regressions the invariants cannot catch.
-func dumpTrajectory(t *testing.T, training *model.Training, steps []model.LLMStep) {
+func dumpTrajectory(t *testing.T, training *model.Training, steps []model.ModelStep) {
 	t.Helper()
 	var stepNames []string
 	for _, step := range steps {
-		stepNames = append(stepNames, fmt.Sprintf("%s(%s)", step.Step, step.Model))
+		stepNames = append(stepNames, fmt.Sprintf("%s(%s)", step.Step, step.ModelName()))
 	}
 	t.Logf("steps: %s", strings.Join(stepNames, " -> "))
 	for _, step := range steps {
-		usage := step.Usage.Data()
-		t.Logf("step [%d] %s model=%s prompt_tokens=%d completion_tokens=%d reasoning_tokens=%d cost=%.6f",
-			step.Position, step.Step, step.Model, usage.PromptTokens, usage.CompletionTokens, usage.ReasoningTokens, usage.Cost)
-		if output := strings.TrimSpace(step.Output.Data()); output != "" {
+		if step.Kind == model.StepKindDM {
+			payload := step.DM.Data()
+			t.Logf("step [%d] %s kind=dm model=%s latency=%dms input_tokens=%d cost=%.6f request=%s",
+				step.Position, step.Step, payload.Model, payload.LatencyMs, payload.Usage.InputTokens, payload.Usage.Cost, payload.RequestID)
+			for _, answer := range payload.Answers {
+				t.Logf("step [%d] answer %s kind=%s noul=%.3f choice=%q score=%.3f confidence=%.3f probabilities=%v",
+					step.Position, answer.ID, answer.Kind, answer.Noul, answer.Choice, answer.Score, answer.Confidence, answer.Probabilities)
+			}
+			continue
+		}
+		payload := step.LLM.Data()
+		usage := payload.Usage
+		t.Logf("step [%d] %s kind=llm model=%s prompt_tokens=%d completion_tokens=%d reasoning_tokens=%d cost=%.6f",
+			step.Position, step.Step, payload.Model, usage.PromptTokens, usage.CompletionTokens, usage.ReasoningTokens, usage.Cost)
+		if output := strings.TrimSpace(payload.Output); output != "" {
 			t.Logf("step [%d] %s output:\n%s", step.Position, step.Step, output)
 		}
 	}
@@ -205,7 +218,7 @@ func dumpTrajectory(t *testing.T, training *model.Training, steps []model.LLMSte
 // whatever the scenario: the generation succeeded structurally, the
 // steps are the canonical rounds in compact order, and every programmed
 // activity is grounded in the pool and carries a dose.
-func assertTrajectory(t *testing.T, req TrainingGenerationRequest, training *model.Training, steps []model.LLMStep) {
+func assertTrajectory(t *testing.T, req TrainingGenerationRequest, training *model.Training, steps []model.ModelStep) {
 	t.Helper()
 	if training == nil {
 		t.Fatal("training is nil")
@@ -259,6 +272,24 @@ func assertTrajectory(t *testing.T, req TrainingGenerationRequest, training *mod
 		}
 		if steps[i].Position != i {
 			t.Errorf("steps[%d].Position = %d, want %d", i, steps[i].Position, i)
+		}
+	}
+
+	// the migrated nodes must record decision steps, the creative and
+	// combinatorial nodes language steps.
+	decisionSteps := map[pipeline.GenerationStep]bool{
+		pipeline.StepDeriveParams:     true,
+		pipeline.StepAnalyzeRecovery:  true,
+		pipeline.StepReviewHistory:    true,
+		pipeline.StepCheckConstraints: true,
+		pipeline.StepTargetMuscles:    true,
+	}
+	for i, want := range wantSteps {
+		if decisionSteps[want] && steps[i].Kind != model.StepKindDM {
+			t.Errorf("steps[%d] %s kind = %q, want dm", i, want, steps[i].Kind)
+		}
+		if !decisionSteps[want] && steps[i].Kind != model.StepKindLLM {
+			t.Errorf("steps[%d] %s kind = %q, want llm", i, want, steps[i].Kind)
 		}
 	}
 }
@@ -351,7 +382,7 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 		}
 	}
 
-	run := func(t *testing.T, req TrainingGenerationRequest) (*model.Training, []model.LLMStep) {
+	run := func(t *testing.T, req TrainingGenerationRequest) (*model.Training, []model.ModelStep) {
 		t.Helper()
 		training, steps, err := GenTrainingDAG(req, nil)
 		dumpTrajectory(t, training, steps)
@@ -523,6 +554,69 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 			if strings.Contains(desc, "five rounds") || strings.Contains(desc, "5 rounds") {
 				t.Errorf("description conflates movements with rounds: %d work blocks described as five rounds: %q", blocks, training.Description)
 			}
+		}
+	})
+
+	t.Run("recovery and history decisions shape the session", func(t *testing.T) {
+		req := baseRequest()
+		req.Methodology = &strength
+		req.Muscles = []string{"chest"}
+		req.HealthSnapshot = &model.HealthSnapshot{
+			SleepHours: 5.0, SleepBaseline: 7.5, SleepDeviation: -33, SleepPresent: true,
+			HRVRMSSD: 38, HRVBaseline: 55, HRVDeviation: -31, HRVPresent: true,
+			RestingHR: 68, RHRBaseline: 58, RHRDeviation: 17, RHRPresent: true,
+			BaselineDays: 14,
+		}
+		pastID := uuid.New()
+		past := model.Training{
+			Name: "Push Day",
+			Routines: []model.Routine{{Type: "work", Blocks: []model.Block{{Activities: []model.Activity{
+				{ExerciseID: "dumbbell-bench-press", WeightKg: 24, Reps: 10},
+			}}}}},
+		}
+		past.ID = pastID
+		req.RecentTrainings = []model.Training{past}
+		req.RecentFeedback = map[uuid.UUID]model.TrainingFeedback{
+			pastID: {ActivityFeedback: datatypes.JSON(`{"dumbbell-bench-press":"too_easy"}`)},
+		}
+		req.UserPrompt = "Chest strength session."
+
+		_, steps := run(t, req)
+
+		byStep := map[string]model.ModelStep{}
+		for _, step := range steps {
+			byStep[step.Step] = step
+		}
+		health := byStep[string(pipeline.StepAnalyzeRecovery)].DM.Data()
+		recoveryFound := false
+		for _, answer := range health.Answers {
+			if answer.ID == "recovery" {
+				recoveryFound = true
+				if answer.Score < 0 || answer.Score > 4 {
+					t.Errorf("recovery score = %v, outside the rubric", answer.Score)
+				}
+				if answer.Score < 0.5 {
+					t.Errorf("recovery score = %v on a clearly fatigued snapshot, want registered fatigue", answer.Score)
+				}
+			}
+		}
+		if !recoveryFound {
+			t.Error("health step carries no recovery answer on a snapshot with recovery signal")
+		}
+		history := byStep[string(pipeline.StepReviewHistory)].DM.Data()
+		progressionFound := false
+		for _, answer := range history.Answers {
+			if answer.ID == "progression:dumbbell-bench-press" {
+				progressionFound = true
+				switch answer.Choice {
+				case "increase_weight", "increase_reps", "add_modifier", "maintain":
+				default:
+					t.Errorf("progression choice = %q, outside the too_easy option set", answer.Choice)
+				}
+			}
+		}
+		if !progressionFound {
+			t.Error("history step carries no progression question for the too_easy exercise")
 		}
 	})
 }

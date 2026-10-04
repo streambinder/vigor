@@ -130,14 +130,9 @@ class _FlowIntervalController extends IntervalController {
       : super(training: _syntheticTraining(poses));
 
   static final _emptyStep = LLMStep(
-    id: '',
-    step: '',
-    position: 0,
     model: '',
     prompt: LLMPrompt(system: '', user: ''),
     usage: const {},
-    createdAt: DateTime.fromMillisecondsSinceEpoch(0),
-    updatedAt: DateTime.fromMillisecondsSinceEpoch(0),
   );
 
   static final _emptyPrompt = TrainingPrompt(
@@ -188,7 +183,7 @@ class _FlowIntervalController extends IntervalController {
             ],
           ),
         ],
-        lLMSteps: const [],
+        modelSteps: const [],
         prompt: _emptyPrompt,
         completedAt: null,
         completedIn: null,

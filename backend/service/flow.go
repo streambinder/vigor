@@ -108,7 +108,7 @@ func GenerateFlow(userID uuid.UUID, duration int, muscles []string, prompt strin
 
 	var (
 		session         *model.FlowSession
-		steps           []model.LLMStep
+		steps           []model.ModelStep
 		correctionHint  string
 		lastReasoning   string
 		lastStructuring string
@@ -279,7 +279,7 @@ func GenerateFlow(userID uuid.UUID, duration int, muscles []string, prompt strin
 	}
 	session.References = datatypes.NewJSONType(refs)
 	session.FactIndices = nil
-	session.LLMSteps = steps
+	session.ModelSteps = steps
 	session.Prompt = model.LegacyPrompt(steps)
 	session.UserID = userID
 	// use muscles actually covered by selected poses, not just the input target
@@ -304,7 +304,7 @@ func GenerateFlow(userID uuid.UUID, duration int, muscles []string, prompt strin
 func GetFlowSessions(userID uuid.UUID) ([]model.FlowSession, error) {
 	var sessions []model.FlowSession
 	err := database.DB.
-		Preload("LLMSteps", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("ModelSteps", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Where("user_id = ?", userID).
 		Order("(completed_at IS NOT NULL), COALESCE(completed_at, created_at) DESC").
 		Find(&sessions).Error
@@ -349,10 +349,10 @@ func CompleteFlowSession(userID uuid.UUID, sessionID string) (*model.FlowSession
 	}
 
 	// load steps for the legacy prompt projection in the response
-	if err := database.DB.Order("position").Where("flow_session_id = ?", session.ID).Find(&session.LLMSteps).Error; err != nil {
+	if err := database.DB.Order("position").Where("flow_session_id = ?", session.ID).Find(&session.ModelSteps).Error; err != nil {
 		log.Error().Err(err).Str("flow_session", session.ID.String()).Msg("failed to load flow llm steps")
 	}
-	session.Prompt = model.LegacyPrompt(session.LLMSteps)
+	session.Prompt = model.LegacyPrompt(session.ModelSteps)
 
 	return &session, nil
 }

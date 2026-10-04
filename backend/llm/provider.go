@@ -104,7 +104,7 @@ type TrainingGenerationRequest struct {
 	Derived *pipeline.DerivedParams
 	// DerivedStep carries the derivation step when the service layer derived
 	// upfront (so the generated execution still reports the pre-step)
-	DerivedStep *model.LLMStep
+	DerivedStep *model.ModelStep
 }
 
 // reasoning effort levels, as understood by openrouter.
@@ -190,9 +190,9 @@ type flowLLMOutput struct {
 
 // GenFlow generates a personalized flow/yoga/stretching session using the same two-stage approach
 // as GenTraining: reasoning at high temp, then deterministic schema extraction.
-func GenFlow(req FlowGenerationRequest) (*model.FlowSession, []model.LLMStep, error) {
-	var steps []model.LLMStep
-	pushStep := func(name string, step model.LLMStep) {
+func GenFlow(req FlowGenerationRequest) (*model.FlowSession, []model.ModelStep, error) {
+	var steps []model.ModelStep
+	pushStep := func(name string, step model.ModelStep) {
 		step.Step = name
 		step.Position = len(steps)
 		steps = append(steps, step)
@@ -221,18 +221,18 @@ func GenFlow(req FlowGenerationRequest) (*model.FlowSession, []model.LLMStep, er
 		reasoningPrompt,
 		queryOpts{temperature: 0.8, maxTokens: 10000, topP: 0.9, effort: effortLow, timeout: 120 * time.Second},
 	)
-	pushStep(model.StepReasoning, reasoningStep)
+	pushStep(model.StepReasoning, model.NewLLMStep(reasoningStep))
 	if err != nil {
 		return nil, steps, fmt.Errorf("%w (reasoning stage): %w", ErrLLMQuery, err)
 	}
-	if strings.TrimSpace(reasoningStep.Output.Data()) == "" {
+	if strings.TrimSpace(reasoningStep.Output) == "" {
 		return nil, steps, fmt.Errorf("%w (reasoning stage): empty response", ErrLLMQuery)
 	}
 
 	// stage 2: structuring — extract JSON from reasoning
 	structuringPrompt := model.LLMPrompt{
 		System: prompt.FlowSystem(),
-		User:   prompt.GenFlowStructuring(reasoningStep.Output.Data()),
+		User:   prompt.GenFlowStructuring(reasoningStep.Output),
 	}
 
 	structuringStep, err := getLLM(StageStructuring, req.LastStructuringModel).query(
@@ -241,13 +241,13 @@ func GenFlow(req FlowGenerationRequest) (*model.FlowSession, []model.LLMStep, er
 		// transcribes the reasoning output into the schema — keep it deterministic
 		queryOpts{temperature: 0.0, maxTokens: 3000, schema: &model.FlowSessionSchema, timeout: 90 * time.Second},
 	)
-	pushStep(model.StepStructure, structuringStep)
+	pushStep(model.StepStructure, model.NewLLMStep(structuringStep))
 	if err != nil {
 		return nil, steps, fmt.Errorf("%w (structuring stage): %w", ErrLLMQuery, err)
 	}
 
 	var output flowLLMOutput
-	if err := json.Unmarshal([]byte(structuringStep.Output.Data()), &output); err != nil {
+	if err := json.Unmarshal([]byte(structuringStep.Output), &output); err != nil {
 		return nil, steps, fmt.Errorf("%w: %s", ErrLLMUnmarshal, err)
 	}
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"math"
 	"regexp"
 	"sort"
 	"strings"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
+	"github.com/streambinder/vigor/dm"
 	"github.com/streambinder/vigor/llm/pipeline"
 	"github.com/streambinder/vigor/llm/prompt"
 	"github.com/streambinder/vigor/model"
@@ -38,8 +40,8 @@ var dagStepOrder = []pipeline.GenerationStep{
 }
 
 // orderedSteps flattens executed DAG nodes into steps ordered by round.
-func orderedSteps(nodes map[pipeline.GenerationStep]model.LLMStep) []model.LLMStep {
-	steps := make([]model.LLMStep, 0, len(nodes))
+func orderedSteps(nodes map[pipeline.GenerationStep]model.ModelStep) []model.ModelStep {
+	steps := make([]model.ModelStep, 0, len(nodes))
 	for _, genStep := range dagStepOrder {
 		node, ok := nodes[genStep]
 		if !ok {
@@ -54,7 +56,7 @@ func orderedSteps(nodes map[pipeline.GenerationStep]model.LLMStep) []model.LLMSt
 
 // GenTrainingDAG generates a training using a multi-node DAG instead of a single monolith.
 // onProgress is called after each node completes (may be nil).
-func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (*model.Training, []model.LLMStep, error) {
+func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (*model.Training, []model.ModelStep, error) {
 	progress := func(step pipeline.GenerationStep) {
 		if onProgress != nil {
 			onProgress(step)
@@ -66,7 +68,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		goalIDs[i] = g.ID
 	}
 
-	nodes := make(map[pipeline.GenerationStep]model.LLMStep)
+	nodes := make(map[pipeline.GenerationStep]model.ModelStep)
 
 	// pre-conditional step, prompted requests only: the tuning parameters a
 	// guided request would carry are deduced from the raw prompt (and any
@@ -76,12 +78,13 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	if req.FreeText != "" {
 		if req.Derived == nil {
 			derived, deriveStep, err := DeriveFreeTextParams(DeriveRequest{
-				FreeText:       req.FreeText,
-				Articles:       req.Articles,
-				Methodologies:  req.Methodologies,
-				AllGoals:       req.AllGoals,
-				ValidMuscles:   req.ValidMuscles,
-				ValidEquipment: req.ValidEquipment,
+				FreeText:           req.FreeText,
+				Articles:           req.Articles,
+				Methodologies:      req.Methodologies,
+				AllGoals:           req.AllGoals,
+				ValidMuscles:       req.ValidMuscles,
+				ValidEquipment:     req.ValidEquipment,
+				MovementCandidates: exerciseNames(req.WorkExercises, req.WarmupExercises, req.CooldownExercises),
 			})
 			if err != nil {
 				return nil, orderedSteps(nodes), fmt.Errorf("derive params node: %w", err)
@@ -101,7 +104,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		historyResult                           pipeline.HistoryAnalysis
 		constraintResult                        pipeline.ConstraintExtraction
 		healthErr, historyErr, constraintErr    error
-		healthStep, historyStep, constraintStep model.LLMStep
+		healthStep, historyStep, constraintStep model.ModelStep
 	)
 
 	var wg sync.WaitGroup
@@ -155,7 +158,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		strategyResult              pipeline.Strategy
 		targetingResult             pipeline.MuscleTargeting
 		strategyErr, targetingErr   error
-		strategyStep, targetingStep model.LLMStep
+		strategyStep, targetingStep model.ModelStep
 	)
 
 	wg.Add(2)
@@ -338,43 +341,252 @@ const maxDerivedMovements = 12
 // can run both as the DAG pre-step and upfront in the service layer (where
 // the derived filters drive exercise retrieval).
 type DeriveRequest struct {
-	FreeText       string
-	Articles       []string
-	Methodologies  []model.Methodology
-	AllGoals       []model.Goal
-	ValidMuscles   []string
-	ValidEquipment []string
+	FreeText string
+	Articles []string
+	// MovementCandidates are the catalog movement names the request
+	// text is matched against for explicit programs
+	MovementCandidates []string
+	Methodologies      []model.Methodology
+	AllGoals           []model.Goal
+	ValidMuscles       []string
+	ValidEquipment     []string
 }
 
-// DeriveFreeTextParams executes the prompt param derivation node: from the
-// raw prompt (and the distilled text of any linked articles) deduce the
-// tuning parameters a guided request would carry. an unusable LLM response
-// degrades to plain defaults rather than failing the generation — the prompt
-// itself still flows downstream.
-func DeriveFreeTextParams(req DeriveRequest) (pipeline.DerivedParams, model.LLMStep, error) {
+// DeriveFreeTextParams executes the prompt param derivation node: from
+// the raw prompt (and the distilled text of any linked articles) deduce
+// the tuning parameters a guided request would carry. The deduction is
+// a battery of typed questions — methodology as a choice, goals,
+// muscles and equipment as one claim each — judged by the decision
+// model against the request state; the movements of an explicit
+// program are matched deterministically against the catalog names.
+func DeriveFreeTextParams(req DeriveRequest) (pipeline.DerivedParams, model.ModelStep, error) {
 	validGoals := make([]string, len(req.AllGoals))
 	for i, g := range req.AllGoals {
 		validGoals[i] = g.ID
 	}
 
-	p := model.LLMPrompt{
-		System: prompt.NodeDeriveParamsSystem(req.Methodologies, req.ValidMuscles, validGoals, req.ValidEquipment),
-		User:   prompt.NodeDeriveParamsUser(req.FreeText, req.Articles),
+	state := prompt.NodeDeriveParamsUser(req.FreeText, req.Articles)
+
+	methodologyOptions := map[string]string{
+		"auto": "No specific methodology: the request does not point at one in particular",
+	}
+	for _, m := range req.Methodologies {
+		methodologyOptions[m.ID] = m.Name + ": " + truncateText(m.Description, 160)
 	}
 
-	// mapping prose onto validated enums — extraction, not reasoning
-	step, err := getLLM(StageReasoning, "").query(p,
-		queryOpts{temperature: 0.1, maxTokens: 1500, effort: effortLow, timeout: 45 * time.Second})
+	questions := make([]dm.Question, 0, 3+len(req.AllGoals)+len(req.ValidMuscles)+len(req.ValidEquipment))
+	questions = append(questions, dm.Question{
+		ID:           "methodology",
+		Kind:         dm.KindChoice,
+		Instructions: "Which training methodology does the request best fit?",
+		Options:      methodologyOptions,
+	})
+	for _, g := range req.AllGoals {
+		questions = append(questions, dm.Question{
+			ID:           "goal:" + g.ID,
+			Kind:         dm.KindNoul,
+			Instructions: fmt.Sprintf("The request pursues the goal %q (%s).", g.ID, g.Description),
+		})
+	}
+	for _, muscle := range req.ValidMuscles {
+		questions = append(questions, dm.Question{
+			ID:           "muscle:" + muscle,
+			Kind:         dm.KindNoul,
+			Instructions: fmt.Sprintf("The session should emphasize the muscle %q.", muscle),
+		})
+	}
+	for _, equipment := range req.ValidEquipment {
+		questions = append(questions, dm.Question{
+			ID:           "equipment:" + equipment,
+			Kind:         dm.KindNoul,
+			Instructions: fmt.Sprintf("The program calls for the equipment %q.", equipment),
+		})
+	}
+	questions = append(questions,
+		dm.Question{
+			ID:           "skip_warmup_cooldown",
+			Kind:         dm.KindNoul,
+			Instructions: "The request clearly implies a work-only session, with no warmup or cooldown.",
+		},
+		dm.Question{
+			ID:           "explicit_program",
+			Kind:         dm.KindNoul,
+			Instructions: "The request (or a linked article) fully specifies the session: concrete movements with their sets, reps or durations scheme.",
+		},
+	)
+
+	answers, step, err := decide(state, questions)
 	if err != nil {
 		return pipeline.DerivedParams{}, step, err
 	}
 
 	var result pipeline.DerivedParams
-	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
-		log.Warn().Err(err).Str("raw", step.Output.Data()).Msg("derive params unmarshal failed, using defaults")
-		return pipeline.DerivedParams{}, step, nil
+	if choice := answers["methodology"].Choice; choice != "" && choice != "auto" {
+		result.Methodology = choice
 	}
+	for _, g := range req.AllGoals {
+		if decided(answers["goal:"+g.ID]) {
+			result.Goals = append(result.Goals, g.ID)
+		}
+	}
+	for _, muscle := range req.ValidMuscles {
+		if decided(answers["muscle:"+muscle]) {
+			result.Muscles = append(result.Muscles, muscle)
+		}
+	}
+	for _, equipment := range req.ValidEquipment {
+		if decided(answers["equipment:"+equipment]) {
+			result.Equipment = append(result.Equipment, equipment)
+		}
+	}
+	result.SkipWarmupCooldown = decided(answers["skip_warmup_cooldown"])
+	result.Movements = matchMovements(req.FreeText, req.Articles, req.MovementCandidates)
+	result.ExplicitProgram = decided(answers["explicit_program"]) && len(result.Movements) > 0
+	result.Summary = deriveSummary(result, req.FreeText, req.Articles)
 	return normalizeDerivedParams(result, req.Methodologies, req.ValidMuscles, validGoals, req.ValidEquipment), step, nil
+}
+
+// truncateText caps a catalog description for use as a choice option
+// legend, cutting at a word boundary where possible.
+func truncateText(text string, maxLen int) string {
+	if len(text) <= maxLen {
+		return text
+	}
+	cut := strings.LastIndex(text[:maxLen], " ")
+	if cut < maxLen/2 {
+		cut = maxLen
+	}
+	return strings.TrimSpace(text[:cut]) + "…"
+}
+
+// movementTokens splits text into the normalized token set movement
+// names are matched against, indexing light singular forms alongside
+// plurals so "jumps" in the request still finds "jump" in a name.
+func movementTokens(text string) map[string]bool {
+	tokens := make(map[string]bool)
+	for _, token := range strings.FieldsFunc(util.NormalizeIDText(text), func(r rune) bool {
+		return !(r >= 'a' && r <= 'z' || r >= '0' && r <= '9')
+	}) {
+		if token == "" {
+			continue
+		}
+		tokens[token] = true
+		if len(token) > 3 && strings.HasSuffix(token, "s") {
+			tokens[token[:len(token)-1]] = true
+		}
+	}
+	return tokens
+}
+
+// matchMovements finds the candidate movement names the request text
+// pins, deterministically: a candidate matches when every token of its
+// normalized name appears in the normalized text. More specific names
+// (more tokens) win over shorter ones they contain, so "incline push-up"
+// suppresses a bare "push-up" hit inside it.
+func matchMovements(freeText string, articles []string, candidates []string) []string {
+	textTokens := movementTokens(freeText + " " + strings.Join(articles, " "))
+
+	type candidate struct {
+		name   string
+		tokens map[string]bool
+	}
+	ordered := make([]candidate, 0, len(candidates))
+	seen := make(map[string]bool, len(candidates))
+	for _, name := range candidates {
+		norm := util.NormalizeIDText(name)
+		if norm == "" || seen[norm] {
+			continue
+		}
+		seen[norm] = true
+		tokens := movementTokens(name)
+		if len(tokens) == 0 {
+			continue
+		}
+		ordered = append(ordered, candidate{name: name, tokens: tokens})
+	}
+	sort.Slice(ordered, func(i, j int) bool {
+		if len(ordered[i].tokens) != len(ordered[j].tokens) {
+			return len(ordered[i].tokens) > len(ordered[j].tokens)
+		}
+		return ordered[i].name < ordered[j].name
+	})
+
+	var matched []string
+	var matchedTokens []map[string]bool
+	for _, c := range ordered {
+		present := true
+		for token := range c.tokens {
+			if !textTokens[token] {
+				present = false
+				break
+			}
+		}
+		if !present {
+			continue
+		}
+		contained := false
+		for _, kept := range matchedTokens {
+			strictSubset := len(c.tokens) < len(kept)
+			for token := range c.tokens {
+				if !kept[token] {
+					strictSubset = false
+					break
+				}
+			}
+			if strictSubset {
+				contained = true
+				break
+			}
+		}
+		if contained {
+			continue
+		}
+		matched = append(matched, c.name)
+		matchedTokens = append(matchedTokens, c.tokens)
+	}
+	return matched
+}
+
+// deriveSummary renders the derived parameters as the compact program
+// schema downstream nodes design the session from: the structured
+// derivation first, then the request's own words, so an explicit
+// program's scheme reaches downstream verbatim instead of paraphrased.
+func deriveSummary(result pipeline.DerivedParams, freeText string, articles []string) string {
+	lines := make([]string, 0, 6)
+	if result.Methodology != "" {
+		lines = append(lines, "Methodology: "+result.Methodology)
+	}
+	if len(result.Goals) > 0 {
+		lines = append(lines, "Goals: "+strings.Join(result.Goals, ", "))
+	}
+	if len(result.Muscles) > 0 {
+		lines = append(lines, "Muscles: "+strings.Join(result.Muscles, ", "))
+	}
+	if len(result.Equipment) > 0 {
+		lines = append(lines, "Equipment: "+strings.Join(result.Equipment, ", "))
+	}
+	if result.SkipWarmupCooldown {
+		lines = append(lines, "Work only: no warmup or cooldown")
+	}
+	if result.ExplicitProgram {
+		lines = append(lines, "Explicit program, movements: "+strings.Join(result.Movements, ", "))
+	}
+
+	summary := strings.Join(lines, ". ")
+	source := strings.TrimSpace(freeText)
+	for _, article := range articles {
+		source += "\n\n" + strings.TrimSpace(article)
+	}
+	if source != "" {
+		if summary != "" {
+			summary += "\n\n"
+		}
+		summary += "Request: " + source
+	}
+	if len(summary) > maxDerivedSummaryLen {
+		summary = summary[:maxDerivedSummaryLen]
+	}
+	return summary
 }
 
 // applyDerivedParams overlays the derived tuning parameters on the DAG
@@ -417,10 +629,11 @@ func applyDerivedParams(req *TrainingGenerationRequest) {
 	}
 	// the service layer owns the retrieval query composition (derived schema
 	// + articles + raw prompt): only fall back to the derivation here when the
-	// request carries no prompt of its own
+	// request carries no prompt of its own. the derived summary already
+	// ends with the request in the user's own words, so it stands alone.
 	if req.UserPrompt == "" {
 		if derived.Summary != "" {
-			req.UserPrompt = strings.TrimSpace(derived.Summary + "\n\n" + req.FreeText)
+			req.UserPrompt = derived.Summary
 		} else {
 			req.UserPrompt = req.FreeText
 		}
@@ -459,6 +672,18 @@ func normalizeDerivedParams(
 	return derived
 }
 
+// exerciseNames flattens exercise pools to their names, for use as
+// movement match candidates.
+func exerciseNames(pools ...[]model.Exercise) []string {
+	names := make([]string, 0)
+	for _, pool := range pools {
+		for _, ex := range pool {
+			names = append(names, ex.Name)
+		}
+	}
+	return names
+}
+
 // sanitizeMovements trims, dedupes and caps the movement names of an explicit
 // program. they are matched against the exercise catalog, not validated as
 // IDs, so the request's own wording is kept.
@@ -480,66 +705,281 @@ func sanitizeMovements(movements []string) []string {
 	return kept
 }
 
-// runHealthNode executes the health assessment node.
-func runHealthNode(healthSnapshot *model.HealthSnapshot) (pipeline.HealthAssessment, model.LLMStep, error) {
-	// short-circuit: no snapshot, or a snapshot with no actually-reported recovery metric
-	// (e.g. device synced only steps=0/sleep=0 rows) → no adjustment. this prevents a missing
-	// metric rendered as "0" from being read as an extreme value.
-	if healthSnapshot == nil || !healthSnapshot.HasRecoverySignal() {
-		return pipeline.HealthAssessment{
-			VolumeModifier: 1.0, IntensityModifier: 1.0,
-		}, model.LLMStep{}, nil
-	}
-
-	p := model.LLMPrompt{
-		System: prompt.NodeHealthSystem(),
-		User:   prompt.NodeHealthUser(healthSnapshot),
-	}
-
-	// threshold mapping over a few recovery metrics — nothing to deliberate about
-	step, err := getLLM(StageReasoning, "").query(p,
-		queryOpts{temperature: 0.1, maxTokens: 1000, effort: effortMinimal, timeout: 30 * time.Second})
-	if err != nil {
-		return pipeline.HealthAssessment{}, step, err
-	}
-
-	var result pipeline.HealthAssessment
-	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
-		log.Warn().Err(err).Str("raw", step.Output.Data()).Msg("health node unmarshal failed, using defaults")
-		return pipeline.HealthAssessment{VolumeModifier: 1.0, IntensityModifier: 1.0}, step, nil
-	}
-	return result, step, nil
+// progressionOptions maps each documented feedback signal to the
+// progression calls the history node may pick for it, plus the standing
+// "maintain" outcome. The signal vocabulary mirrors the rules the
+// free-text analyst used to apply.
+var progressionOptions = map[string]map[string]string{
+	"too_easy": {
+		"increase_weight": "The load was too easy: increase the weight",
+		"increase_reps":   "The load was too easy: increase the repetitions at the same weight",
+		"add_modifier":    "The load was too easy: keep load and reps, add a difficulty modifier",
+		"maintain":        "Keep the current load: no progression is warranted",
+	},
+	"too_hard": {
+		"decrease_weight": "The load was too hard: decrease the weight",
+		"decrease_reps":   "The load was too hard: decrease the repetitions at the same weight",
+		"replace":         "The exercise itself is the problem: replace it",
+		"maintain":        "Keep the current load: no progression is warranted",
+	},
+	"quality_bad": {
+		"decrease_weight": "Execution quality was bad: decrease the weight to restore form",
+		"decrease_reps":   "Execution quality was bad: decrease the repetitions at the same weight",
+		"add_modifier":    "Execution quality was bad: add a form or tempo modifier",
+		"maintain":        "Keep the current load: no progression is warranted",
+	},
 }
 
-// runHistoryNode executes the history analysis node.
+// exerciseSignal aggregates one exercise's feedback across the recent
+// sessions: the latest rating, the rating counts, and the most recent
+// performed load.
+type exerciseSignal struct {
+	latest     string
+	counts     map[string]int
+	lastWeight float64
+	lastReps   int
+	performed  bool
+}
+
+// collectExerciseSignals folds per-session activity feedback and
+// performed loads into per-exercise signals. Sessions are read most
+// recent first, so the first rating seen for an exercise is its latest.
+func collectExerciseSignals(
+	recentTrainings []model.Training,
+	recentFeedback map[uuid.UUID]model.TrainingFeedback,
+) map[string]*exerciseSignal {
+	signals := make(map[string]*exerciseSignal)
+	get := func(exerciseID string) *exerciseSignal {
+		sig, ok := signals[exerciseID]
+		if !ok {
+			sig = &exerciseSignal{counts: make(map[string]int)}
+			signals[exerciseID] = sig
+		}
+		return sig
+	}
+	for _, training := range recentTrainings {
+		if fb, ok := recentFeedback[training.ID]; ok {
+			var activityFeedback map[string]string
+			if err := json.Unmarshal(fb.ActivityFeedback, &activityFeedback); err == nil {
+				for exerciseID, rating := range activityFeedback {
+					sig := get(exerciseID)
+					if sig.latest == "" {
+						sig.latest = rating
+					}
+					sig.counts[rating]++
+				}
+			}
+		}
+		for _, routine := range training.Routines {
+			for _, block := range routine.Blocks {
+				for _, activity := range block.Activities {
+					sig := get(activity.ExerciseID)
+					if !sig.performed && activity.WeightKg > 0 {
+						sig.lastWeight = activity.WeightKg
+						sig.lastReps = activity.Reps
+						sig.performed = true
+					}
+				}
+			}
+		}
+	}
+	return signals
+}
+
+// recentIssue renders the most recent badly rated session as a plain
+// fact, or "" when every rated session was good.
+func recentIssue(
+	recentTrainings []model.Training,
+	recentFeedback map[uuid.UUID]model.TrainingFeedback,
+) string {
+	for _, training := range recentTrainings {
+		fb, ok := recentFeedback[training.ID]
+		if !ok || fb.Quality == nil || *fb.Quality {
+			continue
+		}
+		if fb.QualityReason != "" {
+			return fmt.Sprintf("session %q was rated bad: %s", training.Name, fb.QualityReason)
+		}
+		return fmt.Sprintf("session %q was rated bad", training.Name)
+	}
+	return ""
+}
+
+// adjustWeight applies the standard load step to a performed weight:
+// five percent, never less than 2.5kg, rounded to the nearest half kilo.
+func adjustWeight(from float64, increase bool) float64 {
+	delta := math.Round(math.Max(2.5, from*0.05)*2) / 2
+	if increase {
+		return from + delta
+	}
+	return math.Max(0, from-delta)
+}
+
+// runHistoryNode executes the history analysis node. Avoid lists and
+// session facts are deterministic folds of the feedback record; the
+// progression call per signal-bearing exercise — increase, decrease,
+// replace, or maintain — is judged by the decision model against the
+// rendered history state, and any weight change is arithmetic in code.
 func runHistoryNode(
 	recentTrainings []model.Training,
 	recentFeedback map[uuid.UUID]model.TrainingFeedback,
 	recentHR map[uuid.UUID]*model.HealthExerciseSession,
-) (pipeline.HistoryAnalysis, model.LLMStep, error) {
+) (pipeline.HistoryAnalysis, model.ModelStep, error) {
 	if len(recentTrainings) == 0 {
-		return pipeline.HistoryAnalysis{}, model.LLMStep{}, nil
-	}
-
-	p := model.LLMPrompt{
-		System: prompt.NodeHistorySystem(),
-		User:   prompt.NodeHistoryUser(recentTrainings, recentFeedback, recentHR),
-	}
-
-	// has to weigh feedback against HR trends to call a progression — some judgment
-	step, err := getLLM(StageReasoning, "").query(p,
-		queryOpts{temperature: 0.1, maxTokens: 2500, effort: effortLow, timeout: 45 * time.Second})
-	if err != nil {
-		return pipeline.HistoryAnalysis{}, step, err
+		return pipeline.HistoryAnalysis{}, model.NewDMStep(model.DMStep{}), nil
 	}
 
 	var result pipeline.HistoryAnalysis
-	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
-		log.Warn().Err(err).Str("raw", step.Output.Data()).Msg("history node unmarshal failed, using empty")
-		return pipeline.HistoryAnalysis{}, step, nil
+	for _, training := range recentTrainings {
+		result.RecentNames = append(result.RecentNames, training.Name)
+	}
+	result.RecentIssue = recentIssue(recentTrainings, recentFeedback)
+
+	signals := collectExerciseSignals(recentTrainings, recentFeedback)
+
+	type candidate struct {
+		exerciseID string
+		signal     string
+		weight     float64
+		reps       int
+		performed  bool
+	}
+	var candidates []candidate
+	exerciseIDs := make([]string, 0, len(signals))
+	for exerciseID := range signals {
+		exerciseIDs = append(exerciseIDs, exerciseID)
+	}
+	sort.Strings(exerciseIDs)
+	for _, exerciseID := range exerciseIDs {
+		sig := signals[exerciseID]
+		switch {
+		case sig.latest == "impossible":
+			// an impossible exercise leaves the pool and is replaced:
+			// no judgment call remains.
+			result.AvoidExercises = append(result.AvoidExercises, exerciseID)
+			progression := pipeline.ProgressionSignal{
+				ExerciseID: exerciseID,
+				Action:     "replace",
+				Signal:     "impossible",
+			}
+			if sig.performed {
+				progression.FromWeight = pipeline.FlexFloat64(sig.lastWeight)
+			}
+			result.Progressions = append(result.Progressions, progression)
+		case sig.counts["too_hard"] >= 2:
+			// consistently too hard: the exercise leaves the pool.
+			result.AvoidExercises = append(result.AvoidExercises, exerciseID)
+		case sig.latest == "too_easy" || sig.latest == "too_hard" || sig.latest == "quality_bad":
+			candidates = append(candidates, candidate{
+				exerciseID: exerciseID,
+				signal:     sig.latest,
+				weight:     sig.lastWeight,
+				reps:       sig.lastReps,
+				performed:  sig.performed,
+			})
+		}
+	}
+
+	state := prompt.NodeHistoryUser(recentTrainings, recentFeedback, recentHR)
+	if len(candidates) == 0 {
+		_, step, err := decide(state, nil)
+		result.Summary = historySummary(result)
+		return result, step, err
+	}
+
+	questions := make([]dm.Question, 0, len(candidates))
+	for _, c := range candidates {
+		instructions := fmt.Sprintf("In a recent session the user rated the exercise %q as %q.", c.exerciseID, c.signal)
+		if c.performed {
+			instructions += fmt.Sprintf(" It was last performed at %s for %d reps.", formatWeightText(c.weight), c.reps)
+		}
+		instructions += " What is the right progression call for the next session?"
+		questions = append(questions, dm.Question{
+			ID:           "progression:" + c.exerciseID,
+			Kind:         dm.KindChoice,
+			Instructions: instructions,
+			Options:      progressionOptions[c.signal],
+		})
+	}
+
+	answers, step, err := decide(state, questions)
+	if err != nil {
+		return pipeline.HistoryAnalysis{}, step, err
+	}
+	for _, c := range candidates {
+		action := answers["progression:"+c.exerciseID].Choice
+		if action == "" || action == "maintain" {
+			continue
+		}
+		progression := pipeline.ProgressionSignal{
+			ExerciseID: c.exerciseID,
+			Action:     action,
+			Signal:     c.signal,
+		}
+		if c.performed {
+			progression.FromWeight = pipeline.FlexFloat64(c.weight)
+			switch action {
+			case "increase_weight":
+				progression.ToWeight = pipeline.FlexFloat64(adjustWeight(c.weight, true))
+			case "decrease_weight":
+				progression.ToWeight = pipeline.FlexFloat64(adjustWeight(c.weight, false))
+			case "increase_reps", "decrease_reps", "add_modifier":
+				progression.ToWeight = pipeline.FlexFloat64(c.weight)
+			}
+		}
+		result.Progressions = append(result.Progressions, progression)
 	}
 	dropProgressionsWithoutSignal(&result)
+	result.Summary = historySummary(result)
 	return result, step, nil
+}
+
+// formatWeightText renders a weight for decision instructions.
+func formatWeightText(w float64) string {
+	if w == math.Trunc(w) {
+		return fmt.Sprintf("%dkg", int(w))
+	}
+	return fmt.Sprintf("%.1fkg", w)
+}
+
+// historySummary renders the history outcome as the one-liner the
+// creative copy node weaves into the training description.
+func historySummary(result pipeline.HistoryAnalysis) string {
+	parts := make([]string, 0, 3)
+	if len(result.Progressions) > 0 {
+		parts = append(parts, fmt.Sprintf("%d progression adjustments from recent feedback", len(result.Progressions)))
+	}
+	if len(result.AvoidExercises) > 0 {
+		parts = append(parts, "avoiding "+strings.Join(result.AvoidExercises, ", "))
+	}
+	if result.RecentIssue != "" {
+		parts = append(parts, result.RecentIssue)
+	}
+	if len(parts) == 0 {
+		return "no actionable signals from recent sessions"
+	}
+	return strings.Join(parts, "; ")
+}
+
+// historyFacts renders the history outcome as the compact fact block
+// downstream LLM prompts (strategy, creative) read in place of the
+// free-form pattern notes the node used to produce.
+func historyFacts(history pipeline.HistoryAnalysis) string {
+	parts := make([]string, 0, 3)
+	if len(history.Progressions) > 0 {
+		actions := make([]string, 0, len(history.Progressions))
+		for _, p := range history.Progressions {
+			actions = append(actions, fmt.Sprintf("%s: %s (%s)", p.ExerciseID, p.Action, p.Signal))
+		}
+		parts = append(parts, "progressions: "+strings.Join(actions, ", "))
+	}
+	if len(history.AvoidExercises) > 0 {
+		parts = append(parts, "exercises to avoid: "+strings.Join(history.AvoidExercises, ", "))
+	}
+	if history.RecentIssue != "" {
+		parts = append(parts, history.RecentIssue)
+	}
+	return strings.Join(parts, "; ")
 }
 
 // validProgressionSignals are the only feedback values a progression may be
@@ -564,8 +1004,46 @@ func dropProgressionsWithoutSignal(result *pipeline.HistoryAnalysis) {
 	result.Progressions = kept
 }
 
-// runConstraintsNode executes the constraint extraction node.
-func runConstraintsNode(profiles []model.Profile) (pipeline.ConstraintExtraction, model.LLMStep, error) {
+// constraintVocabulary is the closed set of movement patterns and
+// accommodations the constraint node can report. Phrases land verbatim in
+// ConstraintExtraction: downstream prompts read them, and the
+// deterministic exercise filter matches them against exercise names.
+type constraintItem struct {
+	id     string
+	phrase string
+	claim  string
+}
+
+var contraindicatedVocabulary = []constraintItem{
+	{"overhead-pressing", "overhead pressing", "Pressing weight overhead (shoulder press, overhead press, military press) is contraindicated for this user"},
+	{"overhead-hanging", "overhead hanging", "Hanging from a bar or other overhead traction (dead hang, pull-up bar hangs) is contraindicated for this user"},
+	{"high-impact-jumping", "high-impact jumping", "Jumping, plyometrics and landing impact are contraindicated for this user"},
+	{"deep-spinal-flexion", "deep spinal flexion", "Deep or loaded spinal flexion (crunches, sit-ups, toe touches) is contraindicated for this user"},
+	{"spinal-extension", "spinal extension", "Deep spinal extension (back hyperextension, prone press-ups) is contraindicated for this user"},
+	{"loaded-rotation", "loaded rotation", "Loaded trunk rotation (russian twists, woodchoppers) is contraindicated for this user"},
+	{"deep-knee-flexion", "deep knee flexion", "Deep knee flexion under load (deep squats, deep lunges) is contraindicated for this user"},
+	{"kneeling-pressure", "kneeling pressure", "Kneeling or direct pressure on the knees is contraindicated for this user"},
+	{"wrist-weight-bearing", "wrist weight bearing", "Bearing weight through extended wrists (push-ups, planks, handstands) is contraindicated for this user"},
+	{"running-impact", "running impact", "Running or jogging impact is contraindicated for this user"},
+	{"neck-loading", "neck loading", "Direct loading of the neck is contraindicated for this user"},
+	{"single-leg-balance", "single-leg balance", "Single-leg balance work is contraindicated for this user"},
+}
+
+var accommodationVocabulary = []constraintItem{
+	{"reduce-squat-depth", "reduce squat depth", "Squats should be performed with reduced depth for this user"},
+	{"reduce-range-of-motion", "reduce range of motion", "Exercises should be performed with a reduced range of motion for this user"},
+	{"reduce-load", "reduce load", "Training loads should be kept reduced for this user"},
+	{"avoid-end-range", "avoid end-range positions", "End-range joint positions should be avoided for this user"},
+	{"supported-variations", "use supported variations", "Supported or assisted exercise variations should be preferred for this user"},
+	{"keep-spine-neutral", "keep spine neutral", "The spine should be kept in a neutral position under load for this user"},
+	{"low-impact", "prefer low-impact work", "Low-impact exercise variations should be preferred for this user"},
+	{"limit-overhead-range", "limit overhead range", "Overhead movements should use a limited range of motion for this user"},
+}
+
+// runConstraintsNode executes the constraint extraction node: each
+// pattern and accommodation of the closed vocabulary is a noul claim
+// the decision model judges against the profile state.
+func runConstraintsNode(profiles []model.Profile) (pipeline.ConstraintExtraction, model.ModelStep, error) {
 	// short-circuit: no injuries/limitations/conditions → empty constraints
 	hasConstraints := false
 	for _, p := range profiles {
@@ -575,26 +1053,157 @@ func runConstraintsNode(profiles []model.Profile) (pipeline.ConstraintExtraction
 		}
 	}
 	if !hasConstraints {
-		return pipeline.ConstraintExtraction{}, model.LLMStep{}, nil
+		return pipeline.ConstraintExtraction{}, model.NewDMStep(model.DMStep{}), nil
 	}
 
-	p := model.LLMPrompt{
-		System: prompt.NodeConstraintsSystem(),
-		User:   prompt.NodeConstraintsUser(profiles),
+	state := prompt.NodeConstraintsUser(profiles)
+	questions := make([]dm.Question, 0, len(contraindicatedVocabulary)+len(accommodationVocabulary))
+	for _, item := range contraindicatedVocabulary {
+		questions = append(questions, dm.Question{
+			ID:           "pattern:" + item.id,
+			Kind:         dm.KindNoul,
+			Instructions: item.claim + ".",
+		})
+	}
+	for _, item := range accommodationVocabulary {
+		questions = append(questions, dm.Question{
+			ID:           "accommodation:" + item.id,
+			Kind:         dm.KindNoul,
+			Instructions: item.claim + ".",
+		})
 	}
 
-	// pulls injuries/limitations out of profile text — extraction, not reasoning
-	step, err := getLLM(StageReasoning, "").query(p,
-		queryOpts{temperature: 0.1, maxTokens: 1000, effort: effortMinimal, timeout: 30 * time.Second})
+	answers, step, err := decide(state, questions)
 	if err != nil {
 		return pipeline.ConstraintExtraction{}, step, err
 	}
 
 	var result pipeline.ConstraintExtraction
-	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
-		log.Warn().Err(err).Str("raw", step.Output.Data()).Msg("constraints node unmarshal failed, using empty")
-		return pipeline.ConstraintExtraction{}, step, nil
+	for _, item := range contraindicatedVocabulary {
+		if decided(answers["pattern:"+item.id]) {
+			result.ContraindicatedPatterns = append(result.ContraindicatedPatterns, item.phrase)
+		}
 	}
+	for _, item := range accommodationVocabulary {
+		if decided(answers["accommodation:"+item.id]) {
+			result.Accommodations = append(result.Accommodations, item.phrase)
+		}
+	}
+	result.Summary = constraintSummary(result)
+	return result, step, nil
+}
+
+// constraintSummary renders the constraint outcome as the one-liner the
+// creative copy node weaves into the training description.
+func constraintSummary(result pipeline.ConstraintExtraction) string {
+	if len(result.ContraindicatedPatterns) == 0 && len(result.Accommodations) == 0 {
+		return "no movement restrictions"
+	}
+	parts := make([]string, 0, 2)
+	if len(result.ContraindicatedPatterns) > 0 {
+		parts = append(parts, "movement selection avoids "+strings.Join(result.ContraindicatedPatterns, ", "))
+	}
+	if len(result.Accommodations) > 0 {
+		parts = append(parts, "accommodations: "+strings.Join(result.Accommodations, ", "))
+	}
+	return strings.Join(parts, "; ")
+}
+
+// recoveryLevels is the rubric of the health node's recovery score,
+// from fully recovered to severely compromised.
+var recoveryLevels = []string{
+	"fully recovered",
+	"slightly fatigued",
+	"fatigued",
+	"significantly fatigued",
+	"severely compromised",
+}
+
+// volume and intensity multipliers per recovery level: the decision
+// model judges the state, the arithmetic stays in code.
+var (
+	recoveryVolumeByLevel    = []float64{1.0, 0.95, 0.85, 0.7, 0.5}
+	recoveryIntensityByLevel = []float64{1.0, 1.0, 0.9, 0.8, 0.65}
+)
+
+// modifierAt interpolates a per-level multiplier table at a fractional
+// score position.
+func modifierAt(table []float64, score float64) float64 {
+	if score <= 0 {
+		return table[0]
+	}
+	if score >= float64(len(table)-1) {
+		return table[len(table)-1]
+	}
+	lo := int(score)
+	return table[lo] + (score-float64(lo))*(table[lo+1]-table[lo])
+}
+
+// recoverySummary renders the recovery score as the one-liner the
+// creative copy node weaves into the training description.
+func recoverySummary(score float64) string {
+	switch {
+	case score < 0.5:
+		return "no adjustment — recovery looks solid"
+	case score < 1.5:
+		return "slight reduction to match recovery"
+	case score < 2.5:
+		return "reduced volume due to fatigue"
+	case score < 3.5:
+		return "significantly reduced load to support recovery"
+	default:
+		return "major reduction — recovery is compromised"
+	}
+}
+
+// runHealthNode executes the health assessment node: the decision model
+// scores the recovery state against the snapshot, code maps the score
+// to volume and intensity multipliers.
+func runHealthNode(healthSnapshot *model.HealthSnapshot) (pipeline.HealthAssessment, model.ModelStep, error) {
+	// short-circuit: no snapshot, or a snapshot with no actually-reported recovery metric
+	// (e.g. device synced only steps=0/sleep=0 rows) → no adjustment. this prevents a missing
+	// metric rendered as "0" from being read as an extreme value.
+	if healthSnapshot == nil || !healthSnapshot.HasRecoverySignal() {
+		return pipeline.HealthAssessment{
+			VolumeModifier: 1.0, IntensityModifier: 1.0,
+		}, model.NewDMStep(model.DMStep{}), nil
+	}
+
+	state := prompt.NodeHealthUser(healthSnapshot)
+	answers, step, err := decide(state, []dm.Question{
+		{
+			ID:   "recovery",
+			Kind: dm.KindScore,
+			Instructions: "Rate the user's overall recovery state for today's training. " +
+				"Sleep deviation at or below -15% implies fatigue; HRV deviation at or below -15% implies fatigue affecting both volume and intensity; " +
+				"resting heart rate deviation at or above +15% implies strain; external workouts in the last 48 hours (especially football, running, cycling) add leg fatigue; " +
+				"multiple negative deviations compound; sleep under 5 hours or HRV under 15ms RMSSD means severely compromised regardless of baseline; " +
+				"when baselines are not established, only extreme values count; negligible deviations mean fully recovered. " +
+				"Judge only the metrics present in the state: an absent metric was not measured.",
+			Levels: recoveryLevels,
+		},
+		{
+			ID:           "extend_warmup",
+			Kind:         dm.KindNoul,
+			Instructions: "An extended warmup is advisable today (low daily step count, stiffness, or significant fatigue).",
+		},
+	})
+	if err != nil {
+		return pipeline.HealthAssessment{}, step, err
+	}
+
+	score := answers["recovery"].Score
+	volume := modifierAt(recoveryVolumeByLevel, score)
+	intensity := modifierAt(recoveryIntensityByLevel, score)
+	level := recoveryLevels[int(score+0.5)]
+	result := pipeline.HealthAssessment{
+		VolumeModifier:    volume,
+		IntensityModifier: intensity,
+		ExtendWarmup:      decided(answers["extend_warmup"]),
+		Rationale: fmt.Sprintf("recovery rated %q (score %.2f of %d): volume at %.0f%%, intensity at %.0f%%",
+			level, score, len(recoveryLevels)-1, volume*100, intensity*100),
+	}
+	result.Summary = recoverySummary(score)
 	return result, step, nil
 }
 
@@ -610,13 +1219,13 @@ func runStrategyNode(
 	duration int,
 	skipWarmupCooldown bool,
 	explicitProgram bool,
-) (pipeline.Strategy, model.LLMStep, error) {
+) (pipeline.Strategy, model.ModelStep, error) {
 	p := model.LLMPrompt{
 		System: prompt.NodeStrategySystem(methodology, methodologies, coverage, explicitProgram),
 		User: prompt.NodeStrategyUser(
 			goals,
 			health.VolumeModifier, health.IntensityModifier, health.Rationale,
-			history.PatternNotes, history.BadSessionNotes,
+			historyFacts(history),
 			userPrompt, duration, skipWarmupCooldown,
 		),
 	}
@@ -626,24 +1235,30 @@ func runStrategyNode(
 		// medium effort was measured spending up to ~1700 tokens thinking, so leave room
 		queryOpts{temperature: 0.3, maxTokens: 3000, effort: effortMedium, timeout: 60 * time.Second})
 	if err != nil {
-		return pipeline.Strategy{}, step, err
+		return pipeline.Strategy{}, model.NewLLMStep(step), err
 	}
 
 	var result pipeline.Strategy
-	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
-		return pipeline.Strategy{}, step, fmt.Errorf("strategy unmarshal: %w", err)
+	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
+		return pipeline.Strategy{}, model.NewLLMStep(step), fmt.Errorf("strategy unmarshal: %w", err)
 	}
 
 	// if methodology was preselected, enforce it regardless of LLM output
 	if methodology != nil {
 		result.Methodology = methodology.ID
 	}
-	return result, step, nil
+	return result, model.NewLLMStep(step), nil
 }
 
-// runMuscleTargetingNode executes the muscle targeting node.
-// weighs user-selected muscles (when given) against injuries, recovery status and
-// recent history to decide the session's primary/secondary emphasis and the muscles to rest.
+// muscleEmphasisLevels is the rubric of the muscle targeting score,
+// from deliberate rest to session emphasis.
+var muscleEmphasisLevels = []string{"rest", "maintenance", "emphasis"}
+
+// runMuscleTargetingNode executes the muscle targeting node: the
+// decision model scores every trainable muscle's emphasis against the
+// session state, code maps the scores to primary, secondary and rest
+// sets. User-selected muscles keep their deterministic priority via
+// resolvePrimaryMuscles.
 func runMuscleTargetingNode(
 	userMuscles []string,
 	goals []model.Goal,
@@ -653,36 +1268,191 @@ func runMuscleTargetingNode(
 	history pipeline.HistoryAnalysis,
 	userPrompt string,
 	explicitProgram bool,
-) (pipeline.MuscleTargeting, model.LLMStep, error) {
+) (pipeline.MuscleTargeting, model.ModelStep, error) {
 	if len(coverage) == 0 {
-		return pipeline.MuscleTargeting{}, model.LLMStep{}, fmt.Errorf("no trainable muscles in the exercise pool")
+		return pipeline.MuscleTargeting{}, model.NewDMStep(model.DMStep{}), fmt.Errorf("no trainable muscles in the exercise pool")
 	}
 
-	p := model.LLMPrompt{
-		System: prompt.NodeMusclesSystem(coverage, explicitProgram),
-		User: prompt.NodeMusclesUser(
-			userMuscles, goals,
-			constraints.ContraindicatedPatterns, constraints.Accommodations,
-			health.VolumeModifier, health.IntensityModifier, health.Rationale,
-			history.PatternNotes, history.BadSessionNotes, userPrompt,
-		),
+	muscles := make([]string, 0, len(coverage))
+	for muscle := range coverage {
+		muscles = append(muscles, muscle)
+	}
+	sort.Slice(muscles, func(i, j int) bool {
+		if coverage[muscles[i]] != coverage[muscles[j]] {
+			return coverage[muscles[i]] > coverage[muscles[j]]
+		}
+		return muscles[i] < muscles[j]
+	})
+
+	state := muscleTargetingState(userMuscles, goals, muscles, coverage, constraints, health, history, userPrompt)
+	questions := make([]dm.Question, 0, len(muscles))
+	for _, muscle := range muscles {
+		questions = append(questions, dm.Question{
+			ID:   "muscle:" + muscle,
+			Kind: dm.KindScore,
+			Instructions: fmt.Sprintf("How much should the muscle %q be trained in this session, given the user's goals and request, the recovery status, the constraints, and the recent training history? "+
+				"Rest means deliberately leaving it out to recover, maintenance means a light touch, emphasis means it is a focus of the session.", muscle),
+			Levels: muscleEmphasisLevels,
+		})
 	}
 
-	// picks session emphasis across equipment coverage, constraints and history — a real
-	// trade-off, but a narrow one
-	step, err := getLLM(StageReasoning, "").query(p,
-		queryOpts{temperature: 0.2, maxTokens: 1500, effort: effortLow, timeout: 45 * time.Second})
+	answers, step, err := decide(state, questions)
 	if err != nil {
 		return pipeline.MuscleTargeting{}, step, err
 	}
 
-	var result pipeline.MuscleTargeting
-	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
-		return pipeline.MuscleTargeting{}, step, fmt.Errorf("muscle targeting unmarshal: %w", err)
+	scores := make(map[string]float64, len(muscles))
+	for _, muscle := range muscles {
+		scores[muscle] = answers["muscle:"+muscle].Score
+	}
+	byScore := func(list []string) {
+		sort.SliceStable(list, func(i, j int) bool {
+			if scores[list[i]] != scores[list[j]] {
+				return scores[list[i]] > scores[list[j]]
+			}
+			return list[i] < list[j]
+		})
 	}
 
+	var result pipeline.MuscleTargeting
+	for _, muscle := range muscles {
+		switch score := scores[muscle]; {
+		case score >= 1.5:
+			result.PrimaryMuscles = append(result.PrimaryMuscles, muscle)
+		case score >= 0.7:
+			result.SecondaryMuscles = append(result.SecondaryMuscles, muscle)
+		case score < 0.35:
+			result.AvoidMuscles = append(result.AvoidMuscles, muscle)
+		}
+	}
+
+	if explicitProgram {
+		// an explicit program is followed faithfully: never rest a
+		// muscle the request itself targets.
+		requested := make(map[string]bool, len(userMuscles))
+		for _, muscle := range userMuscles {
+			requested[muscle] = true
+		}
+		kept := result.AvoidMuscles[:0]
+		for _, muscle := range result.AvoidMuscles {
+			if !requested[muscle] {
+				kept = append(kept, muscle)
+			}
+		}
+		result.AvoidMuscles = kept
+	}
+
+	// a muscle cannot be both emphasized and rested: emphasis wins.
+	emphasized := make(map[string]bool, len(result.PrimaryMuscles)+len(result.SecondaryMuscles))
+	for _, muscle := range result.PrimaryMuscles {
+		emphasized[muscle] = true
+	}
+	secondary := result.SecondaryMuscles[:0]
+	for _, muscle := range result.SecondaryMuscles {
+		if !emphasized[muscle] {
+			secondary = append(secondary, muscle)
+			emphasized[muscle] = true
+		}
+	}
+	result.SecondaryMuscles = secondary
+	resting := result.AvoidMuscles[:0]
+	for _, muscle := range result.AvoidMuscles {
+		if !emphasized[muscle] {
+			resting = append(resting, muscle)
+		}
+	}
+	result.AvoidMuscles = resting
+
 	result.PrimaryMuscles = resolvePrimaryMuscles(userMuscles, result.PrimaryMuscles, coverage)
+	byScore(result.PrimaryMuscles)
+	byScore(result.SecondaryMuscles)
+	byScore(result.AvoidMuscles)
+	result.Rationale = targetingRationale(result)
+	result.Summary = targetingSummary(result)
 	return result, step, nil
+}
+
+// muscleTargetingState renders the session facts the targeting scores
+// are judged against.
+func muscleTargetingState(
+	userMuscles []string,
+	goals []model.Goal,
+	muscles []string,
+	coverage map[string]int,
+	constraints pipeline.ConstraintExtraction,
+	health pipeline.HealthAssessment,
+	history pipeline.HistoryAnalysis,
+	userPrompt string,
+) string {
+	var b strings.Builder
+	b.WriteString("Trainable muscles with the available equipment (muscle: exercise count):\n")
+	for _, muscle := range muscles {
+		fmt.Fprintf(&b, "%s: %d\n", muscle, coverage[muscle])
+	}
+	if len(userMuscles) > 0 {
+		fmt.Fprintf(&b, "\nUser-requested muscles (explicit session target): %s\n", strings.Join(userMuscles, ", "))
+	}
+	if len(goals) > 0 {
+		b.WriteString("\nGoals:\n")
+		for _, goal := range goals {
+			fmt.Fprintf(&b, "- %s: %s\n", goal.ID, goal.Description)
+		}
+	}
+	if len(constraints.ContraindicatedPatterns) > 0 || len(constraints.Accommodations) > 0 {
+		b.WriteString("\nConstraints:\n")
+		if len(constraints.ContraindicatedPatterns) > 0 {
+			fmt.Fprintf(&b, "- patterns to avoid: %s\n", strings.Join(constraints.ContraindicatedPatterns, "; "))
+		}
+		if len(constraints.Accommodations) > 0 {
+			fmt.Fprintf(&b, "- accommodations: %s\n", strings.Join(constraints.Accommodations, "; "))
+		}
+	}
+	if health.VolumeModifier < 1.0 || health.IntensityModifier < 1.0 {
+		fmt.Fprintf(&b, "\nRecovery status: volume at %.0f%%, intensity at %.0f%%. %s\n",
+			health.VolumeModifier*100, health.IntensityModifier*100, health.Rationale)
+	}
+	if facts := historyFacts(history); facts != "" {
+		fmt.Fprintf(&b, "\nHistory: %s\n", facts)
+	}
+	if userPrompt != "" {
+		fmt.Fprintf(&b, "\nUser request: %s\n", userPrompt)
+	}
+	return b.String()
+}
+
+// targetingRationale renders the targeting outcome as the internal
+// one-liner downstream prompts read.
+func targetingRationale(result pipeline.MuscleTargeting) string {
+	parts := make([]string, 0, 3)
+	if len(result.PrimaryMuscles) > 0 {
+		parts = append(parts, "emphasis on "+strings.Join(result.PrimaryMuscles, ", "))
+	}
+	if len(result.SecondaryMuscles) > 0 {
+		parts = append(parts, "maintenance on "+strings.Join(result.SecondaryMuscles, ", "))
+	}
+	if len(result.AvoidMuscles) > 0 {
+		parts = append(parts, "resting "+strings.Join(result.AvoidMuscles, ", "))
+	}
+	if len(parts) == 0 {
+		return "balanced session across the trainable muscles"
+	}
+	return strings.Join(parts, "; ")
+}
+
+// targetingSummary renders the targeting outcome as the one-liner the
+// creative copy node weaves into the training description.
+func targetingSummary(result pipeline.MuscleTargeting) string {
+	switch {
+	case len(result.PrimaryMuscles) > 0 && len(result.AvoidMuscles) > 0:
+		return fmt.Sprintf("targets %s while letting %s recover",
+			strings.Join(result.PrimaryMuscles, " and "), strings.Join(result.AvoidMuscles, " and "))
+	case len(result.PrimaryMuscles) > 0:
+		return "focuses on " + strings.Join(result.PrimaryMuscles, " and ")
+	case len(result.AvoidMuscles) > 0:
+		return "lets " + strings.Join(result.AvoidMuscles, " and ") + " recover"
+	default:
+		return "balanced session across the trainable muscles"
+	}
 }
 
 // resolvePrimaryMuscles settles the session's primary emphasis. user-selected muscles are an
@@ -745,7 +1515,7 @@ func runExercisesNode(
 	duration int,
 	explicitProgram bool,
 	derivedSummary string,
-) (pipeline.ExerciseSelection, model.LLMStep, error) {
+) (pipeline.ExerciseSelection, model.ModelStep, error) {
 	minExercises, maxExercises := exerciseCountBand(methodology, duration)
 	p := model.LLMPrompt{
 		System: prompt.NodeExercisesSystem(skipWarmupCooldown, minExercises, maxExercises, explicitProgram, derivedSummary),
@@ -763,12 +1533,12 @@ func runExercisesNode(
 	step, err := getLLM(StageReasoning, "").query(p,
 		queryOpts{temperature: 0.5, maxTokens: 4000, topP: 0.9, effort: effortMedium, timeout: 90 * time.Second})
 	if err != nil {
-		return pipeline.ExerciseSelection{}, step, err
+		return pipeline.ExerciseSelection{}, model.NewLLMStep(step), err
 	}
 
 	var result pipeline.ExerciseSelection
-	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
-		return pipeline.ExerciseSelection{}, step, fmt.Errorf("exercises unmarshal: %w", err)
+	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
+		return pipeline.ExerciseSelection{}, model.NewLLMStep(step), fmt.Errorf("exercises unmarshal: %w", err)
 	}
 
 	sanitizeSelection(&result)
@@ -786,7 +1556,7 @@ func runExercisesNode(
 		}
 		result.Exercises = workOnly
 	}
-	return result, step, nil
+	return result, model.NewLLMStep(step), nil
 }
 
 // sanitizeSelection strips annotations the LLM may have echoed into exercise IDs,
@@ -1032,7 +1802,7 @@ func runLoadNode(
 	duration int,
 	explicitProgram bool,
 	requestedProgram string,
-) (pipeline.LoadProgramming, model.LLMStep, error) {
+) (pipeline.LoadProgramming, model.ModelStep, error) {
 	p := model.LLMPrompt{
 		System: prompt.NodeLoadSystem(methodology, len(modifiers) > 0, len(modifierVariants) > 0, explicitProgram),
 		User: prompt.NodeLoadUser(
@@ -1055,14 +1825,14 @@ func runLoadNode(
 	step, err := getLLM(StageReasoning, "").query(p,
 		queryOpts{temperature: 0.2, maxTokens: maxTokens, effort: effortMedium, timeout: 90 * time.Second})
 	if err != nil {
-		return pipeline.LoadProgramming{}, step, err
+		return pipeline.LoadProgramming{}, model.NewLLMStep(step), err
 	}
 
 	var result pipeline.LoadProgramming
-	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
-		return pipeline.LoadProgramming{}, step, fmt.Errorf("load unmarshal: %w", err)
+	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
+		return pipeline.LoadProgramming{}, model.NewLLMStep(step), fmt.Errorf("load unmarshal: %w", err)
 	}
-	return result, step, nil
+	return result, model.NewLLMStep(step), nil
 }
 
 // progressionsForSelected keeps only the progression signals whose exercise is part of the
@@ -1095,7 +1865,7 @@ func runCreativeNode(
 	health pipeline.HealthAssessment,
 	derivedSummary string,
 	calibrationCoverage []pipeline.CalibrationCoverage,
-) (pipeline.CreativeCopy, model.LLMStep, error) {
+) (pipeline.CreativeCopy, model.ModelStep, error) {
 	p := model.LLMPrompt{
 		System: prompt.NodeCreativeSystem(language),
 		User: prompt.NodeCreativeUser(
@@ -1107,14 +1877,14 @@ func runCreativeNode(
 	step, err := getLLM(StageReasoning, "").query(p,
 		queryOpts{temperature: 0.8, maxTokens: 1500, topP: 0.9, effort: effortMinimal, timeout: 30 * time.Second})
 	if err != nil {
-		return pipeline.CreativeCopy{}, step, err
+		return pipeline.CreativeCopy{}, model.NewLLMStep(step), err
 	}
 
 	var result pipeline.CreativeCopy
-	if err := json.Unmarshal(extractJSON([]byte(step.Output.Data())), &result); err != nil {
-		return pipeline.CreativeCopy{}, step, fmt.Errorf("creative unmarshal: %w", err)
+	if err := json.Unmarshal(extractJSON([]byte(step.Output)), &result); err != nil {
+		return pipeline.CreativeCopy{}, model.NewLLMStep(step), fmt.Errorf("creative unmarshal: %w", err)
 	}
-	return result, step, nil
+	return result, model.NewLLMStep(step), nil
 }
 
 // assembleTraining converts DAG node outputs into a model.Training.

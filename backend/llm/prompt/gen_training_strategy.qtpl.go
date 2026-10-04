@@ -88,8 +88,7 @@ func StreamNodeStrategyUser(qw422016 *qt422016.Writer,
 	healthVolumeModifier float64,
 	healthIntensityModifier float64,
 	healthRationale string,
-	historyPatternNotes string,
-	historyBadSessionNotes string,
+	historyFacts string,
 	userPrompt string,
 	duration int,
 	skipWarmupCooldown bool,
@@ -133,16 +132,9 @@ Recovery status: volume at `)
 	}
 	qw422016.N().S(`
 `)
-	if historyPatternNotes != "" {
+	if historyFacts != "" {
 		qw422016.N().S(`History: `)
-		qw422016.E().S(historyPatternNotes)
-	}
-	qw422016.N().S(`
-`)
-	if historyBadSessionNotes != "" {
-		qw422016.N().S(`
-Recent issue: `)
-		qw422016.E().S(historyBadSessionNotes)
+		qw422016.E().S(historyFacts)
 	}
 	qw422016.N().S(`
 `)
@@ -162,14 +154,13 @@ func WriteNodeStrategyUser(qq422016 qtio422016.Writer,
 	healthVolumeModifier float64,
 	healthIntensityModifier float64,
 	healthRationale string,
-	historyPatternNotes string,
-	historyBadSessionNotes string,
+	historyFacts string,
 	userPrompt string,
 	duration int,
 	skipWarmupCooldown bool,
 ) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeStrategyUser(qw422016, goals, healthVolumeModifier, healthIntensityModifier, healthRationale, historyPatternNotes, historyBadSessionNotes, userPrompt, duration, skipWarmupCooldown)
+	StreamNodeStrategyUser(qw422016, goals, healthVolumeModifier, healthIntensityModifier, healthRationale, historyFacts, userPrompt, duration, skipWarmupCooldown)
 	qt422016.ReleaseWriter(qw422016)
 }
 
@@ -178,14 +169,13 @@ func NodeStrategyUser(
 	healthVolumeModifier float64,
 	healthIntensityModifier float64,
 	healthRationale string,
-	historyPatternNotes string,
-	historyBadSessionNotes string,
+	historyFacts string,
 	userPrompt string,
 	duration int,
 	skipWarmupCooldown bool,
 ) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeStrategyUser(qb422016, goals, healthVolumeModifier, healthIntensityModifier, healthRationale, historyPatternNotes, historyBadSessionNotes, userPrompt, duration, skipWarmupCooldown)
+	WriteNodeStrategyUser(qb422016, goals, healthVolumeModifier, healthIntensityModifier, healthRationale, historyFacts, userPrompt, duration, skipWarmupCooldown)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

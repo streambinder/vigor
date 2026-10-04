@@ -65,9 +65,9 @@ func (usage *LLMUsage) Add(other LLMUsage) {
 }
 
 // TrainingPrompt is the deprecated two-stage view of the LLM execution,
-// derived from the owner's LLMStep rows via LegacyPrompt. the persisted
-// source of truth is the llm_steps table: this shape only survives in the
-// read API until clients move to the steps array.
+// derived from the owner's LLM steps via LegacyPrompt. The persisted
+// source of truth is the model_steps table: this shape only survives in
+// the read API until clients move to the steps array.
 type TrainingPrompt struct {
 	Reasoning   LLMStep `json:"reasoning"`
 	Structuring LLMStep `json:"structuring"`
@@ -121,8 +121,8 @@ type Training struct {
 	References  datatypes.JSONType[[]TrainingReference] `gorm:"type:jsonb" json:"references" prompt:"-"`
 	FactIndices []int                                   `gorm:"-" json:"fact_indices" prompt:"Indices of [FACTS] used (e.g. [0,2]), empty if none"`
 	Routines    []Routine                               `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"routines" prompt:"Training routines"`
-	LLMSteps    []LLMStep                               `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"llm_steps" prompt:"-"`
-	// Prompt is a deprecated read-only projection of LLMSteps, computed by
+	ModelSteps  []ModelStep                             `gorm:"foreignKey:TrainingID;constraint:OnDelete:CASCADE" json:"model_steps" dart:"List<Map<String, dynamic>>" prompt:"-"`
+	// Prompt is a deprecated read-only projection of ModelSteps, computed by
 	// AfterFind; it is not a column and must never be written to.
 	Prompt TrainingPrompt `gorm:"-" json:"prompt" prompt:"-"`
 
@@ -190,7 +190,7 @@ type Activity struct {
 // AfterFind derives the deprecated two-stage prompt projection from the
 // loaded steps, so legacy readers keep their shape without a prompt column.
 func (t *Training) AfterFind(_ *gorm.DB) error {
-	t.Prompt = LegacyPrompt(t.LLMSteps)
+	t.Prompt = LegacyPrompt(t.ModelSteps)
 	return nil
 }
 
@@ -362,7 +362,7 @@ func (t Training) Clone(newUserID uuid.UUID) Training {
 	clone.UserID = newUserID
 	clone.ParentID = &t.ID
 	// steps belong to the original generation run: the clone starts with none
-	clone.LLMSteps = nil
+	clone.ModelSteps = nil
 	clone.Prompt = LegacyPrompt(nil)
 	clone.CompletedAt = nil
 	clone.CompletedIn = nil

@@ -95,8 +95,8 @@ Routine structure:
 {% for _, r := range loadResult.Routines %}{% code betweenBlocks := 0 %}{% if len(r.Blocks) > 0 %}{% code betweenBlocks = r.Blocks[0].Rest %}{% endif %}- {%s r.Type %}: {%d len(r.Blocks) %} block(s), {%d betweenBlocks %}s rest between blocks{% if r.Rest > 0 %}, {%d r.Rest %}s rest after routine{% endif %}
 {% endfor %}{% code workBlocks, totalRounds, workMovements := workStructureFacts(loadResult, exercises) %}Work structure: {%d workBlocks %} work block(s), {%d totalRounds %} round(s) counting block repeats, {%d workMovements %} distinct work movement(s). Movements are not rounds.
 {% endif %}
-{% if history.BadSessionNotes != "" %}
-Recent issue: {%s history.BadSessionNotes %}{% endif %}
+{% if history.RecentIssue != "" %}
+Recent issue: {%s history.RecentIssue %}{% endif %}
 {% if len(recentNames) > 0 %}
 Do not reuse these names: {%s strings.Join(recentNames, ", ") %}{% endif %}
 {% endfunc %}

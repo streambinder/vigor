@@ -266,10 +266,10 @@ Routine structure:
 	}
 	qw422016.N().S(`
 `)
-	if history.BadSessionNotes != "" {
+	if history.RecentIssue != "" {
 		qw422016.N().S(`
 Recent issue: `)
-		qw422016.E().S(history.BadSessionNotes)
+		qw422016.E().S(history.RecentIssue)
 	}
 	qw422016.N().S(`
 `)

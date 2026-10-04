@@ -6,7 +6,6 @@ import (
 
 	"github.com/streambinder/vigor/llm/pipeline"
 	"github.com/streambinder/vigor/model"
-	"gorm.io/datatypes"
 )
 
 func TestExerciseCountBand(t *testing.T) {
@@ -283,12 +282,12 @@ func TestNormalizeDerivedParams(t *testing.T) {
 }
 
 func TestOrderedSteps(t *testing.T) {
-	node := func(output string) model.LLMStep {
-		return model.LLMStep{Model: "m", Output: datatypes.NewJSONType(output)}
+	node := func(output string) model.ModelStep {
+		return model.NewLLMStep(model.LLMStep{Model: "m", Output: output})
 	}
 
 	t.Run("canonical round order with compact positions", func(t *testing.T) {
-		steps := orderedSteps(map[pipeline.GenerationStep]model.LLMStep{
+		steps := orderedSteps(map[pipeline.GenerationStep]model.ModelStep{
 			pipeline.StepWriteCopy:       node("copy"),
 			pipeline.StepAnalyzeRecovery: node("health"),
 			pipeline.StepPickStrategy:    node("strategy"),
@@ -312,7 +311,7 @@ func TestOrderedSteps(t *testing.T) {
 	})
 
 	t.Run("guided runs skip the derive pre-step without position gaps", func(t *testing.T) {
-		steps := orderedSteps(map[pipeline.GenerationStep]model.LLMStep{
+		steps := orderedSteps(map[pipeline.GenerationStep]model.ModelStep{
 			pipeline.StepSelectExercises: node("exercises"),
 		})
 		if len(steps) != 1 || steps[0].Position != 0 || steps[0].Step != string(pipeline.StepSelectExercises) {

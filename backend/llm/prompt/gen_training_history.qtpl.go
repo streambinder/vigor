@@ -20,41 +20,6 @@ var (
 	_ = qt422016.AcquireByteBuffer
 )
 
-func StreamNodeHistorySystem(qw422016 *qt422016.Writer) {
-	qw422016.N().S(`You are a training history analyst. Review recent training sessions and user feedback to identify progression signals.
-
-Output a JSON object with:
-- progressions: array of {exercise_id, action, from_weight, to_weight, signal} where action is one of: increase_weight, decrease_weight, increase_reps, decrease_reps, replace, add_modifier — from_weight and to_weight are numbers in kg, no units or labels
-- avoid_exercises: array of exercise IDs rated "impossible" or consistently "too_hard"
-- recent_names: array of training names from history (to avoid reusing)
-- pattern_notes: one sentence about overall patterns (e.g. "user finds leg sessions too hard")
-- bad_session_notes: one sentence if any recent session was rated bad, empty string otherwise
-- summary: one-sentence plain-language summary of what the history reveals (e.g. "user is progressing well on pressing movements but struggles with legs"), written conversationally without technical labels
-
-Rules:
-- "too_easy" → increase_weight or increase_reps or add_modifier
-- "too_hard" → decrease_weight or decrease_reps
-- "impossible" → replace (add to avoid_exercises)
-- "ok" means the load was right: never emit a progression for it — ok signals maintain, not progress
-- If quality was rated bad, note the reason
-- Be concise — only report actionable signals
-`)
-}
-
-func WriteNodeHistorySystem(qq422016 qtio422016.Writer) {
-	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeHistorySystem(qw422016)
-	qt422016.ReleaseWriter(qw422016)
-}
-
-func NodeHistorySystem() string {
-	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeHistorySystem(qb422016)
-	qs422016 := string(qb422016.B)
-	qt422016.ReleaseByteBuffer(qb422016)
-	return qs422016
-}
-
 func StreamNodeHistoryUser(qw422016 *qt422016.Writer,
 	recentTrainings []model.Training,
 	recentFeedback map[uuid.UUID]model.TrainingFeedback,
