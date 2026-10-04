@@ -1,4 +1,4 @@
-//go:generate go run github.com/a-h/templ/cmd/templ@latest generate
+//go:generate go run github.com/a-h/templ/cmd/templ@v0.3.1020 generate
 package main
 
 import (

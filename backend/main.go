@@ -1,5 +1,5 @@
-//go:generate go run github.com/valyala/quicktemplate/qtc@latest -skipLineComments -dir=llm/prompt
-//go:generate go run github.com/valyala/quicktemplate/qtc@latest -skipLineComments -dir=llm/rag
+//go:generate go run github.com/valyala/quicktemplate/qtc@v1.8.0 -skipLineComments -dir=llm/prompt
+//go:generate go run github.com/valyala/quicktemplate/qtc@v1.8.0 -skipLineComments -dir=llm/rag
 //go:generate sh -c "cd tools/codegen && go run . -models ../../model -output ../../../app/lib/models"
 //go:generate sh -c "cd tools/codegen && go run . -models ../../handler/dto -output ../../../app/lib/dto -model-import ../models/"
 //go:generate sh -c "cd ../app && dart run build_runner build"
