@@ -11,6 +11,8 @@ class Exercise {
   final String id;
   @JsonKey(name: 'name', defaultValue: '')
   final String name;
+  @JsonKey(name: 'aliases')
+  final List<String>? aliases;
   @JsonKey(name: 'equipment', defaultValue: [])
   final List<String> equipment;
   @JsonKey(name: 'muscles', defaultValue: [])
@@ -31,6 +33,7 @@ class Exercise {
   Exercise({
     required this.id,
     required this.name,
+    this.aliases,
     required this.equipment,
     required this.muscles,
     required this.reference,
