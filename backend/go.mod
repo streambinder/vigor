@@ -3,6 +3,7 @@ module github.com/streambinder/vigor
 go 1.26.1
 
 require (
+	github.com/Tangerg/typesafe-sdk-go v0.1.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/gofiber/fiber/v2 v2.52.15
 	github.com/golang-jwt/jwt/v5 v5.3.1

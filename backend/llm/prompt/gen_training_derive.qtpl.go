@@ -3,10 +3,6 @@
 
 package prompt
 
-import "strings"
-
-import "github.com/streambinder/vigor/model"
-
 import (
 	qtio422016 "io"
 
@@ -17,62 +13,6 @@ var (
 	_ = qtio422016.Copy
 	_ = qt422016.AcquireByteBuffer
 )
-
-func StreamNodeDeriveParamsSystem(qw422016 *qt422016.Writer, methodologies []model.Methodology, muscles, goals, equipment []string) {
-	methodologyIDs := make([]string, len(methodologies))
-	for i, m := range methodologies {
-		methodologyIDs[i] = m.ID
-	}
-
-	qw422016.N().S(`You are a training analyst. From the user's free text request — and the text of any linked articles provided — derive the tuning parameters of a guided training request.
-
-Output a JSON object with:
-- methodology: ID of the best-fitting methodology (empty string for auto)
-- goals: list of matching goal IDs
-- muscles: list of muscle IDs the session should emphasize
-- equipment: list of equipment IDs the program calls for
-- skip_warmup_cooldown: boolean, true only when the request clearly implies a work-only session
-- explicit_program: boolean, true only when the request (typically a linked article) fully specifies the session structure — specific movements with their sets/reps/durations scheme
-- movements: the program's exercises as plain movement names in the request's own words (e.g. "pull-up", "sit-up"), in exercise order — only when the request names a concrete set, otherwise an empty list
-- summary: compact plain-text schema of the requested program (session structure, sets x reps or durations per block, progression rules, focus). this is what downstream nodes design the session from, so keep it faithful to the source and under 1200 characters
-
-Rules:
-- use only IDs from the lists below — never invent new ones
-- describe programs with muscle and movement vocabulary, never with exercise IDs
-- when explicit_program is true, transcribe the source scheme faithfully into the summary — percentages, rep ladders and progression rules stay as stated
-- explicit_program requires the session scheme (movements with their sets/reps/durations) to be present in the request or article text provided below — never infer a program from a URL, its slug, or prior knowledge of the linked content
-- when no article text is provided below, derive strictly from the request itself
-- percentages and loads from articles stay in the summary as-is; absolute weights are calibrated downstream from the user's history
-- when the request is vague, stay minimal: empty lists, auto methodology, explicit_program false, no summary embellishment
-
-Valid methodology IDs: `)
-	qw422016.E().S(strings.Join(methodologyIDs, ", "))
-	qw422016.N().S(`
-Valid goal IDs: `)
-	qw422016.E().S(strings.Join(goals, ", "))
-	qw422016.N().S(`
-Valid muscle IDs: `)
-	qw422016.E().S(strings.Join(muscles, ", "))
-	qw422016.N().S(`
-Valid equipment IDs: `)
-	qw422016.E().S(strings.Join(equipment, ", "))
-	qw422016.N().S(`
-`)
-}
-
-func WriteNodeDeriveParamsSystem(qq422016 qtio422016.Writer, methodologies []model.Methodology, muscles, goals, equipment []string) {
-	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeDeriveParamsSystem(qw422016, methodologies, muscles, goals, equipment)
-	qt422016.ReleaseWriter(qw422016)
-}
-
-func NodeDeriveParamsSystem(methodologies []model.Methodology, muscles, goals, equipment []string) string {
-	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeDeriveParamsSystem(qb422016, methodologies, muscles, goals, equipment)
-	qs422016 := string(qb422016.B)
-	qt422016.ReleaseByteBuffer(qb422016)
-	return qs422016
-}
 
 func StreamNodeDeriveParamsUser(qw422016 *qt422016.Writer, freeText string, articles []string) {
 	qw422016.N().S(`REQUEST: `)

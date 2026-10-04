@@ -106,11 +106,10 @@ func (f *FlexFloat64) UnmarshalJSON(data []byte) error {
 // HistoryAnalysis is the output of the history analysis node.
 type HistoryAnalysis struct {
 	Summarizable
-	Progressions    []ProgressionSignal `json:"progressions"`
-	AvoidExercises  []string            `json:"avoid_exercises"` // exercises rated impossible or consistently too_hard
-	RecentNames     []string            `json:"recent_names"`    // training names to avoid reusing
-	PatternNotes    string              `json:"pattern_notes"`   // free-form observations (e.g. "user consistently rates leg sessions bad")
-	BadSessionNotes string              `json:"bad_session_notes"`
+	Progressions   []ProgressionSignal `json:"progressions"`
+	AvoidExercises []string            `json:"avoid_exercises"` // exercises rated impossible or consistently too_hard
+	RecentNames    []string            `json:"recent_names"`    // training names to avoid reusing
+	RecentIssue    string              `json:"recent_issue"`    // most recent badly rated session, as a plain fact
 }
 
 // ConstraintExtraction is the output of the constraint extraction node.

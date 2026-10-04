@@ -8,14 +8,21 @@ import (
 	"gorm.io/datatypes"
 )
 
-func step(name string, position int, model, output string, cost float64) LLMStep {
-	return LLMStep{
+func step(name string, position int, modelName, output string, cost float64) ModelStep {
+	return ModelStep{
 		Step:     name,
 		Position: position,
-		Model:    model,
-		Prompt:   datatypes.NewJSONType(LLMPrompt{System: "sys-" + name, User: "usr-" + name}),
-		Output:   datatypes.NewJSONType(output),
-		Usage:    datatypes.NewJSONType(LLMUsage{PromptTokens: 10, Cost: cost}),
+		Kind:     StepKindLLM,
+		LLM:      datatypes.NewJSONType(LLMStep{Model: modelName, Prompt: LLMPrompt{System: "sys-" + name, User: "usr-" + name}, Output: output, Usage: LLMUsage{PromptTokens: 10, Cost: cost}}),
+	}
+}
+
+func dmStep(name string, position int) ModelStep {
+	return ModelStep{
+		Step:     name,
+		Position: position,
+		Kind:     StepKindDM,
+		DM:       datatypes.NewJSONType(DMStep{Model: "typesafe/jev-1.13", StateHash: "abc"}),
 	}
 }
 
@@ -34,7 +41,7 @@ func TestLegacyPromptEmpty(t *testing.T) {
 func TestLegacyPromptFlowShape(t *testing.T) {
 	// flow sessions run a two-stage pipeline: reasoning then structure.
 	// steps are passed out of order to prove position ordering wins.
-	legacy := LegacyPrompt([]LLMStep{
+	legacy := LegacyPrompt([]ModelStep{
 		step(StepStructure, 1, "struct-model", "json-out", 0.2),
 		step(StepReasoning, 0, "reason-model", "reasoning-out", 0.1),
 	})
@@ -42,19 +49,19 @@ func TestLegacyPromptFlowShape(t *testing.T) {
 	if legacy.Reasoning.Model != "reason-model" {
 		t.Errorf("Reasoning.Model = %q, want reason-model", legacy.Reasoning.Model)
 	}
-	if got := legacy.Reasoning.Output.Data(); got != "reasoning-out" {
+	if got := legacy.Reasoning.Output; got != "reasoning-out" {
 		t.Errorf("Reasoning.Output = %q, want raw step output", got)
 	}
-	if got := legacy.Reasoning.Prompt.Data(); got.System != "sys-"+StepReasoning || got.User != "usr-"+StepReasoning {
+	if got := legacy.Reasoning.Prompt; got.System != "sys-"+StepReasoning || got.User != "usr-"+StepReasoning {
 		t.Errorf("single step should keep its own prompt, got %+v", got)
 	}
-	if legacy.Structuring.Model != "struct-model" || legacy.Structuring.Output.Data() != "json-out" {
+	if legacy.Structuring.Model != "struct-model" || legacy.Structuring.Output != "json-out" {
 		t.Errorf("Structuring = %+v, want structure step mapped one to one", legacy.Structuring)
 	}
 }
 
 func TestLegacyPromptDAGFold(t *testing.T) {
-	legacy := LegacyPrompt([]LLMStep{
+	legacy := LegacyPrompt([]ModelStep{
 		step("WRITE_COPY", 2, "model-b", "copy", 0.3),
 		step("ANALYZE_RECOVERY", 0, "model-a", "health", 0.1),
 		step("PICK_STRATEGY", 1, "model-a", "strategy", 0.2),
@@ -63,7 +70,7 @@ func TestLegacyPromptDAGFold(t *testing.T) {
 	if legacy.Reasoning.Model != "model-a" {
 		t.Errorf("Reasoning.Model = %q, want first step model", legacy.Reasoning.Model)
 	}
-	output := legacy.Reasoning.Output.Data()
+	output := legacy.Reasoning.Output
 	for i, header := range []string{"[ANALYZE_RECOVERY]", "[PICK_STRATEGY]", "[WRITE_COPY]"} {
 		if i == 0 && !strings.HasPrefix(output, header) {
 			t.Errorf("folded output should start with %s, got %q", header, output)
@@ -72,7 +79,7 @@ func TestLegacyPromptDAGFold(t *testing.T) {
 			t.Errorf("folded output missing header %s: %q", header, output)
 		}
 	}
-	got := legacy.Reasoning.Usage.Data()
+	got := legacy.Reasoning.Usage
 	if got.PromptTokens != 30 || got.Cost < 0.59 || got.Cost > 0.61 {
 		t.Errorf("folded usage = %+v, want 30 prompt tokens and ~0.6 cost", got)
 	}
@@ -83,12 +90,39 @@ func TestLegacyPromptDAGFold(t *testing.T) {
 }
 
 func TestLegacyPromptSkipsStructureInFold(t *testing.T) {
-	legacy := LegacyPrompt([]LLMStep{
+	legacy := LegacyPrompt([]ModelStep{
 		step(StepReasoning, 0, "model-a", "reasoning", 0.1),
 		step(StepStructure, 1, "model-b", "json", 0.1),
 		step("WRITE_COPY", 2, "model-c", "copy", 0.1),
 	})
-	if strings.Contains(legacy.Reasoning.Output.Data(), "["+StepStructure+"]") {
-		t.Errorf("structure step must not fold into reasoning: %q", legacy.Reasoning.Output.Data())
+	if strings.Contains(legacy.Reasoning.Output, "["+StepStructure+"]") {
+		t.Errorf("structure step must not fold into reasoning: %q", legacy.Reasoning.Output)
+	}
+}
+
+func TestLegacyPromptSkipsDecisionSteps(t *testing.T) {
+	// decision steps carry no prose output: the deprecated fold must not
+	// see them, and their model must not leak into the reasoning slot
+	legacy := LegacyPrompt([]ModelStep{
+		dmStep("ANALYZE_RECOVERY", 0),
+		step("PICK_STRATEGY", 1, "model-a", "strategy", 0.2),
+	})
+	if legacy.Reasoning.Model != "model-a" {
+		t.Errorf("Reasoning.Model = %q, want model-a (decision step skipped)", legacy.Reasoning.Model)
+	}
+	if got := legacy.Reasoning.Output; got != "[PICK_STRATEGY]\nstrategy\n\n" && !strings.Contains(got, "strategy") {
+		t.Errorf("folded output = %q, want strategy only", got)
+	}
+}
+
+func TestModelStepModelName(t *testing.T) {
+	if got := step("X", 0, "model-a", "", 0).ModelName(); got != "model-a" {
+		t.Errorf("llm step ModelName = %q, want model-a", got)
+	}
+	if got := dmStep("X", 0).ModelName(); got != "typesafe/jev-1.13" {
+		t.Errorf("dm step ModelName = %q, want typesafe/jev-1.13", got)
+	}
+	if got := (ModelStep{}).ModelName(); got != "" {
+		t.Errorf("empty step ModelName = %q, want empty", got)
 	}
 }

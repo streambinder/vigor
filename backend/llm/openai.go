@@ -11,7 +11,6 @@ import (
 	"github.com/openai/openai-go/shared"
 	"github.com/rs/zerolog/log"
 	"github.com/streambinder/vigor/model"
-	"gorm.io/datatypes"
 )
 
 type OpenAI struct {
@@ -31,7 +30,7 @@ func openAIClient(host, apiKey string) openai.Client {
 }
 
 func (llm *OpenAI) query(prompt model.LLMPrompt, opts queryOpts) (model.LLMStep, error) {
-	step := model.LLMStep{Model: llm.model, Prompt: datatypes.NewJSONType(prompt)}
+	step := model.LLMStep{Model: llm.model, Prompt: prompt}
 	start := time.Now()
 	ctx, cancel := context.WithTimeout(context.Background(), opts.timeout)
 	defer cancel()
@@ -93,14 +92,14 @@ func (llm *OpenAI) query(prompt model.LLMPrompt, opts queryOpts) (model.LLMStep,
 	// openai schema, so it only exists in the raw json.
 	rawCost := completion.Usage.JSON.ExtraFields["cost"].Raw()
 	cost, _ := strconv.ParseFloat(rawCost, 64) // absent on llama.cpp, zero is the right fallback
-	step.Usage = datatypes.NewJSONType(model.LLMUsage{
+	step.Usage = model.LLMUsage{
 		PromptTokens:     completion.Usage.PromptTokens,
 		CachedTokens:     completion.Usage.PromptTokensDetails.CachedTokens,
 		CompletionTokens: completion.Usage.CompletionTokens,
 		ReasoningTokens:  completion.Usage.CompletionTokensDetails.ReasoningTokens,
 		Cost:             cost,
-	})
-	usage := step.Usage.Data()
+	}
+	usage := step.Usage
 
 	usageLog := log.With().
 		Str("provider", llm.provider).
@@ -127,6 +126,6 @@ func (llm *OpenAI) query(prompt model.LLMPrompt, opts queryOpts) (model.LLMStep,
 	usageLog.Info().Msg("LLM query completed")
 
 	log.Debug().Str("provider", llm.provider).Dur("latency", time.Since(start)).Str("content", completionChoice.Message.Content).Msg("Received LLM response")
-	step.Output = datatypes.NewJSONType(completionChoice.Message.Content)
+	step.Output = completionChoice.Message.Content
 	return step, nil
 }

@@ -1,0 +1,361 @@
+package llm
+
+import (
+	"context"
+	"strings"
+	"testing"
+
+	"github.com/google/uuid"
+	"github.com/streambinder/vigor/dm"
+	"github.com/streambinder/vigor/llm/pipeline"
+	"github.com/streambinder/vigor/model"
+	"gorm.io/datatypes"
+)
+
+// fakeDecisionClient is a dm.Client returning canned answers, so the
+// decision nodes run deterministically in unit tests. It lives here and
+// nowhere else: production code never sees it.
+type fakeDecisionClient struct {
+	answers    map[string]dm.Answer
+	noul       float64 // default probability for noul questions without a canned answer
+	calls      [][]dm.Question
+	lastStates []string
+}
+
+func (f *fakeDecisionClient) Decide(_ context.Context, state string, questions []dm.Question) (*dm.Result, error) {
+	f.calls = append(f.calls, questions)
+	f.lastStates = append(f.lastStates, state)
+	out := make(map[string]dm.Answer, len(questions))
+	for _, q := range questions {
+		if a, ok := f.answers[q.ID]; ok {
+			a.Kind = q.Kind
+			out[q.ID] = a
+			continue
+		}
+		switch q.Kind {
+		case dm.KindNoul:
+			out[q.ID] = dm.Answer{Kind: q.Kind, Noul: f.noul}
+		case dm.KindScore:
+			out[q.ID] = dm.Answer{Kind: q.Kind, Score: 0}
+		case dm.KindChoice:
+			first := ""
+			for id := range q.Options {
+				if first == "" || id < first {
+					first = id
+				}
+			}
+			out[q.ID] = dm.Answer{Kind: q.Kind, Choice: first}
+		}
+	}
+	return &dm.Result{
+		Model:   "typesafe/jev-1.13",
+		Answers: out,
+		Usage:   dm.Usage{InputTokens: 42, Cost: 0.001},
+	}, nil
+}
+
+func installFakeDecisionClient(t *testing.T, fake *fakeDecisionClient) {
+	t.Helper()
+	prev := decisionClient
+	decisionClient = fake
+	t.Cleanup(func() { decisionClient = prev })
+}
+
+func TestDecideChunksAndMerges(t *testing.T) {
+	fake := &fakeDecisionClient{noul: 0.9}
+	installFakeDecisionClient(t, fake)
+
+	questions := make([]dm.Question, 0, 40)
+	for i := range 40 {
+		questions = append(questions, dm.Question{
+			ID:           "q" + strings.Repeat("x", i+1),
+			Kind:         dm.KindNoul,
+			Instructions: "claim",
+		})
+	}
+
+	answers, step, err := decide("some state", questions)
+	if err != nil {
+		t.Fatalf("decide: %v", err)
+	}
+	if len(answers) != 40 {
+		t.Errorf("answers = %d, want 40", len(answers))
+	}
+	if len(fake.calls) != 2 {
+		t.Errorf("client calls = %d, want 2 chunks", len(fake.calls))
+	}
+	if step.Kind != model.StepKindDM {
+		t.Errorf("step kind = %q, want dm", step.Kind)
+	}
+	payload := step.DM.Data()
+	if payload.Model != "typesafe/jev-1.13" || payload.Usage.InputTokens != 84 || len(payload.Questions) != 40 || len(payload.Answers) != 40 {
+		t.Errorf("payload = model %q tokens %d questions %d answers %d, want merged step",
+			payload.Model, payload.Usage.InputTokens, len(payload.Questions), len(payload.Answers))
+	}
+	if payload.StateHash == "" || payload.State != "some state" {
+		t.Errorf("payload state/hash missing: %+v", payload)
+	}
+}
+
+func TestDecideNoQuestionsSkipsClient(t *testing.T) {
+	fake := &fakeDecisionClient{}
+	installFakeDecisionClient(t, fake)
+
+	answers, step, err := decide("state", nil)
+	if err != nil {
+		t.Fatalf("decide: %v", err)
+	}
+	if len(answers) != 0 || len(fake.calls) != 0 {
+		t.Errorf("answers %d calls %d, want none", len(answers), len(fake.calls))
+	}
+	if step.DM.Data().State != "state" {
+		t.Errorf("step should still record the state, got %+v", step.DM.Data())
+	}
+}
+
+func TestModifierAt(t *testing.T) {
+	table := []float64{1.0, 0.9, 0.8}
+	if got := modifierAt(table, -1); got != 1.0 {
+		t.Errorf("below range = %v, want 1.0", got)
+	}
+	if got := modifierAt(table, 5); got != 0.8 {
+		t.Errorf("above range = %v, want 0.8", got)
+	}
+	if got := modifierAt(table, 0.5); got < 0.949 || got > 0.951 {
+		t.Errorf("midpoint = %v, want ~0.95", got)
+	}
+}
+
+func TestHealthNodeShortCircuit(t *testing.T) {
+	result, step, err := runHealthNode(nil)
+	if err != nil {
+		t.Fatalf("runHealthNode: %v", err)
+	}
+	if result.VolumeModifier != 1.0 || result.IntensityModifier != 1.0 {
+		t.Errorf("modifiers = %v/%v, want 1.0/1.0", result.VolumeModifier, result.IntensityModifier)
+	}
+	if step.Kind != model.StepKindDM {
+		t.Errorf("step kind = %q, want dm", step.Kind)
+	}
+}
+
+func TestHealthNodeDecision(t *testing.T) {
+	fake := &fakeDecisionClient{answers: map[string]dm.Answer{
+		"recovery":      {Score: 3.0},
+		"extend_warmup": {Noul: 0.9},
+	}}
+	installFakeDecisionClient(t, fake)
+
+	snapshot := &model.HealthSnapshot{
+		SleepHours: 5.5, SleepBaseline: 7.5, SleepDeviation: -26, SleepPresent: true,
+		BaselineDays: 14,
+	}
+	result, step, err := runHealthNode(snapshot)
+	if err != nil {
+		t.Fatalf("runHealthNode: %v", err)
+	}
+	if result.VolumeModifier != 0.7 || result.IntensityModifier != 0.8 {
+		t.Errorf("modifiers at score 3 = %v/%v, want 0.7/0.8", result.VolumeModifier, result.IntensityModifier)
+	}
+	if !result.ExtendWarmup {
+		t.Error("extend warmup = false, want true at noul 0.9")
+	}
+	if !strings.Contains(result.Rationale, "significantly fatigued") {
+		t.Errorf("rationale = %q, want level label", result.Rationale)
+	}
+	if step.DM.Data().Model != "typesafe/jev-1.13" {
+		t.Errorf("step model = %q, want the fake's model", step.DM.Data().Model)
+	}
+}
+
+func TestConstraintsNodeShortCircuit(t *testing.T) {
+	result, _, err := runConstraintsNode([]model.Profile{{FirstName: "A"}})
+	if err != nil {
+		t.Fatalf("runConstraintsNode: %v", err)
+	}
+	if len(result.ContraindicatedPatterns) != 0 || len(result.Accommodations) != 0 {
+		t.Errorf("result = %+v, want empty", result)
+	}
+}
+
+func TestConstraintsNodeDecision(t *testing.T) {
+	fake := &fakeDecisionClient{answers: map[string]dm.Answer{
+		"pattern:deep-knee-flexion":        {Noul: 0.92},
+		"pattern:overhead-pressing":        {Noul: 0.2},
+		"accommodation:reduce-squat-depth": {Noul: 0.8},
+	}, noul: 0.1}
+	installFakeDecisionClient(t, fake)
+
+	profile := model.Profile{
+		Data: datatypes.JSON(`{"injuries":[{"description":"torn ACL","year":2023}],"limitations":["knee instability"]}`),
+	}
+	result, _, err := runConstraintsNode([]model.Profile{profile})
+	if err != nil {
+		t.Fatalf("runConstraintsNode: %v", err)
+	}
+	if len(result.ContraindicatedPatterns) != 1 || result.ContraindicatedPatterns[0] != "deep knee flexion" {
+		t.Errorf("patterns = %v, want [deep knee flexion]", result.ContraindicatedPatterns)
+	}
+	if len(result.Accommodations) != 1 || result.Accommodations[0] != "reduce squat depth" {
+		t.Errorf("accommodations = %v, want [reduce squat depth]", result.Accommodations)
+	}
+	if result.Summary == "no movement restrictions" || result.Summary == "" {
+		t.Errorf("summary = %q, want a restriction summary", result.Summary)
+	}
+}
+
+func TestMatchMovements(t *testing.T) {
+	matched := matchMovements(
+		"3 rounds: 10 pull-up, 15 push-up, then squat jumps",
+		nil,
+		[]string{"Pull Up", "Push Up", "Incline Push Up", "Squat", "Squat Jump", "Deadlift"},
+	)
+	want := map[string]bool{"Pull Up": true, "Push Up": true, "Squat Jump": true}
+	if len(matched) != len(want) {
+		t.Fatalf("matched = %v, want keys of %v", matched, want)
+	}
+	for _, m := range matched {
+		if !want[m] {
+			t.Errorf("unexpected match %q", m)
+		}
+	}
+}
+
+func TestDeriveNodeDecision(t *testing.T) {
+	fake := &fakeDecisionClient{answers: map[string]dm.Answer{
+		"methodology":        {Choice: "circuit"},
+		"goal:hypertrophy":   {Noul: 0.9},
+		"muscle:chest":       {Noul: 0.8},
+		"equipment:dumbbell": {Noul: 0.7},
+		"explicit_program":   {Noul: 0.95},
+	}, noul: 0.1}
+	installFakeDecisionClient(t, fake)
+
+	derived, step, err := DeriveFreeTextParams(DeriveRequest{
+		FreeText:           "allenamento a circuito con 10 pull-up e 20 push-up",
+		Methodologies:      []model.Methodology{{ID: "circuit", Name: "Circuit", Description: "rounds"}, {ID: "strength", Name: "Strength", Description: "heavy"}},
+		AllGoals:           []model.Goal{{ID: "hypertrophy", Description: "muscle mass"}, {ID: "endurance", Description: "stamina"}},
+		ValidMuscles:       []string{"chest", "legs"},
+		ValidEquipment:     []string{"dumbbell", "barbell"},
+		MovementCandidates: []string{"Pull Up", "Push Up", "Squat"},
+	})
+	if err != nil {
+		t.Fatalf("DeriveFreeTextParams: %v", err)
+	}
+	if derived.Methodology != "circuit" {
+		t.Errorf("methodology = %q, want circuit", derived.Methodology)
+	}
+	if len(derived.Goals) != 1 || derived.Goals[0] != "hypertrophy" {
+		t.Errorf("goals = %v, want [hypertrophy]", derived.Goals)
+	}
+	if len(derived.Muscles) != 1 || derived.Muscles[0] != "chest" {
+		t.Errorf("muscles = %v, want [chest]", derived.Muscles)
+	}
+	if len(derived.Equipment) != 1 || derived.Equipment[0] != "dumbbell" {
+		t.Errorf("equipment = %v, want [dumbbell]", derived.Equipment)
+	}
+	if !derived.ExplicitProgram || len(derived.Movements) != 2 {
+		t.Errorf("explicit = %v movements = %v, want explicit with 2 movements", derived.ExplicitProgram, derived.Movements)
+	}
+	if !strings.Contains(derived.Summary, "Methodology: circuit") || !strings.Contains(derived.Summary, "pull-up") {
+		t.Errorf("summary = %q, want derivation + request words", derived.Summary)
+	}
+	if step.Kind != model.StepKindDM {
+		t.Errorf("step kind = %q, want dm", step.Kind)
+	}
+}
+
+func TestMuscleTargetingNodeDecision(t *testing.T) {
+	fake := &fakeDecisionClient{answers: map[string]dm.Answer{
+		"muscle:back":  {Score: 1.9},
+		"muscle:chest": {Score: 1.0},
+		"muscle:legs":  {Score: 0.1},
+	}}
+	installFakeDecisionClient(t, fake)
+
+	result, _, err := runMuscleTargetingNode(
+		nil, nil,
+		map[string]int{"back": 12, "chest": 10, "legs": 14},
+		pipeline.ConstraintExtraction{}, pipeline.HealthAssessment{VolumeModifier: 1, IntensityModifier: 1},
+		pipeline.HistoryAnalysis{}, "", false,
+	)
+	if err != nil {
+		t.Fatalf("runMuscleTargetingNode: %v", err)
+	}
+	if len(result.PrimaryMuscles) != 1 || result.PrimaryMuscles[0] != "back" {
+		t.Errorf("primary = %v, want [back]", result.PrimaryMuscles)
+	}
+	if len(result.SecondaryMuscles) != 1 || result.SecondaryMuscles[0] != "chest" {
+		t.Errorf("secondary = %v, want [chest]", result.SecondaryMuscles)
+	}
+	if len(result.AvoidMuscles) != 1 || result.AvoidMuscles[0] != "legs" {
+		t.Errorf("avoid = %v, want [legs]", result.AvoidMuscles)
+	}
+}
+
+func TestHistoryNodeProgressions(t *testing.T) {
+	fake := &fakeDecisionClient{answers: map[string]dm.Answer{
+		"progression:bench-press": {Choice: "increase_weight"},
+		"progression:deadlift":    {Choice: "maintain"},
+	}}
+	installFakeDecisionClient(t, fake)
+
+	trainingID := uuid.New()
+	trainings := []model.Training{
+		{
+			Name: "Push Day",
+			Routines: []model.Routine{{Blocks: []model.Block{{Activities: []model.Activity{
+				{ExerciseID: "bench-press", WeightKg: 60, Reps: 8},
+				{ExerciseID: "squat", WeightKg: 80, Reps: 5},
+				{ExerciseID: "deadlift", WeightKg: 100, Reps: 5},
+			}}}}},
+		},
+	}
+	feedback := map[uuid.UUID]model.TrainingFeedback{
+		trainingID: {},
+	}
+	// the training carries no id of its own in this fixture; key feedback by its zero id instead
+	trainings[0].ID = trainingID
+	feedback[trainingID] = model.TrainingFeedback{
+		ActivityFeedback: datatypes.JSON(`{"bench-press":"too_easy","squat":"impossible","deadlift":"too_hard"}`),
+	}
+
+	result, step, err := runHistoryNode(trainings, feedback, nil)
+	if err != nil {
+		t.Fatalf("runHistoryNode: %v", err)
+	}
+	if len(result.AvoidExercises) != 1 || result.AvoidExercises[0] != "squat" {
+		t.Errorf("avoid = %v, want [squat]", result.AvoidExercises)
+	}
+	byExercise := map[string]pipeline.ProgressionSignal{}
+	for _, p := range result.Progressions {
+		byExercise[p.ExerciseID] = p
+	}
+	bench, ok := byExercise["bench-press"]
+	if !ok || bench.Action != "increase_weight" || float64(bench.ToWeight) != 63 {
+		t.Errorf("bench progression = %+v, want increase_weight to 63kg", bench)
+	}
+	squat, ok := byExercise["squat"]
+	if !ok || squat.Action != "replace" {
+		t.Errorf("squat progression = %+v, want replace", squat)
+	}
+	if _, ok := byExercise["deadlift"]; ok {
+		t.Errorf("maintain must not produce a progression, got %+v", byExercise["deadlift"])
+	}
+	if step.Kind != model.StepKindDM {
+		t.Errorf("step kind = %q, want dm", step.Kind)
+	}
+	if len(result.RecentNames) != 1 || result.RecentNames[0] != "Push Day" {
+		t.Errorf("recent names = %v", result.RecentNames)
+	}
+}
+
+func TestHistoryNodeEmpty(t *testing.T) {
+	result, step, err := runHistoryNode(nil, nil, nil)
+	if err != nil {
+		t.Fatalf("runHistoryNode: %v", err)
+	}
+	if len(result.Progressions) != 0 || step.Kind != model.StepKindDM {
+		t.Errorf("result = %+v step kind %q, want empty dm step", result, step.Kind)
+	}
+}

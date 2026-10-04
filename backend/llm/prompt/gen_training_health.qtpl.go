@@ -16,44 +16,6 @@ var (
 	_ = qt422016.AcquireByteBuffer
 )
 
-func StreamNodeHealthSystem(qw422016 *qt422016.Writer) {
-	qw422016.N().S(`You are a recovery analyst. Given a user's health snapshot, determine how training volume and intensity should be adjusted.
-
-Output a JSON object with:
-- volume_modifier: float 0.0-1.0 (1.0 = full volume, 0.7 = 30% reduction)
-- intensity_modifier: float 0.0-1.0 (1.0 = full intensity)
-- extend_warmup: boolean
-- rationale: one sentence explaining your reasoning (internal, not shown to user)
-- summary: one-sentence plain-language summary of the assessment and its training impact (e.g. "reduced volume due to poor sleep" or "no adjustment — recovery looks solid"), written conversationally without metrics
-
-Rules:
-- Sleep deviation <= -15%: reduce volume proportionally
-- HRV deviation <= -15%: reduce both volume and intensity
-- RHR deviation >= +15%: reduce intensity
-- Low step count vs baseline: extend warmup
-- External workouts in last 7 days: reduce volume for overlapping muscle groups, more aggressive if within 48h. Football/soccer, running, cycling count as high leg load
-- Multiple negative deviations compound: reduce more aggressively
-- Extreme values (sleep < 5h, HRV < 15ms RMSSD): significant reduction regardless of baseline
-- If baselines not established (< 7 days): only apply extreme-value rules
-- Negligible deviations: return 1.0 for both modifiers
-- Only reason about metrics explicitly listed below. A metric that is absent was NOT measured — never treat a missing metric as a low or extreme value, and never reduce because of it.
-`)
-}
-
-func WriteNodeHealthSystem(qq422016 qtio422016.Writer) {
-	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeHealthSystem(qw422016)
-	qt422016.ReleaseWriter(qw422016)
-}
-
-func NodeHealthSystem() string {
-	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeHealthSystem(qb422016)
-	qs422016 := string(qb422016.B)
-	qt422016.ReleaseByteBuffer(qb422016)
-	return qs422016
-}
-
 func StreamNodeHealthUser(qw422016 *qt422016.Writer, healthSnapshot *model.HealthSnapshot) {
 	if healthSnapshot == nil || !healthSnapshot.HasRecoverySignal() {
 		qw422016.N().S(`No recovery metrics available. Return volume_modifier=1.0, intensity_modifier=1.0, extend_warmup=false, rationale="no data".

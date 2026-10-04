@@ -44,8 +44,8 @@ type FlowSession struct {
 	References  datatypes.JSONType[[]TrainingReference] `gorm:"type:jsonb" json:"references" prompt:"-"`
 	FactIndices []int                                   `gorm:"-" json:"fact_indices" prompt:"Indices of [FACTS] used (0-based)"`
 	Poses       datatypes.JSON                          `gorm:"type:jsonb" json:"poses" dart:"List<FlowPose>" prompt:"-"`
-	LLMSteps    []LLMStep                               `gorm:"foreignKey:FlowSessionID;constraint:OnDelete:CASCADE" json:"llm_steps" prompt:"-"`
-	// Prompt is a deprecated read-only projection of LLMSteps, computed by
+	ModelSteps  []ModelStep                             `gorm:"foreignKey:FlowSessionID;constraint:OnDelete:CASCADE" json:"model_steps" dart:"List<Map<String, dynamic>>" prompt:"-"`
+	// Prompt is a deprecated read-only projection of ModelSteps, computed by
 	// AfterFind; it is not a column and must never be written to.
 	Prompt TrainingPrompt `gorm:"-" json:"prompt" prompt:"-"`
 
@@ -67,7 +67,7 @@ type FlowPose struct {
 // AfterFind derives the deprecated two-stage prompt projection from the
 // loaded steps, so legacy readers keep their shape without a prompt column.
 func (s *FlowSession) AfterFind(_ *gorm.DB) error {
-	s.Prompt = LegacyPrompt(s.LLMSteps)
+	s.Prompt = LegacyPrompt(s.ModelSteps)
 	return nil
 }
 

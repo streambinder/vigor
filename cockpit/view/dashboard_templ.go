@@ -395,8 +395,8 @@ func Dashboard(data DashboardData) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if len(t.LLMSteps) == 0 {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<button class=\"btn-json\" disabled title=\"No LLM steps recorded\">Trajectory</button>")
+				if len(t.ModelSteps) == 0 {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<button class=\"btn-json\" disabled title=\"No steps recorded\">Trajectory</button>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -899,10 +899,10 @@ func showReportJSON(index int, kind string) templ.ComponentScript {
 
 func showTrainingTrajectory(index int) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_showTrainingTrajectory_8da7`,
-		Function: `function __templ_showTrainingTrajectory_8da7(index){var el = document.getElementById('training-' + index);
+		Name: `__templ_showTrainingTrajectory_b2d2`,
+		Function: `function __templ_showTrainingTrajectory_b2d2(index){var el = document.getElementById('training-' + index);
 	var data = JSON.parse(el.textContent);
-	var steps = (data.llm_steps || []).slice().sort(function(a, b) { return a.position - b.position; });
+	var steps = (data.model_steps || []).slice().sort(function(a, b) { return a.position - b.position; });
 	var out = document.getElementById('modal-json');
 	function esc(value) {
 		return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -914,25 +914,38 @@ func showTrainingTrajectory(index int) templ.ComponentScript {
 	var html = '';
 	for (var i = 0; i < steps.length; i++) {
 		var step = steps[i];
-		var prompt = step.prompt || {};
 		html += '<div class="trajectory-step">'
-			+ '<div class="trajectory-step-header">' + esc(step.position) + ' · ' + esc(step.step || 'STEP') + '</div>'
-			+ field('Model', step.model, false)
+			+ '<div class="trajectory-step-header">' + esc(step.position) + ' · ' + esc(step.step || 'STEP') + ' · ' + esc(step.kind || '') + '</div>'
 			+ field('ID', step.id, false)
 			+ field('Created', step.created_at, false)
-			+ field('Updated', step.updated_at, false)
-			+ field('Usage', JSON.stringify(step.usage || {}, null, 2), true)
-			+ field('System prompt', prompt.system || '', true)
-			+ field('User prompt', prompt.user || '', true)
-			+ field('Output', typeof step.output === 'string' ? step.output : JSON.stringify(step.output, null, 2), true)
-			+ '</div>';
+			+ field('Updated', step.updated_at, false);
+		if (step.kind === 'dm') {
+			var dm = step.dm || {};
+			html += field('Model', dm.model, false)
+				+ field('Latency', dm.latency_ms != null ? dm.latency_ms + ' ms' : '', false)
+				+ field('Request ID', dm.request_id || '', false)
+				+ field('State hash', dm.state_hash || '', false)
+				+ field('Usage', JSON.stringify(dm.usage || {}, null, 2), true)
+				+ field('State', dm.state || '', true)
+				+ field('Questions', JSON.stringify(dm.questions || [], null, 2), true)
+				+ field('Answers', JSON.stringify(dm.answers || [], null, 2), true);
+		} else {
+			var payload = step.llm || {};
+			var prompt = payload.prompt || {};
+			html += field('Model', payload.model, false)
+				+ field('Usage', JSON.stringify(payload.usage || {}, null, 2), true)
+				+ field('System prompt', prompt.system || '', true)
+				+ field('User prompt', prompt.user || '', true)
+				+ field('Output', typeof payload.output === 'string' ? payload.output : JSON.stringify(payload.output, null, 2), true);
+		}
+		html += '</div>';
 	}
 	document.getElementById('modal-title').textContent = 'Trajectory';
 	out.innerHTML = html;
 	document.getElementById('modal').classList.add('open');
 }`,
-		Call:       templ.SafeScript(`__templ_showTrainingTrajectory_8da7`, index),
-		CallInline: templ.SafeScriptInline(`__templ_showTrainingTrajectory_8da7`, index),
+		Call:       templ.SafeScript(`__templ_showTrainingTrajectory_b2d2`, index),
+		CallInline: templ.SafeScriptInline(`__templ_showTrainingTrajectory_b2d2`, index),
 	}
 }
 

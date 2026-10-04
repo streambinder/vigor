@@ -50,7 +50,7 @@ var (
 // and reference the derivation.
 type promptDerivation struct {
 	derived        pipeline.DerivedParams
-	step           model.LLMStep
+	step           model.ModelStep
 	allGoals       []model.Goal
 	validMuscles   []string
 	validEquipment []string
@@ -75,6 +75,14 @@ func derivePromptParams(promptText string, articles []string, onProgress llm.DAG
 	if err := database.Knowledge.Find(&allEquipment).Error; err != nil {
 		return nil, err
 	}
+	var allExercises []model.Exercise
+	if err := database.Knowledge.Select("name").Find(&allExercises).Error; err != nil {
+		return nil, err
+	}
+	movementCandidates := make([]string, len(allExercises))
+	for i, ex := range allExercises {
+		movementCandidates[i] = ex.Name
+	}
 
 	derivation := &promptDerivation{
 		allGoals:       allGoals,
@@ -89,12 +97,13 @@ func derivePromptParams(promptText string, articles []string, onProgress llm.DAG
 	}
 
 	derivation.derived, derivation.step, err = llm.DeriveFreeTextParams(llm.DeriveRequest{
-		FreeText:       promptText,
-		Articles:       articles,
-		Methodologies:  methodologies,
-		AllGoals:       allGoals,
-		ValidMuscles:   derivation.validMuscles,
-		ValidEquipment: derivation.validEquipment,
+		FreeText:           promptText,
+		Articles:           articles,
+		Methodologies:      methodologies,
+		AllGoals:           allGoals,
+		ValidMuscles:       derivation.validMuscles,
+		ValidEquipment:     derivation.validEquipment,
+		MovementCandidates: movementCandidates,
 	})
 	if err != nil {
 		return nil, err
@@ -595,7 +604,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 
 	llmStart := time.Now()
 	var training *model.Training
-	var steps []model.LLMStep
+	var steps []model.ModelStep
 	var actualMuscles []string
 	// totalled across attempts, like llmStart, so a retried generation reports what it really cost
 	var usage model.LLMUsage
@@ -604,7 +613,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		var err error
 		training, steps, err = llm.GenTrainingDAG(dagRequest, onProgress)
 		for _, step := range steps {
-			usage.Add(step.Usage.Data())
+			usage.Add(step.LLM.Data().Usage)
 		}
 		if err != nil {
 			legacy := model.LegacyPrompt(steps)
@@ -771,7 +780,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	training.References = datatypes.NewJSONType(refs)
 	training.FactIndices = nil // clear after resolution
 
-	training.LLMSteps = steps
+	training.ModelSteps = steps
 	training.Prompt = legacy
 	if gym != nil {
 		training.GymID = &gym.ID
@@ -847,7 +856,7 @@ func GetTrainings(userID uuid.UUID) ([]model.Training, error) {
 		Preload("Routines", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Preload("Routines.Blocks", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Preload("Routines.Blocks.Activities", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
-		Preload("LLMSteps", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("ModelSteps", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Where("user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?)", userID, userID).
 		Order("(completed_at IS NOT NULL), COALESCE(completed_at, created_at) desc").
 		Find(&trainings).Error
@@ -985,10 +994,10 @@ func UpdateTrainingFeedback(userID uuid.UUID, trainingID string, quality *bool, 
 // projection for endpoints returning the training after a write, where the
 // initial fetch skipped preloads to keep Save side-effect free.
 func loadTrainingSteps(training *model.Training) {
-	if err := database.DB.Order("position").Where("training_id = ?", training.ID).Find(&training.LLMSteps).Error; err != nil {
-		log.Error().Err(err).Str("training", training.ID.String()).Msg("failed to load training llm steps")
+	if err := database.DB.Order("position").Where("training_id = ?", training.ID).Find(&training.ModelSteps).Error; err != nil {
+		log.Error().Err(err).Str("training", training.ID.String()).Msg("failed to load training model steps")
 	}
-	training.Prompt = model.LegacyPrompt(training.LLMSteps)
+	training.Prompt = model.LegacyPrompt(training.ModelSteps)
 }
 
 // upsertTrainingFeedback creates or updates a per-user feedback row.
