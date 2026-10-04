@@ -414,6 +414,28 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 		}
 	})
 
+	t.Run("non-english explicit program pins survive selection and load", func(t *testing.T) {
+		req := baseRequest()
+		req.Methodology = &circuit
+		req.Duration = 45
+		req.PinnedExercises = exercisesByID(work, "pull-up", "push-up", "air-squat")
+		req.Derived = &pipeline.DerivedParams{
+			ExplicitProgram: true,
+			Movements:       []string{"trazioni", "push-up", "air squat"},
+			Summarizable:    pipeline.Summarizable{Summary: "Programma esplicito: 5 round di 10 trazioni, 20 push-up e 30 air squat, in quest'ordine."},
+		}
+		req.UserPrompt = req.Derived.Summary
+
+		training, _ := run(t, req)
+
+		ids := workExerciseIDs(training)
+		for _, pin := range req.PinnedExercises {
+			if !ids[pin.ID] {
+				t.Errorf("pinned exercise %q missing from the generated training", pin.ID)
+			}
+		}
+	})
+
 	t.Run("contraindicated overhead exercise is excluded from every phase", func(t *testing.T) {
 		req := baseRequest()
 		req.Methodology = &strength

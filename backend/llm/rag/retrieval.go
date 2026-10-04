@@ -236,9 +236,10 @@ func pinProgramMovements(movements []string, catalog []model.Exercise) []model.E
 }
 
 // plainestProgramMatch resolves a program movement to one catalog exercise ID.
-// An exact normalized ID or name match wins outright. Otherwise every
-// token-subset candidate — the same recall gate util.FuzzyLookup applies —
-// is ranked toward the plainest variant: fewest tokens beyond the movement,
+// An exact normalized ID or name match wins outright, then a match on the
+// exercise aliases the knowledge data carries. Otherwise every token-subset
+// candidate — the same recall gate util.FuzzyLookup applies — is ranked
+// toward the plainest variant: fewest tokens beyond the movement,
 // non-assisted before assisted, a qualifier naming one of the exercise's own
 // muscles (the canonical pattern, e.g. chest-dip) before other variations
 // (e.g. the equipment-free reverse-dip), least required equipment, then ID
@@ -253,6 +254,9 @@ func plainestProgramMatch(movement string, catalog []model.Exercise) (string, bo
 		if util.NormalizeIDText(ex.ID) == norm || util.NormalizeIDText(ex.Name) == norm {
 			return ex.ID, true
 		}
+	}
+	if id, ok := aliasProgramMatch(norm, catalog); ok {
+		return id, true
 	}
 
 	movementTokens := strings.Split(norm, "-")
@@ -302,12 +306,35 @@ func plainestProgramMatch(movement string, catalog []model.Exercise) (string, bo
 
 	candidates := make([]util.MatchCandidate, len(catalog))
 	for i, ex := range catalog {
-		candidates[i] = util.MatchCandidate{
-			Match: ex.ID,
-			Keys:  []string{util.NormalizeIDText(ex.ID), util.NormalizeIDText(ex.Name)},
+		keys := []string{util.NormalizeIDText(ex.ID), util.NormalizeIDText(ex.Name)}
+		for _, alias := range ex.Aliases {
+			keys = append(keys, util.NormalizeIDText(alias))
 		}
+		candidates[i] = util.MatchCandidate{Match: ex.ID, Keys: keys}
 	}
 	return util.FuzzyLookup(movement, candidates)
+}
+
+// aliasProgramMatch resolves a program movement through the aliases the
+// knowledge data carries for each exercise: an alias equal to the movement
+// wins, otherwise the longest alias fully contained in the movement names
+// it, with catalog order breaking ties.
+func aliasProgramMatch(norm string, catalog []model.Exercise) (string, bool) {
+	movementTokens := strings.Split(norm, "-")
+	best, bestLen := "", 0
+	for _, ex := range catalog {
+		for _, alias := range ex.Aliases {
+			aliasNorm := util.NormalizeIDText(alias)
+			if aliasNorm == norm {
+				return ex.ID, true
+			}
+			aliasTokens := strings.Split(aliasNorm, "-")
+			if len(aliasTokens) > bestLen && len(aliasTokens) <= len(movementTokens) && tokenSubset(aliasTokens, movementTokens) {
+				best, bestLen = ex.ID, len(aliasTokens)
+			}
+		}
+	}
+	return best, best != ""
 }
 
 // tokenSubset reports whether every token of needle appears in haystack.

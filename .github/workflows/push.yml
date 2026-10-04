@@ -140,6 +140,8 @@ jobs:
           cache-dependency-path: backend/go.sum
       - run: go test -race -timeout 300s ./...
         working-directory: backend
+      - run: go test -race -timeout 300s ./...
+        working-directory: knowledge
 
   go-generate:
     runs-on: ubuntu-latest

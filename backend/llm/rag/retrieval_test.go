@@ -229,4 +229,47 @@ func TestPinProgramMovements(t *testing.T) {
 			t.Fatalf("unexpected pins: %+v", pins)
 		}
 	})
+
+	t.Run("italian movement names pin their english exercises", func(t *testing.T) {
+		catalog := []model.Exercise{
+			{ID: "pull-up", Name: "Pull Up", Aliases: []string{"trazioni", "trazioni alla sbarra"}},
+			{ID: "trx-inverted-row", Name: "TRX Inverted Row"},
+			{ID: "push-up", Name: "Push Up"},
+			{ID: "air-squat", Name: "Air Squat"},
+		}
+		pins := pinProgramMovements([]string{"trazioni", "push-up", "air squat"}, catalog)
+		if len(pins) != 3 || pins[0].ID != "pull-up" || pins[1].ID != "push-up" || pins[2].ID != "air-squat" {
+			t.Fatalf("unexpected pins: %+v", pins)
+		}
+	})
+
+	t.Run("multilingual aliases pin across languages", func(t *testing.T) {
+		catalog := []model.Exercise{
+			{ID: "pull-up", Name: "Pull Up", Aliases: []string{"dominadas"}},
+			{ID: "push-up", Name: "Push Up", Aliases: []string{"pompes"}},
+			{ID: "bodyweight-squat", Name: "Bodyweight Squat", Aliases: []string{"Kniebeugen"}},
+			{ID: "chest-dip", Name: "Chest Dip", Equipment: []string{"dip station"}, Aliases: []string{"parallele"}},
+		}
+		pins := pinProgramMovements([]string{"dominadas", "pompes", "kniebeugen", "parallele"}, catalog)
+		want := []string{"pull-up", "push-up", "bodyweight-squat", "chest-dip"}
+		if len(pins) != len(want) {
+			t.Fatalf("unexpected pins: %+v", pins)
+		}
+		for i, id := range want {
+			if pins[i].ID != id {
+				t.Fatalf("unexpected pins: %+v", pins)
+			}
+		}
+	})
+
+	t.Run("alias inside a longer movement name still pins", func(t *testing.T) {
+		catalog := []model.Exercise{
+			{ID: "pull-up", Name: "Pull Up", Aliases: []string{"trazioni alla sbarra"}},
+			{ID: "trx-inverted-row", Name: "TRX Inverted Row"},
+		}
+		pins := pinProgramMovements([]string{"trazioni alla sbarra con presa larga"}, catalog)
+		if len(pins) != 1 || pins[0].ID != "pull-up" {
+			t.Fatalf("unexpected pins: %+v", pins)
+		}
+	})
 }
