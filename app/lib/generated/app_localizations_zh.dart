@@ -487,9 +487,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get leaveTraining => '离开训练';
 
   @override
-  String get showAiReasoning => '显示 AI 推理';
-
-  @override
   String get reportIssue => '报告问题';
 
   @override
@@ -573,9 +570,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get failedToShuffleExercise => '更换动作失败';
-
-  @override
-  String get reasoning => '推理';
 
   @override
   String get strategy => '策略';

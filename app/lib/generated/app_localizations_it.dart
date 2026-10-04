@@ -504,9 +504,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get leaveTraining => 'Abbandona Allenamento';
 
   @override
-  String get showAiReasoning => 'Mostra ragionamento IA';
-
-  @override
   String get reportIssue => 'Segnala problema';
 
   @override
@@ -592,9 +589,6 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get failedToShuffleExercise => 'Impossibile cambiare esercizio';
-
-  @override
-  String get reasoning => 'Ragionamento';
 
   @override
   String get strategy => 'Strategia';

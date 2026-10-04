@@ -487,9 +487,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get leaveTraining => 'トレーニングから退出';
 
   @override
-  String get showAiReasoning => 'AI推論を表示';
-
-  @override
   String get reportIssue => '問題を報告';
 
   @override
@@ -573,9 +570,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get failedToShuffleExercise => 'エクササイズの変更に失敗しました';
-
-  @override
-  String get reasoning => '推論';
 
   @override
   String get strategy => '戦略';
