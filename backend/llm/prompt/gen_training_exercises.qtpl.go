@@ -31,10 +31,10 @@ Rules:
 - Annotations in parentheses (weighted, timer-only, reps-only, recent) are metadata — not part of the ID
 - For work exercises: cover the primary muscles with higher count, secondary muscles with 1-2 exercises
 - If muscles to rest are listed, never pick exercises from their groups
-- Avoid exercises matching any contraindicated pattern
+- Avoid exercises matching any contraindicated pattern in every phase (warmup, work, and cooldown) — there is no mobility or warmup exemption
 - Prefer favorite exercises when they fit
 - Prefer non-recent exercises over recent ones for variety
-- Avoid exercises listed in avoid_exercises
+- Avoid exercises listed in avoid_exercises in every phase (warmup, work, and cooldown) — there is no mobility or warmup exemption
 `)
 	if explicitProgram {
 		qw422016.N().S(`- The user request fully specifies this session's program: `)
@@ -161,9 +161,24 @@ Favorites: `)
 		qw422016.N().D(len(warmupExercises))
 		qw422016.N().S(` options
 `)
-		for _, exercise := range warmupExercises {
+		for i, exercise := range warmupExercises {
 			qw422016.E().S(exercise.ID)
-			qw422016.N().S(`, `)
+			if len(exercise.Muscles) > 0 || len(exercise.Equipment) > 0 {
+				qw422016.N().S(` (`)
+				if len(exercise.Muscles) > 0 {
+					qw422016.E().S(exercise.Muscles[0])
+				}
+				if len(exercise.Muscles) > 0 && len(exercise.Equipment) > 0 {
+					qw422016.N().S(`, `)
+				}
+				if len(exercise.Equipment) > 0 {
+					qw422016.E().S(strings.Join(exercise.Equipment, ", "))
+				}
+				qw422016.N().S(`)`)
+			}
+			if i < len(warmupExercises)-1 {
+				qw422016.N().S(`, `)
+			}
 		}
 		qw422016.N().S(`
 
