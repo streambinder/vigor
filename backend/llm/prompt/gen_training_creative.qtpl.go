@@ -56,6 +56,7 @@ Description rules:
 - If no warmup/cooldown, skip structural mentions of them
 - Never invent reasons for a decision: report only motives stated in the pipeline inputs — a substitution "replacing recent X" stays exactly that, never upgrade it to a medical or protective claim — and describe what was done without a why when no reason is given
 - When accommodations are listed, repeat them literally and neutrally — never reinterpret them as protection, treatment, prevention, diagnosis, or medical advice
+- Movements are not rounds: never state a round or block count that contradicts the Routine structure and Work structure facts below; if unsure of the count, describe the shape (for example "ascends then descends") without inventing a number
 
 `)
 }
@@ -252,6 +253,16 @@ Routine structure:
 			qw422016.N().S(`
 `)
 		}
+		workBlocks, totalRounds, workMovements := workStructureFacts(loadResult, exercises)
+
+		qw422016.N().S(`Work structure: `)
+		qw422016.N().D(workBlocks)
+		qw422016.N().S(` work block(s), `)
+		qw422016.N().D(totalRounds)
+		qw422016.N().S(` round(s) counting block repeats, `)
+		qw422016.N().D(workMovements)
+		qw422016.N().S(` distinct work movement(s). Movements are not rounds.
+`)
 	}
 	qw422016.N().S(`
 `)

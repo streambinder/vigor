@@ -35,6 +35,7 @@ Description rules:
 - If no warmup/cooldown, skip structural mentions of them
 - Never invent reasons for a decision: report only motives stated in the pipeline inputs — a substitution "replacing recent X" stays exactly that, never upgrade it to a medical or protective claim — and describe what was done without a why when no reason is given
 - When accommodations are listed, repeat them literally and neutrally — never reinterpret them as protection, treatment, prevention, diagnosis, or medical advice
+- Movements are not rounds: never state a round or block count that contradicts the Routine structure and Work structure facts below; if unsure of the count, describe the shape (for example "ascends then descends") without inventing a number
 
 {% endfunc %}
 
@@ -92,7 +93,8 @@ Contraindications:
 {% if len(loadResult.Routines) > 0 %}
 Routine structure:
 {% for _, r := range loadResult.Routines %}{% code betweenBlocks := 0 %}{% if len(r.Blocks) > 0 %}{% code betweenBlocks = r.Blocks[0].Rest %}{% endif %}- {%s r.Type %}: {%d len(r.Blocks) %} block(s), {%d betweenBlocks %}s rest between blocks{% if r.Rest > 0 %}, {%d r.Rest %}s rest after routine{% endif %}
-{% endfor %}{% endif %}
+{% endfor %}{% code workBlocks, totalRounds, workMovements := workStructureFacts(loadResult, exercises) %}Work structure: {%d workBlocks %} work block(s), {%d totalRounds %} round(s) counting block repeats, {%d workMovements %} distinct work movement(s). Movements are not rounds.
+{% endif %}
 {% if history.BadSessionNotes != "" %}
 Recent issue: {%s history.BadSessionNotes %}{% endif %}
 {% if len(recentNames) > 0 %}
