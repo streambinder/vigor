@@ -1026,12 +1026,6 @@ abstract class AppLocalizations {
   /// **'Leave Training'**
   String get leaveTraining;
 
-  /// No description provided for @showAiReasoning.
-  ///
-  /// In en, this message translates to:
-  /// **'Show AI reasoning'**
-  String get showAiReasoning;
-
   /// No description provided for @reportIssue.
   ///
   /// In en, this message translates to:
@@ -1181,12 +1175,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to shuffle exercise'**
   String get failedToShuffleExercise;
-
-  /// No description provided for @reasoning.
-  ///
-  /// In en, this message translates to:
-  /// **'Reasoning'**
-  String get reasoning;
 
   /// No description provided for @strategy.
   ///

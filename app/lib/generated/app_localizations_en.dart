@@ -501,9 +501,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leaveTraining => 'Leave Training';
 
   @override
-  String get showAiReasoning => 'Show AI reasoning';
-
-  @override
   String get reportIssue => 'Report issue';
 
   @override
@@ -587,9 +584,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToShuffleExercise => 'Failed to shuffle exercise';
-
-  @override
-  String get reasoning => 'Reasoning';
 
   @override
   String get strategy => 'Strategy';

@@ -506,9 +506,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get leaveTraining => 'Training Verlassen';
 
   @override
-  String get showAiReasoning => 'KI-Begründung anzeigen';
-
-  @override
   String get reportIssue => 'Problem melden';
 
   @override
@@ -594,9 +591,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get failedToShuffleExercise => 'Übung konnte nicht gewechselt werden';
-
-  @override
-  String get reasoning => 'Begründung';
 
   @override
   String get strategy => 'Strategie';

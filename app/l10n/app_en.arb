@@ -232,7 +232,6 @@
   "shareWithUser": "Share with User",
   "deleteTraining": "Delete Training",
   "leaveTraining": "Leave Training",
-  "showAiReasoning": "Show AI reasoning",
   "reportIssue": "Report issue",
   "deleteTrainingConfirmation": "Delete \"{name}\"? This cannot be undone.",
   "@deleteTrainingConfirmation": {
@@ -299,7 +298,6 @@
   "shuffleExercise": "Shuffle exercise",
   "exerciseShuffled": "Exercise shuffled",
   "failedToShuffleExercise": "Failed to shuffle exercise",
-  "reasoning": "Reasoning",
   "strategy": "Strategy",
   "typeSelection": "Type Selection",
   "progression": "Progression",

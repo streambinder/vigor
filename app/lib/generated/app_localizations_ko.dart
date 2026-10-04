@@ -487,9 +487,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get leaveTraining => '트레이닝 나가기';
 
   @override
-  String get showAiReasoning => 'AI 추론 표시';
-
-  @override
   String get reportIssue => '문제 보고';
 
   @override
@@ -573,9 +570,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get failedToShuffleExercise => '운동 변경 실패';
-
-  @override
-  String get reasoning => '추론';
 
   @override
   String get strategy => '전략';

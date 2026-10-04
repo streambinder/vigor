@@ -500,9 +500,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get leaveTraining => 'Покинуть Тренировку';
 
   @override
-  String get showAiReasoning => 'Показать рассуждения ИИ';
-
-  @override
   String get reportIssue => 'Сообщить о проблеме';
 
   @override
@@ -586,9 +583,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get failedToShuffleExercise => 'Не удалось сменить упражнение';
-
-  @override
-  String get reasoning => 'Рассуждение';
 
   @override
   String get strategy => 'Стратегия';
