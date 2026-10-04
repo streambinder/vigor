@@ -44,10 +44,7 @@ type FlowSession struct {
 	References  datatypes.JSONType[[]TrainingReference] `gorm:"type:jsonb" json:"references" prompt:"-"`
 	FactIndices []int                                   `gorm:"-" json:"fact_indices" prompt:"Indices of [FACTS] used (0-based)"`
 	Poses       datatypes.JSON                          `gorm:"type:jsonb" json:"poses" dart:"List<FlowPose>" prompt:"-"`
-	ModelSteps  []ModelStep                             `gorm:"foreignKey:FlowSessionID;constraint:OnDelete:CASCADE" json:"model_steps" dart:"List<Map<String, dynamic>>" prompt:"-"`
-	// Prompt is a deprecated read-only projection of ModelSteps, computed by
-	// AfterFind; it is not a column and must never be written to.
-	Prompt TrainingPrompt `gorm:"-" json:"prompt" prompt:"-"`
+	Trajectory  *Trajectory                             `gorm:"foreignKey:FlowSessionID;constraint:OnDelete:SET NULL" json:"trajectory" prompt:"-"`
 
 	CompletedAt *time.Time `gorm:"type:timestamptz" json:"completed_at" prompt:"-"`
 	CreatedAt   time.Time  `gorm:"type:timestamptz;default:now()" json:"created_at" prompt:"-"`
@@ -64,10 +61,10 @@ type FlowPose struct {
 	Detail     json.RawMessage `json:"detail" dart:"Map<String, dynamic>" prompt:"-"`
 }
 
-// AfterFind derives the deprecated two-stage prompt projection from the
-// loaded steps, so legacy readers keep their shape without a prompt column.
+// AfterFind folds the loaded trajectory steps into the trajectory
+// accounting, so readers get models and costs without a second pass.
 func (s *FlowSession) AfterFind(_ *gorm.DB) error {
-	s.Prompt = LegacyPrompt(s.ModelSteps)
+	s.Trajectory.Summarize()
 	return nil
 }
 

@@ -16,26 +16,22 @@ const (
 )
 
 // ModelStep is one round of a generation pipeline, persisted as its own
-// row: every DAG node (or flow stage) maps to exactly one step pointing
-// at its owner training or flow session, with the request, the typed
-// result and the telemetry of whichever model produced it.
-//
-// codegen:skip — the app has no step rendering; trajectory inspection is
-// the cockpit's job, and the app sees steps only as untyped maps.
+// row inside the owner's trajectory: every DAG node (or flow stage) maps
+// to exactly one step, with the request, the typed result and the
+// telemetry of whichever model produced it.
 type ModelStep struct {
-	ID            uuid.UUID  `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
-	TrainingID    *uuid.UUID `gorm:"type:uuid;index;uniqueIndex:idx_model_steps_training_position,priority:1" json:"training_id"`
-	FlowSessionID *uuid.UUID `gorm:"type:uuid;index;uniqueIndex:idx_model_steps_flow_position,priority:1" json:"flow_session_id"`
+	ID           uuid.UUID  `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" dart:"String"`
+	TrajectoryID *uuid.UUID `gorm:"type:uuid;index;uniqueIndex:idx_model_steps_trajectory_position,priority:1" json:"trajectory_id" dart:"String"`
 
 	Step     string `gorm:"not null" json:"step"`
-	Position int    `gorm:"not null;uniqueIndex:idx_model_steps_training_position,priority:2;uniqueIndex:idx_model_steps_flow_position,priority:2" json:"position"`
+	Position int    `gorm:"not null;uniqueIndex:idx_model_steps_trajectory_position,priority:2" json:"position"`
 
 	Kind string                      `gorm:"not null" json:"kind"`
-	LLM  datatypes.JSONType[LLMStep] `gorm:"type:jsonb" json:"llm,omitempty"`
-	DM   datatypes.JSONType[DMStep]  `gorm:"type:jsonb" json:"dm,omitempty"`
+	LLM  datatypes.JSONType[LLMStep] `gorm:"type:jsonb" json:"llm,omitempty" dart:"Map<String, dynamic>"`
+	DM   datatypes.JSONType[DMStep]  `gorm:"type:jsonb" json:"dm,omitempty" dart:"Map<String, dynamic>"`
 
 	CreatedAt time.Time `gorm:"type:timestamptz;default:now()" json:"created_at"`
-	UpdatedAt time.Time `gorm:"type:timestamptz;default:now()" json:"updated_at"`
+	UpdatedAt time.Time `gorm:"type:timestamptz;default:now()" json:"-"`
 }
 
 // TableName pins the table name: gorm pluralization of initialisms is not

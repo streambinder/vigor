@@ -71,8 +71,7 @@ func GetSharedTraining(tokenStr string) (*model.Training, *model.Profile, error)
 
 	// strip sensitive fields
 	training.Request = ""
-	training.ModelSteps = nil
-	training.Prompt = model.LegacyPrompt(nil)
+	training.Trajectory = nil
 
 	return &training, &profile, nil
 }

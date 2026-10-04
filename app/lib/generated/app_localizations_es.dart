@@ -2104,4 +2104,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get exerciseTypeWheelchair => 'Wheelchair';
+
+  @override
+  String get trajectory => 'Trayectoria';
 }

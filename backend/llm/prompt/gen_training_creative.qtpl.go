@@ -46,7 +46,7 @@ Description rules:
 - Every sentence should map to a pipeline step — cover all 7 steps: recovery/health assessment, history-based progression, movement constraints, methodology choice, muscle targeting, exercise selection, and programming approach
 - Always name the session's muscle targets explicitly — never leave them implied by the exercise list alone
 - If muscles to rest are listed, mention what was deliberately left to recover and why
-- If a calibration coverage section is present, those muscles are trained by construction: never describe a muscle with forced calibration coverage as resting or recovering — describe it as light calibration work alongside the session focus
+- If a calibration coverage section is present, those muscles are trained by construction: never describe a muscle with forced calibration coverage as resting or recovering — describe it as light calibration work alongside the session focus. Keep resting muscles and calibration muscles in separate sentences, so the resting ones never read as covering the calibrated ones
 - If a step's summary is empty or states "no adjustment"/"no change", skip it naturally — do NOT invent coverage
 - Write conversationally, as if explaining the workout to the user
 - Do NOT use raw data labels like "too_easy", "too_hard", or technical metric names

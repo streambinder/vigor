@@ -18,7 +18,7 @@ func TestEnsureMuscleCoverage(t *testing.T) {
 		selection := pipeline.ExerciseSelection{
 			Exercises: []pipeline.SelectedExercise{{ExerciseID: "chest-a", Phase: "work"}},
 		}
-		got, injected := ensureMuscleCoverage(selection, nil, candidates, nil, false)
+		got, injected := ensureMuscleCoverage(selection, nil, candidates, nil, false, nil, nil)
 		if len(got.Exercises) != 1 {
 			t.Errorf("got %d exercises, want 1", len(got.Exercises))
 		}
@@ -32,7 +32,7 @@ func TestEnsureMuscleCoverage(t *testing.T) {
 			Exercises: []pipeline.SelectedExercise{{ExerciseID: "chest-a", Phase: "work"}},
 		}
 		gaps := map[string]int{"chest": 0}
-		got, injected := ensureMuscleCoverage(selection, gaps, candidates, nil, false)
+		got, injected := ensureMuscleCoverage(selection, gaps, candidates, nil, false, nil, nil)
 		if len(got.Exercises) != 1 {
 			t.Errorf("got %d exercises, want 1", len(got.Exercises))
 		}
@@ -48,7 +48,7 @@ func TestEnsureMuscleCoverage(t *testing.T) {
 			Exercises: []pipeline.SelectedExercise{{ExerciseID: "chest-a", Phase: "warmup"}},
 		}
 		gaps := map[string]int{"chest": 0}
-		got, injected := ensureMuscleCoverage(selection, gaps, candidates, nil, false)
+		got, injected := ensureMuscleCoverage(selection, gaps, candidates, nil, false, nil, nil)
 		if len(got.Exercises) != 2 {
 			t.Fatalf("got %d exercises, want 2", len(got.Exercises))
 		}
@@ -61,39 +61,59 @@ func TestEnsureMuscleCoverage(t *testing.T) {
 	})
 
 	t.Run("uncovered gap muscle appends first valid candidate", func(t *testing.T) {
+		// the selection's exclusion list is an LLM opinion: it cannot veto a
+		// calibration requirement, so the excluded-but-safe candidate is used.
 		selection := pipeline.ExerciseSelection{
 			Exercises: []pipeline.SelectedExercise{{ExerciseID: "chest-a", Phase: "work"}},
-			Excluded:  []pipeline.ExcludedExercise{{ExerciseID: "back-a", Reason: "recent"}},
+			Excluded:  []pipeline.ExcludedExercise{{ExerciseID: "back-a", Reason: "targets resting muscle"}},
 		}
 		gaps := map[string]int{"back": 0}
-		// back-a is excluded → no candidate left for back → nothing appended
-		got, injected := ensureMuscleCoverage(selection, gaps, candidates, nil, false)
-		if len(got.Exercises) != 1 {
-			t.Errorf("got %d exercises, want 1", len(got.Exercises))
+		got, injected := ensureMuscleCoverage(selection, gaps, candidates, nil, false, nil, nil)
+		if len(got.Exercises) != 2 {
+			t.Fatalf("got %d exercises, want 2", len(got.Exercises))
 		}
-		if len(injected) != 0 {
-			t.Errorf("got %d injected, want 0", len(injected))
+		if injected["back"] != "back-a" {
+			t.Errorf("injected back = %s, want back-a", injected["back"])
 		}
 	})
 
-	t.Run("uncovered gap muscle picks non-excluded candidate", func(t *testing.T) {
+	t.Run("avoid-listed and contraindicated candidates are never injected", func(t *testing.T) {
 		selection := pipeline.ExerciseSelection{
-			Excluded: []pipeline.ExcludedExercise{{ExerciseID: "chest-a", Reason: "contraindicated"}},
+			Exercises: []pipeline.SelectedExercise{{ExerciseID: "chest-a", Phase: "work"}},
+		}
+		gaps := map[string]int{"back": 0}
+
+		// back-a is the only back candidate: on the history avoid list → no injection
+		got, injected := ensureMuscleCoverage(selection, gaps, candidates, nil, false, nil, []string{"back-a"})
+		if len(got.Exercises) != 1 || len(injected) != 0 {
+			t.Errorf("avoid-listed candidate injected: exercises=%d injected=%v", len(got.Exercises), injected)
+		}
+
+		// same with a contraindicated pattern covering the exercise name
+		got, injected = ensureMuscleCoverage(selection, gaps, candidates, nil, false, []string{"back a"}, nil)
+		if len(got.Exercises) != 1 || len(injected) != 0 {
+			t.Errorf("contraindicated candidate injected: exercises=%d injected=%v", len(got.Exercises), injected)
+		}
+	})
+
+	t.Run("uncovered gap muscle picks first safe candidate over the exclusion list", func(t *testing.T) {
+		selection := pipeline.ExerciseSelection{
+			Excluded: []pipeline.ExcludedExercise{{ExerciseID: "chest-a", Reason: "targets resting muscle"}},
 		}
 		gaps := map[string]int{"chest": 0}
-		// chest-a excluded → chest-b appended
-		got, injected := ensureMuscleCoverage(selection, gaps, candidates, nil, false)
+		// exclusion does not demote chest-a: first safe candidate wins
+		got, injected := ensureMuscleCoverage(selection, gaps, candidates, nil, false, nil, nil)
 		if len(got.Exercises) != 1 {
 			t.Fatalf("got %d exercises, want 1", len(got.Exercises))
 		}
-		if got.Exercises[0].ExerciseID != "chest-b" {
-			t.Errorf("appended %s, want chest-b", got.Exercises[0].ExerciseID)
+		if got.Exercises[0].ExerciseID != "chest-a" {
+			t.Errorf("appended %s, want chest-a", got.Exercises[0].ExerciseID)
 		}
 		if got.Exercises[0].Phase != "work" {
 			t.Errorf("appended phase %s, want work", got.Exercises[0].Phase)
 		}
-		if injected["chest"] != "chest-b" {
-			t.Errorf("injected chest = %s, want chest-b", injected["chest"])
+		if injected["chest"] != "chest-a" {
+			t.Errorf("injected chest = %s, want chest-a", injected["chest"])
 		}
 	})
 
@@ -102,7 +122,7 @@ func TestEnsureMuscleCoverage(t *testing.T) {
 			Exercises: []pipeline.SelectedExercise{{ExerciseID: "chest-a", Phase: "work"}},
 		}
 		gaps := map[string]int{"back": 0}
-		got, _ := ensureMuscleCoverage(selection, gaps, candidates, []string{"back-a"}, false)
+		got, _ := ensureMuscleCoverage(selection, gaps, candidates, []string{"back-a"}, false, nil, nil)
 		if len(got.Exercises) != 1 {
 			t.Errorf("recent candidate should be skipped, got %d exercises", len(got.Exercises))
 		}
@@ -113,7 +133,7 @@ func TestEnsureMuscleCoverage(t *testing.T) {
 			Exercises: []pipeline.SelectedExercise{{ExerciseID: "chest-a", Phase: "work"}},
 		}
 		gaps := map[string]int{"back": 0}
-		got, injected := ensureMuscleCoverage(selection, gaps, candidates, nil, true)
+		got, injected := ensureMuscleCoverage(selection, gaps, candidates, nil, true, nil, nil)
 		if len(got.Exercises) != 1 {
 			t.Errorf("got %d exercises, want 1", len(got.Exercises))
 		}

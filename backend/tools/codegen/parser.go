@@ -183,8 +183,13 @@ func (p *Parser) parseField(field *ast.Field) Field {
 			f.IsRequired = true
 		}
 
-		// Parse dart tag (overrides generated Dart type)
+		// Parse dart tag (overrides generated Dart type; "-" hides the
+		// field from the app entirely)
 		if dartType := tag.Get("dart"); dartType != "" {
+			if dartType == "-" {
+				f.JsonOmit = true
+				return f
+			}
 			f.DartOverride = dartType
 		}
 	}

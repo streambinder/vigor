@@ -510,14 +510,54 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
     }
   }
 
-  void _showReasoningDialog(BuildContext context) {
+  void _showTrajectoryDialog(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final reasoningText = training.prompt.reasoning.output?.isNotEmpty == true
-        ? training.prompt.reasoning.output!
-        : training.prompt.reasoning.prompt.user;
-    final reasoningModel = training.prompt.reasoning.model;
-    final structuringModel = training.prompt.structuring.model;
+    final trajectory = training.trajectory;
+    if (trajectory == null) return;
+    final steps = [...trajectory.steps]..sort((a, b) => a.position.compareTo(b.position));
+
+    String fmt(num value) => value % 1 == 0 ? value.toInt().toString() : value.toStringAsFixed(2);
+
+    String answerText(Map<String, dynamic> answer) {
+      final id = answer['id']?.toString() ?? '';
+      final kind = answer['kind']?.toString() ?? '';
+      if (kind == 'choice') {
+        final choice = answer['choice']?.toString() ?? '';
+        final probabilities = answer['probabilities'];
+        final probability = probabilities is Map ? probabilities[choice] : null;
+        return '**$id**: $choice${probability is num ? ' (${fmt(probability)})' : ''}';
+      }
+      final value = kind == 'score' ? answer['score'] : answer['noul'];
+      return '**$id**: ${value is num ? fmt(value) : '—'}';
+    }
+
+    final buffer = StringBuffer();
+    for (final step in steps) {
+      final isDm = step.kind == 'dm';
+      final payload = isDm ? step.dM : step.lLM;
+      final model = payload?['model']?.toString() ?? '';
+      buffer.writeln('## ${step.position + 1}. ${step.step} · ${isDm ? 'DM' : 'LLM'}${model.isEmpty ? '' : ' · $model'}');
+      if (isDm) {
+        final answers = payload?['answers'];
+        if (answers is List) {
+          for (final answer in answers) {
+            if (answer is Map<String, dynamic>) {
+              buffer.writeln('- ${answerText(answer)}');
+            }
+          }
+        }
+      } else {
+        final output = payload?['output']?.toString() ?? '';
+        if (output.isNotEmpty) buffer.writeln(output);
+      }
+      buffer.writeln();
+    }
+
+    final subtitle = [
+      if (trajectory.models.isNotEmpty) trajectory.models.join(' → '),
+      '\$${trajectory.usage.cost.toStringAsFixed(4)}',
+    ].join(' · ');
 
     showDialog(
       context: context,
@@ -532,10 +572,10 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.reasoning, style: VigorTypography.headline.copyWith(color: VigorColors.textPrimary(ctx))),
+                  Text(l10n.trajectory, style: VigorTypography.headline.copyWith(color: VigorColors.textPrimary(ctx))),
                   const SizedBox(height: VigorSpacing.xs),
                   Text(
-                    '$reasoningModel → $structuringModel',
+                    subtitle,
                     style: VigorTypography.caption.copyWith(color: VigorColors.stone),
                   ),
                 ],
@@ -552,7 +592,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
               borderRadius: VigorRadius.radiusMd,
             ),
             child: Markdown(
-              data: reasoningText,
+              data: buffer.toString(),
               selectable: true,
               shrinkWrap: true,
               styleSheet: MarkdownStyleSheet(
@@ -1095,8 +1135,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
           case 'add_partner':
             _showAddPartnerDialog(context);
             break;
-          case 'reasoning':
-            _showReasoningDialog(context);
+          case 'trajectory':
+            _showTrajectoryDialog(context);
             break;
           case 'report':
             _showReportDialog(context);
@@ -1148,16 +1188,17 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
               ],
             ),
           ),
-        PopupMenuItem(
-          value: 'reasoning',
-          child: Row(
-            children: [
-              const Icon(Icons.psychology, size: 20, color: VigorColors.stone),
-              const SizedBox(width: VigorSpacing.sm),
-              Text(l10n.showAiReasoning, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
-            ],
+        if (training.trajectory != null && training.trajectory!.steps.isNotEmpty)
+          PopupMenuItem(
+            value: 'trajectory',
+            child: Row(
+              children: [
+                const Icon(Icons.psychology, size: 20, color: VigorColors.stone),
+                const SizedBox(width: VigorSpacing.sm),
+                Text(l10n.trajectory, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+              ],
+            ),
           ),
-        ),
         const PopupMenuDivider(),
         PopupMenuItem(
           value: 'report',

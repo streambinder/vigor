@@ -395,7 +395,7 @@ func Dashboard(data DashboardData) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if len(t.ModelSteps) == 0 {
+				if t.Trajectory == nil || len(t.Trajectory.Steps) == 0 {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<button class=\"btn-json\" disabled title=\"No steps recorded\">Trajectory</button>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -899,10 +899,11 @@ func showReportJSON(index int, kind string) templ.ComponentScript {
 
 func showTrainingTrajectory(index int) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_showTrainingTrajectory_b2d2`,
-		Function: `function __templ_showTrainingTrajectory_b2d2(index){var el = document.getElementById('training-' + index);
+		Name: `__templ_showTrainingTrajectory_6b0d`,
+		Function: `function __templ_showTrainingTrajectory_6b0d(index){var el = document.getElementById('training-' + index);
 	var data = JSON.parse(el.textContent);
-	var steps = (data.model_steps || []).slice().sort(function(a, b) { return a.position - b.position; });
+	var trajectory = data.trajectory || {};
+	var steps = (trajectory.steps || []).slice().sort(function(a, b) { return a.position - b.position; });
 	var out = document.getElementById('modal-json');
 	function esc(value) {
 		return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -911,14 +912,18 @@ func showTrainingTrajectory(index int) templ.ComponentScript {
 		var body = value === '' || value == null ? '<span class="trajectory-empty">-</span>' : (pre ? '<pre class="trajectory-value">' + esc(value) + '</pre>' : esc(value));
 		return '<div class="trajectory-field"><div class="trajectory-label">' + label + '</div>' + body + '</div>';
 	}
-	var html = '';
+	var usage = trajectory.usage || {};
+	var html = '<div class="trajectory-step">'
+		+ '<div class="trajectory-step-header">Trajectory</div>'
+		+ field('Models', (trajectory.models || []).join(' → '), false)
+		+ field('Cost', usage.cost != null ? '$' + Number(usage.cost).toFixed(5) : '', false)
+		+ '</div>';
 	for (var i = 0; i < steps.length; i++) {
 		var step = steps[i];
 		html += '<div class="trajectory-step">'
 			+ '<div class="trajectory-step-header">' + esc(step.position) + ' · ' + esc(step.step || 'STEP') + ' · ' + esc(step.kind || '') + '</div>'
 			+ field('ID', step.id, false)
-			+ field('Created', step.created_at, false)
-			+ field('Updated', step.updated_at, false);
+			+ field('Created', step.created_at, false);
 		if (step.kind === 'dm') {
 			var dm = step.dm || {};
 			html += field('Model', dm.model, false)
@@ -944,8 +949,8 @@ func showTrainingTrajectory(index int) templ.ComponentScript {
 	out.innerHTML = html;
 	document.getElementById('modal').classList.add('open');
 }`,
-		Call:       templ.SafeScript(`__templ_showTrainingTrajectory_b2d2`, index),
-		CallInline: templ.SafeScriptInline(`__templ_showTrainingTrajectory_b2d2`, index),
+		Call:       templ.SafeScript(`__templ_showTrainingTrajectory_6b0d`, index),
+		CallInline: templ.SafeScriptInline(`__templ_showTrainingTrajectory_6b0d`, index),
 	}
 }
 

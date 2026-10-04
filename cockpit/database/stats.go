@@ -80,7 +80,7 @@ func GetReports() ([]model.Report, error) {
 	err := DB.Order("created_at DESC").Limit(100).
 		Preload("User").
 		Preload("Training.Routines.Blocks.Activities").
-		Preload("Training.ModelSteps", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Training.Trajectory.Steps", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Preload("Activity").
 		Find(&reports).Error
 	return reports, err
@@ -94,7 +94,7 @@ func GetTrainings() ([]model.Training, error) {
 	err := DB.Order("created_at DESC").Limit(100).
 		Preload("User").
 		Preload("Routines.Blocks.Activities").
-		Preload("ModelSteps", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
+		Preload("Trajectory.Steps", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		Find(&trainings).Error
 	return trainings, err
 }
@@ -123,9 +123,10 @@ func GetBadQualityPerModel() ([]ModelQualityPoint, error) {
 	err := DB.Raw(`
 		SELECT s.llm->>'model' AS model, COUNT(DISTINCT f.training_id) AS count
 		FROM training_feedbacks f
+		JOIN trajectories t ON t.training_id = f.training_id
 		JOIN LATERAL (
 			SELECT llm FROM model_steps
-			WHERE training_id = f.training_id
+			WHERE trajectory_id = t.id
 			  AND kind = 'llm'
 			  AND llm->>'model' IS NOT NULL
 			  AND llm->>'model' != ''

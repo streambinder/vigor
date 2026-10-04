@@ -685,5 +685,6 @@
   "exerciseTypeSwimmingOpenWater": "Nuoto acque libere",
   "exerciseTypeSwimmingPool": "Nuoto in piscina",
   "exerciseTypeWeightlifting": "Sollevamento pesi",
-  "exerciseTypeWheelchair": "Carrozzina"
+  "exerciseTypeWheelchair": "Carrozzina",
+  "trajectory": "Traiettoria"
 }

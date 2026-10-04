@@ -4019,6 +4019,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wheelchair'**
   String get exerciseTypeWheelchair;
+
+  /// No description provided for @trajectory.
+  ///
+  /// In en, this message translates to:
+  /// **'Trajectory'**
+  String get trajectory;
 }
 
 class _AppLocalizationsDelegate

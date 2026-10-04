@@ -251,6 +251,8 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		req.WorkExercises,
 		req.RecentExerciseIDs,
 		explicitProgram,
+		constraintResult.ContraindicatedPatterns,
+		historyResult.AvoidExercises,
 	)
 
 	// build exercise metadata maps for the load node (mode tags, weighted flags)
