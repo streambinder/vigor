@@ -305,6 +305,16 @@ func descriptionRestSentence(description, muscle string) (string, bool) {
 	return "", false
 }
 
+func workBlockCount(training *model.Training) int {
+	count := 0
+	for _, routine := range training.Routines {
+		if routine.Type == "work" {
+			count += len(routine.Blocks)
+		}
+	}
+	return count
+}
+
 func TestGenTrainingDAGTrajectories(t *testing.T) {
 	requireReasoningProvider(t)
 	// release pooled provider connections so goleak in TestMain does
@@ -504,6 +514,14 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 				if equipment == "barbell" || equipment == "dumbbell" {
 					t.Errorf("bodyweight article program generated weighted exercise %q", id)
 				}
+			}
+		}
+		// the ladder's five movements expand to many rounds: the copy
+		// must not equate the movement count with the round count.
+		if blocks := workBlockCount(training); blocks != 5 {
+			desc := strings.ToLower(training.Description)
+			if strings.Contains(desc, "five rounds") || strings.Contains(desc, "5 rounds") {
+				t.Errorf("description conflates movements with rounds: %d work blocks described as five rounds: %q", blocks, training.Description)
 			}
 		}
 	})

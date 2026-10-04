@@ -5,6 +5,7 @@ import (
 	"math"
 	"strings"
 
+	"github.com/streambinder/vigor/llm/pipeline"
 	"github.com/streambinder/vigor/model"
 )
 
@@ -111,6 +112,51 @@ func formatNumber(n int) string {
 		result = append(result, byte(c))
 	}
 	return string(result)
+}
+
+// workStructureFacts derives the ground-truth work counts the copy node must
+// respect: work blocks, total rounds counting block repeats, and distinct work
+// movements. Blocks and rounds come from the load programming so the numbers
+// describe the session actually built; movements come from the selection's
+// work phase (falling back to the load activities when the selection is
+// empty) so a ladder's five movements are never mistaken for five rounds.
+func workStructureFacts(load pipeline.LoadProgramming, exercises pipeline.ExerciseSelection) (blocks, rounds, movements int) {
+	for _, r := range load.Routines {
+		if r.Type != "work" {
+			continue
+		}
+		for _, b := range r.Blocks {
+			blocks++
+			if b.Repeats > 0 {
+				rounds += b.Repeats
+			} else {
+				rounds++
+			}
+		}
+	}
+	seen := make(map[string]bool)
+	for _, ex := range exercises.Exercises {
+		if ex.Phase == "work" && !seen[ex.ExerciseID] {
+			seen[ex.ExerciseID] = true
+			movements++
+		}
+	}
+	if movements == 0 {
+		for _, r := range load.Routines {
+			if r.Type != "work" {
+				continue
+			}
+			for _, b := range r.Blocks {
+				for _, a := range b.Activities {
+					if !seen[a.ExerciseID] {
+						seen[a.ExerciseID] = true
+						movements++
+					}
+				}
+			}
+		}
+	}
+	return blocks, rounds, movements
 }
 
 // exerciseAnnotations builds a comma-separated annotation string for an exercise
