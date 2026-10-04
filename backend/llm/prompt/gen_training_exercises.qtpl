@@ -16,10 +16,10 @@ Rules:
 - Annotations in parentheses (weighted, timer-only, reps-only, recent) are metadata — not part of the ID
 - For work exercises: cover the primary muscles with higher count, secondary muscles with 1-2 exercises
 - If muscles to rest are listed, never pick exercises from their groups
-- Avoid exercises matching any contraindicated pattern
+- Avoid exercises matching any contraindicated pattern in every phase (warmup, work, and cooldown) — there is no mobility or warmup exemption
 - Prefer favorite exercises when they fit
 - Prefer non-recent exercises over recent ones for variety
-- Avoid exercises listed in avoid_exercises
+- Avoid exercises listed in avoid_exercises in every phase (warmup, work, and cooldown) — there is no mobility or warmup exemption
 {% if explicitProgram %}- The user request fully specifies this session's program: {%s requestSchema %}
 - Map each requested movement to its closest exercise from the [WORK] pool — that is the session, do not redesign it, do not add alternative work exercises, and never rest muscles it trains
 - Pinned movements are mandatory: never swap one for a different exercise for recency or variety — the "prefer non-recent" rule does not apply to them; substitute only on contraindication as above and state the real reason in the rationale{% else %}- Select {%d minWork %}-{%d maxWork %} distinct work exercises (band scaled to methodology density and session duration){% endif %}
@@ -62,7 +62,7 @@ Favorites: {% for i, ex := range favoriteExercises %}{%s ex.ID %}{% if i < len(f
 {% code recentSet := make(map[string]bool, len(recentExerciseIDs)); for _, id := range recentExerciseIDs { recentSet[id] = true } %}
 {% if !skipWarmupCooldown %}
 [WARMUP] {%d len(warmupExercises) %} options
-{% for _, exercise := range warmupExercises %}{%s exercise.ID %}, {% endfor %}
+{% for i, exercise := range warmupExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 || len(exercise.Equipment) > 0 %} ({% if len(exercise.Muscles) > 0 %}{%s exercise.Muscles[0] %}{% endif %}{% if len(exercise.Muscles) > 0 && len(exercise.Equipment) > 0 %}, {% endif %}{% if len(exercise.Equipment) > 0 %}{%s strings.Join(exercise.Equipment, ", ") %}{% endif %}){% endif %}{% if i < len(warmupExercises)-1 %}, {% endif %}{% endfor %}
 
 {% endif %}
 [WORK] {%d len(workExercises) %} options

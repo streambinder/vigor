@@ -224,6 +224,13 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	}
 	progress(pipeline.StepSelectExercises)
 
+	// deterministic safety net: the selection LLM can still leak a
+	// contraindicated or avoided exercise into a warmup/cooldown phase, so
+	// drop any such selection across all phases before pin enforcement.
+	exerciseResult = filterContraindicatedExercises(exerciseResult,
+		constraintResult.ContraindicatedPatterns, historyResult.AvoidExercises,
+		req.WorkExercises, req.WarmupExercises, req.CooldownExercises)
+
 	if explicitProgram {
 		// the selection node may still swap a pinned movement for a pool
 		// neighbor; restore pins deterministically, keeping only grounded
@@ -906,17 +913,72 @@ func enforceExplicitPins(
 	}
 }
 
+// filterContraindicatedExercises deterministically drops any selected
+// exercise in any phase (warmup, work, cooldown) that is on the history
+// avoid-list or whose pool exercise matches a contraindicated pattern. It
+// is the safety net behind the selection prompt: the LLM may still leak a
+// mobility exercise past an "overhead" constraint, so the drop happens here
+// regardless of phase. Unknown exercise IDs are matched by ID text alone.
+func filterContraindicatedExercises(
+	selection pipeline.ExerciseSelection,
+	contraindicatedPatterns []string,
+	avoidExercises []string,
+	pools ...[]model.Exercise,
+) pipeline.ExerciseSelection {
+	if len(contraindicatedPatterns) == 0 && len(avoidExercises) == 0 {
+		return selection
+	}
+	byID := make(map[string]model.Exercise)
+	for _, pool := range pools {
+		for _, ex := range pool {
+			byID[ex.ID] = ex
+		}
+	}
+	avoid := make(map[string]bool, len(avoidExercises))
+	for _, id := range avoidExercises {
+		avoid[id] = true
+	}
+	kept := selection.Exercises[:0]
+	for _, sel := range selection.Exercises {
+		if avoid[sel.ExerciseID] {
+			log.Debug().Str("exercise", sel.ExerciseID).Str("phase", sel.Phase).
+				Msg("exercises node: dropped avoid-listed exercise")
+			continue
+		}
+		ex, ok := byID[sel.ExerciseID]
+		if !ok {
+			ex = model.Exercise{ID: sel.ExerciseID, Name: sel.ExerciseID}
+		}
+		if matchesContraindicatedPattern(ex, contraindicatedPatterns) {
+			log.Debug().Str("exercise", sel.ExerciseID).Str("phase", sel.Phase).
+				Msg("exercises node: dropped contraindicated exercise")
+			continue
+		}
+		kept = append(kept, sel)
+	}
+	selection.Exercises = kept
+	return selection
+}
+
 // matchesContraindicatedPattern reports whether a free-text contraindicated
 // pattern (e.g. "overhead press") covers the exercise, by substring or
-// token-subset match against its normalized ID and name.
+// token-subset match against its normalized ID and name. A pattern carrying
+// the "overhead" token also covers hang exercises (overhead traction under
+// the same shoulder contraindication, e.g. active-hang).
 func matchesContraindicatedPattern(ex model.Exercise, patterns []string) bool {
 	keys := []string{util.NormalizeIDText(ex.ID), util.NormalizeIDText(ex.Name)}
+	normID := util.NormalizeIDText(ex.ID)
 	for _, pattern := range patterns {
 		norm := util.NormalizeIDText(pattern)
 		if norm == "" {
 			continue
 		}
 		patternTokens := strings.Split(norm, "-")
+		for _, token := range patternTokens {
+			if token == "overhead" && strings.Contains(normID, "hang") {
+				return true
+			}
+		}
 		for _, key := range keys {
 			if strings.Contains(key, norm) || isTokenSubset(patternTokens, strings.Split(key, "-")) {
 				return true

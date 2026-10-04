@@ -432,6 +432,91 @@ func TestEnforceExplicitPins(t *testing.T) {
 	})
 }
 
+func TestFilterContraindicatedExercises(t *testing.T) {
+	pools := []model.Exercise{
+		{ID: "barbell-standing-overhead-press", Name: "Barbell Standing Overhead Press"},
+		{ID: "active-hang", Name: "Active Hang"},
+		{ID: "push-up", Name: "Push-Up"},
+		{ID: "arm-circles", Name: "Arm Circles"},
+	}
+	sel := func(id, phase string) pipeline.SelectedExercise {
+		return pipeline.SelectedExercise{ExerciseID: id, Phase: phase}
+	}
+	ids := func(s pipeline.ExerciseSelection) []string {
+		var out []string
+		for _, e := range s.Exercises {
+			out = append(out, e.ExerciseID)
+		}
+		return out
+	}
+
+	t.Run("drops contraindicated exercises from every phase", func(t *testing.T) {
+		got := filterContraindicatedExercises(pipeline.ExerciseSelection{Exercises: []pipeline.SelectedExercise{
+			sel("active-hang", "warmup"),
+			sel("barbell-standing-overhead-press", "work"),
+			sel("active-hang", "cooldown"),
+			sel("push-up", "work"),
+			sel("arm-circles", "warmup"),
+		}}, []string{"overhead press"}, nil, pools)
+		if !equalStrings(ids(got), []string{"push-up", "arm-circles"}) {
+			t.Errorf("exercises = %v, want [push-up arm-circles]", ids(got))
+		}
+	})
+
+	t.Run("drops avoid-listed exercises from every phase", func(t *testing.T) {
+		got := filterContraindicatedExercises(pipeline.ExerciseSelection{Exercises: []pipeline.SelectedExercise{
+			sel("push-up", "warmup"),
+			sel("push-up", "work"),
+			sel("arm-circles", "cooldown"),
+		}}, nil, []string{"push-up"}, pools)
+		if !equalStrings(ids(got), []string{"arm-circles"}) {
+			t.Errorf("exercises = %v, want [arm-circles]", ids(got))
+		}
+	})
+
+	t.Run("empty inputs keep the selection untouched", func(t *testing.T) {
+		input := pipeline.ExerciseSelection{Exercises: []pipeline.SelectedExercise{
+			sel("active-hang", "warmup"), sel("push-up", "work"),
+		}}
+		got := filterContraindicatedExercises(input, nil, nil, pools)
+		if !equalStrings(ids(got), []string{"active-hang", "push-up"}) {
+			t.Errorf("exercises = %v, want [active-hang push-up]", ids(got))
+		}
+	})
+
+	t.Run("clean exercises survive a non-empty filter", func(t *testing.T) {
+		got := filterContraindicatedExercises(pipeline.ExerciseSelection{Exercises: []pipeline.SelectedExercise{
+			sel("push-up", "work"), sel("arm-circles", "cooldown"),
+		}}, []string{"overhead press"}, []string{"barbell-deadlift"}, pools)
+		if !equalStrings(ids(got), []string{"push-up", "arm-circles"}) {
+			t.Errorf("exercises = %v, want [push-up arm-circles]", ids(got))
+		}
+	})
+}
+
+func TestMatchesContraindicatedPattern(t *testing.T) {
+	cases := []struct {
+		name     string
+		exercise model.Exercise
+		patterns []string
+		want     bool
+	}{
+		{"overhead press matches by name", model.Exercise{ID: "barbell-standing-overhead-press", Name: "Barbell Standing Overhead Press"}, []string{"overhead press"}, true},
+		{"overhead pattern covers active hang", model.Exercise{ID: "active-hang", Name: "Active Hang"}, []string{"overhead press"}, true},
+		{"overhead pattern covers dead hang", model.Exercise{ID: "dead-hang", Name: "Dead Hang"}, []string{"overhead pressing"}, true},
+		{"non-overhead pattern does not cover hang", model.Exercise{ID: "active-hang", Name: "Active Hang"}, []string{"high-impact jumping"}, false},
+		{"push-up does not match overhead press", model.Exercise{ID: "push-up", Name: "Push-Up"}, []string{"overhead press"}, false},
+		{"empty patterns never match", model.Exercise{ID: "active-hang", Name: "Active Hang"}, nil, false},
+	}
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := matchesContraindicatedPattern(tt.exercise, tt.patterns); got != tt.want {
+				t.Errorf("matchesContraindicatedPattern(%s, %v) = %v, want %v", tt.exercise.ID, tt.patterns, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestNormalizeBlockActivityOrder(t *testing.T) {
 	selection := pipeline.ExerciseSelection{Exercises: []pipeline.SelectedExercise{
 		{ExerciseID: "pull-up", Phase: "work"},

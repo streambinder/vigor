@@ -370,7 +370,7 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 		}
 	})
 
-	t.Run("contraindicated overhead work is excluded", func(t *testing.T) {
+	t.Run("contraindicated overhead exercise is excluded from every phase", func(t *testing.T) {
 		req := baseRequest()
 		req.Methodology = &strength
 		req.Profiles = []model.Profile{integrationProfile(t,
@@ -381,10 +381,15 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 
 		training, _ := run(t, req)
 
-		for _, activity := range training.Activities() {
-			ex := poolByID(work)[activity.ExerciseID]
-			if matchesContraindicatedPattern(ex, []string{"overhead press"}) {
-				t.Errorf("contraindicated exercise %q present in the generated training", ex.ID)
+		byID := poolByID(work, warmup, cooldown)
+		for _, routine := range training.Routines {
+			for _, block := range routine.Blocks {
+				for _, activity := range block.Activities {
+					ex := byID[activity.ExerciseID]
+					if matchesContraindicatedPattern(ex, []string{"overhead press"}) {
+						t.Errorf("contraindicated exercise %q present in %s phase", ex.ID, routine.Type)
+					}
+				}
 			}
 		}
 	})
