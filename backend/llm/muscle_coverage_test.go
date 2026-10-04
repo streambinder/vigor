@@ -123,6 +123,102 @@ func TestEnsureMuscleCoverage(t *testing.T) {
 	})
 }
 
+func TestReconcileTargetingForCopy(t *testing.T) {
+	t.Run("injected muscle is removed from avoid, others untouched", func(t *testing.T) {
+		targeting := pipeline.MuscleTargeting{
+			PrimaryMuscles:   []string{"chest"},
+			SecondaryMuscles: []string{"arms"},
+			AvoidMuscles:     []string{"back", "legs", "glutes"},
+		}
+		injected := map[string]string{"back": "inverted-row"}
+		got := reconcileTargetingForCopy(targeting, injected)
+		if len(got.AvoidMuscles) != 2 || got.AvoidMuscles[0] != "legs" || got.AvoidMuscles[1] != "glutes" {
+			t.Errorf("avoid = %v, want [legs glutes]", got.AvoidMuscles)
+		}
+		if len(got.PrimaryMuscles) != 1 || got.PrimaryMuscles[0] != "chest" {
+			t.Errorf("primary = %v, want [chest] untouched", got.PrimaryMuscles)
+		}
+		if len(got.SecondaryMuscles) != 1 || got.SecondaryMuscles[0] != "arms" {
+			t.Errorf("secondary = %v, want [arms] untouched", got.SecondaryMuscles)
+		}
+		// the persisted targeting must keep the original rest decision
+		if len(targeting.AvoidMuscles) != 3 {
+			t.Errorf("original avoid mutated = %v, want [back legs glutes]", targeting.AvoidMuscles)
+		}
+	})
+
+	t.Run("no injection leaves targeting untouched", func(t *testing.T) {
+		targeting := pipeline.MuscleTargeting{
+			AvoidMuscles: []string{"back"},
+		}
+		got := reconcileTargetingForCopy(targeting, nil)
+		if len(got.AvoidMuscles) != 1 || got.AvoidMuscles[0] != "back" {
+			t.Errorf("avoid = %v, want [back]", got.AvoidMuscles)
+		}
+	})
+
+	t.Run("multiple injected muscles are all removed", func(t *testing.T) {
+		targeting := pipeline.MuscleTargeting{
+			AvoidMuscles: []string{"back", "legs", "core"},
+		}
+		injected := map[string]string{"back": "inverted-row", "core": "bicycle-crunch"}
+		got := reconcileTargetingForCopy(targeting, injected)
+		if len(got.AvoidMuscles) != 1 || got.AvoidMuscles[0] != "legs" {
+			t.Errorf("avoid = %v, want [legs]", got.AvoidMuscles)
+		}
+	})
+
+	t.Run("empty avoid stays empty", func(t *testing.T) {
+		targeting := pipeline.MuscleTargeting{}
+		got := reconcileTargetingForCopy(targeting, map[string]string{"back": "inverted-row"})
+		if len(got.AvoidMuscles) != 0 {
+			t.Errorf("avoid = %v, want empty", got.AvoidMuscles)
+		}
+	})
+}
+
+func TestSortedCalibrationCoverage(t *testing.T) {
+	t.Run("empty injection yields no coverage", func(t *testing.T) {
+		if got := sortedCalibrationCoverage(nil); len(got) != 0 {
+			t.Errorf("got %v, want empty", got)
+		}
+		if got := sortedCalibrationCoverage(map[string]string{}); len(got) != 0 {
+			t.Errorf("got %v, want empty", got)
+		}
+	})
+
+	t.Run("coverage is ordered by muscle deterministically", func(t *testing.T) {
+		injected := map[string]string{
+			"legs": "air-squat",
+			"back": "inverted-row",
+			"core": "bicycle-crunch",
+		}
+		got := sortedCalibrationCoverage(injected)
+		want := []pipeline.CalibrationCoverage{
+			{Muscle: "back", ExerciseID: "inverted-row"},
+			{Muscle: "core", ExerciseID: "bicycle-crunch"},
+			{Muscle: "legs", ExerciseID: "air-squat"},
+		}
+		if len(got) != len(want) {
+			t.Fatalf("got %v, want %v", got, want)
+		}
+		for i := range want {
+			if got[i] != want[i] {
+				t.Fatalf("got %v, want %v", got, want)
+			}
+		}
+		// repeated calls must agree: map iteration order must not leak
+		for range 5 {
+			again := sortedCalibrationCoverage(injected)
+			for i := range want {
+				if again[i] != want[i] {
+					t.Fatalf("non-deterministic order: got %v, want %v", again, want)
+				}
+			}
+		}
+	})
+}
+
 func TestEnforceMuscleCoverage(t *testing.T) {
 	byID := map[string]model.Exercise{
 		"chest-a": {ID: "chest-a", Muscles: []string{"chest"}},

@@ -22,6 +22,7 @@ func TestNodeCreativeUserRoutineStructure(t *testing.T) {
 		pipeline.HealthAssessment{},
 		nil,
 		"",
+		nil,
 	)
 	if strings.Contains(out, "blocks}") {
 		t.Fatalf("routine structure line carries stray brace: %q", out)
@@ -46,6 +47,7 @@ func TestNodeCreativeUserBlockRestBeatsRoutineRest(t *testing.T) {
 		pipeline.HealthAssessment{},
 		nil,
 		"",
+		nil,
 	)
 	if !strings.Contains(out, "- work: 2 block(s), 60s rest between blocks") {
 		t.Fatalf("between-blocks rest not read from blocks: %q", out)
@@ -74,5 +76,61 @@ func TestNodeCreativeSystemLiteralAccommodations(t *testing.T) {
 		if !strings.Contains(out, term) {
 			t.Fatalf("copy prompt rule does not name forbidden reinterpretation %q:\n%s", term, out)
 		}
+	}
+}
+
+func TestNodeCreativeUserCalibrationCoverage(t *testing.T) {
+	out := NodeCreativeUser(
+		pipeline.Strategy{Methodology: "strength"},
+		pipeline.MuscleTargeting{
+			PrimaryMuscles: []string{"chest"},
+		},
+		pipeline.ExerciseSelection{},
+		pipeline.HistoryAnalysis{},
+		pipeline.ConstraintExtraction{},
+		pipeline.LoadProgramming{},
+		pipeline.HealthAssessment{},
+		nil,
+		"",
+		[]pipeline.CalibrationCoverage{
+			{Muscle: "back", ExerciseID: "inverted-row"},
+		},
+	)
+	if !strings.Contains(out, "Calibration coverage (required, already in the program):") {
+		t.Fatalf("calibration coverage section missing:\n%s", out)
+	}
+	if !strings.Contains(out, "- back via inverted-row") {
+		t.Fatalf("calibration coverage line missing muscle/exercise:\n%s", out)
+	}
+	if !strings.Contains(out, "light calibration work, not a rest day for this muscle") {
+		t.Fatalf("calibration coverage line missing guidance:\n%s", out)
+	}
+}
+
+func TestNodeCreativeUserNoCalibrationCoverage(t *testing.T) {
+	out := NodeCreativeUser(
+		pipeline.Strategy{},
+		pipeline.MuscleTargeting{},
+		pipeline.ExerciseSelection{},
+		pipeline.HistoryAnalysis{},
+		pipeline.ConstraintExtraction{},
+		pipeline.LoadProgramming{},
+		pipeline.HealthAssessment{},
+		nil,
+		"",
+		nil,
+	)
+	if strings.Contains(out, "Calibration coverage") {
+		t.Fatalf("empty coverage must not render the section:\n%s", out)
+	}
+}
+
+func TestNodeCreativeSystemCalibrationCoverageRule(t *testing.T) {
+	out := NodeCreativeSystem("en")
+	if !strings.Contains(out, "never describe a muscle with forced calibration coverage as resting or recovering") {
+		t.Fatalf("copy prompt missing calibration coverage rule:\n%s", out)
+	}
+	if !strings.Contains(out, "light calibration work") {
+		t.Fatalf("copy prompt missing calibration work phrasing:\n%s", out)
 	}
 }

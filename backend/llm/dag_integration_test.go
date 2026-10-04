@@ -271,6 +271,40 @@ func workExerciseIDs(training *model.Training) map[string]bool {
 	return ids
 }
 
+// descriptionRestSentence returns the first sentence of the description
+// that claims the given muscle is resting, if any. A sentence claims rest
+// when it names the muscle together with rest/recover wording; an explicit
+// negation ("not a rest day") is not a rest claim.
+func descriptionRestSentence(description, muscle string) (string, bool) {
+	sentences := strings.FieldsFunc(description, func(r rune) bool {
+		return r == '.' || r == '!' || r == '?'
+	})
+	restWords := []string{"rest", "recover"}
+	for _, sentence := range sentences {
+		lower := strings.ToLower(sentence)
+		if !strings.Contains(lower, muscle) {
+			continue
+		}
+		if strings.Contains(lower, "not a rest") || strings.Contains(lower, "rather than rest") ||
+			strings.Contains(lower, "instead of rest") || strings.Contains(lower, "not resting") {
+			continue
+		}
+		for _, word := range restWords {
+			if strings.Contains(lower, word) {
+				return strings.TrimSpace(sentence), true
+			}
+		}
+		// "leave/left ... to recover" splits across the rest-word check
+		// above via "recover"; the bare leave-to-rest phrasing is caught here.
+		if strings.Contains(lower, "leave") || strings.Contains(lower, "left to") {
+			if strings.Contains(lower, "recover") {
+				return strings.TrimSpace(sentence), true
+			}
+		}
+	}
+	return "", false
+}
+
 func TestGenTrainingDAGTrajectories(t *testing.T) {
 	requireReasoningProvider(t)
 	// release pooled provider connections so goleak in TestMain does
@@ -412,6 +446,14 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 		}
 		if !coversBack {
 			t.Error("calibration gap muscle back is not covered by any work exercise")
+		}
+		// copy coherence: the forced back work is light calibration work,
+		// so the description must not narrate the back as resting.
+		if coversBack {
+			if sentence, claimsRest := descriptionRestSentence(training.Description, "back"); claimsRest {
+				t.Errorf("description claims back is resting while training it: %q (full description: %s)",
+					sentence, training.Description)
+			}
 		}
 	})
 
