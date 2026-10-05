@@ -400,6 +400,12 @@ func DeriveFreeTextParams(req DeriveRequest) (pipeline.DerivedParams, model.Mode
 
 	state := prompt.NodeDeriveParamsUser(req.FreeText, req.Articles)
 
+	// a linked article can carry several distinct programs; when it
+	// does, the session must follow exactly one of them instead of a
+	// blend, so the candidates are segmented upfront and, when more
+	// than one qualifies, the choice joins the question battery.
+	programs := segmentPrograms(req.Articles, req.MovementCandidates)
+
 	methodologyOptions := map[string]string{
 		"auto": "No specific methodology: the request does not point at one in particular",
 	}
@@ -414,6 +420,22 @@ func DeriveFreeTextParams(req DeriveRequest) (pipeline.DerivedParams, model.Mode
 		Instructions: "Which training methodology does the request best fit?",
 		Options:      methodologyOptions,
 	})
+	if len(programs) > 1 {
+		options := make(map[string]string, len(programs))
+		for i, p := range programs {
+			label := p.Title
+			if label == "" {
+				label = "Opening section"
+			}
+			options[programOptionID(i)] = label + " — movements: " + strings.Join(p.Movements, ", ")
+		}
+		questions = append(questions, dm.Question{
+			ID:           "program",
+			Kind:         dm.KindChoice,
+			Instructions: "The linked text contains more than one distinct training program. Which single program should this session follow and reproduce exactly?",
+			Options:      options,
+		})
+	}
 	for _, g := range req.AllGoals {
 		questions = append(questions, dm.Question{
 			ID:           "goal:" + g.ID,
@@ -473,10 +495,44 @@ func DeriveFreeTextParams(req DeriveRequest) (pipeline.DerivedParams, model.Mode
 		}
 	}
 	result.SkipWarmupCooldown = decided(answers["skip_warmup_cooldown"])
-	result.Movements = matchMovements(req.FreeText, req.Articles, req.MovementCandidates)
+	// a chosen program owns the session: its movements replace the
+	// whole-text union and its text alone flows downstream as the
+	// requested program. With no candidate — the ordinary case — the
+	// article speaks as a whole, as before.
+	articles := req.Articles
+	if len(programs) > 0 {
+		chosen := programFallback(programs)
+		if len(programs) > 1 {
+			if idx, ok := programChoiceIndex(answers["program"].Choice, len(programs)); ok {
+				chosen = programs[idx]
+			}
+		}
+		result.Movements = chosen.Movements
+		result.ProgramText = chosen.Text
+		articles = []string{chosen.Text}
+	} else {
+		result.Movements = matchMovements(req.FreeText, req.Articles, req.MovementCandidates)
+	}
 	result.ExplicitProgram = decided(answers["explicit_program"]) && len(result.Movements) > 0
-	result.Summary = deriveSummary(result, req.FreeText, req.Articles)
+	result.Summary = deriveSummary(result, req.FreeText, articles)
 	return normalizeDerivedParams(result, req.Methodologies, req.ValidMuscles, validGoals, req.ValidEquipment), step, nil
+}
+
+// programOptionID keys the candidate programs of a derive program
+// choice question, in article order.
+func programOptionID(i int) string {
+	return fmt.Sprintf("program_%d", i)
+}
+
+// programChoiceIndex resolves a program choice answer back to its
+// candidate, reporting false for anything the battery did not offer.
+func programChoiceIndex(choice string, count int) (int, bool) {
+	for i := 0; i < count; i++ {
+		if choice == programOptionID(i) {
+			return i, true
+		}
+	}
+	return 0, false
 }
 
 // truncateText caps a catalog description for use as a choice option
@@ -725,6 +781,192 @@ func matchMovements(freeText string, articles []string, candidates []MovementCan
 		matched[i] = c.name
 	}
 	return matched
+}
+
+// programSegment is one candidate program inside a linked article: a
+// heading-delimited stretch of text that pins its own movement set with
+// a numeric scheme, distinct enough from its neighbours that a session
+// could follow it alone.
+type programSegment struct {
+	Title     string
+	Text      string
+	Movements []string
+}
+
+// segmentPrograms splits the linked articles into candidate programs.
+// A segment becomes a candidate only when it carries at least two of
+// the article's pinned movements and digits (a rep scheme, a time
+// cap): prose sections, execution notes and marketing tails carry at
+// most one and drop out. Callers act only on a clear picture — exactly
+// one candidate, or several to choose between — and otherwise keep
+// treating the article as a whole.
+//
+// Segment membership starts from the article-level pins: a movement
+// belongs to a segment when one of its forms recurs there or stands
+// in a rep scheme there, or when its name's head word stands in a rep
+// scheme there — programs routinely shorten a movement inside their
+// scheme ("5 squat" in a ladder whose squat the article elsewhere
+// names in full). An intro that merely lists movement names belongs
+// to no program.
+func segmentPrograms(articles []string, candidates []MovementCandidate) []programSegment {
+	pins := matchMovements("", articles, candidates)
+	if len(pins) == 0 {
+		return nil
+	}
+	byName := make(map[string]MovementCandidate, len(candidates))
+	for _, c := range candidates {
+		byName[c.Name] = c
+	}
+	var programs []programSegment
+	for _, article := range articles {
+		for _, seg := range splitArticleSegments(article) {
+			text := strings.TrimSpace(seg.text)
+			if len(movementTokenSequence(text)) < 40 {
+				continue
+			}
+			movements := segmentMovements(text, pins, byName)
+			if len(movements) < 2 || !hasDigitToken(text) {
+				continue
+			}
+			programs = append(programs, programSegment{Title: seg.title, Text: text, Movements: movements})
+		}
+	}
+	return programs
+}
+
+// segmentMovements returns the article-pinned movements a segment
+// carries, in pin order.
+func segmentMovements(text string, pins []string, byName map[string]MovementCandidate) []string {
+	lines := strings.Split(text, "\n")
+	tokenLines := make([][]string, len(lines))
+	for i, line := range lines {
+		tokenLines[i] = movementTokenSequence(line)
+	}
+	var movements []string
+	for _, name := range pins {
+		candidate, ok := byName[name]
+		if !ok {
+			continue
+		}
+		if movementOccursIn(tokenLines, candidate) {
+			movements = append(movements, name)
+		}
+	}
+	return movements
+}
+
+// movementOccursIn reports whether a movement belongs to a segment:
+// one of its forms recurs there or sits in a rep scheme there (the
+// same corroboration the article-level matcher demands), or the
+// name's head word stands in a rep scheme there.
+func movementOccursIn(lines [][]string, candidate MovementCandidate) bool {
+	var spans []sequenceSpan
+	for _, form := range append([]string{candidate.Name}, candidate.Aliases...) {
+		seq := movementFormSequence(form)
+		if len(seq) > 0 {
+			spans = append(spans, countSequenceOccurrences(lines, seq)...)
+		}
+	}
+	if len(spans) >= 2 {
+		return true
+	}
+	for _, span := range spans {
+		if spanInScheme(lines, span) {
+			return true
+		}
+	}
+	nameSeq := movementFormSequence(candidate.Name)
+	if len(nameSeq) == 0 {
+		return false
+	}
+	head := nameSeq[len(nameSeq)-1]
+	for _, tokens := range lines {
+		for i := 1; i < len(tokens); i++ {
+			if tokens[i] == head {
+				if _, err := strconv.Atoi(tokens[i-1]); err == nil {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+// articleSegment is a heading-delimited stretch of an article: the
+// (possibly empty) heading line plus the lines that follow it.
+type articleSegment struct {
+	title string
+	text  string
+}
+
+// splitArticleSegments cuts an article at its heading lines. Extracted
+// article text is noisy, so heading detection stays strict: a short
+// line, opening with a letter, carrying no sentence punctuation —
+// anything looser would shred ordinary paragraphs into fake sections.
+func splitArticleSegments(article string) []articleSegment {
+	var segments []articleSegment
+	var current articleSegment
+	flush := func() {
+		if strings.TrimSpace(current.text) != "" {
+			segments = append(segments, current)
+		}
+		current = articleSegment{}
+	}
+	for _, line := range strings.Split(article, "\n") {
+		if isSegmentHeading(line) {
+			flush()
+			current.title = strings.TrimSpace(line)
+			current.text = line + "\n"
+			continue
+		}
+		current.text += line + "\n"
+	}
+	flush()
+	return segments
+}
+
+// isSegmentHeading reports whether an extracted text line reads as a
+// section heading rather than body copy. Extracted text wraps long
+// sentences across lines, and a wrapped continuation opens lowercase:
+// requiring an uppercase opening keeps those out.
+func isSegmentHeading(line string) bool {
+	t := strings.TrimSpace(line)
+	runes := []rune(t)
+	if len(runes) < 3 || len(runes) > 90 || len(strings.Fields(t)) > 12 {
+		return false
+	}
+	if !unicode.IsUpper(runes[0]) {
+		return false
+	}
+	switch runes[len(runes)-1] {
+	case '.', '!', '?', ',', ';', ':', '”', '"':
+		return false
+	}
+	return true
+}
+
+// hasDigitToken reports whether the text carries any numeric token —
+// the mark of a rep scheme or a time cap, as opposed to pure prose.
+func hasDigitToken(text string) bool {
+	for _, token := range movementTokenSequence(text) {
+		if _, err := strconv.Atoi(token); err == nil {
+			return true
+		}
+	}
+	return false
+}
+
+// programFallback picks the candidate a session follows when no
+// decision resolves the choice: the one pinning the most movements,
+// earliest in the text on ties.
+func programFallback(programs []programSegment) programSegment {
+	best := programs[0]
+	for _, p := range programs[1:] {
+		if len(p.Movements) > len(best.Movements) {
+			best = p
+		}
+	}
+	return best
 }
 
 // deriveSummary renders the derived parameters as the compact program

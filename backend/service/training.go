@@ -240,6 +240,12 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		if derivation.derived.SkipWarmupCooldown {
 			skipWarmupCooldown = true
 		}
+		// when the derivation picked one program out of several in the
+		// linked text, the retrieval query draws on that program alone,
+		// never on the blended whole.
+		if derivation.derived.ProgramText != "" {
+			articles = []string{derivation.derived.ProgramText}
+		}
 		prompt = promptRetrievalQuery(derivation.derived.Summary, articles, originalPrompt)
 	}
 
