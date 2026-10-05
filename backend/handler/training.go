@@ -41,6 +41,9 @@ func postTrainingJSON(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
 	}
 
+	// the request as the client sent it, kept verbatim for the trajectory
+	rawRequest := append([]byte(nil), c.Body()...)
+
 	loc, err := service.ParseTimezone(c.Get("X-Timezone"))
 	if err != nil {
 		middleware.Log(c).Warn().Err(err).Msg("invalid timezone header")
@@ -51,7 +54,7 @@ func postTrainingJSON(c *fiber.Ctx) error {
 		c.Locals("userID").(uuid.UUID),
 		req.Duration, req.Equipment, req.Gym, req.Prompt, req.Partners,
 		req.SkipWarmupCooldown, req.Methodology, req.Goals, req.Muscles,
-		loc, nil,
+		rawRequest, loc, nil,
 	)
 	if err != nil {
 		return trainingError(c, err)
@@ -79,6 +82,9 @@ func postTrainingSSE(c *fiber.Ctx) error {
 
 	userID := c.Locals("userID").(uuid.UUID)
 
+	// the request as the client sent it, kept verbatim for the trajectory
+	rawRequest := append([]byte(nil), c.Body()...)
+
 	c.Set("Content-Type", "text/event-stream")
 	c.Set("Cache-Control", "no-cache")
 	c.Set("Connection", "keep-alive")
@@ -94,7 +100,7 @@ func postTrainingSSE(c *fiber.Ctx) error {
 			userID,
 			req.Duration, req.Equipment, req.Gym, req.Prompt, req.Partners,
 			req.SkipWarmupCooldown, req.Methodology, req.Goals, req.Muscles,
-			loc, onProgress,
+			rawRequest, loc, onProgress,
 		)
 
 		if genErr != nil {

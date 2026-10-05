@@ -30,7 +30,7 @@ var (
 )
 
 // GenerateFlow creates a new AI-generated flow/yoga session.
-func GenerateFlow(userID uuid.UUID, duration int, muscles []string, prompt string) (*model.FlowSession, error) {
+func GenerateFlow(userID uuid.UUID, duration int, muscles []string, prompt string, request []byte) (*model.FlowSession, error) {
 	if duration <= 0 {
 		return nil, ErrDurationRequired
 	}
@@ -280,6 +280,9 @@ func GenerateFlow(userID uuid.UUID, duration int, muscles []string, prompt strin
 	session.References = datatypes.NewJSONType(refs)
 	session.FactIndices = nil
 	session.Trajectory = &model.Trajectory{Steps: steps}
+	if len(request) > 0 {
+		session.Trajectory.Request = request
+	}
 	session.Trajectory.Summarize()
 	session.UserID = userID
 	// use muscles actually covered by selected poses, not just the input target
