@@ -261,6 +261,59 @@ func TestMatchMovementsItalianAliases(t *testing.T) {
 	}
 }
 
+// a long article names far more than it programs: scaling asides,
+// examples, and a title that collides with catalog names. Only the
+// movements the programs actually prescribe — contiguous, recurring
+// or inside a rep scheme — may pin; scattered co-occurrence and
+// one-off mentions must not (regression: a Spider-Man program article
+// pinned spider curls and L-sit variants matched from transliterated
+// aliases and stray words, and the dip fell out of the pin cap).
+func TestMatchMovementsNoisyArticle(t *testing.T) {
+	article := "L'allenamento a corpo libero di Spider-Man. " +
+		"Primo programma: timer di 20 minuti, più round possibili di 5 trazioni, " +
+		"10 piegamenti e 15 squat a corpo libero; in inglese 5 pull up, 10 push up " +
+		"e 15 air squat. Varianti facilitate: trazioni orizzontali al TRX, " +
+		"piegamenti sulle ginocchia, squat box con una panca dietro. " +
+		"Secondo programma: 1 trazione alla sbarra, 2 dip, 3 push-up, 4 addominali " +
+		"e 5 squat; si sale fino a 10 trazioni, 20 dip, 30 push-up, 40 addominali " +
+		"e 50 squat, poi si ridiscende fino a 1. Esecuzione: 1 trazione alla " +
+		"sbarra, 2 dip su parallele, 3 piegamenti, 4 sit-up, 5 squat. " +
+		"Scalare: dip facilitati su panca o box, crunch a terra, box squat. " +
+		"Personalizzare: elastici per le trazioni, esercizi monoarto come " +
+		"one arm push up e one arm pull up, manubri tra le gambe come zavorra."
+	matched := matchMovements(
+		"replica l'allenamento di questo articolo",
+		[]string{article},
+		[]MovementCandidate{
+			{Name: "Pull-Up", Aliases: []string{"trazioni", "trazioni alla sbarra"}},
+			{Name: "Chest Dip", Aliases: []string{"parallele", "petto dip"}},
+			{Name: "3/4 Sit-Up", Aliases: []string{"addominali"}},
+			{Name: "Push-Up", Aliases: []string{"piegamenti", "flessioni"}},
+			{Name: "Air Squat", Aliases: []string{"squat a corpo libero"}},
+			{Name: "Cable Spider Curl", Aliases: []string{"cavo spider curl", "трос spider сгибание"}},
+			{Name: "Dumbbell Spider Curl", Aliases: []string{"manubrio spider curl", "гантель spider сгибание"}},
+			{Name: "L-Pull-Up", Aliases: []string{"l trazione su", "l тяга вверх"}},
+			{Name: "L-Sit", Aliases: []string{"l seduta", "l сидя"}},
+			{Name: "Ring L-Sit", Aliases: []string{"anello l seduta", "кольцо l сидя"}},
+			{Name: "Spider Crawl Push Up", Aliases: []string{"spider strisciata spinta su", "spider ползание жим вверх"}},
+			{Name: "One Arm Push Up", Aliases: []string{"spinta su un braccio"}},
+			{Name: "Crunch Floor", Aliases: []string{"crunch a terra"}},
+		},
+	)
+	want := map[string]bool{
+		"Pull-Up": true, "Chest Dip": true, "3/4 Sit-Up": true,
+		"Push-Up": true, "Air Squat": true,
+	}
+	if len(matched) != len(want) {
+		t.Fatalf("matched = %v, want keys of %v", matched, want)
+	}
+	for _, m := range matched {
+		if !want[m] {
+			t.Errorf("unexpected match %q", m)
+		}
+	}
+}
+
 func TestDeriveNodeDecision(t *testing.T) {
 	fake := &fakeDecisionClient{answers: map[string]dm.Answer{
 		"methodology":        {Choice: "circuit"},

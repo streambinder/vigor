@@ -62,6 +62,33 @@ con petto che sfiora il pavimento; squat almeno al parallelo.
 Recuperi liberi a sensazione, oppure fissi tra i round per aumentare
 la densità.`
 
+// noisyArticleText mocks a real linked article that carries two full
+// programs plus scaling and personalization asides around them: a
+// 20-minute AMRAP circuit of three movements and a five-movement
+// ladder that climbs to a peak and comes back down. The page is named
+// after a film character whose name collides with catalog exercises,
+// and the asides name variations and gear the programs never use. The
+// derivation must pin the programs' movements, not the noise.
+const noisyArticleText = `L'allenamento a corpo libero di Spider-Man (Tom Holland).
+Primo programma, il Cindy: timer di 20 minuti, più round possibili di
+5 trazioni, 10 piegamenti e 15 squat a corpo libero; in inglese
+5 pull up, 10 push up e 15 air squat. Record citato: 27 round.
+Varianti facilitate: trazioni orizzontali al TRX, piegamenti sulle
+ginocchia, squat box con una panca dietro.
+Secondo programma, il Ladder: 1 trazione alla sbarra, 2 dip,
+3 push-up, 4 addominali e 5 squat; si sale round dopo round fino a
+10 trazioni, 20 dip, 30 push-up, 40 addominali e 50 squat, poi si
+ridiscende fino a 1. Tempo stimato: circa un'ora.
+Esecuzione: 1 trazione alla sbarra con mento oltre la sbarra,
+2 dip su parallele rompendo il parallelo, 3 piegamenti con petto
+a terra, 4 sit-up da sdraiato a pancia in su, 5 squat almeno al
+parallelo.
+Scalare il Ladder: dip facilitati su panca o box, crunch a terra,
+box squat con supporto dietro.
+Personalizzare: elastici per facilitare le trazioni, esercizi
+monoarto come one arm push up e one arm pull up, manubri tra le
+gambe come zavorra per trazioni e dip, lavoro agli anelli.`
+
 func requireReasoningProvider(t *testing.T) {
 	t.Helper()
 	if len(reasoningProviders) == 0 {
@@ -631,6 +658,109 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 		}
 		if !strings.Contains(desc, "pull") {
 			t.Errorf("description never names the flagged pull-up movement: %q", training.Description)
+		}
+	})
+
+	t.Run("noisy article with two programs pins only program movements", func(t *testing.T) {
+		req := baseRequest()
+		req.Goals = goals[:1]
+		// the scenario pool carries the catalog exercises the article's
+		// title and asides collide with, aliases included: none of them
+		// is a program movement, so none may reach the session.
+		noisy := append([]model.Exercise{}, work...)
+		noisy = append(noisy,
+			model.Exercise{ID: "cable-spider-curl", Name: "Cable Spider Curl", Muscles: []string{"arms"}, Equipment: []string{"cable"}, Mode: "reps", Difficulty: 35, Aliases: []string{"cavo spider curl", "трос spider сгибание"}},
+			model.Exercise{ID: "dumbbell-spider-curl", Name: "Dumbbell Spider Curl", Muscles: []string{"arms"}, Equipment: []string{"dumbbell", "bench"}, Mode: "reps", Difficulty: 35, Aliases: []string{"manubrio spider curl", "гантель spider сгибание"}},
+			model.Exercise{ID: "dumbbell-reverse-spider-curl", Name: "Dumbbell Reverse Spider Curl", Muscles: []string{"arms"}, Equipment: []string{"dumbbell", "bench"}, Mode: "reps", Difficulty: 35, Aliases: []string{"manubrio inverso spider curl", "гантель обратный spider сгибание"}},
+			model.Exercise{ID: "dumbbell-one-arm-reverse-spider-curl", Name: "Dumbbell One Arm Reverse Spider Curl", Muscles: []string{"arms"}, Equipment: []string{"dumbbell", "bench"}, Mode: "reps", Difficulty: 35, Aliases: []string{"manubrio un braccio inverso spider curl", "гантель один рука обратный spider сгибание"}},
+			model.Exercise{ID: "l-pull-up", Name: "L-Pull-Up", Muscles: []string{"back", "core"}, Equipment: []string{"pull-up bar"}, Mode: "reps", Difficulty: 60, Aliases: []string{"l trazione su", "l тяга вверх"}},
+			model.Exercise{ID: "l-sit", Name: "L-Sit", Muscles: []string{"core", "arms"}, Mode: "either", Difficulty: 65, Aliases: []string{"l seduta", "l сидя"}},
+			model.Exercise{ID: "l-sit-on-floor", Name: "L-Sit On Floor", Muscles: []string{"core", "arms"}, Mode: "either", Difficulty: 60, Aliases: []string{"l seduta a terra", "l сидя пол"}},
+			model.Exercise{ID: "ring-l-sit", Name: "Ring L-Sit", Muscles: []string{"core", "arms"}, Equipment: []string{"rings"}, Mode: "either", Difficulty: 70, Aliases: []string{"anello l seduta", "кольцо l сидя"}},
+			model.Exercise{ID: "spider-crawl-push-up", Name: "Spider Crawl Push Up", Muscles: []string{"chest", "arms"}, Mode: "reps", Difficulty: 50, Aliases: []string{"spider strisciata spinta su", "spider ползание жим вверх"}},
+		)
+		req.WorkExercises = noisy
+		req.FreeText = "Voglio replicare l'allenamento a corpo libero descritto qui: " + linkedArticleURL
+		req.Articles = []string{noisyArticleText}
+		req.AllGoals = goals
+		req.ValidMuscles = []string{"chest", "back", "shoulders", "arms", "core", "glutes", "legs"}
+		req.ValidEquipment = []string{"pull-up bar", "dip station", "bench", "barbell", "dumbbell", "cable", "rings"}
+
+		training, steps := run(t, req)
+
+		// the derivation itself is deterministic: the pinned movement
+		// list handed downstream must be exactly the two programs'
+		// movements, whatever the selection model later makes of it.
+		var selectPrompt string
+		for _, step := range steps {
+			if step.Step == string(pipeline.StepSelectExercises) {
+				llm := step.LLM.Data()
+				selectPrompt = llm.Prompt.System + "\n" + llm.Prompt.User
+			}
+		}
+		idx := strings.Index(selectPrompt, "Explicit program, movements:")
+		if idx < 0 {
+			t.Fatalf("selection prompt carries no explicit program movements: %q", selectPrompt)
+		}
+		segment := selectPrompt[idx+len("Explicit program, movements:"):]
+		if cut := strings.Index(segment, "\n"); cut >= 0 {
+			segment = segment[:cut]
+		}
+		segment = strings.TrimSuffix(strings.TrimSpace(segment), ".")
+		derivedMovements := map[string]bool{}
+		for _, movement := range strings.Split(segment, ", ") {
+			derivedMovements[strings.TrimSpace(movement)] = true
+		}
+		for _, want := range []string{"Pull-Up", "Push-Up", "Air Squat", "3/4 Sit-Up", "Chest Dip"} {
+			if !derivedMovements[want] {
+				t.Errorf("derived movements %v miss program movement %q", derivedMovements, want)
+			}
+		}
+		for movement := range derivedMovements {
+			switch movement {
+			case "Pull-Up", "Push-Up", "Air Squat", "3/4 Sit-Up", "Chest Dip":
+			default:
+				t.Errorf("derived movements pin non-program movement %q", movement)
+			}
+		}
+
+		ids := workExerciseIDs(training)
+		for _, noise := range []string{
+			"cable-spider-curl", "dumbbell-spider-curl", "dumbbell-reverse-spider-curl",
+			"dumbbell-one-arm-reverse-spider-curl", "l-pull-up", "l-sit",
+			"l-sit-on-floor", "ring-l-sit", "spider-crawl-push-up",
+		} {
+			if ids[noise] {
+				t.Errorf("article noise exercise %q reached the generated training", noise)
+			}
+		}
+		byID := poolByID(noisy)
+		for id := range ids {
+			for _, equipment := range byID[id].Equipment {
+				if equipment == "barbell" || equipment == "dumbbell" || equipment == "cable" {
+					t.Errorf("bodyweight article program generated weighted exercise %q", id)
+				}
+			}
+		}
+		// the two programs share pull-up, push-up and squat; the ladder
+		// adds dip and sit-up. Every family must be in the session.
+		families := map[string][]string{
+			"pull-up": {"pull-up"},
+			"dip":     {"chest-dip", "bench-dip-on-floor"},
+			"push-up": {"push-up"},
+			"sit-up":  {"34-sit-up", "bicycle-crunch"},
+			"squat":   {"air-squat"},
+		}
+		for family, candidates := range families {
+			found := false
+			for _, candidate := range candidates {
+				if ids[candidate] {
+					found = true
+				}
+			}
+			if !found {
+				t.Errorf("no %s movement from the article programs reached the generated training", family)
+			}
 		}
 	})
 
