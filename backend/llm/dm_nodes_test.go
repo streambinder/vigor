@@ -240,7 +240,7 @@ func TestMatchMovementsItalianAliases(t *testing.T) {
 		[]string{article},
 		[]MovementCandidate{
 			{Name: "Pull-Up", Aliases: []string{"trazioni", "trazioni alla sbarra"}},
-			{Name: "Chest Dip", Aliases: []string{"parallele", "petto dip"}},
+			{Name: "Chest Dip", Aliases: []string{"dip", "parallele", "petto dip"}},
 			{Name: "3/4 Sit-Up", Aliases: []string{"addominali"}},
 			{Name: "Push-Up", Aliases: []string{"piegamenti", "flessioni"}},
 			{Name: "Air Squat", Aliases: []string{"squat a corpo libero"}},
@@ -277,7 +277,7 @@ func TestMatchMovementsNoisyArticle(t *testing.T) {
 		"Secondo programma: 1 trazione alla sbarra, 2 dip, 3 push-up, 4 addominali " +
 		"e 5 squat; si sale fino a 10 trazioni, 20 dip, 30 push-up, 40 addominali " +
 		"e 50 squat, poi si ridiscende fino a 1. Esecuzione: 1 trazione alla " +
-		"sbarra, 2 dip su parallele, 3 piegamenti, 4 sit-up, 5 squat. " +
+		"sbarra, 2 dip, 3 piegamenti, 4 sit-up, 5 squat. " +
 		"Scalare: dip facilitati su panca o box, crunch a terra, box squat. " +
 		"Personalizzare: elastici per le trazioni, esercizi monoarto come " +
 		"one arm push up e one arm pull up, manubri tra le gambe come zavorra."
@@ -286,7 +286,7 @@ func TestMatchMovementsNoisyArticle(t *testing.T) {
 		[]string{article},
 		[]MovementCandidate{
 			{Name: "Pull-Up", Aliases: []string{"trazioni", "trazioni alla sbarra"}},
-			{Name: "Chest Dip", Aliases: []string{"parallele", "petto dip"}},
+			{Name: "Chest Dip", Aliases: []string{"dip", "parallele", "petto dip"}},
 			{Name: "3/4 Sit-Up", Aliases: []string{"addominali"}},
 			{Name: "Push-Up", Aliases: []string{"piegamenti", "flessioni"}},
 			{Name: "Air Squat", Aliases: []string{"squat a corpo libero"}},

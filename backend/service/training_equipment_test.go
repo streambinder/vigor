@@ -91,3 +91,43 @@ func TestMergeSelectedExerciseEquipment(t *testing.T) {
 		}
 	})
 }
+
+func TestUsedActivityModifiers(t *testing.T) {
+	training := trainingWithExercises("push-up", "pull-up", "air-squat")
+	training.Routines[0].Blocks[0].Activities[0].Modifiers = []string{"push up bars"}
+	training.Routines[0].Blocks[0].Activities[1].Modifiers = []string{"weighted vest", "push up bars"}
+
+	got := usedActivityModifiers(training)
+	want := []string{"push up bars", "weighted vest"}
+	if len(got) != len(want) {
+		t.Fatalf("got %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("got %v, want %v", got, want)
+		}
+	}
+
+	// the persisted equipment of a session is its exercises' gear plus
+	// the modifiers it applies: a gym's inventory must not leak in.
+	setupKnowledgeDB(t, []model.Exercise{
+		{ID: "pull-up", Name: "Pull-Up", Equipment: []string{"pull-up bar"}},
+		{ID: "push-up", Name: "Push-Up"},
+		{ID: "air-squat", Name: "Air Squat"},
+	})
+	equipment := mergeSelectedExerciseEquipment(training, usedActivityModifiers(training))
+	for _, id := range equipment {
+		if id == "barbell" || id == "rings" {
+			t.Fatalf("equipment %v carries gym inventory the session never uses", equipment)
+		}
+	}
+	found := map[string]bool{}
+	for _, id := range equipment {
+		found[id] = true
+	}
+	for _, want := range []string{"pull-up bar", "push up bars", "weighted vest"} {
+		if !found[want] {
+			t.Fatalf("equipment %v misses %q the session uses", equipment, want)
+		}
+	}
+}

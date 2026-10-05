@@ -711,11 +711,18 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 
 		// the stored session length always mirrors the generated program; the
 		// requested duration additionally scales repeats and enforces the
-		// duration match band, unless the program itself sets the length
+		// duration match band, unless the program itself sets the length.
+		// An AMRAP program is the exception: its length is a time cap, not
+		// a sum of activities, so the requested duration is the only
+		// deterministic cap even when the program sets the round scheme —
+		// SetDuration for amrap only writes that cap and never scales
+		// repeats, so the program structure survives untouched.
 		training.Duration = training.CalculateDuration()
 		if validationErr == nil && !explicitProgram {
 			training.SetDuration(duration)
 			validationErr = training.ValidateDuration(duration)
+		} else if validationErr == nil && training.Methodology == "amrap" {
+			training.SetDuration(duration)
 		}
 
 		if validationErr == nil {
@@ -789,14 +796,11 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		training.GymID = &gym.ID
 		training.Gym = gym
 	}
-	training.Equipment = equipmentIDs
-	for _, m := range modifiers {
-		training.Equipment = append(training.Equipment, m.ID)
-	}
-	// the selection can pin exercises whose gear was never declared —
-	// explicit programs bypass equipment filtering at retrieval — so merge
-	// the selected exercises' required equipment in, keeping the record honest.
-	training.Equipment = mergeSelectedExerciseEquipment(training, training.Equipment)
+	// the persisted equipment is what the session itself uses: the gear
+	// its programmed exercises require plus the modifiers actually
+	// applied to its activities — never the gym's whole inventory or
+	// every modifier the catalog carries.
+	training.Equipment = mergeSelectedExerciseEquipment(training, usedActivityModifiers(training))
 	training.Goals = effectiveGoals
 	training.Muscles = actualMuscles
 	// the stored request is the user's own prompt: the retrieval query
@@ -1141,6 +1145,26 @@ func filterApplicableModifiers(modifiers []model.Modifier, exercises []model.Exe
 		}
 	}
 	return applicable
+}
+
+// usedActivityModifiers collects the modifier IDs the generated
+// program actually applies to its activities, in first-use order.
+func usedActivityModifiers(training *model.Training) []string {
+	seen := make(map[string]bool)
+	var used []string
+	for _, r := range training.Routines {
+		for _, b := range r.Blocks {
+			for _, a := range b.Activities {
+				for _, m := range a.Modifiers {
+					if m != "" && !seen[m] {
+						seen[m] = true
+						used = append(used, m)
+					}
+				}
+			}
+		}
+	}
+	return used
 }
 
 // mergeSelectedExerciseEquipment appends to equipmentIDs any gear the
