@@ -16,7 +16,8 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "it.davidepucci.vigor"
-    compileSdk = flutter.compileSdkVersion
+    // pinned to 37: permission_handler_android compiles against SDK 37
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
