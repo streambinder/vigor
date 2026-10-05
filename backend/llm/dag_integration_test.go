@@ -80,7 +80,7 @@ Secondo programma, il Ladder: 1 trazione alla sbarra, 2 dip,
 10 trazioni, 20 dip, 30 push-up, 40 addominali e 50 squat, poi si
 ridiscende fino a 1. Tempo stimato: circa un'ora.
 Esecuzione: 1 trazione alla sbarra con mento oltre la sbarra,
-2 dip su parallele rompendo il parallelo, 3 piegamenti con petto
+2 dip rompendo il parallelo, 3 piegamenti con petto
 a terra, 4 sit-up da sdraiato a pancia in su, 5 squat almeno al
 parallelo.
 Scalare il Ladder: dip facilitati su panca o box, crunch a terra,
@@ -139,7 +139,7 @@ func integrationPool() (work, warmup, cooldown []model.Exercise) {
 		{ID: "pull-up", Name: "Pull-Up", Muscles: []string{"back", "arms"}, Equipment: []string{"pull-up bar"}, Mode: "reps", Difficulty: 50, Aliases: []string{"trazioni", "trazioni alla sbarra", "dominadas"}},
 		{ID: "inverted-row", Name: "Inverted Row", Muscles: []string{"back", "arms"}, Equipment: []string{"pull-up bar"}, Mode: "reps", Difficulty: 40},
 		{ID: "push-up", Name: "Push-Up", Muscles: []string{"chest", "arms"}, Mode: "reps", Difficulty: 45, Aliases: []string{"piegamenti", "flessioni", "flexiones"}},
-		{ID: "chest-dip", Name: "Chest Dip", Muscles: []string{"arms", "chest", "shoulders"}, Equipment: []string{"dip station"}, Mode: "reps", Difficulty: 45, Aliases: []string{"parallele", "fondos", "petto dip"}},
+		{ID: "chest-dip", Name: "Chest Dip", Muscles: []string{"arms", "chest", "shoulders"}, Equipment: []string{"dip station"}, Mode: "reps", Difficulty: 45, Aliases: []string{"dip", "parallele", "fondos", "petto dip"}},
 		{ID: "bench-dip-on-floor", Name: "Bench Dip On Floor", Muscles: []string{"arms", "chest", "shoulders"}, Equipment: []string{"bench"}, Mode: "reps", Difficulty: 45},
 		{ID: "34-sit-up", Name: "3/4 Sit-Up", Muscles: []string{"core", "back"}, Mode: "reps", Difficulty: 45, Aliases: []string{"addominali", "abdominales"}},
 		{ID: "bicycle-crunch", Name: "Bicycle Crunch", Muscles: []string{"core"}, Mode: "reps", Difficulty: 40},
