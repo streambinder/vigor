@@ -84,7 +84,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 				AllGoals:           req.AllGoals,
 				ValidMuscles:       req.ValidMuscles,
 				ValidEquipment:     req.ValidEquipment,
-				MovementCandidates: exerciseNames(req.WorkExercises, req.WarmupExercises, req.CooldownExercises),
+				MovementCandidates: exerciseCandidates(req.WorkExercises, req.WarmupExercises, req.CooldownExercises),
 			})
 			if err != nil {
 				return nil, orderedSteps(nodes), fmt.Errorf("derive params node: %w", err)
@@ -213,9 +213,20 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		return nil, orderedSteps(nodes), fmt.Errorf("strategy picked unknown methodology: %s", strategyResult.Methodology)
 	}
 
+	// an explicit program is the user's own literal request: contraindicated
+	// patterns never filter or reshape it. The selection, the deterministic
+	// filter and pin enforcement all run without them, and the patterns
+	// surface downstream as cautions in the session copy instead.
+	effectivePatterns := constraintResult.ContraindicatedPatterns
+	selectionConstraints := constraintResult
+	if explicitProgram {
+		effectivePatterns = nil
+		selectionConstraints.ContraindicatedPatterns = nil
+	}
+
 	// layer 2: exercise selection
 	exerciseResult, exerciseStep, err := runExercisesNode(
-		strategyResult, targetingResult, constraintResult, historyResult,
+		strategyResult, targetingResult, selectionConstraints, historyResult,
 		req.WorkExercises, req.WarmupExercises, req.CooldownExercises,
 		req.FavoriteExercises, req.RecentExerciseIDs,
 		resolvedMethodology, req.SkipWarmupCooldown, req.Duration,
@@ -230,16 +241,18 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	// deterministic safety net: the selection LLM can still leak a
 	// contraindicated or avoided exercise into a warmup/cooldown phase, so
 	// drop any such selection across all phases before pin enforcement.
+	// Explicit programs run without patterns (see above): only the
+	// history avoid-list still drops selections there.
 	exerciseResult = filterContraindicatedExercises(exerciseResult,
-		constraintResult.ContraindicatedPatterns, historyResult.AvoidExercises,
+		effectivePatterns, historyResult.AvoidExercises,
 		req.WorkExercises, req.WarmupExercises, req.CooldownExercises)
 
 	if explicitProgram {
 		// the selection node may still swap a pinned movement for a pool
-		// neighbor; restore pins deterministically, keeping only grounded
-		// contraindication substitutions.
+		// neighbor; restore pins deterministically. The avoid-list is the
+		// only grounded substitution left: contraindications never are.
 		enforceExplicitPins(&exerciseResult, req.PinnedExercises,
-			constraintResult.ContraindicatedPatterns, historyResult.AvoidExercises)
+			effectivePatterns, historyResult.AvoidExercises)
 	}
 
 	// deterministic calibration: guarantee gap-muscle coverage by construction.
@@ -313,9 +326,17 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	if len(req.Profiles) > 0 && req.Profiles[0].Language != "" {
 		language = req.Profiles[0].Language
 	}
+	// explicit-program cautions: the requested movements stay in the session
+	// even where they touch a contraindicated pattern; the copy flags them.
+	var cautionMovements []string
+	if explicitProgram && len(constraintResult.ContraindicatedPatterns) > 0 {
+		cautionMovements = requestedMovementNames(exerciseResult, req, workByID)
+	}
+
 	creativeResult, creativeStep, err := runCreativeNode(
 		language, strategyResult, copyTargeting, exerciseResult, historyResult, constraintResult,
 		loadResult, healthResult, derivedSummary, calibrationCoverage,
+		cautionMovements, userConditionsText(req.Profiles),
 	)
 	nodes[pipeline.StepWriteCopy] = creativeStep
 	if err != nil {
@@ -339,15 +360,23 @@ const maxDerivedSummaryLen = 2000
 // maxDerivedMovements caps the movement names an explicit program may carry.
 const maxDerivedMovements = 12
 
+// MovementCandidate is a catalog movement the request text can pin: its
+// canonical name plus the multilingual aliases the knowledge data carries,
+// so a request written in the user's own language still pins its movements.
+type MovementCandidate struct {
+	Name    string
+	Aliases []string
+}
+
 // DeriveRequest carries the inputs of the prompt param derivation, so it
 // can run both as the DAG pre-step and upfront in the service layer (where
 // the derived filters drive exercise retrieval).
 type DeriveRequest struct {
 	FreeText string
 	Articles []string
-	// MovementCandidates are the catalog movement names the request
+	// MovementCandidates are the catalog movements the request
 	// text is matched against for explicit programs
-	MovementCandidates []string
+	MovementCandidates []MovementCandidate
 	Methodologies      []model.Methodology
 	AllGoals           []model.Goal
 	ValidMuscles       []string
@@ -480,13 +509,47 @@ func movementTokens(text string) map[string]bool {
 	return tokens
 }
 
-// matchMovements finds the candidate movement names the request text
-// pins, deterministically: a candidate matches when every token of its
-// normalized name appears in the normalized text. More specific names
-// (more tokens) win over shorter ones they contain, so "incline push-up"
-// suppresses a bare "push-up" hit inside it.
-func matchMovements(freeText string, articles []string, candidates []string) []string {
-	textTokens := movementTokens(freeText + " " + strings.Join(articles, " "))
+// canonicalMovementToken stems a token to the form names, aliases and
+// request text are all matched by: trailing plural markers fold away, so
+// "trazioni" in an alias meets "trazione" in an Italian request and
+// "jumps" meets "jump". Both sides stem identically, so the folding only
+// merges words that differ by their plural ending.
+func canonicalMovementToken(token string) string {
+	if len(token) > 3 {
+		switch token[len(token)-1] {
+		case 's', 'i':
+			return token[:len(token)-1]
+		}
+	}
+	if len(token) > 4 && token[len(token)-1] == 'e' {
+		return token[:len(token)-1]
+	}
+	return token
+}
+
+// movementFormTokens reduces a movement name or alias to the canonical
+// token set it is matched by.
+func movementFormTokens(form string) map[string]bool {
+	tokens := make(map[string]bool)
+	for token := range movementTokens(form) {
+		tokens[canonicalMovementToken(token)] = true
+	}
+	return tokens
+}
+
+// matchMovements finds the candidate movements the request text pins,
+// deterministically: a candidate matches when every token of its name —
+// or of one of its aliases — appears in the normalized text. The longest
+// matching form represents the candidate, and more specific forms win
+// over shorter ones they contain, so "incline push-up" suppresses a bare
+// "push-up" hit inside it. The canonical catalog name is returned, so
+// downstream pinning resolves the same exercise whatever language the
+// request was written in.
+func matchMovements(freeText string, articles []string, candidates []MovementCandidate) []string {
+	textTokens := make(map[string]bool)
+	for token := range movementTokens(freeText + " " + strings.Join(articles, " ")) {
+		textTokens[canonicalMovementToken(token)] = true
+	}
 
 	type candidate struct {
 		name   string
@@ -494,17 +557,32 @@ func matchMovements(freeText string, articles []string, candidates []string) []s
 	}
 	ordered := make([]candidate, 0, len(candidates))
 	seen := make(map[string]bool, len(candidates))
-	for _, name := range candidates {
-		norm := util.NormalizeIDText(name)
+	for _, c := range candidates {
+		norm := util.NormalizeIDText(c.Name)
 		if norm == "" || seen[norm] {
 			continue
 		}
 		seen[norm] = true
-		tokens := movementTokens(name)
-		if len(tokens) == 0 {
-			continue
+		var best map[string]bool
+		for _, form := range append([]string{c.Name}, c.Aliases...) {
+			tokens := movementFormTokens(form)
+			if len(tokens) == 0 {
+				continue
+			}
+			present := true
+			for token := range tokens {
+				if !textTokens[token] {
+					present = false
+					break
+				}
+			}
+			if present && (best == nil || len(tokens) > len(best)) {
+				best = tokens
+			}
 		}
-		ordered = append(ordered, candidate{name: name, tokens: tokens})
+		if best != nil {
+			ordered = append(ordered, candidate{name: c.Name, tokens: best})
+		}
 	}
 	sort.Slice(ordered, func(i, j int) bool {
 		if len(ordered[i].tokens) != len(ordered[j].tokens) {
@@ -674,16 +752,23 @@ func normalizeDerivedParams(
 	return derived
 }
 
-// exerciseNames flattens exercise pools to their names, for use as
-// movement match candidates.
-func exerciseNames(pools ...[]model.Exercise) []string {
-	names := make([]string, 0)
+// exerciseCandidates flattens exercise pools to their movement
+// candidates (canonical name plus catalog aliases), for use as
+// derivation match candidates.
+func exerciseCandidates(pools ...[]model.Exercise) []MovementCandidate {
+	candidates := make([]MovementCandidate, 0)
+	seen := make(map[string]bool)
 	for _, pool := range pools {
 		for _, ex := range pool {
-			names = append(names, ex.Name)
+			key := util.NormalizeIDText(ex.Name)
+			if key == "" || seen[key] {
+				continue
+			}
+			seen[key] = true
+			candidates = append(candidates, MovementCandidate{Name: ex.Name, Aliases: ex.Aliases})
 		}
 	}
-	return names
+	return candidates
 }
 
 // sanitizeMovements trims, dedupes and caps the movement names of an explicit
@@ -1619,12 +1704,60 @@ func normalizeBlockActivityOrder(load *pipeline.LoadProgramming, selection pipel
 	}
 }
 
+// requestedMovementNames returns the names of the session's work
+// exercises the user literally requested — derived program movements or
+// pinned exercises — in selection order.
+func requestedMovementNames(selection pipeline.ExerciseSelection, req TrainingGenerationRequest, byID map[string]model.Exercise) []string {
+	wanted := make(map[string]bool)
+	if req.Derived != nil {
+		for _, name := range req.Derived.Movements {
+			wanted[util.NormalizeIDText(name)] = true
+		}
+	}
+	for _, pin := range req.PinnedExercises {
+		wanted[util.NormalizeIDText(pin.Name)] = true
+	}
+	var names []string
+	seen := make(map[string]bool)
+	for _, sel := range selection.Exercises {
+		if sel.Phase != "work" {
+			continue
+		}
+		ex, ok := byID[sel.ExerciseID]
+		if !ok || !wanted[util.NormalizeIDText(ex.Name)] || seen[ex.Name] {
+			continue
+		}
+		seen[ex.Name] = true
+		names = append(names, ex.Name)
+	}
+	return names
+}
+
+// userConditionsText renders the profiles' declared injuries, limitations
+// and conditions as one line, the way the copy cautions quote them.
+func userConditionsText(profiles []model.Profile) string {
+	var parts []string
+	for _, p := range profiles {
+		for _, injury := range p.Injuries() {
+			if injury.Year > 0 {
+				parts = append(parts, fmt.Sprintf("%s (%d)", injury.Description, injury.Year))
+			} else {
+				parts = append(parts, injury.Description)
+			}
+		}
+		parts = append(parts, p.Limitations()...)
+		parts = append(parts, p.Conditions()...)
+	}
+	return strings.Join(parts, ", ")
+}
+
 // enforceExplicitPins restores pinned explicit-program movements the selection
 // node swapped for pool neighbors: a pin is mandatory, so a missing pin takes
 // back the first non-pin work slot (or is appended when the selection holds
 // pins only). the only exception is a grounded contraindication — a matching
 // contraindicated pattern or avoid-list entry — where the LLM's substitution
-// stands untouched.
+// stands untouched. Callers pass no patterns for explicit programs: a
+// literally requested program is never reshaped by contraindications.
 func enforceExplicitPins(
 	selection *pipeline.ExerciseSelection,
 	pins []model.Exercise,
@@ -1868,11 +2001,13 @@ func runCreativeNode(
 	health pipeline.HealthAssessment,
 	derivedSummary string,
 	calibrationCoverage []pipeline.CalibrationCoverage,
+	cautionMovements []string,
+	conditions string,
 ) (pipeline.CreativeCopy, model.ModelStep, error) {
 	p := model.LLMPrompt{
 		System: prompt.NodeCreativeSystem(language),
 		User: prompt.NodeCreativeUser(
-			strategy, targeting, exercises, history, constraints, loadResult, health, history.RecentNames, derivedSummary, calibrationCoverage,
+			strategy, targeting, exercises, history, constraints, loadResult, health, history.RecentNames, derivedSummary, calibrationCoverage, cautionMovements, conditions,
 		),
 	}
 

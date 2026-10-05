@@ -51,6 +51,7 @@ Description rules:
 - Write conversationally, as if explaining the workout to the user
 - Do NOT use raw data labels like "too_easy", "too_hard", or technical metric names
 - If constraints apply, mention what was worked around in a positive, practical way
+- If requested-program cautions are listed, flag the affected movements exactly as instructed there — never describe a requested movement that is in the session as worked around, substituted, or avoided
 - If exercises set aside during selection are listed, weave at most one or two notable ones into the selection sentence (what was left out and why) — never list them mechanically, and mention none when the list is empty
 - If recovery was adjusted, mention the rationale without naming metrics
 - If no warmup/cooldown, skip structural mentions of them
@@ -86,6 +87,8 @@ func StreamNodeCreativeUser(qw422016 *qt422016.Writer,
 	recentNames []string,
 	derivedSummary string,
 	calibrationCoverage []pipeline.CalibrationCoverage,
+	cautionMovements []string,
+	conditions string,
 ) {
 	if derivedSummary != "" {
 		qw422016.N().S(`Requested program: `)
@@ -187,7 +190,32 @@ Progression decisions:
 	}
 	qw422016.N().S(`
 `)
-	if len(constraints.ContraindicatedPatterns) > 0 || len(constraints.Accommodations) > 0 {
+	if len(cautionMovements) > 0 {
+		qw422016.N().S(`
+Requested-program cautions: the user asked for this program literally, so these requested movements stayed in the session even where they touch a pattern to handle with care. In the description, plainly flag each of them that touches one of the patterns below: name the movement and tell the user to approach it with care and control given their conditions`)
+		if conditions != "" {
+			qw422016.N().S(` (`)
+			qw422016.E().S(conditions)
+			qw422016.N().S(`)`)
+		}
+		qw422016.N().S(` — practical and factual, never medical advice, diagnosis or treatment claims.
+Requested movements: `)
+		qw422016.E().S(strings.Join(cautionMovements, ", "))
+		qw422016.N().S(`
+Patterns to handle with care: `)
+		qw422016.E().S(strings.Join(constraints.ContraindicatedPatterns, ", "))
+		qw422016.N().S(`
+`)
+		if len(constraints.Accommodations) > 0 {
+			qw422016.N().S(`Care notes: `)
+			qw422016.E().S(strings.Join(constraints.Accommodations, ", "))
+			qw422016.N().S(` — indications for the user, not modifications applied to the program: phrase them as advice, never as changes already made.
+`)
+		}
+	}
+	qw422016.N().S(`
+`)
+	if len(cautionMovements) == 0 && (len(constraints.ContraindicatedPatterns) > 0 || len(constraints.Accommodations) > 0) {
 		qw422016.N().S(`
 Contraindications:
 `)
@@ -293,9 +321,11 @@ func WriteNodeCreativeUser(qq422016 qtio422016.Writer,
 	recentNames []string,
 	derivedSummary string,
 	calibrationCoverage []pipeline.CalibrationCoverage,
+	cautionMovements []string,
+	conditions string,
 ) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeCreativeUser(qw422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames, derivedSummary, calibrationCoverage)
+	StreamNodeCreativeUser(qw422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames, derivedSummary, calibrationCoverage, cautionMovements, conditions)
 	qt422016.ReleaseWriter(qw422016)
 }
 
@@ -310,9 +340,11 @@ func NodeCreativeUser(
 	recentNames []string,
 	derivedSummary string,
 	calibrationCoverage []pipeline.CalibrationCoverage,
+	cautionMovements []string,
+	conditions string,
 ) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeCreativeUser(qb422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames, derivedSummary, calibrationCoverage)
+	WriteNodeCreativeUser(qb422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames, derivedSummary, calibrationCoverage, cautionMovements, conditions)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

@@ -76,12 +76,12 @@ func derivePromptParams(promptText string, articles []string, onProgress llm.DAG
 		return nil, err
 	}
 	var allExercises []model.Exercise
-	if err := database.Knowledge.Select("name").Find(&allExercises).Error; err != nil {
+	if err := database.Knowledge.Select("name", "aliases").Find(&allExercises).Error; err != nil {
 		return nil, err
 	}
-	movementCandidates := make([]string, len(allExercises))
+	movementCandidates := make([]llm.MovementCandidate, len(allExercises))
 	for i, ex := range allExercises {
-		movementCandidates[i] = ex.Name
+		movementCandidates[i] = llm.MovementCandidate{Name: ex.Name, Aliases: ex.Aliases}
 	}
 
 	derivation := &promptDerivation{
