@@ -684,17 +684,22 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 		// exactly that program's set — the circuit's three movements or
 		// the ladder's five — never the union and never the noise.
 		deriveAsked := false
+		programOptions := 0
 		for _, step := range steps {
 			if step.Step == string(pipeline.StepDeriveParams) {
 				for _, q := range step.DM.Data().Questions {
 					if q.ID == "program" {
 						deriveAsked = true
+						programOptions = len(q.Options)
 					}
 				}
 			}
 		}
 		if !deriveAsked {
 			t.Errorf("derive step never asked the program choice question")
+		}
+		if programOptions != 2 {
+			t.Errorf("program choice offered %d options, want exactly the article's two programs", programOptions)
 		}
 		var selectPrompt string
 		for _, step := range steps {

@@ -545,6 +545,65 @@ func TestSegmentProgramsSingleProgram(t *testing.T) {
 	}
 }
 
+func TestMatchMovementsSingleTokenFormNeedsDigit(t *testing.T) {
+	candidates := []MovementCandidate{
+		{Name: "Bottoms-Up", Aliases: []string{"su", "arriba"}},
+		{Name: "Chest Dip", Aliases: []string{"dip"}},
+		{Name: "Pull-Up", Aliases: []string{"trazioni"}},
+	}
+
+	// "su" recurs through the prose but never stands digit-led: a lone
+	// common word corroborates nothing in a long text, so Bottoms-Up
+	// must not pin on it.
+	prose := strings.Repeat("le mani su un rialzo e i piedi su una panca per variare la leva durante la seduta ", 10)
+	if got := matchMovements("", []string{prose}, candidates); len(got) != 0 {
+		t.Fatalf("prose pins = %v, want none", got)
+	}
+
+	// digit-led entries are scheme lines and pin their movements.
+	scheme := strings.Repeat("respira e recupera tra un round e l'altro senza fermarti mai del tutto ", 10) +
+		"Si esegue cosi: 5 trazioni alla sbarra, 2 dip e ancora 5 trazioni alla sbarra, 2 dip"
+	got := movementSet(matchMovements("", []string{scheme}, candidates))
+	for _, want := range []string{"Pull-Up", "Chest Dip"} {
+		if !got[want] {
+			t.Errorf("scheme pins = %v, missing %q", got, want)
+		}
+	}
+	if got["Bottoms-Up"] {
+		t.Errorf("scheme pins = %v, Bottoms-Up must stay out", got)
+	}
+}
+
+func TestSegmentProgramsDropsFragmentCandidates(t *testing.T) {
+	article := `Il Circuito
+Timer di 20 minuti, piu round possibili di 5 trazioni alla sbarra,
+10 push-up e 15 air squat a ogni giro, restando vicino alla sbarra
+per non perdere tempo negli spostamenti durante tutta la seduta
+intera, dall'inizio alla fine senza allontanarsi dalla postazione.
+Round 1: 5 trazioni alla sbarra, 10 push-up, 15 air squat
+Round 2: 5 trazioni alla sbarra, 10 push-up, 15 air squat
+
+Valutazione dei livelli
+Round completati in 20 minuti e livello raggiunto dal soggetto
+Eccellente
+Chiude 18 round o piu con 5 trazioni alla sbarra, 10 push-up e
+15 air squat a ogni giro: resta il riferimento per chi si allena
+da anni con costanza durante tutta la settimana lavorativa.`
+
+	programs := segmentPrograms([]string{article}, programTestCandidates())
+	if len(programs) != 1 {
+		t.Fatalf("programs = %d, want only the circuit itself", len(programs))
+	}
+	if !strings.Contains(programs[0].Title, "Circuito") {
+		t.Errorf("title = %q, want the circuit heading", programs[0].Title)
+	}
+	// the round table stays body copy inside the program: its rows
+	// carry digits and must never cut the segment into fragments
+	if !strings.Contains(programs[0].Text, "Round 2") {
+		t.Errorf("program text lost the round table: %.120q", programs[0].Text)
+	}
+}
+
 func TestDeriveProgramChoice(t *testing.T) {
 	fake := &fakeDecisionClient{answers: map[string]dm.Answer{
 		"methodology":      {Choice: "amrap"},
