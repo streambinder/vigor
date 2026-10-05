@@ -26,6 +26,7 @@ import '../services/service_locator.dart';
 import '../services/readiness_retry.dart';
 import '../widgets/vigor_logo.dart';
 import 'health_permissions_screen.dart';
+import 'main_navigation.dart';
 import 'training_details_screen.dart';
 
 class HomePage extends StatefulWidget {
@@ -599,7 +600,11 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage>, 
                       ),
                     ),
                     Center(
-                      child: Container(
+                      // tapping the counter opens Activity on the completed tab
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => MainNavigation.navigateToCompletedTrainings(),
+                        child: Container(
                         width: size,
                         height: size,
                         padding: VigorSpacing.paddingLg,
@@ -646,6 +651,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage>, 
                             ),
                           ],
                         ),
+                      ),
                       ),
                     ),
                     // readiness badge - top right
