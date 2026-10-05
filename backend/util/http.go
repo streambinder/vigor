@@ -16,6 +16,8 @@ import (
 	"time"
 
 	"golang.org/x/net/html"
+
+	readability "github.com/go-shiori/go-readability"
 )
 
 var (
@@ -192,15 +194,15 @@ const (
 	// MaxResourceURLs caps the links extracted from a single request
 	MaxResourceURLs = 3
 
-	// MinArticleLength is the floor for usable article content: a distilled
+	// MinArticleLength is the floor for usable article content: extracted
 	// text shorter than this carries no program signal, so callers treat it
 	// as a failed extraction rather than a thin article.
 	MinArticleLength = 200
 
-	// maxCleanLength caps the residual program text handed to the LLM
-	maxCleanLength = 4000
-	// fallbackLength is kept when no clear program signal survives filtering
-	fallbackLength = 2000
+	// maxArticleLength caps the cleaned article text handed downstream: a
+	// cost guard on prompt size, cut at a line boundary, never a relevance
+	// filter.
+	maxArticleLength = 20000
 
 	fetchMaxBytes = 512 * 1024
 	fetchTimeout  = 10 * time.Second
@@ -213,22 +215,6 @@ var (
 	// matches explicit scheme URLs inside free text, stopping at whitespace
 	// or markdown delimiters
 	urlPattern = regexp.MustCompile(`https?://[^\s"'<>\)\]]+`)
-
-	// blocks that never carry program content
-	skipElements = map[string]bool{
-		"script": true, "style": true, "noscript": true, "template": true,
-		"iframe": true, "svg": true, "nav": true, "header": true,
-		"footer": true, "aside": true, "form": true, "select": true, "button": true,
-	}
-
-	// blocks emitted as standalone lines
-	lineElements = map[string]bool{
-		"p": true, "li": true, "blockquote": true, "pre": true, "tr": true,
-		"h1": true, "h2": true, "h3": true, "h4": true, "h5": true, "h6": true,
-	}
-
-	// vocabulary that marks a line as program-relevant
-	programSignal = regexp.MustCompile(`(?i)\b(\d+\s*[x×]\s*\d+|\d+\s*%|\d+\s*rm\b|rpe|sets?|reps?|rest|tempo|superset|circuit|rounds?|amrap|emom|hiit|tabata|warm[- ]?up|cool[- ]?down|progression|deload|week|day|kg|lbs?)\b`)
 
 	whitespace = regexp.MustCompile(`\s+`)
 )
@@ -258,8 +244,8 @@ func ExtractURLs(text string) []string {
 	return urls
 }
 
-// FetchResource downloads an article and distills it to its compact
-// program-relevant text. any failure is fatal to the calling request.
+// FetchResource downloads an article and returns its cleaned main text,
+// one block per line. any failure is fatal to the calling request.
 func FetchResource(rawURL string) (string, error) {
 	body, _, err := SafeFetch(rawURL, SafeFetchOptions{
 		BlockPrivateIPs:   true,
@@ -272,42 +258,36 @@ func FetchResource(rawURL string) (string, error) {
 		return "", err
 	}
 
-	lines, err := extractMainText(string(body))
+	return extractMainText(string(body), rawURL)
+}
+
+// extractMainText returns the article's main text as one block per line.
+// A publisher-declared JSON-LD articleBody is authoritative when present;
+// otherwise Mozilla's Readability algorithm (via go-readability) isolates
+// the main content. Text under MinArticleLength is a failed extraction.
+func extractMainText(page, rawURL string) (string, error) {
+	doc, err := html.Parse(strings.NewReader(page))
 	if err != nil {
 		return "", err
 	}
 
-	return FilterProgram(lines), nil
-}
-
-// mainContainer picks the semantic container holding the article body by
-// text volume: the first article/main element in document order is often a
-// promo box rather than the body, so the richest candidate wins, and when
-// none reaches MinArticleLength the whole document is scanned instead.
-func mainContainer(doc *html.Node) *html.Node {
-	var candidates []*html.Node
-	var walk func(n *html.Node)
-	walk = func(n *html.Node) {
-		if n.Type == html.ElementNode {
-			if n.Data == "article" || n.Data == "main" || hasAttr(n, "role", "main") {
-				candidates = append(candidates, n)
-				return
-			}
-		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			walk(c)
-		}
+	if body := ldArticleBody(doc); len(body) >= MinArticleLength {
+		return capArticle(cleanLines(body)), nil
 	}
-	walk(doc)
 
-	best := doc
-	bestLen := MinArticleLength
-	for _, candidate := range candidates {
-		if length := textLength(candidate); length > bestLen {
-			best, bestLen = candidate, length
-		}
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		return "", ErrNoProgramContent
 	}
-	return best
+	article, err := readability.FromReader(strings.NewReader(page), parsed)
+	if err != nil {
+		return "", ErrNoProgramContent
+	}
+	lines := cleanLines(article.TextContent)
+	if len(strings.Join(lines, "\n")) < MinArticleLength {
+		return "", ErrNoProgramContent
+	}
+	return capArticle(lines), nil
 }
 
 // hasAttr reports whether an element carries the attribute value (compared
@@ -319,62 +299,6 @@ func hasAttr(n *html.Node, key, value string) bool {
 		}
 	}
 	return false
-}
-
-// textLength sums the visible text characters of a subtree.
-func textLength(n *html.Node) int {
-	var text strings.Builder
-	collectText(n, &text)
-	return text.Len()
-}
-
-// extractMainText parses an HTML page and returns its main text as one line
-// per block-level element, skipping chrome (nav, scripts, footers...). A
-// publisher-declared JSON-LD articleBody is authoritative when present.
-func extractMainText(page string) ([]string, error) {
-	doc, err := html.Parse(strings.NewReader(page))
-	if err != nil {
-		return nil, err
-	}
-
-	if body := ldArticleBody(doc); len(body) >= MinArticleLength {
-		var lines []string
-		for _, line := range strings.Split(body, "\n") {
-			if line = normalizeLine(line); line != "" {
-				lines = append(lines, line)
-			}
-		}
-		if len(lines) > 0 {
-			return lines, nil
-		}
-	}
-
-	var lines []string
-	var emit func(n *html.Node)
-	emit = func(n *html.Node) {
-		if n.Type == html.ElementNode {
-			if skipElements[n.Data] {
-				return
-			}
-			if lineElements[n.Data] {
-				var text strings.Builder
-				collectText(n, &text)
-				if line := normalizeLine(text.String()); line != "" {
-					lines = append(lines, line)
-				}
-				return
-			}
-		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			emit(c)
-		}
-	}
-	emit(mainContainer(doc))
-
-	if len(lines) == 0 {
-		return nil, ErrNoProgramContent
-	}
-	return lines, nil
 }
 
 // articleTypes names the JSON-LD @type values expected to carry an articleBody.
@@ -458,63 +382,33 @@ func articleFamily(value any) bool {
 	return false
 }
 
-// collectText appends the full text content of a subtree.
-func collectText(n *html.Node, out *strings.Builder) {
-	if n.Type == html.TextNode {
-		out.WriteString(n.Data)
-	}
-	if n.Type == html.ElementNode && skipElements[n.Data] {
-		return
-	}
-	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		collectText(c, out)
-	}
-}
-
 func normalizeLine(s string) string {
 	return strings.TrimSpace(whitespace.ReplaceAllString(s, " "))
 }
 
-// FilterProgram reduces cleaned article lines to the program-relevant
-// residue: lines carrying training signal (sets x reps, %, rest, weeks...),
-// each introduced by the last short heading seen for context. falls back to
-// the plain article lead when nothing matches.
-func FilterProgram(lines []string) string {
-	shortHeading := func(s string) bool {
-		return len(s) <= 80 && !strings.HasSuffix(s, ".")
+// cleanLines splits text into normalized non-empty lines.
+func cleanLines(text string) []string {
+	var lines []string
+	for _, line := range strings.Split(text, "\n") {
+		if line = normalizeLine(line); line != "" {
+			lines = append(lines, line)
+		}
 	}
+	return lines
+}
 
-	var kept []string
-	lastHeading := ""
-	headingKept := false
+// capArticle joins lines up to maxArticleLength, cutting at a line
+// boundary so downstream text never ends mid-sentence.
+func capArticle(lines []string) string {
+	var joined strings.Builder
 	for _, line := range lines {
-		if shortHeading(line) {
-			lastHeading = line
-			headingKept = false
-			continue
+		if joined.Len() > 0 && joined.Len()+1+len(line) > maxArticleLength {
+			break
 		}
-		if !programSignal.MatchString(line) {
-			continue
+		if joined.Len() > 0 {
+			joined.WriteString("\n")
 		}
-		if lastHeading != "" && !headingKept {
-			kept = append(kept, lastHeading)
-			headingKept = true
-		}
-		kept = append(kept, line)
+		joined.WriteString(line)
 	}
-
-	var joined string
-	if len(kept) == 0 {
-		joined = strings.Join(lines, "\n")
-		if len(joined) > fallbackLength {
-			joined = joined[:fallbackLength]
-		}
-	} else {
-		joined = strings.Join(kept, "\n")
-		if len(joined) > maxCleanLength {
-			joined = joined[:maxCleanLength]
-		}
-	}
-
-	return strings.TrimSpace(joined)
+	return joined.String()
 }

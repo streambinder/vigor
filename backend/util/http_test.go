@@ -216,15 +216,17 @@ func TestExtractMainText(t *testing.T) {
 <ul>
 <li>Squat 3x5 at 85%</li>
 </ul>
+<p>Each training week follows a fixed wave of percentages with an
+assistance block after the main lift, and every fourth week is a deload
+that lets accumulated fatigue clear before the next cycle starts over.</p>
 </article>
 <footer><p>Copyright 2026</p></footer>
 </body></html>`
 
-	lines, err := extractMainText(page)
+	joined, err := extractMainText(page, "https://example.com/wendler")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	joined := strings.Join(lines, "\n")
 	for _, want := range []string{"Wendler 5/3/1", "classic strength template", "Squat 3x5 at 85%"} {
 		if !strings.Contains(joined, want) {
 			t.Fatalf("expected %q in extracted lines: %q", want, joined)
@@ -238,7 +240,7 @@ func TestExtractMainText(t *testing.T) {
 }
 
 func TestExtractMainTextEmpty(t *testing.T) {
-	if _, err := extractMainText(`<html><body><script>only()</script></body></html>`); err != ErrNoProgramContent {
+	if _, err := extractMainText(`<html><body><script>only()</script></body></html>`, "https://example.com/x"); err != ErrNoProgramContent {
 		t.Fatalf("expected ErrNoProgramContent, got %v", err)
 	}
 }
@@ -252,11 +254,10 @@ func TestExtractMainTextJSONLDBody(t *testing.T) {
 		t.Fatalf("failed to read fixture: %v", err)
 	}
 
-	lines, err := extractMainText(string(page))
+	joined, err := extractMainText(string(page), "https://example.com/article")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	joined := strings.Join(lines, "\n")
 	for _, want := range []string{"1 trazione alla sbarra", "50 squat"} {
 		if !strings.Contains(joined, want) {
 			t.Fatalf("expected %q in extracted lines: %q", want, joined)
@@ -282,11 +283,10 @@ func TestExtractMainTextPicksRichestContainer(t *testing.T) {
 <article><h2>Shop</h2><p>Abbonamenti digitali</p></article>
 </body></html>`
 
-	lines, err := extractMainText(page)
+	joined, err := extractMainText(page, "https://example.com/program")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	joined := strings.Join(lines, "\n")
 	if !strings.Contains(joined, "Back squat 5x5 at 80%") {
 		t.Fatalf("expected the richest container to win: %q", joined)
 	}
@@ -298,60 +298,71 @@ func TestExtractMainTextPicksRichestContainer(t *testing.T) {
 }
 
 func TestExtractMainTextThinExtraction(t *testing.T) {
-	// no JSON-LD and no meaningful container: extraction must surface the
-	// thinness so the caller can treat it as a failed extraction
+	// no JSON-LD and no meaningful content: a thin extraction is a failed
+	// extraction, so the caller can treat the resource as unusable
 	page := `<html><body>
 <article><h2>l'editoriale</h2></article>
 <article><h2>Il Borghese</h2></article>
 </body></html>`
 
-	lines, err := extractMainText(page)
+	if _, err := extractMainText(page, "https://example.com/thin"); err != ErrNoProgramContent {
+		t.Fatalf("expected ErrNoProgramContent, got %v", err)
+	}
+}
+
+func TestExtractMainTextKeepsConsecutiveSchemeLines(t *testing.T) {
+	// regression: enumerated scheme lines (digit-led, one movement each)
+	// must all survive extraction: a relevance filter used to collapse
+	// consecutive short lines into the last one, dropping the scheme head
+	page := `<html><head><title>t</title></head><body>
+<nav><ul><li>Home</li><li>Shop</li></ul></nav>
+<article>
+<h1>Il circuito a corpo libero</h1>
+<p>Imposta un timer di venti minuti ed esegui la sequenza a oltranza,
+ripartendo dal primo esercizio non appena concluso l'ultimo, cercando di
+chiudere il maggior numero di giri completi nel tempo a disposizione.</p>
+<p>5 trazioni</p>
+<p>10 piegamenti</p>
+<p>15 squat a corpo libero</p>
+<p>La qualita del movimento resta il vincolo principale: meglio un giro
+in meno che ripetizioni sporche, soprattutto quando la fatica accumulata
+nella seconda meta del lavoro inizia a farsi sentire sulle spalle.</p>
+</article>
+<footer><p>Copyright 2026</p></footer>
+</body></html>`
+
+	got, err := extractMainText(page, "https://example.com/circuit")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if got := len(strings.Join(lines, "\n")); got >= MinArticleLength {
-		t.Fatalf("expected extraction under %d chars, got %d", MinArticleLength, got)
-	}
-}
-
-func TestFilterProgram(t *testing.T) {
-	lines := []string{
-		"The Program",
-		"Welcome to my blog about my journey through fitness and wellness over the years.",
-		"Back squat 5x5 at 80% 1RM, rest 3 minutes between sets.",
-		"Keep the bar path vertical throughout the lift to stay balanced.",
-		"Bench press 3x8, rest 90s.",
-	}
-
-	got := FilterProgram(lines)
-	for _, want := range []string{"The Program", "5x5 at 80%", "Bench press 3x8"} {
+	for _, want := range []string{"5 trazioni", "10 piegamenti", "15 squat a corpo libero"} {
 		if !strings.Contains(got, want) {
-			t.Fatalf("expected %q in filtered output: %q", want, got)
+			t.Fatalf("expected %q in extracted text: %q", want, got)
 		}
 	}
-	if strings.Contains(got, "journey through fitness") {
-		t.Fatalf("prose should have been filtered out: %q", got)
-	}
-	// no bar-path vocabulary: filtered too, despite sitting between kept lines
-	if strings.Contains(got, "bar path") {
-		t.Fatalf("neutral line should have been filtered out: %q", got)
+	for _, unwanted := range []string{"Home", "Copyright"} {
+		if strings.Contains(got, unwanted) {
+			t.Fatalf("did not expect %q in extracted text: %q", unwanted, got)
+		}
 	}
 }
 
-func TestFilterProgramFallback(t *testing.T) {
-	lines := []string{"Just a story.", "No program vocabulary anywhere here at all."}
-	got := FilterProgram(lines)
-	if !strings.Contains(got, "Just a story.") {
-		t.Fatalf("expected fallback to keep the article lead, got %q", got)
-	}
-}
-
-func TestFilterProgramCap(t *testing.T) {
-	var lines []string
+func TestExtractMainTextCap(t *testing.T) {
+	var body strings.Builder
+	body.WriteString(`<html><body><article><h1>Long read</h1>`)
 	for range 200 {
-		lines = append(lines, "Squat 5x5 with 3 minutes rest between heavy sets.")
+		body.WriteString("<p>Squat 5x5 with 3 minutes rest between heavy sets and steady tempo.</p>")
 	}
-	if got := FilterProgram(lines); len(got) > maxCleanLength {
-		t.Fatalf("expected output capped at %d, got %d", maxCleanLength, len(got))
+	body.WriteString(`</article></body></html>`)
+
+	got, err := extractMainText(body.String(), "https://example.com/long")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) > maxArticleLength {
+		t.Fatalf("expected output capped at %d, got %d", maxArticleLength, len(got))
+	}
+	if !strings.HasSuffix(got, "tempo.") {
+		t.Fatalf("expected the cap to cut at a line boundary, got tail %q", got[max(0, len(got)-40):])
 	}
 }
