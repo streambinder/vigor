@@ -172,7 +172,7 @@ func calibrationGenerationAllowed(analyze bool, equipment []string, gymID, promp
 		!skipWarmupCooldown
 }
 
-func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string, loc *time.Location, onProgress llm.DAGProgressFunc) (*model.Training, error) {
+func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string, request []byte, loc *time.Location, onProgress llm.DAGProgressFunc) (*model.Training, error) {
 	// a non-empty prompt runs through the analyzer, which fills only the
 	// tuning parameters the user left unset; explicit choices stay
 	// authoritative
@@ -781,6 +781,9 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	training.FactIndices = nil // clear after resolution
 
 	training.Trajectory = &model.Trajectory{Steps: steps}
+	if len(request) > 0 {
+		training.Trajectory.Request = request
+	}
 	training.Trajectory.Summarize()
 	if gym != nil {
 		training.GymID = &gym.ID

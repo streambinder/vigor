@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/datatypes"
 )
 
 // TrajectoryUsage is the aggregated accounting of a trajectory:
@@ -30,6 +31,12 @@ type Trajectory struct {
 	ID            uuid.UUID  `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" dart:"String"`
 	TrainingID    *uuid.UUID `gorm:"type:uuid;uniqueIndex" json:"training_id,omitempty" dart:"-"`
 	FlowSessionID *uuid.UUID `gorm:"type:uuid;uniqueIndex" json:"flow_session_id,omitempty" dart:"-"`
+
+	// Request is the generation request exactly as the client sent it,
+	// kept as opaque JSON whatever shape the current API gives it: the
+	// record of what was asked must survive request schema changes, so
+	// no typed copy of the request lives on the trajectory.
+	Request datatypes.JSON `gorm:"type:jsonb" json:"request,omitempty" dart:"-"`
 
 	Steps []ModelStep `gorm:"foreignKey:TrajectoryID;constraint:OnDelete:CASCADE" json:"steps"`
 

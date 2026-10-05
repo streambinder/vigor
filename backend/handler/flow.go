@@ -29,6 +29,8 @@ func postFlow(c *fiber.Ctx) error {
 		req.Duration,
 		req.Muscles,
 		req.Prompt,
+		// the request as the client sent it, kept verbatim for the trajectory
+		append([]byte(nil), c.Body()...),
 	)
 	if err != nil {
 		switch {
