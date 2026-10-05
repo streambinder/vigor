@@ -23,6 +23,8 @@ func TestNodeCreativeUserRoutineStructure(t *testing.T) {
 		nil,
 		"",
 		nil,
+		nil,
+		"",
 	)
 	if strings.Contains(out, "blocks}") {
 		t.Fatalf("routine structure line carries stray brace: %q", out)
@@ -48,6 +50,8 @@ func TestNodeCreativeUserBlockRestBeatsRoutineRest(t *testing.T) {
 		nil,
 		"",
 		nil,
+		nil,
+		"",
 	)
 	if !strings.Contains(out, "- work: 2 block(s), 60s rest between blocks") {
 		t.Fatalf("between-blocks rest not read from blocks: %q", out)
@@ -95,6 +99,8 @@ func TestNodeCreativeUserCalibrationCoverage(t *testing.T) {
 		[]pipeline.CalibrationCoverage{
 			{Muscle: "back", ExerciseID: "inverted-row"},
 		},
+		nil,
+		"",
 	)
 	if !strings.Contains(out, "Calibration coverage (required, already in the program):") {
 		t.Fatalf("calibration coverage section missing:\n%s", out)
@@ -119,6 +125,8 @@ func TestNodeCreativeUserNoCalibrationCoverage(t *testing.T) {
 		nil,
 		"",
 		nil,
+		nil,
+		"",
 	)
 	if strings.Contains(out, "Calibration coverage") {
 		t.Fatalf("empty coverage must not render the section:\n%s", out)
@@ -179,6 +187,8 @@ func TestNodeCreativeUserWorkStructureFacts(t *testing.T) {
 		nil,
 		"",
 		nil,
+		nil,
+		"",
 	)
 	if !strings.Contains(out, "19 work block(s), 19 round(s) counting block repeats, 5 distinct work movement(s)") {
 		t.Fatalf("work structure facts do not distinguish blocks from movements: %q", out)
@@ -211,8 +221,42 @@ func TestNodeCreativeUserWorkStructureCountsRepeats(t *testing.T) {
 		nil,
 		"",
 		nil,
+		nil,
+		"",
 	)
 	if !strings.Contains(out, "2 work block(s), 5 round(s) counting block repeats, 2 distinct work movement(s)") {
 		t.Fatalf("repeats not counted as rounds or movements double-counted: %q", out)
+	}
+}
+
+func TestNodeCreativeUserExplicitProgramCautions(t *testing.T) {
+	out := NodeCreativeUser(
+		pipeline.Strategy{},
+		pipeline.MuscleTargeting{},
+		pipeline.ExerciseSelection{},
+		pipeline.HistoryAnalysis{},
+		pipeline.ConstraintExtraction{
+			ContraindicatedPatterns: []string{"overhead hanging", "deep spinal flexion"},
+			Accommodations:          []string{"reduce squat depth"},
+		},
+		pipeline.LoadProgramming{},
+		pipeline.HealthAssessment{},
+		nil,
+		"",
+		nil,
+		[]string{"Pull-Up", "3/4 Sit-Up"},
+		"Pubalgia (2021), Lussazione della spalla sinistra (2020)",
+	)
+	if !strings.Contains(out, "Requested-program cautions") {
+		t.Fatalf("cautions block missing: %q", out)
+	}
+	if !strings.Contains(out, "Requested movements: Pull-Up, 3/4 Sit-Up") {
+		t.Fatalf("caution movements missing: %q", out)
+	}
+	if !strings.Contains(out, "Lussazione della spalla sinistra (2020)") {
+		t.Fatalf("conditions missing: %q", out)
+	}
+	if strings.Contains(out, "Contraindications:\nPatterns to avoid") {
+		t.Fatalf("standard contraindications block must yield to cautions: %q", out)
 	}
 }

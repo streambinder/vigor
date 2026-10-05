@@ -208,9 +208,49 @@ func TestMatchMovements(t *testing.T) {
 	matched := matchMovements(
 		"3 rounds: 10 pull-up, 15 push-up, then squat jumps",
 		nil,
-		[]string{"Pull Up", "Push Up", "Incline Push Up", "Squat", "Squat Jump", "Deadlift"},
+		[]MovementCandidate{
+			{Name: "Pull Up"},
+			{Name: "Push Up"},
+			{Name: "Incline Push Up"},
+			{Name: "Squat"},
+			{Name: "Squat Jump"},
+			{Name: "Deadlift"},
+		},
 	)
 	want := map[string]bool{"Pull Up": true, "Push Up": true, "Squat Jump": true}
+	if len(matched) != len(want) {
+		t.Fatalf("matched = %v, want keys of %v", matched, want)
+	}
+	for _, m := range matched {
+		if !want[m] {
+			t.Errorf("unexpected match %q", m)
+		}
+	}
+}
+
+// an Italian article names its movements in Italian: the catalog aliases
+// must still pin them, returning canonical names (regression: a Spider-Man
+// program article pinned only the two movements it spelled in English,
+// and the delivered session silently lost pull-ups, dips and sit-ups).
+func TestMatchMovementsItalianAliases(t *testing.T) {
+	article := "Il Ladder prevede 1 trazione alla sbarra, 2 dip su parallele, " +
+		"3 push-up, 4 addominali e 5 air squat, salendo fino a 10-20-30-40-50."
+	matched := matchMovements(
+		"replica questo allenamento",
+		[]string{article},
+		[]MovementCandidate{
+			{Name: "Pull-Up", Aliases: []string{"trazioni", "trazioni alla sbarra"}},
+			{Name: "Chest Dip", Aliases: []string{"parallele", "petto dip"}},
+			{Name: "3/4 Sit-Up", Aliases: []string{"addominali"}},
+			{Name: "Push-Up", Aliases: []string{"piegamenti", "flessioni"}},
+			{Name: "Air Squat", Aliases: []string{"squat a corpo libero"}},
+			{Name: "Deadlift", Aliases: []string{"stacco da terra"}},
+		},
+	)
+	want := map[string]bool{
+		"Pull-Up": true, "Chest Dip": true, "3/4 Sit-Up": true,
+		"Push-Up": true, "Air Squat": true,
+	}
 	if len(matched) != len(want) {
 		t.Fatalf("matched = %v, want keys of %v", matched, want)
 	}
@@ -237,7 +277,7 @@ func TestDeriveNodeDecision(t *testing.T) {
 		AllGoals:           []model.Goal{{ID: "hypertrophy", Description: "muscle mass"}, {ID: "endurance", Description: "stamina"}},
 		ValidMuscles:       []string{"chest", "legs"},
 		ValidEquipment:     []string{"dumbbell", "barbell"},
-		MovementCandidates: []string{"Pull Up", "Push Up", "Squat"},
+		MovementCandidates: []MovementCandidate{{Name: "Pull Up"}, {Name: "Push Up"}, {Name: "Squat"}},
 	})
 	if err != nil {
 		t.Fatalf("DeriveFreeTextParams: %v", err)

@@ -31,8 +31,12 @@ Rules:
 - Annotations in parentheses (weighted, timer-only, reps-only, recent) are metadata — not part of the ID
 - For work exercises: cover the primary muscles with higher count, secondary muscles with 1-2 exercises
 - If muscles to rest are listed, never pick exercises from their groups
-- Avoid exercises matching any contraindicated pattern in every phase (warmup, work, and cooldown) — there is no mobility or warmup exemption
-- Prefer favorite exercises when they fit
+`)
+	if !explicitProgram {
+		qw422016.N().S(`- Avoid exercises matching any contraindicated pattern in every phase (warmup, work, and cooldown) — there is no mobility or warmup exemption
+`)
+	}
+	qw422016.N().S(`- Prefer favorite exercises when they fit
 - Prefer non-recent exercises over recent ones for variety
 - Avoid exercises listed in avoid_exercises in every phase (warmup, work, and cooldown) — there is no mobility or warmup exemption
 `)
@@ -41,7 +45,7 @@ Rules:
 		qw422016.E().S(requestSchema)
 		qw422016.N().S(`
 - Map each requested movement to its closest exercise from the [WORK] pool — that is the session, do not redesign it, do not add alternative work exercises, and never rest muscles it trains
-- Pinned movements are mandatory: never swap one for a different exercise for recency or variety — the "prefer non-recent" rule does not apply to them; substitute only on contraindication as above and state the real reason in the rationale`)
+- Pinned movements are mandatory: never swap one for a different exercise for recency or variety — the "prefer non-recent" rule does not apply to them; never substitute one on contraindication grounds either: the user asked for this program literally, so every requested movement stays exactly as requested and any caution belongs to the session copy, not to the selection`)
 	} else {
 		qw422016.N().S(`- Select `)
 		qw422016.N().D(minWork)

@@ -109,14 +109,14 @@ func integrationProfile(t *testing.T, limitations, injuries []string) model.Prof
 // scenarios need to discriminate between.
 func integrationPool() (work, warmup, cooldown []model.Exercise) {
 	work = []model.Exercise{
-		{ID: "pull-up", Name: "Pull-Up", Muscles: []string{"back", "arms"}, Equipment: []string{"pull-up bar"}, Mode: "reps", Difficulty: 50},
+		{ID: "pull-up", Name: "Pull-Up", Muscles: []string{"back", "arms"}, Equipment: []string{"pull-up bar"}, Mode: "reps", Difficulty: 50, Aliases: []string{"trazioni", "trazioni alla sbarra", "dominadas"}},
 		{ID: "inverted-row", Name: "Inverted Row", Muscles: []string{"back", "arms"}, Equipment: []string{"pull-up bar"}, Mode: "reps", Difficulty: 40},
-		{ID: "push-up", Name: "Push-Up", Muscles: []string{"chest", "arms"}, Mode: "reps", Difficulty: 45},
-		{ID: "chest-dip", Name: "Chest Dip", Muscles: []string{"arms", "chest", "shoulders"}, Equipment: []string{"dip station"}, Mode: "reps", Difficulty: 45},
+		{ID: "push-up", Name: "Push-Up", Muscles: []string{"chest", "arms"}, Mode: "reps", Difficulty: 45, Aliases: []string{"piegamenti", "flessioni", "flexiones"}},
+		{ID: "chest-dip", Name: "Chest Dip", Muscles: []string{"arms", "chest", "shoulders"}, Equipment: []string{"dip station"}, Mode: "reps", Difficulty: 45, Aliases: []string{"parallele", "fondos", "petto dip"}},
 		{ID: "bench-dip-on-floor", Name: "Bench Dip On Floor", Muscles: []string{"arms", "chest", "shoulders"}, Equipment: []string{"bench"}, Mode: "reps", Difficulty: 45},
-		{ID: "34-sit-up", Name: "3/4 Sit-Up", Muscles: []string{"core", "back"}, Mode: "reps", Difficulty: 45},
+		{ID: "34-sit-up", Name: "3/4 Sit-Up", Muscles: []string{"core", "back"}, Mode: "reps", Difficulty: 45, Aliases: []string{"addominali", "abdominales"}},
 		{ID: "bicycle-crunch", Name: "Bicycle Crunch", Muscles: []string{"core"}, Mode: "reps", Difficulty: 40},
-		{ID: "air-squat", Name: "Air Squat", Muscles: []string{"legs", "glutes"}, Mode: "reps", Difficulty: 25},
+		{ID: "air-squat", Name: "Air Squat", Muscles: []string{"legs", "glutes"}, Mode: "reps", Difficulty: 25, Aliases: []string{"squat a corpo libero", "sentadillas"}},
 		{ID: "burpee", Name: "Burpee", Muscles: []string{"legs", "chest"}, Mode: "reps", Difficulty: 50},
 		{ID: "front-plank-with-twist", Name: "Front Plank With Twist", Muscles: []string{"core", "shoulders"}, Mode: "duration", Difficulty: 45},
 		{ID: "barbell-standing-overhead-press", Name: "Barbell Standing Overhead Press", Muscles: []string{"shoulders"}, Equipment: []string{"barbell"}, Mode: "reps", Difficulty: 60},
@@ -318,6 +318,11 @@ func descriptionRestSentence(description, muscle string) (string, bool) {
 		}
 		if strings.Contains(lower, "not a rest") || strings.Contains(lower, "rather than rest") ||
 			strings.Contains(lower, "instead of rest") || strings.Contains(lower, "not resting") {
+			continue
+		}
+		// a sentence that puts the muscle to calibration work describes
+		// training, not rest, even when resting muscles share the sentence.
+		if strings.Contains(lower, "calibration") {
 			continue
 		}
 		for _, word := range restWords {
@@ -576,6 +581,56 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 			if strings.Contains(desc, "five rounds") || strings.Contains(desc, "5 rounds") {
 				t.Errorf("description conflates movements with rounds: %d work blocks described as five rounds: %q", blocks, training.Description)
 			}
+		}
+	})
+
+	t.Run("italian article program keeps contraindicated movements and flags them", func(t *testing.T) {
+		req := baseRequest()
+		req.Goals = goals[:1]
+		// the requesting user carries the very conditions that make two
+		// of the article's movements contraindicated: the program was
+		// asked for literally, so both movements must stay in the
+		// session and the description must flag them instead.
+		req.Profiles = []model.Profile{integrationProfile(t, nil,
+			[]string{"Lussazione della spalla sinistra (left shoulder dislocation)", "Pubalgia (groin pain)"})}
+		req.FreeText = "Voglio replicare l'allenamento a corpo libero descritto qui: " + linkedArticleURL
+		req.Articles = []string{linkedArticleText}
+		req.AllGoals = goals
+		req.ValidMuscles = []string{"chest", "back", "shoulders", "arms", "core", "glutes", "legs"}
+		req.ValidEquipment = []string{"pull-up bar", "dip station", "bench", "barbell", "dumbbell"}
+
+		training, _ := run(t, req)
+
+		// all five ladder movements, named in Italian in the article,
+		// must pin through the catalog aliases and reach the session —
+		// pull-ups and sit-ups included, contraindications
+		// notwithstanding.
+		ids := workExerciseIDs(training)
+		for _, id := range []string{"pull-up", "push-up", "air-squat"} {
+			if !ids[id] {
+				t.Errorf("article movement %q missing from the generated training", id)
+			}
+		}
+		if !ids["chest-dip"] && !ids["bench-dip-on-floor"] {
+			t.Error("no dip movement from the article reached the generated training")
+		}
+		if !ids["34-sit-up"] && !ids["bicycle-crunch"] {
+			t.Error("no sit-up movement from the article reached the generated training")
+		}
+		// the kept contraindicated movements are flagged in the copy:
+		// the description must pair a caution with the movement.
+		desc := strings.ToLower(training.Description)
+		caution := false
+		for _, word := range []string{"care", "caution", "careful", "mindful", "gentle", "control"} {
+			if strings.Contains(desc, word) {
+				caution = true
+			}
+		}
+		if !caution {
+			t.Errorf("description carries no caution for the contraindicated requested movements: %q", training.Description)
+		}
+		if !strings.Contains(desc, "pull") {
+			t.Errorf("description never names the flagged pull-up movement: %q", training.Description)
 		}
 	})
 

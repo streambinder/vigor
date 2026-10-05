@@ -30,6 +30,7 @@ Description rules:
 - Write conversationally, as if explaining the workout to the user
 - Do NOT use raw data labels like "too_easy", "too_hard", or technical metric names
 - If constraints apply, mention what was worked around in a positive, practical way
+- If requested-program cautions are listed, flag the affected movements exactly as instructed there — never describe a requested movement that is in the session as worked around, substituted, or avoided
 - If exercises set aside during selection are listed, weave at most one or two notable ones into the selection sentence (what was left out and why) — never list them mechanically, and mention none when the list is empty
 - If recovery was adjusted, mention the rationale without naming metrics
 - If no warmup/cooldown, skip structural mentions of them
@@ -50,6 +51,8 @@ Description rules:
     recentNames []string,
     derivedSummary string,
     calibrationCoverage []pipeline.CalibrationCoverage,
+    cautionMovements []string,
+    conditions string,
 ) -%}
 {% if derivedSummary != "" %}Requested program: {%s derivedSummary %}
 
@@ -81,7 +84,13 @@ Progression decisions:
 {% for _, p := range history.Progressions %}- {%s p.ExerciseID %}: {%s p.Action %} ({%s p.Signal %})
 {% endfor %}
 {% endif %}
-{% if len(constraints.ContraindicatedPatterns) > 0 || len(constraints.Accommodations) > 0 %}
+{% if len(cautionMovements) > 0 %}
+Requested-program cautions: the user asked for this program literally, so these requested movements stayed in the session even where they touch a pattern to handle with care. In the description, plainly flag each of them that touches one of the patterns below: name the movement and tell the user to approach it with care and control given their conditions{% if conditions != "" %} ({%s conditions %}){% endif %} — practical and factual, never medical advice, diagnosis or treatment claims.
+Requested movements: {%s strings.Join(cautionMovements, ", ") %}
+Patterns to handle with care: {%s strings.Join(constraints.ContraindicatedPatterns, ", ") %}
+{% if len(constraints.Accommodations) > 0 %}Care notes: {%s strings.Join(constraints.Accommodations, ", ") %} — indications for the user, not modifications applied to the program: phrase them as advice, never as changes already made.
+{% endif %}{% endif %}
+{% if len(cautionMovements) == 0 && (len(constraints.ContraindicatedPatterns) > 0 || len(constraints.Accommodations) > 0) %}
 Contraindications:
 {% if len(constraints.ContraindicatedPatterns) > 0 %}Patterns to avoid: {%s strings.Join(constraints.ContraindicatedPatterns, ", ") %}
 {% endif %}{% if len(constraints.Accommodations) > 0 %}Accommodations applied: {%s strings.Join(constraints.Accommodations, ", ") %}
