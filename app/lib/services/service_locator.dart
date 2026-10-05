@@ -207,6 +207,9 @@ class ServiceLocator extends ChangeNotifier {
   /// triggers backend sync which can block on expensive database joins.
   /// Health data is fetched separately via fire-and-forget syncToBackend().
   Future<void> loadInitialData() async {
+    // seed today's cached hint during the splash so the first home frame
+    // already paints it instead of the grey placeholder
+    serveCachedReadiness();
     final results = await Future.wait([
       progressService.getProgress(),
       progressService.getWeeklyTarget(),
