@@ -650,12 +650,26 @@ func spanInScheme(lines [][]string, span sequenceSpan) bool {
 	return false
 }
 
+// spanDigitLed reports whether a numeric token stands immediately
+// before the span on its line — the tight shape of a scheme entry
+// ("5 trazioni", "2 dip"). Single-token forms are admitted in long
+// texts only in this shape: a lone common word recurs anywhere ("su"
+// is Italian for "on"), so bare recurrence corroborates nothing.
+func spanDigitLed(lines [][]string, span sequenceSpan) bool {
+	if span.start == 0 {
+		return false
+	}
+	_, err := strconv.Atoi(lines[span.line][span.start-1])
+	return err == nil
+}
+
 // longMovementTextTokens is the length past which a text is read as a
 // document rather than a request: brief prompts are taken literally, so
 // a movement they name once is a movement they mean. A long article
 // also names movements it never programs — scaling asides, examples,
 // variations — so past this length a form must be corroborated: it
-// recurs, or it appears inside a rep scheme.
+// recurs, or it appears inside a rep scheme. A single-token form is
+// corroborated only digit-led: common words recur everywhere.
 const longMovementTextTokens = 120
 
 // matchMovements finds the candidate movements the request text pins,
@@ -705,15 +719,23 @@ func matchMovements(freeText string, articles []string, candidates []MovementCan
 			if len(spans) == 0 {
 				continue
 			}
-			if longText && len(spans) < 2 {
+			if longText {
 				grounded := false
 				for _, span := range spans {
-					if spanInScheme(lines, span) {
+					// a single-token form is grounded only digit-led:
+					// bare recurrence of a common word proves nothing
+					if len(sequence) == 1 {
+						if spanDigitLed(lines, span) {
+							grounded = true
+						}
+					} else if spanInScheme(lines, span) {
 						grounded = true
 					}
 				}
-				if !grounded {
-					continue
+				if len(sequence) == 1 || len(spans) < 2 {
+					if !grounded {
+						continue
+					}
 				}
 			}
 			if best == nil || len(sequence) > len(best) {
@@ -819,6 +841,7 @@ func segmentPrograms(articles []string, candidates []MovementCandidate) []progra
 	}
 	var programs []programSegment
 	for _, article := range articles {
+		var articlePrograms []programSegment
 		for _, seg := range splitArticleSegments(article) {
 			text := strings.TrimSpace(seg.text)
 			if len(movementTokenSequence(text)) < 40 {
@@ -828,10 +851,54 @@ func segmentPrograms(articles []string, candidates []MovementCandidate) []progra
 			if len(movements) < 2 || !hasDigitToken(text) {
 				continue
 			}
-			programs = append(programs, programSegment{Title: seg.title, Text: text, Movements: movements})
+			articlePrograms = append(articlePrograms, programSegment{Title: seg.title, Text: text, Movements: movements})
 		}
+		programs = append(programs, dropFragmentPrograms(articlePrograms)...)
 	}
 	return programs
+}
+
+// dropFragmentPrograms removes restatements of a program already
+// carried by a longer stretch of the same article: evaluation tables
+// and execution notes re-list a program's movements under cell-like
+// headings ("Eccellente") and would otherwise compete with the program
+// itself as candidates. Only an identical movement set marks a
+// restatement — a distinct program that merely shares movements with
+// a bigger one (a Cindy inside an article that also carries a ladder
+// over the same base) keeps its own candidacy.
+func dropFragmentPrograms(programs []programSegment) []programSegment {
+	var kept []programSegment
+	for _, p := range programs {
+		fragment := false
+		for _, q := range programs {
+			if len(q.Text) > len(p.Text) && sameMovementSet(q.Movements, p.Movements) {
+				fragment = true
+				break
+			}
+		}
+		if !fragment {
+			kept = append(kept, p)
+		}
+	}
+	return kept
+}
+
+// sameMovementSet reports whether two movement lists name the same
+// movements, order aside.
+func sameMovementSet(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	set := make(map[string]bool, len(a))
+	for _, name := range a {
+		set[name] = true
+	}
+	for _, name := range b {
+		if !set[name] {
+			return false
+		}
+	}
+	return true
 }
 
 // segmentMovements returns the article-pinned movements a segment
@@ -863,9 +930,22 @@ func movementOccursIn(lines [][]string, candidate MovementCandidate) bool {
 	var spans []sequenceSpan
 	for _, form := range append([]string{candidate.Name}, candidate.Aliases...) {
 		seq := movementFormSequence(form)
-		if len(seq) > 0 {
-			spans = append(spans, countSequenceOccurrences(lines, seq)...)
+		if len(seq) == 0 {
+			continue
 		}
+		formSpans := countSequenceOccurrences(lines, seq)
+		if len(seq) == 1 {
+			// single-token forms count only digit-led, as in the
+			// article-level matcher: recurrence of a common word
+			// ("su") inside a segment proves no membership
+			for _, span := range formSpans {
+				if spanDigitLed(lines, span) {
+					spans = append(spans, span)
+				}
+			}
+			continue
+		}
+		spans = append(spans, formSpans...)
 	}
 	if len(spans) >= 2 {
 		return true
@@ -928,7 +1008,9 @@ func splitArticleSegments(article string) []articleSegment {
 // isSegmentHeading reports whether an extracted text line reads as a
 // section heading rather than body copy. Extracted text wraps long
 // sentences across lines, and a wrapped continuation opens lowercase:
-// requiring an uppercase opening keeps those out.
+// requiring an uppercase opening keeps those out. A line carrying a
+// digit is scheme content (a table row, a round entry), never a
+// heading: cutting there would shred a program's table into fragments.
 func isSegmentHeading(line string) bool {
 	t := strings.TrimSpace(line)
 	runes := []rune(t)
@@ -936,6 +1018,9 @@ func isSegmentHeading(line string) bool {
 		return false
 	}
 	if !unicode.IsUpper(runes[0]) {
+		return false
+	}
+	if hasDigitToken(t) {
 		return false
 	}
 	switch runes[len(runes)-1] {
