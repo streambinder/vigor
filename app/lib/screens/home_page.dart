@@ -35,7 +35,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
+class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage>, WidgetsBindingObserver {
   Progress? _progress;
   WeeklyTarget? _weeklyTarget;
   Map<String, dynamic>? _healthDaily;
@@ -53,6 +53,9 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
     if (_consumedInitialData) return;
     _consumedInitialData = true;
     final serviceLocator = context.read<ServiceLocator>();
+    // paint today's cached readiness hint on the first frame instead of
+    // waiting for a load cycle that the preloaded path may never run
+    serviceLocator.serveCachedReadiness();
     if (serviceLocator.initialDataLoaded) {
       _progress = serviceLocator.initialProgress;
       _weeklyTarget = serviceLocator.initialWeeklyTarget;
@@ -77,7 +80,29 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // reopening the app must surface today's hint without a manual refresh:
+    // serve the device cache at once, then probe the backend (which serves
+    // its own day cache without recomputing)
+    if (state != AppLifecycleState.resumed || !mounted) return;
+    final locator = context.read<ServiceLocator>();
+    locator.serveCachedReadiness();
+    _readinessRetryPolicy.reset();
+    locator.refreshReadiness().then((ready) {
+      if (!ready) _scheduleReadinessRetry();
+    });
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _readinessRetryTimer?.cancel();
     _healthDailyNotifier?.removeListener(_onHealthDailyChanged);
     super.dispose();
@@ -136,12 +161,17 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage> {
         }
       });
 
-      // trigger incremental health metrics sync (fire-and-forget, server-throttled)
+      // probe readiness right away, in parallel with the health sync: the
+      // backend answers 404 until this morning's sleep has synced, so an
+      // early probe cannot grade stale data — it just arms the retry chain
+      locator.refreshReadiness(force: userRefresh).then((ready) {
+        if (!ready && !userRefresh) _scheduleReadinessRetry();
+      });
+
+      // trigger incremental health metrics sync (fire-and-forget, server-throttled),
+      // then re-probe so the hint reflects the freshly synced data
       if (locator.healthDataService != null) {
         AppLogger.debug('[HomePage] triggering health sync on refresh');
-        // readiness hint only after the sync has landed: the backend answers
-        // 404 until this morning's sleep is in the database, so probing in
-        // parallel would race the sync and grade stale data
         locator.healthDataService!.syncToBackend().whenComplete(() async {
           final ready = await locator.refreshReadiness(force: userRefresh);
           // no recovery data yet: retry on a bounded backoff instead of

@@ -13,7 +13,7 @@ class ReadinessRetryPolicy {
 
   int _attempts = 0;
 
-  ReadinessRetryPolicy({this.maxAttempts = 5, this.baseDelay = const Duration(seconds: 30)});
+  ReadinessRetryPolicy({this.maxAttempts = 5, this.baseDelay = const Duration(seconds: 10)});
 
   /// Delay before the next retry, or null when the attempts are exhausted.
   Duration? nextDelay() {
