@@ -68,26 +68,18 @@ la densità.`
 // ladder that climbs to a peak and comes back down. The page is named
 // after a film character whose name collides with catalog exercises,
 // and the asides name variations and gear the programs never use. The
-// derivation must pin the programs' movements, not the noise.
+// text is shaped the way the article extractor returns it: a title
+// line, one heading per program, and full-sentence lines. The
+// derivation must segment the two programs, choose one, and pin only
+// that program's movements, never the noise and never a blend.
 const noisyArticleText = `L'allenamento a corpo libero di Spider-Man (Tom Holland).
-Primo programma, il Cindy: timer di 20 minuti, più round possibili di
-5 trazioni, 10 piegamenti e 15 squat a corpo libero; in inglese
-5 pull up, 10 push up e 15 air squat. Record citato: 27 round.
-Varianti facilitate: trazioni orizzontali al TRX, piegamenti sulle
-ginocchia, squat box con una panca dietro.
-Secondo programma, il Ladder: 1 trazione alla sbarra, 2 dip,
-3 push-up, 4 addominali e 5 squat; si sale round dopo round fino a
-10 trazioni, 20 dip, 30 push-up, 40 addominali e 50 squat, poi si
-ridiscende fino a 1. Tempo stimato: circa un'ora.
-Esecuzione: 1 trazione alla sbarra con mento oltre la sbarra,
-2 dip rompendo il parallelo, 3 piegamenti con petto
-a terra, 4 sit-up da sdraiato a pancia in su, 5 squat almeno al
-parallelo.
-Scalare il Ladder: dip facilitati su panca o box, crunch a terra,
-box squat con supporto dietro.
-Personalizzare: elastici per facilitare le trazioni, esercizi
-monoarto come one arm push up e one arm pull up, manubri tra le
-gambe come zavorra per trazioni e dip, lavoro agli anelli.`
+Due schemi diversi per allenarsi senza attrezzi: un circuito a tempo e una scala di ripetizioni, entrambi costruiti sui movimenti base del calisthenics.
+L'allenamento a corpo libero di Spider-Man: il Cindy
+Timer di 20 minuti, più round possibili di 5 trazioni, 10 piegamenti e 15 squat a corpo libero; in inglese 5 pull up, 10 push up e 15 air squat, restando sempre vicino alla sbarra per non perdere tempo negli spostamenti. Record citato: 27 round. Varianti facilitate: trazioni orizzontali al TRX, piegamenti sulle ginocchia, squat box con una panca dietro.
+L'allenamento a corpo libero di Spider-Man: il Ladder
+1 trazione alla sbarra, 2 dip, 3 push-up, 4 addominali e 5 squat; si sale round dopo round fino a 10 trazioni, 20 dip, 30 push-up, 40 addominali e 50 squat, poi si ridiscende fino a 1. Tempo stimato: circa un'ora. Esecuzione: 1 trazione alla sbarra con mento oltre la sbarra, 2 dip rompendo il parallelo, 3 piegamenti con petto a terra, 4 sit-up da sdraiato a pancia in su, 5 squat almeno al parallelo. Scalare il Ladder: dip facilitati su panca o box, crunch a terra, box squat con supporto dietro.
+Personalizzare il percorso
+Elastici per facilitare le trazioni, esercizi monoarto come one arm push up e one arm pull up, manubri tra le gambe come zavorra per trazioni e dip, lavoro agli anelli e tanta costanza settimanale.`
 
 func requireReasoningProvider(t *testing.T) {
 	t.Helper()
@@ -663,8 +655,7 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 
 	t.Run("noisy article with two programs pins only program movements", func(t *testing.T) {
 		req := baseRequest()
-		req.Goals = goals[:1]
-		// the scenario pool carries the catalog exercises the article's
+		req.Goals = goals[:1] // the scenario pool carries the catalog exercises the article's
 		// title and asides collide with, aliases included: none of them
 		// is a program movement, so none may reach the session.
 		noisy := append([]model.Exercise{}, work...)
@@ -688,9 +679,23 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 
 		training, steps := run(t, req)
 
-		// the derivation itself is deterministic: the pinned movement
-		// list handed downstream must be exactly the two programs'
-		// movements, whatever the selection model later makes of it.
+		// the derivation segments the article's two programs and picks
+		// one: the pinned movement list handed downstream must be
+		// exactly that program's set — the circuit's three movements or
+		// the ladder's five — never the union and never the noise.
+		deriveAsked := false
+		for _, step := range steps {
+			if step.Step == string(pipeline.StepDeriveParams) {
+				for _, q := range step.DM.Data().Questions {
+					if q.ID == "program" {
+						deriveAsked = true
+					}
+				}
+			}
+		}
+		if !deriveAsked {
+			t.Errorf("derive step never asked the program choice question")
+		}
 		var selectPrompt string
 		for _, step := range steps {
 			if step.Step == string(pipeline.StepSelectExercises) {
@@ -711,17 +716,20 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 		for _, movement := range strings.Split(segment, ", ") {
 			derivedMovements[strings.TrimSpace(movement)] = true
 		}
-		for _, want := range []string{"Pull-Up", "Push-Up", "Air Squat", "3/4 Sit-Up", "Chest Dip"} {
-			if !derivedMovements[want] {
-				t.Errorf("derived movements %v miss program movement %q", derivedMovements, want)
+		sameSet := func(want ...string) bool {
+			if len(derivedMovements) != len(want) {
+				return false
 			}
+			for _, m := range want {
+				if !derivedMovements[m] {
+					return false
+				}
+			}
+			return true
 		}
-		for movement := range derivedMovements {
-			switch movement {
-			case "Pull-Up", "Push-Up", "Air Squat", "3/4 Sit-Up", "Chest Dip":
-			default:
-				t.Errorf("derived movements pin non-program movement %q", movement)
-			}
+		ladderChosen := sameSet("Pull-Up", "Push-Up", "Air Squat", "3/4 Sit-Up", "Chest Dip")
+		if !ladderChosen && !sameSet("Pull-Up", "Push-Up", "Air Squat") {
+			t.Errorf("derived movements %v are neither program's set: the two programs were blended", derivedMovements)
 		}
 
 		ids := workExerciseIDs(training)
@@ -742,24 +750,63 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 				}
 			}
 		}
-		// the two programs share pull-up, push-up and squat; the ladder
-		// adds dip and sit-up. Every family must be in the session.
-		families := map[string][]string{
-			"pull-up": {"pull-up"},
-			"dip":     {"chest-dip", "bench-dip-on-floor"},
-			"push-up": {"push-up"},
-			"sit-up":  {"34-sit-up", "bicycle-crunch"},
-			"squat":   {"air-squat"},
+		// both programs share pull-up, push-up and squat; the ladder
+		// adds dip and sit-up. The chosen program's families, and only
+		// those, must be in the session.
+		familyOf := map[string]string{
+			"pull-up": "pull-up", "chest-dip": "dip", "bench-dip-on-floor": "dip",
+			"push-up": "push-up", "34-sit-up": "sit-up", "bicycle-crunch": "sit-up",
+			"air-squat": "squat",
 		}
-		for family, candidates := range families {
-			found := false
-			for _, candidate := range candidates {
-				if ids[candidate] {
-					found = true
+		sessionFamilies := map[string]bool{}
+		for id := range ids {
+			if family, ok := familyOf[id]; ok {
+				sessionFamilies[family] = true
+			}
+		}
+		for _, family := range []string{"pull-up", "push-up", "squat"} {
+			if !sessionFamilies[family] {
+				t.Errorf("no %s movement from the chosen program reached the generated training", family)
+			}
+		}
+		if ladderChosen {
+			for _, family := range []string{"dip", "sit-up"} {
+				if !sessionFamilies[family] {
+					t.Errorf("ladder chosen but no %s movement reached the generated training", family)
 				}
 			}
-			if !found {
-				t.Errorf("no %s movement from the article programs reached the generated training", family)
+			// the ladder is a progression: the session must climb, not
+			// sit in one uniform block — several blocks, or reps that
+			// change between blocks.
+			var blocks []model.Block
+			for _, routine := range training.Routines {
+				if routine.Type == "work" {
+					blocks = append(blocks, routine.Blocks...)
+				}
+			}
+			progresses := len(blocks) > 1
+			if len(blocks) > 1 {
+				first := map[string]int{}
+				for _, a := range blocks[0].Activities {
+					first[a.ExerciseID] = a.Reps
+				}
+				progresses = false
+				for _, block := range blocks[1:] {
+					for _, a := range block.Activities {
+						if a.Reps != first[a.ExerciseID] {
+							progresses = true
+						}
+					}
+				}
+			}
+			if !progresses {
+				t.Errorf("ladder chosen but the training is one uniform circuit, not a progression")
+			}
+		} else {
+			for _, family := range []string{"dip", "sit-up"} {
+				if sessionFamilies[family] {
+					t.Errorf("circuit chosen but a %s movement from the ladder reached the training", family)
+				}
 			}
 		}
 	})

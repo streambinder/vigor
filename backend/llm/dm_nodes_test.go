@@ -452,3 +452,143 @@ func TestHistoryNodeEmpty(t *testing.T) {
 		t.Errorf("result = %+v step kind %q, want empty dm step", result, step.Kind)
 	}
 }
+
+// twoProgramsArticle carries two distinct programs under their own
+// headings plus prose sections that program nothing. It is a distilled
+// paraphrase written for this test, not copied article text.
+const twoProgramsArticle = `Allenamento a corpo libero completo
+Due schemi diversi per allenarsi senza attrezzi, da scegliere in base
+al tempo e al livello. Entrambi lavorano su spinta, trazione, gambe
+e addome con movimenti base del calisthenics moderno.
+
+Programma A: il Circuito Veloce
+Timer di 20 minuti, più round possibili di 5 trazioni alla sbarra,
+10 push-up e 15 air squat, senza pause lunghe tra un round e l'altro.
+Il circuito veloce chiede densità: 5 trazioni alla sbarra, 10 push-up
+e 15 air squat a ogni giro, restando vicino alla sbarra per non
+perdere tempo negli spostamenti durante tutta la seduta a corpo
+libero, in palestra oppure a casa propria con un minimo di spazio.
+
+Programma B: la Scala
+Si parte da 1 trazione alla sbarra, 2 dip, 3 push-up, 4 addominali
+e 5 squat, poi si sale fino a 10 trazioni alla sbarra, 20 dip,
+30 push-up, 40 addominali e 50 squat, e infine si ridiscende fino
+a 1 trazione alla sbarra, 2 dip, 3 push-up, 4 addominali e 5 squat.
+La scala completa dura circa un'ora, con recuperi liberi a
+sensazione tra un round e l'altro in base al proprio livello.
+
+Consigli pratici
+Dormire bene, mangiare proteine a sufficienza e bere acqua aiuta
+il recupero tra una seduta e l'altra, qualunque schema si scelga
+per allenarsi con costanza durante la settimana lavorativa intera.`
+
+func programTestCandidates() []MovementCandidate {
+	return []MovementCandidate{
+		{Name: "Pull-Up", Aliases: []string{"trazioni", "trazioni alla sbarra"}},
+		{Name: "Chest Dip", Aliases: []string{"dip", "parallele", "petto dip"}},
+		{Name: "3/4 Sit-Up", Aliases: []string{"addominali"}},
+		{Name: "Push-Up", Aliases: []string{"piegamenti", "flessioni"}},
+		{Name: "Air Squat", Aliases: []string{"squat a corpo libero"}},
+	}
+}
+
+func movementSet(movements []string) map[string]bool {
+	set := make(map[string]bool, len(movements))
+	for _, m := range movements {
+		set[m] = true
+	}
+	return set
+}
+
+func TestSegmentPrograms(t *testing.T) {
+	programs := segmentPrograms([]string{twoProgramsArticle}, programTestCandidates())
+	if len(programs) != 2 {
+		t.Fatalf("programs = %d, want 2", len(programs))
+	}
+	circuit := movementSet(programs[0].Movements)
+	for _, want := range []string{"Pull-Up", "Push-Up", "Air Squat"} {
+		if !circuit[want] {
+			t.Errorf("circuit movements = %v, missing %q", programs[0].Movements, want)
+		}
+	}
+	if circuit["Chest Dip"] || circuit["3/4 Sit-Up"] {
+		t.Errorf("circuit movements = %v, must not blend the ladder in", programs[0].Movements)
+	}
+	ladder := movementSet(programs[1].Movements)
+	for _, want := range []string{"Pull-Up", "Chest Dip", "Push-Up", "3/4 Sit-Up", "Air Squat"} {
+		if !ladder[want] {
+			t.Errorf("ladder movements = %v, missing %q", programs[1].Movements, want)
+		}
+	}
+	if !strings.Contains(programs[1].Title, "Scala") {
+		t.Errorf("ladder title = %q, want the Scala heading", programs[1].Title)
+	}
+}
+
+func TestSegmentProgramsSingleProgram(t *testing.T) {
+	article := "Circuito semplice\n" +
+		"Ripeti per 20 minuti 5 trazioni alla sbarra, 10 push-up e 15 air squat, " +
+		"poi ancora 5 trazioni alla sbarra, 10 push-up e 15 air squat senza pause " +
+		"lunghe, restando vicino alla sbarra per tutta la seduta a corpo libero, " +
+		"in palestra oppure a casa propria con un minimo di spazio a disposizione."
+	programs := segmentPrograms([]string{article}, programTestCandidates())
+	if len(programs) != 1 {
+		t.Fatalf("programs = %d, want 1", len(programs))
+	}
+
+	prose := "Consigli generali\n" +
+		"Dormire bene e mangiare proteine aiuta il recupero tra una seduta " +
+		"e l'altra, qualunque schema si scelga per allenarsi con costanza " +
+		"durante la settimana, a casa oppure in palestra con gli amici."
+	if got := segmentPrograms([]string{prose}, programTestCandidates()); len(got) != 0 {
+		t.Fatalf("prose programs = %d, want 0", len(got))
+	}
+}
+
+func TestDeriveProgramChoice(t *testing.T) {
+	fake := &fakeDecisionClient{answers: map[string]dm.Answer{
+		"methodology":      {Choice: "amrap"},
+		"program":          {Choice: "program_1"},
+		"explicit_program": {Noul: 0.95},
+	}, noul: 0.1}
+	installFakeDecisionClient(t, fake)
+
+	derived, step, err := DeriveFreeTextParams(DeriveRequest{
+		FreeText:           "voglio replicare l'allenamento di questo articolo",
+		Articles:           []string{twoProgramsArticle},
+		Methodologies:      []model.Methodology{{ID: "amrap", Name: "AMRAP", Description: "rounds against the clock"}},
+		MovementCandidates: programTestCandidates(),
+	})
+	if err != nil {
+		t.Fatalf("DeriveFreeTextParams: %v", err)
+	}
+	if !derived.ExplicitProgram {
+		t.Error("want explicit program")
+	}
+	got := movementSet(derived.Movements)
+	for _, want := range []string{"Pull-Up", "Chest Dip", "Push-Up", "3/4 Sit-Up", "Air Squat"} {
+		if !got[want] {
+			t.Errorf("movements = %v, missing ladder movement %q", derived.Movements, want)
+		}
+	}
+	if !strings.Contains(derived.ProgramText, "la Scala") {
+		t.Errorf("program text missing the chosen segment: %.80q", derived.ProgramText)
+	}
+	if strings.Contains(derived.Summary, "Circuito Veloce") {
+		t.Errorf("summary blends the unchosen program: %.200q", derived.Summary)
+	}
+	asked := false
+	for _, call := range fake.calls {
+		for _, q := range call {
+			if q.ID == "program" {
+				asked = true
+			}
+		}
+	}
+	if !asked {
+		t.Error("program choice question was not asked")
+	}
+	if step.Kind != model.StepKindDM {
+		t.Errorf("step kind = %q, want dm", step.Kind)
+	}
+}

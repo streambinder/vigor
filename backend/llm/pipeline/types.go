@@ -45,6 +45,11 @@ type DerivedParams struct {
 	// ("pull-up", "push-up"); populated only when the request pins a concrete
 	// set, and matched against the exercise catalog downstream — never IDs
 	Movements []string `json:"movements"`
+	// ProgramText is the linked text of the single program the session
+	// follows when the source carried several distinct programs: the one
+	// segment downstream nodes should treat as the requested program,
+	// instead of the whole article. Empty when no choice was made.
+	ProgramText string `json:"program_text,omitempty"`
 }
 
 // Summarizable is the embedded base for all pipeline node outputs.
