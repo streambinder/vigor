@@ -7,9 +7,11 @@ import (
 	"math"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
+	"unicode"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
@@ -490,20 +492,14 @@ func truncateText(text string, maxLen int) string {
 	return strings.TrimSpace(text[:cut]) + "…"
 }
 
-// movementTokens splits text into the normalized token set movement
-// names are matched against, indexing light singular forms alongside
-// plurals so "jumps" in the request still finds "jump" in a name.
-func movementTokens(text string) map[string]bool {
-	tokens := make(map[string]bool)
+// rawMovementTokens splits text into its normalized tokens, in order.
+func rawMovementTokens(text string) []string {
+	var tokens []string
 	for _, token := range strings.FieldsFunc(util.NormalizeIDText(text), func(r rune) bool {
 		return !(r >= 'a' && r <= 'z' || r >= '0' && r <= '9')
 	}) {
-		if token == "" {
-			continue
-		}
-		tokens[token] = true
-		if len(token) > 3 && strings.HasSuffix(token, "s") {
-			tokens[token[:len(token)-1]] = true
+		if token != "" {
+			tokens = append(tokens, token)
 		}
 	}
 	return tokens
@@ -527,33 +523,112 @@ func canonicalMovementToken(token string) string {
 	return token
 }
 
-// movementFormTokens reduces a movement name or alias to the canonical
-// token set it is matched by.
-func movementFormTokens(form string) map[string]bool {
-	tokens := make(map[string]bool)
-	for token := range movementTokens(form) {
-		tokens[canonicalMovementToken(token)] = true
+// movementTokenSequence reduces text to its canonical token sequence.
+func movementTokenSequence(text string) []string {
+	raw := rawMovementTokens(text)
+	sequence := make([]string, len(raw))
+	for i, token := range raw {
+		sequence[i] = canonicalMovementToken(token)
 	}
-	return tokens
+	return sequence
 }
 
-// matchMovements finds the candidate movements the request text pins,
-// deterministically: a candidate matches when every token of its name —
-// or of one of its aliases — appears in the normalized text. The longest
-// matching form represents the candidate, and more specific forms win
-// over shorter ones they contain, so "incline push-up" suppresses a bare
-// "push-up" hit inside it. The canonical catalog name is returned, so
-// downstream pinning resolves the same exercise whatever language the
-// request was written in.
-func matchMovements(freeText string, articles []string, candidates []MovementCandidate) []string {
-	textTokens := make(map[string]bool)
-	for token := range movementTokens(freeText + " " + strings.Join(articles, " ")) {
-		textTokens[canonicalMovementToken(token)] = true
+// movementFormSequence reduces a movement name or alias to the canonical
+// token sequence it is matched by. A form is unusable when one of its
+// words leaves no token behind: the catalog aliases carry scripts this
+// tokenizer cannot represent (Cyrillic, CJK, Korean), and their forms
+// would otherwise collapse to a single embedded Latin word — a Russian
+// dumbbell alias reduced to "spider" must never pin a spider exercise.
+func movementFormSequence(form string) []string {
+	var sequence []string
+	for _, word := range strings.Fields(form) {
+		tokens := movementTokenSequence(word)
+		if len(tokens) == 0 {
+			if strings.IndexFunc(word, unicode.IsLetter) >= 0 {
+				return nil
+			}
+			continue
+		}
+		sequence = append(sequence, tokens...)
 	}
+	return sequence
+}
+
+// sequenceSpan locates one contiguous occurrence of a form.
+type sequenceSpan struct {
+	line, start, end int
+}
+
+// countSequenceOccurrences finds every contiguous occurrence of the
+// form in the text lines. An occurrence is in a rep scheme when a
+// numeric token sits just before it on the same line — "5 trazioni",
+// "2 dip su parallele" — the shape program lines take.
+func countSequenceOccurrences(lines [][]string, form []string) []sequenceSpan {
+	var spans []sequenceSpan
+	for i, line := range lines {
+		for start := 0; start+len(form) <= len(line); start++ {
+			match := true
+			for j, token := range form {
+				if line[start+j] != token {
+					match = false
+					break
+				}
+			}
+			if match {
+				spans = append(spans, sequenceSpan{line: i, start: start, end: start + len(form)})
+			}
+		}
+	}
+	return spans
+}
+
+// spanInScheme reports whether a numeric token precedes the span
+// within the scheme window on its line.
+func spanInScheme(lines [][]string, span sequenceSpan) bool {
+	line := lines[span.line]
+	for i := max(span.start-8, 0); i < span.start; i++ {
+		if _, err := strconv.Atoi(line[i]); err == nil {
+			return true
+		}
+	}
+	return false
+}
+
+// longMovementTextTokens is the length past which a text is read as a
+// document rather than a request: brief prompts are taken literally, so
+// a movement they name once is a movement they mean. A long article
+// also names movements it never programs — scaling asides, examples,
+// variations — so past this length a form must be corroborated: it
+// recurs, or it appears inside a rep scheme.
+const longMovementTextTokens = 120
+
+// matchMovements finds the candidate movements the request text pins,
+// deterministically: a candidate matches when one of its name or alias
+// forms appears in the text as a contiguous token sequence — scattered
+// co-occurrence of a form's words across a whole article is not a
+// mention of the movement. In a long text the form must also be
+// corroborated (it recurs, or it sits in a rep scheme), so incidental
+// mentions in asides do not pin. The longest grounded form represents
+// the candidate, and more specific forms win over shorter ones they
+// contain, so "incline push-up" suppresses a bare "push-up" hit inside
+// it. The canonical catalog name is returned, so downstream pinning
+// resolves the same exercise whatever language the request was written
+// in.
+func matchMovements(freeText string, articles []string, candidates []MovementCandidate) []string {
+	text := freeText + "\n" + strings.Join(articles, "\n")
+	rawLines := strings.Split(text, "\n")
+	lines := make([][]string, len(rawLines))
+	totalTokens := 0
+	for i, raw := range rawLines {
+		lines[i] = movementTokenSequence(raw)
+		totalTokens += len(lines[i])
+	}
+	longText := totalTokens > longMovementTextTokens
 
 	type candidate struct {
 		name   string
 		tokens map[string]bool
+		spans  []sequenceSpan
 	}
 	ordered := make([]candidate, 0, len(candidates))
 	seen := make(map[string]bool, len(candidates))
@@ -563,26 +638,41 @@ func matchMovements(freeText string, articles []string, candidates []MovementCan
 			continue
 		}
 		seen[norm] = true
-		var best map[string]bool
+		var best []string
+		var bestSpans []sequenceSpan
 		for _, form := range append([]string{c.Name}, c.Aliases...) {
-			tokens := movementFormTokens(form)
-			if len(tokens) == 0 {
+			sequence := movementFormSequence(form)
+			if len(sequence) == 0 {
 				continue
 			}
-			present := true
-			for token := range tokens {
-				if !textTokens[token] {
-					present = false
-					break
+			spans := countSequenceOccurrences(lines, sequence)
+			if len(spans) == 0 {
+				continue
+			}
+			if longText && len(spans) < 2 {
+				grounded := false
+				for _, span := range spans {
+					if spanInScheme(lines, span) {
+						grounded = true
+					}
+				}
+				if !grounded {
+					continue
 				}
 			}
-			if present && (best == nil || len(tokens) > len(best)) {
-				best = tokens
+			if best == nil || len(sequence) > len(best) {
+				best = sequence
+				bestSpans = spans
 			}
 		}
-		if best != nil {
-			ordered = append(ordered, candidate{name: c.Name, tokens: best})
+		if best == nil {
+			continue
 		}
+		tokenSet := make(map[string]bool, len(best))
+		for _, token := range best {
+			tokenSet[token] = true
+		}
+		ordered = append(ordered, candidate{name: c.Name, tokens: tokenSet, spans: bestSpans})
 	}
 	sort.Slice(ordered, func(i, j int) bool {
 		if len(ordered[i].tokens) != len(ordered[j].tokens) {
@@ -591,38 +681,48 @@ func matchMovements(freeText string, articles []string, candidates []MovementCan
 		return ordered[i].name < ordered[j].name
 	})
 
-	var matched []string
-	var matchedTokens []map[string]bool
+	// a shorter movement is suppressed by a more specific one only
+	// where the specific form actually covers its occurrences: a bare
+	// "push-up" elsewhere in the text still pins push-up even when an
+	// "incline push-up" also appears.
+	var kept []candidate
 	for _, c := range ordered {
-		present := true
-		for token := range c.tokens {
-			if !textTokens[token] {
-				present = false
-				break
-			}
-		}
-		if !present {
-			continue
-		}
-		contained := false
-		for _, kept := range matchedTokens {
-			strictSubset := len(c.tokens) < len(kept)
-			for token := range c.tokens {
-				if !kept[token] {
-					strictSubset = false
-					break
+		suppressed := len(c.spans) > 0
+		for _, span := range c.spans {
+			covered := false
+			for _, k := range kept {
+				if len(k.tokens) <= len(c.tokens) {
+					continue
+				}
+				subset := true
+				for token := range c.tokens {
+					if !k.tokens[token] {
+						subset = false
+						break
+					}
+				}
+				if !subset {
+					continue
+				}
+				for _, ks := range k.spans {
+					if ks.line == span.line && ks.start <= span.start && ks.end >= span.end {
+						covered = true
+					}
 				}
 			}
-			if strictSubset {
-				contained = true
+			if !covered {
+				suppressed = false
 				break
 			}
 		}
-		if contained {
-			continue
+		if !suppressed {
+			kept = append(kept, c)
 		}
-		matched = append(matched, c.name)
-		matchedTokens = append(matchedTokens, c.tokens)
+	}
+
+	matched := make([]string, len(kept))
+	for i, c := range kept {
+		matched[i] = c.name
 	}
 	return matched
 }
