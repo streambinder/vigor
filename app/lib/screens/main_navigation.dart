@@ -26,6 +26,12 @@ class MainNavigation extends StatefulWidget {
     navKey.currentState?._onTabTapped(index);
   }
 
+  /// Navigate to the Activity tab showing completed trainings
+  static void navigateToCompletedTrainings() {
+    navigateToTab(1);
+    ActivityScreen.showCompletedTab();
+  }
+
   @override
   State<MainNavigation> createState() => MainNavigationState();
 }
@@ -34,10 +40,10 @@ class MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
   // use IndexedStack to preserve screen state across tab switches
-  static const List<Widget> _screens = [
-    HomePage(),
-    ActivityScreen(),
-    ProfileScreen(),
+  static final List<Widget> _screens = [
+    const HomePage(),
+    ActivityScreen(key: ActivityScreen.screenKey),
+    const ProfileScreen(),
   ];
 
   void _onTabTapped(int index) {

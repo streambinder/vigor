@@ -20,11 +20,18 @@ import 'flow_details_screen.dart';
 class ActivityScreen extends StatefulWidget {
   const ActivityScreen({super.key});
 
+  static final GlobalKey<ActivityScreenState> screenKey = GlobalKey();
+
+  /// Select the completed trainings tab from outside the screen
+  static void showCompletedTab() {
+    screenKey.currentState?.selectCompletedTab();
+  }
+
   @override
-  State<ActivityScreen> createState() => _ActivityScreenState();
+  State<ActivityScreen> createState() => ActivityScreenState();
 }
 
-class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProviderStateMixin {
+class ActivityScreenState extends State<ActivityScreen> with SingleTickerProviderStateMixin {
   bool _isLoading = false;
   bool _hasLoadedOnce = false;
   bool _isDeleting = false;
@@ -44,6 +51,11 @@ class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProvid
       if (_tabController.indexIsChanging) return;
       setState(() => _selectedIds.clear());
     });
+  }
+
+  /// Switch to the completed trainings tab
+  void selectCompletedTab() {
+    if (_tabController.index != 1) _tabController.animateTo(1);
   }
 
   @override
