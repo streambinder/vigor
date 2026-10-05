@@ -1662,8 +1662,9 @@ func runStrategyNode(
 
 	// picks a methodology against goals, coverage counts and recovery — real trade-off
 	step, err := getLLM(StageReasoning, "").query(p,
-		// medium effort was measured spending up to ~1700 tokens thinking, so leave room
-		queryOpts{temperature: 0.3, maxTokens: 3000, effort: effortMedium, timeout: 60 * time.Second})
+		// low effort: the trade-off inputs arrive pre-digested from the dm steps, and
+		// medium was measured spending up to ~1700 tokens thinking over the same calls
+		queryOpts{temperature: 0.3, maxTokens: 3000, effort: effortLow, timeout: 60 * time.Second})
 	if err != nil {
 		return pipeline.Strategy{}, model.NewLLMStep(step), err
 	}
@@ -1961,7 +1962,7 @@ func runExercisesNode(
 
 	// the hard one: satisfy family coverage, muscles, equipment and avoid-lists at once
 	step, err := getLLM(StageReasoning, "").query(p,
-		queryOpts{temperature: 0.5, maxTokens: 4000, topP: 0.9, effort: effortMedium, timeout: 90 * time.Second})
+		queryOpts{temperature: 0.5, maxTokens: 4000, topP: 0.9, effort: effortLow, timeout: 90 * time.Second})
 	if err != nil {
 		return pipeline.ExerciseSelection{}, model.NewLLMStep(step), err
 	}
