@@ -871,39 +871,46 @@ func formatCompleted(t *time.Time) string {
 
 func showTrainingJSON(index int) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_showTrainingJSON_66cb`,
-		Function: `function __templ_showTrainingJSON_66cb(index){var el = document.getElementById('training-' + index);
+		Name: `__templ_showTrainingJSON_7ba3`,
+		Function: `function __templ_showTrainingJSON_7ba3(index){var el = document.getElementById('training-' + index);
 	var data = JSON.parse(el.textContent);
+	var json = JSON.stringify(data, null, 2);
 	document.getElementById('modal-title').textContent = 'JSON';
-	document.getElementById('modal-json').textContent = JSON.stringify(data, null, 2);
+	document.getElementById('modal-json').textContent = json;
+	modalCopyText = json;
 	document.getElementById('modal').classList.add('open');
 }`,
-		Call:       templ.SafeScript(`__templ_showTrainingJSON_66cb`, index),
-		CallInline: templ.SafeScriptInline(`__templ_showTrainingJSON_66cb`, index),
+		Call:       templ.SafeScript(`__templ_showTrainingJSON_7ba3`, index),
+		CallInline: templ.SafeScriptInline(`__templ_showTrainingJSON_7ba3`, index),
 	}
 }
 
 func showReportJSON(index int, kind string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_showReportJSON_a068`,
-		Function: `function __templ_showReportJSON_a068(index, kind){var el = document.getElementById('report-' + index + '-' + kind);
+		Name: `__templ_showReportJSON_5e06`,
+		Function: `function __templ_showReportJSON_5e06(index, kind){var el = document.getElementById('report-' + index + '-' + kind);
 	var data = JSON.parse(el.textContent);
+	var json = JSON.stringify(data, null, 2);
 	document.getElementById('modal-title').textContent = 'JSON';
-	document.getElementById('modal-json').textContent = JSON.stringify(data, null, 2);
+	document.getElementById('modal-json').textContent = json;
+	modalCopyText = json;
 	document.getElementById('modal').classList.add('open');
 }`,
-		Call:       templ.SafeScript(`__templ_showReportJSON_a068`, index, kind),
-		CallInline: templ.SafeScriptInline(`__templ_showReportJSON_a068`, index, kind),
+		Call:       templ.SafeScript(`__templ_showReportJSON_5e06`, index, kind),
+		CallInline: templ.SafeScriptInline(`__templ_showReportJSON_5e06`, index, kind),
 	}
 }
 
 func showTrainingTrajectory(index int) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_showTrainingTrajectory_6b0d`,
-		Function: `function __templ_showTrainingTrajectory_6b0d(index){var el = document.getElementById('training-' + index);
+		Name: `__templ_showTrainingTrajectory_db9c`,
+		Function: `function __templ_showTrainingTrajectory_db9c(index){var el = document.getElementById('training-' + index);
 	var data = JSON.parse(el.textContent);
 	var trajectory = data.trajectory || {};
 	var steps = (trajectory.steps || []).slice().sort(function(a, b) { return a.position - b.position; });
+	var owner = Object.assign({}, data);
+	delete owner.trajectory;
+	modalCopyText = JSON.stringify({ trajectory: Object.assign({}, trajectory, { steps: steps }), training: owner }, null, 2);
 	var out = document.getElementById('modal-json');
 	function esc(value) {
 		return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -949,8 +956,8 @@ func showTrainingTrajectory(index int) templ.ComponentScript {
 	out.innerHTML = html;
 	document.getElementById('modal').classList.add('open');
 }`,
-		Call:       templ.SafeScript(`__templ_showTrainingTrajectory_6b0d`, index),
-		CallInline: templ.SafeScriptInline(`__templ_showTrainingTrajectory_6b0d`, index),
+		Call:       templ.SafeScript(`__templ_showTrainingTrajectory_db9c`, index),
+		CallInline: templ.SafeScriptInline(`__templ_showTrainingTrajectory_db9c`, index),
 	}
 }
 
@@ -988,7 +995,7 @@ func modalScript() templ.Component {
 			templ_7745c5c3_Var39 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "<script>\n\t\tfunction closeModal(event) {\n\t\t\tif (event && event.target !== document.getElementById('modal')) return;\n\t\t\tdocument.getElementById('modal').classList.remove('open');\n\t\t}\n\t\tfunction copyModalJSON(btn) {\n\t\t\tvar text = document.getElementById('modal-json').textContent;\n\t\t\tfunction confirmCopied() {\n\t\t\t\tbtn.classList.add('copied');\n\t\t\t\tbtn.textContent = 'Copied';\n\t\t\t\tsetTimeout(function() {\n\t\t\t\t\tbtn.classList.remove('copied');\n\t\t\t\t\tbtn.textContent = 'Copy';\n\t\t\t\t}, 1500);\n\t\t\t}\n\t\t\tif (navigator.clipboard && navigator.clipboard.writeText) {\n\t\t\t\tnavigator.clipboard.writeText(text).then(confirmCopied);\n\t\t\t} else {\n\t\t\t\tvar helper = document.createElement('textarea');\n\t\t\t\thelper.value = text;\n\t\t\t\tdocument.body.appendChild(helper);\n\t\t\t\thelper.select();\n\t\t\t\ttry { document.execCommand('copy'); confirmCopied(); } catch (e) {}\n\t\t\t\tdocument.body.removeChild(helper);\n\t\t\t}\n\t\t}\n\t\tdocument.addEventListener('keydown', function(e) {\n\t\t\tif (e.key === 'Escape') closeModal();\n\t\t});\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 75, "<script>\n\t\tvar modalCopyText = '';\n\t\tfunction closeModal(event) {\n\t\t\tif (event && event.target !== document.getElementById('modal')) return;\n\t\t\tdocument.getElementById('modal').classList.remove('open');\n\t\t\tmodalCopyText = '';\n\t\t}\n\t\tfunction copyModalJSON(btn) {\n\t\t\tvar text = modalCopyText || document.getElementById('modal-json').textContent;\n\t\t\tfunction confirmCopied() {\n\t\t\t\tbtn.classList.add('copied');\n\t\t\t\tbtn.textContent = 'Copied';\n\t\t\t\tsetTimeout(function() {\n\t\t\t\t\tbtn.classList.remove('copied');\n\t\t\t\t\tbtn.textContent = 'Copy';\n\t\t\t\t}, 1500);\n\t\t\t}\n\t\t\tif (navigator.clipboard && navigator.clipboard.writeText) {\n\t\t\t\tnavigator.clipboard.writeText(text).then(confirmCopied);\n\t\t\t} else {\n\t\t\t\tvar helper = document.createElement('textarea');\n\t\t\t\thelper.value = text;\n\t\t\t\tdocument.body.appendChild(helper);\n\t\t\t\thelper.select();\n\t\t\t\ttry { document.execCommand('copy'); confirmCopied(); } catch (e) {}\n\t\t\t\tdocument.body.removeChild(helper);\n\t\t\t}\n\t\t}\n\t\tdocument.addEventListener('keydown', function(e) {\n\t\t\tif (e.key === 'Escape') closeModal();\n\t\t});\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

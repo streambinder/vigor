@@ -506,16 +506,20 @@ func formatCompleted(t *time.Time) string {
 script showTrainingJSON(index int) {
 	var el = document.getElementById('training-' + index);
 	var data = JSON.parse(el.textContent);
+	var json = JSON.stringify(data, null, 2);
 	document.getElementById('modal-title').textContent = 'JSON';
-	document.getElementById('modal-json').textContent = JSON.stringify(data, null, 2);
+	document.getElementById('modal-json').textContent = json;
+	modalCopyText = json;
 	document.getElementById('modal').classList.add('open');
 }
 
 script showReportJSON(index int, kind string) {
 	var el = document.getElementById('report-' + index + '-' + kind);
 	var data = JSON.parse(el.textContent);
+	var json = JSON.stringify(data, null, 2);
 	document.getElementById('modal-title').textContent = 'JSON';
-	document.getElementById('modal-json').textContent = JSON.stringify(data, null, 2);
+	document.getElementById('modal-json').textContent = json;
+	modalCopyText = json;
 	document.getElementById('modal').classList.add('open');
 }
 
@@ -524,6 +528,9 @@ script showTrainingTrajectory(index int) {
 	var data = JSON.parse(el.textContent);
 	var trajectory = data.trajectory || {};
 	var steps = (trajectory.steps || []).slice().sort(function(a, b) { return a.position - b.position; });
+	var owner = Object.assign({}, data);
+	delete owner.trajectory;
+	modalCopyText = JSON.stringify({ trajectory: Object.assign({}, trajectory, { steps: steps }), training: owner }, null, 2);
 	var out = document.getElementById('modal-json');
 	function esc(value) {
 		return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -579,12 +586,14 @@ script deleteReport(id string) {
 
 templ modalScript() {
 	<script>
+		var modalCopyText = '';
 		function closeModal(event) {
 			if (event && event.target !== document.getElementById('modal')) return;
 			document.getElementById('modal').classList.remove('open');
+			modalCopyText = '';
 		}
 		function copyModalJSON(btn) {
-			var text = document.getElementById('modal-json').textContent;
+			var text = modalCopyText || document.getElementById('modal-json').textContent;
 			function confirmCopied() {
 				btn.classList.add('copied');
 				btn.textContent = 'Copied';
