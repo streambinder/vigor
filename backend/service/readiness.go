@@ -105,8 +105,8 @@ func GetReadinessToday(userID uuid.UUID, loc *time.Location, force bool) (*model
 	}
 
 	var trainings []model.Training
-	if err := database.DB.Where("user_id = ? AND created_at > ?", userID, time.Now().UTC().In(loc).AddDate(0, 0, -3)).
-		Order("created_at DESC").
+	if err := database.DB.Where("user_id = ? AND completed_at IS NOT NULL AND completed_at > ?", userID, time.Now().UTC().In(loc).AddDate(0, 0, -3)).
+		Order("completed_at DESC").
 		Limit(5).
 		Find(&trainings).Error; err != nil {
 		return nil, fmt.Errorf("readiness trainings: %w", err)

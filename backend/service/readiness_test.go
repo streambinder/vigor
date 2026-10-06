@@ -53,7 +53,7 @@ func setupReadinessDB(t *testing.T) {
 			hr_zone_distribution_json TEXT, hr_samples_json TEXT,
 			hc_record_id TEXT, synced_at DATETIME
 		)`,
-		`CREATE TABLE trainings (id TEXT PRIMARY KEY, user_id TEXT, name TEXT, duration INTEGER, created_at DATETIME)`,
+		`CREATE TABLE trainings (id TEXT PRIMARY KEY, user_id TEXT, name TEXT, duration INTEGER, created_at DATETIME, completed_at DATETIME)`,
 		`CREATE TABLE profiles (user_id TEXT PRIMARY KEY, language TEXT)`,
 		// daily fallback tables carry no schema; the partition machinery is
 		// postgres-only and skipped on sqlite
@@ -297,6 +297,49 @@ func TestGetReadinessToday_DayRolloverReprobes(t *testing.T) {
 	}
 	if calls.Load() != 1 {
 		t.Fatalf("day rollover must re-run the probe, ran %d times", calls.Load())
+	}
+}
+
+func TestGetReadinessToday_OnlyCompletedTrainingsReachProbe(t *testing.T) {
+	setupReadinessDB(t)
+	userID := uuid.New()
+	insertHealthMetric(t, userID, time.Now().UTC())
+
+	now := time.Now().UTC()
+	insert := func(name string, createdAgo, completedAgo time.Duration) {
+		t.Helper()
+		var completed any
+		if completedAgo >= 0 {
+			completed = now.Add(-completedAgo)
+		}
+		if err := database.DB.Exec(
+			`INSERT INTO trainings (id, user_id, name, duration, created_at, completed_at)
+			 VALUES (?, ?, ?, 2700, ?, ?)`,
+			uuid.New().String(), userID.String(), name, now.Add(-createdAgo), completed,
+		).Error; err != nil {
+			t.Fatalf("insert training %s: %v", name, err)
+		}
+	}
+	// generated yesterday but never done: must not reach the probe
+	insert("generated-not-done", time.Hour, -1)
+	// done two hours ago: the only session the probe may see
+	insert("done-recently", 3*time.Hour, 2*time.Hour)
+	// done long ago: outside the 3-day window
+	insert("done-last-week", 24*8*time.Hour, 24*8*time.Hour)
+
+	var seen []model.Training
+	prev := genReadiness
+	genReadiness = func(_ *model.HealthSnapshot, trainings []model.Training, _ string) (*model.ReadinessResponse, model.LLMStep, error) {
+		seen = trainings
+		return &model.ReadinessResponse{Score: 80, Level: "green"}, model.LLMStep{}, nil
+	}
+	t.Cleanup(func() { genReadiness = prev })
+
+	if _, err := GetReadinessToday(userID, time.UTC, false); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(seen) != 1 || seen[0].Name != "done-recently" {
+		t.Fatalf("probe must see only the recently completed training, got %+v", seen)
 	}
 }
 
