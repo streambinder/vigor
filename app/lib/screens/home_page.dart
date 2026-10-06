@@ -57,6 +57,12 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage>, 
     // paint today's cached readiness hint on the first frame instead of
     // waiting for a load cycle that the preloaded path may never run
     serviceLocator.serveCachedReadiness();
+    // the preloaded path never runs _loadProgress, so probe readiness here
+    // too (mirrors the resume path); the sync completion refreshes it again
+    _readinessRetryPolicy.reset();
+    serviceLocator.refreshReadiness().then((ready) {
+      if (!ready) _scheduleReadinessRetry();
+    });
     if (serviceLocator.initialDataLoaded) {
       _progress = serviceLocator.initialProgress;
       _weeklyTarget = serviceLocator.initialWeeklyTarget;
