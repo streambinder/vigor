@@ -75,6 +75,7 @@ class ServiceLocator extends ChangeNotifier {
       case HealthSyncCompleted():
         refreshHealthDaily();
         refreshTrainings();
+        refreshReadiness();
       case FlowSessionListChanged():
         refreshFlowSessions();
       case FeedbackSubmitted():
@@ -185,8 +186,13 @@ class ServiceLocator extends ChangeNotifier {
   Future<bool> refreshReadiness({bool force = false}) async {
     final today = readinessDayKey();
     if (!force && _prefs.readinessDate == today) {
-      readinessNotifier.value ??= _prefs.readinessJson;
-      return readinessNotifier.value != null;
+      final cached = _prefs.readinessJson;
+      if (cached != null) {
+        readinessNotifier.value ??= cached;
+        return true;
+      }
+      // the day is marked but the cached value is missing or unreadable:
+      // fall through to the backend probe instead of serving nothing all day
     }
     final response = await trainingService.getReadinessToday(force: force);
     if (response.isSuccess) {
