@@ -106,7 +106,7 @@ class ActivityScreenState extends State<ActivityScreen> with SingleTickerProvide
     );
   }
 
-  Future<void> _loadData({int retryCount = 0}) async {
+  Future<void> _loadData({int retryCount = 0, bool triggerSync = false}) async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
     _hasLoadedOnce = true;
@@ -119,7 +119,7 @@ class ActivityScreenState extends State<ActivityScreen> with SingleTickerProvide
         if (mounted) {
           setState(() => _isLoading = false);
           _hasLoadedOnce = false;
-          _loadData(retryCount: retryCount + 1);
+          _loadData(retryCount: retryCount + 1, triggerSync: triggerSync);
         }
         return;
       }
@@ -132,8 +132,11 @@ class ActivityScreenState extends State<ActivityScreen> with SingleTickerProvide
       locator.refreshHealthDaily(),
     ]);
 
-    // trigger incremental health metrics sync (fire-and-forget, server-throttled)
-    locator.healthDataService?.syncToBackend();
+    // trigger incremental health metrics sync (fire-and-forget, server-throttled);
+    // opt-in only: pull-to-refresh just refetches what this page shows
+    if (triggerSync) {
+      locator.healthDataService?.syncToBackend();
+    }
 
     if (mounted) {
       setState(() => _isLoading = false);
@@ -271,7 +274,7 @@ class ActivityScreenState extends State<ActivityScreen> with SingleTickerProvide
 
     final authState = context.watch<AuthProvider>().state;
     if (authState == AuthState.authenticated && !_hasLoadedOnce && !_isLoading) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
+      WidgetsBinding.instance.addPostFrameCallback((_) => _loadData(triggerSync: true));
     }
 
     return ValueListenableBuilder<List<Training>?>(
