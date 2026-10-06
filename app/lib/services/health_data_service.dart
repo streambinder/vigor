@@ -517,12 +517,6 @@ mixin HealthDataServiceMixin on HealthDataService {
       totalSessionsSynced += (response.data?['sessions_synced'] as int?) ?? 0;
       lastResponseData = response.data;
       await onSyncSuccess();
-
-      // gentle pacing: 1.2s + jitter 0-800ms between dates to avoid hammering
-      if (idx < targetDates.length - 1) {
-        final jitter = (DateTime.now().millisecond % 800);
-        await Future.delayed(Duration(milliseconds: 1200 + jitter));
-      }
     }
 
     if (!anyPosted) {
