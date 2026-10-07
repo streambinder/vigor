@@ -2129,4 +2129,32 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get trajectory => 'Verlauf';
+
+  @override
+  String get refine => 'Verfeinern';
+
+  @override
+  String get refineDescription =>
+      'Beschreibe, was sich ändern soll. Alles andere bleibt unverändert.';
+
+  @override
+  String get refinePromptHint =>
+      'z. B. Kniebeugen durch Klimmzüge ersetzen, kürzer machen';
+
+  @override
+  String get aiUnavailableDuringCalibration =>
+      'Noch nicht verfügbar – KI-Funktionen werden nach Abschluss der Kalibrierung freigeschaltet';
+
+  @override
+  String get failedToRefineTraining =>
+      'Training konnte nicht verfeinert werden';
+
+  @override
+  String get stack => 'Stapel';
+
+  @override
+  String get parentTraining => 'Übergeordnetes Training';
+
+  @override
+  String get childTraining => 'Untergeordnetes Training';
 }

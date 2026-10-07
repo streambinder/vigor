@@ -694,5 +694,13 @@
   "exerciseTypeSwimmingPool": "Pool Swimming",
   "exerciseTypeWeightlifting": "Weightlifting",
   "exerciseTypeWheelchair": "Wheelchair",
-  "trajectory": "轨迹"
+  "trajectory": "轨迹",
+  "refine": "调整",
+  "refineDescription": "描述你想更改的内容，其余部分保持不变。",
+  "refinePromptHint": "例如：将深蹲换成引体向上，缩短时长",
+  "aiUnavailableDuringCalibration": "尚不可用 — AI功能将在校准完成后解锁",
+  "failedToRefineTraining": "无法调整训练",
+  "stack": "堆叠",
+  "parentTraining": "父训练",
+  "childTraining": "子训练"
 }

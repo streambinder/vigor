@@ -694,5 +694,13 @@
   "exerciseTypeSwimmingPool": "Pool Swimming",
   "exerciseTypeWeightlifting": "Weightlifting",
   "exerciseTypeWheelchair": "Wheelchair",
-  "trajectory": "Verlauf"
+  "trajectory": "Verlauf",
+  "refine": "Verfeinern",
+  "refineDescription": "Beschreibe, was sich ändern soll. Alles andere bleibt unverändert.",
+  "refinePromptHint": "z. B. Kniebeugen durch Klimmzüge ersetzen, kürzer machen",
+  "aiUnavailableDuringCalibration": "Noch nicht verfügbar – KI-Funktionen werden nach Abschluss der Kalibrierung freigeschaltet",
+  "failedToRefineTraining": "Training konnte nicht verfeinert werden",
+  "stack": "Stapel",
+  "parentTraining": "Übergeordnetes Training",
+  "childTraining": "Untergeordnetes Training"
 }

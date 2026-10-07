@@ -2075,4 +2075,28 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get trajectory => '轨迹';
+
+  @override
+  String get refine => '调整';
+
+  @override
+  String get refineDescription => '描述你想更改的内容，其余部分保持不变。';
+
+  @override
+  String get refinePromptHint => '例如：将深蹲换成引体向上，缩短时长';
+
+  @override
+  String get aiUnavailableDuringCalibration => '尚不可用 — AI功能将在校准完成后解锁';
+
+  @override
+  String get failedToRefineTraining => '无法调整训练';
+
+  @override
+  String get stack => '堆叠';
+
+  @override
+  String get parentTraining => '父训练';
+
+  @override
+  String get childTraining => '子训练';
 }

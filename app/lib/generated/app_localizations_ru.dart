@@ -2114,4 +2114,31 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get trajectory => 'Траектория';
+
+  @override
+  String get refine => 'Доработать';
+
+  @override
+  String get refineDescription =>
+      'Опишите, что изменить. Всё остальное останется как есть.';
+
+  @override
+  String get refinePromptHint =>
+      'например, Замени приседания подтягиваниями, сделай короче';
+
+  @override
+  String get aiUnavailableDuringCalibration =>
+      'Пока недоступно — функции ИИ разблокируются после завершения калибровки';
+
+  @override
+  String get failedToRefineTraining => 'Не удалось доработать тренировку';
+
+  @override
+  String get stack => 'Стек';
+
+  @override
+  String get parentTraining => 'Родительская тренировка';
+
+  @override
+  String get childTraining => 'Дочерняя тренировка';
 }

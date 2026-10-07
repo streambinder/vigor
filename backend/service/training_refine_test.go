@@ -279,3 +279,55 @@ func TestRefineTrainingCreatesChildAndLeavesOriginalIntact(t *testing.T) {
 		t.Fatalf("chained ParentID = %v, want the refined training %v", chained.ParentID, refined.ID)
 	}
 }
+
+func TestRefineTrainingInheritsPartners(t *testing.T) {
+	db := setupRefineDB(t)
+	userID, trainingID := seedRefineTraining(t, db, false)
+
+	partnerIDs := []uuid.UUID{uuid.New(), uuid.New()}
+	for _, partnerID := range partnerIDs {
+		if err := db.Exec(`INSERT INTO partners (training_id, user_id) VALUES (?, ?)`,
+			trainingID.String(), partnerID.String()).Error; err != nil {
+			t.Fatalf("seed partner: %v", err)
+		}
+	}
+
+	refined, err := refineTraining(userID, trainingID.String(), "more push-up volume", nil, stubRefineStep)
+	if err != nil {
+		t.Fatalf("refineTraining: %v", err)
+	}
+
+	partnerUserIDs := func(trainingID uuid.UUID) map[uuid.UUID]bool {
+		var partners []model.Partner
+		if err := db.Where("training_id = ?", trainingID).Find(&partners).Error; err != nil {
+			t.Fatalf("load partners: %v", err)
+		}
+		ids := make(map[uuid.UUID]bool, len(partners))
+		for _, partner := range partners {
+			ids[partner.UserID] = true
+		}
+		return ids
+	}
+
+	// the refined training carries the original's partners.
+	inherited := partnerUserIDs(refined.ID)
+	if len(inherited) != len(partnerIDs) {
+		t.Fatalf("refined partners = %v, want %d inherited", inherited, len(partnerIDs))
+	}
+	for _, partnerID := range partnerIDs {
+		if !inherited[partnerID] {
+			t.Errorf("refined training is missing inherited partner %v", partnerID)
+		}
+	}
+
+	// the original's partner rows are untouched.
+	original := partnerUserIDs(trainingID)
+	if len(original) != len(partnerIDs) {
+		t.Fatalf("original partners = %v, want untouched %d", original, len(partnerIDs))
+	}
+	for _, partnerID := range partnerIDs {
+		if !original[partnerID] {
+			t.Errorf("original training lost partner %v", partnerID)
+		}
+	}
+}

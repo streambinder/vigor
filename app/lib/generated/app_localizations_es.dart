@@ -2131,4 +2131,31 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get trajectory => 'Trayectoria';
+
+  @override
+  String get refine => 'Refinar';
+
+  @override
+  String get refineDescription =>
+      'Describe qué cambiar. Todo lo demás queda igual.';
+
+  @override
+  String get refinePromptHint =>
+      'p. ej., Sustituye las sentadillas por dominadas, hazlo más corto';
+
+  @override
+  String get aiUnavailableDuringCalibration =>
+      'Aún no disponible: las funciones de IA se desbloquean al completar la calibración';
+
+  @override
+  String get failedToRefineTraining => 'No se pudo refinar el entrenamiento';
+
+  @override
+  String get stack => 'Pila';
+
+  @override
+  String get parentTraining => 'Entrenamiento padre';
+
+  @override
+  String get childTraining => 'Entrenamiento hijo';
 }

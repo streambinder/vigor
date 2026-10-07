@@ -2081,4 +2081,29 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get trajectory => '궤적';
+
+  @override
+  String get refine => '다듬기';
+
+  @override
+  String get refineDescription => '변경할 내용을 설명하세요. 나머지는 그대로 유지됩니다.';
+
+  @override
+  String get refinePromptHint => '예: 스쿼트를 풀업으로 교체하고, 더 짧게';
+
+  @override
+  String get aiUnavailableDuringCalibration =>
+      '아직 사용할 수 없습니다 — AI 기능은 캘리브레이션 완료 후 잠금 해제됩니다';
+
+  @override
+  String get failedToRefineTraining => '트레이닝을 다듬지 못했습니다';
+
+  @override
+  String get stack => '스택';
+
+  @override
+  String get parentTraining => '상위 트레이닝';
+
+  @override
+  String get childTraining => '하위 트레이닝';
 }

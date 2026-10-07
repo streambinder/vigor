@@ -694,5 +694,13 @@
   "exerciseTypeSwimmingPool": "Pool Swimming",
   "exerciseTypeWeightlifting": "Weightlifting",
   "exerciseTypeWheelchair": "Wheelchair",
-  "trajectory": "Trayectoria"
+  "trajectory": "Trayectoria",
+  "refine": "Refinar",
+  "refineDescription": "Describe qué cambiar. Todo lo demás queda igual.",
+  "refinePromptHint": "p. ej., Sustituye las sentadillas por dominadas, hazlo más corto",
+  "aiUnavailableDuringCalibration": "Aún no disponible: las funciones de IA se desbloquean al completar la calibración",
+  "failedToRefineTraining": "No se pudo refinar el entrenamiento",
+  "stack": "Pila",
+  "parentTraining": "Entrenamiento padre",
+  "childTraining": "Entrenamiento hijo"
 }

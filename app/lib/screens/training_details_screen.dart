@@ -41,6 +41,8 @@ class TrainingDetailsScreen extends StatefulWidget {
 class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppEventSubscriber<TrainingDetailsScreen> {
   late Training _training;
   List<PartnerInfo> _partners = [];
+  Training? _parentTraining;
+  Training? _childTraining;
   TrainingFeedback? _userFeedback;
   Map<String, dynamic>? _healthSessionData;
   final Set<String> _shufflingActivityIds = {};
@@ -59,6 +61,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
     _training = widget.training;
     subscribeToEvents(context.read<ServiceLocator>().events, _onAppEvent);
     _loadPartners();
+    _loadStackRelatives();
     if (_training.completedAt != null) _loadUserFeedback();
     if (_training.hasHealthSession) _loadHealthSession();
   }
@@ -85,6 +88,33 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
       setState(() => _partners = (response.data ?? [])
           .where((p) => p.userId != currentUserId)
           .toList());
+    }
+  }
+
+  /// whether this training belongs to a parent/child stack: it has a
+  /// parent, or another training in the user's list points at it.
+  bool get _inStack => training.parentId != null || _childTraining != null;
+
+  /// resolve this training's parent and most recent child from the
+  /// user's full training list, for the stack chip and menu navigation.
+  Future<void> _loadStackRelatives() async {
+    final response = await context.read<ServiceLocator>().trainingService.getTrainings();
+    if (response.isSuccess && response.data != null && mounted) {
+      Training? parent;
+      Training? child;
+      for (final t in response.data!) {
+        if (training.parentId != null && t.id == training.parentId) parent = t;
+        if (t.parentId == training.id) {
+          final current = child;
+          if (current == null || t.createdAt.isAfter(current.createdAt)) {
+            child = t;
+          }
+        }
+      }
+      setState(() {
+        _parentTraining = parent;
+        _childTraining = child;
+      });
     }
   }
 
@@ -118,6 +148,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
       if (updated != null) {
         setState(() => _training = updated);
         _loadUserFeedback();
+        _loadStackRelatives();
       }
     }
   }
@@ -672,6 +703,121 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
     }
   }
 
+  /// refine this training from a free-text critique: the backend runs a
+  /// single revision step anchored on this training and returns the
+  /// revision as a new training, which we navigate to.
+  /// AI actions (refine, exercise shuffle) stay visible during
+  /// calibration but cannot run until it completes: tapping one
+  /// explains why instead of hiding the affordance.
+  void _showCalibrationBlocked() {
+    AdaptiveNotification.show(
+      context: context,
+      message: AppLocalizations.of(context).aiUnavailableDuringCalibration,
+    );
+  }
+
+  Future<void> _showRefineDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final controller = TextEditingController();
+    var isSubmitting = false;
+
+    final refined = await showDialog<Training>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: Text(l10n.refine),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.refineDescription,
+                style: VigorTypography.body.copyWith(color: VigorColors.textSecondary(ctx)),
+              ),
+              const SizedBox(height: VigorSpacing.md),
+              AdaptiveTextField(
+                controller: controller,
+                placeholder: l10n.refinePromptHint,
+                maxLines: 3,
+                minLines: 2,
+                maxLength: 500,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: isSubmitting ? null : () => Navigator.of(ctx).pop(),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: isSubmitting
+                  ? null
+                  : () async {
+                      final critique = controller.text.trim();
+                      if (critique.isEmpty) {
+                        Navigator.of(ctx).pop();
+                        return;
+                      }
+                      setDialogState(() => isSubmitting = true);
+                      final response = await context.read<ServiceLocator>().trainingService.refineTraining(training.id, critique);
+                      if (!ctx.mounted) return;
+                      if (response.isSuccess && response.data != null) {
+                        Navigator.of(ctx).pop(response.data);
+                      } else {
+                        Navigator.of(ctx).pop();
+                        if (context.mounted) {
+                          AdaptiveNotification.showError(
+                            context: context,
+                            message: l10n.failedToRefineTraining,
+                            rawError: response.error,
+                          );
+                        }
+                      }
+                    },
+              child: isSubmitting
+                  ? const SizedBox(width: 18, height: 18, child: AdaptiveLoadingIndicator())
+                  : Text(l10n.refine),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (refined != null && context.mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => TrainingDetailsScreen(training: refined)),
+      );
+    }
+  }
+
+  /// Stack navigation keeps the pile metaphor spatial: going to the
+  /// child pushes deeper (the platform default, entering from the
+  /// right), going to the parent steps back up the stack, so the
+  /// parent page slides in from the left instead.
+  void _navigateToStackRelative(Training? relative, {bool reverse = false}) {
+    if (relative == null) return;
+    if (!reverse) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => TrainingDetailsScreen(training: relative)),
+      );
+      return;
+    }
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => TrainingDetailsScreen(training: relative),
+        transitionDuration: VigorAnimation.medium,
+        reverseTransitionDuration: VigorAnimation.medium,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) => SlideTransition(
+          position: Tween<Offset>(begin: const Offset(-1, 0), end: Offset.zero).animate(
+            CurvedAnimation(parent: animation, curve: VigorAnimation.entranceCurve),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+
   Future<void> _shuffleActivity(Activity activity) async {
     if (_shufflingActivityIds.contains(activity.id)) return;
     final l10n = AppLocalizations.of(context);
@@ -886,6 +1032,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
       child: ExpansionTile(
         tilePadding: EdgeInsets.zero,
         childrenPadding: const EdgeInsets.symmetric(vertical: VigorSpacing.xs),
+        expandedAlignment: Alignment.centerLeft,
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
         leading: const Icon(Icons.chat_bubble_outline, size: 18, color: VigorColors.stone),
         title: Text(l10n.request, style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context))),
         children: [
@@ -893,7 +1041,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
             padding: const EdgeInsets.symmetric(vertical: VigorSpacing.xs),
             child: Text(
               training.request,
-              style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context), fontStyle: FontStyle.italic),
+              textAlign: TextAlign.left,
+              style: VigorTypography.caption.copyWith(color: VigorColors.textSecondary(context)),
             ),
           ),
         ],
@@ -949,17 +1098,33 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
   }
 
   Widget _buildMetadataChips(AppLocalizations l10n) {
-    return Wrap(
-      spacing: VigorSpacing.sm,
-      runSpacing: VigorSpacing.sm,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildMethodologyBadge(KnowledgeLabels.methodologyLabel(training.methodology, l10n)),
-        if (training.completedAt != null && training.hasHealthSession) _buildMetaChip(Icons.monitor_heart, l10n.healthMetrics),
-        _buildMetaChip(Icons.schedule, _formatDuration(training.completedIn ?? training.duration)),
-        _buildMetaChip(Icons.calendar_today, _formatDate(training.completedAt ?? training.createdAt)),
-        if (_partners.isNotEmpty) ..._partners.map((p) => _buildMetaChip(Icons.person, '${p.firstName} ${p.lastName}'.trim())),
-        if (training.gym != null) _buildMetaChip(Icons.location_on, training.gym!.name),
-        if (training.parentId != null) _buildMetaChip(Icons.copy, l10n.copied),
+        Expanded(
+          child: Wrap(
+            spacing: VigorSpacing.sm,
+            runSpacing: VigorSpacing.sm,
+            children: [
+              _buildMethodologyBadge(KnowledgeLabels.methodologyLabel(training.methodology, l10n)),
+              if (training.completedAt != null && training.hasHealthSession) _buildMetaChip(Icons.monitor_heart, l10n.healthMetrics),
+              _buildMetaChip(Icons.schedule, _formatDuration(training.completedIn ?? training.duration)),
+              _buildMetaChip(Icons.calendar_today, _formatDate(training.completedAt ?? training.createdAt)),
+              if (_partners.isNotEmpty) ..._partners.map((p) => _buildMetaChip(Icons.person, '${p.firstName} ${p.lastName}'.trim())),
+              if (training.gym != null) _buildMetaChip(Icons.location_on, training.gym!.name),
+              if (_inStack) _buildMetaChip(Icons.layers, l10n.stack),
+            ],
+          ),
+        ),
+        if (training.completedAt == null) ...[
+          const SizedBox(width: VigorSpacing.sm),
+          _RefineButton(
+            tooltip: l10n.refine,
+            onTap: () => context.read<ServiceLocator>().isCalibratingNotifier.value
+                ? _showCalibrationBlocked()
+                : _showRefineDialog(context),
+          ),
+        ],
       ],
     );
   }
@@ -1136,6 +1301,12 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
           case 'trajectory':
             _showTrajectoryDialog(context);
             break;
+          case 'parent':
+            _navigateToStackRelative(_parentTraining, reverse: true);
+            break;
+          case 'child':
+            _navigateToStackRelative(_childTraining);
+            break;
           case 'report':
             _showReportDialog(context);
             break;
@@ -1197,6 +1368,41 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
               ],
             ),
           ),
+        if (_inStack) ...[
+          const PopupMenuDivider(),
+          PopupMenuItem(
+            value: 'parent',
+            enabled: _parentTraining != null,
+            child: Row(
+              children: [
+                const Icon(Icons.arrow_upward, size: 20, color: VigorColors.stone),
+                const SizedBox(width: VigorSpacing.sm),
+                Text(
+                  l10n.parentTraining,
+                  style: VigorTypography.body.copyWith(
+                    color: _parentTraining != null ? VigorColors.textPrimary(context) : VigorColors.stone,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: 'child',
+            enabled: _childTraining != null,
+            child: Row(
+              children: [
+                const Icon(Icons.arrow_downward, size: 20, color: VigorColors.stone),
+                const SizedBox(width: VigorSpacing.sm),
+                Text(
+                  l10n.childTraining,
+                  style: VigorTypography.body.copyWith(
+                    color: _childTraining != null ? VigorColors.textPrimary(context) : VigorColors.stone,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         const PopupMenuDivider(),
         PopupMenuItem(
           value: 'report',
@@ -1430,7 +1636,6 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
           ValueListenableBuilder<bool>(
             valueListenable: context.read<ServiceLocator>().isCalibratingNotifier,
             builder: (context, isCalibrating, _) {
-              if (isCalibrating) return const SizedBox.shrink();
               return SizedBox(
                 height: 72,
                 child: Padding(
@@ -1439,7 +1644,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
                   child: Center(
                     child: _ShuffleButton(
                       isLoading: _shufflingActivityIds.contains(activity.id),
-                      onTap: () => _shuffleActivity(activity),
+                      onTap: () => isCalibrating ? _showCalibrationBlocked() : _shuffleActivity(activity),
                     ),
                   ),
                 ),
@@ -1559,6 +1764,56 @@ class _SliverTimerDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(_SliverTimerDelegate oldDelegate) => height != oldDelegate.height;
 }
 
+/// large AI refine button on the metadata chips row: the exercise
+/// shuffle button's styling (circular stone container) at a bigger
+/// scale, with a single rotation flourish on tap.
+class _RefineButton extends StatefulWidget {
+  final String tooltip;
+  final VoidCallback onTap;
+
+  const _RefineButton({required this.tooltip, required this.onTap});
+
+  @override
+  State<_RefineButton> createState() => _RefineButtonState();
+}
+
+class _RefineButtonState extends State<_RefineButton> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 600),
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: widget.tooltip,
+      child: GestureDetector(
+        onTap: () {
+          _controller.forward(from: 0);
+          widget.onTap();
+        },
+        child: Container(
+          padding: VigorSpacing.paddingXs,
+          decoration: BoxDecoration(
+            color: VigorColors.stone.withValues(alpha: 0.1),
+            borderRadius: VigorRadius.radiusFull,
+          ),
+          child: RotationTransition(
+            turns: _controller,
+            child: const Icon(Icons.auto_awesome, size: 14, color: VigorColors.stone),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ShuffleButton extends StatefulWidget {
   final bool isLoading;
   final VoidCallback onTap;
@@ -1605,14 +1860,14 @@ class _ShuffleButtonState extends State<_ShuffleButton> with SingleTickerProvide
     return GestureDetector(
       onTap: widget.isLoading ? null : widget.onTap,
       child: Container(
-        padding: VigorSpacing.paddingSm,
+        padding: VigorSpacing.paddingXs,
         decoration: BoxDecoration(
           color: VigorColors.stone.withValues(alpha: 0.1),
           borderRadius: VigorRadius.radiusFull,
         ),
         child: RotationTransition(
           turns: _controller,
-          child: const Icon(Icons.refresh, size: 18, color: VigorColors.stone),
+          child: const Icon(Icons.refresh, size: 14, color: VigorColors.stone),
         ),
       ),
     );

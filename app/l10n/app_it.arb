@@ -694,5 +694,13 @@
   "exerciseTypeSwimmingPool": "Nuoto in piscina",
   "exerciseTypeWeightlifting": "Sollevamento pesi",
   "exerciseTypeWheelchair": "Carrozzina",
-  "trajectory": "Traiettoria"
+  "trajectory": "Traiettoria",
+  "refine": "Raffina",
+  "refineDescription": "Descrivi cosa cambiare. Tutto il resto resta com'è.",
+  "refinePromptHint": "es. Sostituisci gli squat con le trazioni, rendilo più breve",
+  "aiUnavailableDuringCalibration": "Non ancora disponibile: le funzioni AI si sbloccano al completamento della calibrazione",
+  "failedToRefineTraining": "Impossibile raffinare l'allenamento",
+  "stack": "Stack",
+  "parentTraining": "Allenamento padre",
+  "childTraining": "Allenamento figlio"
 }
