@@ -2081,4 +2081,29 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get trajectory => 'トラジェクトリ';
+
+  @override
+  String get refine => 'リファイン';
+
+  @override
+  String get refineDescription => '変更したい内容を入力してください。それ以外はそのまま残ります。';
+
+  @override
+  String get refinePromptHint => '例：スクワットを懸垂に変えて、短くして';
+
+  @override
+  String get aiUnavailableDuringCalibration =>
+      'まだ利用できません — AI機能はキャリブレーション完了後に解放されます';
+
+  @override
+  String get failedToRefineTraining => 'トレーニングをリファインできませんでした';
+
+  @override
+  String get stack => 'スタック';
+
+  @override
+  String get parentTraining => '親トレーニング';
+
+  @override
+  String get childTraining => '子トレーニング';
 }

@@ -694,5 +694,13 @@
   "exerciseTypeSwimmingPool": "Pool Swimming",
   "exerciseTypeWeightlifting": "Weightlifting",
   "exerciseTypeWheelchair": "Wheelchair",
-  "trajectory": "トラジェクトリ"
+  "trajectory": "トラジェクトリ",
+  "refine": "リファイン",
+  "refineDescription": "変更したい内容を入力してください。それ以外はそのまま残ります。",
+  "refinePromptHint": "例：スクワットを懸垂に変えて、短くして",
+  "aiUnavailableDuringCalibration": "まだ利用できません — AI機能はキャリブレーション完了後に解放されます",
+  "failedToRefineTraining": "トレーニングをリファインできませんでした",
+  "stack": "スタック",
+  "parentTraining": "親トレーニング",
+  "childTraining": "子トレーニング"
 }

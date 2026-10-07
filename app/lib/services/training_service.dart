@@ -363,6 +363,33 @@ class TrainingService {
     }
   }
 
+  Future<ApiResponse<Training>> refineTraining(String trainingId, String critique) async {
+    AppLogger.debug('[TrainingService] Refining training: $trainingId');
+
+    final response = await _apiService.post(
+      '/training/refine/$trainingId',
+      body: {'critique': critique},
+    );
+
+    if (response.isSuccess && response.data != null) {
+      try {
+        final training = Training.fromJson(response.data!);
+        AppLogger.info('[TrainingService] Refined training: $trainingId');
+        emitEvent?.call(TrainingListChanged());
+        return ApiResponse.success(training, response.statusCode);
+      } catch (e) {
+        AppLogger.error('[TrainingService] failed to parse refined training', e);
+        return ApiResponse.error('Failed to parse refined training', response.statusCode);
+      }
+    } else {
+      AppLogger.error('[TrainingService] Failed to refine training: ${response.error}');
+      return ApiResponse.error(
+        response.error ?? 'Failed to refine training',
+        response.statusCode,
+      );
+    }
+  }
+
   Future<ApiResponse<List<PartnerInfo>>> getPartners(String trainingId) async {
     AppLogger.debug('[TrainingService] Fetching partners for training: $trainingId');
 

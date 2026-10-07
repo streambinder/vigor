@@ -256,12 +256,31 @@ class ActivityScreenState extends State<ActivityScreen> with SingleTickerProvide
     return DateTime.now().difference(training.createdAt).inDays >= 7;
   }
 
-  List<Training> _availableTrainings(List<Training>? trainings) => (trainings ?? [])
+  /// ids of the trainings that belong to a parent/child stack within
+  /// the full list: they have a parent, or another training points at
+  /// them as its parent.
+  Set<String> _stackTrainingIds(List<Training> trainings) {
+    final parentIds = trainings.map((t) => t.parentId).whereType<String>().toSet();
+    return trainings
+        .where((t) => t.parentId != null || parentIds.contains(t.id))
+        .map((t) => t.id)
+        .toSet();
+  }
+
+  /// only the leaf of every parent/child chain stays visible: a
+  /// training whose id appears as another training's parent is hidden
+  /// behind the chain's leaf.
+  List<Training> _leafTrainings(List<Training> trainings) {
+    final parentIds = trainings.map((t) => t.parentId).whereType<String>().toSet();
+    return trainings.where((t) => !parentIds.contains(t.id)).toList();
+  }
+
+  List<Training> _availableTrainings(List<Training>? trainings) => _leafTrainings(trainings ?? [])
       .where((t) => !_isCompletedTraining(t))
       .toList()
     ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-  List<Training> _pastTrainings(List<Training>? trainings) => (trainings ?? [])
+  List<Training> _pastTrainings(List<Training>? trainings) => _leafTrainings(trainings ?? [])
       .where((t) => _isCompletedTraining(t))
       .toList()
     ..sort((a, b) => (b.completedAt ?? b.createdAt).compareTo(a.completedAt ?? a.createdAt));
@@ -406,6 +425,7 @@ class ActivityScreenState extends State<ActivityScreen> with SingleTickerProvide
     final completedFlows = flowSessions.where((f) => f.completedAt != null).toList();
     final available = _availableTrainings(trainings);
     final past = _pastTrainings(trainings);
+    final stackIds = _stackTrainingIds(trainings);
 
     return Column(
       children: [
@@ -414,8 +434,8 @@ class ActivityScreenState extends State<ActivityScreen> with SingleTickerProvide
           child: TabBarView(
             controller: _tabController,
             children: [
-              _buildTrainingList(available, l10n, isAvailable: true, flowSessions: pendingFlows),
-              _buildTrainingList(past, l10n, isAvailable: false, flowSessions: completedFlows),
+              _buildTrainingList(available, l10n, isAvailable: true, flowSessions: pendingFlows, stackIds: stackIds),
+              _buildTrainingList(past, l10n, isAvailable: false, flowSessions: completedFlows, stackIds: stackIds),
             ],
           ),
         ),
@@ -469,7 +489,7 @@ class ActivityScreenState extends State<ActivityScreen> with SingleTickerProvide
     );
   }
 
-  Widget _buildTrainingList(List<Training> trainings, AppLocalizations l10n, {required bool isAvailable, List<FlowSession> flowSessions = const []}) {
+  Widget _buildTrainingList(List<Training> trainings, AppLocalizations l10n, {required bool isAvailable, List<FlowSession> flowSessions = const [], Set<String> stackIds = const {}}) {
     final externalSessions = !isAvailable ? _getExternalSessions() : <Map<String, dynamic>>[];
 
     if (trainings.isEmpty && externalSessions.isEmpty && flowSessions.isEmpty) {
@@ -524,7 +544,7 @@ class ActivityScreenState extends State<ActivityScreen> with SingleTickerProvide
             if (item.flowSession != null) {
               return _buildFlowSessionCard(item.flowSession!);
             }
-            return _buildTrainingCard(item.training!, l10n, isAvailable: true, key: ValueKey(item.training!.id));
+            return _buildTrainingCard(item.training!, l10n, isAvailable: true, inStack: stackIds.contains(item.training!.id), key: ValueKey(item.training!.id));
           },
         ),
       );
@@ -570,7 +590,7 @@ class ActivityScreenState extends State<ActivityScreen> with SingleTickerProvide
         itemBuilder: (context, index) {
           final item = items[index];
           if (item.training != null) {
-            return _buildTrainingCard(item.training!, l10n, isAvailable: false, key: ValueKey(item.training!.id));
+            return _buildTrainingCard(item.training!, l10n, isAvailable: false, inStack: stackIds.contains(item.training!.id), key: ValueKey(item.training!.id));
           }
           if (item.flowSession != null) {
             return _buildFlowSessionCard(item.flowSession!);
@@ -766,7 +786,7 @@ class ActivityScreenState extends State<ActivityScreen> with SingleTickerProvide
     return type.split('_').map((w) => w.isEmpty ? w : '${w[0].toUpperCase()}${w.substring(1)}').join(' ');
   }
 
-  Widget _buildTrainingCard(Training training, AppLocalizations l10n, {required bool isAvailable, Key? key}) {
+  Widget _buildTrainingCard(Training training, AppLocalizations l10n, {required bool isAvailable, bool inStack = false, Key? key}) {
     final isStale = _isStaleTraining(training);
     final partners = _partnerData[training.id] ?? [];
     final partnerCount = partners.length;
@@ -846,6 +866,11 @@ class ActivityScreenState extends State<ActivityScreen> with SingleTickerProvide
                         ).createShader(bounds),
                         child: const Icon(Icons.monitor_heart, size: 16, color: Colors.white),
                       ),
+                    ),
+                  if (inStack)
+                    const Padding(
+                      padding: EdgeInsets.only(left: VigorSpacing.xs),
+                      child: Icon(Icons.layers, size: 16, color: VigorColors.stone),
                     ),
                   if (isStale)
                     _buildStatusBadge(l10n.stale, VigorColors.stone, Icons.schedule),

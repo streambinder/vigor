@@ -2121,4 +2121,31 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get trajectory => 'Trajetória';
+
+  @override
+  String get refine => 'Refinar';
+
+  @override
+  String get refineDescription =>
+      'Descreve o que mudar. Tudo o resto fica igual.';
+
+  @override
+  String get refinePromptHint =>
+      'ex.: Substitui os agachamentos por elevações, torna-o mais curto';
+
+  @override
+  String get aiUnavailableDuringCalibration =>
+      'Ainda não disponível — as funções de IA são desbloqueadas após a conclusão da calibração';
+
+  @override
+  String get failedToRefineTraining => 'Falha ao refinar o treino';
+
+  @override
+  String get stack => 'Pilha';
+
+  @override
+  String get parentTraining => 'Treino pai';
+
+  @override
+  String get childTraining => 'Treino filho';
 }

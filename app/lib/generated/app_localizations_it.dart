@@ -2129,4 +2129,31 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get trajectory => 'Traiettoria';
+
+  @override
+  String get refine => 'Raffina';
+
+  @override
+  String get refineDescription =>
+      'Descrivi cosa cambiare. Tutto il resto resta com\'è.';
+
+  @override
+  String get refinePromptHint =>
+      'es. Sostituisci gli squat con le trazioni, rendilo più breve';
+
+  @override
+  String get aiUnavailableDuringCalibration =>
+      'Non ancora disponibile: le funzioni AI si sbloccano al completamento della calibrazione';
+
+  @override
+  String get failedToRefineTraining => 'Impossibile raffinare l\'allenamento';
+
+  @override
+  String get stack => 'Stack';
+
+  @override
+  String get parentTraining => 'Allenamento padre';
+
+  @override
+  String get childTraining => 'Allenamento figlio';
 }

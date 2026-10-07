@@ -2135,4 +2135,32 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get trajectory => 'Trajectoire';
+
+  @override
+  String get refine => 'Affiner';
+
+  @override
+  String get refineDescription =>
+      'Décris ce qu\'il faut changer. Tout le reste reste inchangé.';
+
+  @override
+  String get refinePromptHint =>
+      'ex. : Remplace les squats par des tractions, rends-le plus court';
+
+  @override
+  String get aiUnavailableDuringCalibration =>
+      'Pas encore disponible : les fonctions IA se débloquent une fois l\'étalonnage terminé';
+
+  @override
+  String get failedToRefineTraining =>
+      'Échec de l\'affinement de l\'entraînement';
+
+  @override
+  String get stack => 'Pile';
+
+  @override
+  String get parentTraining => 'Entraînement parent';
+
+  @override
+  String get childTraining => 'Entraînement enfant';
 }

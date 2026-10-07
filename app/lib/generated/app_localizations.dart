@@ -4073,6 +4073,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Trajectory'**
   String get trajectory;
+
+  /// No description provided for @refine.
+  ///
+  /// In en, this message translates to:
+  /// **'Refine'**
+  String get refine;
+
+  /// No description provided for @refineDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe what to change. Everything else stays as it is.'**
+  String get refineDescription;
+
+  /// No description provided for @refinePromptHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Replace the squats with pull-ups, make it shorter'**
+  String get refinePromptHint;
+
+  /// No description provided for @aiUnavailableDuringCalibration.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available yet — AI features unlock once calibration is complete'**
+  String get aiUnavailableDuringCalibration;
+
+  /// No description provided for @failedToRefineTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to refine training'**
+  String get failedToRefineTraining;
+
+  /// No description provided for @stack.
+  ///
+  /// In en, this message translates to:
+  /// **'Stack'**
+  String get stack;
+
+  /// No description provided for @parentTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent training'**
+  String get parentTraining;
+
+  /// No description provided for @childTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Child training'**
+  String get childTraining;
 }
 
 class _AppLocalizationsDelegate

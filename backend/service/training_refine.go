@@ -170,7 +170,35 @@ func refineTraining(userID uuid.UUID, trainingID string, critique string, reques
 	}
 	refined.Trajectory.Summarize()
 
-	if err := database.DB.Create(&refined).Error; err != nil {
+	// the refined training inherits the original's partners, so the
+	// people the session was shared with keep access to its revision;
+	// a partner row naming the refined training's owner is meaningless
+	// (the caller, when a partner refines someone else's training) and
+	// is skipped.
+	var originalPartners []model.Partner
+	if err := database.DB.Where("training_id = ?", original.ID).Find(&originalPartners).Error; err != nil {
+		return nil, err
+	}
+
+	err = database.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&refined).Error; err != nil {
+			return err
+		}
+		for _, originalPartner := range originalPartners {
+			if originalPartner.UserID == refined.UserID {
+				continue
+			}
+			partner := model.Partner{
+				TrainingID: refined.ID,
+				UserID:     originalPartner.UserID,
+			}
+			if err := tx.Create(&partner).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
 		return nil, err
 	}
 

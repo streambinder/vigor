@@ -980,5 +980,13 @@
   "exerciseTypeSwimmingPool": "Pool Swimming",
   "exerciseTypeWeightlifting": "Weightlifting",
   "exerciseTypeWheelchair": "Wheelchair",
-  "trajectory": "Trajectory"
+  "trajectory": "Trajectory",
+  "refine": "Refine",
+  "refineDescription": "Describe what to change. Everything else stays as it is.",
+  "refinePromptHint": "e.g., Replace the squats with pull-ups, make it shorter",
+  "aiUnavailableDuringCalibration": "Not available yet — AI features unlock once calibration is complete",
+  "failedToRefineTraining": "Failed to refine training",
+  "stack": "Stack",
+  "parentTraining": "Parent training",
+  "childTraining": "Child training"
 }

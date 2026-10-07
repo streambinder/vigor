@@ -694,5 +694,13 @@
   "exerciseTypeSwimmingPool": "Pool Swimming",
   "exerciseTypeWeightlifting": "Weightlifting",
   "exerciseTypeWheelchair": "Wheelchair",
-  "trajectory": "Траектория"
+  "trajectory": "Траектория",
+  "refine": "Доработать",
+  "refineDescription": "Опишите, что изменить. Всё остальное останется как есть.",
+  "refinePromptHint": "например, Замени приседания подтягиваниями, сделай короче",
+  "aiUnavailableDuringCalibration": "Пока недоступно — функции ИИ разблокируются после завершения калибровки",
+  "failedToRefineTraining": "Не удалось доработать тренировку",
+  "stack": "Стек",
+  "parentTraining": "Родительская тренировка",
+  "childTraining": "Дочерняя тренировка"
 }
