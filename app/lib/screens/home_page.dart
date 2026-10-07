@@ -2163,7 +2163,7 @@ class _ReadinessModal extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  '$score/100',
+                  '$score%',
                   style: VigorTypography.dataDisplay.copyWith(
                     fontSize: 32,
                     fontWeight: FontWeight.w700,
