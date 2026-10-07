@@ -3192,6 +3192,66 @@ abstract class AppLocalizations {
   /// **'Rest — you\'re drained'**
   String get readinessRed;
 
+  /// No description provided for @readinessMetricSleep.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep'**
+  String get readinessMetricSleep;
+
+  /// No description provided for @readinessMetricHrv.
+  ///
+  /// In en, this message translates to:
+  /// **'HRV'**
+  String get readinessMetricHrv;
+
+  /// No description provided for @readinessMetricRestingHr.
+  ///
+  /// In en, this message translates to:
+  /// **'Resting HR'**
+  String get readinessMetricRestingHr;
+
+  /// No description provided for @readinessMetricBaseline.
+  ///
+  /// In en, this message translates to:
+  /// **'Baseline'**
+  String get readinessMetricBaseline;
+
+  /// No description provided for @readinessMetricAvg7Days.
+  ///
+  /// In en, this message translates to:
+  /// **'7-day avg'**
+  String get readinessMetricAvg7Days;
+
+  /// No description provided for @readinessMetricLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent load'**
+  String get readinessMetricLoad;
+
+  /// No description provided for @readinessLoadVigor.
+  ///
+  /// In en, this message translates to:
+  /// **'Vigor sessions'**
+  String get readinessLoadVigor;
+
+  /// No description provided for @readinessLoadExternal.
+  ///
+  /// In en, this message translates to:
+  /// **'External activities'**
+  String get readinessLoadExternal;
+
+  /// No description provided for @readinessLast3Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 3 days'**
+  String get readinessLast3Days;
+
+  /// No description provided for @readinessLast7Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get readinessLast7Days;
+
   /// No description provided for @healthInstallHcTitle.
   ///
   /// In en, this message translates to:

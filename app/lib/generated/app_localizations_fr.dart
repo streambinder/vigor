@@ -1688,6 +1688,36 @@ class AppLocalizationsFr extends AppLocalizations {
   String get readinessRed => 'Repose-toi, tu es vidé';
 
   @override
+  String get readinessMetricSleep => 'Sommeil';
+
+  @override
+  String get readinessMetricHrv => 'HRV';
+
+  @override
+  String get readinessMetricRestingHr => 'FC au repos';
+
+  @override
+  String get readinessMetricBaseline => 'Référence';
+
+  @override
+  String get readinessMetricAvg7Days => 'Moy. 7 jours';
+
+  @override
+  String get readinessMetricLoad => 'Charge récente';
+
+  @override
+  String get readinessLoadVigor => 'Séances Vigor';
+
+  @override
+  String get readinessLoadExternal => 'Activités externes';
+
+  @override
+  String get readinessLast3Days => '3 derniers jours';
+
+  @override
+  String get readinessLast7Days => '7 derniers jours';
+
+  @override
   String get healthInstallHcTitle => 'Health Connect requis';
 
   @override

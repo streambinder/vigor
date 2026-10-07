@@ -1667,6 +1667,36 @@ class AppLocalizationsRu extends AppLocalizations {
   String get readinessRed => 'Отдохни — ты вымотан';
 
   @override
+  String get readinessMetricSleep => 'Сон';
+
+  @override
+  String get readinessMetricHrv => 'HRV';
+
+  @override
+  String get readinessMetricRestingHr => 'ЧСС в покое';
+
+  @override
+  String get readinessMetricBaseline => 'Базовый уровень';
+
+  @override
+  String get readinessMetricAvg7Days => 'Среднее за 7 дней';
+
+  @override
+  String get readinessMetricLoad => 'Недавняя нагрузка';
+
+  @override
+  String get readinessLoadVigor => 'Тренировки Vigor';
+
+  @override
+  String get readinessLoadExternal => 'Внешняя активность';
+
+  @override
+  String get readinessLast3Days => 'Последние 3 дня';
+
+  @override
+  String get readinessLast7Days => 'Последние 7 дней';
+
+  @override
   String get healthInstallHcTitle => 'Требуется Health Connect';
 
   @override

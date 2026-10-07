@@ -133,9 +133,50 @@ type HealthDailyResponse struct {
 // ReadinessResponse is the response for GET /health/readiness/today.
 // score runs 0-100; level is the user-facing severity bucket derived from it.
 type ReadinessResponse struct {
-	Score   int    `json:"score"`
-	Level   string `json:"level"`
-	Summary string `json:"summary"`
+	Score   int               `json:"score"`
+	Level   string            `json:"level"`
+	Summary string            `json:"summary"`
+	Metrics *ReadinessMetrics `json:"metrics,omitempty"`
+}
+
+// ReadinessMetrics carries the probe inputs behind the score, so the app can
+// show the user the actual numbers the readiness judgment rests on. a group
+// is present only when the underlying signal was measured. status buckets
+// (good, caution, poor) mirror the thresholds of the readiness prompt.
+type ReadinessMetrics struct {
+	Sleep     *ReadinessSleepMetric `json:"sleep,omitempty"`
+	HRV       *ReadinessHRVMetric   `json:"hrv,omitempty"`
+	RestingHR *ReadinessRHRMetric   `json:"resting_hr,omitempty"`
+	Load      *ReadinessLoadMetric  `json:"load,omitempty"`
+}
+
+type ReadinessSleepMetric struct {
+	Hours         float64 `json:"hours"`
+	BaselineHours float64 `json:"baseline_hours,omitempty"`
+	DeviationPct  float64 `json:"deviation_pct,omitempty"`
+	Status        string  `json:"status,omitempty"`
+}
+
+type ReadinessHRVMetric struct {
+	TodayMs      float64 `json:"today_ms"`
+	RecentAvgMs  float64 `json:"recent_avg_ms,omitempty"`
+	BaselineMs   float64 `json:"baseline_ms,omitempty"`
+	ZScore       float64 `json:"z_score,omitempty"`
+	DeviationPct float64 `json:"deviation_pct,omitempty"`
+	Status       string  `json:"status,omitempty"`
+}
+
+type ReadinessRHRMetric struct {
+	TodayBpm     int     `json:"today_bpm"`
+	BaselineBpm  float64 `json:"baseline_bpm,omitempty"`
+	DeviationBpm float64 `json:"deviation_bpm,omitempty"`
+	Status       string  `json:"status,omitempty"`
+}
+
+type ReadinessLoadMetric struct {
+	VigorSessions    int `json:"vigor_sessions"`
+	ExternalWorkouts int `json:"external_workouts"`
+	ExternalMinutes  int `json:"external_minutes,omitempty"`
 }
 
 // HealthSyncRequest is the DTO for POST /health/sync.

@@ -1674,6 +1674,36 @@ class AppLocalizationsPt extends AppLocalizations {
   String get readinessRed => 'Descanse, você está esgotado';
 
   @override
+  String get readinessMetricSleep => 'Sono';
+
+  @override
+  String get readinessMetricHrv => 'HRV';
+
+  @override
+  String get readinessMetricRestingHr => 'FC em repouso';
+
+  @override
+  String get readinessMetricBaseline => 'Referência';
+
+  @override
+  String get readinessMetricAvg7Days => 'Média 7 dias';
+
+  @override
+  String get readinessMetricLoad => 'Carga recente';
+
+  @override
+  String get readinessLoadVigor => 'Sessões Vigor';
+
+  @override
+  String get readinessLoadExternal => 'Atividades externas';
+
+  @override
+  String get readinessLast3Days => 'Últimos 3 dias';
+
+  @override
+  String get readinessLast7Days => 'Últimos 7 dias';
+
+  @override
   String get healthInstallHcTitle => 'Health Connect necessário';
 
   @override

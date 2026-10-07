@@ -21,6 +21,7 @@ import '../widgets/adaptive/adaptive.dart';
 import '../widgets/animated_number_text.dart';
 import '../widgets/progress/progress.dart';
 import '../models/progress.dart';
+import '../models/readiness_metrics.dart';
 import '../services/progress_service.dart';
 import '../services/service_locator.dart';
 import '../services/readiness_retry.dart';
@@ -590,6 +591,8 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage>, 
               final level = readiness?['level'] as String? ?? 'red';
               final score = (readiness?['score'] as num?)?.toInt() ?? 0;
               final summary = readiness?['summary'] as String? ?? '';
+              final metricsJson = readiness?['metrics'] as Map<String, dynamic>?;
+              final metrics = metricsJson != null ? ReadinessMetrics.fromJson(metricsJson) : null;
               // before readiness lands the effect runs in grey instead of hiding
               final glowColor =
                   readiness == null ? VigorColors.stone : _readinessStyle(l10n, level).$1;
@@ -675,7 +678,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage>, 
                           ),
                           child: GestureDetector(
                             behavior: HitTestBehavior.opaque,
-                            onTap: () => _showReadinessModal(context, l10n, score: score, level: level, summary: summary),
+                            onTap: () => _showReadinessModal(context, l10n, score: score, level: level, summary: summary, metrics: metrics),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -782,6 +785,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage>, 
     required int score,
     required String level,
     required String summary,
+    ReadinessMetrics? metrics,
   }) {
     showModalBottomSheet(
       context: context,
@@ -792,6 +796,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage>, 
         score: score,
         level: level,
         summary: summary,
+        metrics: metrics,
       ),
     );
   }
@@ -1979,19 +1984,111 @@ class _ReadinessGlowPainter extends CustomPainter {
       angle != oldDelegate.angle;
 }
 
+/// Signed percent chip for a metric deviation; null when it rounds to zero.
+String? _pctChip(double? deviationPct) {
+  if (deviationPct == null || deviationPct.round() == 0) return null;
+  final rounded = deviationPct.round();
+  return rounded > 0 ? '+$rounded%' : '$rounded%';
+}
+
+/// Signed bpm chip for the resting HR deviation; null when it rounds to zero.
+String? _bpmChip(double? deviationBpm) {
+  if (deviationBpm == null || deviationBpm.round() == 0) return null;
+  final rounded = deviationBpm.round();
+  return rounded > 0 ? '+$rounded bpm' : '$rounded bpm';
+}
+
 /// Modal for readiness details, sibling of [_CalibrationModal]
 class _ReadinessModal extends StatelessWidget {
   final AppLocalizations l10n;
   final int score;
   final String level;
   final String summary;
+  final ReadinessMetrics? metrics;
 
   const _ReadinessModal({
     required this.l10n,
     required this.score,
     required this.level,
     required this.summary,
+    this.metrics,
   });
+
+  List<Widget> _metricRows(BuildContext context) {
+    final m = metrics!;
+    final rows = <Widget>[];
+    final sleep = m.sleep;
+    if (sleep != null) {
+      rows.add(_ReadinessMetricRow(
+        icon: Icons.bedtime_outlined,
+        label: l10n.readinessMetricSleep,
+        detail: sleep.baselineHours != null
+            ? '${l10n.readinessMetricBaseline} ${sleep.baselineHours!.toStringAsFixed(1)} h'
+            : null,
+        value: '${sleep.hours.toStringAsFixed(1)} h',
+        chip: _pctChip(sleep.deviationPct),
+        status: sleep.status,
+      ));
+    }
+    final hrv = m.hRV;
+    if (hrv != null) {
+      final detail = <String>[
+        if (hrv.recentAvgMs != null)
+          '${l10n.readinessMetricAvg7Days} ${hrv.recentAvgMs!.round()} ms',
+        if (hrv.baselineMs != null)
+          '${l10n.readinessMetricBaseline} ${hrv.baselineMs!.round()} ms',
+      ];
+      rows.add(_ReadinessMetricRow(
+        icon: Icons.monitor_heart_outlined,
+        label: l10n.readinessMetricHrv,
+        detail: detail.isEmpty ? null : detail.join(' · '),
+        value: '${hrv.todayMs.round()} ms',
+        chip: _pctChip(hrv.deviationPct),
+        status: hrv.status,
+      ));
+    }
+    final rhr = m.restingHR;
+    if (rhr != null) {
+      rows.add(_ReadinessMetricRow(
+        icon: Icons.favorite_outline,
+        label: l10n.readinessMetricRestingHr,
+        detail: rhr.baselineBpm != null
+            ? '${l10n.readinessMetricBaseline} ${rhr.baselineBpm!.round()} bpm'
+            : null,
+        value: '${rhr.todayBpm} bpm',
+        chip: _bpmChip(rhr.deviationBpm),
+        status: rhr.status,
+      ));
+    }
+    final load = m.load;
+    if (load != null) {
+      rows.add(Padding(
+        padding: const EdgeInsets.only(top: VigorSpacing.sm),
+        child: Text(
+          l10n.readinessMetricLoad,
+          style: VigorTypography.caption.copyWith(
+            color: VigorColors.textSecondary(context),
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ));
+      rows.add(_ReadinessMetricRow(
+        icon: Icons.fitness_center,
+        label: l10n.readinessLoadVigor,
+        detail: l10n.readinessLast3Days,
+        value: '${load.vigorSessions}',
+      ));
+      rows.add(_ReadinessMetricRow(
+        icon: Icons.directions_run_outlined,
+        label: l10n.readinessLoadExternal,
+        detail: load.externalMinutes != null && load.externalMinutes! > 0
+            ? '${l10n.readinessLast7Days} · ${load.externalMinutes} min'
+            : l10n.readinessLast7Days,
+        value: '${load.externalWorkouts}',
+      ));
+    }
+    return rows;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2066,7 +2163,95 @@ class _ReadinessModal extends StatelessWidget {
                 ),
               ),
             ),
+          if (metrics != null) ...[
+            const SizedBox(height: VigorSpacing.md),
+            Divider(height: 1, color: VigorColors.border(context)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _metricRows(context),
+              ),
+            ),
+          ],
           const SizedBox(height: VigorSpacing.lg),
+        ],
+      ),
+    );
+  }
+}
+
+/// One metric row in [_ReadinessModal]: icon and label on the left, the
+/// measured value and an optional deviation chip on the right.
+class _ReadinessMetricRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String? detail;
+  final String value;
+  final String? chip;
+  final String? status;
+
+  const _ReadinessMetricRow({
+    required this.icon,
+    required this.label,
+    this.detail,
+    required this.value,
+    this.chip,
+    this.status,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final chipColor = switch (status) {
+      'good' => VigorColors.success,
+      'caution' => VigorColors.warning,
+      'poor' => VigorColors.error,
+      _ => VigorColors.stone,
+    };
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: VigorSpacing.sm),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: VigorColors.stone),
+          const SizedBox(width: VigorSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: VigorTypography.body.copyWith(
+                    color: VigorColors.textPrimary(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (detail != null)
+                  Text(
+                    detail!,
+                    style: VigorTypography.caption.copyWith(
+                      color: VigorColors.textSecondary(context),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Text(
+            value,
+            style: VigorTypography.data.copyWith(
+              color: VigorColors.textPrimary(context),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          if (chip != null) ...[
+            const SizedBox(width: VigorSpacing.sm),
+            Text(
+              chip!,
+              style: VigorTypography.caption.copyWith(
+                color: chipColor,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -124,9 +124,90 @@ func GetReadinessToday(userID uuid.UUID, loc *time.Location, force bool) (*model
 		log.Warn().Err(err).Str("user", userID.String()).Msg("readiness probe failed")
 		return nil, fmt.Errorf("readiness inference: %w", err)
 	}
+	resp.Metrics = readinessMetrics(snapshot, trainings)
 
 	if err := database.DailySave(database.TableReadiness, userID, now, loc, resp); err != nil {
 		log.Warn().Err(err).Str("user", userID.String()).Msg("daily readiness save failed")
 	}
 	return resp, nil
+}
+
+// readinessMetrics distills the probe inputs into the user-facing numbers
+// behind the score. a group appears only when its signal was measured, and
+// each status mirrors the thresholds the readiness prompt judges by.
+func readinessMetrics(snapshot *model.HealthSnapshot, trainings []model.Training) *model.ReadinessMetrics {
+	metrics := &model.ReadinessMetrics{}
+
+	if snapshot.SleepPresent {
+		sleep := &model.ReadinessSleepMetric{Hours: snapshot.SleepHours}
+		if snapshot.SleepBaseline > 0 {
+			sleep.BaselineHours = snapshot.SleepBaseline
+			sleep.DeviationPct = snapshot.SleepDeviation
+		}
+		switch {
+		case snapshot.SleepHours < 6:
+			sleep.Status = "poor"
+		case snapshot.SleepHours < 7 || (snapshot.SleepBaseline > 0 && snapshot.SleepDeviation <= -15):
+			sleep.Status = "caution"
+		default:
+			sleep.Status = "good"
+		}
+		metrics.Sleep = sleep
+	}
+
+	if snapshot.HRVPresent {
+		hrv := &model.ReadinessHRVMetric{
+			TodayMs:     snapshot.HRVRMSSD,
+			RecentAvgMs: snapshot.HRVRecentAvg,
+		}
+		if snapshot.HRVBaseline > 0 {
+			hrv.BaselineMs = snapshot.HRVBaseline
+			hrv.DeviationPct = snapshot.HRVDeviation
+		}
+		if snapshot.HRVHasZScore {
+			hrv.ZScore = snapshot.HRVZScore
+			switch {
+			case snapshot.HRVZScore <= -1:
+				hrv.Status = "poor"
+			case snapshot.HRVZScore < -0.5:
+				hrv.Status = "caution"
+			default:
+				hrv.Status = "good"
+			}
+		}
+		metrics.HRV = hrv
+	}
+
+	if snapshot.RHRPresent {
+		rhr := &model.ReadinessRHRMetric{TodayBpm: snapshot.RestingHR}
+		if snapshot.RHRBaseline > 0 {
+			rhr.BaselineBpm = snapshot.RHRBaseline
+			rhr.DeviationBpm = snapshot.RHRDeviationBpm
+			switch {
+			case snapshot.RHRDeviationBpm > 5:
+				rhr.Status = "poor"
+			case snapshot.RHRDeviationBpm >= 3:
+				rhr.Status = "caution"
+			default:
+				rhr.Status = "good"
+			}
+		}
+		metrics.RestingHR = rhr
+	}
+
+	load := &model.ReadinessLoadMetric{
+		VigorSessions:    len(trainings),
+		ExternalWorkouts: len(snapshot.ExternalWorkouts),
+	}
+	for _, w := range snapshot.ExternalWorkouts {
+		load.ExternalMinutes += w.DurationMins
+	}
+	if load.VigorSessions > 0 || load.ExternalWorkouts > 0 {
+		metrics.Load = load
+	}
+
+	if metrics.Sleep == nil && metrics.HRV == nil && metrics.RestingHR == nil && metrics.Load == nil {
+		return nil
+	}
+	return metrics
 }

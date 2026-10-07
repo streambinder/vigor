@@ -1684,6 +1684,36 @@ class AppLocalizationsDe extends AppLocalizations {
   String get readinessRed => 'Ruh dich aus, du bist platt';
 
   @override
+  String get readinessMetricSleep => 'Schlaf';
+
+  @override
+  String get readinessMetricHrv => 'HRV';
+
+  @override
+  String get readinessMetricRestingHr => 'Ruhepuls';
+
+  @override
+  String get readinessMetricBaseline => 'Referenz';
+
+  @override
+  String get readinessMetricAvg7Days => '7-Tage-Mittel';
+
+  @override
+  String get readinessMetricLoad => 'Aktuelle Belastung';
+
+  @override
+  String get readinessLoadVigor => 'Vigor-Einheiten';
+
+  @override
+  String get readinessLoadExternal => 'Externe Aktivitäten';
+
+  @override
+  String get readinessLast3Days => 'Letzte 3 Tage';
+
+  @override
+  String get readinessLast7Days => 'Letzte 7 Tage';
+
+  @override
   String get healthInstallHcTitle => 'Health Connect erforderlich';
 
   @override
