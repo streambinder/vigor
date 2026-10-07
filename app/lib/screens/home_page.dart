@@ -85,6 +85,22 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage>, 
     if (!mounted) return;
     final updated = _healthDailyNotifier?.value;
     if (updated != null && updated != _healthDaily) setState(() => _healthDaily = updated);
+    _persistHealthTileCache(updated);
+  }
+
+  /// caches the latest backend health values so the metric tiles can seed
+  /// their counters from them on the next open instead of counting from 0
+  void _persistHealthTileCache(Map<String, dynamic>? daily) {
+    final metrics = daily?['metrics'] as List?;
+    if (metrics == null || metrics.isEmpty) return;
+    final today = metrics.first as Map<String, dynamic>;
+    final prefs = context.read<PreferencesService>();
+    final sleep = (today['sleep_hours'] as num?)?.toDouble() ?? 0;
+    if (sleep > 0) prefs.setHealthTileSleep(sleep);
+    final restingHr = (today['resting_hr'] as num?)?.toDouble() ?? 0;
+    if (restingHr > 0) prefs.setHealthTileRestingHr(restingHr);
+    final hrv = (today['hrv_rmssd'] as num?)?.toDouble() ?? 0;
+    if (hrv > 0) prefs.setHealthTileHrv(hrv);
   }
 
   @override
@@ -441,11 +457,15 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage>, 
     final restingHR = (today?['resting_hr'] as num?)?.toInt() ?? 0;
     final hrv = (today?['hrv_rmssd'] as num?)?.toDouble() ?? 0;
 
+    // tiles seed their counters from the last shown values, so a reopen
+    // with unchanged data renders statically instead of counting from 0
+    final prefs = context.read<PreferencesService>();
+
     // always show all tiles — use — for missing values
     final tiles = <Widget>[
-      _buildMetricTile(l10n.healthDailySleep, sleepHours > 0 ? sleepHours : null, 'h', _formatSleepHours),
-      _buildMetricTile(l10n.healthDailyRestingHr, restingHR > 0 ? restingHR.toDouble() : null, 'bpm', (v) => '${v.toInt()}'),
-      _buildMetricTile(l10n.healthDailyHrv, hrv > 0 ? hrv : null, 'ms', (v) => '${v.toInt()}'),
+      _buildMetricTile(l10n.healthDailySleep, sleepHours > 0 ? sleepHours : null, 'h', _formatSleepHours, seedValue: prefs.healthTileSleep),
+      _buildMetricTile(l10n.healthDailyRestingHr, restingHR > 0 ? restingHR.toDouble() : null, 'bpm', (v) => '${v.toInt()}', seedValue: prefs.healthTileRestingHr),
+      _buildMetricTile(l10n.healthDailyHrv, hrv > 0 ? hrv : null, 'ms', (v) => '${v.toInt()}', seedValue: prefs.healthTileHrv),
     ];
 
     return Column(
@@ -476,7 +496,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage>, 
     );
   }
 
-  Widget _buildMetricTile(String label, double? value, String unit, String Function(double) formatValue) {
+  Widget _buildMetricTile(String label, double? value, String unit, String Function(double) formatValue, {double? seedValue}) {
     final valueStyle = VigorTypography.data.copyWith(
       fontSize: 20,
       fontWeight: FontWeight.w600,
@@ -492,6 +512,7 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage>, 
           children: [
             AnimatedNumberText(
               value: value,
+              seedValue: seedValue,
               formatValue: formatValue,
               style: valueStyle,
             ),

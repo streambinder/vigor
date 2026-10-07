@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 
 /// Text that tweens between numeric values with an ease-in-out curve,
 /// counting from the previously shown value whenever the input changes.
+///
+/// The caller seeds the first frame with [seedValue] — the last value shown
+/// in an earlier session — so a reopen tweens seed → current only when the
+/// value actually changed, and never counts up from zero. With no seed the
+/// first value is shown as-is.
 class AnimatedNumberText extends StatefulWidget {
   const AnimatedNumberText({
     super.key,
     required this.value,
     required this.formatValue,
+    this.seedValue,
     this.placeholder = '—',
     this.style,
     this.duration = const Duration(milliseconds: 900),
@@ -14,6 +20,9 @@ class AnimatedNumberText extends StatefulWidget {
 
   /// Current value; null renders [placeholder] statically.
   final double? value;
+
+  /// Last value shown in a previous session; the first tween starts here.
+  final double? seedValue;
 
   /// Formats the interpolated value for display.
   final String Function(double value) formatValue;
@@ -36,13 +45,18 @@ class _AnimatedNumberTextState extends State<AnimatedNumberText>
   late final AnimationController _controller;
   late Animation<double> _animation;
 
+  /// last numeric value handed to this widget for display: the next tween
+  /// starts from here, so equal consecutive values never animate
+  double? _displayed;
+
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this, duration: widget.duration);
     _animation = const AlwaysStoppedAnimation(0);
+    _displayed = widget.seedValue;
     final value = widget.value;
-    if (value != null) _tweenTo(value, from: 0);
+    if (value != null) _showValue(value);
   }
 
   @override
@@ -53,17 +67,20 @@ class _AnimatedNumberTextState extends State<AnimatedNumberText>
       _controller.stop();
       return;
     }
-    if (value != oldWidget.value) {
-      _tweenTo(value, from: oldWidget.value == null ? 0 : _animation.value);
-    }
+    if (value != oldWidget.value) _showValue(value);
   }
 
-  void _tweenTo(double target, {required double from}) {
-    if (from == target) {
-      _animation = AlwaysStoppedAnimation(target);
+  /// renders [value]: tweens from the previously shown value when there is
+  /// one and it differs, snaps directly when there is none or it is unchanged
+  void _showValue(double value) {
+    final from = _displayed;
+    _displayed = value;
+    if (from == null || from == value) {
+      _controller.stop();
+      _animation = AlwaysStoppedAnimation(value);
       return;
     }
-    _animation = Tween<double>(begin: from, end: target).animate(
+    _animation = Tween<double>(begin: from, end: value).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
     _controller.forward(from: 0);
