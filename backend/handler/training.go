@@ -22,6 +22,7 @@ func initTraining(app *fiber.App) {
 	app.Get("/training/feedback/:id", middleware.Authorized(), getTrainingFeedbackById)
 	app.Post("/training/partner/:id", middleware.Authorized(), postTrainingPartner)
 	app.Post("/training/copy/:id", middleware.Authorized(), postTrainingCopy)
+	app.Post("/training/refine/:id", middleware.Authorized(), postTrainingRefine)
 	app.Get("/training", middleware.Authorized(), getTraining)
 	app.Get("/training/partners/:id", middleware.Authorized(), getTrainingPartners)
 	app.Delete("/training/:id", middleware.Authorized(), deleteTrainingById)
@@ -335,6 +336,45 @@ func postTrainingPartner(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(dto.PostTrainingPartnerResponse{Message: "partner added"})
+}
+
+func postTrainingRefine(c *fiber.Ctx) error {
+	trainingID := c.Params("id")
+	if trainingID == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "training id is required"})
+	}
+
+	var req dto.PostTrainingRefineRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
+	}
+
+	// the request as the client sent it, kept verbatim for the trajectory
+	rawRequest := append([]byte(nil), c.Body()...)
+
+	training, err := service.RefineTraining(c.Locals("userID").(uuid.UUID), trainingID, req.Critique, rawRequest)
+	if err != nil {
+		switch {
+		case errors.Is(err, service.ErrTrainingNotFound):
+			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})
+		case errors.Is(err, service.ErrCritiqueRequired):
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "critique is required"})
+		case errors.Is(err, service.ErrPromptTooLong):
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "prompt exceeds maximum length"})
+		case errors.Is(err, service.ErrTrainingAlreadyCompleted):
+			return c.Status(http.StatusUnprocessableEntity).JSON(fiber.Map{"error": "training already completed"})
+		case errors.Is(err, service.ErrUserNotFound):
+			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "invalid session"})
+		case errors.Is(err, service.ErrMalformedTraining):
+			c.Set("Retry-After", "3")
+			return c.Status(http.StatusServiceUnavailable).JSON(fiber.Map{"error": "malformed generated training"})
+		default:
+			middleware.Log(c).Error().Err(err).Msg("failed to refine training")
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		}
+	}
+
+	return c.JSON(dto.PostTrainingRefineResponse(*training))
 }
 
 func postTrainingCopy(c *fiber.Ctx) error {

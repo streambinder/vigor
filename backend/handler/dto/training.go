@@ -92,6 +92,14 @@ type PostTrainingCopyRequest struct {
 // PostTrainingCopyResponse represents the response for POST /training/copy/:id
 type PostTrainingCopyResponse model.Training
 
+// PostTrainingRefineRequest represents the request for POST /training/refine/:id
+type PostTrainingRefineRequest struct {
+	Critique string `json:"critique"`
+}
+
+// PostTrainingRefineResponse represents the response for POST /training/refine/:id
+type PostTrainingRefineResponse model.Training
+
 // PostReportRequest represents the request for POST /report
 type PostReportRequest struct {
 	TrainingID string `json:"training_id"`

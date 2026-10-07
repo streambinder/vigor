@@ -25,6 +25,7 @@ const (
 	StepProgramLoad      GenerationStep = "PROGRAM_LOAD"
 	StepWriteCopy        GenerationStep = "WRITE_COPY"
 	StepStructure        GenerationStep = "STRUCTURE"
+	StepRefineTraining   GenerationStep = "REFINE_TRAINING"
 )
 
 // DerivedParams is the output of the free text param derivation node.

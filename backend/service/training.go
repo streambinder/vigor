@@ -30,19 +30,21 @@ const (
 const maxPromptLength = 500
 
 var (
-	ErrTrainingNotFound     = errors.New("training not found")
-	ErrUserNotFound         = errors.New("user not found")
-	ErrAccessDenied         = errors.New("access denied")
-	ErrCannotAddSelf        = errors.New("cannot add yourself as partner")
-	ErrPartnerExists        = errors.New("partner already added")
-	ErrInvalidGym           = errors.New("gym not found")
-	ErrDurationRequired     = errors.New("duration is required")
-	ErrDurationOutOfRange   = errors.New("duration must be between 10 and 180 minutes")
-	ErrPromptTooLong        = errors.New("prompt exceeds maximum length")
-	ErrMalformedTraining    = errors.New("malformed generated training")
-	ErrTrainingNotCompleted = errors.New("training not completed")
-	ErrFetchResource        = errors.New("could not fetch linked resource")
-	ErrCalibrationAutoOnly  = errors.New("non-Auto training generation is blocked during calibration")
+	ErrTrainingNotFound         = errors.New("training not found")
+	ErrUserNotFound             = errors.New("user not found")
+	ErrAccessDenied             = errors.New("access denied")
+	ErrCannotAddSelf            = errors.New("cannot add yourself as partner")
+	ErrPartnerExists            = errors.New("partner already added")
+	ErrInvalidGym               = errors.New("gym not found")
+	ErrDurationRequired         = errors.New("duration is required")
+	ErrDurationOutOfRange       = errors.New("duration must be between 10 and 180 minutes")
+	ErrPromptTooLong            = errors.New("prompt exceeds maximum length")
+	ErrMalformedTraining        = errors.New("malformed generated training")
+	ErrTrainingNotCompleted     = errors.New("training not completed")
+	ErrCritiqueRequired         = errors.New("critique is required")
+	ErrTrainingAlreadyCompleted = errors.New("training already completed")
+	ErrFetchResource            = errors.New("could not fetch linked resource")
+	ErrCalibrationAutoOnly      = errors.New("non-Auto training generation is blocked during calibration")
 )
 
 // promptDerivation holds the result of deriving the tuning parameters of a
@@ -644,40 +646,6 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			return nil, err
 		}
 
-		// normalize modifier IDs from LLM output (e.g. "weighted_vest" -> "weighted vest")
-		for i := range training.Routines {
-			for j := range training.Routines[i].Blocks {
-				for k := range training.Routines[i].Blocks[j].Activities {
-					a := &training.Routines[i].Blocks[j].Activities[k]
-					for m := range a.Modifiers {
-						a.Modifiers[m] = strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(a.Modifiers[m], "_", " "), "-", " "))
-					}
-				}
-			}
-		}
-
-		// auto-attach weight modifier to activities with weight_kg > 0 and no existing weighted modifier
-		for i := range training.Routines {
-			for j := range training.Routines[i].Blocks {
-				for k := range training.Routines[i].Blocks[j].Activities {
-					a := &training.Routines[i].Blocks[j].Activities[k]
-					if a.WeightKg <= 0 {
-						continue
-					}
-					hasWeighted := false
-					for _, mod := range a.Modifiers {
-						if weightedModifierIDs[mod] {
-							hasWeighted = true
-							break
-						}
-					}
-					if !hasWeighted {
-						a.Modifiers = append(a.Modifiers, WeightModifier)
-					}
-				}
-			}
-		}
-
 		// reps-vs-duration mode is a property of the chosen methodology (knowledge data),
 		// resolved from the record rather than a hardcoded map
 		durationBased := false
@@ -687,19 +655,20 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 				break
 			}
 		}
-		training.PurgeRepsDuration(durationBased)
 
-		if skipWarmupCooldown {
-			workOnly := training.Routines[:0]
-			for _, r := range training.Routines {
-				if r.Type == "work" {
-					workOnly = append(workOnly, r)
-				}
-			}
-			training.Routines = workOnly
-		}
-
-		training.Routines = reorderRoutines(training.Routines)
+		validationErr := prepareGeneratedTraining(training, generatedValidationContext{
+			validExerciseIDs:      validExerciseIDs,
+			exerciseModes:         exerciseModes,
+			validModifierIDs:      validModifierIDs,
+			validRoutineTypes:     validRoutineTypes,
+			weightedModifierIDs:   weightedModifierIDs,
+			weightedExerciseIDs:   weightedExerciseIDs,
+			durationBased:         durationBased,
+			stripNonWork:          skipWarmupCooldown,
+			requireWarmupCooldown: !skipWarmupCooldown,
+			targetMinutes:         duration,
+			enforceDuration:       !explicitProgram,
+		})
 
 		muscleSet := make(map[string]bool)
 		for _, activity := range training.Activities() {
@@ -710,25 +679,6 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		actualMuscles = nil
 		for muscle := range muscleSet {
 			actualMuscles = append(actualMuscles, muscle)
-		}
-
-		// structural validation only — muscle coverage is owned by the strategy node, not the validator
-		validationErr := training.Validate(validExerciseIDs, exerciseModes, validModifierIDs, validRoutineTypes, weightedModifierIDs, weightedExerciseIDs, !skipWarmupCooldown)
-
-		// the stored session length always mirrors the generated program; the
-		// requested duration additionally scales repeats and enforces the
-		// duration match band, unless the program itself sets the length.
-		// An AMRAP program is the exception: its length is a time cap, not
-		// a sum of activities, so the requested duration is the only
-		// deterministic cap even when the program sets the round scheme —
-		// SetDuration for amrap only writes that cap and never scales
-		// repeats, so the program structure survives untouched.
-		training.Duration = training.CalculateDuration()
-		if validationErr == nil && !explicitProgram {
-			training.SetDuration(duration)
-			validationErr = training.ValidateDuration(duration)
-		} else if validationErr == nil && training.Methodology == "amrap" {
-			training.SetDuration(duration)
 		}
 
 		if validationErr == nil {
