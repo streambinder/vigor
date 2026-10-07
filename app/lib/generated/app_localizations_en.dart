@@ -1665,6 +1665,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get readinessRed => 'Rest — you\'re drained';
 
   @override
+  String get readinessMetricSleep => 'Sleep';
+
+  @override
+  String get readinessMetricHrv => 'HRV';
+
+  @override
+  String get readinessMetricRestingHr => 'Resting HR';
+
+  @override
+  String get readinessMetricBaseline => 'Baseline';
+
+  @override
+  String get readinessMetricAvg7Days => '7-day avg';
+
+  @override
+  String get readinessMetricLoad => 'Recent load';
+
+  @override
+  String get readinessLoadVigor => 'Vigor sessions';
+
+  @override
+  String get readinessLoadExternal => 'External activities';
+
+  @override
+  String get readinessLast3Days => 'Last 3 days';
+
+  @override
+  String get readinessLast7Days => 'Last 7 days';
+
+  @override
   String get healthInstallHcTitle => 'Health Connect Required';
 
   @override

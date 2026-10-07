@@ -1639,6 +1639,36 @@ class AppLocalizationsJa extends AppLocalizations {
   String get readinessRed => '今日は休息を — お疲れ気味です';
 
   @override
+  String get readinessMetricSleep => '睡眠';
+
+  @override
+  String get readinessMetricHrv => 'HRV';
+
+  @override
+  String get readinessMetricRestingHr => '安静時心拍数';
+
+  @override
+  String get readinessMetricBaseline => '基準値';
+
+  @override
+  String get readinessMetricAvg7Days => '7日平均';
+
+  @override
+  String get readinessMetricLoad => '最近の負荷';
+
+  @override
+  String get readinessLoadVigor => 'Vigorのセッション';
+
+  @override
+  String get readinessLoadExternal => '外部アクティビティ';
+
+  @override
+  String get readinessLast3Days => '過去3日間';
+
+  @override
+  String get readinessLast7Days => '過去7日間';
+
+  @override
   String get healthInstallHcTitle => 'Health Connectが必要です';
 
   @override

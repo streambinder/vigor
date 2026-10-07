@@ -371,3 +371,86 @@ func TestGetReadinessToday_ForceOverwritesStored(t *testing.T) {
 			callsFirst.Load(), callsSecond.Load())
 	}
 }
+
+func TestGetReadinessToday_ResponseCarriesProbeMetrics(t *testing.T) {
+	setupReadinessDB(t)
+	userID := uuid.New()
+	insertHealthMetric(t, userID, time.Now().UTC())
+	stubReadinessProbe(t, &model.ReadinessResponse{Score: 80, Level: "green", Summary: "go"}, nil)
+
+	resp, err := GetReadinessToday(userID, time.UTC, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp == nil || resp.Metrics == nil {
+		t.Fatalf("expected metrics on the response, got %+v", resp)
+	}
+	m := resp.Metrics
+	if m.Sleep == nil || m.Sleep.Hours != 7.5 || m.Sleep.Status != "good" {
+		t.Fatalf("unexpected sleep metric: %+v", m.Sleep)
+	}
+	if m.HRV == nil || m.HRV.TodayMs != 45 || m.HRV.Status != "" {
+		t.Fatalf("unexpected hrv metric: %+v", m.HRV)
+	}
+	if m.RestingHR == nil || m.RestingHR.TodayBpm != 58 || m.RestingHR.Status != "good" {
+		t.Fatalf("unexpected resting hr metric: %+v", m.RestingHR)
+	}
+	if m.Load != nil {
+		t.Fatalf("expected no load without sessions, got %+v", m.Load)
+	}
+
+	// metrics persist with the stored snapshot: a cache hit serves them too
+	cached, err := GetReadinessToday(userID, time.UTC, false)
+	if err != nil {
+		t.Fatalf("cached call: %v", err)
+	}
+	if cached == nil || cached.Metrics == nil || cached.Metrics.Sleep == nil || cached.Metrics.Sleep.Hours != 7.5 {
+		t.Fatalf("cached response lost its metrics: %+v", cached)
+	}
+}
+
+func TestReadinessMetrics_StatusesAndPresence(t *testing.T) {
+	snapshot := &model.HealthSnapshot{
+		SleepPresent:    true,
+		SleepHours:      5.5,
+		SleepBaseline:   7.5,
+		SleepDeviation:  -26.7,
+		HRVPresent:      true,
+		HRVRMSSD:        38,
+		HRVRecentAvg:    40,
+		HRVBaseline:     52,
+		HRVHasZScore:    true,
+		HRVZScore:       -1.3,
+		HRVDeviation:    -23.1,
+		RHRPresent:      true,
+		RestingHR:       63,
+		RHRBaseline:     58,
+		RHRDeviationBpm: 4,
+		ExternalWorkouts: []model.ExternalWorkoutSummary{
+			{DaysAgo: 1, ExerciseType: "run", DurationMins: 30},
+			{DaysAgo: 3, ExerciseType: "walk", DurationMins: 20},
+		},
+	}
+	trainings := []model.Training{{Name: "a"}, {Name: "b"}}
+
+	m := readinessMetrics(snapshot, trainings)
+	if m == nil {
+		t.Fatal("expected metrics")
+	}
+	if m.Sleep == nil || m.Sleep.Status != "poor" || m.Sleep.BaselineHours != 7.5 {
+		t.Fatalf("unexpected sleep metric: %+v", m.Sleep)
+	}
+	if m.HRV == nil || m.HRV.Status != "poor" || m.HRV.ZScore != -1.3 {
+		t.Fatalf("unexpected hrv metric: %+v", m.HRV)
+	}
+	if m.RestingHR == nil || m.RestingHR.Status != "caution" || m.RestingHR.DeviationBpm != 4 {
+		t.Fatalf("unexpected resting hr metric: %+v", m.RestingHR)
+	}
+	if m.Load == nil || m.Load.VigorSessions != 2 || m.Load.ExternalWorkouts != 2 || m.Load.ExternalMinutes != 50 {
+		t.Fatalf("unexpected load metric: %+v", m.Load)
+	}
+
+	if got := readinessMetrics(&model.HealthSnapshot{}, nil); got != nil {
+		t.Fatalf("expected nil metrics without any signal, got %+v", got)
+	}
+}

@@ -1639,6 +1639,36 @@ class AppLocalizationsKo extends AppLocalizations {
   String get readinessRed => '피로가 쌓였어요, 쉬세요';
 
   @override
+  String get readinessMetricSleep => '수면';
+
+  @override
+  String get readinessMetricHrv => 'HRV';
+
+  @override
+  String get readinessMetricRestingHr => '안정시 심박수';
+
+  @override
+  String get readinessMetricBaseline => '기준값';
+
+  @override
+  String get readinessMetricAvg7Days => '7일 평균';
+
+  @override
+  String get readinessMetricLoad => '최근 부하';
+
+  @override
+  String get readinessLoadVigor => 'Vigor 세션';
+
+  @override
+  String get readinessLoadExternal => '외부 활동';
+
+  @override
+  String get readinessLast3Days => '지난 3일';
+
+  @override
+  String get readinessLast7Days => '지난 7일';
+
+  @override
   String get healthInstallHcTitle => 'Health Connect 필요';
 
   @override

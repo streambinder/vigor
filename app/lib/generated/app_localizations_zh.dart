@@ -1633,6 +1633,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get readinessRed => '今天休息吧，你很疲惫';
 
   @override
+  String get readinessMetricSleep => '睡眠';
+
+  @override
+  String get readinessMetricHrv => 'HRV';
+
+  @override
+  String get readinessMetricRestingHr => '静息心率';
+
+  @override
+  String get readinessMetricBaseline => '基准值';
+
+  @override
+  String get readinessMetricAvg7Days => '7日均值';
+
+  @override
+  String get readinessMetricLoad => '近期负荷';
+
+  @override
+  String get readinessLoadVigor => 'Vigor 训练';
+
+  @override
+  String get readinessLoadExternal => '外部活动';
+
+  @override
+  String get readinessLast3Days => '最近3天';
+
+  @override
+  String get readinessLast7Days => '最近7天';
+
+  @override
   String get healthInstallHcTitle => '需要Health Connect';
 
   @override
