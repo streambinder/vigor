@@ -26,6 +26,9 @@ class PreferencesService {
   static const String _hcSessionsToKey = 'hc_sessions_to';
   static const String _readinessDateKey = 'readiness_date';
   static const String _readinessJsonKey = 'readiness_json';
+  static const String _healthTileSleepKey = 'health_tile_sleep';
+  static const String _healthTileRestingHrKey = 'health_tile_resting_hr';
+  static const String _healthTileHrvKey = 'health_tile_hrv';
   static const int defaultDurationFallback = 60;
 
   SharedPreferences? _prefs;
@@ -198,6 +201,30 @@ class PreferencesService {
     await _prefs?.remove(_hcMetricsToKey);
     await _prefs?.remove(_hcSessionsFromKey);
     await _prefs?.remove(_hcSessionsToKey);
+    await _prefs?.remove(_healthTileSleepKey);
+    await _prefs?.remove(_healthTileRestingHrKey);
+    await _prefs?.remove(_healthTileHrvKey);
+  }
+
+  // last health values shown by the homepage metric tiles: the tiles seed
+  // their counters from these, so reopening never counts up from zero
+
+  double? get healthTileSleep => _prefs?.getDouble(_healthTileSleepKey);
+
+  Future<void> setHealthTileSleep(double value) async {
+    await _prefs?.setDouble(_healthTileSleepKey, value);
+  }
+
+  double? get healthTileRestingHr => _prefs?.getDouble(_healthTileRestingHrKey);
+
+  Future<void> setHealthTileRestingHr(double value) async {
+    await _prefs?.setDouble(_healthTileRestingHrKey, value);
+  }
+
+  double? get healthTileHrv => _prefs?.getDouble(_healthTileHrvKey);
+
+  Future<void> setHealthTileHrv(double value) async {
+    await _prefs?.setDouble(_healthTileHrvKey, value);
   }
 
   // health connect connection state
