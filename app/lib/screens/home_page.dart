@@ -325,8 +325,11 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage>, 
           padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
           child: _buildWeeklyTargetCard(context, l10n, _weeklyTarget!),
         ),
-      // health metrics card — always visible when health is connected
-      if (context.read<PreferencesService>().hcConnected)
+      // health metrics card — visible when health is connected on this
+      // device, or when the backend already holds health data for the user:
+      // on web nothing is pushed from here, but data synced by the phone
+      // app must still show
+      if (context.read<PreferencesService>().hcConnected || _hasHealthDailyData)
         Padding(
           padding: const EdgeInsets.only(bottom: VigorSpacing.lg),
           child: _buildHealthMetricsCard(l10n),
@@ -348,6 +351,13 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage>, 
       itemCount: sections.length,
       itemBuilder: (context, index) => sections[index],
     );
+  }
+
+  /// whether the backend health payload holds any daily metric row — the
+  /// display source for the metrics card on clients that never push (web)
+  bool get _hasHealthDailyData {
+    final metrics = _healthDaily?['metrics'] as List?;
+    return metrics != null && metrics.isNotEmpty;
   }
 
   bool _shouldShowHealthOnboarding() {
