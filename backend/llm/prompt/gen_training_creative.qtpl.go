@@ -47,6 +47,7 @@ Description rules:
 - Always name the session's muscle targets explicitly — never leave them implied by the exercise list alone
 - If muscles to rest are listed, mention what was deliberately left to recover and why
 - If a calibration coverage section is present, those muscles are trained by construction: never describe a muscle with forced calibration coverage as resting or recovering — describe it as light calibration work alongside the session focus. Keep resting muscles and calibration muscles in separate sentences, so the resting ones never read as covering the calibrated ones
+- If targeted muscles with no exercise in the final program are listed, never describe them as trained or as a focus of the session — no exercise for them survived the constraints and the available equipment
 - If a step's summary is empty or states "no adjustment"/"no change", skip it naturally — do NOT invent coverage
 - Write conversationally, as if explaining the workout to the user
 - Do NOT use raw data labels like "too_easy", "too_hard", or technical metric names
@@ -87,6 +88,7 @@ func StreamNodeCreativeUser(qw422016 *qt422016.Writer,
 	recentNames []string,
 	derivedSummary string,
 	calibrationCoverage []pipeline.CalibrationCoverage,
+	uncoveredMuscles []string,
 	cautionMovements []string,
 	conditions string,
 ) {
@@ -135,6 +137,15 @@ Calibration coverage (required, already in the program):
 `)
 		}
 		qw422016.N().S(`
+`)
+	}
+	qw422016.N().S(`
+`)
+	if len(uncoveredMuscles) > 0 {
+		qw422016.N().S(`
+Targeted muscles with no exercise in the final program: `)
+		qw422016.E().S(strings.Join(uncoveredMuscles, ", "))
+		qw422016.N().S(` — no exercise for them survived the constraints and the available equipment. Do not describe them as trained or as a focus of the session.
 `)
 	}
 	qw422016.N().S(`
@@ -321,11 +332,12 @@ func WriteNodeCreativeUser(qq422016 qtio422016.Writer,
 	recentNames []string,
 	derivedSummary string,
 	calibrationCoverage []pipeline.CalibrationCoverage,
+	uncoveredMuscles []string,
 	cautionMovements []string,
 	conditions string,
 ) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeCreativeUser(qw422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames, derivedSummary, calibrationCoverage, cautionMovements, conditions)
+	StreamNodeCreativeUser(qw422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames, derivedSummary, calibrationCoverage, uncoveredMuscles, cautionMovements, conditions)
 	qt422016.ReleaseWriter(qw422016)
 }
 
@@ -340,11 +352,12 @@ func NodeCreativeUser(
 	recentNames []string,
 	derivedSummary string,
 	calibrationCoverage []pipeline.CalibrationCoverage,
+	uncoveredMuscles []string,
 	cautionMovements []string,
 	conditions string,
 ) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeCreativeUser(qb422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames, derivedSummary, calibrationCoverage, cautionMovements, conditions)
+	WriteNodeCreativeUser(qb422016, strategy, targeting, exercises, history, constraints, loadResult, health, recentNames, derivedSummary, calibrationCoverage, uncoveredMuscles, cautionMovements, conditions)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

@@ -105,6 +105,39 @@ func ensureMuscleCoverage(
 	return selection, injected
 }
 
+// uncoveredPrimaryMuscles returns the targeted primary muscles that no
+// programmed work activity covers as a primary muscle, in targeting order.
+// A targeted muscle ends up uncovered when every exercise for it is
+// contraindicated or unavailable with the gym equipment. The copy node
+// receives the list so the session copy never claims a focus the final
+// program does not deliver.
+func uncoveredPrimaryMuscles(
+	targeting pipeline.MuscleTargeting,
+	load pipeline.LoadProgramming,
+	workByID map[string]model.Exercise,
+) []string {
+	covered := make(map[string]bool)
+	for _, r := range load.Routines {
+		if r.Type != "work" {
+			continue
+		}
+		for _, b := range r.Blocks {
+			for _, a := range b.Activities {
+				if ex, ok := workByID[a.ExerciseID]; ok && len(ex.Muscles) > 0 {
+					covered[ex.Muscles[0]] = true
+				}
+			}
+		}
+	}
+	var out []string
+	for _, m := range targeting.PrimaryMuscles {
+		if !covered[m] {
+			out = append(out, m)
+		}
+	}
+	return out
+}
+
 // sortedCalibrationCoverage flattens the injected muscle -> exercise map
 // into a deterministically ordered slice (muscle name) for copy generation,
 // where map iteration order must never leak into the prompt.
