@@ -3,6 +3,8 @@ package prompt
 import (
 	"strings"
 	"testing"
+
+	"github.com/streambinder/vigor/model"
 )
 
 func TestNodeExercisesSystemExplicitPins(t *testing.T) {
@@ -26,5 +28,33 @@ func TestNodeExercisesSystemSkipWarmupCooldown(t *testing.T) {
 	out = NodeExercisesSystem(false, 5, 8, false, "")
 	if strings.Contains(out, `every exercise must have phase "work"`) {
 		t.Fatalf("work-only rule leaked into warmup/cooldown prompt:\n%s", out)
+	}
+}
+
+func TestNodeExercisesUserFacts(t *testing.T) {
+	out := NodeExercisesUser(
+		"hiit",
+		[]string{"back", "core"},
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		[]model.Fact{{Content: "Maintain 1:1 push-to-pull ratio or favor pulling."}},
+		true,
+	)
+	if !strings.Contains(out, "[FACTS]\n- [F0] Maintain 1:1 push-to-pull ratio or favor pulling.") {
+		t.Fatalf("facts block missing from exercises user prompt: %q", out)
+	}
+}
+
+func TestNodeExercisesSystemFactsRule(t *testing.T) {
+	out := NodeExercisesSystem(false, 3, 4, false, "")
+	if !strings.Contains(out, "push-to-pull balance fact governs the mix") {
+		t.Fatalf("facts rule missing from exercises system prompt: %q", out)
 	}
 }

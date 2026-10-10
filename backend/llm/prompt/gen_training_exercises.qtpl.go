@@ -39,6 +39,7 @@ Rules:
 	qw422016.N().S(`- Prefer favorite exercises when they fit
 - Prefer non-recent exercises over recent ones for variety
 - Avoid exercises listed in avoid_exercises in every phase (warmup, work, and cooldown) — there is no mobility or warmup exemption
+- When [FACTS] are provided, respect the ones that constrain selection — a push-to-pull balance fact governs the mix of pushing and pulling exercises you pick
 `)
 	if explicitProgram {
 		qw422016.N().S(`- The user request fully specifies this session's program: `)
@@ -95,6 +96,7 @@ func StreamNodeExercisesUser(qw422016 *qt422016.Writer,
 	cooldownExercises []model.Exercise,
 	favoriteExercises []model.Exercise,
 	recentExerciseIDs []string,
+	facts []model.Fact,
 	skipWarmupCooldown bool,
 ) {
 	qw422016.N().S(`Methodology: `)
@@ -151,6 +153,23 @@ Favorites: `)
 	}
 	qw422016.N().S(`
 
+`)
+	if len(facts) > 0 {
+		qw422016.N().S(`
+[FACTS]
+`)
+		for i, fact := range facts {
+			qw422016.N().S(`- [F`)
+			qw422016.N().D(i)
+			qw422016.N().S(`] `)
+			qw422016.E().S(fact.Content)
+			qw422016.N().S(`
+`)
+		}
+		qw422016.N().S(`
+`)
+	}
+	qw422016.N().S(`
 `)
 	recentSet := make(map[string]bool, len(recentExerciseIDs))
 	for _, id := range recentExerciseIDs {
@@ -252,10 +271,11 @@ func WriteNodeExercisesUser(qq422016 qtio422016.Writer,
 	cooldownExercises []model.Exercise,
 	favoriteExercises []model.Exercise,
 	recentExerciseIDs []string,
+	facts []model.Fact,
 	skipWarmupCooldown bool,
 ) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeExercisesUser(qw422016, methodology, primaryMuscles, secondaryMuscles, avoidMuscles, contraindicatedPatterns, avoidExercises, workExercises, warmupExercises, cooldownExercises, favoriteExercises, recentExerciseIDs, skipWarmupCooldown)
+	StreamNodeExercisesUser(qw422016, methodology, primaryMuscles, secondaryMuscles, avoidMuscles, contraindicatedPatterns, avoidExercises, workExercises, warmupExercises, cooldownExercises, favoriteExercises, recentExerciseIDs, facts, skipWarmupCooldown)
 	qt422016.ReleaseWriter(qw422016)
 }
 
@@ -271,10 +291,11 @@ func NodeExercisesUser(
 	cooldownExercises []model.Exercise,
 	favoriteExercises []model.Exercise,
 	recentExerciseIDs []string,
+	facts []model.Fact,
 	skipWarmupCooldown bool,
 ) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeExercisesUser(qb422016, methodology, primaryMuscles, secondaryMuscles, avoidMuscles, contraindicatedPatterns, avoidExercises, workExercises, warmupExercises, cooldownExercises, favoriteExercises, recentExerciseIDs, skipWarmupCooldown)
+	WriteNodeExercisesUser(qb422016, methodology, primaryMuscles, secondaryMuscles, avoidMuscles, contraindicatedPatterns, avoidExercises, workExercises, warmupExercises, cooldownExercises, favoriteExercises, recentExerciseIDs, facts, skipWarmupCooldown)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

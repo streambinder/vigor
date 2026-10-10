@@ -20,6 +20,7 @@ Rules:
 {% endif %}- Prefer favorite exercises when they fit
 - Prefer non-recent exercises over recent ones for variety
 - Avoid exercises listed in avoid_exercises in every phase (warmup, work, and cooldown) — there is no mobility or warmup exemption
+- When [FACTS] are provided, respect the ones that constrain selection — a push-to-pull balance fact governs the mix of pushing and pulling exercises you pick
 {% if explicitProgram %}- The user request fully specifies this session's program: {%s requestSchema %}
 - Map each requested movement to its closest exercise from the [WORK] pool — that is the session, do not redesign it, do not add alternative work exercises, and never rest muscles it trains
 - Pinned movements are mandatory: never swap one for a different exercise for recency or variety — the "prefer non-recent" rule does not apply to them; never substitute one on contraindication grounds either: the user asked for this program literally, so every requested movement stays exactly as requested and any caution belongs to the session copy, not to the selection{% else %}- Select {%d minWork %}-{%d maxWork %} distinct work exercises (band scaled to methodology density and session duration){% endif %}
@@ -41,6 +42,7 @@ Rules:
     cooldownExercises []model.Exercise,
     favoriteExercises []model.Exercise,
     recentExerciseIDs []string,
+    facts []model.Fact,
     skipWarmupCooldown bool,
 ) -%}
 Methodology: {%s methodology %}
@@ -59,6 +61,11 @@ Avoid these exercises: {%s strings.Join(avoidExercises, ", ") %}
 Favorites: {% for i, ex := range favoriteExercises %}{%s ex.ID %}{% if i < len(favoriteExercises)-1 %}, {% endif %}{% endfor %}
 {% endif %}
 
+{% if len(facts) > 0 %}
+[FACTS]
+{% for i, fact := range facts %}- [F{%d i %}] {%s fact.Content %}
+{% endfor %}
+{% endif %}
 {% code recentSet := make(map[string]bool, len(recentExerciseIDs)); for _, id := range recentExerciseIDs { recentSet[id] = true } %}
 {% if !skipWarmupCooldown %}
 [WARMUP] {%d len(warmupExercises) %} options
