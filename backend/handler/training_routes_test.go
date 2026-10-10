@@ -160,11 +160,8 @@ func TestTrainingGenerationRoutesCoverage(t *testing.T) {
 	expectStatus(t, status, http.StatusOK, body)
 
 	// SSE requests that fail before the generation DAG starts
-	// stream an error event. Requests that enter the DAG are not
-	// exercised over SSE here: the progress callback writes to the
-	// response stream from parallel DAG goroutines without
-	// synchronization (a pre-existing race in postTrainingSSE,
-	// reported in the PR body), so a -race run cannot drive it.
+	// stream an error event. Requests that enter the DAG are
+	// exercised by TestTrainingSSEGenerationStreamsProgress below.
 	sseAuth := map[string]string{"Accept": "text/event-stream"}
 	for k, v := range auth {
 		sseAuth[k] = v
@@ -179,6 +176,32 @@ func TestTrainingGenerationRoutesCoverage(t *testing.T) {
 	status, body = doReq(t, app, http.MethodPost, "/training",
 		[]byte(`{"duration":30}`), withTZ(sseAuth, "Not/AZone"))
 	expectStatus(t, status, http.StatusBadRequest, body)
+}
+
+// TestTrainingSSEGenerationStreamsProgress drives a successful
+// generation over SSE. The DAG reports progress from parallel node
+// goroutines, so this is the regression test for the data race on
+// the shared response stream writer in postTrainingSSE: under -race
+// it passes only when every stream write is serialized.
+func TestTrainingSSEGenerationStreamsProgress(t *testing.T) {
+	app := Init()
+	db := setupHandlerDB(t)
+	useHandlerFakeKnowledge(t)
+	userID := seedHandlerUser(t, db, "sse@example.com", "")
+	auth := withTZ(authHeader(t, db, userID), "UTC")
+	sseAuth := map[string]string{"Accept": "text/event-stream"}
+	for k, v := range auth {
+		sseAuth[k] = v
+	}
+
+	status, body := doReq(t, app, http.MethodPost, "/training", []byte(`{"duration":30}`), sseAuth)
+	expectStatus(t, status, http.StatusOK, body)
+	if !strings.Contains(string(body), "event: step") {
+		t.Fatalf("SSE generation body has no step events: %s", body)
+	}
+	if !strings.Contains(string(body), "event: done") {
+		t.Fatalf("SSE generation body has no done event: %s", body)
+	}
 }
 
 func TestTrainingFetchErrorRouteCoverage(t *testing.T) {
