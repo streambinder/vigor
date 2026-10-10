@@ -17,6 +17,14 @@ type Exercise struct {
 	Instructions pq.StringArray `gorm:"type:text[]" json:"instructions"`
 	Cues         pq.StringArray `gorm:"type:text[]" json:"cues"`
 
+	// Patterns lists the contraindication pattern slugs that cover this
+	// exercise even when its ID and name do not reveal them (e.g. a
+	// scapular pull-up is an overhead hang, a pike push-up is an overhead
+	// press). Slugs come from the constraint pattern table in the llm
+	// package. The contraindication matcher consults them with the ID
+	// and the name.
+	Patterns pq.StringArray `gorm:"type:text[]" json:"patterns,omitempty"`
+
 	// Difficulty is the exercise difficulty on a 0-100 scale.
 	// Higher values indicate more advanced exercises.
 	Difficulty int `gorm:"not null;default:0" json:"difficulty"`

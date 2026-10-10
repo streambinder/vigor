@@ -506,6 +506,12 @@ func TestMatchesContraindicatedPattern(t *testing.T) {
 		{"non-overhead pattern does not cover hang", model.Exercise{ID: "active-hang", Name: "Active Hang"}, []string{"high-impact jumping"}, false},
 		{"push-up does not match overhead press", model.Exercise{ID: "push-up", Name: "Push-Up"}, []string{"overhead press"}, false},
 		{"empty patterns never match", model.Exercise{ID: "active-hang", Name: "Active Hang"}, nil, false},
+		{"pressing pattern covers press by token prefix", model.Exercise{ID: "barbell-standing-overhead-press", Name: "Barbell Standing Overhead Press"}, []string{"overhead pressing"}, true},
+		{"push-up does not match overhead pressing", model.Exercise{ID: "push-up", Name: "Push-Up"}, []string{"overhead pressing"}, false},
+		{"scapular pull-up evades the hanging pattern without a tag", model.Exercise{ID: "scapular-pull-up", Name: "Scapular Pull-Up"}, []string{"overhead hanging"}, false},
+		{"hanging tag covers the scapular pull up", model.Exercise{ID: "scapular-pull-up", Name: "Scapular Pull-Up", Patterns: []string{"overhead-hanging"}}, []string{"overhead hanging"}, true},
+		{"pressing tag covers the pike push up", model.Exercise{ID: "elevated-pike-push-up", Name: "Elevated Pike Push-Up", Patterns: []string{"overhead-pressing"}}, []string{"overhead pressing"}, true},
+		{"unrelated tag does not match", model.Exercise{ID: "scapular-pull-up", Name: "Scapular Pull-Up", Patterns: []string{"overhead-hanging"}}, []string{"high-impact jumping"}, false},
 	}
 	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
