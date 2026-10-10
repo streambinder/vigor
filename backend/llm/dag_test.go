@@ -493,6 +493,83 @@ func TestFilterContraindicatedExercises(t *testing.T) {
 	})
 }
 
+func TestFilterContraindicatedActivities(t *testing.T) {
+	pools := []model.Exercise{
+		{ID: "barbell-standing-overhead-press", Name: "Barbell Standing Overhead Press"},
+		{ID: "active-hang", Name: "Active Hang"},
+		{ID: "push-up", Name: "Push-Up"},
+		{ID: "arm-circles", Name: "Arm Circles"},
+	}
+	act := func(id string) pipeline.ProgrammedActivity {
+		return pipeline.ProgrammedActivity{ExerciseID: id, Reps: 10}
+	}
+	acts := func(ids ...string) []pipeline.ProgrammedActivity {
+		var out []pipeline.ProgrammedActivity
+		for _, id := range ids {
+			out = append(out, act(id))
+		}
+		return out
+	}
+	load := func(ids ...string) pipeline.LoadProgramming {
+		return pipeline.LoadProgramming{Routines: []pipeline.ProgrammedRoutine{{
+			Type:   "work",
+			Blocks: []pipeline.ProgrammedBlock{{Activities: acts(ids...)}},
+		}}}
+	}
+	ids := func(l pipeline.LoadProgramming) []string {
+		var out []string
+		for _, r := range l.Routines {
+			for _, b := range r.Blocks {
+				for _, a := range b.Activities {
+					out = append(out, a.ExerciseID)
+				}
+			}
+		}
+		return out
+	}
+
+	t.Run("drops contraindicated activities from the program", func(t *testing.T) {
+		got := filterContraindicatedActivities(
+			load("push-up", "barbell-standing-overhead-press", "active-hang"),
+			[]string{"overhead press"}, nil, pools)
+		if !equalStrings(ids(got), []string{"push-up"}) {
+			t.Errorf("activities = %v, want [push-up]", ids(got))
+		}
+	})
+
+	t.Run("overhead pattern covers hang activities in the program", func(t *testing.T) {
+		got := filterContraindicatedActivities(
+			load("push-up", "active-hang"), []string{"overhead pressing"}, nil, pools)
+		if !equalStrings(ids(got), []string{"push-up"}) {
+			t.Errorf("activities = %v, want [push-up]", ids(got))
+		}
+	})
+
+	t.Run("drops avoid-listed activities from the program", func(t *testing.T) {
+		got := filterContraindicatedActivities(
+			load("push-up", "arm-circles"), nil, []string{"push-up"}, pools)
+		if !equalStrings(ids(got), []string{"arm-circles"}) {
+			t.Errorf("activities = %v, want [arm-circles]", ids(got))
+		}
+	})
+
+	t.Run("unknown exercise IDs are matched by ID text alone", func(t *testing.T) {
+		got := filterContraindicatedActivities(
+			load("push-up", "dead-hang"), []string{"overhead hanging"}, nil, pools)
+		if !equalStrings(ids(got), []string{"push-up"}) {
+			t.Errorf("activities = %v, want [push-up]", ids(got))
+		}
+	})
+
+	t.Run("empty inputs keep the program untouched", func(t *testing.T) {
+		got := filterContraindicatedActivities(
+			load("active-hang", "push-up"), nil, nil, pools)
+		if !equalStrings(ids(got), []string{"active-hang", "push-up"}) {
+			t.Errorf("activities = %v, want [active-hang push-up]", ids(got))
+		}
+	})
+}
+
 func TestMatchesContraindicatedPattern(t *testing.T) {
 	cases := []struct {
 		name     string
