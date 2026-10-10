@@ -23,6 +23,8 @@ class Exercise {
   final List<String> instructions;
   @JsonKey(name: 'cues', defaultValue: [])
   final List<String> cues;
+  @JsonKey(name: 'patterns')
+  final List<String>? patterns;
   @JsonKey(name: 'difficulty')
   final int difficulty;
   @JsonKey(name: 'is_mobility')
@@ -39,6 +41,7 @@ class Exercise {
     required this.reference,
     required this.instructions,
     required this.cues,
+    this.patterns,
     required this.difficulty,
     required this.isMobility,
     required this.mode,

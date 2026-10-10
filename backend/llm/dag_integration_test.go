@@ -515,6 +515,58 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 		}
 	})
 
+	// The 2026-10-10 production incident (trajectory 6b8b2337): a user with
+	// pubalgia and a dislocated left shoulder received a scapular pull-up,
+	// an overhead hang whose ID and name do not reveal the pattern. The
+	// pool below mirrors that gym: the core options hang from the bar, the
+	// back options hang or row, and a pike push-up presses vertically. The
+	// pattern tags on the pool exercises are what the knowledge base now
+	// carries, and no tagged exercise may reach the final training.
+	t.Run("tagged hangs and vertical presses stay out with shoulder and groin history", func(t *testing.T) {
+		hiit := integrationMethodology(t, "hiit",
+			"High-intensity interval training: near-maximal effort intervals alternating with structured recovery.",
+			model.ExerciseDensity{Min: 12, Max: 20})
+		pool := append(append([]model.Exercise{}, work...),
+			model.Exercise{ID: "scapular-pull-up", Name: "Scapular Pull-Up", Muscles: []string{"shoulders", "back"}, Equipment: []string{"pull-up bar"}, Mode: "reps", Difficulty: 45, Patterns: []string{"overhead-hanging"}},
+			model.Exercise{ID: "hanging-straight-leg-hip-raise", Name: "Hanging Straight Leg Hip Raise", Muscles: []string{"core"}, Equipment: []string{"pull-up bar"}, Mode: "reps", Difficulty: 55, Patterns: []string{"overhead-hanging"}},
+			model.Exercise{ID: "elevated-pike-push-up", Name: "Elevated Pike Push-Up", Muscles: []string{"shoulders", "triceps", "chest"}, Mode: "reps", Difficulty: 60, Patterns: []string{"overhead-pressing"}},
+			model.Exercise{ID: "hold-push-up", Name: "Hold Push-Up", Muscles: []string{"chest", "shoulders", "core"}, Mode: "duration", Difficulty: 45},
+			model.Exercise{ID: "elevated-push-up", Name: "Elevated Push Up", Muscles: []string{"chest", "shoulders", "core"}, Mode: "reps", Difficulty: 50},
+			model.Exercise{ID: "grinder", Name: "Grinder", Muscles: []string{"shoulders", "chest", "core"}, Mode: "either", Difficulty: 55},
+		)
+		req := baseRequest()
+		req.Methodologies = append(append([]model.Methodology{}, methodologies...), hiit)
+		req.Methodology = &hiit
+		req.Duration = 15
+		req.SkipWarmupCooldown = true
+		req.WorkExercises = pool
+		req.Profiles = []model.Profile{integrationProfile(t, nil,
+			[]string{"Pubalgia", "Dislocation of the left shoulder"})}
+		req.Muscles = []string{"chest", "back", "shoulders", "core"}
+		req.UserPrompt = "Short HIIT session for chest, back, shoulders and core."
+
+		training, _ := run(t, req)
+
+		patterns := []string{
+			"overhead pressing", "overhead hanging", "high-impact jumping",
+			"deep spinal flexion", "loaded rotation", "running impact",
+		}
+		byID := poolByID(pool, warmup, cooldown)
+		for _, routine := range training.Routines {
+			for _, block := range routine.Blocks {
+				for _, activity := range block.Activities {
+					ex := byID[activity.ExerciseID]
+					if matchesContraindicatedPattern(ex, patterns) {
+						t.Errorf("contraindicated exercise %q present in %s phase", ex.ID, routine.Type)
+					}
+				}
+			}
+		}
+		if got := len(workExerciseIDs(training)); got < 2 {
+			t.Errorf("distinct work exercises = %d, want at least 2 after the exclusions", got)
+		}
+	})
+
 	t.Run("calibration gap muscle is covered by construction", func(t *testing.T) {
 		req := baseRequest()
 		req.Methodology = &strength

@@ -2302,11 +2302,15 @@ func filterContraindicatedExercises(
 
 // matchesContraindicatedPattern reports whether a free-text contraindicated
 // pattern (e.g. "overhead press") covers the exercise, by substring or
-// token-subset match against its normalized ID and name. A pattern carrying
-// the "overhead" token also covers hang exercises (overhead traction under
-// the same shoulder contraindication, e.g. active-hang).
+// token-subset match against its normalized ID, name and knowledge-base
+// pattern tags. A pattern carrying the "overhead" token also covers hang
+// exercises (overhead traction under the same shoulder contraindication,
+// e.g. active-hang).
 func matchesContraindicatedPattern(ex model.Exercise, patterns []string) bool {
 	keys := []string{util.NormalizeIDText(ex.ID), util.NormalizeIDText(ex.Name)}
+	for _, tag := range ex.Patterns {
+		keys = append(keys, util.NormalizeIDText(tag))
+	}
 	normID := util.NormalizeIDText(ex.ID)
 	for _, pattern := range patterns {
 		norm := util.NormalizeIDText(pattern)
@@ -2329,17 +2333,37 @@ func matchesContraindicatedPattern(ex model.Exercise, patterns []string) bool {
 }
 
 // isTokenSubset reports whether every token of needle appears in haystack.
+// Tokens match when equal or when one is a prefix of the other, so the
+// pattern token "pressing" covers the exercise token "press" (and "hang"
+// covers "hanging"). Tokens shorter than four characters match only when
+// equal, so short tokens do not over-match.
 func isTokenSubset(needle, haystack []string) bool {
-	set := make(map[string]bool, len(haystack))
-	for _, t := range haystack {
-		set[t] = true
-	}
 	for _, t := range needle {
-		if !set[t] {
+		found := false
+		for _, h := range haystack {
+			if tokenMatches(t, h) {
+				found = true
+				break
+			}
+		}
+		if !found {
 			return false
 		}
 	}
 	return true
+}
+
+// tokenMatches reports whether two normalized tokens are the same token or
+// one is a prefix of the other. The prefix rule needs at least four
+// characters on both sides.
+func tokenMatches(a, b string) bool {
+	if a == b {
+		return true
+	}
+	if len(a) < 4 || len(b) < 4 {
+		return false
+	}
+	return strings.HasPrefix(a, b) || strings.HasPrefix(b, a)
 }
 
 // load token budgets: compact sessions on the left, an explicit program's full

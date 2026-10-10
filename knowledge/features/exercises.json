@@ -272,7 +272,8 @@
     "difficulty": 25,
     "is_mobility": true,
     "cues": [],
-    "mode": "duration"
+    "mode": "duration",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "adductor-machine",
@@ -328,7 +329,8 @@
     "difficulty": 60,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "air-bike",
@@ -602,7 +604,8 @@
       "Pull with one arm while the other assists",
       "Control the descent fully"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "archer-push-up",
@@ -692,7 +695,8 @@
     "difficulty": 30,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "arm-slingers-hanging-straight-legs",
@@ -720,7 +724,8 @@
     "difficulty": 45,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "arms-apart-circular-toe-touch",
@@ -872,7 +877,8 @@
     "difficulty": 5,
     "is_mobility": false,
     "cues": [],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "assisted-lying-calf-stretch",
@@ -1024,7 +1030,8 @@
       "Pull elbows down and back",
       "Control the descent"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "assisted-prone-hamstring",
@@ -1178,7 +1185,8 @@
       "Pull elbows down and back",
       "Control the descent fully"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "assisted-side-lying-adductor-stretch",
@@ -1535,7 +1543,8 @@
     "difficulty": 85,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "back-lever-half-lay",
@@ -1563,7 +1572,8 @@
     "difficulty": 80,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "back-lever-one-leg",
@@ -1591,7 +1601,8 @@
     "difficulty": 65,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "back-lever-one-leg-advanced",
@@ -1619,7 +1630,8 @@
     "difficulty": 70,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "back-lever-straddle",
@@ -1647,7 +1659,8 @@
     "difficulty": 75,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "back-pec-stretch",
@@ -1828,7 +1841,8 @@
       "Pull elbows down and back",
       "Control the descent fully"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "band-assisted-wheel-rollerout",
@@ -9719,7 +9733,8 @@
       "Pull elbows down and back",
       "Control the descent"
     ],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "biceps-pull-up",
@@ -9751,7 +9766,8 @@
       "Pull elbows down and back",
       "Control the descent"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "bicycle-crunch",
@@ -15907,7 +15923,8 @@
       "Pull your chest toward the bar",
       "Control the descent fully"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "chin-ups-narrow-parallel-grip",
@@ -15940,7 +15957,8 @@
       "Pull chest toward the bar",
       "Control the descent"
     ],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "circles-knee-stretch",
@@ -16079,7 +16097,8 @@
       "Pull chest toward the bar",
       "Control the descent"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "close-grip-push-up",
@@ -24650,7 +24669,8 @@
     "difficulty": 60,
     "is_mobility": false,
     "cues": [],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-pressing"]
   },
   {
     "id": "elevated-pike-to-planche",
@@ -24678,7 +24698,8 @@
     "difficulty": 70,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-pressing"]
   },
   {
     "id": "elevated-push-up",
@@ -24857,7 +24878,8 @@
       "Elbows at 45 degrees",
       "Touch chest to the floor"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-pressing"]
   },
   {
     "id": "ez-bar-lying-bent-arms-pullover",
@@ -25974,7 +25996,8 @@
     "difficulty": 90,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "front-lever-reps",
@@ -25993,7 +26016,8 @@
     "difficulty": 90,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "front-plank-with-twist",
@@ -26457,7 +26481,8 @@
     "difficulty": 80,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "half-lay-planche",
@@ -26622,7 +26647,8 @@
     "difficulty": 50,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-pressing"]
   },
   {
     "id": "handstand-push-up",
@@ -26655,7 +26681,8 @@
       "Lower until head touches the floor",
       "Press straight up"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-pressing"]
   },
   {
     "id": "hanging-leg-hip-raise",
@@ -26683,7 +26710,8 @@
     "difficulty": 45,
     "is_mobility": false,
     "cues": [],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "hanging-leg-raise",
@@ -26716,7 +26744,8 @@
       "Curl pelvis up at the top",
       "Control the descent — don't swing"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "hanging-oblique-knee-raise",
@@ -26745,7 +26774,8 @@
     "difficulty": 30,
     "is_mobility": false,
     "cues": [],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "hanging-pike",
@@ -26774,7 +26804,8 @@
     "difficulty": 45,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "hanging-straight-leg-hip-raise",
@@ -26802,7 +26833,8 @@
     "difficulty": 40,
     "is_mobility": false,
     "cues": [],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "hanging-straight-leg-raise",
@@ -26831,7 +26863,8 @@
     "difficulty": 45,
     "is_mobility": false,
     "cues": [],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "hanging-straight-twisting-leg-hip-raise",
@@ -26861,7 +26894,8 @@
     "difficulty": 40,
     "is_mobility": false,
     "cues": [],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "high-knee-against-wall",
@@ -29906,7 +29940,8 @@
     "difficulty": 100,
     "is_mobility": false,
     "cues": [],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "knee-touch-crunch",
@@ -30161,7 +30196,8 @@
       "Pull elbows down and back",
       "Control the descent"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "l-sit",
@@ -34287,7 +34323,8 @@
       "Pull chest toward the bar",
       "Control the descent"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "modified-hindu-push-up",
@@ -34438,7 +34475,8 @@
       "Transition hands over the bar at the top",
       "Lock out with straight arms above the bar"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "muscle-up-on-vertical-bar",
@@ -34468,7 +34506,8 @@
     "difficulty": 100,
     "is_mobility": false,
     "cues": [],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "neck-circles",
@@ -34889,7 +34928,8 @@
       "Pull chest toward the bar",
       "Control the descent"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "one-arm-dip",
@@ -35335,7 +35375,8 @@
     "difficulty": 20,
     "is_mobility": true,
     "cues": [],
-    "mode": "duration"
+    "mode": "duration",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "pause-crunch",
@@ -35617,7 +35658,8 @@
       "Lower the top of your head toward the floor",
       "Press straight up"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-pressing"]
   },
   {
     "id": "pike-to-cobra-push-up",
@@ -35653,7 +35695,8 @@
       "Elbows at 45 degrees",
       "Touch chest to the floor"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-pressing"]
   },
   {
     "id": "plyo-push-up",
@@ -36107,7 +36150,8 @@
       "Pull elbows down and back",
       "Control the descent"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "pull-up",
@@ -36147,7 +36191,8 @@
       "Pull elbows down and back",
       "Get chin over the bar"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "pump-push-up",
@@ -36186,7 +36231,8 @@
       "Pull chest toward the bar",
       "Control the descent"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "push-to-run",
@@ -36695,7 +36741,8 @@
       "Pull elbows down and back",
       "Control the descent"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "reclining-big-toe-pose-with-rope",
@@ -37087,7 +37134,8 @@
       "Pull elbows down and back",
       "Control the descent"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "reverse-hyper",
@@ -37536,7 +37584,8 @@
     "difficulty": 85,
     "is_mobility": false,
     "cues": [],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "ring-pike-push-up",
@@ -37569,7 +37618,8 @@
       "Elbows at 45 degrees",
       "Touch chest to the floor"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-pressing"]
   },
   {
     "id": "ring-rollout",
@@ -38318,7 +38368,8 @@
       "Pull elbows down and back",
       "Control the descent"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "scissor-jumps",
@@ -38868,7 +38919,8 @@
       "Pull elbows down and back",
       "Control the descent"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "shoulder-press-machine",
@@ -39817,7 +39869,8 @@
     "difficulty": 45,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "sled-45-leg-press-side-pov",
@@ -44451,7 +44504,8 @@
     "difficulty": 55,
     "is_mobility": false,
     "cues": [],
-    "mode": "either"
+    "mode": "either",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "tuck-crunch",
@@ -45072,7 +45126,8 @@
       "Pull elbows down toward your hips",
       "Get chin over the bar"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "wide-grip-rear-pull-up",
@@ -45106,7 +45161,8 @@
       "Pull elbows down and back",
       "Control the descent"
     ],
-    "mode": "reps"
+    "mode": "reps",
+    "patterns": ["overhead-hanging"]
   },
   {
     "id": "wide-hand-push-up",

@@ -12,9 +12,10 @@ import (
 // featureEntry is the identifier-bearing shape shared by the knowledge
 // feature catalogs. Files whose entries carry no id (facts) are skipped.
 type featureEntry struct {
-	ID      string   `json:"id"`
-	Name    string   `json:"name"`
-	Aliases []string `json:"aliases"`
+	ID       string   `json:"id"`
+	Name     string   `json:"name"`
+	Aliases  []string `json:"aliases"`
+	Patterns []string `json:"patterns"`
 }
 
 func loadFeatureEntries(t *testing.T, path string) []featureEntry {
@@ -94,6 +95,36 @@ func TestFeatureIdentifiersUnique(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// TestExercisePatternVocabulary guards the pattern tags the contraindication
+// matcher relies on: a tag outside the canonical pattern vocabulary never
+// matches a constraint and silently disables the safety net for that
+// exercise.
+func TestExercisePatternVocabulary(t *testing.T) {
+	canonical := map[string]bool{
+		"overhead-pressing": true, "overhead-hanging": true,
+		"high-impact-jumping": true, "deep-spinal-flexion": true,
+		"spinal-extension": true, "loaded-rotation": true,
+		"deep-knee-flexion": true, "kneeling-pressure": true,
+		"wrist-weight-bearing": true, "running-impact": true,
+		"neck-loading": true, "single-leg-balance": true,
+	}
+	entries := loadFeatureEntries(t, "features/exercises.json")
+	tagged := 0
+	for _, entry := range entries {
+		for _, p := range entry.Patterns {
+			if !canonical[p] {
+				t.Errorf("exercise %s carries unknown pattern %q", entry.ID, p)
+			}
+		}
+		if len(entry.Patterns) > 0 {
+			tagged++
+		}
+	}
+	if tagged == 0 {
+		t.Error("no exercise carries pattern tags, want the curated families tagged")
 	}
 }
 
