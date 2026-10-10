@@ -24,6 +24,7 @@ func TestNodeCreativeUserRoutineStructure(t *testing.T) {
 		"",
 		nil,
 		nil,
+		nil,
 		"",
 	)
 	if strings.Contains(out, "blocks}") {
@@ -49,6 +50,7 @@ func TestNodeCreativeUserBlockRestBeatsRoutineRest(t *testing.T) {
 		pipeline.HealthAssessment{},
 		nil,
 		"",
+		nil,
 		nil,
 		nil,
 		"",
@@ -100,6 +102,7 @@ func TestNodeCreativeUserCalibrationCoverage(t *testing.T) {
 			{Muscle: "back", ExerciseID: "inverted-row"},
 		},
 		nil,
+		nil,
 		"",
 	)
 	if !strings.Contains(out, "Calibration coverage (required, already in the program):") {
@@ -124,6 +127,7 @@ func TestNodeCreativeUserNoCalibrationCoverage(t *testing.T) {
 		pipeline.HealthAssessment{},
 		nil,
 		"",
+		nil,
 		nil,
 		nil,
 		"",
@@ -188,6 +192,7 @@ func TestNodeCreativeUserWorkStructureFacts(t *testing.T) {
 		"",
 		nil,
 		nil,
+		nil,
 		"",
 	)
 	if !strings.Contains(out, "19 work block(s), 19 round(s) counting block repeats, 5 distinct work movement(s)") {
@@ -222,6 +227,7 @@ func TestNodeCreativeUserWorkStructureCountsRepeats(t *testing.T) {
 		"",
 		nil,
 		nil,
+		nil,
 		"",
 	)
 	if !strings.Contains(out, "2 work block(s), 5 round(s) counting block repeats, 2 distinct work movement(s)") {
@@ -244,6 +250,7 @@ func TestNodeCreativeUserExplicitProgramCautions(t *testing.T) {
 		nil,
 		"",
 		nil,
+		nil,
 		[]string{"Pull-Up", "3/4 Sit-Up"},
 		"Pubalgia (2021), Lussazione della spalla sinistra (2020)",
 	)
@@ -258,5 +265,33 @@ func TestNodeCreativeUserExplicitProgramCautions(t *testing.T) {
 	}
 	if strings.Contains(out, "Contraindications:\nPatterns to avoid") {
 		t.Fatalf("standard contraindications block must yield to cautions: %q", out)
+	}
+}
+
+func TestNodeCreativeUserUncoveredMuscles(t *testing.T) {
+	out := NodeCreativeUser(
+		pipeline.Strategy{},
+		pipeline.MuscleTargeting{PrimaryMuscles: []string{"back", "core"}},
+		pipeline.ExerciseSelection{},
+		pipeline.HistoryAnalysis{},
+		pipeline.ConstraintExtraction{},
+		pipeline.LoadProgramming{},
+		pipeline.HealthAssessment{},
+		nil,
+		"",
+		nil,
+		[]string{"core"},
+		nil,
+		"",
+	)
+	if !strings.Contains(out, "Targeted muscles with no exercise in the final program: core") {
+		t.Fatalf("uncovered muscles section missing: %q", out)
+	}
+}
+
+func TestNodeCreativeSystemUncoveredMuscles(t *testing.T) {
+	out := NodeCreativeSystem("English")
+	if !strings.Contains(out, "never describe them as trained or as a focus of the session") {
+		t.Fatalf("uncovered muscles rule missing from system prompt: %q", out)
 	}
 }

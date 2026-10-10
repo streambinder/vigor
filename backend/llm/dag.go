@@ -322,6 +322,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	// muscle to rest. The persisted targeting step keeps the original.
 	copyTargeting := reconcileTargetingForCopy(targetingResult, injectedCoverage)
 	calibrationCoverage := sortedCalibrationCoverage(injectedCoverage)
+	uncoveredMuscles := uncoveredPrimaryMuscles(targetingResult, loadResult, workByID)
 
 	// layer 4: creative copy (language-native)
 	language := "English"
@@ -337,7 +338,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 
 	creativeResult, creativeStep, err := runCreativeNode(
 		language, strategyResult, copyTargeting, exerciseResult, historyResult, constraintResult,
-		loadResult, healthResult, derivedSummary, calibrationCoverage,
+		loadResult, healthResult, derivedSummary, calibrationCoverage, uncoveredMuscles,
 		cautionMovements, userConditionsText(req.Profiles),
 	)
 	nodes[pipeline.StepWriteCopy] = creativeStep
@@ -2453,13 +2454,14 @@ func runCreativeNode(
 	health pipeline.HealthAssessment,
 	derivedSummary string,
 	calibrationCoverage []pipeline.CalibrationCoverage,
+	uncoveredMuscles []string,
 	cautionMovements []string,
 	conditions string,
 ) (pipeline.CreativeCopy, model.ModelStep, error) {
 	p := model.LLMPrompt{
 		System: prompt.NodeCreativeSystem(language),
 		User: prompt.NodeCreativeUser(
-			strategy, targeting, exercises, history, constraints, loadResult, health, history.RecentNames, derivedSummary, calibrationCoverage, cautionMovements, conditions,
+			strategy, targeting, exercises, history, constraints, loadResult, health, history.RecentNames, derivedSummary, calibrationCoverage, uncoveredMuscles, cautionMovements, conditions,
 		),
 	}
 

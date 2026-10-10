@@ -324,3 +324,50 @@ func TestEnforceMuscleCoverage(t *testing.T) {
 		}
 	})
 }
+
+func TestUncoveredPrimaryMuscles(t *testing.T) {
+	workByID := map[string]model.Exercise{
+		"inverted-row": {ID: "inverted-row", Muscles: []string{"back", "arms"}},
+		"push-up":      {ID: "push-up", Muscles: []string{"chest", "triceps"}},
+		"dead-bug":     {ID: "dead-bug", Muscles: []string{"core"}},
+	}
+	loadWith := func(routineType string, ids ...string) pipeline.LoadProgramming {
+		var acts []pipeline.ProgrammedActivity
+		for _, id := range ids {
+			acts = append(acts, pipeline.ProgrammedActivity{ExerciseID: id, Reps: 10})
+		}
+		return pipeline.LoadProgramming{Routines: []pipeline.ProgrammedRoutine{{
+			Type:   routineType,
+			Blocks: []pipeline.ProgrammedBlock{{Activities: acts}},
+		}}}
+	}
+	targeting := pipeline.MuscleTargeting{PrimaryMuscles: []string{"back", "core", "chest"}}
+
+	t.Run("muscle without a work activity is uncovered", func(t *testing.T) {
+		got := uncoveredPrimaryMuscles(targeting, loadWith("work", "inverted-row", "push-up"), workByID)
+		if !equalStrings(got, []string{"core"}) {
+			t.Errorf("uncovered = %v, want [core]", got)
+		}
+	})
+
+	t.Run("all covered returns nil", func(t *testing.T) {
+		got := uncoveredPrimaryMuscles(targeting, loadWith("work", "inverted-row", "push-up", "dead-bug"), workByID)
+		if len(got) != 0 {
+			t.Errorf("uncovered = %v, want none", got)
+		}
+	})
+
+	t.Run("non-work routines do not cover", func(t *testing.T) {
+		got := uncoveredPrimaryMuscles(targeting, loadWith("warmup", "dead-bug"), workByID)
+		if !equalStrings(got, []string{"back", "core", "chest"}) {
+			t.Errorf("uncovered = %v, want [back core chest]", got)
+		}
+	})
+
+	t.Run("unknown exercises do not cover", func(t *testing.T) {
+		got := uncoveredPrimaryMuscles(targeting, loadWith("work", "mystery-move"), workByID)
+		if !equalStrings(got, []string{"back", "core", "chest"}) {
+			t.Errorf("uncovered = %v, want [back core chest]", got)
+		}
+	})
+}
