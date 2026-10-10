@@ -1,4 +1,4 @@
-package service
+package handler
 
 import (
 	"context"
@@ -12,8 +12,6 @@ import (
 	"strings"
 	"syscall"
 	"testing"
-
-	"go.uber.org/goleak"
 )
 
 // The service test binary runs the full generation stack (training DAG,
@@ -22,17 +20,17 @@ import (
 // the LLAMACPP tiers ports. The CI workflow exports the matching
 // environment variables for the whole go-test step, so llm provider
 // registration picks the stubs up at process start. All stub responses
-// close their connections so goleak stays quiet.
+// close their connections when the suite ends.
 const (
-	serviceEmbeddingStubAddr = "127.0.0.1:18741"
-	serviceChatStubAddr      = "127.0.0.1:18745"
-	serviceDecisionStubAddr  = "127.0.0.1:18746"
+	handlerEmbeddingStubAddr = "127.0.0.1:18741"
+	handlerChatStubAddr      = "127.0.0.1:18745"
+	handlerDecisionStubAddr  = "127.0.0.1:18746"
 )
 
 func TestMain(m *testing.M) {
-	embeddingStub := startServiceEmbeddingStub()
-	chatStub := startServiceChatStub()
-	decisionStub := startServiceDecisionStub()
+	embeddingStub := startHandlerEmbeddingStub()
+	chatStub := startHandlerChatStub()
+	decisionStub := startHandlerDecisionStub()
 
 	code := m.Run()
 
@@ -45,16 +43,12 @@ func TestMain(m *testing.M) {
 	if embeddingStub != nil {
 		embeddingStub.Close()
 	}
-	if code == 0 {
-		if err := goleak.Find(); err != nil {
-			fmt.Fprintf(os.Stderr, "goleak: %v\n", err)
-			code = 1
-		}
-	}
+	// no goleak check here: fiber keeps process-lifetime background
+	// goroutines (timestamp updater, limiter storage) by design
 	os.Exit(code)
 }
 
-// startServiceEmbeddingStub serves deterministic position-based vectors.
+// startHandlerEmbeddingStub serves deterministic position-based vectors.
 // Another package's test process may already own the port with an
 // identical stub; a bind failure is therefore not an error.
 // soReusePort is SO_REUSEPORT on Linux (the syscall package does
@@ -80,8 +74,8 @@ func listenStubPort(addr string) (net.Listener, error) {
 	return lc.Listen(context.Background(), "tcp", addr)
 }
 
-func startServiceEmbeddingStub() net.Listener {
-	listener, err := listenStubPort(serviceEmbeddingStubAddr)
+func startHandlerEmbeddingStub() net.Listener {
+	listener, err := listenStubPort(handlerEmbeddingStubAddr)
 	if err != nil {
 		return nil
 	}
@@ -107,10 +101,10 @@ func startServiceEmbeddingStub() net.Listener {
 	return listener
 }
 
-// startServiceChatStub answers chat completions for every generation
+// startHandlerChatStub answers chat completions for every generation
 // stage the service layer can reach, routing on the system prompt.
-func startServiceChatStub() net.Listener {
-	listener, err := listenStubPort(serviceChatStubAddr)
+func startHandlerChatStub() net.Listener {
+	listener, err := listenStubPort(handlerChatStubAddr)
 	if err != nil {
 		return nil
 	}
@@ -133,7 +127,7 @@ func startServiceChatStub() net.Listener {
 			all.WriteString(msg.Content)
 			all.WriteByte('\n')
 		}
-		content := serviceStubResponse(system, all.String())
+		content := handlerStubResponse(system, all.String())
 		resp, _ := json.Marshal(map[string]any{
 			"choices": []any{map[string]any{
 				"message":       map[string]any{"role": "assistant", "content": content},
@@ -149,12 +143,12 @@ func startServiceChatStub() net.Listener {
 	return listener
 }
 
-// startServiceDecisionStub answers TypeSafe decision-model calls with
+// startHandlerDecisionStub answers TypeSafe decision-model calls with
 // maximally decisive answers: every score question lands on its top
 // level, every choice picks its first declared option. The CI workflow
 // points DM_BASE_URL at this stub and sets a dummy OPENROUTER_API_KEY.
-func startServiceDecisionStub() net.Listener {
-	listener, err := listenStubPort(serviceDecisionStubAddr)
+func startHandlerDecisionStub() net.Listener {
+	listener, err := listenStubPort(handlerDecisionStubAddr)
 	if err != nil {
 		return nil
 	}
@@ -214,11 +208,11 @@ func startServiceDecisionStub() net.Listener {
 	return listener
 }
 
-// serviceStubResponse routes on the system prompt. Test prompts and
+// handlerStubResponse routes on the system prompt. Test prompts and
 // parameters can carry STUBFAIL markers that switch a stage to a
 // failure fixture, which exercises the callers' retry and validation
 // branches.
-func serviceStubResponse(system, all string) string {
+func handlerStubResponse(system, all string) string {
 	switch {
 	case strings.Contains(system, "revising an existing training session"):
 		// the seeded anchor training holds a single work routine, and
@@ -248,7 +242,7 @@ func serviceStubResponse(system, all string) string {
 		return `{"name":"Stub Session","description":"A stub generated session."}`
 	case strings.Contains(system, "expert yoga and mobility coach"):
 		text := "A gentle full-body mobility flow that opens the hips and spine."
-		for _, marker := range []string{"STUBFAIL:flow-few", "STUBFAIL:flow-under", "STUBFAIL:flow-over", "STUBFAIL:flow-unknown", "STUBFAIL:flow-badjson"} {
+		for _, marker := range []string{"STUBFAIL:flow-few", "STUBFAIL:flow-under", "STUBFAIL:flow-over", "STUBFAIL:flow-unknown"} {
 			if strings.Contains(all, marker) {
 				return text + " " + marker
 			}
@@ -256,8 +250,6 @@ func serviceStubResponse(system, all string) string {
 		return text
 	case strings.Contains(system, "mobility data extraction assistant"):
 		switch {
-		case strings.Contains(all, "STUBFAIL:flow-badjson"):
-			return `not json at all`
 		case strings.Contains(all, "STUBFAIL:flow-few"):
 			return `{"name":"Stub Flow","poses":[` +
 				`{"exercise_id":"cat-cow","duration":290,"rest":10},` +
