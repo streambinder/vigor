@@ -139,10 +139,47 @@ jobs:
         with:
           go-version-file: backend/go.mod
           cache-dependency-path: backend/go.sum
+      # The stub env points the provider registries at the in-process
+      # stub servers the test binaries start (embedding, chat and
+      # decision-model tiers on fixed loopback ports).
       - run: go test -race -timeout 300s ./...
         working-directory: backend
+        env:
+          INFINITY_TIERS: http://127.0.0.1:18741
+          LLAMACPP_REASONING_TIERS: http://127.0.0.1:18745
+          LLAMACPP_STRUCTURING_TIERS: http://127.0.0.1:18745
+          OPENROUTER_API_KEY: stub-key
+          DM_BASE_URL: http://127.0.0.1:18746
       - run: go test -race -timeout 300s ./...
         working-directory: knowledge
+        env:
+          INFINITY_TIERS: http://127.0.0.1:18741
+      - name: Coverage gate (backend)
+        working-directory: backend
+        env:
+          INFINITY_TIERS: http://127.0.0.1:18741
+          LLAMACPP_REASONING_TIERS: http://127.0.0.1:18745
+          LLAMACPP_STRUCTURING_TIERS: http://127.0.0.1:18745
+          OPENROUTER_API_KEY: stub-key
+          DM_BASE_URL: http://127.0.0.1:18746
+        # The gate reads the coverprofile of the same run: the
+        # streamed summary is unreliable here because application
+        # log lines contain the word "coverage:" and corrupt the
+        # value the go tool lifts from the test output stream.
+        run: |
+          go test -race -timeout 600s -cover -coverprofile=coverage.out ./... | tee coverage.txt
+          awk '$2 ~ /^[0-9]+$/ { file = $1; sub(/:[0-9]+\.[0-9]+,[0-9]+\.[0-9]+$/, "", file); pkg = file; sub(/\/[^\/]+$/, "", pkg); stmts[pkg] += $2; if ($3 > 0) covered[pkg] += $2 } END { for (pkg in stmts) { pct = 100 * covered[pkg] / stmts[pkg]; printf "%s %.1f%%\n", pkg, pct; if (pct < 90) { print "coverage below 90%:", pkg; bad = 1 } } exit bad }' coverage.out
+      - name: Coverage gate (knowledge)
+        working-directory: knowledge
+        env:
+          INFINITY_TIERS: http://127.0.0.1:18741
+        # The gate reads the coverprofile of the same run: the
+        # streamed summary is unreliable here because application
+        # log lines contain the word "coverage:" and corrupt the
+        # value the go tool lifts from the test output stream.
+        run: |
+          go test -race -timeout 600s -cover -coverprofile=coverage.out ./... | tee coverage.txt
+          awk '$2 ~ /^[0-9]+$/ { file = $1; sub(/:[0-9]+\.[0-9]+,[0-9]+\.[0-9]+$/, "", file); pkg = file; sub(/\/[^\/]+$/, "", pkg); stmts[pkg] += $2; if ($3 > 0) covered[pkg] += $2 } END { for (pkg in stmts) { pct = 100 * covered[pkg] / stmts[pkg]; printf "%s %.1f%%\n", pkg, pct; if (pct < 90) { print "coverage below 90%:", pkg; bad = 1 } } exit bad }' coverage.out
 
   go-generate:
     runs-on: ubuntu-latest
@@ -222,6 +259,31 @@ jobs:
           dart run build_runner build --delete-conflicting-outputs
           flutter analyze
 
+  flutter-test:
+    runs-on: ubuntu-latest
+    needs: changes
+    # workflow_dispatch bypasses the paths filter so the job can be
+    # verified on demand against an unchanged app tree
+    if: needs.changes.outputs.app == 'true' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+          flutter-version: 3.47.0
+      - run: |
+          cd app
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+          flutter test --coverage
+      # The app has no coverage gate yet: this step measures and
+      # reports line coverage from the lcov report only.
+      - name: Report app coverage
+        run: |
+          awk -F: '/^LF:/ { lf += $2 } /^LH:/ { lh += $2 } END { if (lf > 0) printf "app line coverage: %.1f%% (%d of %d lines)\n", 100 * lh / lf, lh, lf }' app/coverage/lcov.info
+
   app-apk:
     runs-on: ubuntu-latest
     environment: deploy
@@ -233,6 +295,7 @@ jobs:
         dart-build-runner,
         flutter-l10n,
         flutter-analyze,
+        flutter-test,
       ]
     if: |
       always() &&
@@ -242,6 +305,7 @@ jobs:
       needs.dart-build-runner.result == 'success' &&
       needs.flutter-l10n.result == 'success' &&
       needs.flutter-analyze.result == 'success' &&
+      needs.flutter-test.result == 'success' &&
       github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -295,6 +359,7 @@ jobs:
         dart-build-runner,
         flutter-l10n,
         flutter-analyze,
+        flutter-test,
       ]
     if: |
       always() &&
@@ -303,7 +368,8 @@ jobs:
       (needs.go-generate.result == 'success' || needs.go-generate.result == 'skipped') &&
       needs.dart-build-runner.result == 'success' &&
       needs.flutter-l10n.result == 'success' &&
-      needs.flutter-analyze.result == 'success'
+      needs.flutter-analyze.result == 'success' &&
+      (needs.flutter-test.result == 'success' || needs.flutter-test.result == 'skipped')
     permissions:
       contents: read
       packages: write
