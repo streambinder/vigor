@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sync"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -91,10 +92,20 @@ func postTrainingSSE(c *fiber.Ctx) error {
 	c.Set("Connection", "keep-alive")
 
 	c.Context().SetBodyStreamWriter(func(w *bufio.Writer) {
+		// the DAG reports progress from parallel node goroutines:
+		// every write to the response stream is serialized on mu, so
+		// a step event can never interleave with another write
+		var mu sync.Mutex
+		writeEvent := func(format string, args ...any) {
+			mu.Lock()
+			defer mu.Unlock()
+			fmt.Fprintf(w, format, args...)
+			w.Flush()
+		}
+
 		// progress callback writes SSE step events
 		onProgress := func(step pipeline.GenerationStep) {
-			fmt.Fprintf(w, "event: step\ndata: {\"step\":%q}\n\n", step)
-			w.Flush()
+			writeEvent("event: step\ndata: {\"step\":%q}\n\n", step)
 		}
 
 		training, genErr := service.GenerateTraining(
@@ -106,14 +117,12 @@ func postTrainingSSE(c *fiber.Ctx) error {
 
 		if genErr != nil {
 			errMsg := trainingErrorMessage(genErr)
-			fmt.Fprintf(w, "event: error\ndata: {\"error\":%q,\"code\":%q}\n\n", errMsg, trainingErrorCode(genErr))
-			w.Flush()
+			writeEvent("event: error\ndata: {\"error\":%q,\"code\":%q}\n\n", errMsg, trainingErrorCode(genErr))
 			return
 		}
 
 		data, _ := json.Marshal(dto.PostTrainingResponse(*training))
-		fmt.Fprintf(w, "event: done\ndata: %s\n\n", data)
-		w.Flush()
+		writeEvent("event: done\ndata: %s\n\n", data)
 	})
 
 	return nil
