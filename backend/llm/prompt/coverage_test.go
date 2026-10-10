@@ -139,10 +139,10 @@ func TestPromptTemplatesCoverage(t *testing.T) {
 		[]string{"quads"}, []string{"core"}, []string{"shoulders"},
 		[]string{"overhead press"}, []string{"burpee"},
 		exercises, exercises, exercises, exercises,
-		[]string{"squat"}, false)
+		[]string{"squat"}, []model.Fact{{Reference: "ref-1", Content: "fact content"}}, false)
 	outputs["exercisesUserSkip"] = NodeExercisesUser("strength",
 		[]string{"quads"}, nil, nil, nil, nil,
-		exercises, nil, nil, nil, nil, true)
+		exercises, nil, nil, nil, nil, nil, true)
 
 	outputs["loadSystemFull"] = NodeLoadSystem(methodology, true, true, false)
 	outputs["loadSystemExplicit"] = NodeLoadSystem(methodology, false, false, true)
@@ -197,15 +197,15 @@ func TestPromptTemplatesCoverage(t *testing.T) {
 	outputs["creativeUserFull"] = NodeCreativeUser(strategy, targeting, selection, history, constraints, load, health,
 		[]string{"Leg Day"}, "derived summary",
 		[]pipeline.CalibrationCoverage{{Muscle: "shoulders", ExerciseID: "press"}},
-		[]string{"overhead press"}, "knee pain")
+		[]string{"chest"}, []string{"overhead press"}, "knee pain")
 	outputs["creativeUserCautionNoConditions"] = NodeCreativeUser(strategy, targeting, selection, history, constraints, load, health,
-		nil, "", nil, []string{"overhead press"}, "")
+		nil, "", nil, nil, []string{"overhead press"}, "")
 	outputs["creativeUserBare"] = NodeCreativeUser(pipeline.Strategy{}, pipeline.MuscleTargeting{}, pipeline.ExerciseSelection{},
 		pipeline.HistoryAnalysis{}, pipeline.ConstraintExtraction{}, pipeline.LoadProgramming{},
-		pipeline.HealthAssessment{VolumeModifier: 1, IntensityModifier: 1}, nil, "", nil, nil, "")
+		pipeline.HealthAssessment{VolumeModifier: 1, IntensityModifier: 1}, nil, "", nil, nil, nil, "")
 	outputs["creativeUserAccommodationsOnly"] = NodeCreativeUser(strategy, targeting, selection, history,
 		pipeline.ConstraintExtraction{Accommodations: []string{"use a chair"}},
-		load, health, nil, "", nil, nil, "")
+		load, health, nil, "", nil, nil, nil, "")
 
 	outputs["readinessSystemLang"] = ReadinessSystem("italian")
 	outputs["readinessSystemDefault"] = ReadinessSystem("")
@@ -228,10 +228,10 @@ func TestPromptTemplatesCoverage(t *testing.T) {
 	StreamGenFlowStructuring(w, "reasoning")
 	StreamNodeConstraintsUser(w, []model.Profile{profile, plainProfile})
 	StreamNodeCreativeSystem(w, "italian")
-	StreamNodeCreativeUser(w, strategy, targeting, selection, history, constraints, load, health, []string{"Leg Day"}, "derived", []pipeline.CalibrationCoverage{{Muscle: "shoulders", ExerciseID: "press"}}, []string{"overhead press"}, "knee")
+	StreamNodeCreativeUser(w, strategy, targeting, selection, history, constraints, load, health, []string{"Leg Day"}, "derived", []pipeline.CalibrationCoverage{{Muscle: "shoulders", ExerciseID: "press"}}, []string{"chest"}, []string{"overhead press"}, "knee")
 	StreamNodeDeriveParamsUser(w, "text", []string{"a"})
 	StreamNodeExercisesSystem(w, false, 4, 8, true, "schema")
-	StreamNodeExercisesUser(w, "strength", []string{"quads"}, []string{"core"}, []string{"shoulders"}, []string{"overhead"}, []string{"burpee"}, exercises, exercises, exercises, exercises, []string{"squat"}, false)
+	StreamNodeExercisesUser(w, "strength", []string{"quads"}, []string{"core"}, []string{"shoulders"}, []string{"overhead"}, []string{"burpee"}, exercises, exercises, exercises, exercises, []string{"squat"}, facts, false)
 	StreamNodeHealthUser(w, snapshot)
 	StreamNodeHistoryUser(w, []model.Training{training}, fb, hr)
 	StreamNodeLoadSystem(w, methodology, true, true, false)
@@ -251,10 +251,10 @@ func TestPromptTemplatesCoverage(t *testing.T) {
 	WriteGenFlowStructuring(&buf, "reasoning")
 	WriteNodeConstraintsUser(&buf, []model.Profile{profile})
 	WriteNodeCreativeSystem(&buf, "english")
-	WriteNodeCreativeUser(&buf, strategy, targeting, selection, history, constraints, load, health, nil, "", nil, nil, "")
+	WriteNodeCreativeUser(&buf, strategy, targeting, selection, history, constraints, load, health, nil, "", nil, nil, nil, "")
 	WriteNodeDeriveParamsUser(&buf, "", nil)
 	WriteNodeExercisesSystem(&buf, true, 1, 2, false, "")
-	WriteNodeExercisesUser(&buf, "mobility", []string{"core"}, nil, nil, nil, nil, exercises, nil, nil, nil, nil, true)
+	WriteNodeExercisesUser(&buf, "mobility", []string{"core"}, nil, nil, nil, nil, exercises, nil, nil, nil, nil, nil, true)
 	WriteNodeHealthUser(&buf, nil)
 	WriteNodeHistoryUser(&buf, nil, nil, nil)
 	WriteNodeLoadSystem(&buf, methodology, false, false, true)

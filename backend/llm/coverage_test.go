@@ -403,7 +403,7 @@ func TestNodeRunners(t *testing.T) {
 		result, _, err := runExercisesNode(
 			pipeline.Strategy{Methodology: "strength"}, pipeline.MuscleTargeting{},
 			pipeline.ConstraintExtraction{}, pipeline.HistoryAnalysis{},
-			nil, nil, nil, nil, nil, methodology, true, 45, false, "",
+			nil, nil, nil, nil, nil, nil, methodology, true, 45, false, "",
 		)
 		if err != nil || len(result.Exercises) != 1 || result.Exercises[0].ExerciseID != "squat" {
 			t.Errorf("runExercisesNode = %+v, %v", result, err)
@@ -414,7 +414,7 @@ func TestNodeRunners(t *testing.T) {
 	})
 	t.Run("exercises bad json", func(t *testing.T) {
 		installProviders(t, staticLLM("junk"), nil)
-		if _, _, err := runExercisesNode(pipeline.Strategy{}, pipeline.MuscleTargeting{}, pipeline.ConstraintExtraction{}, pipeline.HistoryAnalysis{}, nil, nil, nil, nil, nil, methodology, false, 45, false, ""); err == nil {
+		if _, _, err := runExercisesNode(pipeline.Strategy{}, pipeline.MuscleTargeting{}, pipeline.ConstraintExtraction{}, pipeline.HistoryAnalysis{}, nil, nil, nil, nil, nil, nil, methodology, false, 45, false, ""); err == nil {
 			t.Error("bad JSON must fail the exercises node")
 		}
 	})
@@ -442,14 +442,14 @@ func TestNodeRunners(t *testing.T) {
 		installProviders(t, staticLLM(`{"name":"Iron Dawn","description":"desc"}`), nil)
 		result, _, err := runCreativeNode("English", pipeline.Strategy{}, pipeline.MuscleTargeting{},
 			pipeline.ExerciseSelection{}, pipeline.HistoryAnalysis{}, pipeline.ConstraintExtraction{},
-			pipeline.LoadProgramming{}, pipeline.HealthAssessment{}, "", nil, nil, "")
+			pipeline.LoadProgramming{}, pipeline.HealthAssessment{}, "", nil, nil, nil, "")
 		if err != nil || result.Name != "Iron Dawn" {
 			t.Errorf("runCreativeNode = %+v, %v", result, err)
 		}
 	})
 	t.Run("creative bad json", func(t *testing.T) {
 		installProviders(t, staticLLM("junk"), nil)
-		if _, _, err := runCreativeNode("English", pipeline.Strategy{}, pipeline.MuscleTargeting{}, pipeline.ExerciseSelection{}, pipeline.HistoryAnalysis{}, pipeline.ConstraintExtraction{}, pipeline.LoadProgramming{}, pipeline.HealthAssessment{}, "", nil, nil, ""); err == nil {
+		if _, _, err := runCreativeNode("English", pipeline.Strategy{}, pipeline.MuscleTargeting{}, pipeline.ExerciseSelection{}, pipeline.HistoryAnalysis{}, pipeline.ConstraintExtraction{}, pipeline.LoadProgramming{}, pipeline.HealthAssessment{}, "", nil, nil, nil, ""); err == nil {
 			t.Error("bad JSON must fail the creative node")
 		}
 	})
