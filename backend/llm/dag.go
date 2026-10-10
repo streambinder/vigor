@@ -230,7 +230,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	exerciseResult, exerciseStep, err := runExercisesNode(
 		strategyResult, targetingResult, selectionConstraints, historyResult,
 		req.WorkExercises, req.WarmupExercises, req.CooldownExercises,
-		req.FavoriteExercises, req.RecentExerciseIDs,
+		req.FavoriteExercises, req.RecentExerciseIDs, req.Facts,
 		resolvedMethodology, req.SkipWarmupCooldown, req.Duration,
 		explicitProgram, derivedSummary,
 	)
@@ -2026,6 +2026,7 @@ func runExercisesNode(
 	workExercises, warmupExercises, cooldownExercises []model.Exercise,
 	favoriteExercises []model.Exercise,
 	recentExerciseIDs []string,
+	facts []model.Fact,
 	methodology *model.Methodology,
 	skipWarmupCooldown bool,
 	duration int,
@@ -2040,7 +2041,7 @@ func runExercisesNode(
 			targeting.PrimaryMuscles, targeting.SecondaryMuscles, targeting.AvoidMuscles,
 			constraints.ContraindicatedPatterns, history.AvoidExercises,
 			workExercises, warmupExercises, cooldownExercises,
-			favoriteExercises, recentExerciseIDs,
+			favoriteExercises, recentExerciseIDs, facts,
 			skipWarmupCooldown,
 		),
 	}
