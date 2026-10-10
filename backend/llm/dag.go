@@ -317,6 +317,15 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	// activity so calibration completes by construction.
 	loadResult = enforceMuscleCoverage(loadResult, injectedCoverage, workByID, exerciseModes)
 
+	// last safety net: the load node output is what gets persisted, so
+	// re-check its activities against the same patterns and avoid-list
+	// that guarded the selection, before the copy node sees the program.
+	// Explicit programs run without patterns (see above): only the
+	// history avoid-list still drops activities there.
+	loadResult = filterContraindicatedActivities(loadResult,
+		effectivePatterns, historyResult.AvoidExercises,
+		req.WorkExercises, req.WarmupExercises, req.CooldownExercises)
+
 	// copy-facing targeting: a muscle with forced calibration coverage is
 	// trained by construction, so it must not reach the copy node as a
 	// muscle to rest. The persisted targeting step keeps the original.
@@ -2300,6 +2309,60 @@ func filterContraindicatedExercises(
 	}
 	selection.Exercises = kept
 	return selection
+}
+
+// filterContraindicatedActivities deterministically drops any programmed
+// activity in any routine whose exercise is on the history avoid-list or
+// matches a contraindicated pattern. It is the last safety net before the
+// training is assembled: the selection filter guards the selection, this
+// one guards the load node output, so an exercise that reaches the program
+// through any later stage is checked again before it is persisted and
+// before the copy node describes the session. Unknown exercise IDs are
+// matched by ID text alone.
+func filterContraindicatedActivities(
+	load pipeline.LoadProgramming,
+	contraindicatedPatterns []string,
+	avoidExercises []string,
+	pools ...[]model.Exercise,
+) pipeline.LoadProgramming {
+	if len(contraindicatedPatterns) == 0 && len(avoidExercises) == 0 {
+		return load
+	}
+	byID := make(map[string]model.Exercise)
+	for _, pool := range pools {
+		for _, ex := range pool {
+			byID[ex.ID] = ex
+		}
+	}
+	avoid := make(map[string]bool, len(avoidExercises))
+	for _, id := range avoidExercises {
+		avoid[id] = true
+	}
+	for i := range load.Routines {
+		for j := range load.Routines[i].Blocks {
+			acts := load.Routines[i].Blocks[j].Activities
+			kept := acts[:0]
+			for _, act := range acts {
+				if avoid[act.ExerciseID] {
+					log.Info().Str("exercise", act.ExerciseID).
+						Msg("program node: dropped avoid-listed activity")
+					continue
+				}
+				ex, ok := byID[act.ExerciseID]
+				if !ok {
+					ex = model.Exercise{ID: act.ExerciseID, Name: act.ExerciseID}
+				}
+				if matchesContraindicatedPattern(ex, contraindicatedPatterns) {
+					log.Info().Str("exercise", act.ExerciseID).
+						Msg("program node: dropped contraindicated activity")
+					continue
+				}
+				kept = append(kept, act)
+			}
+			load.Routines[i].Blocks[j].Activities = kept
+		}
+	}
+	return load
 }
 
 // matchesContraindicatedPattern reports whether a free-text contraindicated
