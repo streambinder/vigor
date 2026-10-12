@@ -43,6 +43,6 @@ ENV POSTGRES_USER=user
 COPY --from=data-builder /build/init.sql /docker-entrypoint-initdb.d/
 RUN echo "CREATE EXTENSION IF NOT EXISTS vector;" > /docker-entrypoint-initdb.d/00-init-pgvector.sql
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD pg_isready -U user -d db || exit 1
+  CMD ["pg_isready", "-U", "user", "-d", "db"]
 EXPOSE 5432
 USER postgres
