@@ -574,3 +574,68 @@ jobs:
           cache-to: type=gha,scope=cockpit,mode=max
           tags: ${{ steps.tags-cockpit.outputs.tags }}
           push: true
+  deploy:
+    name: deploy
+    needs: [app-docker, knowledge-docker, backend-docker, cockpit-docker]
+    if: |
+      always() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/master' &&
+      (needs.app-docker.result == 'success' ||
+       needs.knowledge-docker.result == 'success' ||
+       needs.backend-docker.result == 'success' ||
+       needs.cockpit-docker.result == 'success') &&
+      needs.app-docker.result != 'failure' &&
+      needs.knowledge-docker.result != 'failure' &&
+      needs.backend-docker.result != 'failure' &&
+      needs.cockpit-docker.result != 'failure' &&
+      needs.app-docker.result != 'cancelled' &&
+      needs.knowledge-docker.result != 'cancelled' &&
+      needs.backend-docker.result != 'cancelled' &&
+      needs.cockpit-docker.result != 'cancelled'
+    runs-on: [self-hosted, lobster]
+    environment: production
+    timeout-minutes: 15
+    env:
+      DOCKER_HOST: unix:///run/podman/podman.sock
+      APP: ${{ needs.app-docker.result }}
+      KNOWLEDGE: ${{ needs.knowledge-docker.result }}
+      BACKEND: ${{ needs.backend-docker.result }}
+      COCKPIT: ${{ needs.cockpit-docker.result }}
+    steps:
+      - name: Pull the images and restart the updated services
+        run: |
+          docker run --rm --privileged --pid=host \
+            -e APP -e KNOWLEDGE -e BACKEND -e COCKPIT \
+            docker.io/library/alpine:3.22@sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8 \
+            nsenter -t 1 -m -u -i -n -p -- sh -euc '
+              if [ "$KNOWLEDGE" = "success" ]; then
+                podman pull ghcr.io/${{ github.repository }}/knowledge:latest
+                systemctl restart vigor-knowledge.service
+              fi
+              if [ "$BACKEND" = "success" ]; then
+                podman pull ghcr.io/${{ github.repository }}/backend:latest
+                systemctl restart vigor-backend.service
+              fi
+              if [ "$COCKPIT" = "success" ]; then
+                podman pull ghcr.io/${{ github.repository }}/cockpit:latest
+                systemctl restart vigor-cockpit.service
+              fi
+              if [ "$APP" = "success" ]; then
+                podman pull ghcr.io/${{ github.repository }}/app:latest
+                systemctl restart vigor-app.service
+              fi
+            '
+      - name: Check vigor answers
+        run: |
+          docker run --rm --privileged --pid=host \
+            docker.io/library/alpine:3.22@sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8 \
+            nsenter -t 1 -m -u -i -n -p -- sh -euc '
+              for attempt in $(seq 1 30); do
+                if curl -fsS -o /dev/null http://127.0.0.1:65534/health; then
+                  exit 0
+                fi
+                sleep 2
+              done
+              exit 1
+            '
