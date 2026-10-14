@@ -1,6 +1,8 @@
 package it.davidepucci.vigor
 
-import android.app.*
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -16,14 +18,15 @@ class TimerNotificationService {
 
         fun createNotificationChannel(context: Context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel = NotificationChannel(
-                    CHANNEL_ID,
-                    CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_HIGH
-                ).apply {
-                    description = "Live training timer updates"
-                    setShowBadge(false)
-                }
+                val channel =
+                    NotificationChannel(
+                        CHANNEL_ID,
+                        CHANNEL_NAME,
+                        NotificationManager.IMPORTANCE_HIGH,
+                    ).apply {
+                        description = "Live training timer updates"
+                        setShowBadge(false)
+                    }
 
                 val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 manager.createNotificationChannel(channel)
@@ -40,43 +43,49 @@ class TimerNotificationService {
             progress: Double,
             stopLabel: String,
             completeLabel: String,
-            isPaused: Boolean = false
+            isPaused: Boolean = false,
         ) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return
 
-            val intent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
-            val pendingIntent = PendingIntent.getActivity(
-                context,
-                0,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE
-            )
+            val intent =
+                Intent(context, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                }
+            val pendingIntent =
+                PendingIntent.getActivity(
+                    context,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_IMMUTABLE,
+                )
 
             // stop action
-            val stopIntent = Intent(context, MainActivity::class.java).apply {
-                action = "TIMER_STOP"
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
-            val stopPendingIntent = PendingIntent.getActivity(
-                context,
-                1,
-                stopIntent,
-                PendingIntent.FLAG_IMMUTABLE
-            )
+            val stopIntent =
+                Intent(context, MainActivity::class.java).apply {
+                    action = "TIMER_STOP"
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                }
+            val stopPendingIntent =
+                PendingIntent.getActivity(
+                    context,
+                    1,
+                    stopIntent,
+                    PendingIntent.FLAG_IMMUTABLE,
+                )
 
             // complete action
-            val completeIntent = Intent(context, MainActivity::class.java).apply {
-                action = "TIMER_COMPLETE"
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
-            val completePendingIntent = PendingIntent.getActivity(
-                context,
-                2,
-                completeIntent,
-                PendingIntent.FLAG_IMMUTABLE
-            )
+            val completeIntent =
+                Intent(context, MainActivity::class.java).apply {
+                    action = "TIMER_COMPLETE"
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                }
+            val completePendingIntent =
+                PendingIntent.getActivity(
+                    context,
+                    2,
+                    completeIntent,
+                    PendingIntent.FLAG_IMMUTABLE,
+                )
 
             // format total elapsed time for chip
             val totalMinutes = totalElapsedSeconds / 60
@@ -89,24 +98,27 @@ class TimerNotificationService {
             val remainingTimeText = String.format("%02d:%02d", remainingMinutes, remainingSeconds)
 
             // build content text with countdown if duration-based
-            val fullContentText = if (isDurationBased) {
-                "$contentText · $remainingTimeText"
-            } else {
-                contentText
-            }
+            val fullContentText =
+                if (isDurationBased) {
+                    "$contentText · $remainingTimeText"
+                } else {
+                    contentText
+                }
 
-            val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setContentTitle(trainingName)
-                .setContentText(fullContentText)
-                .setSmallIcon(android.R.drawable.ic_media_play)
-                .setContentIntent(pendingIntent)
-                .setOngoing(true)
-                .setCategory(NotificationCompat.CATEGORY_WORKOUT)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setOnlyAlertOnce(true)
-                .setAutoCancel(false)
-                .addAction(android.R.drawable.ic_delete, stopLabel, stopPendingIntent)
-                .addAction(android.R.drawable.ic_menu_save, completeLabel, completePendingIntent)
+            val builder =
+                NotificationCompat
+                    .Builder(context, CHANNEL_ID)
+                    .setContentTitle(trainingName)
+                    .setContentText(fullContentText)
+                    .setSmallIcon(android.R.drawable.ic_media_play)
+                    .setContentIntent(pendingIntent)
+                    .setOngoing(true)
+                    .setCategory(NotificationCompat.CATEGORY_WORKOUT)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setOnlyAlertOnce(true)
+                    .setAutoCancel(false)
+                    .addAction(android.R.drawable.ic_delete, stopLabel, stopPendingIntent)
+                    .addAction(android.R.drawable.ic_menu_save, completeLabel, completePendingIntent)
 
             // android 16+ uses live updates with chip showing total elapsed time
             if (Build.VERSION.SDK_INT >= 36) {

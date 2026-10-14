@@ -25,6 +25,7 @@ class MainActivity : FlutterFragmentActivity() {
             "TIMER_STOP" -> {
                 methodChannel?.invokeMethod("onTimerStop", null)
             }
+
             "TIMER_COMPLETE" -> {
                 methodChannel?.invokeMethod("onTimerComplete", null)
             }
@@ -58,25 +59,31 @@ class MainActivity : FlutterFragmentActivity() {
                         progress,
                         stopLabel,
                         completeLabel,
-                        isPaused
+                        isPaused,
                     )
                     result.success(null)
                 }
+
                 "stopTimer" -> {
                     // notify flutter to stop timer
                     methodChannel?.invokeMethod("onTimerStop", null)
                     result.success(null)
                 }
+
                 "completeTimer" -> {
                     // notify flutter to complete timer
                     methodChannel?.invokeMethod("onTimerComplete", null)
                     result.success(null)
                 }
+
                 "cancelTimerNotification" -> {
                     TimerNotificationService.cancelNotification(this)
                     result.success(null)
                 }
-                else -> result.notImplemented()
+
+                else -> {
+                    result.notImplemented()
+                }
             }
         }
     }
