@@ -73,7 +73,7 @@ func (c *serviceFakeDBConn) ExecContext(context.Context, string, []driver.NamedV
 
 func (c *serviceFakeDBConn) QueryContext(_ context.Context, query string, _ []driver.NamedValue) (driver.Rows, error) {
 	lower := strings.ToLower(query)
-	now := time.Date(2026, 10, 9, 12, 0, 0, 0, time.UTC)
+	now := time.Now().UTC()
 	switch {
 	case strings.Contains(lower, "count(distinct"):
 		columns := []string{"muscle", "count"}
@@ -85,7 +85,7 @@ func (c *serviceFakeDBConn) QueryContext(_ context.Context, query string, _ []dr
 	case strings.Contains(lower, "proficiencies"):
 		columns := []string{"muscle", "max_value", "last_seen_at"}
 		return &serviceFakeDBRows{columns: columns, values: [][]driver.Value{
-			{"quads", 60.0, now},
+			{"quads", 60.0, now.Add(-24 * time.Hour)},
 			{"chest", 30.0, now.Add(-90 * 24 * time.Hour)},
 		}}, nil
 	case strings.Contains(lower, "count(*)"):
