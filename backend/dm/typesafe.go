@@ -14,7 +14,7 @@ import (
 
 const (
 	defaultBaseURL = "https://openrouter.ai/api"
-	defaultModel   = "typesafe/jev-1.13"
+	defaultModel   = "typesafe/jev-1.14"
 	defaultTimeout = 5 * time.Second
 )
 
@@ -27,7 +27,7 @@ type TypeSafeConfig struct {
 	// OpenRouter, which serves the TypeSafe contract behind that root;
 	// point it at https://api.typesafe.ai to call TypeSafe directly.
 	BaseURL string
-	// Model defaults to typesafe/jev-1.13. Pin a version; the -latest
+	// Model defaults to typesafe/jev-1.14. Pin a version; the -latest
 	// alias moves under your feet.
 	Model string
 	// PricePerMInput is the USD price per million input tokens, used

@@ -34,7 +34,7 @@ func testQuestions() []Question {
 }
 
 const testResponse = `{
-	"model": "typesafe/jev-1.13",
+	"model": "typesafe/jev-1.14",
 	"answers": {
 		"urgent": {"type": "noul", "noul": 0.92},
 		"team": {"type": "choice", "choice": "technical", "confidence": 0.8, "probabilities": {"billing": 0.1, "technical": 0.8, "sales": 0.1}},
@@ -80,8 +80,8 @@ func TestDecide(t *testing.T) {
 	if gotPath != "/v1/systemone" {
 		t.Errorf("path = %q, want /v1/systemone", gotPath)
 	}
-	if gotReq.Model != "typesafe/jev-1.13" {
-		t.Errorf("request model = %q, want typesafe/jev-1.13", gotReq.Model)
+	if gotReq.Model != "typesafe/jev-1.14" {
+		t.Errorf("request model = %q, want typesafe/jev-1.14", gotReq.Model)
 	}
 	if gotReq.State != "Checkout is failing for everyone." {
 		t.Errorf("request state = %q", gotReq.State)
@@ -109,7 +109,7 @@ func TestDecide(t *testing.T) {
 		t.Errorf("score criteria = %v", scoreCriteria)
 	}
 
-	if res.Model != "typesafe/jev-1.13" {
+	if res.Model != "typesafe/jev-1.14" {
 		t.Errorf("result model = %q", res.Model)
 	}
 	if got := res.Answers["urgent"].Noul; math.Abs(got-0.92) > 1e-9 {
