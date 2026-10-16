@@ -254,6 +254,15 @@ class _HomePageState extends State<HomePage> with AppEventSubscriber<HomePage>, 
       if (ServiceLocator.readinessDayKey() != day) return;
       final locator = context.read<ServiceLocator>();
       if (locator.readinessNotifier.value != null) return;
+      // Probing the backend alone can never converge here: the startup
+      // sync already ran and today's record was not in Health Connect
+      // yet (Fitbit exports the night with a long lag). Re-read the
+      // device first, then refresh the tiles and probe again.
+      if (locator.healthDataService != null) {
+        await locator.healthDataService!.syncToBackend();
+        if (!mounted) return;
+        await locator.refreshHealthDaily();
+      }
       final ready = await locator.refreshReadiness();
       if (!ready) _scheduleReadinessRetry();
     });
