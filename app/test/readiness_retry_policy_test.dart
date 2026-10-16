@@ -21,6 +21,22 @@ void main() {
     expect(policy.nextDelay(), isNull);
   });
 
+  test('default window spans about 21 minutes so a late export can land', () {
+    final policy = ReadinessRetryPolicy();
+
+    var total = Duration.zero;
+    var attempts = 0;
+    while (true) {
+      final delay = policy.nextDelay();
+      if (delay == null) break;
+      total += delay;
+      attempts++;
+    }
+
+    expect(attempts, 7);
+    expect(total, const Duration(seconds: 1270));
+  });
+
   test('reset restarts the delay sequence', () {
     final policy = ReadinessRetryPolicy(maxAttempts: 1, baseDelay: const Duration(seconds: 5));
 
