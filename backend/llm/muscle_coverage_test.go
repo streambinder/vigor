@@ -143,6 +143,101 @@ func TestEnsureMuscleCoverage(t *testing.T) {
 	})
 }
 
+func TestEnsureTargetedMuscleCoverage(t *testing.T) {
+	candidates := []model.Exercise{
+		{ID: "push-up", Muscles: []string{"chest"}},
+		{ID: "back-lever", Muscles: []string{"back"}, Patterns: []string{"overhead-hanging"}},
+		{ID: "bodyweight-row", Muscles: []string{"back"}},
+		{ID: "dead-bug", Muscles: []string{"core"}},
+	}
+	targeting := pipeline.MuscleTargeting{PrimaryMuscles: []string{"chest", "back", "core"}}
+
+	t.Run("requested primary muscle filtered out gets a substitute", func(t *testing.T) {
+		// the selection as the contraindication filter left it: the only
+		// back pick was a hanging lever, so back has no exercise left
+		selection := pipeline.ExerciseSelection{
+			Exercises: []pipeline.SelectedExercise{{ExerciseID: "push-up", Phase: "work"}},
+		}
+		got, injected := ensureTargetedMuscleCoverage(
+			selection, targeting, []string{"chest", "back", "core"},
+			candidates, nil, false, []string{"overhead-hanging"}, nil,
+		)
+		if injected["back"] != "bodyweight-row" {
+			t.Fatalf("injected = %v, want back -> bodyweight-row", injected)
+		}
+		if injected["core"] != "dead-bug" {
+			t.Fatalf("injected = %v, want core -> dead-bug", injected)
+		}
+		last := got.Exercises[len(got.Exercises)-1]
+		if last.Phase != "work" {
+			t.Errorf("substitute phase = %s, want work", last.Phase)
+		}
+		if last.Rationale != "deterministic coverage for requested muscle core" {
+			t.Errorf("substitute rationale = %q", last.Rationale)
+		}
+	})
+
+	t.Run("covered requested muscle is left alone", func(t *testing.T) {
+		selection := pipeline.ExerciseSelection{
+			Exercises: []pipeline.SelectedExercise{
+				{ExerciseID: "push-up", Phase: "work"},
+				{ExerciseID: "bodyweight-row", Phase: "work"},
+			},
+		}
+		_, injected := ensureTargetedMuscleCoverage(
+			selection, targeting, []string{"chest", "back"},
+			candidates, nil, false, []string{"overhead-hanging"}, nil,
+		)
+		if len(injected) != 0 {
+			t.Errorf("injected = %v, want none", injected)
+		}
+	})
+
+	t.Run("primary muscle the user did not request is not forced", func(t *testing.T) {
+		selection := pipeline.ExerciseSelection{
+			Exercises: []pipeline.SelectedExercise{{ExerciseID: "push-up", Phase: "work"}},
+		}
+		_, injected := ensureTargetedMuscleCoverage(
+			selection, targeting, []string{"chest"},
+			candidates, nil, false, []string{"overhead-hanging"}, nil,
+		)
+		if len(injected) != 0 {
+			t.Errorf("injected = %v, want none", injected)
+		}
+	})
+
+	t.Run("no safe candidate leaves the muscle uncovered", func(t *testing.T) {
+		selection := pipeline.ExerciseSelection{
+			Exercises: []pipeline.SelectedExercise{{ExerciseID: "push-up", Phase: "work"}},
+		}
+		_, injected := ensureTargetedMuscleCoverage(
+			selection, targeting, []string{"chest", "back"},
+			candidates, nil, false, []string{"overhead-hanging"}, []string{"bodyweight-row"},
+		)
+		if len(injected) != 0 {
+			t.Errorf("injected = %v, want none", injected)
+		}
+	})
+
+	t.Run("explicit program and free generation are untouched", func(t *testing.T) {
+		selection := pipeline.ExerciseSelection{
+			Exercises: []pipeline.SelectedExercise{{ExerciseID: "push-up", Phase: "work"}},
+		}
+		if _, injected := ensureTargetedMuscleCoverage(
+			selection, targeting, []string{"chest", "back"},
+			candidates, nil, true, []string{"overhead-hanging"}, nil,
+		); len(injected) != 0 {
+			t.Errorf("explicit program injected = %v, want none", injected)
+		}
+		if _, injected := ensureTargetedMuscleCoverage(
+			selection, targeting, nil,
+			candidates, nil, false, []string{"overhead-hanging"}, nil,
+		); len(injected) != 0 {
+			t.Errorf("no-request injected = %v, want none", injected)
+		}
+	})
+}
+
 func TestReconcileTargetingForCopy(t *testing.T) {
 	t.Run("injected muscle is removed from avoid, others untouched", func(t *testing.T) {
 		targeting := pipeline.MuscleTargeting{
