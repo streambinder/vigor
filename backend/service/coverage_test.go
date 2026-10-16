@@ -70,7 +70,7 @@ func setupCoverageDB(t *testing.T) *gorm.DB {
 		`CREATE TABLE gyms (id TEXT PRIMARY KEY, user_id TEXT, name TEXT, equipment TEXT, modifier_variants TEXT, created_at DATETIME, updated_at DATETIME)`,
 		`CREATE TABLE trajectories (
 			id TEXT PRIMARY KEY DEFAULT (substr(lower(hex(randomblob(16))),1,8)||'-'||substr(lower(hex(randomblob(16))),9,4)||'-4'||substr(lower(hex(randomblob(16))),13,3)||'-a'||substr(lower(hex(randomblob(16))),16,3)||'-'||substr(lower(hex(randomblob(16))),17,12)),
-			training_id TEXT, flow_session_id TEXT, request TEXT,
+			training_id TEXT, flow_session_id TEXT, request TEXT, error TEXT,
 			created_at DATETIME, updated_at DATETIME
 		)`,
 		`CREATE TABLE model_steps (

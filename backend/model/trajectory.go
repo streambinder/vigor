@@ -27,10 +27,20 @@ type TrajectoryUsage struct {
 // session detaches the trajectory (the owner columns are SET NULL)
 // instead of deleting it, so the record of what the pipeline decided —
 // and why — stays available for troubleshooting.
+//
+// A generation attempt that fails persists its trajectory too, with no
+// owner and Error set: a retry streak stays auditable attempt by
+// attempt instead of vanishing from the record.
 type Trajectory struct {
 	ID            uuid.UUID  `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id" dart:"String"`
 	TrainingID    *uuid.UUID `gorm:"type:uuid;uniqueIndex" json:"training_id,omitempty" dart:"-"`
 	FlowSessionID *uuid.UUID `gorm:"type:uuid;uniqueIndex" json:"flow_session_id,omitempty" dart:"-"`
+
+	// Error records why the generation attempt that produced this
+	// trajectory failed, in the words of the stage that rejected it:
+	// the DAG node error, or the specific validation failure that the
+	// generated training did not pass. Empty on success.
+	Error string `gorm:"type:text" json:"error,omitempty" dart:"-"`
 
 	// Request is the generation request exactly as the client sent it,
 	// kept as opaque JSON whatever shape the current API gives it: the
