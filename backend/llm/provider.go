@@ -105,6 +105,13 @@ type TrainingGenerationRequest struct {
 	// DerivedStep carries the derivation step when the service layer derived
 	// upfront (so the generated execution still reports the pre-step)
 	DerivedStep *model.ModelStep
+	// RetryFeedback describes why the previous generation attempt for
+	// this same request failed, in the words of the stage that rejected
+	// it. The selection and load nodes receive it as an explicit
+	// correction note; empty on the first attempt. Without it a retry
+	// re-rolls the same models on the same prompts and repeats the
+	// same failure.
+	RetryFeedback string
 }
 
 // reasoning effort levels, as understood by openrouter.

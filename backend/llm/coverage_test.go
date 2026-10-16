@@ -403,7 +403,7 @@ func TestNodeRunners(t *testing.T) {
 		result, _, err := runExercisesNode(
 			pipeline.Strategy{Methodology: "strength"}, pipeline.MuscleTargeting{},
 			pipeline.ConstraintExtraction{}, pipeline.HistoryAnalysis{},
-			nil, nil, nil, nil, nil, nil, methodology, true, 45, false, "",
+			nil, nil, nil, nil, nil, nil, methodology, true, 45, false, "", "",
 		)
 		if err != nil || len(result.Exercises) != 1 || result.Exercises[0].ExerciseID != "squat" {
 			t.Errorf("runExercisesNode = %+v, %v", result, err)
@@ -414,7 +414,7 @@ func TestNodeRunners(t *testing.T) {
 	})
 	t.Run("exercises bad json", func(t *testing.T) {
 		installProviders(t, staticLLM("junk"), nil)
-		if _, _, err := runExercisesNode(pipeline.Strategy{}, pipeline.MuscleTargeting{}, pipeline.ConstraintExtraction{}, pipeline.HistoryAnalysis{}, nil, nil, nil, nil, nil, nil, methodology, false, 45, false, ""); err == nil {
+		if _, _, err := runExercisesNode(pipeline.Strategy{}, pipeline.MuscleTargeting{}, pipeline.ConstraintExtraction{}, pipeline.HistoryAnalysis{}, nil, nil, nil, nil, nil, nil, methodology, false, 45, false, "", ""); err == nil {
 			t.Error("bad JSON must fail the exercises node")
 		}
 	})
@@ -425,7 +425,7 @@ func TestNodeRunners(t *testing.T) {
 		result, _, err := runLoadNode(
 			pipeline.Strategy{VolumeTarget: "high"}, pipeline.ExerciseSelection{},
 			pipeline.HistoryAnalysis{}, pipeline.HealthAssessment{},
-			nil, nil, methodology, nil, nil, nil, nil, nil, false, 45, true, "program",
+			nil, nil, methodology, nil, nil, nil, nil, nil, false, 45, true, "program", "",
 		)
 		if err != nil || len(result.Routines) != 1 {
 			t.Errorf("runLoadNode = %+v, %v", result, err)
@@ -433,7 +433,7 @@ func TestNodeRunners(t *testing.T) {
 	})
 	t.Run("load bad json", func(t *testing.T) {
 		installProviders(t, staticLLM("junk"), nil)
-		if _, _, err := runLoadNode(pipeline.Strategy{}, pipeline.ExerciseSelection{}, pipeline.HistoryAnalysis{}, pipeline.HealthAssessment{}, nil, nil, methodology, nil, nil, nil, nil, nil, false, 45, false, ""); err == nil {
+		if _, _, err := runLoadNode(pipeline.Strategy{}, pipeline.ExerciseSelection{}, pipeline.HistoryAnalysis{}, pipeline.HealthAssessment{}, nil, nil, methodology, nil, nil, nil, nil, nil, false, 45, false, "", ""); err == nil {
 			t.Error("bad JSON must fail the load node")
 		}
 	})
@@ -739,6 +739,53 @@ func TestGenTrainingDAGEndToEnd(t *testing.T) {
 	}
 	if !foundPlank {
 		t.Error("calibration gap exercise plank must be enforced into the load")
+	}
+}
+
+func TestGenTrainingDAGRetryFeedback(t *testing.T) {
+	installFakeDecisionClient(t, &fakeDecisionClient{answers: map[string]dm.Answer{
+		"muscle:quads": {Score: 2.0},
+		"muscle:back":  {Score: 1.0},
+		"muscle:core":  {Score: 0.1},
+	}})
+	installProviders(t, dagLLM(), nil)
+
+	const feedback = "validation_error:invalid_exercise: activity 3 has invalid exercise: pull-up"
+	req := dagFixtures(t)
+	req.RetryFeedback = feedback
+	_, steps, err := GenTrainingDAG(req, nil)
+	if err != nil {
+		t.Fatalf("GenTrainingDAG: %v", err)
+	}
+	for _, name := range []string{"SELECT_EXERCISES", "PROGRAM_LOAD"} {
+		found := false
+		for _, step := range steps {
+			if step.Step != name {
+				continue
+			}
+			found = true
+			user := step.LLM.Data().Prompt.User
+			if !strings.Contains(user, "Previous attempt rejected") || !strings.Contains(user, feedback) {
+				t.Errorf("%s prompt misses the retry feedback:\n%s", name, user)
+			}
+		}
+		if !found {
+			t.Errorf("step %s not in trajectory", name)
+		}
+	}
+
+	// without feedback the note is absent: first attempts stay clean
+	_, steps, err = GenTrainingDAG(dagFixtures(t), nil)
+	if err != nil {
+		t.Fatalf("GenTrainingDAG without feedback: %v", err)
+	}
+	for _, step := range steps {
+		if strings.Contains(step.LLM.Data().Prompt.User, "Previous attempt rejected") {
+			t.Errorf("step %s carries a retry note on a first attempt", step.Step)
+		}
+	}
+	if got := retryFeedbackNote(""); got != "" {
+		t.Errorf("retryFeedbackNote(empty) = %q, want empty", got)
 	}
 }
 
