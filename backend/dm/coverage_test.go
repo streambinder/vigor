@@ -3,6 +3,7 @@ package dm
 import (
 	"context"
 	"errors"
+	"maps"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -108,6 +109,36 @@ func TestValidateAnswersEdgeCases(t *testing.T) {
 	}
 	if err := checkDistribution("q", nil); !errors.Is(err, ErrValidation) {
 		t.Errorf("empty distribution = %v", err)
+	}
+}
+
+func TestValidateAnswersChoiceNearTie(t *testing.T) {
+	questions := testQuestions()
+	base := map[string]Answer{
+		"urgent":   {Kind: KindNoul, Noul: 0.5},
+		"severity": {Kind: KindScore, Score: 1},
+	}
+
+	// the sampled choice a hair below the argmax (0.40 against 0.42) is a
+	// near-tie: the answer is coherent and must validate.
+	answers := maps.Clone(base)
+	answers["team"] = Answer{Kind: KindChoice, Choice: "billing", Probabilities: map[string]float64{"billing": 0.40, "technical": 0.42, "sales": 0.18}}
+	if err := validateAnswers(questions, answers); err != nil {
+		t.Errorf("near-tie choice = %v, want nil", err)
+	}
+
+	// a choice well below the argmax (0.20 against 0.70) stays invalid.
+	answers = maps.Clone(base)
+	answers["team"] = Answer{Kind: KindChoice, Choice: "billing", Probabilities: map[string]float64{"billing": 0.20, "technical": 0.70, "sales": 0.10}}
+	if err := validateAnswers(questions, answers); !errors.Is(err, ErrValidation) {
+		t.Errorf("clear-gap choice = %v, want ErrValidation", err)
+	}
+
+	// the exact argmax validates as before.
+	answers = maps.Clone(base)
+	answers["team"] = Answer{Kind: KindChoice, Choice: "technical", Probabilities: map[string]float64{"billing": 0.20, "technical": 0.70, "sales": 0.10}}
+	if err := validateAnswers(questions, answers); err != nil {
+		t.Errorf("argmax choice = %v, want nil", err)
 	}
 }
 
