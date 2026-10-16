@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -270,12 +271,89 @@ func TestGenerateTrainingFailureModesCoverage(t *testing.T) {
 	// the strategy stage answers garbage: the DAG fails on every
 	// attempt and the error surfaces
 	if _, err := GenerateTraining(fakeDBOwnerID, 30, nil, "", "STUBFAIL:strategy-bad", nil, false, "", nil, nil, nil, time.UTC, nil); err == nil {
-		t.Fatal("strategy failure must surface")
+		t.Fatalf("strategy failure must surface: %v", err)
 	}
 	// the load stage answers a stub-sized session that cannot scale
 	// to the requested duration: validation rejects every attempt
 	if _, err := GenerateTraining(fakeDBOwnerID, 30, nil, "", "STUBFAIL:load-short", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrMalformedTraining) {
 		t.Fatalf("load-short err = %v", err)
+	}
+}
+
+// TestGenerateTrainingFailurePersistsTrajectories verifies that a
+// generation attempt whose DAG fails on every retry leaves one
+// persisted trajectory per attempt, each marked with the error that
+// ended it, so a retry streak stays auditable instead of vanishing.
+func TestGenerateTrainingFailurePersistsTrajectories(t *testing.T) {
+	db := setupCoverageDB(t)
+	// an empty muscle catalog reads as a fully calibrated user to the
+	// generation gates, so the prompted generation reaches the DAG
+	useFakeKnowledgeMode(t, true)
+	userID := seedCoverageUser(t, db, "failtraj@example.com", "")
+
+	// the strategy stage answers garbage: the DAG fails on every attempt
+	if _, err := GenerateTraining(userID, 30, nil, "", "STUBFAIL:strategy-bad",
+		nil, false, "", nil, nil, []byte("raw request"), time.UTC, nil); err == nil {
+		t.Fatal("strategy failure must surface")
+	}
+
+	var failed []model.Trajectory
+	if err := db.Preload("Steps").Where("error <> ''").Find(&failed).Error; err != nil {
+		t.Fatalf("load failed trajectories: %v", err)
+	}
+	if len(failed) != maxGenerationRetries+1 {
+		t.Fatalf("DAG-failure trajectories = %d, want %d", len(failed), maxGenerationRetries+1)
+	}
+	for _, trajectory := range failed {
+		if trajectory.TrainingID != nil {
+			t.Fatalf("failed trajectory has a training: %v", trajectory.TrainingID)
+		}
+		if !strings.Contains(trajectory.Error, "strategy") {
+			t.Fatalf("trajectory error = %q, want the strategy failure", trajectory.Error)
+		}
+		if len(trajectory.Steps) == 0 {
+			t.Fatal("failed trajectory must keep the steps the attempt ran")
+		}
+		if string(trajectory.Request) != "raw request" {
+			t.Fatalf("trajectory request = %q", trajectory.Request)
+		}
+	}
+}
+
+// TestPersistFailedTrajectory verifies the failure record itself: the
+// steps, the request and the specific validation error that ended the
+// attempt are stored, with no training attached.
+func TestPersistFailedTrajectory(t *testing.T) {
+	db := setupCoverageDB(t)
+	seedCoverageUser(t, db, "persistfail@example.com", "")
+
+	strategyStep := model.NewLLMStep(model.LLMStep{})
+	strategyStep.Step = "PICK_STRATEGY"
+	loadStep := model.NewLLMStep(model.LLMStep{})
+	loadStep.Step = "PROGRAM_LOAD"
+	steps := []model.ModelStep{strategyStep, loadStep}
+	persistFailedTrajectory([]byte("raw request"), steps,
+		"validation_error:invalid_exercise: activity 3 has invalid exercise: pull-up")
+
+	var stored []model.Trajectory
+	if err := db.Preload("Steps").Where("error <> ''").Find(&stored).Error; err != nil {
+		t.Fatalf("load stored trajectories: %v", err)
+	}
+	if len(stored) != 1 {
+		t.Fatalf("stored trajectories = %d, want 1", len(stored))
+	}
+	trajectory := stored[0]
+	if trajectory.TrainingID != nil || trajectory.FlowSessionID != nil {
+		t.Fatal("failed trajectory must have no owner")
+	}
+	if !strings.Contains(trajectory.Error, "invalid exercise: pull-up") {
+		t.Fatalf("trajectory error = %q", trajectory.Error)
+	}
+	if len(trajectory.Steps) != 2 {
+		t.Fatalf("trajectory steps = %d, want 2", len(trajectory.Steps))
+	}
+	if string(trajectory.Request) != "raw request" {
+		t.Fatalf("trajectory request = %q", trajectory.Request)
 	}
 }
 

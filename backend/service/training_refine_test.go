@@ -62,7 +62,7 @@ func setupRefineDB(t *testing.T) *gorm.DB {
 		`CREATE TABLE gyms (id TEXT PRIMARY KEY, user_id TEXT, name TEXT, equipment TEXT, modifier_variants TEXT, created_at DATETIME, updated_at DATETIME)`,
 		`CREATE TABLE trajectories (
 			id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
-			training_id TEXT, flow_session_id TEXT, request TEXT,
+			training_id TEXT, flow_session_id TEXT, request TEXT, error TEXT,
 			created_at DATETIME, updated_at DATETIME
 		)`,
 		`CREATE TABLE model_steps (

@@ -632,6 +632,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 				Reason:           "llm_error",
 				Message:          err.Error(),
 			}
+			persistFailedTrajectory(request, steps, err.Error())
 			if attempt < maxGenerationRetries {
 				log.Warn().
 					Interface("event", failureEvent).
@@ -694,6 +695,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			Reason:           ve.Reason(),
 			Message:          ve.Error(),
 		}
+		persistFailedTrajectory(request, steps, ve.Reason()+": "+ve.Error())
 
 		if attempt < maxGenerationRetries {
 			log.Warn().
@@ -809,6 +811,22 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	}
 
 	return training, nil
+}
+
+// persistFailedTrajectory keeps the record of a generation attempt that
+// produced no training: the steps the attempt ran and the error that
+// ended it, so a retry streak stays auditable attempt by attempt. The
+// write is best-effort: a persistence failure is logged and never masks
+// the generation error the caller is about to receive.
+func persistFailedTrajectory(request []byte, steps []model.ModelStep, errText string) {
+	trajectory := model.Trajectory{Steps: steps, Error: errText}
+	if len(request) > 0 {
+		trajectory.Request = request
+	}
+	trajectory.Summarize()
+	if err := database.DB.Create(&trajectory).Error; err != nil {
+		log.Error().Err(err).Msg("failed to persist failed generation trajectory")
+	}
 }
 
 // GetTrainings retrieves all trainings for a user.
