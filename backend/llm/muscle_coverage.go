@@ -105,6 +105,68 @@ func ensureMuscleCoverage(
 	return selection, injected
 }
 
+// ensureTargetedMuscleCoverage extends the coverage guarantee to the
+// muscles the user requested and the targeting node made primary. The
+// contraindication filter that guards the selection can only remove
+// exercises: when it removes every exercise for a requested primary
+// muscle, the session silently collapses onto the surviving muscles
+// (a push-only session for a chest-and-back request). This appends one
+// substitute per such muscle from the work pool, under the same rules
+// as calibration coverage: first pool candidate with that primary
+// muscle that is not already selected, not recently used, not on the
+// avoid-list and not contraindicated. When no candidate passes, the
+// muscle stays uncovered and uncoveredPrimaryMuscles reports it to the
+// copy node, as before. Explicit programs are left untouched: they must
+// transcribe their source schema faithfully.
+//
+// It returns the updated selection plus the injected muscle -> exercise
+// ID map, used downstream to enforce that the substitutes survive
+// program load.
+func ensureTargetedMuscleCoverage(
+	selection pipeline.ExerciseSelection,
+	targeting pipeline.MuscleTargeting,
+	requestedMuscles []string,
+	candidates []model.Exercise,
+	recentExerciseIDs []string,
+	explicitProgram bool,
+	contraindicatedPatterns []string,
+	avoidExercises []string,
+) (pipeline.ExerciseSelection, map[string]string) {
+	injected := make(map[string]string)
+	if explicitProgram || len(requestedMuscles) == 0 || len(candidates) == 0 {
+		return selection, injected
+	}
+
+	requested := make(map[string]bool, len(requestedMuscles))
+	for _, muscle := range requestedMuscles {
+		requested[muscle] = true
+	}
+	// targeting order is the priority: the map value orders the
+	// injection exactly like calibration gap counts do.
+	gaps := make(map[string]int)
+	for i, muscle := range targeting.PrimaryMuscles {
+		if requested[muscle] {
+			gaps[muscle] = i
+		}
+	}
+	if len(gaps) == 0 {
+		return selection, injected
+	}
+
+	selection, injected = ensureMuscleCoverage(
+		selection, gaps, candidates, recentExerciseIDs,
+		explicitProgram, contraindicatedPatterns, avoidExercises,
+	)
+	for muscle, exerciseID := range injected {
+		for i := range selection.Exercises {
+			if selection.Exercises[i].ExerciseID == exerciseID {
+				selection.Exercises[i].Rationale = "deterministic coverage for requested muscle " + muscle
+			}
+		}
+	}
+	return selection, injected
+}
+
 // uncoveredPrimaryMuscles returns the targeted primary muscles that no
 // programmed work activity covers as a primary muscle, in targeting order.
 // A targeted muscle ends up uncovered when every exercise for it is

@@ -270,6 +270,23 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		historyResult.AvoidExercises,
 	)
 
+	// deterministic targeting coverage: a muscle the user requested and
+	// the targeting node made primary must not lose every exercise to
+	// the contraindication filter without a substitute. The filter above
+	// can only drop; this appends the first pool exercise for the muscle
+	// that passes the same filters, so the session still trains what was
+	// asked for instead of silently collapsing onto the surviving muscles.
+	exerciseResult, injectedTargeted := ensureTargetedMuscleCoverage(
+		exerciseResult,
+		targetingResult,
+		req.Muscles,
+		req.WorkExercises,
+		req.RecentExerciseIDs,
+		explicitProgram,
+		effectivePatterns,
+		historyResult.AvoidExercises,
+	)
+
 	// build exercise metadata maps for the load node (mode tags, weighted flags)
 	exerciseModes := make(map[string]string)
 	weightedExercises := make(map[string]bool)
@@ -316,6 +333,11 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	// routines; deterministically re-add any gap muscle left without a work
 	// activity so calibration completes by construction.
 	loadResult = enforceMuscleCoverage(loadResult, injectedCoverage, workByID, exerciseModes)
+
+	// the same survival guarantee holds for the targeted substitutes
+	// injected at selection time: the load node must not drop the only
+	// exercise that trains a requested primary muscle.
+	loadResult = enforceMuscleCoverage(loadResult, injectedTargeted, workByID, exerciseModes)
 
 	// last safety net: the load node output is what gets persisted, so
 	// re-check its activities against the same patterns and avoid-list
