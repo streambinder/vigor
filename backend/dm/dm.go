@@ -145,10 +145,18 @@ func validateQuestions(questions []Question) error {
 	return nil
 }
 
+// choiceNearTieTolerance is the probability gap within which a choice
+// answer counts as consistent with its own distribution. A decision
+// model samples its choice and its probabilities in one pass, so on a
+// near-tie the sampled choice can land a hair below the argmax without
+// the answer being incoherent; a strict argmax check turns that noise
+// into a hard failure of the whole caller pipeline.
+const choiceNearTieTolerance = 0.05
+
 // validateAnswers checks parsed answers against the questions that
 // produced them: every question answered, choices inside the declared
 // option set, distributions (approximately) normalized, and the chosen
-// option the most probable one.
+// option the most probable one, allowing a near-tie tolerance.
 func validateAnswers(questions []Question, answers map[string]Answer) error {
 	for _, q := range questions {
 		a, ok := answers[q.ID]
@@ -176,7 +184,7 @@ func validateAnswers(questions []Question, answers map[string]Answer) error {
 					best, bestP = opt, p
 				}
 			}
-			if best != "" && best != a.Choice {
+			if best != "" && best != a.Choice && a.Probabilities[a.Choice] < bestP-choiceNearTieTolerance {
 				return fmt.Errorf("%w: choice %q for %q is not the most probable option %q", ErrValidation, a.Choice, q.ID, best)
 			}
 		case KindScore:
