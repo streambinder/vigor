@@ -56,6 +56,20 @@ func orderedSteps(nodes map[pipeline.GenerationStep]model.ModelStep) []model.Mod
 	return steps
 }
 
+// retryFeedbackNote renders the correction note a retried generation
+// hands to the nodes that produce exercises and activities: the exact
+// failure the previous attempt was rejected with, and the standing
+// rules that failure class violates. Empty feedback renders empty.
+func retryFeedbackNote(feedback string) string {
+	if feedback == "" {
+		return ""
+	}
+	return "\n\n## Previous attempt rejected\n" +
+		"A previous generation attempt for this same request failed: " + feedback + "\n" +
+		"Do not repeat that failure. Use only exercise IDs from the provided pool, " +
+		"exactly as written. Give rep-based exercises reps and duration-based exercises a duration, never the other way round."
+}
+
 // GenTrainingDAG generates a training using a multi-node DAG instead of a single monolith.
 // onProgress is called after each node completes (may be nil).
 func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (*model.Training, []model.ModelStep, error) {
@@ -232,7 +246,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		req.WorkExercises, req.WarmupExercises, req.CooldownExercises,
 		req.FavoriteExercises, req.RecentExerciseIDs, req.Facts,
 		resolvedMethodology, req.SkipWarmupCooldown, req.Duration,
-		explicitProgram, derivedSummary,
+		explicitProgram, derivedSummary, req.RetryFeedback,
 	)
 	nodes[pipeline.StepSelectExercises] = exerciseStep
 	if err != nil {
@@ -315,7 +329,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 		req.Modifiers, req.ModifierVariants, req.Facts,
 		req.EquipmentIDs, req.FavoriteEquipmentIDs,
 		req.SkipWarmupCooldown, req.Duration,
-		explicitProgram, derivedSummary,
+		explicitProgram, derivedSummary, req.RetryFeedback,
 	)
 	nodes[pipeline.StepProgramLoad] = loadStep
 	if err != nil {
@@ -2064,6 +2078,7 @@ func runExercisesNode(
 	duration int,
 	explicitProgram bool,
 	derivedSummary string,
+	retryFeedback string,
 ) (pipeline.ExerciseSelection, model.ModelStep, error) {
 	minExercises, maxExercises := exerciseCountBand(methodology, duration)
 	p := model.LLMPrompt{
@@ -2077,6 +2092,7 @@ func runExercisesNode(
 			skipWarmupCooldown,
 		),
 	}
+	p.User += retryFeedbackNote(retryFeedback)
 
 	// the hard one: satisfy family coverage, muscles, equipment and avoid-lists at once
 	step, err := getLLM(StageReasoning, "").query(p,
@@ -2477,6 +2493,7 @@ func runLoadNode(
 	duration int,
 	explicitProgram bool,
 	requestedProgram string,
+	retryFeedback string,
 ) (pipeline.LoadProgramming, model.ModelStep, error) {
 	p := model.LLMPrompt{
 		System: prompt.NodeLoadSystem(methodology, len(modifiers) > 0, len(modifierVariants) > 0, explicitProgram),
@@ -2489,6 +2506,7 @@ func runLoadNode(
 			skipWarmupCooldown, duration, requestedProgram,
 		),
 	}
+	p.User += retryFeedbackNote(retryFeedback)
 
 	// sets/reps/load per exercise under methodology rules — arithmetic, and wrong answers show.
 	// a verbatim ladder/pyramid serializes to one block per rung, so an explicit

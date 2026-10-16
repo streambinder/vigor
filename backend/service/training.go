@@ -616,9 +616,16 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	var actualMuscles []string
 	// totalled across attempts, like llmStart, so a retried generation reports what it really cost
 	var usage model.LLMUsage
+	// the failure the previous attempt ended with, fed back into the
+	// next attempt's prompts (empty on the first attempt)
+	var retryFeedback string
 
 	for attempt := 0; attempt <= maxGenerationRetries; attempt++ {
 		var err error
+		// a retry re-runs the DAG with the previous attempt's failure
+		// attached, so the nodes can correct the exact rejection instead
+		// of re-rolling the same prompts and repeating it
+		dagRequest.RetryFeedback = retryFeedback
 		training, steps, err = llm.GenTrainingDAG(dagRequest, onProgress)
 		for _, step := range steps {
 			usage.Add(step.LLM.Data().Usage)
@@ -633,6 +640,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 				Message:          err.Error(),
 			}
 			persistFailedTrajectory(request, steps, err.Error())
+			retryFeedback = err.Error()
 			if attempt < maxGenerationRetries {
 				log.Warn().
 					Interface("event", failureEvent).
@@ -696,6 +704,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			Message:          ve.Error(),
 		}
 		persistFailedTrajectory(request, steps, ve.Reason()+": "+ve.Error())
+		retryFeedback = ve.Reason() + ": " + ve.Error()
 
 		if attempt < maxGenerationRetries {
 			log.Warn().
