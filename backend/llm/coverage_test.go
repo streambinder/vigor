@@ -375,21 +375,21 @@ func TestNodeRunners(t *testing.T) {
 
 	t.Run("strategy preselected", func(t *testing.T) {
 		installProviders(t, staticLLM(`{"methodology":"other","volume_target":"high","intensity_target":"low","summary":"s"}`), nil)
-		result, _, err := runStrategyNode(nil, methodology, nil, nil, pipeline.HealthAssessment{}, pipeline.HistoryAnalysis{}, "", 45, false, false)
+		result, _, err := runStrategyNode(context.Background(), nil, methodology, nil, nil, pipeline.HealthAssessment{}, pipeline.HistoryAnalysis{}, "", 45, false, false)
 		if err != nil || result.Methodology != "strength" {
 			t.Errorf("runStrategyNode = %+v, %v", result, err)
 		}
 	})
 	t.Run("strategy bad json", func(t *testing.T) {
 		installProviders(t, staticLLM("junk"), nil)
-		if _, _, err := runStrategyNode(nil, nil, nil, nil, pipeline.HealthAssessment{}, pipeline.HistoryAnalysis{}, "", 45, false, false); err == nil {
+		if _, _, err := runStrategyNode(context.Background(), nil, nil, nil, nil, pipeline.HealthAssessment{}, pipeline.HistoryAnalysis{}, "", 45, false, false); err == nil {
 			t.Error("bad JSON must fail the strategy node")
 		}
 	})
 	t.Run("strategy error", func(t *testing.T) {
 		boom := &fakeLLM{model: "m", handler: func(model.LLMPrompt) (string, error) { return "", errors.New("x") }}
 		installProviders(t, boom, nil)
-		if _, _, err := runStrategyNode(nil, nil, nil, nil, pipeline.HealthAssessment{}, pipeline.HistoryAnalysis{}, "", 45, false, false); err == nil {
+		if _, _, err := runStrategyNode(context.Background(), nil, nil, nil, nil, pipeline.HealthAssessment{}, pipeline.HistoryAnalysis{}, "", 45, false, false); err == nil {
 			t.Error("query error must fail the strategy node")
 		}
 	})
@@ -400,7 +400,7 @@ func TestNodeRunners(t *testing.T) {
 			{"exercise_id":"hip-stretch","phase":"warmup","rationale":"prep"}],
 			"excluded":[{"exercise_id":"burpee (recent)","reason":"recent"}], "summary":"s"}`
 		installProviders(t, staticLLM(out), nil)
-		result, _, err := runExercisesNode(
+		result, _, err := runExercisesNode(context.Background(),
 			pipeline.Strategy{Methodology: "strength"}, pipeline.MuscleTargeting{},
 			pipeline.ConstraintExtraction{}, pipeline.HistoryAnalysis{},
 			nil, nil, nil, nil, nil, nil, methodology, true, 45, false, "", "",
@@ -414,7 +414,7 @@ func TestNodeRunners(t *testing.T) {
 	})
 	t.Run("exercises bad json", func(t *testing.T) {
 		installProviders(t, staticLLM("junk"), nil)
-		if _, _, err := runExercisesNode(pipeline.Strategy{}, pipeline.MuscleTargeting{}, pipeline.ConstraintExtraction{}, pipeline.HistoryAnalysis{}, nil, nil, nil, nil, nil, nil, methodology, false, 45, false, "", ""); err == nil {
+		if _, _, err := runExercisesNode(context.Background(), pipeline.Strategy{}, pipeline.MuscleTargeting{}, pipeline.ConstraintExtraction{}, pipeline.HistoryAnalysis{}, nil, nil, nil, nil, nil, nil, methodology, false, 45, false, "", ""); err == nil {
 			t.Error("bad JSON must fail the exercises node")
 		}
 	})
@@ -422,7 +422,7 @@ func TestNodeRunners(t *testing.T) {
 	loadJSON := `{"routines":[{"type":"work","blocks":[{"repeats":2,"activities":[{"exercise_id":"squat","reps":8}]}]}],"fact_indices":[1],"summary":"s"}`
 	t.Run("load", func(t *testing.T) {
 		installProviders(t, staticLLM(loadJSON), nil)
-		result, _, err := runLoadNode(
+		result, _, err := runLoadNode(context.Background(),
 			pipeline.Strategy{VolumeTarget: "high"}, pipeline.ExerciseSelection{},
 			pipeline.HistoryAnalysis{}, pipeline.HealthAssessment{},
 			nil, nil, methodology, nil, nil, nil, nil, nil, false, 45, true, "program", "",
@@ -433,14 +433,14 @@ func TestNodeRunners(t *testing.T) {
 	})
 	t.Run("load bad json", func(t *testing.T) {
 		installProviders(t, staticLLM("junk"), nil)
-		if _, _, err := runLoadNode(pipeline.Strategy{}, pipeline.ExerciseSelection{}, pipeline.HistoryAnalysis{}, pipeline.HealthAssessment{}, nil, nil, methodology, nil, nil, nil, nil, nil, false, 45, false, "", ""); err == nil {
+		if _, _, err := runLoadNode(context.Background(), pipeline.Strategy{}, pipeline.ExerciseSelection{}, pipeline.HistoryAnalysis{}, pipeline.HealthAssessment{}, nil, nil, methodology, nil, nil, nil, nil, nil, false, 45, false, "", ""); err == nil {
 			t.Error("bad JSON must fail the load node")
 		}
 	})
 
 	t.Run("creative", func(t *testing.T) {
 		installProviders(t, staticLLM(`{"name":"Iron Dawn","description":"desc"}`), nil)
-		result, _, err := runCreativeNode("English", pipeline.Strategy{}, pipeline.MuscleTargeting{},
+		result, _, err := runCreativeNode(context.Background(), "English", pipeline.Strategy{}, pipeline.MuscleTargeting{},
 			pipeline.ExerciseSelection{}, pipeline.HistoryAnalysis{}, pipeline.ConstraintExtraction{},
 			pipeline.LoadProgramming{}, pipeline.HealthAssessment{}, "", nil, nil, nil, "")
 		if err != nil || result.Name != "Iron Dawn" {
@@ -449,7 +449,7 @@ func TestNodeRunners(t *testing.T) {
 	})
 	t.Run("creative bad json", func(t *testing.T) {
 		installProviders(t, staticLLM("junk"), nil)
-		if _, _, err := runCreativeNode("English", pipeline.Strategy{}, pipeline.MuscleTargeting{}, pipeline.ExerciseSelection{}, pipeline.HistoryAnalysis{}, pipeline.ConstraintExtraction{}, pipeline.LoadProgramming{}, pipeline.HealthAssessment{}, "", nil, nil, nil, ""); err == nil {
+		if _, _, err := runCreativeNode(context.Background(), "English", pipeline.Strategy{}, pipeline.MuscleTargeting{}, pipeline.ExerciseSelection{}, pipeline.HistoryAnalysis{}, pipeline.ConstraintExtraction{}, pipeline.LoadProgramming{}, pipeline.HealthAssessment{}, "", nil, nil, nil, ""); err == nil {
 			t.Error("bad JSON must fail the creative node")
 		}
 	})
@@ -488,7 +488,7 @@ func TestMuscleTargetingNode(t *testing.T) {
 		"muscle:back":  {Score: 0.1},
 	}}
 	installFakeDecisionClient(t, fake)
-	result, _, err := runMuscleTargetingNode(
+	result, _, err := runMuscleTargetingNode(context.Background(),
 		[]string{"quads"}, nil, coverage,
 		pipeline.ConstraintExtraction{}, pipeline.HealthAssessment{}, pipeline.HistoryAnalysis{}, "", false,
 	)
@@ -506,7 +506,7 @@ func TestMuscleTargetingNode(t *testing.T) {
 	}
 
 	// explicit program: a requested muscle is never rested.
-	result, _, err = runMuscleTargetingNode(
+	result, _, err = runMuscleTargetingNode(context.Background(),
 		[]string{"back"}, nil, coverage,
 		pipeline.ConstraintExtraction{}, pipeline.HealthAssessment{}, pipeline.HistoryAnalysis{}, "", true,
 	)
@@ -514,14 +514,14 @@ func TestMuscleTargetingNode(t *testing.T) {
 		t.Errorf("explicit targeting avoid = %v, %v", result.AvoidMuscles, err)
 	}
 
-	if _, _, err := runMuscleTargetingNode(nil, nil, nil, pipeline.ConstraintExtraction{}, pipeline.HealthAssessment{}, pipeline.HistoryAnalysis{}, "", false); err == nil {
+	if _, _, err := runMuscleTargetingNode(context.Background(), nil, nil, nil, pipeline.ConstraintExtraction{}, pipeline.HealthAssessment{}, pipeline.HistoryAnalysis{}, "", false); err == nil {
 		t.Error("empty coverage must fail the targeting node")
 	}
 
 	saved := decisionClient
 	decisionClient = errDecisionClient{}
 	t.Cleanup(func() { decisionClient = saved })
-	if _, _, err := runMuscleTargetingNode(nil, nil, coverage, pipeline.ConstraintExtraction{}, pipeline.HealthAssessment{}, pipeline.HistoryAnalysis{}, "", false); err == nil {
+	if _, _, err := runMuscleTargetingNode(context.Background(), nil, nil, coverage, pipeline.ConstraintExtraction{}, pipeline.HealthAssessment{}, pipeline.HistoryAnalysis{}, "", false); err == nil {
 		t.Error("a failing decision client must fail the targeting node")
 	}
 	// getDecisionClient surfaces the replaced client without env access.
@@ -710,7 +710,7 @@ func TestGenTrainingDAGEndToEnd(t *testing.T) {
 	// the recorder is mutex-guarded
 	var progressedMu sync.Mutex
 	var progressed []pipeline.GenerationStep
-	training, steps, err := GenTrainingDAG(dagFixtures(t), func(step pipeline.GenerationStep) {
+	training, steps, err := GenTrainingDAG(context.Background(), dagFixtures(t), func(step pipeline.GenerationStep) {
 		progressedMu.Lock()
 		progressed = append(progressed, step)
 		progressedMu.Unlock()
@@ -753,7 +753,7 @@ func TestGenTrainingDAGRetryFeedback(t *testing.T) {
 	const feedback = "validation_error:invalid_exercise: activity 3 has invalid exercise: pull-up"
 	req := dagFixtures(t)
 	req.RetryFeedback = feedback
-	_, steps, err := GenTrainingDAG(req, nil)
+	_, steps, err := GenTrainingDAG(context.Background(), req, nil)
 	if err != nil {
 		t.Fatalf("GenTrainingDAG: %v", err)
 	}
@@ -775,7 +775,7 @@ func TestGenTrainingDAGRetryFeedback(t *testing.T) {
 	}
 
 	// without feedback the note is absent: first attempts stay clean
-	_, steps, err = GenTrainingDAG(dagFixtures(t), nil)
+	_, steps, err = GenTrainingDAG(context.Background(), dagFixtures(t), nil)
 	if err != nil {
 		t.Fatalf("GenTrainingDAG without feedback: %v", err)
 	}
@@ -786,6 +786,21 @@ func TestGenTrainingDAGRetryFeedback(t *testing.T) {
 	}
 	if got := retryFeedbackNote(""); got != "" {
 		t.Errorf("retryFeedbackNote(empty) = %q, want empty", got)
+	}
+}
+
+func TestGenTrainingDAGCancelledContext(t *testing.T) {
+	installFakeDecisionClient(t, &fakeDecisionClient{answers: map[string]dm.Answer{
+		"muscle:quads": {Score: 2.0},
+		"muscle:back":  {Score: 1.0},
+		"muscle:core":  {Score: 0.1},
+	}})
+	installProviders(t, dagLLM(), nil)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, _, err := GenTrainingDAG(ctx, dagFixtures(t), nil); !errors.Is(err, context.Canceled) {
+		t.Fatalf("cancelled DAG err = %v, want context.Canceled", err)
 	}
 }
 
@@ -812,7 +827,7 @@ func TestGenTrainingDAGExplicitProgram(t *testing.T) {
 	req.DerivedStep = &model.ModelStep{Step: string(pipeline.StepDeriveParams)}
 	req.PinnedExercises = []model.Exercise{{ID: "squat", Name: "Squat"}}
 
-	training, steps, err := GenTrainingDAG(req, nil)
+	training, steps, err := GenTrainingDAG(context.Background(), req, nil)
 	if err != nil {
 		t.Fatalf("GenTrainingDAG explicit: %v", err)
 	}
@@ -836,7 +851,7 @@ func TestGenTrainingDAGFreeTextDerive(t *testing.T) {
 	req.AllGoals = req.Goals
 	req.ValidMuscles = []string{"quads", "back", "core"}
 
-	if _, _, err := GenTrainingDAG(req, nil); err != nil {
+	if _, _, err := GenTrainingDAG(context.Background(), req, nil); err != nil {
 		t.Fatalf("GenTrainingDAG with derivation: %v", err)
 	}
 }
@@ -849,7 +864,7 @@ func TestGenTrainingDAGFailures(t *testing.T) {
 			return "", errors.New("down")
 		}}
 		installProviders(t, boom, nil)
-		if _, _, err := GenTrainingDAG(dagFixtures(t), nil); err == nil {
+		if _, _, err := GenTrainingDAG(context.Background(), dagFixtures(t), nil); err == nil {
 			t.Error("a failing strategy node must fail the DAG")
 		}
 	})
@@ -864,7 +879,7 @@ func TestGenTrainingDAGFailures(t *testing.T) {
 		installProviders(t, llm, nil)
 		req := dagFixtures(t)
 		req.Methodologies = nil
-		if _, _, err := GenTrainingDAG(req, nil); err == nil || !strings.Contains(err.Error(), "unknown methodology") {
+		if _, _, err := GenTrainingDAG(context.Background(), req, nil); err == nil || !strings.Contains(err.Error(), "unknown methodology") {
 			t.Errorf("unknown methodology error = %v", err)
 		}
 	})

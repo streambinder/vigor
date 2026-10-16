@@ -1,6 +1,7 @@
 package llm
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -126,6 +127,10 @@ const (
 // queryOpts carries the per-call knobs. grouped rather than passed positionally
 // because effort/schema are set on a minority of the call sites.
 type queryOpts struct {
+	// ctx carries the caller's cancellation (a user cancelling a
+	// generation): a nil ctx means the call is not cancellable and
+	// only the timeout applies.
+	ctx         context.Context
 	temperature float64
 	maxTokens   int
 	topP        float64

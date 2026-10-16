@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -84,15 +85,15 @@ func TestErrorBranchesCoverage(t *testing.T) {
 	}
 
 	// prompt derivation fails on each unreadable catalog in turn
-	if _, err := derivePromptParams("prompt", nil, nil); err == nil {
+	if _, err := derivePromptParams(context.Background(), "prompt", nil, nil); err == nil {
 		t.Fatal("derive without methodologies must fail")
 	}
 	bareKnowledge(t, &model.Methodology{})
-	if _, err := derivePromptParams("prompt", nil, nil); err == nil {
+	if _, err := derivePromptParams(context.Background(), "prompt", nil, nil); err == nil {
 		t.Fatal("derive without goals must fail")
 	}
 	bareKnowledge(t, &model.Methodology{}, &model.Goal{})
-	if _, err := derivePromptParams("prompt", nil, nil); err == nil {
+	if _, err := derivePromptParams(context.Background(), "prompt", nil, nil); err == nil {
 		t.Fatal("derive without muscles must fail")
 	}
 }

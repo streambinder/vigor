@@ -44,7 +44,7 @@ const maxDecisionQuestions = 32
 // recording the full probability distributions for the trajectory.
 // Decision nodes own no fallback: an unreachable or incoherent decision
 // model fails the node, and with it the generation.
-func decide(state string, questions []dm.Question) (map[string]dm.Answer, model.ModelStep, error) {
+func decide(ctx context.Context, state string, questions []dm.Question) (map[string]dm.Answer, model.ModelStep, error) {
 	hash := sha256.Sum256([]byte(state))
 	payload := model.DMStep{
 		State:     state,
@@ -75,7 +75,7 @@ func decide(state string, questions []dm.Question) (map[string]dm.Answer, model.
 	answers := make(map[string]dm.Answer, len(questions))
 	for start := 0; start < len(questions); start += maxDecisionQuestions {
 		end := min(start+maxDecisionQuestions, len(questions))
-		result, err := client.Decide(context.Background(), state, questions[start:end])
+		result, err := client.Decide(ctx, state, questions[start:end])
 		if err != nil {
 			return nil, model.NewDMStep(payload), fmt.Errorf("decision model call: %w", err)
 		}

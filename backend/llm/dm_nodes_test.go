@@ -74,7 +74,7 @@ func TestDecideChunksAndMerges(t *testing.T) {
 		})
 	}
 
-	answers, step, err := decide("some state", questions)
+	answers, step, err := decide(context.Background(), "some state", questions)
 	if err != nil {
 		t.Fatalf("decide: %v", err)
 	}
@@ -101,7 +101,7 @@ func TestDecideNoQuestionsSkipsClient(t *testing.T) {
 	fake := &fakeDecisionClient{}
 	installFakeDecisionClient(t, fake)
 
-	answers, step, err := decide("state", nil)
+	answers, step, err := decide(context.Background(), "state", nil)
 	if err != nil {
 		t.Fatalf("decide: %v", err)
 	}
@@ -127,7 +127,7 @@ func TestModifierAt(t *testing.T) {
 }
 
 func TestHealthNodeShortCircuit(t *testing.T) {
-	result, step, err := runHealthNode(nil)
+	result, step, err := runHealthNode(context.Background(), nil)
 	if err != nil {
 		t.Fatalf("runHealthNode: %v", err)
 	}
@@ -150,7 +150,7 @@ func TestHealthNodeDecision(t *testing.T) {
 		SleepHours: 5.5, SleepBaseline: 7.5, SleepDeviation: -26, SleepPresent: true,
 		BaselineDays: 14,
 	}
-	result, step, err := runHealthNode(snapshot)
+	result, step, err := runHealthNode(context.Background(), snapshot)
 	if err != nil {
 		t.Fatalf("runHealthNode: %v", err)
 	}
@@ -169,7 +169,7 @@ func TestHealthNodeDecision(t *testing.T) {
 }
 
 func TestConstraintsNodeShortCircuit(t *testing.T) {
-	result, _, err := runConstraintsNode([]model.Profile{{FirstName: "A"}})
+	result, _, err := runConstraintsNode(context.Background(), []model.Profile{{FirstName: "A"}})
 	if err != nil {
 		t.Fatalf("runConstraintsNode: %v", err)
 	}
@@ -189,7 +189,7 @@ func TestConstraintsNodeDecision(t *testing.T) {
 	profile := model.Profile{
 		Data: datatypes.JSON(`{"injuries":[{"description":"torn ACL","year":2023}],"limitations":["knee instability"]}`),
 	}
-	result, _, err := runConstraintsNode([]model.Profile{profile})
+	result, _, err := runConstraintsNode(context.Background(), []model.Profile{profile})
 	if err != nil {
 		t.Fatalf("runConstraintsNode: %v", err)
 	}
@@ -324,7 +324,7 @@ func TestDeriveNodeDecision(t *testing.T) {
 	}, noul: 0.1}
 	installFakeDecisionClient(t, fake)
 
-	derived, step, err := DeriveFreeTextParams(DeriveRequest{
+	derived, step, err := DeriveFreeTextParams(context.Background(), DeriveRequest{
 		FreeText:           "allenamento a circuito con 10 pull-up e 20 push-up",
 		Methodologies:      []model.Methodology{{ID: "circuit", Name: "Circuit", Description: "rounds"}, {ID: "strength", Name: "Strength", Description: "heavy"}},
 		AllGoals:           []model.Goal{{ID: "hypertrophy", Description: "muscle mass"}, {ID: "endurance", Description: "stamina"}},
@@ -366,7 +366,7 @@ func TestMuscleTargetingNodeDecision(t *testing.T) {
 	}}
 	installFakeDecisionClient(t, fake)
 
-	result, _, err := runMuscleTargetingNode(
+	result, _, err := runMuscleTargetingNode(context.Background(),
 		nil, nil,
 		map[string]int{"back": 12, "chest": 10, "legs": 14},
 		pipeline.ConstraintExtraction{}, pipeline.HealthAssessment{VolumeModifier: 1, IntensityModifier: 1},
@@ -413,7 +413,7 @@ func TestHistoryNodeProgressions(t *testing.T) {
 		ActivityFeedback: datatypes.JSON(`{"bench-press":"too_easy","squat":"impossible","deadlift":"too_hard"}`),
 	}
 
-	result, step, err := runHistoryNode(trainings, feedback, nil)
+	result, step, err := runHistoryNode(context.Background(), trainings, feedback, nil)
 	if err != nil {
 		t.Fatalf("runHistoryNode: %v", err)
 	}
@@ -444,7 +444,7 @@ func TestHistoryNodeProgressions(t *testing.T) {
 }
 
 func TestHistoryNodeEmpty(t *testing.T) {
-	result, step, err := runHistoryNode(nil, nil, nil)
+	result, step, err := runHistoryNode(context.Background(), nil, nil, nil)
 	if err != nil {
 		t.Fatalf("runHistoryNode: %v", err)
 	}
@@ -612,7 +612,7 @@ func TestDeriveProgramChoice(t *testing.T) {
 	}, noul: 0.1}
 	installFakeDecisionClient(t, fake)
 
-	derived, step, err := DeriveFreeTextParams(DeriveRequest{
+	derived, step, err := DeriveFreeTextParams(context.Background(), DeriveRequest{
 		FreeText:           "voglio replicare l'allenamento di questo articolo",
 		Articles:           []string{twoProgramsArticle},
 		Methodologies:      []model.Methodology{{ID: "amrap", Name: "AMRAP", Description: "rounds against the clock"}},

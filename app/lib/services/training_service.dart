@@ -4,6 +4,7 @@ import '../models/activity.dart';
 import '../dto/partner_info.dart';
 import '../models/training.dart';
 import '../models/training_feedback.dart';
+import 'api_service.dart';
 import 'app_event.dart';
 import 'app_logger.dart';
 import 'authenticated_api_service.dart';
@@ -15,10 +16,22 @@ import 'secure_storage_service.dart';
 class TrainingGenerationException implements Exception {
   final String message;
   final bool retryable;
-  const TrainingGenerationException(this.message, {this.retryable = true});
+  final String? code;
+  const TrainingGenerationException(this.message, {this.retryable = true, this.code});
 
   @override
   String toString() => 'TrainingGenerationException: $message';
+}
+
+/// Thrown inside the service when the user cancels an in-flight
+/// generation: the SSE subscription is dropped (which closes the
+/// connection and abandons the generation server-side) and the
+/// pending request completes with this instead of a result.
+class GenerationCancelledException implements Exception {
+  const GenerationCancelledException();
+
+  @override
+  String toString() => 'GenerationCancelledException';
 }
 
 class TrainingService {
@@ -33,6 +46,29 @@ class TrainingService {
 
   final AuthenticatedApiService _apiService;
   final void Function(AppEvent)? emitEvent;
+
+  /// The in-flight generation's SSE subscription and completer, held so
+  /// [cancelGeneration] can drop the stream and fail the pending call.
+  StreamSubscription<SSEEvent>? _activeGenerationSub;
+  Completer<Training?>? _activeGenerationCompleter;
+  bool _generationCancelled = false;
+
+  /// Status code reported for a user-cancelled generation, mirroring
+  /// the backend's 499 so callers can tell a cancel from a failure.
+  static const int cancelledStatusCode = 499;
+
+  /// Cancels the in-flight generation, if any: the SSE connection is
+  /// closed (the server abandons the request) and the pending
+  /// [generateTraining] call returns a cancelled response instead of
+  /// retrying. Safe to call when nothing is generating.
+  void cancelGeneration() {
+    _generationCancelled = true;
+    final completer = _activeGenerationCompleter;
+    if (completer != null && !completer.isCompleted) {
+      completer.completeError(const GenerationCancelledException());
+    }
+    _activeGenerationSub?.cancel();
+  }
 
   TrainingService({
     AuthenticatedApiService? apiService,
@@ -69,8 +105,12 @@ class TrainingService {
     AppLogger.debug('[TrainingService] Generating training: ${body.keys.join(', ')}');
 
     const maxRetries = 2;
+    _generationCancelled = false;
 
     for (var attempt = 0; attempt <= maxRetries; attempt++) {
+      if (_generationCancelled) {
+        return ApiResponse.error('Generation cancelled', cancelledStatusCode);
+      }
       try {
         final result = await _generateViaSSE(body, onStep: onStep);
         if (result != null) {
@@ -79,7 +119,14 @@ class TrainingService {
         }
         // stream ended without a result — treat as transient
         AppLogger.warning('[TrainingService] SSE stream ended without result');
+      } on GenerationCancelledException {
+        // the user cancelled: never retry, never surface as a failure
+        return ApiResponse.error('Generation cancelled', cancelledStatusCode);
       } on TrainingGenerationException catch (e) {
+        if (e.code == 'cancelled') {
+          // the backend abandoned the generation (connection dropped)
+          return ApiResponse.error('Generation cancelled', cancelledStatusCode);
+        }
         if (!e.retryable) {
           // deterministic rejection (e.g. calibration gate): fail fast
           // instead of pointlessly retrying
@@ -108,28 +155,48 @@ class TrainingService {
     Map<String, dynamic> body, {
     void Function(String step)? onStep,
   }) async {
-    await for (final event in _apiService.postSSE('/training', body: body)) {
-      switch (event.event) {
-        case 'step':
-          final step = event.data['step'] as String?;
-          if (step != null) {
-            AppLogger.debug('[TrainingService] SSE step: $step');
-            onStep?.call(step);
-          }
-        case 'done':
-          final training = Training.fromJson(event.data);
-          AppLogger.info('[TrainingService] Generated training: ${training.id}');
-          return training;
-        case 'error':
-          final msg = event.data['error'] as String? ?? 'Unknown error';
-          final code = event.data['code'] as String?;
-          throw TrainingGenerationException(
-            msg,
-            retryable: isRetryableErrorCode(code),
-          );
-      }
+    final completer = Completer<Training?>();
+    late final StreamSubscription<SSEEvent> sub;
+    sub = _apiService.postSSE('/training', body: body).listen(
+      (event) {
+        switch (event.event) {
+          case 'step':
+            final step = event.data['step'] as String?;
+            if (step != null) {
+              AppLogger.debug('[TrainingService] SSE step: $step');
+              onStep?.call(step);
+            }
+          case 'done':
+            final training = Training.fromJson(event.data);
+            AppLogger.info('[TrainingService] Generated training: ${training.id}');
+            if (!completer.isCompleted) completer.complete(training);
+          case 'error':
+            final msg = event.data['error'] as String? ?? 'Unknown error';
+            final code = event.data['code'] as String?;
+            if (!completer.isCompleted) {
+              completer.completeError(
+                TrainingGenerationException(msg, retryable: isRetryableErrorCode(code), code: code),
+              );
+            }
+        }
+      },
+      onError: (Object e) {
+        if (!completer.isCompleted) completer.completeError(e);
+      },
+      onDone: () {
+        // stream ended without a result: transient, the caller retries
+        if (!completer.isCompleted) completer.complete(null);
+      },
+    );
+    _activeGenerationSub = sub;
+    _activeGenerationCompleter = completer;
+    try {
+      return await completer.future;
+    } finally {
+      if (identical(_activeGenerationSub, sub)) _activeGenerationSub = null;
+      if (identical(_activeGenerationCompleter, completer)) _activeGenerationCompleter = null;
+      await sub.cancel();
     }
-    return null;
   }
 
   Future<ApiResponse<List<Training>>> getTrainings() async {
