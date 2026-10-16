@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -318,44 +319,44 @@ func TestGenerateTrainingValidationCoverage(t *testing.T) {
 	userID := seedCoverageUser(t, db, "gen@example.com", `{"goals":["build-strength"]}`)
 
 	// fresh users are calibrating: anything beyond Auto is rejected
-	if _, err := GenerateTraining(userID, 30, nil, "", "a prompt", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrCalibrationAutoOnly) {
+	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", "a prompt", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrCalibrationAutoOnly) {
 		t.Fatalf("calibration gate err = %v", err)
 	}
-	if _, err := GenerateTraining(userID, 0, nil, "", "", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrDurationRequired) {
+	if _, err := GenerateTraining(context.Background(), userID, 0, nil, "", "", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrDurationRequired) {
 		t.Fatalf("duration required err = %v", err)
 	}
-	if _, err := GenerateTraining(userID, 5, nil, "", "", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrDurationOutOfRange) {
+	if _, err := GenerateTraining(context.Background(), userID, 5, nil, "", "", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrDurationOutOfRange) {
 		t.Fatalf("duration range err = %v", err)
 	}
-	if _, err := GenerateTraining(userID, 500, nil, "", "", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrDurationOutOfRange) {
+	if _, err := GenerateTraining(context.Background(), userID, 500, nil, "", "", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrDurationOutOfRange) {
 		t.Fatalf("duration range high err = %v", err)
 	}
 	longPrompt := make([]byte, maxPromptLength+1)
 	for i := range longPrompt {
 		longPrompt[i] = 'x'
 	}
-	if _, err := GenerateTraining(userID, 30, nil, "", string(longPrompt), nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrCalibrationAutoOnly) {
+	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", string(longPrompt), nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrCalibrationAutoOnly) {
 		// calibration rejects the analyze request before the length check
 		t.Fatalf("long prompt during calibration err = %v", err)
 	}
-	if _, err := GenerateTraining(uuid.New(), 30, nil, "", "", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrUserNotFound) {
+	if _, err := GenerateTraining(context.Background(), uuid.New(), 30, nil, "", "", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrUserNotFound) {
 		t.Fatalf("unknown user err = %v", err)
 	}
-	if _, err := GenerateTraining(userID, 30, nil, "", "", []string{"not-a-uuid"}, false, "", nil, nil, nil, time.UTC, nil); err == nil {
+	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", "", []string{"not-a-uuid"}, false, "", nil, nil, nil, time.UTC, nil); err == nil {
 		t.Fatal("bad partner id must fail")
 	}
-	if _, err := GenerateTraining(userID, 30, nil, "", "", []string{uuid.NewString()}, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrUserNotFound) {
+	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", "", []string{uuid.NewString()}, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrUserNotFound) {
 		t.Fatalf("missing partner err = %v", err)
 	}
-	if _, err := GenerateTraining(userID, 30, nil, "not-a-uuid", "", nil, false, "", nil, nil, nil, time.UTC, nil); err == nil {
+	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "not-a-uuid", "", nil, false, "", nil, nil, nil, time.UTC, nil); err == nil {
 		t.Fatal("bad gym id must fail")
 	}
-	if _, err := GenerateTraining(userID, 30, nil, uuid.NewString(), "", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrInvalidGym) {
+	if _, err := GenerateTraining(context.Background(), userID, 30, nil, uuid.NewString(), "", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrInvalidGym) {
 		t.Fatalf("missing gym err = %v", err)
 	}
 	// with sqlite knowledge the pipeline reaches fact retrieval, whose
 	// pgvector SQL sqlite cannot run: the error surfaces from there
-	_, err := GenerateTraining(userID, 30, nil, "", "", nil, false, "", nil, nil, nil, time.UTC, nil)
+	_, err := GenerateTraining(context.Background(), userID, 30, nil, "", "", nil, false, "", nil, nil, nil, time.UTC, nil)
 	if err == nil {
 		t.Fatal("sqlite knowledge must fail at the pgvector retrieval step")
 	}
@@ -372,7 +373,7 @@ func TestGenerateTrainingPromptFetchCoverage(t *testing.T) {
 		}
 	}
 	// the prompt links an unreachable article: the fetch failure is fatal
-	_, err := GenerateTraining(userID, 30, nil, "", "follow https://example.invalid/article please", nil, false, "", nil, nil, nil, time.UTC, nil)
+	_, err := GenerateTraining(context.Background(), userID, 30, nil, "", "follow https://example.invalid/article please", nil, false, "", nil, nil, nil, time.UTC, nil)
 	if !errors.Is(err, ErrFetchResource) {
 		t.Fatalf("fetch err = %v", err)
 	}

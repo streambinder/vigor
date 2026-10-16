@@ -54,6 +54,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   _SessionMode _sessionMode = _SessionMode.training;
   Gym? _selectedGym;
   bool _isGenerating = false;
+  bool _generationCancelled = false;
   int? _retryAttempt;
   late bool _includeWarmupCooldown;
   final List<UserInfo> _partners = [];
@@ -1094,6 +1095,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
     setState(() {
       _isGenerating = true;
+      _generationCancelled = false;
       _retryAttempt = null;
       _showingRetryMessage = false;
       _currentStepMessage = null;
@@ -1106,6 +1108,21 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       case _SessionMode.training:
         await _generateTrainingSession();
     }
+  }
+
+  /// Cancels the in-flight training generation: the service drops the
+  /// SSE connection (the backend abandons the request) and the modal
+  /// returns to the form without an error notification.
+  void _cancelGeneration() {
+    context.read<ServiceLocator>().trainingService.cancelGeneration();
+    _stopMessageRotation();
+    setState(() {
+      _generationCancelled = true;
+      _isGenerating = false;
+      _retryAttempt = null;
+      _showingRetryMessage = false;
+      _currentStepMessage = null;
+    });
   }
 
   Future<void> _generateFlow() async {
@@ -1231,6 +1248,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     _stopMessageRotation();
 
     if (mounted) {
+      // a user cancel already reset the view: no notification, no pop
+      if (_generationCancelled) return;
       setState(() {
         _isGenerating = false;
       });
@@ -1492,6 +1511,13 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                 ),
               ),
             ),
+            if (_sessionMode == _SessionMode.training) ...[
+              const SizedBox(height: VigorSpacing.md),
+              AdaptiveTextButton(
+                onPressed: _cancelGeneration,
+                child: Text(l10n.cancel),
+              ),
+            ],
           ],
         ),
       ),

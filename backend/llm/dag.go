@@ -2,6 +2,7 @@ package llm
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -71,8 +72,14 @@ func retryFeedbackNote(feedback string) string {
 }
 
 // GenTrainingDAG generates a training using a multi-node DAG instead of a single monolith.
-// onProgress is called after each node completes (may be nil).
-func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (*model.Training, []model.ModelStep, error) {
+// onProgress is called after each node completes (may be nil). The
+// context carries the caller's cancellation: it is checked between
+// layers and threaded into every model call, so a cancelled generation
+// abandons its in-flight work instead of running to completion.
+func GenTrainingDAG(ctx context.Context, req TrainingGenerationRequest, onProgress DAGProgressFunc) (*model.Training, []model.ModelStep, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, nil, err
+	}
 	progress := func(step pipeline.GenerationStep) {
 		if onProgress != nil {
 			onProgress(step)
@@ -93,7 +100,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	// upfront — reuse it instead of paying for it again.
 	if req.FreeText != "" {
 		if req.Derived == nil {
-			derived, deriveStep, err := DeriveFreeTextParams(DeriveRequest{
+			derived, deriveStep, err := DeriveFreeTextParams(ctx, DeriveRequest{
 				FreeText:           req.FreeText,
 				Articles:           req.Articles,
 				Methodologies:      req.Methodologies,
@@ -128,19 +135,19 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 
 	go func() {
 		defer wg.Done()
-		healthResult, healthStep, healthErr = runHealthNode(req.HealthSnapshot)
+		healthResult, healthStep, healthErr = runHealthNode(ctx, req.HealthSnapshot)
 		progress(pipeline.StepAnalyzeRecovery)
 	}()
 
 	go func() {
 		defer wg.Done()
-		historyResult, historyStep, historyErr = runHistoryNode(req.RecentTrainings, req.RecentFeedback, req.RecentHR)
+		historyResult, historyStep, historyErr = runHistoryNode(ctx, req.RecentTrainings, req.RecentFeedback, req.RecentHR)
 		progress(pipeline.StepReviewHistory)
 	}()
 
 	go func() {
 		defer wg.Done()
-		constraintResult, constraintStep, constraintErr = runConstraintsNode(req.Profiles)
+		constraintResult, constraintStep, constraintErr = runConstraintsNode(ctx, req.Profiles)
 		progress(pipeline.StepCheckConstraints)
 	}()
 
@@ -158,6 +165,9 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	}
 	if constraintErr != nil {
 		return nil, orderedSteps(nodes), fmt.Errorf("constraints node: %w", constraintErr)
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, orderedSteps(nodes), err
 	}
 
 	// layer 1: strategy and muscle targeting in parallel — both depend on layer 0 only
@@ -182,7 +192,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	go func() {
 		defer wg.Done()
 		strategyResult, strategyStep, strategyErr = runStrategyNode(
-			req.Goals, req.Methodology, req.Methodologies,
+			ctx, req.Goals, req.Methodology, req.Methodologies,
 			methodologyCoverage(req.WorkExercises, req.Methodologies),
 			healthResult, historyResult,
 			req.UserPrompt, req.Duration, req.SkipWarmupCooldown,
@@ -194,7 +204,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	go func() {
 		defer wg.Done()
 		targetingResult, targetingStep, targetingErr = runMuscleTargetingNode(
-			req.Muscles, req.Goals, muscleCoverage(req.WorkExercises),
+			ctx, req.Muscles, req.Goals, muscleCoverage(req.WorkExercises),
 			constraintResult, healthResult, historyResult, req.UserPrompt,
 			explicitProgram,
 		)
@@ -242,7 +252,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 
 	// layer 2: exercise selection
 	exerciseResult, exerciseStep, err := runExercisesNode(
-		strategyResult, targetingResult, selectionConstraints, historyResult,
+		ctx, strategyResult, targetingResult, selectionConstraints, historyResult,
 		req.WorkExercises, req.WarmupExercises, req.CooldownExercises,
 		req.FavoriteExercises, req.RecentExerciseIDs, req.Facts,
 		resolvedMethodology, req.SkipWarmupCooldown, req.Duration,
@@ -324,7 +334,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 
 	// layer 3: load programming
 	loadResult, loadStep, err := runLoadNode(
-		strategyResult, exerciseResult, historyResult, healthResult,
+		ctx, strategyResult, exerciseResult, historyResult, healthResult,
 		exerciseModes, weightedExercises, resolvedMethodology,
 		req.Modifiers, req.ModifierVariants, req.Facts,
 		req.EquipmentIDs, req.FavoriteEquipmentIDs,
@@ -382,7 +392,7 @@ func GenTrainingDAG(req TrainingGenerationRequest, onProgress DAGProgressFunc) (
 	}
 
 	creativeResult, creativeStep, err := runCreativeNode(
-		language, strategyResult, copyTargeting, exerciseResult, historyResult, constraintResult,
+		ctx, language, strategyResult, copyTargeting, exerciseResult, historyResult, constraintResult,
 		loadResult, healthResult, derivedSummary, calibrationCoverage, uncoveredMuscles,
 		cautionMovements, userConditionsText(req.Profiles),
 	)
@@ -438,7 +448,7 @@ type DeriveRequest struct {
 // muscles and equipment as one claim each — judged by the decision
 // model against the request state; the movements of an explicit
 // program are matched deterministically against the catalog names.
-func DeriveFreeTextParams(req DeriveRequest) (pipeline.DerivedParams, model.ModelStep, error) {
+func DeriveFreeTextParams(ctx context.Context, req DeriveRequest) (pipeline.DerivedParams, model.ModelStep, error) {
 	validGoals := make([]string, len(req.AllGoals))
 	for i, g := range req.AllGoals {
 		validGoals[i] = g.ID
@@ -516,7 +526,7 @@ func DeriveFreeTextParams(req DeriveRequest) (pipeline.DerivedParams, model.Mode
 		},
 	)
 
-	answers, step, err := decide(state, questions)
+	answers, step, err := decide(ctx, state, questions)
 	if err != nil {
 		return pipeline.DerivedParams{}, step, err
 	}
@@ -1381,6 +1391,7 @@ func adjustWeight(from float64, increase bool) float64 {
 // replace, or maintain — is judged by the decision model against the
 // rendered history state, and any weight change is arithmetic in code.
 func runHistoryNode(
+	ctx context.Context,
 	recentTrainings []model.Training,
 	recentFeedback map[uuid.UUID]model.TrainingFeedback,
 	recentHR map[uuid.UUID]*model.HealthExerciseSession,
@@ -1442,7 +1453,7 @@ func runHistoryNode(
 
 	state := prompt.NodeHistoryUser(recentTrainings, recentFeedback, recentHR)
 	if len(candidates) == 0 {
-		_, step, err := decide(state, nil)
+		_, step, err := decide(ctx, state, nil)
 		result.Summary = historySummary(result)
 		return result, step, err
 	}
@@ -1462,7 +1473,7 @@ func runHistoryNode(
 		})
 	}
 
-	answers, step, err := decide(state, questions)
+	answers, step, err := decide(ctx, state, questions)
 	if err != nil {
 		return pipeline.HistoryAnalysis{}, step, err
 	}
@@ -1603,7 +1614,7 @@ var accommodationVocabulary = []constraintItem{
 // runConstraintsNode executes the constraint extraction node: each
 // pattern and accommodation of the closed vocabulary is a noul claim
 // the decision model judges against the profile state.
-func runConstraintsNode(profiles []model.Profile) (pipeline.ConstraintExtraction, model.ModelStep, error) {
+func runConstraintsNode(ctx context.Context, profiles []model.Profile) (pipeline.ConstraintExtraction, model.ModelStep, error) {
 	// short-circuit: no injuries/limitations/conditions → empty constraints
 	hasConstraints := false
 	for _, p := range profiles {
@@ -1633,7 +1644,7 @@ func runConstraintsNode(profiles []model.Profile) (pipeline.ConstraintExtraction
 		})
 	}
 
-	answers, step, err := decide(state, questions)
+	answers, step, err := decide(ctx, state, questions)
 	if err != nil {
 		return pipeline.ConstraintExtraction{}, step, err
 	}
@@ -1719,7 +1730,7 @@ func recoverySummary(score float64) string {
 // runHealthNode executes the health assessment node: the decision model
 // scores the recovery state against the snapshot, code maps the score
 // to volume and intensity multipliers.
-func runHealthNode(healthSnapshot *model.HealthSnapshot) (pipeline.HealthAssessment, model.ModelStep, error) {
+func runHealthNode(ctx context.Context, healthSnapshot *model.HealthSnapshot) (pipeline.HealthAssessment, model.ModelStep, error) {
 	// short-circuit: no snapshot, or a snapshot with no actually-reported recovery metric
 	// (e.g. device synced only steps=0/sleep=0 rows) → no adjustment. this prevents a missing
 	// metric rendered as "0" from being read as an extreme value.
@@ -1730,7 +1741,7 @@ func runHealthNode(healthSnapshot *model.HealthSnapshot) (pipeline.HealthAssessm
 	}
 
 	state := prompt.NodeHealthUser(healthSnapshot)
-	answers, step, err := decide(state, []dm.Question{
+	answers, step, err := decide(ctx, state, []dm.Question{
 		{
 			ID:   "recovery",
 			Kind: dm.KindScore,
@@ -1770,6 +1781,7 @@ func runHealthNode(healthSnapshot *model.HealthSnapshot) (pipeline.HealthAssessm
 
 // runStrategyNode executes the strategy & methodology selection node.
 func runStrategyNode(
+	ctx context.Context,
 	goals []model.Goal,
 	methodology *model.Methodology,
 	methodologies []model.Methodology,
@@ -1795,7 +1807,7 @@ func runStrategyNode(
 	step, err := getLLM(StageReasoning, "").query(p,
 		// low effort: the trade-off inputs arrive pre-digested from the dm steps, and
 		// medium was measured spending up to ~1700 tokens thinking over the same calls
-		queryOpts{temperature: 0.3, maxTokens: 3000, effort: effortLow, timeout: 60 * time.Second})
+		queryOpts{ctx: ctx, temperature: 0.3, maxTokens: 3000, effort: effortLow, timeout: 60 * time.Second})
 	if err != nil {
 		return pipeline.Strategy{}, model.NewLLMStep(step), err
 	}
@@ -1822,6 +1834,7 @@ var muscleEmphasisLevels = []string{"rest", "maintenance", "emphasis"}
 // sets. User-selected muscles keep their deterministic priority via
 // resolvePrimaryMuscles.
 func runMuscleTargetingNode(
+	ctx context.Context,
 	userMuscles []string,
 	goals []model.Goal,
 	coverage map[string]int,
@@ -1858,7 +1871,7 @@ func runMuscleTargetingNode(
 		})
 	}
 
-	answers, step, err := decide(state, questions)
+	answers, step, err := decide(ctx, state, questions)
 	if err != nil {
 		return pipeline.MuscleTargeting{}, step, err
 	}
@@ -2065,6 +2078,7 @@ func exerciseCountBand(methodology *model.Methodology, durationMinutes int) (int
 
 // runExercisesNode executes the exercise selection node.
 func runExercisesNode(
+	ctx context.Context,
 	strategy pipeline.Strategy,
 	targeting pipeline.MuscleTargeting,
 	constraints pipeline.ConstraintExtraction,
@@ -2096,7 +2110,7 @@ func runExercisesNode(
 
 	// the hard one: satisfy family coverage, muscles, equipment and avoid-lists at once
 	step, err := getLLM(StageReasoning, "").query(p,
-		queryOpts{temperature: 0.5, maxTokens: 4000, topP: 0.9, effort: effortLow, timeout: 90 * time.Second})
+		queryOpts{ctx: ctx, temperature: 0.5, maxTokens: 4000, topP: 0.9, effort: effortLow, timeout: 90 * time.Second})
 	if err != nil {
 		return pipeline.ExerciseSelection{}, model.NewLLMStep(step), err
 	}
@@ -2478,6 +2492,7 @@ const (
 
 // runLoadNode executes the load programming node.
 func runLoadNode(
+	ctx context.Context,
 	strategy pipeline.Strategy,
 	exercises pipeline.ExerciseSelection,
 	history pipeline.HistoryAnalysis,
@@ -2516,7 +2531,7 @@ func runLoadNode(
 		maxTokens = loadMaxTokensExplicitProgram
 	}
 	step, err := getLLM(StageReasoning, "").query(p,
-		queryOpts{temperature: 0.2, maxTokens: maxTokens, effort: effortMedium, timeout: 90 * time.Second})
+		queryOpts{ctx: ctx, temperature: 0.2, maxTokens: maxTokens, effort: effortMedium, timeout: 90 * time.Second})
 	if err != nil {
 		return pipeline.LoadProgramming{}, model.NewLLMStep(step), err
 	}
@@ -2548,6 +2563,7 @@ func progressionsForSelected(progressions []pipeline.ProgressionSignal, selected
 // each pipeline node result embeds Summarizable, so the creative copy can read
 // the one-liner summary from every step and weave them into a single description.
 func runCreativeNode(
+	ctx context.Context,
 	language string,
 	strategy pipeline.Strategy,
 	targeting pipeline.MuscleTargeting,
@@ -2571,7 +2587,7 @@ func runCreativeNode(
 
 	// title + description: deliberation buys nothing here and eats the token budget
 	step, err := getLLM(StageReasoning, "").query(p,
-		queryOpts{temperature: 0.8, maxTokens: 1500, topP: 0.9, effort: effortMinimal, timeout: 30 * time.Second})
+		queryOpts{ctx: ctx, temperature: 0.8, maxTokens: 1500, topP: 0.9, effort: effortMinimal, timeout: 30 * time.Second})
 	if err != nil {
 		return pipeline.CreativeCopy{}, model.NewLLMStep(step), err
 	}

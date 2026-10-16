@@ -3,6 +3,7 @@
 package llm
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -408,7 +409,7 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 
 	run := func(t *testing.T, req TrainingGenerationRequest) (*model.Training, []model.ModelStep) {
 		t.Helper()
-		training, steps, err := GenTrainingDAG(req, nil)
+		training, steps, err := GenTrainingDAG(context.Background(), req, nil)
 		dumpTrajectory(t, training, steps)
 		if err != nil {
 			t.Fatalf("GenTrainingDAG: %v", err)

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"regexp"
@@ -40,6 +41,7 @@ var (
 	ErrDurationOutOfRange       = errors.New("duration must be between 10 and 180 minutes")
 	ErrPromptTooLong            = errors.New("prompt exceeds maximum length")
 	ErrMalformedTraining        = errors.New("malformed generated training")
+	ErrGenerationCancelled      = errors.New("generation cancelled")
 	ErrTrainingNotCompleted     = errors.New("training not completed")
 	ErrCritiqueRequired         = errors.New("critique is required")
 	ErrTrainingAlreadyCompleted = errors.New("training already completed")
@@ -60,7 +62,7 @@ type promptDerivation struct {
 
 // derivePromptParams runs the DAG derive params node before pool retrieval,
 // so the derivation drives the exercise search rather than following it.
-func derivePromptParams(promptText string, articles []string, onProgress llm.DAGProgressFunc) (*promptDerivation, error) {
+func derivePromptParams(ctx context.Context, promptText string, articles []string, onProgress llm.DAGProgressFunc) (*promptDerivation, error) {
 	methodologies, err := rag.RetrieveAllMethodologies()
 	if err != nil {
 		return nil, err
@@ -98,7 +100,7 @@ func derivePromptParams(promptText string, articles []string, onProgress llm.DAG
 		derivation.validEquipment[i] = e.ID
 	}
 
-	derivation.derived, derivation.step, err = llm.DeriveFreeTextParams(llm.DeriveRequest{
+	derivation.derived, derivation.step, err = llm.DeriveFreeTextParams(ctx, llm.DeriveRequest{
 		FreeText:           promptText,
 		Articles:           articles,
 		Methodologies:      methodologies,
@@ -174,7 +176,7 @@ func calibrationGenerationAllowed(analyze bool, equipment []string, gymID, promp
 		!skipWarmupCooldown
 }
 
-func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string, request []byte, loc *time.Location, onProgress llm.DAGProgressFunc) (*model.Training, error) {
+func GenerateTraining(ctx context.Context, userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string, request []byte, loc *time.Location, onProgress llm.DAGProgressFunc) (*model.Training, error) {
 	// a non-empty prompt runs through the analyzer, which fills only the
 	// tuning parameters the user left unset; explicit choices stay
 	// authoritative
@@ -223,7 +225,7 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 		}
 
 		var err error
-		derivation, err = derivePromptParams(prompt, articles, onProgress)
+		derivation, err = derivePromptParams(ctx, prompt, articles, onProgress)
 		if err != nil {
 			return nil, err
 		}
@@ -621,16 +623,23 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 	var retryFeedback string
 
 	for attempt := 0; attempt <= maxGenerationRetries; attempt++ {
+		if ctx.Err() != nil {
+			return nil, ErrGenerationCancelled
+		}
 		var err error
 		// a retry re-runs the DAG with the previous attempt's failure
 		// attached, so the nodes can correct the exact rejection instead
 		// of re-rolling the same prompts and repeating it
 		dagRequest.RetryFeedback = retryFeedback
-		training, steps, err = llm.GenTrainingDAG(dagRequest, onProgress)
+		training, steps, err = llm.GenTrainingDAG(ctx, dagRequest, onProgress)
 		for _, step := range steps {
 			usage.Add(step.LLM.Data().Usage)
 		}
 		if err != nil {
+			if ctx.Err() != nil {
+				persistFailedTrajectory(request, steps, ErrGenerationCancelled.Error())
+				return nil, ErrGenerationCancelled
+			}
 			legacy := model.LegacyPrompt(steps)
 			failureEvent := event.TrainingGenerationFailureEvent{
 				Event:            event.Event{Time: time.Now()},
@@ -719,6 +728,13 @@ func GenerateTraining(userID uuid.UUID, duration int, equipment []string, gymID,
 			Interface("event", failureEvent).
 			Err(validationErr).Msg("generated training validation failed after all retries")
 		return nil, ErrMalformedTraining
+	}
+
+	// a cancellation that landed during the final attempt must not
+	// deliver a training the user already abandoned
+	if ctx.Err() != nil {
+		persistFailedTrajectory(request, steps, ErrGenerationCancelled.Error())
+		return nil, ErrGenerationCancelled
 	}
 
 	legacy := model.LegacyPrompt(steps)

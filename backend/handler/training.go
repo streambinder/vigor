@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -53,6 +54,7 @@ func postTrainingJSON(c *fiber.Ctx) error {
 	}
 
 	training, err := service.GenerateTraining(
+		c.Context(),
 		c.Locals("userID").(uuid.UUID),
 		req.Duration, req.Equipment, req.Gym, req.Prompt, req.Partners,
 		req.SkipWarmupCooldown, req.Methodology, req.Goals, req.Muscles,
@@ -91,7 +93,17 @@ func postTrainingSSE(c *fiber.Ctx) error {
 	c.Set("Cache-Control", "no-cache")
 	c.Set("Connection", "keep-alive")
 
+	// the stream is also the cancellation channel: the generation runs
+	// under a context that a failed stream write cancels, so a client
+	// that cancels (or goes away) abandons the in-flight generation
+	// server-side instead of letting it run to completion. The context
+	// is created here, not inside the stream writer: the fiber context
+	// is pooled and must not be touched from the writer goroutine.
+	ctx, cancel := context.WithCancel(context.Background())
+
 	c.Context().SetBodyStreamWriter(func(w *bufio.Writer) {
+		defer cancel()
+
 		// the DAG reports progress from parallel node goroutines:
 		// every write to the response stream is serialized on mu, so
 		// a step event can never interleave with another write
@@ -99,8 +111,13 @@ func postTrainingSSE(c *fiber.Ctx) error {
 		writeEvent := func(format string, args ...any) {
 			mu.Lock()
 			defer mu.Unlock()
-			fmt.Fprintf(w, format, args...)
-			w.Flush()
+			if _, err := fmt.Fprintf(w, format, args...); err != nil {
+				cancel()
+				return
+			}
+			if err := w.Flush(); err != nil {
+				cancel()
+			}
 		}
 
 		// progress callback writes SSE step events
@@ -109,7 +126,7 @@ func postTrainingSSE(c *fiber.Ctx) error {
 		}
 
 		training, genErr := service.GenerateTraining(
-			userID,
+			ctx, userID,
 			req.Duration, req.Equipment, req.Gym, req.Prompt, req.Partners,
 			req.SkipWarmupCooldown, req.Methodology, req.Goals, req.Muscles,
 			rawRequest, loc, onProgress,
@@ -131,6 +148,8 @@ func postTrainingSSE(c *fiber.Ctx) error {
 // trainingError returns the appropriate HTTP error for a generation failure.
 func trainingError(c *fiber.Ctx, err error) error {
 	switch {
+	case errors.Is(err, service.ErrGenerationCancelled):
+		return c.Status(499).JSON(fiber.Map{"error": "generation cancelled"})
 	case errors.Is(err, service.ErrDurationRequired):
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "duration is required"})
 	case errors.Is(err, service.ErrDurationOutOfRange):
@@ -160,6 +179,8 @@ func trainingError(c *fiber.Ctx, err error) error {
 // is never attempted. Empty means unknown (legacy behavior: retry).
 func trainingErrorCode(err error) string {
 	switch {
+	case errors.Is(err, service.ErrGenerationCancelled):
+		return "cancelled"
 	case errors.Is(err, service.ErrCalibrationAutoOnly):
 		return "calibration_auto_only"
 	case errors.Is(err, service.ErrMalformedTraining):
@@ -172,6 +193,8 @@ func trainingErrorCode(err error) string {
 // trainingErrorMessage extracts a user-facing error message from a generation error.
 func trainingErrorMessage(err error) string {
 	switch {
+	case errors.Is(err, service.ErrGenerationCancelled):
+		return "generation cancelled"
 	case errors.Is(err, service.ErrFetchResource):
 		return "could not fetch linked resource"
 	case errors.Is(err, service.ErrMalformedTraining):

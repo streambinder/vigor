@@ -32,7 +32,11 @@ func openAIClient(host, apiKey string) openai.Client {
 func (llm *OpenAI) query(prompt model.LLMPrompt, opts queryOpts) (model.LLMStep, error) {
 	step := model.LLMStep{Model: llm.model, Prompt: prompt}
 	start := time.Now()
-	ctx, cancel := context.WithTimeout(context.Background(), opts.timeout)
+	parent := opts.ctx
+	if parent == nil {
+		parent = context.Background()
+	}
+	ctx, cancel := context.WithTimeout(parent, opts.timeout)
 	defer cancel()
 	params := openai.ChatCompletionNewParams{
 		Model: llm.model,

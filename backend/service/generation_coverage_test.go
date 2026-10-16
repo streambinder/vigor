@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"sync/atomic"
@@ -25,7 +26,7 @@ func TestGenerateTrainingSuccessCoverage(t *testing.T) {
 	// the DAG reports progress from its parallel node goroutines:
 	// the counter is atomic
 	var progress atomic.Int32
-	training, err := GenerateTraining(userID, 30, nil, "", "",
+	training, err := GenerateTraining(context.Background(), userID, 30, nil, "", "",
 		[]string{partnerID.String()}, false, "", nil, nil,
 		[]byte("raw request"), time.UTC, func(step pipeline.GenerationStep) { progress.Add(1) })
 	if err != nil {
@@ -57,7 +58,7 @@ func TestGenerateTrainingSuccessCoverage(t *testing.T) {
 		gymID.String(), userID.String()).Error; err != nil {
 		t.Fatal(err)
 	}
-	second, err := GenerateTraining(userID, 30, nil, gymID.String(), "", nil, false, "strength", nil, []string{"quads"}, nil, time.UTC, nil)
+	second, err := GenerateTraining(context.Background(), userID, 30, nil, gymID.String(), "", nil, false, "strength", nil, []string{"quads"}, nil, time.UTC, nil)
 	if err != nil {
 		t.Fatalf("GenerateTraining gym: %v", err)
 	}
@@ -79,7 +80,7 @@ func TestGenerateTrainingPromptDeriveCoverage(t *testing.T) {
 			insertProficiency(t, db, userID, uuid.New(), muscle, 10, time.Now())
 		}
 	}
-	derivation, err := derivePromptParams("a gentle strength session", nil, nil)
+	derivation, err := derivePromptParams(context.Background(), "a gentle strength session", nil, nil)
 	if err != nil {
 		t.Fatalf("derivePromptParams: %v", err)
 	}
@@ -270,12 +271,12 @@ func TestGenerateTrainingFailureModesCoverage(t *testing.T) {
 
 	// the strategy stage answers garbage: the DAG fails on every
 	// attempt and the error surfaces
-	if _, err := GenerateTraining(fakeDBOwnerID, 30, nil, "", "STUBFAIL:strategy-bad", nil, false, "", nil, nil, nil, time.UTC, nil); err == nil {
+	if _, err := GenerateTraining(context.Background(), fakeDBOwnerID, 30, nil, "", "STUBFAIL:strategy-bad", nil, false, "", nil, nil, nil, time.UTC, nil); err == nil {
 		t.Fatalf("strategy failure must surface: %v", err)
 	}
 	// the load stage answers a stub-sized session that cannot scale
 	// to the requested duration: validation rejects every attempt
-	if _, err := GenerateTraining(fakeDBOwnerID, 30, nil, "", "STUBFAIL:load-short", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrMalformedTraining) {
+	if _, err := GenerateTraining(context.Background(), fakeDBOwnerID, 30, nil, "", "STUBFAIL:load-short", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrMalformedTraining) {
 		t.Fatalf("load-short err = %v", err)
 	}
 }
@@ -292,7 +293,7 @@ func TestGenerateTrainingFailurePersistsTrajectories(t *testing.T) {
 	userID := seedCoverageUser(t, db, "failtraj@example.com", "")
 
 	// the strategy stage answers garbage: the DAG fails on every attempt
-	if _, err := GenerateTraining(userID, 30, nil, "", "STUBFAIL:strategy-bad",
+	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", "STUBFAIL:strategy-bad",
 		nil, false, "", nil, nil, []byte("raw request"), time.UTC, nil); err == nil {
 		t.Fatal("strategy failure must surface")
 	}
@@ -354,6 +355,22 @@ func TestPersistFailedTrajectory(t *testing.T) {
 	}
 	if string(trajectory.Request) != "raw request" {
 		t.Fatalf("trajectory request = %q", trajectory.Request)
+	}
+}
+
+// TestGenerateTrainingCancelled verifies that a caller cancelling the
+// generation context gets the cancellation sentinel back instead of a
+// completed generation: the request is abandoned, not finished.
+func TestGenerateTrainingCancelled(t *testing.T) {
+	db := setupCoverageDB(t)
+	useFakeKnowledgeMode(t, true)
+	userID := seedCoverageUser(t, db, "cancelgen@example.com", "")
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, err := GenerateTraining(ctx, userID, 30, nil, "", "",
+		nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrGenerationCancelled) {
+		t.Fatalf("cancelled generation err = %v, want ErrGenerationCancelled", err)
 	}
 }
 

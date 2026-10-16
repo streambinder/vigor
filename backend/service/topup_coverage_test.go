@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -20,7 +21,7 @@ func TestGenerateTrainingDeriveErrors(t *testing.T) {
 		db := setupCoverageDB(t)
 		useFakeKnowledgeFailing(t, failOn)
 		userID := seedCoverageUser(t, db, "derive@example.com", `{"goals":["build-strength"]}`)
-		if _, err := GenerateTraining(userID, 30, nil, "", "",
+		if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", "",
 			nil, false, "", nil, nil, []byte("req"), time.UTC, nil); err == nil {
 			t.Fatalf("failOn %s: GenerateTraining must fail", failOn)
 		}
@@ -60,7 +61,7 @@ func TestGenerationPersistErrors(t *testing.T) {
 		BEGIN SELECT RAISE(ABORT, 'sabotaged'); END`).Error; err != nil {
 		t.Fatal(err)
 	}
-	if _, err := GenerateTraining(userID, 30, nil, "", "",
+	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", "",
 		nil, false, "", nil, nil, []byte("req"), time.UTC, nil); err == nil {
 		t.Fatal("GenerateTraining must fail when the insert is aborted")
 	}
