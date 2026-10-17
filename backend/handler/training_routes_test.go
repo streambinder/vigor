@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"sync"
 	"testing"
@@ -178,6 +179,36 @@ func TestTrainingGenerationRoutesCoverage(t *testing.T) {
 	status, body = doReq(t, app, http.MethodPost, "/training",
 		[]byte(`{"duration":30}`), withTZ(sseAuth, "Not/AZone"))
 	expectStatus(t, status, http.StatusBadRequest, body)
+}
+
+// TestTrainingSSEDisablesProxyBuffering pins the X-Accel-Buffering
+// response header: without it the reverse proxy buffers the event
+// stream, the client sees no progress, and a client disconnect never
+// surfaces as a failed write, so cancellation cannot land.
+func TestTrainingSSEDisablesProxyBuffering(t *testing.T) {
+	app := Init()
+	db := setupHandlerDB(t)
+	useHandlerFakeKnowledge(t)
+	userID := seedHandlerUser(t, db, "sse-buffering@example.com", "")
+	auth := withTZ(authHeader(t, db, userID), "UTC")
+
+	req := httptest.NewRequest(http.MethodPost, "/training", strings.NewReader(`{"duration":30}`))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "text/event-stream")
+	for k, v := range auth {
+		req.Header.Set(k, v)
+	}
+	resp, err := app.Test(req, 30000)
+	if err != nil {
+		t.Fatalf("POST /training (SSE): %v", err)
+	}
+	defer resp.Body.Close()
+	if got := resp.Header.Get("X-Accel-Buffering"); got != "no" {
+		t.Fatalf("X-Accel-Buffering = %q, want %q", got, "no")
+	}
+	if got := resp.Header.Get("Content-Type"); !strings.HasPrefix(got, "text/event-stream") {
+		t.Fatalf("Content-Type = %q, want text/event-stream", got)
+	}
 }
 
 // TestTrainingSSEGenerationStreamsProgress drives a successful
