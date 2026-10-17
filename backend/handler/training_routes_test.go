@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/streambinder/vigor/database"
@@ -338,4 +340,45 @@ func TestProgressAndReportRoutesCoverage(t *testing.T) {
 	status, body = doReq(t, app, http.MethodPost, "/report",
 		[]byte(`{"training_id":"`+trainingID.String()+`","content":"broken"}`), auth)
 	expectStatus(t, status, http.StatusCreated, body)
+}
+
+// TestHeartbeatWrites verifies that the SSE heartbeat writes on every
+// tick and stops when the stop channel closes: the heartbeat is the
+// disconnect probe of a streamed generation, so a stalled writer or a
+// goroutine that outlives the stream would silently break cancellation.
+func TestHeartbeatWrites(t *testing.T) {
+	var mu sync.Mutex
+	writes := 0
+	write := func() {
+		mu.Lock()
+		defer mu.Unlock()
+		writes++
+	}
+
+	stop := make(chan struct{})
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		heartbeatWrites(stop, 5*time.Millisecond, write)
+	}()
+
+	time.Sleep(40 * time.Millisecond)
+	close(stop)
+	<-done
+
+	mu.Lock()
+	got := writes
+	mu.Unlock()
+	if got < 3 {
+		t.Fatalf("heartbeat writes = %d, want several ticks in 40ms", got)
+	}
+
+	// no write may land after the stop
+	time.Sleep(15 * time.Millisecond)
+	mu.Lock()
+	after := writes
+	mu.Unlock()
+	if after != got {
+		t.Fatalf("heartbeat wrote %d more times after stop", after-got)
+	}
 }

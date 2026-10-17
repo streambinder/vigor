@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -72,6 +73,29 @@ func postTrainingJSON(c *fiber.Ctx) error {
 // "error" with {"error":"msg","code":"code"} where code is a machine-readable
 // failure class (empty for unknown errors) so clients can decide whether a
 // retry is worthwhile.
+// sseHeartbeatInterval is the period of the SSE heartbeat written during
+// a streamed generation. The heartbeat bounds the delay between a client
+// disconnect and its detection: without it, the failed write that cancels
+// the generation context can surface only at the next step event, and a
+// fast generation completes before the cancellation lands.
+const sseHeartbeatInterval = time.Second
+
+// heartbeatWrites calls write on every tick until stop is closed. The
+// write is an SSE comment: clients ignore it, and the write itself is the
+// disconnect probe.
+func heartbeatWrites(stop <-chan struct{}, interval time.Duration, write func()) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-stop:
+			return
+		case <-ticker.C:
+			write()
+		}
+	}
+}
+
 func postTrainingSSE(c *fiber.Ctx) error {
 	var req dto.PostTrainingRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -120,6 +144,14 @@ func postTrainingSSE(c *fiber.Ctx) error {
 			}
 		}
 
+		// heartbeat: a comment write every interval, so a disconnect is
+		// detected within one interval even between step events
+		stop := make(chan struct{})
+		var stopOnce sync.Once
+		stopHeartbeat := func() { stopOnce.Do(func() { close(stop) }) }
+		defer stopHeartbeat()
+		go heartbeatWrites(stop, sseHeartbeatInterval, func() { writeEvent(": hb\n\n") })
+
 		// progress callback writes SSE step events
 		onProgress := func(step pipeline.GenerationStep) {
 			writeEvent("event: step\ndata: {\"step\":%q}\n\n", step)
@@ -131,6 +163,7 @@ func postTrainingSSE(c *fiber.Ctx) error {
 			req.SkipWarmupCooldown, req.Methodology, req.Goals, req.Muscles,
 			rawRequest, loc, onProgress,
 		)
+		stopHeartbeat()
 
 		if genErr != nil {
 			errMsg := trainingErrorMessage(genErr)

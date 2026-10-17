@@ -152,29 +152,51 @@ class ApiService {
   }
 
   /// POST request that returns an SSE event stream.
+  ///
+  /// The stream is a transformer chain over the response byte stream,
+  /// never an async* generator: cancelling the subscription must reach
+  /// the socket at once, so the server sees the disconnect and abandons
+  /// the request. An async* generator parked on its next chunk applies
+  /// a cancellation only when that chunk arrives, which kept cancelled
+  /// generations alive server-side until they completed.
   Stream<SSEEvent> postSSE(
     String endpoint, {
     Map<String, dynamic>? body,
     Map<String, String>? headers,
-  }) async* {
+  }) {
     final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
     final request = http.Request('POST', url);
     request.headers.addAll(_buildHeaders(headers));
     request.headers['Accept'] = 'text/event-stream';
     if (body != null) request.body = jsonEncode(body);
 
-    final response = await _client.send(request);
-    String eventType = '';
-    await for (final chunk in response.stream.transform(utf8.decoder).transform(const LineSplitter())) {
-      if (chunk.startsWith('event: ')) {
-        eventType = chunk.substring(7).trim();
-      } else if (chunk.startsWith('data: ')) {
-        final data = chunk.substring(6).trim();
-        try {
-          yield SSEEvent(eventType, jsonDecode(data) as Map<String, dynamic>);
-        } catch (_) {}
-      }
-    }
+    var eventType = '';
+    final parser = StreamTransformer<String, SSEEvent>.fromHandlers(
+      handleData: (line, sink) {
+        if (line.startsWith('event: ')) {
+          eventType = line.substring(7).trim();
+        } else if (line.startsWith('data: ')) {
+          try {
+            sink.add(
+              SSEEvent(
+                eventType,
+                jsonDecode(line.substring(6).trim()) as Map<String, dynamic>,
+              ),
+            );
+          } catch (_) {}
+        }
+      },
+    );
+
+    return _client
+        .send(request)
+        .asStream()
+        .asyncExpand(
+          (response) => response.stream
+              .transform(utf8.decoder)
+              .transform(const LineSplitter())
+              .transform(parser),
+        );
   }
 
   /// Build headers with default values
