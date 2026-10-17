@@ -116,6 +116,12 @@ func postTrainingSSE(c *fiber.Ctx) error {
 	c.Set("Content-Type", "text/event-stream")
 	c.Set("Cache-Control", "no-cache")
 	c.Set("Connection", "keep-alive")
+	// X-Accel-Buffering disables response buffering at the nginx
+	// reverse proxy in front of this service. With buffering on, step
+	// events and heartbeats accumulate in the proxy buffer: the client
+	// sees no progress, and its disconnect never surfaces here as a
+	// failed write, so a cancelled generation runs to completion.
+	c.Set("X-Accel-Buffering", "no")
 
 	// the stream is also the cancellation channel: the generation runs
 	// under a context that a failed stream write cancels, so a client
