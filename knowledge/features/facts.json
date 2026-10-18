@@ -204,10 +204,10 @@
     "content": "Warm-up: 5-10 min aerobic, dynamic stretching, specific warm-up sets with progressive loading. Needs increase with age and load."
   },
   {
-    "reference": "https://doi.org/10.1007/s40279-015-0365-0",
+    "reference": "https://doi.org/10.1249/MSS.0b013e318279a10a",
     "area": "injury",
     "tags": ["overtraining", "fatigue", "recovery"],
-    "content": "Overtraining signs: declining performance despite training, persistent soreness, elevated resting HR 5-10 bpm above baseline. Implement deloads."
+    "content": "Overtraining signs: declining performance despite training, persistent fatigue and sore, heavy muscles, disturbed sleep and mood. Resting heart rate alone does not diagnose it: it may rise, fall, or not change. Prevent it with load management and rest days; established overtraining needs prolonged rest, not just a deload."
   },
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000001675",
@@ -834,10 +834,10 @@
     "content": "Elevated resting heart rate above personal baseline indicates incomplete parasympathetic recovery. A sustained rise of 5+ bpm over baseline is a reliable marker of accumulated training stress."
   },
   {
-    "reference": "https://doi.org/10.1007/s40279-018-0867-7",
+    "reference": "https://doi.org/10.1007/s00421-017-3725-7",
     "area": "recovery",
     "tags": ["DOMS", "fatigue", "external-load"],
-    "content": "Residual muscular fatigue from external exercise peaks at 24-48 hours post-session. Overlapping muscle groups within this window compounds recovery demand and increases injury risk."
+    "content": "After resistance training, especially to failure or with unfamiliar/eccentric work, neuromuscular performance can remain depressed for 24-48 hours, and muscle soreness (DOMS) typically peaks at 24-72 hours. Do not train the same muscle group hard again within this window."
   },
   {
     "reference": "https://doi.org/10.1007/s40279-017-0688-y",
@@ -963,5 +963,675 @@
       "flexibility"
     ],
     "content": "Adding a post-stretch activation (PSA) contraction of the target muscle after PNF stretching eliminates the typical ~4-5% acute strength deficit that PNF alone causes, while fully preserving ROM gains. Protocol: 4 x 30s PNF contract-relax followed by a brief target-muscle activation contraction. Use this sequence when mobility work precedes performance training."
+  },
+  {
+    "reference": "https://doi.org/10.1519/JSC.0000000000004258",
+    "area": "programming",
+    "tags": ["exercise variation", "exercise selection", "hypertrophy"],
+    "content": "Systematic review: varying resistance exercises does not produce superior hypertrophy or strength versus a fixed, well-chosen selection. If exercises are varied, vary systematically to target different muscle regions; random session-to-session rotation can blunt some gains."
+  },
+  {
+    "reference": "https://doi.org/10.1519/JSC.0000000000003964",
+    "area": "programming",
+    "tags": ["minimum effective dose", "maintenance", "detraining"],
+    "content": "In younger adults, strength and muscle size can be maintained up to 32 weeks with one session per week and one set per exercise if intensity is maintained. Older adults need up to two sessions and 2-3 sets."
+  },
+  {
+    "reference": "https://doi.org/10.1519/JSC.0b013e31819df407",
+    "area": "programming",
+    "tags": ["youth", "adolescents", "safety", "position stand"],
+    "content": "NSCA position stand: supervised, technique-focused youth resistance training is safe, does not damage growth plates, and typically raises strength about 30% in 8-20 weeks. Prescribe 1-3 sets of 6-15 repetitions, 2-3 non-consecutive days weekly."
+  },
+  {
+    "reference": "https://doi.org/10.1136/bjsports-2024-109123",
+    "area": "programming",
+    "tags": ["pregnancy", "safety", "health outcomes"],
+    "content": "Systematic review and meta-analysis of 50 studies (47,619 participants): resistance training in pregnancy reduces odds of gestational hypertension (OR 0.42), gestational diabetes (OR 0.62), perinatal mood disorders (OR 0.48) and macrosomia (OR 0.67) versus controls."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fphys.2023.1272106",
+    "area": "technique",
+    "tags": [
+      "calf raise",
+      "standing vs seated",
+      "gastrocnemius",
+      "muscle length"
+    ],
+    "content": "Twelve-week within-person trial: standing (knee-extended) calf raises grow the gastrocnemius far more than seated raises (medial +9.2% versus +0.6%; lateral +12.4% versus +1.7%), while soleus growth is similar. Prioritize standing work for gastrocnemius size."
+  },
+  {
+    "reference": "https://doi.org/10.1249/MSS.0000000000002523",
+    "area": "technique",
+    "tags": ["leg curl", "seated vs prone", "hamstrings", "muscle length"],
+    "content": "Twelve-week within-person trial: seated leg curls, which train the hamstrings lengthened at the hip, grow whole hamstrings more than prone curls (+14% versus +9%), with the advantage in the biarticular muscles. Both protect equally against muscle damage."
+  },
+  {
+    "reference": "https://doi.org/10.1249/mss.0b013e31802ca597",
+    "area": "nutrition",
+    "tags": ["hydration", "dehydration", "fluid replacement", "ACSM"],
+    "content": "Limit dehydration to under 2% body-mass loss during exercise. Estimate individual sweat rate by weighing before and after sessions. Individualize fluid plans; no single drinking rate suits all athletes."
+  },
+  {
+    "reference": "https://doi.org/10.1097/JSM.0000000000000221",
+    "area": "nutrition",
+    "tags": ["hyponatremia", "hydration", "endurance", "drink to thirst"],
+    "content": "Exercise-associated hyponatremia is caused mainly by drinking hypotonic fluid beyond sweat losses. Drink to thirst, avoid gaining weight during endurance events, and do not force fluids on a fixed schedule."
+  },
+  {
+    "reference": "https://doi.org/10.1080/02640414.2011.614269",
+    "area": "nutrition",
+    "tags": ["rehydration", "sodium", "recovery", "fluid"],
+    "content": "After exercise, drink about 150% of the fluid deficit to offset ongoing urine losses. Include sodium from drinks or food: water alone is poorly retained and can dilute plasma sodium."
+  },
+  {
+    "reference": "https://doi.org/10.2165/11530760-000000000-00000",
+    "area": "nutrition",
+    "tags": ["glycerol", "hyperhydration", "hydration", "endurance"],
+    "content": "Glycerol hyperhydration: 1.2 g/kg glycerol in 26 mL/kg fluid over 60 minutes, ending 30 minutes before exercise, can raise body water by 1 L or more. Side effects are rare: nausea, headache, GI discomfort."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s12970-021-00458-w",
+    "area": "nutrition",
+    "tags": [
+      "sodium bicarbonate",
+      "buffering",
+      "high intensity",
+      "supplements"
+    ],
+    "content": "Sodium bicarbonate: 0.3 g/kg taken 60-180 minutes pre-exercise improves high-intensity efforts lasting 30 seconds to 12 minutes. Higher doses add gastrointestinal side effects without extra benefit. Split doses improve tolerance."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-016-0617-7",
+    "area": "nutrition",
+    "tags": ["nitrates", "beetroot", "endurance", "supplements"],
+    "content": "Dietary nitrate (beetroot juice) modestly improves endurance exercise performance in healthy adults, mainly time-to-exhaustion tests. Effects are smaller or absent in elite athletes and in time trials. Dose 2-3 hours pre-exercise."
+  },
+  {
+    "reference": "https://doi.org/10.1042/CS20100597",
+    "area": "nutrition",
+    "tags": ["omega-3", "MPS", "fish oil", "anabolic sensitivity"],
+    "content": "Eight weeks of omega-3 (EPA/DHA) supplementation augments the muscle protein synthetic response to amino acids and insulin in young and middle-aged adults. Omega-3s sensitize muscle to feeding; they do not replace adequate protein."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-014-0267-6",
+    "area": "nutrition",
+    "tags": ["vitamin D", "deficiency", "screening", "athletes"],
+    "content": "Vitamin D inadequacy is highly prevalent in athletes, especially indoor-sport and winter-training athletes. Test serum 25(OH)D and supplement vitamin D3 to correct deficiency; extra vitamin D does not boost performance when status is already sufficient."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s00421-019-04157-y",
+    "area": "nutrition",
+    "tags": ["iron", "female athletes", "ferritin", "hepcidin"],
+    "content": "Iron deficiency affects about 15-35% of female and 5-11% of male athletes. Exercise raises hepcidin for several hours, reducing iron absorption: take iron away from training, with vitamin C, and screen ferritin regularly."
+  },
+  {
+    "reference": "https://doi.org/10.1136/bjsports-2018-099193",
+    "area": "nutrition",
+    "tags": ["RED-S", "energy availability", "health", "IOC"],
+    "content": "Relative energy deficiency in sport (RED-S) impairs menstrual function, bone health, immunity, protein synthesis and cardiovascular health in male and female athletes. The cause is low energy availability, not body weight alone."
+  },
+  {
+    "reference": "https://doi.org/10.3390/nu8120763",
+    "area": "nutrition",
+    "tags": ["pre-sleep protein", "MPS", "casein", "overnight recovery"],
+    "content": "Protein before sleep is digested and absorbed overnight, raising muscle protein synthesis and whole-body protein balance. Use at least 40 g pre-sleep for a robust overnight response; daytime exercise augments the effect."
+  },
+  {
+    "reference": "https://doi.org/10.14814/phy2.12893",
+    "area": "nutrition",
+    "tags": ["protein dose", "MPS", "whole-body training", "whey"],
+    "content": "After whole-body resistance exercise, 40 g whey stimulates greater myofibrillar protein synthesis than 20 g in young trained men. The per-meal ceiling rises when more total muscle mass is trained."
+  },
+  {
+    "reference": "https://doi.org/10.1113/jphysiol.2008.164285",
+    "area": "nutrition",
+    "tags": ["carbohydrate mouth rinse", "endurance", "central effects"],
+    "content": "Rinsing the mouth with glucose or maltodextrin solution improves one-hour cycling time-trial performance by about 2-3% without swallowing. Oral carbohydrate sensing activates brain reward and motor regions; useful when gut tolerance limits intake."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-014-0148-z",
+    "area": "nutrition",
+    "tags": [
+      "carbohydrate fueling",
+      "endurance",
+      "multiple transportable carbohydrates",
+      "fructose"
+    ],
+    "content": "A single carbohydrate source oxidizes at up to about 60 g/h. For events over 2.5 hours, target up to 90 g/h using multiple transportable carbohydrates (glucose plus fructose), which use separate gut transporters."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-018-0867-7",
+    "area": "nutrition",
+    "tags": [
+      "carbohydrate periodization",
+      "train low",
+      "glycogen threshold",
+      "fuel for the work required"
+    ],
+    "content": "Periodize carbohydrate to the session: fuel high for quality and competition work, and place selected low-intensity sessions with low glycogen to amplify adaptation signalling. Train-low augments cell signalling but does not consistently improve performance."
+  },
+  {
+    "reference": "https://doi.org/10.1249/MSS.0000000000000823",
+    "area": "nutrition",
+    "tags": [
+      "sleep low",
+      "carbohydrate periodization",
+      "endurance",
+      "triathlon"
+    ],
+    "content": "Sleep-low periodization (evening high-intensity session fuelled, overnight carbohydrate restriction, morning low-availability session) at the same daily carbohydrate intake (6 g/kg) improved cycling economy and 10 km running performance in triathletes over three weeks."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s00421-002-0621-5",
+    "area": "nutrition",
+    "tags": [
+      "carbohydrate loading",
+      "glycogen",
+      "endurance",
+      "supercompensation"
+    ],
+    "content": "One day of 10 g/kg high-glycaemic carbohydrate with rest nearly doubles muscle glycogen (95 to 180 mmol/kg wet mass) in trained athletes. Extra loading days add nothing; no prior depletion phase is needed."
+  },
+  {
+    "reference": "https://doi.org/10.1371/journal.pone.0088384",
+    "area": "nutrition",
+    "tags": ["alcohol", "MPS", "recovery"],
+    "content": "Alcohol (1.5 g/kg, about 12 drinks) after concurrent exercise reduces myofibrillar protein synthesis by 24% even when co-ingested with protein, and by 37% with carbohydrate instead. Keep alcohol away from the recovery window."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s12970-021-00412-w",
+    "area": "nutrition",
+    "tags": ["creatine safety", "kidneys", "hair loss", "myths"],
+    "content": "At recommended doses, creatine does not damage healthy kidneys, is not an anabolic steroid, and does not cause dehydration or cramping. The hair-loss claim rests on one unreplicated DHT finding; no study measured actual hair loss."
+  },
+  {
+    "reference": "https://doi.org/10.3945/ajcn.115.119339",
+    "area": "nutrition",
+    "tags": ["body recomposition", "energy deficit", "protein", "lean mass"],
+    "content": "During a 40% energy deficit with intense training six days/week, 2.4 g/kg/day protein produced lean-mass gain (+1.2 kg) and greater fat loss than 1.2 g/kg/day over four weeks. Recomposition is possible in a deficit."
+  },
+  {
+    "reference": "https://doi.org/10.1249/MSS.0000000000001596",
+    "area": "nutrition",
+    "tags": ["caffeine", "CYP1A2", "genetics", "endurance"],
+    "content": "Caffeine response depends on CYP1A2 genotype: at 4 mg/kg, fast metabolizers (AA) improved 10 km cycling time by 6.8%, while slow metabolizers (CC) got 13.7% slower. Test caffeine individually before relying on it."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s12970-019-0329-0",
+    "area": "nutrition",
+    "tags": ["probiotics", "gut health", "immunity", "supplements"],
+    "content": "Probiotic benefits are strain- and dose-specific, not generic. In athletes, selected strains support gut-barrier integrity and immune health during heavy training, travel and infection exposure. Labels must state genus, species, strain and CFU at expiry."
+  },
+  {
+    "reference": "https://doi.org/10.1249/JSR.0000000000000831",
+    "area": "nutrition",
+    "tags": [
+      "weight making",
+      "weight-category sports",
+      "rapid weight loss",
+      "safety"
+    ],
+    "content": "Safer weight-making: set the target class from preseason body composition, lose fat chronically, keep acute cuts small, and prohibit extreme dehydration, thermal and pharmacological methods. Plan long-term body-mass management with a sports nutrition professional."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s40798-025-00910-0",
+    "area": "recovery",
+    "tags": [
+      "sauna",
+      "heat-exposure",
+      "hot-water-immersion",
+      "heat-acclimation"
+    ],
+    "content": "Post-exercise heat exposure (sauna or hot-water immersion) shows uncertain effects on acute performance recovery. Repeated exposure may improve running performance in hot conditions, partly via plasma-volume expansion, but did not improve cycling performance or VO2max in reviewed trials."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fphys.2017.00747",
+    "area": "recovery",
+    "tags": ["massage", "DOMS", "soreness"],
+    "content": "Massage after strenuous exercise reduces delayed-onset muscle soreness, with the largest effects at 48-72 hours, lowers creatine kinase, and modestly preserves maximal force and peak torque compared with no intervention."
+  },
+  {
+    "reference": "https://doi.org/10.1136/bmjsem-2019-000614",
+    "area": "recovery",
+    "tags": ["massage", "performance", "DOMS", "flexibility"],
+    "content": "Sports massage does not directly improve strength, jump, sprint, endurance or fatigue outcomes. Meta-analysis found only small benefits for flexibility and delayed-onset muscle soreness, so use massage for soreness and relaxation, not performance enhancement."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fphys.2018.00403",
+    "area": "recovery",
+    "tags": ["active-recovery", "recovery-techniques", "DOMS", "comparison"],
+    "content": "Across 99 studies, active recovery, massage, compression garments, water immersion, contrast water therapy and cryotherapy each reduced delayed-onset muscle soreness, while stretching and electrostimulation did not. Massage was the most effective technique for soreness and perceived fatigue."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-022-01681-4",
+    "area": "recovery",
+    "tags": ["compression-garments", "strength-recovery", "null-effect"],
+    "content": "Wearing compression garments during or after exercise did not speed muscle strength recovery at any time point up to 96 hours in a meta-analysis of 19 randomised trials. Reconsider them as a strength-recovery tool."
+  },
+  {
+    "reference": "https://doi.org/10.1371/journal.pone.0062356",
+    "area": "recovery",
+    "tags": ["contrast-water-therapy", "hydrotherapy", "DOMS"],
+    "content": "Contrast water therapy (alternating hot and cold immersion) improves muscle soreness and strength recovery versus passive rest at all time points up to 96 hours, but shows little advantage over cold immersion, compression, active recovery or stretching."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-021-01482-1",
+    "area": "recovery",
+    "tags": ["sleep", "naps", "cognitive-performance"],
+    "content": "Daytime naps improve short-term physical performance, endurance, specific skills, reaction time and attention in physically active people, especially after partial sleep loss. Longer nap opportunities (around 90 minutes) produced larger benefits and less fatigue than short naps."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-015-0377-9",
+    "area": "recovery",
+    "tags": ["sleep", "sleep-hygiene", "athletes"],
+    "content": "Sleep-hygiene routines recommended for elite athletes include a consistent sleep schedule, a dark, cool, quiet bedroom, a pre-sleep wind-down, and limiting caffeine, alcohol, heavy meals and screen exposure close to bedtime."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s40798-026-00993-3",
+    "area": "recovery",
+    "tags": ["tart-cherry", "supplements", "inflammation", "muscle-damage"],
+    "content": "Tart cherry juice improved maximal voluntary contraction recovery and reduced C-reactive protein up to 48 hours after muscle-damaging exercise in trained athletes, but showed no consistent effect on muscle soreness or creatine kinase. Evidence certainty is low-to-moderate."
+  },
+  {
+    "reference": "https://pubmed.ncbi.nlm.nih.gov/17762369/",
+    "area": "performance",
+    "tags": ["taper", "peaking", "endurance", "meta-analysis"],
+    "content": "Optimal endurance taper: about two weeks, with training volume reduced exponentially by 41-60% while intensity and frequency stay unchanged. Volume reduction matters roughly twice as much as changing intensity or session frequency."
+  },
+  {
+    "reference": "https://doi.org/10.1007/BF03262290",
+    "area": "performance",
+    "tags": [
+      "respiratory-muscle-training",
+      "inspiratory",
+      "endurance",
+      "meta-analysis"
+    ],
+    "content": "Respiratory muscle training improves endurance performance in healthy people, as shown by time trials and constant-load tests but not incremental tests. Benefits are larger in less-fit individuals and in longer-duration sports."
+  },
+  {
+    "reference": "https://doi.org/10.1249/MSS.0000000000000939",
+    "area": "performance",
+    "tags": ["critical-power", "W-prime", "fatigue", "endurance"],
+    "content": "Critical power marks the boundary between heavy and severe exercise: below it oxidative metabolism can stabilize, above it a finite work capacity (W-prime) is spent until exhaustion. It strongly predicts endurance performance."
+  },
+  {
+    "reference": "https://doi.org/10.1126/sciadv.aaw0341",
+    "area": "performance",
+    "tags": [
+      "ultra-endurance",
+      "energy-expenditure",
+      "metabolic-ceiling",
+      "limits"
+    ],
+    "content": "Sustained energy expenditure in extreme endurance events converges to a ceiling near 2.5 times resting metabolic rate, apparently set by alimentary limits on absorbing calories. Longer events force a progressive metabolic downshift."
+  },
+  {
+    "reference": "https://doi.org/10.1249/MSS.0b013e318279a10a",
+    "area": "performance",
+    "tags": ["overreaching", "overtraining", "consensus", "recovery"],
+    "content": "ECSS-ACSM consensus: functional overreaching resolves in days to weeks, nonfunctional overreaching in weeks to months, and overtraining syndrome in months. A persistent performance decrement is the hallmark; diagnosis requires excluding other causes."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fphys.2014.00033",
+    "area": "conditioning",
+    "tags": [
+      "polarized-training",
+      "intensity-distribution",
+      "VO2max",
+      "endurance"
+    ],
+    "content": "Polarized training — roughly 80% low intensity, little threshold work, and the remainder high intensity — produced larger VO2peak (+11.7%) and time-to-exhaustion gains than threshold, high-volume, or HIIT-only models in well-trained endurance athletes over nine weeks."
+  },
+  {
+    "reference": "https://doi.org/10.1123/ijspp.5.3.276",
+    "area": "conditioning",
+    "tags": [
+      "intensity-distribution",
+      "polarized-training",
+      "endurance",
+      "training-load"
+    ],
+    "content": "Elite endurance athletes typically accumulate about 80% of training time at low intensity below the first lactate threshold. Best practice limits high-intensity sessions to two or three per week, with most volume kept easy."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-015-0365-0",
+    "area": "conditioning",
+    "tags": ["HIIT", "VO2max", "MICT", "meta-analysis"],
+    "content": "Meta-analysis of controlled trials: HIIT raised VO2max by about 5.5 mL/kg/min versus no-exercise controls, slightly more than continuous endurance training (about 4.9). Intensity, not just volume, drives aerobic adaptation."
+  },
+  {
+    "reference": "https://doi.org/10.1111/sms.12092",
+    "area": "conditioning",
+    "tags": ["sprint-interval-training", "SIT", "VO2max", "meta-analysis"],
+    "content": "Sprint interval training (repeated 30-second all-out efforts) for two to eight weeks increases VO2max by 4.2-13.4% in sedentary and recreationally active adults, mainly through peripheral muscle oxidative adaptations rather than central cardiac changes."
+  },
+  {
+    "reference": "https://doi.org/10.1113/JP273196",
+    "area": "conditioning",
+    "tags": [
+      "sprint-interval-training",
+      "HIIT",
+      "mitochondria",
+      "time-efficiency"
+    ],
+    "content": "Sprint interval training increases mitochondrial content and VO2max similarly to moderate continuous training despite far lower training volume. For a given training volume, HIIT generally raises VO2max more than continuous training does."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-016-0604-z",
+    "area": "conditioning",
+    "tags": [
+      "running-economy",
+      "strength-training",
+      "plyometrics",
+      "endurance"
+    ],
+    "content": "Heavy weight training and explosive or plyometric training both improve running economy in endurance athletes. Benefits grow with program length: small after 6-8 weeks, moderate-to-large after 12-14 weeks of combined training."
+  },
+  {
+    "reference": "https://doi.org/10.2165/00007256-200939020-00004",
+    "area": "conditioning",
+    "tags": ["altitude", "live-high-train-low", "hypoxia", "endurance"],
+    "content": "Live-high train-low altitude exposure clearly improves sea-level endurance power output by about 1-4% in subelite athletes. In elite athletes the benefit is clearest for natural live-high train-low compared with other hypoxic protocols."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-016-0538-5",
+    "area": "conditioning",
+    "tags": [
+      "heat-acclimation",
+      "plasma-volume",
+      "thermoregulation",
+      "endurance"
+    ],
+    "content": "Heat adaptation over roughly 8-14 days expands plasma volume (about +4%), lowers exercising heart rate and core temperature, raises sweat rate, and improves endurance performance and exercise capacity in hot conditions."
+  },
+  {
+    "reference": "https://doi.org/10.1111/sms.12408",
+    "area": "conditioning",
+    "tags": ["heat-acclimation", "thermoregulation", "protocol", "endurance"],
+    "content": "Heat acclimation builds in stages: plasma volume and cardiovascular stability improve within the first week, while sweating and full thermoregulatory adaptations need 10-14 days. Adaptations decay without regular heat exposure to maintain them."
+  },
+  {
+    "reference": "https://doi.org/10.1136/bjsports-2013-092538",
+    "area": "injury",
+    "tags": [
+      "strength-training",
+      "injury-prevention",
+      "stretching",
+      "proprioception"
+    ],
+    "content": "Strength training reduced sports injuries to less than one third (relative risk 0.32) and proprioception training by about 45% across 25 randomised trials, while stretching showed no injury-prevention effect (relative risk 0.96)."
+  },
+  {
+    "reference": "https://doi.org/10.1136/bjsports-2018-100045",
+    "area": "injury",
+    "tags": ["Nordic-hamstring", "hamstring", "eccentric", "injury-prevention"],
+    "content": "Injury prevention programmes including the Nordic hamstring exercise halved hamstring injury rates (risk ratio 0.49) across 15 studies and 8,459 athletes. Eccentric hamstring strengthening is the best-supported single exercise for hamstring injury prevention."
+  },
+  {
+    "reference": "https://doi.org/10.1136/bjsports-2017-098937",
+    "area": "injury",
+    "tags": ["Copenhagen-adduction", "groin", "adductors", "injury-prevention"],
+    "content": "An adductor strengthening programme based on the Copenhagen adduction exercise, performed three times weekly in pre-season and once weekly in-season, reduced the risk of groin problems by 41% in semi-professional male football players."
+  },
+  {
+    "reference": "https://doi.org/10.1177/0269215518788683",
+    "area": "injury",
+    "tags": [
+      "balance-training",
+      "proprioception",
+      "ankle-sprain",
+      "injury-prevention"
+    ],
+    "content": "Balance and proprioceptive training reduced ankle sprain incidence by 38% in athletes (risk ratio 0.62) in a meta-analysis of randomised trials, while also improving dynamic neuromuscular control, postural sway and joint position sense."
+  },
+  {
+    "reference": "https://doi.org/10.1177/0363546515584760",
+    "area": "injury",
+    "tags": ["tendinopathy", "Achilles", "heavy-slow-resistance", "eccentric"],
+    "content": "For chronic Achilles tendinopathy, heavy slow resistance training matched eccentric training for pain and function at 12 weeks and one year, with higher compliance (92% versus 78%) and patient satisfaction. Progressive loading matters more than the loading type."
+  },
+  {
+    "reference": "https://doi.org/10.1136/bjsports-2014-094386",
+    "area": "injury",
+    "tags": ["tendinopathy", "patellar", "isometrics", "pain"],
+    "content": "A single bout of isometric exercise (five 45-second holds at about 70% of maximum) acutely reduced patellar tendon pain for at least 45 minutes and reduced quadriceps inhibition, making isometrics useful before in-season training."
+  },
+  {
+    "reference": "https://doi.org/10.1136/bjsports-2016-097066",
+    "area": "injury",
+    "tags": ["FIFA-11+", "warm-up", "football", "injury-prevention"],
+    "content": "The FIFA 11+ warm-up programme reduced overall football injuries by 39% (incidence rate ratio 0.61) in a meta-analysis of cluster-randomised trials. The earlier FIFA 11 programme showed no significant injury-preventing effect."
+  },
+  {
+    "reference": "https://doi.org/10.1136/bjsports-2016-096226",
+    "area": "injury",
+    "tags": ["shoulder", "rotator-cuff", "OSTRC", "injury-prevention"],
+    "content": "The OSTRC shoulder prevention programme (internal-rotation mobility, external-rotation and scapular strength, thoracic mobility), performed three times weekly within warm-ups, reduced shoulder-problem risk by 28% over one season in 660 elite handball players."
+  },
+  {
+    "reference": "https://doi.org/10.1097/BPO.0000000000000151",
+    "area": "injury",
+    "tags": ["sleep", "injury-risk", "adolescents"],
+    "content": "Adolescent athletes who averaged less than eight hours of sleep per night were 1.7 times more likely to have sustained an injury than those sleeping eight hours or more. Sleep duration is an injury-risk factor, not just a recovery tool."
+  },
+  {
+    "reference": "https://doi.org/10.1136/bjsports-2017-097699",
+    "area": "injury",
+    "tags": ["concussion", "return-to-play", "consensus"],
+    "content": "After a suspected concussion, remove the athlete immediately with no same-day return. After 24-48 hours of relative rest, follow the six-stage graduated return-to-sport progression, spending at least 24 hours per stage and stepping back if symptoms worsen."
+  },
+  {
+    "reference": "https://doi.org/10.3390/jcm12082955",
+    "area": "biomechanics",
+    "tags": ["squat", "knee travel", "knees over toes", "torque"],
+    "content": "Restricting forward knee travel in the squat lowers knee torque about 22%, but raises hip torque roughly tenfold and increases forward trunk lean and lumbar shear. Allow natural knee travel past the toes in healthy lifters."
+  },
+  {
+    "reference": "https://doi.org/10.2519/jospt.2020.9218",
+    "area": "biomechanics",
+    "tags": ["lumbar flexion", "lifting", "low back pain", "butt wink"],
+    "content": "Systematic review with meta-analysis: no credible evidence that greater lumbar flexion during lifting predicts low back pain onset, persistence, or distinguishes people with pain. Blanket never-flex advice is not evidence-based, though included lifts were light (12 kg maximum)."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fphys.2023.1279170",
+    "area": "biomechanics",
+    "tags": ["hip thrust", "squat", "glute hypertrophy", "EMG"],
+    "content": "Nine-week MRI trial with volume equated: hip thrust and back squat produce similar gluteus maximus hypertrophy, while squats grow quadriceps and adductors more. Hip thrust showed higher glute EMG, but activation did not predict greater growth."
+  },
+  {
+    "reference": "https://doi.org/10.3390/ijerph17134626",
+    "area": "biomechanics",
+    "tags": ["leg press", "foot placement", "muscle activation"],
+    "content": "Systematic review of leg-press EMG: vastus medialis and lateralis dominate in all variants; foot width and rotation do not change quadriceps activation. A high foot position increases gluteus maximus activity, especially at loads near 80% 1RM."
+  },
+  {
+    "reference": "https://doi.org/10.1016/j.jsams.2016.08.011",
+    "area": "assessment",
+    "tags": [
+      "countermovement jump",
+      "fatigue monitoring",
+      "neuromuscular status"
+    ],
+    "content": "Meta-analysis of 151 studies: average countermovement jump height is more sensitive than the single best jump for detecting fatigue and supercompensation. Monitor the mean of several trials, and track peak power and velocity alongside height."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fnins.2017.00612",
+    "area": "assessment",
+    "tags": ["session-RPE", "training load", "monitoring"],
+    "content": "Session-RPE (post-session CR-10 rating multiplied by session minutes) is valid and reliable for quantifying internal training load across sports, ages and expertise levels, correlating with heart-rate-based measures. It can stand alone, but pairs best with objective data."
+  },
+  {
+    "reference": "https://doi.org/10.2466/pms.103.1.215-222",
+    "area": "assessment",
+    "tags": ["sit-to-stand", "functional testing", "older adults", "norms"],
+    "content": "Five-repetition sit-to-stand reference values for older adults: times worse than average are over 11.4 seconds at 60-69 years, over 12.6 seconds at 70-79 years, and over 14.8 seconds at 80-89 years. Use age-matched thresholds."
+  },
+  {
+    "reference": "https://doi.org/10.1371/journal.pone.0113637",
+    "area": "assessment",
+    "tags": ["grip strength", "norms", "sarcopenia screening"],
+    "content": "Grip-strength norms from 49,964 people: median peak is 51 kg in men aged 29-39 and 31 kg in women aged 26-42, declining from midlife. By age 80, 23-27% fall into the weak range."
+  },
+  {
+    "reference": "https://doi.org/10.1519/R-15304.1",
+    "area": "assessment",
+    "tags": ["1RM prediction", "repetition maximum", "testing"],
+    "content": "For estimating 1RM from repetitions to failure, a 5RM test predicts most accurately (R-squared 0.97-0.99 for leg press and chest press); accuracy falls progressively with 10RM and 20RM tests. Keep prediction sets at ten repetitions or fewer."
+  },
+  {
+    "reference": "https://doi.org/10.1080/02640414.2019.1633159",
+    "area": "physiology",
+    "tags": ["sweat rate", "sodium loss", "hydration", "electrolytes"],
+    "content": "Across 1,303 athletes, whole-body sweat rate averaged about 0.8-1.5 L/h by sport, highest in American football and endurance sport. Sweat sodium losses vary widely, so replace sodium individually, not by generic tables."
+  },
+  {
+    "reference": "https://doi.org/10.1359/JBMR.040410",
+    "area": "physiology",
+    "tags": ["energy availability", "bone turnover", "low energy availability"],
+    "content": "Bone formation is suppressed within five days when energy availability falls below about 30 kcal/kg lean body mass/day, versus 45 kcal/kg at balance. Bone resorption rises at the most severe restriction, about 10 kcal/kg."
+  },
+  {
+    "reference": "https://doi.org/10.2165/00007256-200030020-00002",
+    "area": "physiology",
+    "tags": ["detraining", "VO2max", "stroke-volume", "blood-volume"],
+    "content": "Short-term detraining (under four weeks) cuts VO2max by 4-14% in trained athletes, driven by 5-12% lower blood volume and 10-17% lower stroke volume. Aerobic fitness fades faster than strength does."
+  },
+  {
+    "reference": "https://pubmed.ncbi.nlm.nih.gov/10999420/",
+    "area": "physiology",
+    "tags": ["detraining", "reduced-training", "intensity", "maintenance"],
+    "content": "Maintaining training intensity while reducing volume preserves endurance and strength adaptations for many weeks. Cutting intensity, even at maintained volume, causes rapid performance loss — intensity is the key retention stimulus during reduced training."
+  },
+  {
+    "reference": "https://doi.org/10.1242/jeb.124495",
+    "area": "physiology",
+    "tags": ["muscle-memory", "myonuclei", "retraining", "hypertrophy"],
+    "content": "Muscle memory model: myonuclei gained during hypertrophy may persist through subsequent atrophy in animal data, potentially speeding regrowth on retraining. Human evidence for permanent myonuclear retention is still contested — treat as plausible, not settled."
+  },
+  {
+    "reference": "https://doi.org/10.1113/jphysiol.2007.143834",
+    "area": "physiology",
+    "tags": ["masters", "aging", "VO2max", "endurance"],
+    "content": "VO2max falls about 10% per decade after age 25-30. Masters endurance performance declines modestly until about age 60, then accelerates, driven mainly by falling maximal heart rate, stroke volume, and maximal oxygen uptake."
+  },
+  {
+    "reference": "https://doi.org/10.1139/H08-075",
+    "area": "physiology",
+    "tags": ["sex-differences", "fat-oxidation", "substrate-use", "endurance"],
+    "content": "During submaximal endurance exercise, women oxidize proportionally more fat and less glycogen and protein than men at the same relative intensity. Fuel selection differs by sex, so carbohydrate needs during long sessions are not identical."
+  },
+  {
+    "reference": "https://doi.org/10.1152/jappl.1994.76.6.2253",
+    "area": "physiology",
+    "tags": ["substrate-use", "crossover", "fat-oxidation", "carbohydrate"],
+    "content": "Crossover concept: fat is the main fuel at low exercise intensity, but carbohydrate contribution rises with intensity and dominates above roughly the lactate threshold. Endurance training and diet shift the crossover point."
+  },
+  {
+    "reference": "https://doi.org/10.1126/science.283.5399.212",
+    "area": "physiology",
+    "tags": ["NEAT", "energy-expenditure", "fat-gain", "daily-activity"],
+    "content": "Nonexercise activity thermogenesis (NEAT) — posture, fidgeting, and daily movement — explained ten-fold differences in fat gain during controlled overfeeding (+1000 kcal/day for eight weeks). People who spontaneously move more resist fat gain."
+  },
+  {
+    "reference": "https://doi.org/10.1016/S2468-2667(21)00302-9",
+    "area": "physiology",
+    "tags": ["step-count", "mortality", "daily-activity", "meta-analysis"],
+    "content": "Mortality risk falls progressively with daily steps and plateaus around 8,000-10,000 steps per day in adults under 60 and 6,000-8,000 steps per day at age 60-plus, across 15 cohorts and about 47,000 adults."
+  },
+  {
+    "reference": "https://doi.org/10.3945/ajcn.112.051763",
+    "area": "physiology",
+    "tags": ["sedentary", "activity-breaks", "glucose", "sitting"],
+    "content": "Breaking prolonged sitting every 30 minutes with about two minutes of light walking lowers postprandial glucose and insulin more effectively than a single continuous 30-minute walk in healthy, normal-weight adults."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-022-01804-x",
+    "area": "mobility",
+    "tags": [
+      "resistance-training",
+      "range-of-motion",
+      "flexibility",
+      "stretching"
+    ],
+    "content": "Resistance training with external loads improves joint range of motion as effectively as stretching, with no significant difference between the two in meta-analysis. Full-range lifting can maintain flexibility without separate stretching sessions."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-017-0797-9",
+    "area": "mobility",
+    "tags": ["dynamic-stretching", "warm-up", "flexibility", "performance"],
+    "content": "Dynamic stretching acutely increases muscle flexibility and tends to enhance subsequent strength, power and sprint performance, unlike prolonged static stretching. Prefer dynamic stretching inside warm-ups and reserve static stretching for separate flexibility work."
+  },
+  {
+    "reference": "https://doi.org/10.2522/ptj.20090012",
+    "area": "mobility",
+    "tags": ["stretching", "stretch-tolerance", "range-of-motion", "mechanism"],
+    "content": "Most range-of-motion gains from regular stretching reflect increased stretch tolerance — a change in sensation — rather than permanently longer muscles. Viscoelastic changes are transient, so program stretching for tolerance and positions needed, not tissue lengthening."
+  },
+  {
+    "reference": "https://pubmed.ncbi.nlm.nih.gov/33239942/",
+    "area": "mobility",
+    "tags": ["percussive-therapy", "massage-gun", "range-of-motion", "ankle"],
+    "content": "Five minutes of percussive massage (massage gun) on the calf muscles increased ankle dorsiflexion range of motion by 5.4 degrees (+18%) without reducing maximal voluntary contraction torque, making it a warm-up-compatible mobility option."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s12160-015-9704-5",
+    "area": "psychology",
+    "tags": ["affect", "adherence", "enjoyment", "self-selected intensity"],
+    "content": "Systematic review of 24 studies: a positive affective response during moderate-intensity exercise predicts future physical activity, while post-exercise affect does not. How training feels during the session drives whether people return, so keep in-session experience positive."
+  },
+  {
+    "reference": "https://doi.org/10.1080/17437199.2011.560095",
+    "area": "psychology",
+    "tags": ["implementation intentions", "habit", "planning", "adherence"],
+    "content": "Implementation intentions (specific if-then plans for when, where and how to train) increase physical activity with a small-to-medium effect (d=0.31), maintained at follow-up (d=0.24). Effects strengthen when plans include coping strategies for predictable barriers."
+  },
+  {
+    "reference": "https://doi.org/10.1177/1745691611413136",
+    "area": "psychology",
+    "tags": ["self-talk", "cueing", "performance"],
+    "content": "Meta-analysis of 32 studies: self-talk improves sport task performance with a moderate effect (d=0.48). Instructional self-talk works best for fine or novel tasks, motivational for gross tasks, and practiced self-talk beats untrained self-talk."
+  },
+  {
+    "reference": "https://doi.org/10.1080/1750984X.2022.2116723",
+    "area": "psychology",
+    "tags": ["goal setting", "process goals", "self-efficacy"],
+    "content": "Goal-setting meta-analysis in sport (27 studies): process goals produce the largest performance effect (d=1.36), ahead of performance goals (d=0.44) and outcome goals (d=0.09). Process goals also raise self-efficacy strongly (d=1.11). Set controllable technique goals."
+  },
+  {
+    "reference": "https://doi.org/10.1123/jsep.18.1.1",
+    "area": "psychology",
+    "tags": ["social influence", "group training", "cohesion", "adherence"],
+    "content": "Meta-analysis of 87 studies (49,948 participants): social influence has a small-to-moderate positive effect on exercise behavior, with moderate-to-large effects for task cohesion on adherence and family support on compliance. Training with cohesive others improves consistency."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s13102-023-00713-4",
+    "area": "equipment",
+    "tags": ["machines", "free weights", "hypertrophy", "specificity"],
+    "content": "Meta-analysis of 13 studies (1,016 adults): free-weight and machine training produce equal hypertrophy and equal strength when each is tested on its own modality. Strength gains are modality-specific, so choose equipment by goal, access and preference."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-015-0384-x",
+    "area": "equipment",
+    "tags": ["unstable surfaces", "stability", "force output", "balance"],
+    "content": "Unstable-surface resistance training cuts acute force output by roughly 30% and, versus stable training, adds no clear strength, power or balance advantage in healthy young adults. Reserve instability work for balance and rehabilitation goals."
+  },
+  {
+    "reference": "https://doi.org/10.1080/14763141.2018.1472293",
+    "area": "equipment",
+    "tags": ["suspension training", "TRX", "core activation", "bodyweight"],
+    "content": "Suspension exercises raise trunk and core muscle activation versus traditional equivalents in push-ups, inverted rows, bridges and hamstring curls. Progress load by steepening body angle and lengthening levers, not by adding external weight."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s13102-019-0130-z",
+    "area": "equipment",
+    "tags": ["kettlebells", "evidence quality", "conditioning"],
+    "content": "Scoping review of 99 kettlebell publications: longitudinal studies are few, small and underpowered, with typically trivial-to-small effects and low confidence. Use kettlebells as a hinge, carry and conditioning tool, not as a proven superior strength method."
+  },
+  {
+    "reference": "https://doi.org/10.3390/app15169144",
+    "area": "equipment",
+    "tags": ["accommodating resistance", "bands", "chains", "squat"],
+    "content": "Squat-specific meta-analysis (20 studies): adding bands or chains beats constant resistance for long-term maximal strength (g=0.31) and power (g=0.17). Bands favored strength outcomes, chains favored jump power; effects were strongest in cycles under eight weeks."
   }
 ]
