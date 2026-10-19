@@ -1,195 +1,195 @@
 [
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000002053",
+    "reference": "https://doi.org/10.1080/02640414.2016.1210197",
     "area": "programming",
     "tags": ["progressive overload", "hypertrophy", "volume"],
-    "content": "Hypertrophy requires 10-20 sets per muscle group per week. Overload via weight, volume, or frequency. Beyond 20 sets/week yields diminishing returns."
+    "content": "Weekly volume shows a graded dose-response for hypertrophy: higher volumes produce greater muscle growth, with ten or more sets per muscle per week outperforming lower volumes in trained and untrained adults."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000001764",
+    "reference": "https://doi.org/10.1007/s40279-016-0543-8",
     "area": "programming",
     "tags": ["volume", "hypertrophy", "frequency"],
-    "content": "Distribute weekly volume across 2-3 sessions per muscle group. Higher frequency allows greater total weekly volume than once-weekly training."
+    "content": "Train each muscle group at least twice weekly for hypertrophy. Splitting weekly volume across two or more sessions produced greater muscle growth than training each muscle once weekly in meta-analysis."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000000970",
+    "reference": "https://doi.org/10.1519/JSC.0000000000001272",
     "area": "programming",
     "tags": ["rest intervals", "strength", "hypertrophy"],
-    "content": "Strength (1-5 reps): rest 3-5 min. Hypertrophy compounds: 2-3 min. Isolation: 1-2 min. Longer rest allows more volume."
+    "content": "Use longer rest intervals for compound strength work: three minutes between sets produced greater strength and hypertrophy than one minute in trained men training eight to twelve repetitions."
   },
   {
-    "reference": "https://doi.org/10.1007/s40279-018-0872-x",
+    "reference": "https://doi.org/10.1519/JSC.0000000000002200",
     "area": "programming",
     "tags": ["rep range", "hypertrophy", "strength"],
-    "content": "Hypertrophy occurs across 6-30 reps if taken near failure. 1-5 reps optimal for strength. 8-12 reps balance tension and metabolic stress."
+    "content": "Hypertrophy is similar with low and high loads when sets are taken to failure, across wide repetition ranges. Maximal strength gains favour heavier loads and lower repetitions."
   },
   {
-    "reference": "https://doi.org/10.1519/SSC.0000000000000196",
+    "reference": "https://doi.org/10.1186/s40798-024-00691-y",
     "area": "programming",
     "tags": ["periodization", "mesocycle", "deload"],
-    "content": "Structure 4-8 week mesocycles. Final week: deload with 40-50% volume reduction and/or 10-20% intensity reduction."
+    "content": "Plan deloads roughly every six weeks: competitive strength athletes typically deload for about one week, reducing training volume and load while keeping training frequency and exercise selection largely unchanged."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000001490",
+    "reference": "https://doi.org/10.1519/SSC.0000000000000720",
     "area": "programming",
     "tags": ["compound", "isolation", "exercise selection"],
-    "content": "Program 60-80% compound exercises, 20-40% isolation. Compounds allow heavier loads and recruit more muscle mass."
+    "content": "Single-joint and multi-joint exercises produce similar whole-muscle hypertrophy. Prioritise multi-joint compounds for efficiency and load, and add single-joint isolation to target specific muscle subdivisions or weak points."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000002205",
+    "reference": "https://doi.org/10.1080/02640414.2017.1361894",
     "area": "programming",
-    "tags": ["imbalance", "push-pull ratio", "unilateral"],
-    "content": "Maintain 1:1 push-to-pull ratio or favor pulling. Include unilateral work. Address asymmetries >10-15%."
+    "tags": ["imbalance", "unilateral", "asymmetry"],
+    "content": "Inter-limb strength asymmetries can impair jumping, kicking, cycling and change-of-direction performance. Test both limbs, include unilateral training, and target reducing large asymmetries rather than assuming bilateral work alone corrects them."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000001535",
+    "reference": "https://doi.org/10.1249/MSS.0b013e3181915670",
     "area": "programming",
     "tags": ["novice", "linear progression", "beginner"],
-    "content": "Beginners (0-12 months): 3-4 days/week, full-body or upper/lower. Linear progression. 3-5 sets per exercise. Focus technique."
-  },
-  {
-    "reference": "https://doi.org/10.1519/JSC.0000000000001975",
-    "area": "programming",
-    "tags": ["advanced", "intensity techniques", "volume"],
-    "content": "Advanced lifters (3+ years): may need 15-25+ sets/muscle/week. Use drop sets, rest-pause, cluster sets on 1-2 exercises/session."
-  },
-  {
-    "reference": "https://doi.org/10.1519/JSC.0000000000001942",
-    "area": "programming",
-    "tags": ["older adults", "sarcopenia", "technique"],
-    "content": "Adults 40+: prioritize technique over load. Use 8-15 reps. Allow longer recovery. Include balance work."
-  },
-  {
-    "reference": "https://doi.org/10.1519/SSC.0000000000000200",
-    "area": "programming",
-    "tags": ["female", "strength training", "rep range"],
-    "content": "Women respond similarly to men in relative gains. Use all rep ranges including 1-5 reps. Balance upper/lower body work."
-  },
-  {
-    "reference": "https://doi.org/10.1519/JSC.0000000000001659",
-    "area": "programming",
-    "tags": ["movement patterns", "exercise selection"],
-    "content": "Include all patterns: squat, hinge, horizontal push/pull, vertical push/pull, single-leg. Keep core lifts 4-8 weeks, rotate accessories."
-  },
-  {
-    "reference": "https://doi.org/10.1519/JSC.0000000000002095",
-    "area": "programming",
-    "tags": ["bilateral", "unilateral", "core"],
-    "content": "Program 60-70% bilateral (primary strength), 30-40% unilateral (address asymmetries, core stability, reduce spinal load)."
-  },
-  {
-    "reference": "https://doi.org/10.1519/SSC.0000000000000296",
-    "area": "programming",
-    "tags": ["core training", "anti-movement"],
-    "content": "Core training: emphasize anti-extension (planks), anti-lateral flexion (side planks), anti-rotation (Pallof press). 2-3x/week."
-  },
-  {
-    "reference": "https://doi.org/10.1519/JSC.0000000000001911",
-    "area": "programming",
-    "tags": ["power", "plyometrics", "force-velocity"],
-    "content": "Power: 30-60% 1RM for max power output. Perform early in session when fresh. Full recovery 3-5 min between sets."
+    "content": "Novices should train the whole body two to three days weekly, using eight to twelve repetition-maximum loads, single and multi-joint exercises, progressing load two to ten percent when exceeding target repetitions."
   },
   {
     "reference": "https://doi.org/10.1249/MSS.0000000000001764",
     "area": "programming",
-    "tags": ["grip strength", "carries", "deadlift"],
-    "content": "Grip: timed holds at 80-100% deadlift max for 10-30s. Farmer walks. Fat grips. Grip strength correlates with longevity."
+    "tags": ["volume", "hypertrophy", "advanced"],
+    "content": "In resistance-trained men, five sets per exercise produced greater hypertrophy of several muscles than one or three sets over eight weeks, while strength gains did not differ. Trained lifters benefit from higher per-session volumes."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000003607",
+    "reference": "https://doi.org/10.1519/JSC.0000000000003230",
+    "area": "programming",
+    "tags": ["older adults", "sarcopenia", "power"],
+    "content": "Older adults should resistance train two to three days weekly with multi-joint exercises, progressive loads, rapid concentric power work, and balance training to counter sarcopenia and preserve strength and function."
+  },
+  {
+    "reference": "https://doi.org/10.1519/JSC.0000000000003521",
+    "area": "programming",
+    "tags": ["female", "strength training", "sex differences"],
+    "content": "Men and women show similar relative hypertrophy and lower-body strength gains from resistance training. Program women across all rep ranges, including heavy low-rep work, without sex-specific volume reductions."
+  },
+  {
+    "reference": "https://doi.org/10.1249/MSS.0b013e3181915670",
+    "area": "programming",
+    "tags": ["exercise selection", "multi-joint", "progression"],
+    "content": "Build resistance programs from multi-joint and single-joint exercises covering all major muscle groups, sequenced large before small and multi-joint before single-joint, with systematic variation in load and exercise selection."
+  },
+  {
+    "reference": "https://doi.org/10.1519/SSC.0000000000000701",
+    "area": "programming",
+    "tags": ["bilateral", "unilateral", "asymmetry"],
+    "content": "Include unilateral training to reduce interlimb asymmetries: single-leg exercises produce small to moderate reductions in jump and change-of-direction asymmetry. Program bilateral and unilateral work together rather than by fixed percentage splits."
+  },
+  {
+    "reference": "https://doi.org/10.1519/SSC.0b013e3181df4521",
+    "area": "programming",
+    "tags": ["core training", "anti-movement"],
+    "content": "Train the core for endurance and stiffness, not maximal strength: emphasize anti-extension, anti-rotation and anti-lateral-flexion exercises such as planks, side planks and Pallof presses, with spine-sparing technique."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-018-0862-z",
+    "area": "programming",
+    "tags": ["power", "strength", "force-velocity"],
+    "content": "For maximal power, train across the force-velocity spectrum with light to moderate loads, typically thirty to sixty percent of one-repetition maximum for traditional lifts, moving every repetition with maximal intended velocity."
+  },
+  {
+    "reference": "https://doi.org/10.1016/S0140-6736(14)62000-6",
+    "area": "programming",
+    "tags": ["grip strength", "longevity", "mortality"],
+    "content": "Grip strength is a powerful health marker: in the large PURE cohort, weaker grip predicted higher all-cause and cardiovascular mortality, more strongly than systolic blood pressure. Train and track grip regularly."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-022-01784-y",
     "area": "programming",
     "tags": ["failure", "RIR", "proximity"],
-    "content": "Train within 0-3 reps of failure for hypertrophy. Compounds: stop 1-3 RIR. Isolation: 0-1 RIR is well-tolerated."
+    "content": "Train close to failure for hypertrophy, but failure is not required: the proximity-hypertrophy relationship is non-linear and gains plateau before failure. Keep most sets within a few reps of failure and reserve failure for selected isolation work."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000004897",
+    "reference": "https://doi.org/10.1007/s40279-025-02176-8",
     "area": "programming",
     "tags": ["supersets", "agonist-antagonist", "time efficiency"],
-    "content": "Agonist-antagonist supersets (chest/back, biceps/triceps) cut training time 50% with similar hypertrophy. Rest 2-3 min between pairs."
+    "content": "Agonist-antagonist supersets pair opposing exercises with little rest: they match traditional sets for volume, hypertrophy and strength while shortening sessions and increasing training efficiency. Expect higher lactate and perceived exertion."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000004066",
+    "reference": "https://doi.org/10.1007/s40279-019-01172-z",
     "area": "programming",
     "tags": ["cluster sets", "power", "velocity"],
-    "content": "Cluster sets: 10-20s intra-set rest between rep clusters. Maintains bar velocity. Best for power and heavy strength work."
+    "content": "Cluster sets insert short rests (about 10-30 seconds) between single reps or small rep groups within a set. They attenuate losses in velocity, power and force, so use them for heavy strength and power work."
   },
   {
-    "reference": "https://doi.org/10.1186/s40798-023-00606-z",
+    "reference": "https://doi.org/10.1186/s40798-023-00620-5",
     "area": "programming",
     "tags": ["drop sets", "hypertrophy", "time efficiency"],
-    "content": "Drop sets: train to failure, reduce 20-30%, repeat. Use on isolation/machines. 1-2 exercises/session max. Reduces training time 40-50%."
+    "content": "Drop sets: take a set to failure, immediately reduce the load and continue to failure again. Hypertrophy matches traditional sets, in as little as half to one-third of the training time. Use mainly on isolation or machine exercises."
   },
   {
-    "reference": "https://doi.org/10.1123/ijspp.2016-0607",
+    "reference": "https://doi.org/10.1249/MSS.0b013e31806010e0",
     "area": "programming",
     "tags": ["taper", "peaking", "competition"],
-    "content": "Taper for competition: reduce volume 40-60%, maintain intensity. 1-2 weeks optimal. Peak performance within first 2 weeks of reduced training."
+    "content": "Taper about two weeks before competition: reduce training volume exponentially by 41-60% while keeping intensity and session frequency unchanged. This optimises competitive performance better than cutting intensity."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000001975",
+    "reference": "https://doi.org/10.1519/SSC.0000000000000560",
     "area": "programming",
     "tags": ["VBT", "velocity", "autoregulation"],
-    "content": "VBT zones: <0.30 m/s max strength (>85% 1RM), 0.45-0.75 m/s strength-speed, 0.75-1.0 m/s speed-strength, >1.0 m/s power (<55% 1RM)."
+    "content": "Velocity-based training prescribes load from exercise-specific load-velocity profiles. Indicative zones: below 0.30 m/s maximal strength, 0.45-0.75 strength-speed, 0.75-1.00 speed-strength, above 1.00 m/s ballistic power. Verify zones for each exercise and athlete."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000001866",
+    "reference": "https://doi.org/10.1519/JSC.0b013e31819df407",
     "area": "programming",
     "tags": ["youth", "safety", "development"],
-    "content": "Youth training: emphasize technique with light loads. Avoid failure. 1-2 sets, 8-15 reps. 2-3 sessions/week. Qualified supervision required."
+    "content": "Youth resistance training is safe and effective when supervised by qualified instructors: emphasise technique, start light, use 1-3 sets of 8-15 repetitions, train 2-3 non-consecutive days weekly, and progress load gradually."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000002053",
+    "reference": "https://doi.org/10.1007/s40279-015-0320-0",
     "area": "programming",
     "tags": ["frequency", "MPS", "volume distribution"],
-    "content": "Muscle protein synthesis elevated 24-48h post-training. Train each muscle 2-3x/week for repeated MPS spikes."
+    "content": "Muscle protein synthesis rises after each resistance session and repeated elevations sum to produce hypertrophy. The response peaks earlier and is shorter-lived in trained lifters, supporting training each muscle two or more times weekly."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000001490",
+    "reference": "https://doi.org/10.1519/JSC.0000000000001049",
     "area": "programming",
     "tags": ["RPE", "RIR", "autoregulation"],
-    "content": "RPE 8 = 2 RIR. RPE 9 = 1 RIR. RPE 10 = failure. Hypertrophy: most sets RPE 7-9. Strength: RPE 7-9.5. Power: RPE 6-7.5."
+    "content": "Use the RIR-based RPE scale to autoregulate load: RPE 10 means no reps in reserve, RPE 9 means one, RPE 8 means two, RPE 7 means three. Estimates are most accurate near failure."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000002133",
+    "reference": "https://doi.org/10.1519/JSC.0000000000005302",
     "area": "technique",
     "tags": ["eccentric", "tempo", "hypertrophy"],
-    "content": "Controlled eccentric 2-4 seconds maximizes time under tension. Eccentric training creates more muscle damage\u2014allow extra recovery."
+    "content": "Slower eccentric tempos of about 2-4 seconds produce similar hypertrophy to faster eccentrics. Control the lowering phase for technique and safety, but do not expect extra time under tension alone to increase growth."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000001413",
+    "reference": "https://doi.org/10.1111/sms.14006",
     "area": "technique",
     "tags": ["ROM", "full range", "muscle growth"],
-    "content": "Full ROM generally superior for muscle development. Partial ROM for: working around injuries, overloading specific positions."
+    "content": "Full range of motion training produces greater strength gains and greater lower-limb hypertrophy than partial range training. Use full ROM as the default; reserve partials for injury constraints or specific positional overload."
   },
   {
-    "reference": "https://doi.org/10.1007/s40279-016-0486-0",
-    "area": "technique",
-    "tags": ["form", "injury risk", "ego lifting"],
-    "content": "Terminate set if form breaks down. Neutral spine, controlled tempo, joints aligned. Ego lifting is primary injury cause."
+    "reference": "https://doi.org/10.1136/bjsports-2018-099078",
+    "area": "injury",
+    "tags": ["injury prevention", "strength training", "load progression"],
+    "content": "Strength training is the most effective exercise intervention for injury prevention, cutting acute and overuse sports injuries substantially with a dose-response effect. Prioritise progressive strength work and sound technique before adding volume or intensity."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000001413",
+    "reference": "https://doi.org/10.1007/s40279-015-0304-0",
     "area": "technique",
     "tags": ["tempo", "TUT", "reps"],
-    "content": "Wide tempo range (2-8s/rep) produces similar hypertrophy if near failure. Very slow (>10s/rep) requires too-light loads."
+    "content": "Repetition durations from 0.5 to 8 seconds produce similar hypertrophy when sets are taken to failure. Very slow repetitions lasting over 10 seconds appear inferior for hypertrophy, so avoid deliberately ultra-slow tempos."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000002095",
+    "reference": "https://doi.org/10.1519/JSC.0000000000005561",
     "area": "technique",
-    "tags": ["partials", "lengthened position", "ROM"],
-    "content": "Lengthened partials (bottom ROM) may equal or exceed full ROM for hypertrophy. Shortened partials for lockout strength only."
+    "tags": ["partial range of motion", "lengthened partials", "hypertrophy"],
+    "content": "Partial range-of-motion training at long muscle lengths produces hypertrophy similar to full range of motion at moderate intensity. Lengthened partials are a valid option when full range is painful or equipment limits range."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000001413",
+    "reference": "https://doi.org/10.1111/sms.13375",
     "area": "technique",
-    "tags": ["isometric", "joint angle", "specificity"],
-    "content": "Isometrics build strength specific to trained angle (\u00b115\u00b0). Use multiple angles for full ROM strength. 3-6s holds for strength."
+    "tags": ["isometrics", "angle specificity", "muscle length"],
+    "content": "Isometric adaptations depend on joint angle, muscle length, intensity, and intent: gains are largest near the trained angle and transfer better from longer muscle lengths. Train several angles with maximal intent for broader strength transfer."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000001952",
+    "reference": "https://doi.org/10.1519/JSC.0b013e31827de07d",
     "area": "technique",
-    "tags": ["breathing", "Valsalva", "bracing"],
-    "content": "Valsalva for heavy lifts: deep breath, brace core, hold through rep, exhale after. Increases force production 5-15%."
+    "tags": ["Valsalva", "bracing", "intra-abdominal pressure"],
+    "content": "The Valsalva manoeuvre raises intra-abdominal pressure and spinal stability during heavy lifting, but sharply raises blood pressure. Healthy lifters may use a brief Valsalva on maximal attempts; people with cardiovascular risk should avoid prolonged breath holding."
   },
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000001413",
@@ -273,7 +273,7 @@
     "reference": "https://doi.org/10.1519/JSC.0000000000001911",
     "area": "biomechanics",
     "tags": ["bench press", "shoulder", "technique"],
-    "content": "Bench: scapulae retracted and depressed. Elbow 45-70\u00b0 from torso. Touch between nipples and sternum. Narrower grip reduces shoulder stress."
+    "content": "Bench: scapulae retracted and depressed. Elbow 45-70° from torso. Touch between nipples and sternum. Narrower grip reduces shoulder stress."
   },
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000001413",
@@ -297,7 +297,7 @@
     "reference": "https://doi.org/10.1007/s40279-018-0872-x",
     "area": "assessment",
     "tags": ["HRV", "recovery", "readiness"],
-    "content": "HRV 20%+ below baseline suggests incomplete recovery\u2014reduce intensity/volume. Track 7-day rolling average, not daily fluctuations."
+    "content": "HRV 20%+ below baseline suggests incomplete recovery—reduce intensity/volume. Track 7-day rolling average, not daily fluctuations."
   },
   {
     "reference": "https://doi.org/10.1186/s12970-015-0082-9",
@@ -585,7 +585,7 @@
     "reference": "https://doi.org/10.1080/02640414.2018.1555906",
     "area": "programming",
     "tags": ["frequency", "hypertrophy", "volume-equated", "training-split"],
-    "content": "When total weekly volume is equated, training frequency does not significantly impact hypertrophy. Volume is the primary driver\u2014individuals can distribute sets across sessions based on personal preference and schedule."
+    "content": "When total weekly volume is equated, training frequency does not significantly impact hypertrophy. Volume is the primary driver—individuals can distribute sets across sessions based on personal preference and schedule."
   },
   {
     "reference": "https://doi.org/10.1007/s40279-024-02123-z",
@@ -609,7 +609,7 @@
     "reference": "https://doi.org/10.3389/fphys.2025.1525726",
     "area": "recovery",
     "tags": ["cold-water-immersion", "DOMS", "recovery", "protocol"],
-    "content": "Optimal cold water immersion for soreness reduction is 10-15 minutes at 11-15\u00b0C. For neuromuscular recovery and reducing muscle damage markers, use 10-15 minutes at 5-10\u00b0C. Extreme cold or duration is not more effective."
+    "content": "Optimal cold water immersion for soreness reduction is 10-15 minutes at 11-15°C. For neuromuscular recovery and reducing muscle damage markers, use 10-15 minutes at 5-10°C. Extreme cold or duration is not more effective."
   },
   {
     "reference": "https://doi.org/10.3389/fphys.2019.00376",
@@ -627,13 +627,13 @@
     "reference": "https://doi.org/10.1007/s40279-025-02225-2",
     "area": "performance",
     "tags": ["specificity", "transfer", "strength", "sport-specific"],
-    "content": "Dynamic resistance training transfers to untrained isometric strength at roughly half the effect size. Strength gains are highly task-specific\u2014train the movement pattern you need to improve, not just the muscles involved."
+    "content": "Dynamic resistance training transfers to untrained isometric strength at roughly half the effect size. Strength gains are highly task-specific—train the movement pattern you need to improve, not just the muscles involved."
   },
   {
     "reference": "https://doi.org/10.1080/02640414.2025.2567805",
     "area": "technique",
     "tags": ["lengthened-partials", "ROM", "hypertrophy"],
-    "content": "Lengthened partial range-of-motion repetitions produce comparable hypertrophy to full range of motion in trained individuals. Training at stretched muscle lengths is the key stimulus\u2014achievable through either full ROM or lengthened partials."
+    "content": "Lengthened partial range-of-motion repetitions produce comparable hypertrophy to full range of motion in trained individuals. Training at stretched muscle lengths is the key stimulus—achievable through either full ROM or lengthened partials."
   },
   {
     "reference": "https://doi.org/10.7717/peerj.18904",
@@ -735,7 +735,7 @@
     "reference": "https://doi.org/10.1097/MD.0000000000041055",
     "area": "programming",
     "tags": ["concurrent-training", "interference", "strength"],
-    "content": "The interference effect in concurrent training depends on training status, session order, and modality\u2014not on combining cardio and strength per se. Separating sessions by 6+ hours and prioritizing the primary goal first minimizes interference."
+    "content": "The interference effect in concurrent training depends on training status, session order, and modality—not on combining cardio and strength per se. Separating sessions by 6+ hours and prioritizing the primary goal first minimizes interference."
   },
   {
     "reference": "https://doi.org/10.1016/j.jesf.2023.09.001",
@@ -783,7 +783,7 @@
     "reference": "https://doi.org/10.3389/fphys.2025.1617104",
     "area": "performance",
     "tags": ["core-training", "upper-body", "power", "sport-specific"],
-    "content": "Heavy-resistance core training transfers to improved upper-body strength and power output in junior athletes. Core stability is a force transmission link\u2014weak core limits extremity power expression regardless of limb strength."
+    "content": "Heavy-resistance core training transfers to improved upper-body strength and power output in junior athletes. Core stability is a force transmission link—weak core limits extremity power expression regardless of limb strength."
   },
   {
     "reference": "https://doi.org/10.1016/j.ejrad.2019.01.033",
@@ -855,7 +855,7 @@
     "reference": "https://doi.org/10.3389/fphys.2024.1358191",
     "area": "conditioning",
     "tags": ["EMOM", "AMRAP", "for-time", "velocity", "fatigue"],
-    "content": "At identical volume, EMOM produces the highest mean propulsive velocity and least intra-set velocity loss of EMOM/AMRAP/for-time formats. Mandatory minute-long partial recovery is the mechanism \u2014 faster reps leave more rest, preserving movement quality. EMOM is the most technically conservative CrossFit-style format."
+    "content": "At identical volume, EMOM produces the highest mean propulsive velocity and least intra-set velocity loss of EMOM/AMRAP/for-time formats. Mandatory minute-long partial recovery is the mechanism — faster reps leave more rest, preserving movement quality. EMOM is the most technically conservative CrossFit-style format."
   },
   {
     "reference": "https://doi.org/10.5114/biolsport.2021.102928",
@@ -879,7 +879,7 @@
     "reference": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8439678/",
     "area": "conditioning",
     "tags": ["EPOC", "fat-oxidation", "HIIT", "caloric-expenditure"],
-    "content": "Excess post-exercise oxygen consumption (EPOC) is significant for approximately 14 hours after high-intensity exercise, not 24-48 hours as commonly claimed. Estimated additional caloric expenditure through this window is ~168 kcal. EPOC contributes roughly 6-15% of session energy expenditure \u2014 meaningful but not a primary fat-loss mechanism."
+    "content": "Excess post-exercise oxygen consumption (EPOC) is significant for approximately 14 hours after high-intensity exercise, not 24-48 hours as commonly claimed. Estimated additional caloric expenditure through this window is ~168 kcal. EPOC contributes roughly 6-15% of session energy expenditure — meaningful but not a primary fat-loss mechanism."
   },
   {
     "reference": "https://doi.org/10.1519/JSC.0000000000003555",
@@ -1633,5 +1633,110 @@
     "area": "equipment",
     "tags": ["accommodating resistance", "bands", "chains", "squat"],
     "content": "Squat-specific meta-analysis (20 studies): adding bands or chains beats constant resistance for long-term maximal strength (g=0.31) and power (g=0.17). Bands favored strength outcomes, chains favored jump power; effects were strongest in cycles under eight weeks."
+  },
+  {
+    "reference": "https://doi.org/10.1136/bjsports-2022-106503",
+    "area": "physiology",
+    "tags": [
+      "isometric training",
+      "blood pressure",
+      "hypertension",
+      "wall sit"
+    ],
+    "content": "Isometric training lowers resting blood pressure more than aerobic, resistance, or interval training: about −8/−4 mmHg in a network meta-analysis of 270 trials. Use wall sits or handgrip holds several times weekly."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fspor.2025.1710224",
+    "area": "performance",
+    "tags": ["carbon-plated shoes", "running economy", "footwear", "endurance"],
+    "content": "Carbon-plated running shoes reduce metabolic demand by about 2–3% (mean 2.75%) versus non-plated shoes across 14 crossover trials. Individual responses vary widely, and foam and geometry contribute alongside the plate."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s40798-023-00559-7",
+    "area": "performance",
+    "tags": ["mental fatigue", "endurance", "cognitive load"],
+    "content": "Mental fatigue slightly impairs whole-body endurance performance (average effect g=−0.32 across 23 studies). Age, sex, BMI, and fitness did not explain who is most affected. Avoid demanding cognitive work before key endurance sessions."
+  },
+  {
+    "reference": "https://doi.org/10.1111/sms.70123",
+    "area": "nutrition",
+    "tags": ["taurine", "supplements", "ergogenic", "acute dose"],
+    "content": "A single taurine dose (1–6 g, about one hour pre-exercise) gives a small-to-moderate performance benefit (g=0.25) across 23 trials, mainly for endurance and strength-power tasks. Certainty is low; no dose-response was found."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s13102-026-01729-2",
+    "area": "conditioning",
+    "tags": ["small-sided games", "HIIT", "team sports", "adolescents"],
+    "content": "In male adolescent team-sport athletes, small-sided games and HIIT produce similar gains in VO2max, jump, sprint, and change-of-direction across 17 trials. HIIT is better for Yo-Yo intermittent recovery performance; choose by sport context."
+  },
+  {
+    "reference": "https://doi.org/10.1136/fmch-2024-003056",
+    "area": "recovery",
+    "tags": ["sleep", "insomnia", "older adults", "strength training"],
+    "content": "In older adults with insomnia, strengthening exercise improves sleep quality most among exercise types (25 trials, 2,170 participants), ahead of aerobic and combined exercise. Prescribe regular resistance training as a sleep intervention."
+  },
+  {
+    "reference": "https://doi.org/10.1371/journal.pone.0299135",
+    "area": "recovery",
+    "tags": ["curcumin", "supplements", "DOMS", "muscle damage"],
+    "content": "Curcumin supplementation reduces muscle soreness, creatine kinase, and IL-6 and improves range of motion after muscle-damaging exercise (14 trials, 349 participants). Effects are modest and heterogeneous; consider it an adjunct, not a primary recovery tool."
+  },
+  {
+    "reference": "https://doi.org/10.3390/nu18121881",
+    "area": "nutrition",
+    "tags": ["citrulline malate", "supplements", "ergogenic", "null effect"],
+    "content": "Citrulline malate gives only a small overall exercise-performance benefit (g=0.16 across 30 trials) and does not significantly reduce perceived exertion. Evidence certainty is low to very low; do not treat it as a reliable ergogenic."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-024-02077-2",
+    "area": "equipment",
+    "tags": ["wearables", "heart rate", "VO2max", "validity"],
+    "content": "Consumer wearables measure heart rate with about ±3% mean bias, but overestimate VO2max by roughly 10-15% and misestimate activity intensity and energy use widely. Trust heart-rate trends; verify other metrics against reference methods."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fphys.2025.1590866",
+    "area": "equipment",
+    "tags": ["wearable resistance", "weighted vest", "sprint", "acceleration"],
+    "content": "Wearable resistance improves 10-metre sprint acceleration only when worn on the trunk at loads up to 10% of body mass. It does not significantly improve jumping ability, so do not use it for jump development."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-024-02041-0",
+    "area": "mobility",
+    "tags": ["static stretching", "foam rolling", "range of motion"],
+    "content": "Static stretching and foam rolling training increase joint range of motion by a similar moderate amount long-term. For programs lasting four weeks or less, choose static stretching: it improves range where foam rolling does not."
+  },
+  {
+    "reference": "https://doi.org/10.7717/peerj.20012",
+    "area": "psychology",
+    "tags": [
+      "attentional focus",
+      "external focus",
+      "cueing",
+      "motor performance"
+    ],
+    "content": "Cue a distant external focus, not the body part and not a nearby target: distal external focus beats proximal external focus (SMD 0.30) and internal focus (SMD 0.59), mainly in experienced performers, not novices."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fpsyg.2024.1375608",
+    "area": "psychology",
+    "tags": ["mindfulness", "anxiety", "flow", "performance"],
+    "content": "Mindfulness training produces large improvements in athlete performance (SMD 0.92), flow state and mindfulness level, and reduces competitive anxiety (SMD -0.87). Use it as a structured psychological skills intervention, not occasional breathing exercises."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s40798-026-01102-0",
+    "area": "assessment",
+    "tags": [
+      "load-velocity profile",
+      "velocity sensors",
+      "1RM prediction",
+      "reliability"
+    ],
+    "content": "Commercial velocity sensors validly and reliably track bar velocity (ICC about 0.90-0.92), with linear position transducers more consistent than inertial units. Velocity-based 1RM prediction is accurate on average but heterogeneous, especially for lower-body exercises."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s40798-025-00921-x",
+    "area": "biomechanics",
+    "tags": ["squat", "bench press", "deadlift", "fatigue", "bar velocity"],
+    "content": "As load and fatigue rise in squat, bench press and deadlift, bar velocity and power fall, concentric time lengthens, and joint variability grows around the sticking region. Falling velocity signals fatigue before technique visibly breaks."
   }
 ]
