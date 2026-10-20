@@ -194,6 +194,32 @@ func TestGetReadinessToday_TodayRowWithoutSleep(t *testing.T) {
 	}
 }
 
+func TestGetReadinessToday_WestOfUTC(t *testing.T) {
+	setupReadinessDB(t)
+	userID := uuid.New()
+	// the sleep row carries the calendar date the wearable declared. west
+	// of UTC that date must still count as today in the user location:
+	// converting the stored midnight-UTC date into the location shifts
+	// it to the previous day and hid the hint for the whole trip.
+	loc, err := time.LoadLocation("America/Los_Angeles")
+	if err != nil {
+		t.Fatalf("load location: %v", err)
+	}
+	insertHealthMetric(t, userID, time.Now().In(loc))
+	calls := stubReadinessProbe(t, &model.ReadinessResponse{Score: 80, Level: "green"}, nil)
+
+	resp, err := GetReadinessToday(userID, loc, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp == nil {
+		t.Fatalf("expected a readiness response west of UTC, got nil")
+	}
+	if calls.Load() != 1 {
+		t.Fatalf("probe must run once, ran %d times", calls.Load())
+	}
+}
+
 func TestGetReadinessToday_CacheHitAndForce(t *testing.T) {
 	setupReadinessDB(t)
 	userID := uuid.New()
