@@ -89,6 +89,9 @@ func GetReadinessToday(userID uuid.UUID, loc *time.Location, force bool) (*model
 	// morning alignment: the hint judges today from last night's sleep, so it
 	// exists only once the wearable synced a sleep row dated today. a probe
 	// before the morning sync would grade stale data — answer 404 instead.
+	// the stored date is a pure calendar date (midnight UTC): compare it as
+	// stored, because converting it into the user location shifts it to the
+	// previous day for every location west of UTC.
 	var latest model.HealthSleepDaily
 	err = database.DB.Select("date", "sleep_hours").
 		Where("user_id = ?", userID).
@@ -100,7 +103,7 @@ func GetReadinessToday(userID uuid.UUID, loc *time.Location, force bool) (*model
 	if err != nil {
 		return nil, fmt.Errorf("readiness latest metric: %w", err)
 	}
-	if latest.Date.In(loc).Format("2006-01-02") != today || latest.SleepHours <= 0 {
+	if latest.Date.Format("2006-01-02") != today || latest.SleepHours <= 0 {
 		return nil, nil
 	}
 
