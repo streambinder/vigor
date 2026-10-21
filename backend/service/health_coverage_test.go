@@ -78,12 +78,17 @@ func seedHealthRows(t *testing.T, db *gorm.DB, userID uuid.UUID) uuid.UUID {
 		}
 	}
 	trainingID := seedCoverageTraining(t, db, userID, true)
+	// both sessions must share one UTC calendar day: the manifest counts
+	// distinct session dates. relative offsets from now straddle midnight
+	// UTC in the first hours of the day and break that expectation, so
+	// anchor the sessions to fixed hours of the current UTC day instead.
+	dayStart := time.Now().UTC().Truncate(24 * time.Hour)
 	sessionID := uuid.New()
 	if err := db.Exec(`INSERT INTO health_exercise_sessions
 		(id, user_id, training_id, source_app, exercise_type, started_at, ended_at, avg_hr, max_hr, hc_record_id)
 		VALUES (?, ?, ?, 'watch', 'strength', ?, ?, 120, 150, 'rec-1')`,
 		sessionID.String(), userID.String(), trainingID.String(),
-		time.Now().UTC().Add(-time.Hour), time.Now().UTC()).Error; err != nil {
+		dayStart.Add(time.Hour), dayStart.Add(2*time.Hour)).Error; err != nil {
 		t.Fatalf("seed session: %v", err)
 	}
 	// one unlinked session for the daily view
@@ -91,7 +96,7 @@ func seedHealthRows(t *testing.T, db *gorm.DB, userID uuid.UUID) uuid.UUID {
 		(id, user_id, source_app, exercise_type, started_at, ended_at, hc_record_id)
 		VALUES (?, ?, 'watch', 'run', ?, ?, 'rec-2')`,
 		uuid.NewString(), userID.String(),
-		time.Now().UTC().Add(-2*time.Hour), time.Now().UTC().Add(-time.Hour)).Error; err != nil {
+		dayStart.Add(3*time.Hour), dayStart.Add(4*time.Hour)).Error; err != nil {
 		t.Fatalf("seed unlinked session: %v", err)
 	}
 	return trainingID
