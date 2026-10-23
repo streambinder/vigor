@@ -15,23 +15,27 @@ finished workout every time."
 
 ## Clarifications
 
-### Open questions for the owner
+### Session 2026-10-23
 
-- Q1: Which fields does the summary carry? Proposed set: training
-  name, date, methodology, total duration, and for each exercise
-  the name, the sets, the repetitions or duration, the load, and
-  the rests. Does the owner want the training description or the
-  user notes in the text as well?
-- Q2: For a training with recorded session actuals (cycle
-  `specs/001-session-actuals`), the summary reports the actual
-  values. Before that cycle ships, or when no actuals exist, the
-  summary reports the prescribed values. Does the text need to
-  state which of the two the numbers are?
-- Q3: Is the action available on every training, or on completed
-  trainings only? The motivating use is a finished workout; a
-  planned training raises the wording question of Q2.
-- Q4: The summary language follows the application language of the
-  user. Confirmation only: no per-action language choice.
+The owner directed the cycle to proceed on the proposed defaults
+of this draft. The session records the outcome per question.
+
+- Q: Which fields does the summary carry? → A: The proposed set:
+  training name, date, methodology, total duration, and for each
+  exercise the name, the sets, the repetitions or duration, the
+  load, and the rests. The training description and the user
+  notes stay out.
+- Q: For a training with recorded session actuals, the summary
+  reports the actual values; otherwise the prescribed values.
+  Does the text state which of the two the numbers are? → A: No
+  marker. The wording stays neutral and never claims a
+  performance, so the same format serves a planned training and
+  a completed one.
+- Q: Is the action available on every training, or on completed
+  trainings only? → A: On every training. The neutral wording of
+  the previous answer removes the distinction.
+- Q: The summary language follows the application language of
+  the user. → A: Confirmed. No per-action language choice.
 
 ## User Scenarios & Testing _(mandatory)_
 

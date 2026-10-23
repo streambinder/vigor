@@ -51,5 +51,5 @@
 
 - [x] T015 Full backend suite and coverage gate locally; flutter
       analyze and test locally
-- [ ] T016 Pull request with the trajectory-harness gap declared;
+- [x] T016 Pull request with the trajectory-harness gap declared;
       CI green before the merge decision returns to the owner

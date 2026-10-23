@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-23
 
-**Status**: Draft
+**Status**: Implemented (shipped 2026-10-23)
 
 **Input**: User description: "At feedback time, let the user edit
 the repetitions performed and the loads used for each exercise, and
