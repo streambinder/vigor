@@ -681,6 +681,21 @@ class AppLocalizationsIt extends AppLocalizations {
   String get clone => 'Clona';
 
   @override
+  String get copySummary => 'Copia Sintesi';
+
+  @override
+  String get summaryCopied => 'Sintesi copiata negli appunti';
+
+  @override
+  String get routineWarmup => 'Riscaldamento';
+
+  @override
+  String get routineWork => 'Lavoro';
+
+  @override
+  String get routineCooldown => 'Defaticamento';
+
+  @override
   String get share => 'Condividi';
 
   @override
