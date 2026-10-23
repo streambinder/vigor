@@ -15,6 +15,8 @@ class PostTrainingCompleteRequest {
   final String message;
   @JsonKey(name: 'activityFeedback', defaultValue: {})
   final Map<String, String> activityFeedback;
+  @JsonKey(name: 'activityActuals', defaultValue: {})
+  final Map<String, dynamic> activityActuals;
   @JsonKey(name: 'activityReports', defaultValue: [])
   final List<String> activityReports;
   @JsonKey(name: 'completedIn')
@@ -25,6 +27,7 @@ class PostTrainingCompleteRequest {
     required this.qualityReason,
     required this.message,
     required this.activityFeedback,
+    required this.activityActuals,
     required this.activityReports,
     this.completedIn,
   });

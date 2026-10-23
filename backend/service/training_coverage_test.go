@@ -90,13 +90,13 @@ func TestTrainingCompletionCoverage(t *testing.T) {
 	ownerID := seedCoverageUser(t, db, "complete@example.com", "")
 	trainingID := seedCoverageTraining(t, db, ownerID, false)
 
-	if _, err := CompleteTraining(ownerID, uuid.NewString(), nil, "", "", nil, nil, nil); !errors.Is(err, ErrTrainingNotFound) {
+	if _, err := CompleteTraining(ownerID, uuid.NewString(), nil, "", "", nil, nil, nil, nil); !errors.Is(err, ErrTrainingNotFound) {
 		t.Fatalf("complete missing err = %v", err)
 	}
 	quality := true
 	completedIn := 1500
 	completed, err := CompleteTraining(ownerID, trainingID.String(), &quality, "great", "felt good",
-		map[string]string{"squat": model.FeedbackEasy}, []string{"some-activity"}, &completedIn)
+		map[string]string{"squat": model.FeedbackEasy}, nil, []string{"some-activity"}, &completedIn)
 	if err != nil || completed.CompletedAt == nil {
 		t.Fatalf("CompleteTraining = %+v, %v", completed, err)
 	}
@@ -126,7 +126,7 @@ func TestTrainingCompletionCoverage(t *testing.T) {
 
 	// feedback update on a completed training re-records proficiencies
 	updated, err := UpdateTrainingFeedback(ownerID, trainingID.String(), &quality, "", "updated",
-		map[string]string{"squat": model.FeedbackTooHard}, &completedIn)
+		map[string]string{"squat": model.FeedbackTooHard}, nil, &completedIn)
 	if err != nil || updated.CompletedIn == nil {
 		t.Fatalf("UpdateTrainingFeedback = %v", err)
 	}
@@ -141,14 +141,14 @@ func TestTrainingCompletionCoverage(t *testing.T) {
 
 	// feedback on a fresh (not completed) training is rejected
 	freshID := seedCoverageTraining(t, db, ownerID, false)
-	if _, err := UpdateTrainingFeedback(ownerID, freshID.String(), &quality, "", "", nil, nil); !errors.Is(err, ErrTrainingNotCompleted) {
+	if _, err := UpdateTrainingFeedback(ownerID, freshID.String(), &quality, "", "", nil, nil, nil); !errors.Is(err, ErrTrainingNotCompleted) {
 		t.Fatalf("update uncompleted err = %v", err)
 	}
-	if _, err := UpdateTrainingFeedback(ownerID, uuid.NewString(), &quality, "", "", nil, nil); !errors.Is(err, ErrTrainingNotFound) {
+	if _, err := UpdateTrainingFeedback(ownerID, uuid.NewString(), &quality, "", "", nil, nil, nil); !errors.Is(err, ErrTrainingNotFound) {
 		t.Fatalf("update missing err = %v", err)
 	}
 	// completion without optional fields
-	bare, err := CompleteTraining(ownerID, freshID.String(), nil, "", "", nil, nil, nil)
+	bare, err := CompleteTraining(ownerID, freshID.String(), nil, "", "", nil, nil, nil, nil)
 	if err != nil || bare.CompletedAt == nil {
 		t.Fatalf("CompleteTraining bare = %v", err)
 	}

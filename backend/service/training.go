@@ -43,6 +43,7 @@ var (
 	ErrMalformedTraining        = errors.New("malformed generated training")
 	ErrGenerationCancelled      = errors.New("generation cancelled")
 	ErrTrainingNotCompleted     = errors.New("training not completed")
+	ErrInvalidActivityActuals   = errors.New("invalid activity actuals")
 	ErrCritiqueRequired         = errors.New("critique is required")
 	ErrTrainingAlreadyCompleted = errors.New("training already completed")
 	ErrFetchResource            = errors.New("could not fetch linked resource")
@@ -911,7 +912,7 @@ func DeleteTraining(userID uuid.UUID, trainingID string) (isOwner bool, err erro
 }
 
 // CompleteTraining marks a training as completed and records the calling user's feedback.
-func CompleteTraining(userID uuid.UUID, trainingID string, quality *bool, qualityReason, message string, activityFeedback map[string]string, activityReports []string, completedIn *int) (*model.Training, error) {
+func CompleteTraining(userID uuid.UUID, trainingID string, quality *bool, qualityReason, message string, activityFeedback map[string]string, activityActuals map[string]model.ActivityActual, activityReports []string, completedIn *int) (*model.Training, error) {
 	var training model.Training
 	if err := database.DB.
 		Preload("Gym").
@@ -920,6 +921,10 @@ func CompleteTraining(userID uuid.UUID, trainingID string, quality *bool, qualit
 		Preload("Routines.Blocks.Activities", func(db *gorm.DB) *gorm.DB { return db.Order("position") }).
 		First(&training, "id = ? AND (user_id = ? OR id IN (SELECT training_id FROM partners WHERE user_id = ?))", trainingID, userID, userID).Error; err != nil {
 		return nil, ErrTrainingNotFound
+	}
+
+	if err := validateActivityActuals(&training, activityActuals); err != nil {
+		return nil, err
 	}
 
 	now := time.Now().UTC()
@@ -932,7 +937,7 @@ func CompleteTraining(userID uuid.UUID, trainingID string, quality *bool, qualit
 
 	// upsert per-user feedback
 	activityFeedbackJSON, _ := json.Marshal(activityFeedback)
-	if err := upsertTrainingFeedback(userID, training.ID, quality, qualityReason, message, activityFeedbackJSON); err != nil {
+	if err := upsertTrainingFeedback(userID, training.ID, quality, qualityReason, message, activityFeedbackJSON, marshalActivityActuals(activityActuals)); err != nil {
 		return nil, err
 	}
 
@@ -959,7 +964,7 @@ func CompleteTraining(userID uuid.UUID, trainingID string, quality *bool, qualit
 }
 
 // UpdateTrainingFeedback updates feedback on an already-completed training for the calling user.
-func UpdateTrainingFeedback(userID uuid.UUID, trainingID string, quality *bool, qualityReason, message string, activityFeedback map[string]string, completedIn *int) (*model.Training, error) {
+func UpdateTrainingFeedback(userID uuid.UUID, trainingID string, quality *bool, qualityReason, message string, activityFeedback map[string]string, activityActuals map[string]model.ActivityActual, completedIn *int) (*model.Training, error) {
 	var training model.Training
 	if err := database.DB.
 		Preload("Gym").
@@ -974,6 +979,10 @@ func UpdateTrainingFeedback(userID uuid.UUID, trainingID string, quality *bool, 
 		return nil, ErrTrainingNotCompleted
 	}
 
+	if err := validateActivityActuals(&training, activityActuals); err != nil {
+		return nil, err
+	}
+
 	if completedIn != nil {
 		training.CompletedIn = completedIn
 		database.DB.Model(&training).Update("completed_in", completedIn)
@@ -981,7 +990,7 @@ func UpdateTrainingFeedback(userID uuid.UUID, trainingID string, quality *bool, 
 
 	// upsert per-user feedback
 	activityFeedbackJSON, _ := json.Marshal(activityFeedback)
-	if err := upsertTrainingFeedback(userID, training.ID, quality, qualityReason, message, activityFeedbackJSON); err != nil {
+	if err := upsertTrainingFeedback(userID, training.ID, quality, qualityReason, message, activityFeedbackJSON, marshalActivityActuals(activityActuals)); err != nil {
 		return nil, err
 	}
 
@@ -1012,8 +1021,50 @@ func loadTrainingTrajectory(training *model.Training) {
 	training.Trajectory = &trajectory
 }
 
+// validateActivityActuals checks that every recorded actual names
+// an activity of the training and carries no negative value.
+func validateActivityActuals(training *model.Training, actuals map[string]model.ActivityActual) error {
+	if len(actuals) == 0 {
+		return nil
+	}
+	ids := make(map[string]bool)
+	for _, routine := range training.Routines {
+		for _, block := range routine.Blocks {
+			for _, activity := range block.Activities {
+				ids[activity.ID] = true
+			}
+		}
+	}
+	for activityID, actual := range actuals {
+		if !ids[activityID] {
+			return ErrInvalidActivityActuals
+		}
+		if actual.Reps != nil && *actual.Reps < 0 {
+			return ErrInvalidActivityActuals
+		}
+		if actual.Duration != nil && *actual.Duration < 0 {
+			return ErrInvalidActivityActuals
+		}
+		if actual.WeightKg != nil && *actual.WeightKg < 0 {
+			return ErrInvalidActivityActuals
+		}
+	}
+	return nil
+}
+
+// marshalActivityActuals encodes the actuals for storage. A nil map
+// stays nil, so an update that carries no actuals leaves the stored
+// record untouched.
+func marshalActivityActuals(actuals map[string]model.ActivityActual) []byte {
+	if actuals == nil {
+		return nil
+	}
+	data, _ := json.Marshal(actuals)
+	return data
+}
+
 // upsertTrainingFeedback creates or updates a per-user feedback row.
-func upsertTrainingFeedback(userID, trainingID uuid.UUID, quality *bool, qualityReason, message string, activityFeedbackJSON []byte) error {
+func upsertTrainingFeedback(userID, trainingID uuid.UUID, quality *bool, qualityReason, message string, activityFeedbackJSON, activityActualsJSON []byte) error {
 	fb := model.TrainingFeedback{
 		TrainingID:       trainingID,
 		UserID:           userID,
@@ -1021,10 +1072,15 @@ func upsertTrainingFeedback(userID, trainingID uuid.UUID, quality *bool, quality
 		QualityReason:    qualityReason,
 		Message:          message,
 		ActivityFeedback: activityFeedbackJSON,
+		ActivityActuals:  activityActualsJSON,
+	}
+	columns := []string{"quality", "quality_reason", "message", "activity_feedback", "updated_at"}
+	if activityActualsJSON != nil {
+		columns = append(columns, "activity_actuals")
 	}
 	return database.DB.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "training_id"}, {Name: "user_id"}},
-		DoUpdates: clause.AssignmentColumns([]string{"quality", "quality_reason", "message", "activity_feedback", "updated_at"}),
+		DoUpdates: clause.AssignmentColumns(columns),
 	}).Create(&fb).Error
 }
 

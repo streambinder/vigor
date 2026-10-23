@@ -1,6 +1,8 @@
 import 'dart:async';
 import '../models/api_response.dart';
 import '../models/activity.dart';
+import '../models/activity_actual.dart';
+import '../models/activity_actual_ext.dart';
 import '../dto/partner_info.dart';
 import '../models/training.dart';
 import '../models/training_feedback.dart';
@@ -246,6 +248,7 @@ class TrainingService {
     String trainingId, {
     TrainingFeedback? feedback,
     Map<String, String>? activityFeedback,
+    Map<String, ActivityActual>? activityActuals,
     List<String>? activityReports,
     int? completedIn,
   }) async {
@@ -259,6 +262,9 @@ class TrainingService {
     }
     if (activityFeedback != null && activityFeedback.isNotEmpty) {
       body['activityFeedback'] = activityFeedback;
+    }
+    if (activityActuals != null) {
+      body['activityActuals'] = activityActuals.map((key, value) => MapEntry(key, value.toApiJson()));
     }
     if (activityReports != null && activityReports.isNotEmpty) {
       body['activityReports'] = activityReports;
@@ -292,6 +298,7 @@ class TrainingService {
     String trainingId, {
     TrainingFeedback? feedback,
     Map<String, String>? activityFeedback,
+    Map<String, ActivityActual>? activityActuals,
     int? completedIn,
   }) async {
     AppLogger.debug('[TrainingService] Updating feedback for training: $trainingId');
@@ -304,6 +311,9 @@ class TrainingService {
     }
     if (activityFeedback != null) {
       body['activityFeedback'] = activityFeedback;
+    }
+    if (activityActuals != null) {
+      body['activityActuals'] = activityActuals.map((key, value) => MapEntry(key, value.toApiJson()));
     }
     if (completedIn != null) {
       body['completedIn'] = completedIn;

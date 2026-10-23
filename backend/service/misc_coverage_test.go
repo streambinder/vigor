@@ -128,7 +128,7 @@ func TestCompletionWithoutTrajectoryCoverage(t *testing.T) {
 	if err := db.Create(&training).Error; err != nil {
 		t.Fatalf("seed training: %v", err)
 	}
-	if _, err := CompleteTraining(userID, training.ID.String(), nil, "", "", nil, nil, nil); err != nil {
+	if _, err := CompleteTraining(userID, training.ID.String(), nil, "", "", nil, nil, nil, nil); err != nil {
 		t.Fatalf("CompleteTraining: %v", err)
 	}
 

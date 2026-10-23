@@ -10,10 +10,12 @@ import '../models/training.dart';
 import '../models/routine.dart';
 import '../models/block.dart';
 import '../models/activity.dart';
-import '../models/activity_ext.dart';
 import '../models/exercise.dart';
 import '../dto/partner_info.dart';
 import '../models/training_feedback.dart';
+import '../models/activity_actual.dart';
+import '../models/activity_actual_ext.dart';
+import '../models/training_feedback_ext.dart';
 import '../providers/auth_provider.dart';
 import '../services/app_event.dart';
 import '../services/preferences_service.dart';
@@ -391,6 +393,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
       training.id,
       feedback: result.feedback,
       activityFeedback: result.activityFeedback,
+      activityActuals: result.activityActuals,
       activityReports: result.activityReports,
       completedIn: result.completedIn,
     );
@@ -415,6 +418,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
       training.id,
       feedback: result.feedback,
       activityFeedback: result.activityFeedback,
+      activityActuals: result.activityActuals,
       completedIn: result.completedIn,
     );
 
@@ -1583,6 +1587,7 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
   Widget _buildActivityRow(Activity activity, bool isDark, {bool isFirstInBlock = false}) {
     final exercise = _parseExercise(activity.detail);
     final hasValidImage = exercise != null && CachedExerciseImage.isValidUrl(exercise.reference);
+    final actual = _userFeedback?.actualsByActivityId[activity.id];
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1618,13 +1623,19 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      MarqueeText(text: activity.name, style: VigorTypography.body.copyWith(fontWeight: FontWeight.w600, color: VigorColors.textPrimary(context))),
+                      MarqueeText(
+                          text: actual?.name ?? activity.name,
+                          style: VigorTypography.body.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: VigorColors.textPrimary(context),
+                            decoration: (actual?.isSkipped ?? false) ? TextDecoration.lineThrough : null,
+                          )),
                       if (exercise != null && (exercise.equipment.isNotEmpty || exercise.muscles.isNotEmpty || activity.modifiers.isNotEmpty)) ...[
                         const SizedBox(height: VigorSpacing.xs),
                         _buildExerciseDetails(exercise, activity.modifiers),
                       ],
                       const SizedBox(height: VigorSpacing.sm),
-                      _buildActivityTags(activity),
+                      _buildActivityTags(activity, actual),
                     ],
                   ),
                 ),
@@ -1679,32 +1690,50 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
     );
   }
 
-  Widget _buildActivityTags(Activity activity) {
+  Widget _buildActivityTags(Activity activity, ActivityActual? actual) {
+    final l10n = AppLocalizations.of(context);
+    if (actual?.isSkipped ?? false) {
+      return Wrap(
+        spacing: VigorSpacing.xs,
+        runSpacing: VigorSpacing.xs,
+        children: [
+          _buildTag(Icons.block, l10n.notPerformed, deviating: true),
+          if (activity.rest > 0) _buildTag(Icons.hourglass_bottom, '${activity.rest}s'),
+        ],
+      );
+    }
+    final reps = actual?.reps ?? activity.reps;
+    final duration = actual?.duration ?? activity.duration;
+    final weight = actual?.weightKg ?? activity.weightKg;
     return Wrap(
       spacing: VigorSpacing.xs,
       runSpacing: VigorSpacing.xs,
       children: [
-        if (activity.reps > 0) _buildTag(Icons.repeat, '${activity.reps}'),
-        if (activity.weightKg > 0) _buildTag(Icons.fitness_center, '${activity.weightKgDisplay}kg'),
-        if (activity.duration > 0) _buildTag(Icons.timer, _formatTime(activity.duration)),
+        if (reps > 0) _buildTag(Icons.repeat, '$reps', deviating: actual?.reps != null && actual!.reps != activity.reps),
+        if (weight > 0)
+          _buildTag(Icons.fitness_center, '${formatWeightValue(weight)}kg',
+              deviating: actual?.weightKg != null && actual!.weightKg != activity.weightKg),
+        if (duration > 0)
+          _buildTag(Icons.timer, _formatTime(duration), deviating: actual?.duration != null && actual!.duration != activity.duration),
         if (activity.rest > 0) _buildTag(Icons.hourglass_bottom, '${activity.rest}s'),
       ],
     );
   }
 
-  Widget _buildTag(IconData icon, String label) {
+  Widget _buildTag(IconData icon, String label, {bool deviating = false}) {
+    final color = deviating ? VigorColors.indigo : VigorColors.stone;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: VigorSpacing.sm, vertical: VigorSpacing.xs),
       decoration: BoxDecoration(
-        color: VigorColors.stone.withValues(alpha: 0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: VigorRadius.radiusSm,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 11, color: VigorColors.stone),
+          Icon(icon, size: 11, color: color),
           const SizedBox(width: VigorSpacing.xs),
-          Text(label, style: VigorTypography.data.copyWith(fontSize: 11, fontWeight: FontWeight.w600, color: VigorColors.stone)),
+          Text(label, style: VigorTypography.data.copyWith(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
         ],
       ),
     );

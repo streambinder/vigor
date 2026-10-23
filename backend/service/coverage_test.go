@@ -105,7 +105,7 @@ func setupCoverageDB(t *testing.T) *gorm.DB {
 		`CREATE TABLE training_feedbacks (
 			id TEXT PRIMARY KEY DEFAULT (substr(lower(hex(randomblob(16))),1,8)||'-'||substr(lower(hex(randomblob(16))),9,4)||'-4'||substr(lower(hex(randomblob(16))),13,3)||'-a'||substr(lower(hex(randomblob(16))),16,3)||'-'||substr(lower(hex(randomblob(16))),17,12)),
 			training_id TEXT NOT NULL, user_id TEXT NOT NULL,
-			quality BOOLEAN, quality_reason TEXT, message TEXT, activity_feedback TEXT,
+			quality BOOLEAN, quality_reason TEXT, message TEXT, activity_feedback TEXT, activity_actuals TEXT,
 			created_at DATETIME, updated_at DATETIME,
 			UNIQUE (training_id, user_id)
 		)`,
