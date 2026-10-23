@@ -17,6 +17,7 @@ PostTrainingCompleteRequest _$PostTrainingCompleteRequestFromJson(
         (k, e) => MapEntry(k, e as String),
       ) ??
       {},
+  activityActuals: json['activityActuals'] as Map<String, dynamic>? ?? {},
   activityReports:
       (json['activityReports'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -32,6 +33,7 @@ Map<String, dynamic> _$PostTrainingCompleteRequestToJson(
   'qualityReason': instance.qualityReason,
   'message': instance.message,
   'activityFeedback': instance.activityFeedback,
+  'activityActuals': instance.activityActuals,
   'activityReports': instance.activityReports,
   'completedIn': instance.completedIn,
 };

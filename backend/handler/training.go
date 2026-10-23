@@ -315,12 +315,16 @@ func postTrainingCompleteById(c *fiber.Ctx) error {
 		req.QualityReason,
 		req.Message,
 		req.ActivityFeedback,
+		req.ActivityActuals,
 		req.ActivityReports,
 		req.CompletedIn,
 	)
 	if err != nil {
 		if errors.Is(err, service.ErrTrainingNotFound) {
 			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})
+		}
+		if errors.Is(err, service.ErrInvalidActivityActuals) {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid activity actuals"})
 		}
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to update training"})
 	}
@@ -346,6 +350,7 @@ func putTrainingFeedbackById(c *fiber.Ctx) error {
 		req.QualityReason,
 		req.Message,
 		req.ActivityFeedback,
+		req.ActivityActuals,
 		req.CompletedIn,
 	)
 	if err != nil {
@@ -354,6 +359,8 @@ func putTrainingFeedbackById(c *fiber.Ctx) error {
 			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "training not found"})
 		case errors.Is(err, service.ErrTrainingNotCompleted):
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "training not completed"})
+		case errors.Is(err, service.ErrInvalidActivityActuals):
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid activity actuals"})
 		default:
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to update feedback"})
 		}

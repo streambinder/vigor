@@ -2,10 +2,14 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
+import '../models/activity.dart';
+import '../models/activity_actual.dart';
+import '../models/activity_actual_ext.dart';
 import '../models/activity_ext.dart';
 import '../models/exercise.dart';
 import '../models/training.dart';
 import '../models/training_feedback.dart';
+import '../models/training_feedback_ext.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/exercise_modal.dart';
 import '../utils/platform_helper.dart';
@@ -70,16 +74,49 @@ extension ExerciseFeedbackX on ExerciseFeedback {
 class FeedbackResult {
   final TrainingFeedback feedback;
   final Map<String, String> activityFeedback;
+  final Map<String, ActivityActual> activityActuals;
   final List<String> activityReports; // activity IDs flagged by user
   final int? completedIn; // actual duration in seconds
 
   FeedbackResult({
     required this.feedback,
     required this.activityFeedback,
+    required this.activityActuals,
     required this.activityReports,
     this.completedIn,
   });
 }
+
+/// folds one activity draft into an actual record: a field enters
+/// the record only when it deviates from the prescription, so an
+/// untouched activity records nothing
+ActivityActual? activityActualFromDraft({
+  required Activity activity,
+  required String name,
+  required String reps,
+  required String duration,
+  required String weight,
+  required bool skipped,
+}) {
+  if (skipped) return ActivityActual(skipped: true);
+  final parsedReps = int.tryParse(reps.trim());
+  final parsedDuration = int.tryParse(duration.trim());
+  final parsedWeight = double.tryParse(weight.trim().replaceAll(',', '.'));
+  final trimmedName = name.trim();
+  final actual = ActivityActual(
+    reps: activity.reps > 0 && parsedReps != null && parsedReps != activity.reps ? parsedReps : null,
+    duration: activity.duration > 0 && parsedDuration != null && parsedDuration != activity.duration ? parsedDuration : null,
+    weightKg: activity.weightKg > 0 && parsedWeight != null && parsedWeight != activity.weightKg ? parsedWeight : null,
+    name: trimmedName.isNotEmpty && trimmedName != activity.name ? trimmedName : null,
+  );
+  if (actual.reps == null && actual.duration == null && actual.weightKg == null && actual.name == null) {
+    return null;
+  }
+  return actual;
+}
+
+/// weight text for a form field: no trailing zeros
+String formatWeightForField(double value) => value == value.roundToDouble() ? value.toInt().toString() : value.toString();
 
 class FeedbackModal {
   /// extracts unique activities from work routines
@@ -114,8 +151,9 @@ class FeedbackModal {
     final activities = _getWorkActivities(training);
     if (activities.isEmpty) {
       return FeedbackResult(
-        feedback: TrainingFeedback(id: '', trainingId: '', userId: '', qualityReason: '', message: messagePrefix ?? '', activityFeedback: {}, createdAt: DateTime.now()),
+        feedback: TrainingFeedback(id: '', trainingId: '', userId: '', qualityReason: '', message: messagePrefix ?? '', activityFeedback: {}, activityActuals: {}, createdAt: DateTime.now()),
         activityFeedback: {},
+        activityActuals: {},
         activityReports: [],
       );
     }
@@ -125,6 +163,7 @@ class FeedbackModal {
       barrierDismissible: false,
       builder: (context) => _FeedbackDialogContent(
         activities: activities,
+        actualsActivities: _getAllWorkActivities(training),
         showReports: true,
         messagePrefix: messagePrefix,
         elapsedSeconds: elapsedSeconds,
@@ -137,8 +176,9 @@ class FeedbackModal {
     final activities = _getWorkActivities(training);
     if (activities.isEmpty) {
       return FeedbackResult(
-        feedback: TrainingFeedback(id: '', trainingId: '', userId: '', qualityReason: '', message: '', activityFeedback: {}, createdAt: DateTime.now()),
+        feedback: TrainingFeedback(id: '', trainingId: '', userId: '', qualityReason: '', message: '', activityFeedback: {}, activityActuals: {}, createdAt: DateTime.now()),
         activityFeedback: {},
+        activityActuals: {},
         activityReports: [],
       );
     }
@@ -148,16 +188,31 @@ class FeedbackModal {
       barrierDismissible: false,
       builder: (context) => _FeedbackDialogContent(
         activities: activities,
+        actualsActivities: _getAllWorkActivities(training),
         showReports: false,
         initialFeedback: existingFeedback,
         elapsedSeconds: training.completedIn,
       ),
     );
   }
+
+  /// every work activity instance, in training order (no dedupe:
+  /// actuals are recorded per activity)
+  static List<Activity> _getAllWorkActivities(Training training) {
+    final activities = <Activity>[];
+    for (final routine in training.routines) {
+      if (routine.type != 'work') continue;
+      for (final block in routine.blocks) {
+        activities.addAll(block.activities);
+      }
+    }
+    return activities;
+  }
 }
 
 class _FeedbackDialogContent extends StatefulWidget {
   final List<({String id, String exerciseId, String name, Exercise? exercise})> activities;
+  final List<Activity> actualsActivities;
   final bool showReports;
   final TrainingFeedback? initialFeedback;
   final String? messagePrefix;
@@ -165,6 +220,7 @@ class _FeedbackDialogContent extends StatefulWidget {
 
   const _FeedbackDialogContent({
     required this.activities,
+    required this.actualsActivities,
     required this.showReports,
     this.initialFeedback,
     this.messagePrefix,
@@ -181,6 +237,11 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
   late double _durationMinutes;
   late final Map<String, ExerciseFeedback> _exerciseFeedback; // keyed by activity id
   late final Set<String> _flaggedActivities; // activity IDs that are flagged
+  late final Map<String, TextEditingController> _actualNameControllers;
+  late final Map<String, TextEditingController> _actualRepsControllers;
+  late final Map<String, TextEditingController> _actualDurationControllers;
+  late final Map<String, TextEditingController> _actualWeightControllers;
+  late final Set<String> _skippedActivities;
 
   bool? _trainingQuality; // null = unselected, true = good, false = bad
 
@@ -208,12 +269,38 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
             : ExerciseFeedback.ok,
     };
     _flaggedActivities = {};
+    final existingActuals = widget.initialFeedback?.actualsByActivityId ?? const {};
+    _actualNameControllers = {};
+    _actualRepsControllers = {};
+    _actualDurationControllers = {};
+    _actualWeightControllers = {};
+    _skippedActivities = {};
+    for (final a in widget.actualsActivities) {
+      final actual = existingActuals[a.id];
+      _actualNameControllers[a.id] = TextEditingController(text: actual?.name ?? a.name);
+      _actualRepsControllers[a.id] = TextEditingController(text: '${actual?.reps ?? a.reps}');
+      _actualDurationControllers[a.id] = TextEditingController(text: '${actual?.duration ?? a.duration}');
+      _actualWeightControllers[a.id] = TextEditingController(text: formatWeightForField(actual?.weightKg ?? a.weightKg));
+      if (actual?.isSkipped ?? false) _skippedActivities.add(a.id);
+    }
   }
 
   @override
   void dispose() {
     _messageController.dispose();
     _qualityReasonController.dispose();
+    for (final c in _actualNameControllers.values) {
+      c.dispose();
+    }
+    for (final c in _actualRepsControllers.values) {
+      c.dispose();
+    }
+    for (final c in _actualDurationControllers.values) {
+      c.dispose();
+    }
+    for (final c in _actualWeightControllers.values) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -254,6 +341,19 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
     final prefix = widget.messagePrefix;
     final message = prefix != null && prefix.isNotEmpty ? '$prefix$userMessage' : userMessage;
 
+    final activityActuals = <String, ActivityActual>{};
+    for (final a in widget.actualsActivities) {
+      final actual = activityActualFromDraft(
+        activity: a,
+        name: _actualNameControllers[a.id]!.text,
+        reps: _actualRepsControllers[a.id]!.text,
+        duration: _actualDurationControllers[a.id]!.text,
+        weight: _actualWeightControllers[a.id]!.text,
+        skipped: _skippedActivities.contains(a.id),
+      );
+      if (actual != null) activityActuals[a.id] = actual;
+    }
+
     Navigator.of(context).pop(FeedbackResult(
       feedback: TrainingFeedback(
         id: '',
@@ -263,12 +363,109 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
         qualityReason: _trainingQuality == false ? _qualityReasonController.text.trim() : '',
         message: message,
         activityFeedback: activityFeedback,
+        activityActuals: activityActuals.map((key, value) => MapEntry(key, value.toApiJson())),
         createdAt: DateTime.now(),
       ),
       activityFeedback: activityFeedback,
+      activityActuals: activityActuals,
       activityReports: activityReports,
       completedIn: _durationMinutes > 0 ? (_durationMinutes * 60).round() : null,
     ));
+  }
+
+  Widget _buildActualRow(Activity activity, bool useLiquidGlass) {
+    final l10n = AppLocalizations.of(context);
+    final skipped = _skippedActivities.contains(activity.id);
+    final fields = <Widget>[
+      if (activity.reps > 0)
+        TextField(
+          controller: _actualRepsControllers[activity.id],
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: l10n.repsLabel,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+      if (activity.duration > 0)
+        TextField(
+          controller: _actualDurationControllers[activity.id],
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: l10n.durationSecondsLabel,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+      if (activity.weightKg > 0)
+        TextField(
+          controller: _actualWeightControllers[activity.id],
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: l10n.weightKg,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _actualNameControllers[activity.id],
+                  enabled: !skipped,
+                  maxLines: 1,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  skipped ? Icons.undo : Icons.block,
+                  size: 20,
+                  color: skipped ? VigorColors.persimmon : VigorColors.stone,
+                ),
+                tooltip: l10n.notPerformed,
+                onPressed: () => setState(() {
+                  if (skipped) {
+                    _skippedActivities.remove(activity.id);
+                  } else {
+                    _skippedActivities.add(activity.id);
+                  }
+                }),
+              ),
+            ],
+          ),
+          if (skipped)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                l10n.notPerformed,
+                style: (useLiquidGlass
+                        ? LiquidGlassTheme.bodyStyle
+                        : Theme.of(context).textTheme.bodySmall)
+                    ?.copyWith(color: VigorColors.persimmon),
+              ),
+            )
+          else if (fields.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                children: [
+                  for (var i = 0; i < fields.length; i++) ...[
+                    if (i > 0) const SizedBox(width: 8),
+                    Expanded(child: fields[i]),
+                  ],
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -470,6 +667,19 @@ class _FeedbackDialogContentState extends State<_FeedbackDialogContent> {
                               });
                             },
                           )),
+                      if (widget.actualsActivities.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(
+                            l10n.performedValues,
+                            style: useLiquidGlass
+                                ? LiquidGlassTheme.headlineStyle.copyWith(fontSize: 16)
+                                : Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                        ...widget.actualsActivities.map((a) => _buildActualRow(a, useLiquidGlass)),
+                      ],
                     ],
                   ),
                 ),

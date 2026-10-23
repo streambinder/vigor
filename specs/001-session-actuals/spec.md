@@ -14,26 +14,26 @@ with 30 kg."
 
 ## Clarifications
 
-### Open questions for the owner
+### Session 2026-10-23
 
-- Q1: At which granularity does the user record the actual values?
-  One actual value per exercise activity, valid for every set of
-  the block, or one actual value per single set? The motivating
-  example changes one load for the whole exercise; per-set records
-  capture a weaker last set, at the cost of a longer form.
-- Q2: What does renaming mean? The display name of the performed
-  exercise inside this training only, or a re-link to a different
-  exercise of the library, so statistics and progression treat the
-  performance as that exercise?
-- Q3: Does the recording cover duration-based activities with an
-  actual duration, symmetric to repetitions?
-- Q4: Can the user mark an activity as not performed at all, and
-  does a partially performed block (fewer sets than prescribed)
-  need a record?
-- Q5: Do the recorded actual values feed the next generations as
-  the performed history, so progression starts from the load the
-  user actually lifted? The specification assumes yes; the owner
-  confirms or rejects the assumption before the plan step.
+- Q: At which granularity does the user record the actual values?
+  One value per activity, or one value per single set? → A: One
+  value per activity, valid for every set of the block. A per-set
+  record is a later cycle if a real need appears.
+- Q: What does renaming mean? A display label on this training, or
+  a re-link to a different library exercise? → A: A display label
+  on the record of this training only. Statistics and progression
+  keep the original exercise identity.
+- Q: Does the recording cover duration-based activities with an
+  actual duration, symmetric to repetitions? → A: Yes.
+- Q: Can the user mark an activity as not performed at all? → A:
+  Yes, a per-activity not-performed flag. A partially performed
+  block (fewer sets than prescribed) stays out of scope for this
+  cycle: the block repeats record does not exist, and the
+  qualitative feedback already carries that signal.
+- Q: Do the recorded actual values feed the next generations as
+  the performed history? → A: Yes. Progression starts from the
+  load the user actually lifted.
 
 ## User Scenarios & Testing _(mandatory)_
 
@@ -105,8 +105,9 @@ the library and every other training keep the original name.
 - The user deviates on a duration-based activity instead of a
   repetition-based one. The behavior follows the answer to
   clarification Q3.
-- The user performed fewer sets than the block prescribes. The
-  behavior follows the answer to clarification Q4.
+- The user performed fewer sets than the block prescribes. This
+  cycle records no per-set data; the qualitative per-exercise
+  feedback carries the signal, as today.
 - The feedback arrives twice for the same training, from a retry
   or a second device. The second save replaces the first record;
   the training never carries two actual records for one activity.
@@ -162,9 +163,8 @@ the library and every other training keep the original name.
 
 - The feedback step stays the single entry point for post-session
   corrections. No live, mid-session recording enters this cycle.
-- Actual values are per activity in the record, at the granularity
-  that clarification Q1 decides. The requirements hold under
-  either answer.
+- Actual values are per activity in the record: one value set per
+  activity, valid for every set of its block.
 - The qualitative per-exercise feedback that exists today stays;
   actual values complement the signal, they do not replace it.
 - A rename touches the record of one training. Statistics and

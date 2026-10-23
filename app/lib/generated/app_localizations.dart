@@ -1734,6 +1734,30 @@ abstract class AppLocalizations {
   /// **'Actual duration (min)'**
   String get actualDuration;
 
+  /// No description provided for @performedValues.
+  ///
+  /// In en, this message translates to:
+  /// **'Performed values'**
+  String get performedValues;
+
+  /// No description provided for @notPerformed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not performed'**
+  String get notPerformed;
+
+  /// No description provided for @repsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reps'**
+  String get repsLabel;
+
+  /// No description provided for @durationSecondsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration (s)'**
+  String get durationSecondsLabel;
+
   /// No description provided for @impossible.
   ///
   /// In en, this message translates to:

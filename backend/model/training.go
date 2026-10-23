@@ -90,6 +90,19 @@ type JSONSchema struct {
 	Description string                 `json:"description,omitempty"`
 }
 
+// ActivityActual records what the user actually performed for one
+// activity of a completed training, next to the prescription the
+// training carries. A nil field leaves the prescribed value
+// standing. Name is a display label for this training only; the
+// exercise identity never changes.
+type ActivityActual struct {
+	Reps     *int     `json:"reps,omitempty"`
+	Duration *int     `json:"duration,omitempty"`
+	WeightKg *float64 `json:"weightKg,omitempty"`
+	Name     string   `json:"name,omitempty"`
+	Skipped  bool     `json:"skipped,omitempty"`
+}
+
 // TrainingFeedback captures per-user structured feedback for a completed training.
 type TrainingFeedback struct {
 	ID               uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
@@ -99,8 +112,22 @@ type TrainingFeedback struct {
 	QualityReason    string         `json:"qualityReason"`
 	Message          string         `json:"message"`
 	ActivityFeedback datatypes.JSON `gorm:"type:jsonb" json:"activityFeedback"` // map[exerciseID]string
+	ActivityActuals  datatypes.JSON `gorm:"type:jsonb" json:"activityActuals"`  // map[activityID]ActivityActual
 	CreatedAt        time.Time      `gorm:"type:timestamptz;default:now()" json:"createdAt"`
 	UpdatedAt        time.Time      `gorm:"type:timestamptz;default:now()" json:"-"`
+}
+
+// Actuals returns the recorded per-activity actuals, or nil when
+// the feedback carries none or the payload does not parse.
+func (f TrainingFeedback) Actuals() map[string]ActivityActual {
+	if len(f.ActivityActuals) == 0 {
+		return nil
+	}
+	var actuals map[string]ActivityActual
+	if err := json.Unmarshal(f.ActivityActuals, &actuals); err != nil {
+		return nil
+	}
+	return actuals
 }
 
 // TrainingReference holds a resolved fact excerpt with its source URL.

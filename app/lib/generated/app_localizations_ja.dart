@@ -871,6 +871,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get actualDuration => '実際の所要時間（分）';
 
   @override
+  String get performedValues => 'Performed values';
+
+  @override
+  String get notPerformed => 'Not performed';
+
+  @override
+  String get repsLabel => 'Reps';
+
+  @override
+  String get durationSecondsLabel => 'Duration (s)';
+
+  @override
   String get impossible => 'できない';
 
   @override

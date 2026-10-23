@@ -897,6 +897,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get actualDuration => 'Duración real (min)';
 
   @override
+  String get performedValues => 'Performed values';
+
+  @override
+  String get notPerformed => 'Not performed';
+
+  @override
+  String get repsLabel => 'Reps';
+
+  @override
+  String get durationSecondsLabel => 'Duration (s)';
+
+  @override
   String get impossible => 'No puedo';
 
   @override

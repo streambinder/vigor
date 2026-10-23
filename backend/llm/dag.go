@@ -1311,6 +1311,65 @@ type exerciseSignal struct {
 	performed  bool
 }
 
+// applyActuals folds recorded actuals into copies of the recent
+// trainings: a performed value replaces the prescription on the
+// copy, and a skipped activity drops out. The stored prescription
+// never changes; the copy is the performed view that progression
+// and the history prompt read.
+func applyActuals(
+	recentTrainings []model.Training,
+	recentFeedback map[uuid.UUID]model.TrainingFeedback,
+) []model.Training {
+	folded := make([]model.Training, len(recentTrainings))
+	for i, training := range recentTrainings {
+		folded[i] = training
+		fb, ok := recentFeedback[training.ID]
+		if !ok {
+			continue
+		}
+		actuals := fb.Actuals()
+		if len(actuals) == 0 {
+			continue
+		}
+		routines := make([]model.Routine, len(training.Routines))
+		for j, routine := range training.Routines {
+			blocks := make([]model.Block, len(routine.Blocks))
+			for k, block := range routine.Blocks {
+				activities := make([]model.Activity, 0, len(block.Activities))
+				for _, activity := range block.Activities {
+					actual, recorded := actuals[activity.ID]
+					if !recorded {
+						activities = append(activities, activity)
+						continue
+					}
+					if actual.Skipped {
+						continue
+					}
+					if actual.Reps != nil {
+						activity.Reps = *actual.Reps
+					}
+					if actual.Duration != nil {
+						activity.Duration = *actual.Duration
+					}
+					if actual.WeightKg != nil {
+						activity.WeightKg = *actual.WeightKg
+					}
+					if actual.Name != "" {
+						activity.Name = actual.Name
+					}
+					activities = append(activities, activity)
+				}
+				block.Activities = activities
+				blocks[k] = block
+			}
+			routine.Blocks = blocks
+			routines[j] = routine
+		}
+		folded[i].Routines = routines
+	}
+	return folded
+}
+
 // collectExerciseSignals folds per-session activity feedback and
 // performed loads into per-exercise signals. Sessions are read most
 // recent first, so the first rating seen for an exercise is its latest.
@@ -1406,7 +1465,8 @@ func runHistoryNode(
 	}
 	result.RecentIssue = recentIssue(recentTrainings, recentFeedback)
 
-	signals := collectExerciseSignals(recentTrainings, recentFeedback)
+	performed := applyActuals(recentTrainings, recentFeedback)
+	signals := collectExerciseSignals(performed, recentFeedback)
 
 	type candidate struct {
 		exerciseID string
@@ -1451,7 +1511,7 @@ func runHistoryNode(
 		}
 	}
 
-	state := prompt.NodeHistoryUser(recentTrainings, recentFeedback, recentHR)
+	state := prompt.NodeHistoryUser(performed, recentFeedback, recentHR)
 	if len(candidates) == 0 {
 		_, step, err := decide(ctx, state, nil)
 		result.Summary = historySummary(result)

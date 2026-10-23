@@ -21,6 +21,8 @@ class TrainingFeedback {
   final String message;
   @JsonKey(name: 'activityFeedback', defaultValue: {})
   final Map<String, dynamic> activityFeedback;
+  @JsonKey(name: 'activityActuals', defaultValue: {})
+  final Map<String, dynamic> activityActuals;
   @JsonKey(name: 'createdAt', toJson: _dateTimeToJson)
   final DateTime createdAt;
 
@@ -32,6 +34,7 @@ class TrainingFeedback {
     required this.qualityReason,
     required this.message,
     required this.activityFeedback,
+    required this.activityActuals,
     required this.createdAt,
   });
 

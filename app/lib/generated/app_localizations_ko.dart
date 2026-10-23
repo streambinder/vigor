@@ -871,6 +871,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get actualDuration => '실제 소요 시간 (분)';
 
   @override
+  String get performedValues => 'Performed values';
+
+  @override
+  String get notPerformed => 'Not performed';
+
+  @override
+  String get repsLabel => 'Reps';
+
+  @override
+  String get durationSecondsLabel => 'Duration (s)';
+
+  @override
   String get impossible => '못 함';
 
   @override
