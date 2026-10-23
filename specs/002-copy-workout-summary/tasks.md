@@ -7,21 +7,21 @@
 
 ## Phase 1: User Story 1 - Copy the summary of a finished workout (P1)
 
-- [ ] T001 Implement the pure summary builder in
+- [x] T001 Implement the pure summary builder in
       app/lib/utils/workout_summary.dart (header, sections in
       training order, block structure in words, bodyweight load
       omitted, actuals override, skipped activities omitted)
-- [ ] T002 [P] Unit tests for the builder in
+- [x] T002 [P] Unit tests for the builder in
       app/test/workout_summary_test.dart
-- [ ] T003 Add the copy summary action to the training detail
+- [x] T003 Add the copy summary action to the training detail
       overflow menu in
       app/lib/screens/training_details_screen.dart, with the
       clipboard write and the confirmation notification
-- [ ] T004 Add the action and summary labels to app/l10n
+- [x] T004 Add the action and summary labels to app/l10n
       (English and Italian; other locales fall back)
 
 ## Phase 2: Polish and verification
 
-- [ ] T005 Full application analyze and test locally
+- [x] T005 Full application analyze and test locally
 - [ ] T006 Pull request; CI green before the merge decision
       returns to the owner

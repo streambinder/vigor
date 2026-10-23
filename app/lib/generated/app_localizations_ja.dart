@@ -662,6 +662,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get clone => '複製';
 
   @override
+  String get copySummary => 'Copy Summary';
+
+  @override
+  String get summaryCopied => 'Summary copied to clipboard';
+
+  @override
+  String get routineWarmup => 'Warmup';
+
+  @override
+  String get routineWork => 'Work';
+
+  @override
+  String get routineCooldown => 'Cooldown';
+
+  @override
   String get share => '共有';
 
   @override

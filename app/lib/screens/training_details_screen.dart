@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -22,6 +23,7 @@ import '../services/preferences_service.dart';
 import '../services/service_locator.dart';
 import '../timer/workout_timer_notifier.dart';
 import '../utils/knowledge_labels.dart';
+import '../utils/workout_summary.dart';
 import '../widgets/adaptive/adaptive.dart';
 import '../widgets/cached_exercise_image.dart';
 import '../widgets/marquee_text.dart';
@@ -514,6 +516,23 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
       }
     } else {
       AdaptiveNotification.showError(context: context, message: l10n.failedToShareTraining, rawError: response.error);
+    }
+  }
+
+  Future<void> _copySummary(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final date = (training.completedAt ?? training.createdAt).toLocal();
+    final text = buildWorkoutSummary(
+      training,
+      actuals: _userFeedback?.actualsByActivityId ?? const {},
+      labels: (warmup: l10n.routineWarmup, work: l10n.routineWork, cooldown: l10n.routineCooldown, rest: l10n.rest),
+      dateText: DateFormat.yMMMMd(locale).format(date),
+      methodologyLabel: KnowledgeLabels.methodologyLabel(training.methodology, l10n),
+    );
+    await Clipboard.setData(ClipboardData(text: text));
+    if (context.mounted) {
+      AdaptiveNotification.show(context: context, message: l10n.summaryCopied);
     }
   }
 
@@ -1293,6 +1312,9 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
           case 'clone':
             _cloneTraining(context);
             break;
+          case 'copy_summary':
+            _copySummary(context);
+            break;
           case 'share':
             _shareByLink(context);
             break;
@@ -1327,6 +1349,16 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
               const Icon(Icons.copy, size: 20, color: VigorColors.stone),
               const SizedBox(width: VigorSpacing.sm),
               Text(l10n.clone, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'copy_summary',
+          child: Row(
+            children: [
+              const Icon(Icons.content_paste, size: 20, color: VigorColors.stone),
+              const SizedBox(width: VigorSpacing.sm),
+              Text(l10n.copySummary, style: VigorTypography.body.copyWith(color: VigorColors.textPrimary(context))),
             ],
           ),
         ),

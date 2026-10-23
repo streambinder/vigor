@@ -1332,6 +1332,36 @@ abstract class AppLocalizations {
   /// **'Clone'**
   String get clone;
 
+  /// No description provided for @copySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Summary'**
+  String get copySummary;
+
+  /// No description provided for @summaryCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary copied to clipboard'**
+  String get summaryCopied;
+
+  /// No description provided for @routineWarmup.
+  ///
+  /// In en, this message translates to:
+  /// **'Warmup'**
+  String get routineWarmup;
+
+  /// No description provided for @routineWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get routineWork;
+
+  /// No description provided for @routineCooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooldown'**
+  String get routineCooldown;
+
   /// No description provided for @share.
   ///
   /// In en, this message translates to:
