@@ -23,5 +23,5 @@
 ## Phase 2: Polish and verification
 
 - [x] T005 Full application analyze and test locally
-- [ ] T006 Pull request; CI green before the merge decision
+- [x] T006 Pull request; CI green before the merge decision
       returns to the owner
