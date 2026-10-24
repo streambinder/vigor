@@ -167,6 +167,29 @@ func workStructureFacts(load pipeline.LoadProgramming, exercises pipeline.Exerci
 	return blocks, rounds, movements
 }
 
+// exerciseParens builds the parenthetical metadata printed after a pool
+// candidate ID: the lead part (the annotations for a work candidate, the
+// primary muscle for a warmup or cooldown candidate), then the difficulty
+// marker, the equipment list, and the form cues, joined by a middle dot.
+// A difficulty of zero is the unrated default and renders no marker. The
+// result is empty when no part has anything to show.
+func exerciseParens(ex model.Exercise, lead string) string {
+	var parts []string
+	if lead != "" {
+		parts = append(parts, lead)
+	}
+	if ex.Difficulty > 0 {
+		parts = append(parts, fmt.Sprintf("d%d", ex.Difficulty))
+	}
+	if len(ex.Equipment) > 0 {
+		parts = append(parts, strings.Join(ex.Equipment, ", "))
+	}
+	if len(ex.Cues) > 0 {
+		parts = append(parts, "cues: "+strings.Join(ex.Cues, "; "))
+	}
+	return strings.Join(parts, " · ")
+}
+
 // exerciseAnnotations builds a comma-separated annotation string for an exercise
 // (e.g. "weighted, timer-only, recent") for human-readable prompt output.
 func exerciseAnnotations(ex model.Exercise, recentSet map[string]bool) string {

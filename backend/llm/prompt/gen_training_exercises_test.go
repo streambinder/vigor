@@ -52,6 +52,56 @@ func TestNodeExercisesUserFacts(t *testing.T) {
 	}
 }
 
+func TestNodeExercisesUserCandidateMetadata(t *testing.T) {
+	full := model.Exercise{
+		ID: "barbell-bench-press", Muscles: []string{"chest"},
+		Equipment: []string{"barbell", "bench"}, Difficulty: 55,
+		Cues: []string{"touch chest", "pause briefly"}, Mode: "reps",
+	}
+	partial := model.Exercise{ID: "push-up", Muscles: []string{"chest"}, Difficulty: 30}
+	bare := model.Exercise{ID: "burpee", Muscles: []string{"full body"}}
+	warmup := model.Exercise{
+		ID: "arm-circles", Muscles: []string{"shoulders"}, Difficulty: 10,
+		Cues: []string{"small circles"},
+	}
+	cooldown := model.Exercise{ID: "chest-stretch", Muscles: []string{"chest"}, Difficulty: 5}
+
+	out := NodeExercisesUser(
+		"strength",
+		[]string{"chest"},
+		nil, nil, nil, nil,
+		[]model.Exercise{full, partial, bare},
+		[]model.Exercise{warmup},
+		[]model.Exercise{cooldown},
+		nil, nil, nil,
+		false,
+	)
+
+	for _, want := range []string{
+		"barbell-bench-press (weighted, reps-only · d55 · barbell, bench · cues: touch chest; pause briefly)",
+		"push-up (d30)",
+		"arm-circles (shoulders · d10 · cues: small circles)",
+		"chest-stretch (chest · d5)",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("candidate metadata missing %q in:\n%s", want, out)
+		}
+	}
+	if strings.Contains(out, "burpee (") {
+		t.Errorf("bare candidate gained a parenthetical:\n%s", out)
+	}
+}
+
+func TestNodeExercisesSystemMetadataRule(t *testing.T) {
+	out := NodeExercisesSystem(false, 5, 8, false, "")
+	if !strings.Contains(out, "a d-prefixed difficulty (d0 easiest, d100 hardest)") {
+		t.Fatalf("metadata line missing from exercises system prompt:\n%s", out)
+	}
+	if !strings.Contains(out, "already enforced before the pool reaches you") {
+		t.Fatalf("metadata role line missing from exercises system prompt:\n%s", out)
+	}
+}
+
 func TestNodeExercisesSystemFactsRule(t *testing.T) {
 	out := NodeExercisesSystem(false, 3, 4, false, "")
 	if !strings.Contains(out, "push-to-pull balance fact governs the mix") {

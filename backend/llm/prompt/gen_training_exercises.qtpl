@@ -13,7 +13,8 @@ Output a JSON object with:
 
 Rules:
 - Use only exercise IDs from the provided lists — never invent IDs
-- Annotations in parentheses (weighted, timer-only, reps-only, recent) are metadata — not part of the ID
+- Annotations in parentheses are metadata, not part of the ID: weighted, timer-only, reps-only, recent, a d-prefixed difficulty (d0 easiest, d100 hardest), equipment, and form cues where present
+- Difficulty bounds and equipment availability are already enforced before the pool reaches you — use the metadata to judge fit between near-equal options
 - For work exercises: cover the primary muscles with higher count, secondary muscles with 1-2 exercises
 - If muscles to rest are listed, never pick exercises from their groups
 {% if !explicitProgram %}- Avoid exercises matching any contraindicated pattern in every phase (warmup, work, and cooldown) — there is no mobility or warmup exemption
@@ -69,14 +70,14 @@ Favorites: {% for i, ex := range favoriteExercises %}{%s ex.ID %}{% if i < len(f
 {% code recentSet := make(map[string]bool, len(recentExerciseIDs)); for _, id := range recentExerciseIDs { recentSet[id] = true } %}
 {% if !skipWarmupCooldown %}
 [WARMUP] {%d len(warmupExercises) %} options
-{% for i, exercise := range warmupExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 || len(exercise.Equipment) > 0 %} ({% if len(exercise.Muscles) > 0 %}{%s exercise.Muscles[0] %}{% endif %}{% if len(exercise.Muscles) > 0 && len(exercise.Equipment) > 0 %}, {% endif %}{% if len(exercise.Equipment) > 0 %}{%s strings.Join(exercise.Equipment, ", ") %}{% endif %}){% endif %}{% if i < len(warmupExercises)-1 %}, {% endif %}{% endfor %}
+{% for i, exercise := range warmupExercises %}{%s exercise.ID %}{% code lead := "" %}{% if len(exercise.Muscles) > 0 %}{% code lead = exercise.Muscles[0] %}{% endif %}{% code parens := exerciseParens(exercise, lead) %}{% if parens != "" %} ({%s parens %}){% endif %}{% if i < len(warmupExercises)-1 %}, {% endif %}{% endfor %}
 
 {% endif %}
 [WORK] {%d len(workExercises) %} options
-{% code workByMuscle := groupExercisesByMuscle(workExercises) %}{% for _, muscle := range workExerciseMuscleOrder(workExercises) %}{%s muscle %}: {% for i, ex := range workByMuscle[muscle] %}{%s ex.ID %}{% code annotations := exerciseAnnotations(ex, recentSet) %}{% if annotations != "" %} ({%s annotations %}){% endif %}{% if i < len(workByMuscle[muscle])-1 %}, {% endif %}{% endfor %}
+{% code workByMuscle := groupExercisesByMuscle(workExercises) %}{% for _, muscle := range workExerciseMuscleOrder(workExercises) %}{%s muscle %}: {% for i, ex := range workByMuscle[muscle] %}{%s ex.ID %}{% code parens := exerciseParens(ex, exerciseAnnotations(ex, recentSet)) %}{% if parens != "" %} ({%s parens %}){% endif %}{% if i < len(workByMuscle[muscle])-1 %}, {% endif %}{% endfor %}
 {% endfor %}
 {% if !skipWarmupCooldown %}
 [COOLDOWN] {%d len(cooldownExercises) %} options
-{% for i, exercise := range cooldownExercises %}{%s exercise.ID %}{% if len(exercise.Muscles) > 0 %} ({%s exercise.Muscles[0] %}){% endif %}{% if i < len(cooldownExercises)-1 %}, {% endif %}{% endfor %}
+{% for i, exercise := range cooldownExercises %}{%s exercise.ID %}{% code lead := "" %}{% if len(exercise.Muscles) > 0 %}{% code lead = exercise.Muscles[0] %}{% endif %}{% code parens := exerciseParens(exercise, lead) %}{% if parens != "" %} ({%s parens %}){% endif %}{% if i < len(cooldownExercises)-1 %}, {% endif %}{% endfor %}
 {% endif %}
 {% endfunc %}

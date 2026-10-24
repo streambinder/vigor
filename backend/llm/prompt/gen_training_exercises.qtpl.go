@@ -28,7 +28,8 @@ Output a JSON object with:
 
 Rules:
 - Use only exercise IDs from the provided lists — never invent IDs
-- Annotations in parentheses (weighted, timer-only, reps-only, recent) are metadata — not part of the ID
+- Annotations in parentheses are metadata, not part of the ID: weighted, timer-only, reps-only, recent, a d-prefixed difficulty (d0 easiest, d100 hardest), equipment, and form cues where present
+- Difficulty bounds and equipment availability are already enforced before the pool reaches you — use the metadata to judge fit between near-equal options
 - For work exercises: cover the primary muscles with higher count, secondary muscles with 1-2 exercises
 - If muscles to rest are listed, never pick exercises from their groups
 `)
@@ -186,17 +187,17 @@ Favorites: `)
 `)
 		for i, exercise := range warmupExercises {
 			qw422016.E().S(exercise.ID)
-			if len(exercise.Muscles) > 0 || len(exercise.Equipment) > 0 {
+			lead := ""
+
+			if len(exercise.Muscles) > 0 {
+				lead = exercise.Muscles[0]
+
+			}
+			parens := exerciseParens(exercise, lead)
+
+			if parens != "" {
 				qw422016.N().S(` (`)
-				if len(exercise.Muscles) > 0 {
-					qw422016.E().S(exercise.Muscles[0])
-				}
-				if len(exercise.Muscles) > 0 && len(exercise.Equipment) > 0 {
-					qw422016.N().S(`, `)
-				}
-				if len(exercise.Equipment) > 0 {
-					qw422016.E().S(strings.Join(exercise.Equipment, ", "))
-				}
+				qw422016.E().S(parens)
 				qw422016.N().S(`)`)
 			}
 			if i < len(warmupExercises)-1 {
@@ -219,11 +220,11 @@ Favorites: `)
 		qw422016.N().S(`: `)
 		for i, ex := range workByMuscle[muscle] {
 			qw422016.E().S(ex.ID)
-			annotations := exerciseAnnotations(ex, recentSet)
+			parens := exerciseParens(ex, exerciseAnnotations(ex, recentSet))
 
-			if annotations != "" {
+			if parens != "" {
 				qw422016.N().S(` (`)
-				qw422016.E().S(annotations)
+				qw422016.E().S(parens)
 				qw422016.N().S(`)`)
 			}
 			if i < len(workByMuscle[muscle])-1 {
@@ -243,9 +244,17 @@ Favorites: `)
 `)
 		for i, exercise := range cooldownExercises {
 			qw422016.E().S(exercise.ID)
+			lead := ""
+
 			if len(exercise.Muscles) > 0 {
+				lead = exercise.Muscles[0]
+
+			}
+			parens := exerciseParens(exercise, lead)
+
+			if parens != "" {
 				qw422016.N().S(` (`)
-				qw422016.E().S(exercise.Muscles[0])
+				qw422016.E().S(parens)
 				qw422016.N().S(`)`)
 			}
 			if i < len(cooldownExercises)-1 {
