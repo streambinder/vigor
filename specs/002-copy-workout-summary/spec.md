@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-23
 
-**Status**: Draft
+**Status**: Implemented (shipped 2026-10-23)
 
 **Input**: User description: "Add a copy action to the overflow
 menu of a training. The action generates a written summary of the
