@@ -1,5 +1,6 @@
 FROM golang:1.26.4-alpine3.22 AS builder
-RUN apk add --no-cache gcc=14.2.0-r6 musl-dev=1.2.5-r12
+# hadolint ignore=DL3018
+RUN apk add --no-cache gcc musl-dev
 WORKDIR /build
 COPY backend/go.mod backend/go.sum ./backend/
 COPY cockpit/go.mod cockpit/go.sum ./cockpit/
