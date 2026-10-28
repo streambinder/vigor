@@ -15,7 +15,7 @@ require (
 	github.com/valyala/quicktemplate v1.8.0
 	go.uber.org/goleak v1.3.0
 	golang.org/x/crypto v0.58.0
-	golang.org/x/net v0.61.0
+	golang.org/x/net v0.62.0
 	google.golang.org/api v0.304.0
 	gorm.io/driver/postgres v1.6.3
 	gorm.io/gorm v1.31.2
