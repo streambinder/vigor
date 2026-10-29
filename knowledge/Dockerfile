@@ -13,6 +13,13 @@ COPY backend ../backend/
 COPY knowledge/main.go ./
 RUN CGO_ENABLED=0 go build -o bootstrap main.go
 
+FROM python:3.12.12-slim-bookworm AS animations-builder
+WORKDIR /build
+RUN pip install --no-cache-dir numpy==1.26.4 scipy==1.17.1
+COPY knowledge/features/exercises.json features/exercises.json
+COPY knowledge/features/animations features/animations
+RUN python features/animations/generate.py animations-out
+
 FROM pgvector/pgvector:0.8.7-pg18 AS data-builder
 ARG OPENROUTER_EMBEDDING_MODELS
 USER root
@@ -21,6 +28,7 @@ USER postgres
 WORKDIR /build
 COPY --from=bootstrap-builder /build/knowledge/bootstrap /usr/local/bin/bootstrap
 COPY knowledge/features features
+COPY --from=animations-builder /build/animations-out animations
 RUN --mount=type=secret,id=openrouter_api_key,uid=999 initdb -D /tmp/pgdata && \
   pg_ctl -D /tmp/pgdata -o "-k /tmp" start && \
   pg_isready -t 30 -h /tmp && \

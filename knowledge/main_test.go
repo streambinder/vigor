@@ -286,3 +286,67 @@ func TestBootstrapAssociationErrorCoverage(t *testing.T) {
 		t.Fatal("boostrapExercises must fail when the association write fails")
 	}
 }
+
+// writeAnimations fills the animations folder of the scratch
+// directory chdirFeatures prepared with the given files.
+func writeAnimations(t *testing.T, dir string, files map[string]string) {
+	t.Helper()
+	if err := os.MkdirAll(filepath.Join(dir, "animations"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for name, content := range files {
+		if err := os.WriteFile(filepath.Join(dir, "animations", name), []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+func TestBootstrapAnimationsCoverage(t *testing.T) {
+	db, server := openKnowledgeDB(t)
+	dir := chdirFeatures(t, map[string]string{})
+	writeAnimations(t, dir, map[string]string{
+		"barbell-full-squat.json": `{"schema":"vigor-exercise-animation/1"}`,
+		"burpee.json":             `{"schema":"vigor-exercise-animation/1"}`,
+		"notes.txt":               "not an animation",
+	})
+	if err := bootstrapAnimations(db); err != nil {
+		t.Fatalf("bootstrapAnimations: %v", err)
+	}
+	if !server.saw(`insert into "exercise_animations"`) {
+		t.Fatal("no animation inserts recorded")
+	}
+}
+
+// Without the animations directory the bootstrap skips the step:
+// the catalog ships without animations, not with a failed build.
+func TestBootstrapAnimationsMissingDirCoverage(t *testing.T) {
+	db, server := openKnowledgeDB(t)
+	chdirFeatures(t, map[string]string{})
+	if err := bootstrapAnimations(db); err != nil {
+		t.Fatalf("bootstrapAnimations without directory: %v", err)
+	}
+	if server.saw(`insert into "exercise_animations"`) {
+		t.Fatal("animation inserts recorded without a directory")
+	}
+}
+
+func TestBootstrapAnimationsBadJSONCoverage(t *testing.T) {
+	db, _ := openKnowledgeDB(t)
+	dir := chdirFeatures(t, map[string]string{})
+	writeAnimations(t, dir, map[string]string{"burpee.json": "{bad"})
+	if err := bootstrapAnimations(db); err == nil {
+		t.Fatal("bootstrapAnimations must fail on a malformed document")
+	}
+}
+
+func TestBootstrapAnimationsStoreErrorCoverage(t *testing.T) {
+	db, server := openKnowledgeDB(t)
+	dir := chdirFeatures(t, map[string]string{})
+	writeAnimations(t, dir, map[string]string{
+		"burpee.json": `{"schema":"vigor-exercise-animation/1"}`,
+	})
+	server.failOn = "INSERT INTO"
+	if err := bootstrapAnimations(db); err == nil {
+		t.Fatal("bootstrapAnimations must fail when inserts fail")
+	}
+}
