@@ -1,0 +1,48 @@
+[MASTER]
+
+# Use multiple processes to speed up Pylint.
+jobs=0
+
+[MESSAGES CONTROL]
+
+# Repository scope: the only Python in this repository is the vendored,
+# output-verified animation generator under knowledge/features/animations. Its output
+# is hash-checked against the reviewed pool on every change, so the
+# convention and refactor classes below are disabled for it by decision:
+# the generator keeps its compact numeric style (short math identifiers,
+# long builder functions, one module for the whole builder set,
+# construction code shared across the recipe family, lazy imports that
+# break module cycles, undocumented helpers).
+# Error-level checks stay enabled, with one exception:
+# unsubscriptable-object fires four times on a single None-guarded
+# best-selection idiom, a false positive whose blamed line varies
+# between pylint releases.
+# Ignoring Import Errors is desired as super-linter
+# does not support installing dependencies as it runs
+disable=import-error,
+        missing-function-docstring,
+        duplicate-code,
+        too-many-locals,
+        too-many-arguments,
+        too-many-positional-arguments,
+        too-many-statements,
+        too-many-branches,
+        too-many-nested-blocks,
+        too-many-lines,
+        import-outside-toplevel,
+        consider-using-enumerate,
+        consider-using-get,
+        invalid-name,
+        unsubscriptable-object
+
+[FORMAT]
+
+# The formatters and the other Python linters in this setup use a
+# 120-character line width; pylint keeps its own 100 default unless set.
+max-line-length=120
+
+[BASIC]
+
+# "bar" names the barbell anchor in the generator. It is a domain term,
+# not a placeholder name.
+bad-names=foo,baz,toto,tutu,tata

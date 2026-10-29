@@ -1,0 +1,4 @@
+out/
+animations-out/
+__pycache__/
+.coverage

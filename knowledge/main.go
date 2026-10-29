@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/pgvector/pgvector-go"
@@ -42,6 +44,7 @@ func main() {
 		&model.EquipmentEmbedding{},
 		&model.Exercise{},
 		&model.ExerciseEmbedding{},
+		&exerciseAnimation{},
 		&model.Goal{},
 		&model.GoalEmbedding{},
 		&model.Modifier{},
@@ -75,6 +78,9 @@ func main() {
 	}
 	if err := boostrapExercises(gormDB); err != nil {
 		log.Fatalf("Failed to inject exercises: %s", err)
+	}
+	if err := bootstrapAnimations(gormDB); err != nil {
+		log.Fatalf("Failed to inject animations: %s", err)
 	}
 	if err := bootstrapModifiers(gormDB); err != nil {
 		log.Fatalf("Failed to inject modifiers: %s", err)
@@ -137,6 +143,55 @@ func boostrapExercises(gormDB *gorm.DB) error {
 			Text:       entry.text,
 			Embedding:  pgvector.NewVector(vectors[i]),
 		}).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// exerciseAnimation is one generated exercise animation, keyed by
+// the catalog exercise it illustrates. The payload is the minified
+// animation document the image build generates from the recipes in
+// knowledge/recipes, so the catalog and its animations are baked
+// into the same image and versioned together.
+type exerciseAnimation struct {
+	ExerciseID string `gorm:"primaryKey"`
+	Animation  string `gorm:"type:text;not null"`
+}
+
+// bootstrapAnimations injects the generated animations held in the
+// animations directory, one JSON document per catalog exercise,
+// named after the exercise identifier. The directory is a build
+// artifact: when it is absent the catalog ships without animations
+// and the step is skipped. A document that does not parse fails
+// the bootstrap instead of shipping a broken animation.
+func bootstrapAnimations(gormDB *gorm.DB) error {
+	entries, err := os.ReadDir("animations")
+	if err != nil {
+		if os.IsNotExist(err) {
+			log.Print("animations directory not found, skipping animations")
+			return nil
+		}
+		return err
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".json" {
+			continue
+		}
+		bytes, err := os.ReadFile(filepath.Join("animations", entry.Name()))
+		if err != nil {
+			return err
+		}
+		if !json.Valid(bytes) {
+			return fmt.Errorf("animations/%s is not valid JSON", entry.Name())
+		}
+		row := exerciseAnimation{
+			ExerciseID: strings.TrimSuffix(entry.Name(), ".json"),
+			Animation:  string(bytes),
+		}
+		if err := gormDB.Save(&row).Error; err != nil {
 			return err
 		}
 	}

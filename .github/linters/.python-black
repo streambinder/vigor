@@ -1,0 +1,5 @@
+# Black runs on the Python generator under
+# knowledge/features/animations. The generator is formatted at 120:
+# at the 88 default black would reformat 29 of its files.
+[tool.black]
+line-length = 120
