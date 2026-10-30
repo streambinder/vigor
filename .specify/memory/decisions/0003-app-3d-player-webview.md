@@ -1,7 +1,6 @@
 # 0003: app renders exercise animations in a WebView with Three.js
 
-Status: Proposed. This decision is not ratified until Davide
-ratifies it.
+Status: Ratified by Davide on 2026-10-30.
 
 ## Context
 

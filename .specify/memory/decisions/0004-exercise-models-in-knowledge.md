@@ -1,7 +1,6 @@
 # 0004: exercise models live in the knowledge database
 
-Status: Proposed. This decision is not ratified until Davide
-ratifies it.
+Status: Ratified by Davide on 2026-10-30.
 
 ## Context
 
