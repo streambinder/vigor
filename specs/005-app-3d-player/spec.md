@@ -1,7 +1,6 @@
 # Cycle 005: app 3D player on exercise image tap
 
-Status: Draft. This spec is not ratified until Davide ratifies it.
-No implementation starts from it before ratification.
+Status: Ratified by Davide on 2026-10-30.
 
 ## Context
 
