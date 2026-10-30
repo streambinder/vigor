@@ -45,6 +45,7 @@ func Init() *fiber.App {
 	initTraining(app)
 	initShare(app)
 	initActivity(app)
+	initExerciseAnimations(app)
 	initProgress(app)
 	initReport(app)
 	initHealth(app)
