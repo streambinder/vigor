@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_timezone/flutter_timezone.dart';
 
 import '../config/api_config.dart';
@@ -22,6 +24,11 @@ class AuthenticatedApiService {
 
   Future<ApiResponse<Map<String, dynamic>>> get(String endpoint) async {
     return _authenticatedRequest(() => _doGet(endpoint));
+  }
+
+  /// GET request returning raw bytes, with the same 401 refresh retry.
+  Future<ApiResponse<Uint8List>> getBytes(String endpoint) async {
+    return _authenticatedBytesRequest(() => _doGetBytes(endpoint));
   }
 
   Future<ApiResponse<Map<String, dynamic>>> post(
@@ -132,6 +139,32 @@ class AuthenticatedApiService {
       ApiConfig.authorizationHeader: 'Bearer $accessToken',
       'X-Timezone': (await FlutterTimezone.getLocalTimezone()).identifier,
     };
+  }
+
+  /// Wraps a bytes request with 401 interception and token refresh logic.
+  Future<ApiResponse<Uint8List>> _authenticatedBytesRequest(
+    Future<ApiResponse<Uint8List>> Function() request,
+  ) async {
+    final response = await request();
+
+    if (response.statusCode != 401) {
+      return response;
+    }
+
+    final refreshed = await _refreshTokens();
+    if (!refreshed) {
+      return response;
+    }
+
+    return request();
+  }
+
+  Future<ApiResponse<Uint8List>> _doGetBytes(String endpoint) async {
+    final headers = await _getAuthHeaders();
+    if (headers == null) {
+      return ApiResponse.error('Not authenticated', 401);
+    }
+    return _apiService.getBytes(endpoint, headers: headers);
   }
 
   Future<ApiResponse<Map<String, dynamic>>> _doGet(String endpoint) async {

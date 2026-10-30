@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import '../models/api_response.dart';
@@ -40,6 +41,35 @@ class ApiService {
       return ApiResponse.networkError('Bad response format');
     } catch (e) {
       AppLogger.error('[ApiService] GET request failed', e);
+      return ApiResponse.networkError('Something went wrong');
+    }
+  }
+
+  /// Make a GET request returning raw bytes, for payloads the Map-based
+  /// get cannot hold: JSON arrays and binary files such as models.
+  Future<ApiResponse<Uint8List>> getBytes(
+    String endpoint, {
+    Map<String, String>? headers,
+  }) async {
+    try {
+      final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+      AppLogger.debug('[ApiService] GET bytes ${url.toString()}');
+      final response = await _client.get(
+        url,
+        headers: _buildHeaders(headers),
+      );
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return ApiResponse.success(response.bodyBytes, response.statusCode);
+      }
+      return ApiResponse.error('Request failed', response.statusCode);
+    } on SocketException {
+      return ApiResponse.networkError('No internet connection');
+    } on HttpException {
+      return ApiResponse.networkError('HTTP error occurred');
+    } on FormatException {
+      return ApiResponse.networkError('Bad response format');
+    } catch (e) {
+      AppLogger.error('[ApiService] GET bytes request failed', e);
       return ApiResponse.networkError('Something went wrong');
     }
   }

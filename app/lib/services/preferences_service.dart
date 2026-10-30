@@ -26,6 +26,7 @@ class PreferencesService {
   static const String _hcSessionsToKey = 'hc_sessions_to';
   static const String _readinessDateKey = 'readiness_date';
   static const String _readinessJsonKey = 'readiness_json';
+  static const String _exercisePlayerModelKey = 'exercise_player_model_id';
   static const String _healthTileSleepKey = 'health_tile_sleep';
   static const String _healthTileRestingHrKey = 'health_tile_resting_hr';
   static const String _healthTileHrvKey = 'health_tile_hrv';
@@ -50,6 +51,17 @@ class PreferencesService {
   Future<void> clearDefaultGymIfMatches(String id) async {
     if (defaultGymId == id) {
       await setDefaultGymId(null);
+    }
+  }
+
+  String? get exercisePlayerModelId =>
+      _prefs?.getString(_exercisePlayerModelKey);
+
+  Future<void> setExercisePlayerModelId(String? id) async {
+    if (id == null) {
+      await _prefs?.remove(_exercisePlayerModelKey);
+    } else {
+      await _prefs?.setString(_exercisePlayerModelKey, id);
     }
   }
 
