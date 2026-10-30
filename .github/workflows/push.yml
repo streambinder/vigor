@@ -58,7 +58,7 @@ jobs:
           # the CLI tracks them by hash, so linting them fights every refresh.
           # .specify/memory/ stays linted: the constitution and the decision
           # register are authored content.
-          FILTER_REGEX_EXCLUDE: "\\.specify/(commands|templates|scripts|workflows|integrations)/.*|\\.specify/[^/]+\\.json"
+          FILTER_REGEX_EXCLUDE: "\\.specify/(commands|templates|scripts|workflows|integrations)/.*|\\.specify/[^/]+\\.json|app/assets/player/(three\\.min\\.js|GLTFLoader\\.js)"
           SAVE_SUPER_LINTER_OUTPUT: false
           MULTI_STATUS: false
           LOG_LEVEL: WARN

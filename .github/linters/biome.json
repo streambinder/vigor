@@ -10,7 +10,9 @@
       "!**/.specify",
       "!**/build",
       "!**/.dart_tool",
-      "!**/node_modules"
+      "!**/node_modules",
+      "!**/app/assets/player/three.min.js",
+      "!**/app/assets/player/GLTFLoader.js"
     ]
   },
   "formatter": {

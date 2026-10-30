@@ -7,6 +7,8 @@ import '../models/flow_session.dart';
 import '../models/training.dart';
 import '../models/weekly_target.dart';
 import 'app_event.dart';
+import 'authenticated_api_service.dart';
+import 'exercise_player_service.dart';
 import 'flow_service.dart';
 import 'training_service.dart';
 import 'gym_service.dart';
@@ -25,6 +27,7 @@ class ServiceLocator extends ChangeNotifier {
   final PreferencesService _prefs;
 
   TrainingService? _trainingService;
+  ExercisePlayerService? _exercisePlayerService;
   GymService? _gymService;
   ProgressService? _progressService;
   UserService? _userService;
@@ -87,6 +90,12 @@ class ServiceLocator extends ChangeNotifier {
   TrainingService get trainingService => _trainingService ??= TrainingService(
         storageService: _storage,
         emitEvent: emit,
+      );
+
+  ExercisePlayerService get exercisePlayerService =>
+      _exercisePlayerService ??= ExercisePlayerService(
+        api: AuthenticatedApiService(storageService: _storage),
+        prefs: _prefs,
       );
 
   GymService get gymService => _gymService ??= GymService(

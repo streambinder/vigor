@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Exercise player</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        background: transparent;
+      }
+      #view {
+        position: absolute;
+        inset: 0 0 44px 0;
+      }
+      #view canvas {
+        display: block;
+      }
+      #controls {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 10px;
+        background: rgba(0, 0, 0, 0.35);
+        color: #fff;
+        font:
+          13px -apple-system,
+          system-ui,
+          sans-serif;
+      }
+      #controls button,
+      #controls select {
+        background: rgba(255, 255, 255, 0.16);
+        color: #fff;
+        border: 0;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font: inherit;
+      }
+      #controls button.active {
+        background: rgba(255, 255, 255, 0.35);
+      }
+      #phase {
+        flex: 1;
+        accent-color: #fff;
+      }
+      #status {
+        opacity: 0.8;
+        white-space: nowrap;
+      }
+    </style>
+    <script src="three.min.js"></script>
+    <script src="GLTFLoader.js"></script>
+  </head>
+  <body>
+    <div id="view"></div>
+    <div id="controls">
+      <button id="play" type="button">Pause</button>
+      <input id="phase" type="range" min="0" max="1000" value="0" />
+      <select id="speed">
+        <option value="0.5">0.5x</option>
+        <option value="1" selected>1x</option>
+        <option value="2">2x</option>
+      </select>
+      <button id="cam34" type="button" class="active">3/4</button>
+      <button id="cam-front" type="button">Front</button>
+      <button id="cam-side" type="button">Side</button>
+      <span id="status">Loading…</span>
+    </div>
+    <script>
+      // Single-exercise player for the vigor-exercise-animation/1 documents.
+      // The model bytes and the animation document arrive from Flutter as
+      // base64 chunks (see window.appendModelChunk / appendAnimationChunk),
+      // because one large script string can exceed the platform channel limit.
+      // Pose contract, mirrored from the verified QA harness:
+      //   - document bone quaternions are relative to rest: local = rest * q
+      //   - the root track acts at the pelvis: world orientation = root q
+      //     times rest world orientation, world height = rest height times
+      //     hipHeight, world x/z pinned at origin
+      //   - hand and finger mesh triangles are stripped at load
+      //   - props follow the document prop field, as in the harness
+      const BMAP = {
+        hips: "pelvis",
+        spine: "spine_01",
+        chest: "spine_02",
+        upperChest: "spine_03",
+        neck: "neck_01",
+        head: "Head",
+        leftShoulder: "clavicle_l",
+        rightShoulder: "clavicle_r",
+        leftUpperArm: "upperarm_l",
+        rightUpperArm: "upperarm_r",
+        leftLowerArm: "lowerarm_l",
+        rightLowerArm: "lowerarm_r",
+        leftHand: "hand_l",
+        rightHand: "hand_r",
+        leftUpperLeg: "thigh_l",
+        rightUpperLeg: "thigh_r",
+        leftLowerLeg: "calf_l",
+        rightLowerLeg: "calf_r",
+        leftFoot: "foot_l",
+        rightFoot: "foot_r",
+        leftToes: "ball_l",
+        rightToes: "ball_r",
+      };
+      const FINGER_PREFIXES = ["index", "middle", "pinky", "ring", "thumb"];
+
+      const viewEl = document.getElementById("view");
+      const statusEl = document.getElementById("status");
+      const playBtn = document.getElementById("play");
+      const phaseEl = document.getElementById("phase");
+      const speedEl = document.getElementById("speed");
+
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+      });
+      renderer.setClearColor(0x000000, 0);
+      viewEl.appendChild(renderer.domElement);
+      const scene = new THREE.Scene();
+      scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+      const key = new THREE.DirectionalLight(0xffffff, 0.9);
+      key.position.set(2.5, 4, 3);
+      scene.add(key);
+      const fill = new THREE.DirectionalLight(0xbfd4ff, 0.35);
+      fill.position.set(-3, 2, -2);
+      scene.add(fill);
+      const cam = new THREE.PerspectiveCamera(38, 1, 0.05, 100);
+
+      let model = null,
+        anim = null;
+      const bones = {},
+        restLocal = {};
+      let pelvisNode = null,
+        pelvisRestWorldPos = null,
+        pelvisRestWorldQuat = null;
+      let pelvisRestY = 0.917;
+      let phase = 0,
+        playing = true,
+        speed = 1,
+        view = "34";
+      let dragging = false,
+        started = false,
+        boundsBox = null;
+      let barGroup = null,
+        dbL = null,
+        dbR = null,
+        kb = null;
+      let plainBars = {},
+        dipBars = null;
+      const modelChunks = [],
+        animChunks = [];
+
+      function fail(msg) {
+        statusEl.textContent = msg;
+        try {
+          window.PlayerError?.postMessage?.(msg);
+        } catch (e) {
+          /* channel is best effort */
+        }
+      }
+
+      window.appendModelChunk = (c) => {
+        modelChunks.push(c);
+      };
+      window.appendAnimationChunk = (c) => {
+        animChunks.push(c);
+      };
+
+      function b64ToBytes(b64) {
+        const raw = atob(b64);
+        const out = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+        return out;
+      }
+
+      function slerpQ(qa, qb, t) {
+        const a = new THREE.Quaternion(qa[0], qa[1], qa[2], qa[3]);
+        const b = new THREE.Quaternion(qb[0], qb[1], qb[2], qb[3]);
+        return a.slerp(b, t);
+      }
+
+      function trackQ(track, ph) {
+        const keys = track.keys;
+        if (ph <= keys[0].p) return new THREE.Quaternion().fromArray(keys[0].q);
+        for (let i = 0; i < keys.length - 1; i++) {
+          if (ph <= keys[i + 1].p) {
+            const span = keys[i + 1].p - keys[i].p || 1;
+            return slerpQ(keys[i].q, keys[i + 1].q, (ph - keys[i].p) / span);
+          }
+        }
+        return new THREE.Quaternion().fromArray(keys[keys.length - 1].q);
+      }
+
+      function trackHH(ph) {
+        const keys = anim.root.keys;
+        if (ph <= keys[0].p) return keys[0].hipHeight;
+        for (let i = 0; i < keys.length - 1; i++) {
+          if (ph <= keys[i + 1].p) {
+            const span = keys[i + 1].p - keys[i].p || 1;
+            return (
+              keys[i].hipHeight +
+              ((keys[i + 1].hipHeight - keys[i].hipHeight) * (ph - keys[i].p)) /
+                span
+            );
+          }
+        }
+        return keys[keys.length - 1].hipHeight;
+      }
+
+      function isFingerJoint(name) {
+        for (let i = 0; i < FINGER_PREFIXES.length; i++) {
+          const p = FINGER_PREFIXES[i];
+          if (
+            name === `${p}_01_l` ||
+            name === `${p}_02_l` ||
+            name === `${p}_03_l` ||
+            name === `${p}_04_leaf_l` ||
+            name === `${p}_01_r` ||
+            name === `${p}_02_r` ||
+            name === `${p}_03_r` ||
+            name === `${p}_04_leaf_r`
+          )
+            return true;
+        }
+        return false;
+      }
+
+      // Drop triangles whose vertices are all finger-weighted, so the hands
+      // render as clean wrist ends instead of static fingers.
+      function stripHands() {
+        model.traverse((o) => {
+          if (!o.isSkinnedMesh) return;
+          const geo = o.geometry;
+          const index = geo.getIndex();
+          const skinIndex = geo.getAttribute("skinIndex");
+          const skinWeight = geo.getAttribute("skinWeight");
+          if (!index || !skinIndex || !skinWeight) return;
+          const fingerJoints = {};
+          for (let j = 0; j < o.skeleton.joints.length; j++) {
+            if (isFingerJoint(o.skeleton.joints[j].name))
+              fingerJoints[j] = true;
+          }
+          function vertexIsFinger(v) {
+            for (let k = 0; k < 4; k++) {
+              if (
+                fingerJoints[skinIndex.getX(v * 4 + k)] &&
+                skinWeight.getX(v * 4 + k) > 0
+              )
+                return true;
+            }
+            return false;
+          }
+          const kept = [];
+          for (let t = 0; t < index.count; t += 3) {
+            const a = index.getX(t),
+              b = index.getX(t + 1),
+              c = index.getX(t + 2);
+            if (vertexIsFinger(a) && vertexIsFinger(b) && vertexIsFinger(c))
+              continue;
+            kept.push(a, b, c);
+          }
+          geo.setIndex(kept);
+        });
+      }
+
+      function nodePos(name) {
+        const v = new THREE.Vector3();
+        bones[name].getWorldPosition(v);
+        return v;
+      }
+
+      function makeBar() {
+        const g = new THREE.Group();
+        const mat = new THREE.MeshStandardMaterial({
+          color: 0x9aa3ad,
+          roughness: 0.4,
+          metalness: 0.7,
+        });
+        const dark = new THREE.MeshStandardMaterial({
+          color: 0x30343a,
+          roughness: 0.6,
+        });
+        const bar = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.016, 0.016, 2.2, 10),
+          mat,
+        );
+        bar.rotation.z = Math.PI / 2;
+        g.add(bar);
+        for (const s of [-1, 1]) {
+          const plate = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.225, 0.225, 0.045, 24),
+            dark,
+          );
+          plate.rotation.z = Math.PI / 2;
+          plate.position.x = s * 0.86;
+          g.add(plate);
+        }
+        return g;
+      }
+
+      function makeDB() {
+        const g = new THREE.Group();
+        const mat = new THREE.MeshStandardMaterial({
+          color: 0x30343a,
+          roughness: 0.6,
+        });
+        const bar = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.014, 0.014, 0.34, 8),
+          new THREE.MeshStandardMaterial({
+            color: 0x9aa3ad,
+            roughness: 0.4,
+            metalness: 0.7,
+          }),
+        );
+        bar.rotation.z = Math.PI / 2;
+        g.add(bar);
+        for (const s of [-1, 1]) {
+          const disc = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.075, 0.075, 0.05, 16),
+            mat,
+          );
+          disc.rotation.z = Math.PI / 2;
+          disc.position.x = s * 0.12;
+          g.add(disc);
+        }
+        return g;
+      }
+
+      function makeKB() {
+        const g = new THREE.Group();
+        const mat = new THREE.MeshStandardMaterial({
+          color: 0x30343a,
+          roughness: 0.6,
+        });
+        const bell = new THREE.Mesh(
+          new THREE.SphereGeometry(0.105, 18, 14),
+          mat,
+        );
+        bell.position.y = -0.16;
+        g.add(bell);
+        const handle = new THREE.Mesh(
+          new THREE.TorusGeometry(0.075, 0.016, 8, 18, Math.PI),
+          mat,
+        );
+        handle.position.y = -0.055;
+        g.add(handle);
+        return g;
+      }
+
+      function makePlainBar(len) {
+        const g = new THREE.Group();
+        const bar = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.016, 0.016, len, 10),
+          new THREE.MeshStandardMaterial({
+            color: 0x9aa3ad,
+            roughness: 0.4,
+            metalness: 0.7,
+          }),
+        );
+        bar.rotation.z = Math.PI / 2;
+        g.add(bar);
+        return g;
+      }
+
+      function makeDipBars() {
+        const g = new THREE.Group();
+        const mat = new THREE.MeshStandardMaterial({
+          color: 0x9aa3ad,
+          roughness: 0.4,
+          metalness: 0.7,
+        });
+        for (const s of [-1, 1]) {
+          const bar = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.018, 0.018, 0.52, 10),
+            mat,
+          );
+          bar.rotation.x = Math.PI / 2;
+          bar.position.x = s * 0.26;
+          g.add(bar);
+        }
+        return g;
+      }
+
+      function orientAlong(obj, mid, axis) {
+        obj.position.copy(mid);
+        const x = axis.clone().normalize();
+        const y = new THREE.Vector3(0, 1, 0).cross(x).normalize().negate();
+        const z = new THREE.Vector3().crossVectors(x, y);
+        const m = new THREE.Matrix4().makeBasis(x, y, z);
+        obj.quaternion.setFromRotationMatrix(m);
+      }
+
+      function updateProps() {
+        if (!anim) return;
+        const hl = nodePos("leftHand"),
+          hr = nodePos("rightHand");
+        const mid = hl.clone().add(hr).multiplyScalar(0.5);
+        const axis = hl.clone().sub(hr);
+        if (anim.prop === "bar") {
+          if (!barGroup) {
+            barGroup = makeBar();
+            scene.add(barGroup);
+          }
+          orientAlong(barGroup, mid, axis);
+        } else if (anim.prop === "dumbbell") {
+          if (!dbL) {
+            dbL = makeDB();
+            dbR = makeDB();
+            scene.add(dbL);
+            scene.add(dbR);
+          }
+          const fl = nodePos("leftLowerArm"),
+            fr = nodePos("rightLowerArm");
+          orientAlong(dbL, hl, hl.clone().sub(fl));
+          orientAlong(dbR, hr, hr.clone().sub(fr));
+        } else if (anim.prop === "kb") {
+          if (!kb) {
+            kb = makeKB();
+            scene.add(kb);
+          }
+          kb.position.copy(mid);
+        } else if (anim.prop === "chinbar" || anim.prop === "latbar") {
+          const len = anim.prop === "chinbar" ? 1.25 : 1.55;
+          if (!plainBars[anim.prop]) {
+            plainBars[anim.prop] = makePlainBar(len);
+            scene.add(plainBars[anim.prop]);
+          }
+          orientAlong(plainBars[anim.prop], mid, axis);
+        } else if (anim.prop === "dipbars") {
+          if (!dipBars) {
+            dipBars = makeDipBars();
+            scene.add(dipBars);
+          }
+          dipBars.position.set(0, hl.y - 0.01, hl.z - 0.04);
+        }
+      }
+
+      function applyPose(ph) {
+        for (const name in bones) {
+          if (name === "hips") continue; // the root track drives the pelvis below
+          const node = bones[name];
+          node.quaternion
+            .copy(restLocal[name])
+            .multiply(trackQ(anim.bones[name], ph));
+        }
+        const rq = trackQ(anim.root, ph);
+        const qw = rq.clone().multiply(pelvisRestWorldQuat);
+        const pw = new THREE.Vector3(0, pelvisRestY * trackHH(ph), 0);
+        const parent = pelvisNode.parent;
+        const pq = parent.getWorldQuaternion(new THREE.Quaternion()).invert();
+        pelvisNode.quaternion.copy(pq.multiply(qw));
+        pelvisNode.position.copy(parent.worldToLocal(pw.clone()));
+        model.updateMatrixWorld(true);
+        updateProps();
+      }
+
+      function computeBounds() {
+        const box = new THREE.Box3();
+        const v = new THREE.Vector3();
+        for (let i = 0; i < 12; i++) {
+          applyPose(i / 12);
+          for (const name in bones) {
+            bones[name].getWorldPosition(v);
+            box.expandByPoint(v);
+          }
+        }
+        box.expandByPoint(new THREE.Vector3(0, 0, 0));
+        return box;
+      }
+
+      function frameCamera() {
+        const c = boundsBox.getCenter(new THREE.Vector3());
+        const size = boundsBox.getSize(new THREE.Vector3());
+        const d = Math.max(size.y, size.x, size.z) * 1.8 + 0.7;
+        if (view === "side")
+          cam.position.set(c.x + d * 0.94, c.y + 0.1, c.z + d * 0.34);
+        else if (view === "front") cam.position.set(c.x, c.y + 0.1, c.z + d);
+        else cam.position.set(c.x + d * 0.34, c.y + 0.1, c.z + d * 0.94);
+        cam.lookAt(c.x, c.y, c.z);
+        cam.updateProjectionMatrix();
+      }
+
+      function resize() {
+        const w = viewEl.clientWidth || 300,
+          h = viewEl.clientHeight || 300;
+        renderer.setSize(w, h);
+        cam.aspect = w / h;
+        cam.updateProjectionMatrix();
+      }
+
+      window.addEventListener("resize", resize);
+
+      let lastT = null;
+      function loop(t) {
+        requestAnimationFrame(loop);
+        if (lastT === null) lastT = t;
+        const dt = (t - lastT) / 1000;
+        lastT = t;
+        if (playing && anim) {
+          phase = (phase + (dt * speed) / anim.durationHintSec) % 1;
+          if (!dragging) phaseEl.value = Math.round(phase * 1000);
+        }
+        if (anim) applyPose(phase);
+        renderer.render(scene, cam);
+      }
+
+      playBtn.addEventListener("click", () => {
+        playing = !playing;
+        playBtn.textContent = playing ? "Pause" : "Play";
+      });
+      phaseEl.addEventListener("pointerdown", () => {
+        dragging = true;
+      });
+      phaseEl.addEventListener("pointerup", () => {
+        dragging = false;
+      });
+      phaseEl.addEventListener("input", () => {
+        phase = phaseEl.value / 1000;
+      });
+      speedEl.addEventListener("change", () => {
+        speed = parseFloat(speedEl.value);
+      });
+      function setView(v, btn) {
+        view = v;
+        ["cam34", "cam-front", "cam-side"].forEach((id) => {
+          document.getElementById(id).classList.remove("active");
+        });
+        btn.classList.add("active");
+        if (boundsBox) frameCamera();
+      }
+      document.getElementById("cam34").addEventListener("click", (e) => {
+        setView("34", e.target);
+      });
+      document.getElementById("cam-front").addEventListener("click", (e) => {
+        setView("front", e.target);
+      });
+      document.getElementById("cam-side").addEventListener("click", (e) => {
+        setView("side", e.target);
+      });
+
+      window.startPlayer = () => {
+        if (started) return;
+        started = true;
+        try {
+          anim = JSON.parse(atob(animChunks.join("")));
+          const bytes = b64ToBytes(modelChunks.join(""));
+          if (!window.THREE || !THREE.GLTFLoader)
+            throw new Error("3D libraries missing");
+          new THREE.GLTFLoader().parse(
+            bytes.buffer,
+            "",
+            (gltf) => {
+              try {
+                model = gltf.scene;
+                scene.add(model);
+                const byName = {};
+                model.traverse((o) => {
+                  byName[o.name] = o;
+                });
+                for (const vrmc in BMAP) {
+                  const node = byName[BMAP[vrmc]];
+                  if (node) {
+                    bones[vrmc] = node;
+                    restLocal[vrmc] = node.quaternion.clone();
+                  }
+                }
+                model.updateMatrixWorld(true);
+                pelvisNode = byName.pelvis;
+                pelvisRestWorldPos = pelvisNode.getWorldPosition(
+                  new THREE.Vector3(),
+                );
+                pelvisRestWorldQuat = pelvisNode.getWorldQuaternion(
+                  new THREE.Quaternion(),
+                );
+                pelvisRestY = pelvisRestWorldPos.y;
+                stripHands();
+                boundsBox = computeBounds();
+                resize();
+                frameCamera();
+                applyPose(0);
+                statusEl.textContent = anim.displayName || "";
+                try {
+                  window.PlayerReady?.postMessage?.("ok");
+                } catch (e) {
+                  /* channel is best effort */
+                }
+                requestAnimationFrame(loop);
+              } catch (e) {
+                fail("Could not start the animation");
+              }
+            },
+            () => {
+              fail("Could not load the model");
+            },
+          );
+        } catch (e) {
+          fail("Could not load the animation");
+        }
+      };
+    </script>
+  </body>
+</html>

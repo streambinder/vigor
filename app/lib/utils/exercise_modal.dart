@@ -1,22 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../config/api_config.dart';
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
 import '../models/exercise.dart';
+import '../services/exercise_player_service.dart';
+import '../services/service_locator.dart';
 import '../theme/liquid_glass_theme.dart';
 import '../utils/platform_helper.dart';
 import '../widgets/adaptive/adaptive.dart';
+import '../widgets/exercise_player_view.dart';
 
 enum _ExerciseTab { cues, instructions }
 
 class ExerciseModal {
   static void show(BuildContext context, Exercise exercise) {
+    final playerService =
+        context.read<ServiceLocator>().exercisePlayerService;
     showDialog(
       context: context,
       barrierDismissible: true,
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
-        child: _ExerciseModalContent(exercise: exercise),
+        child: _ExerciseModalContent(
+          exercise: exercise,
+          playerService: playerService,
+        ),
       ),
     );
   }
@@ -24,7 +33,11 @@ class ExerciseModal {
 
 class _ExerciseModalContent extends StatefulWidget {
   final Exercise exercise;
-  const _ExerciseModalContent({required this.exercise});
+  final ExercisePlayerService playerService;
+  const _ExerciseModalContent({
+    required this.exercise,
+    required this.playerService,
+  });
 
   @override
   State<_ExerciseModalContent> createState() => _ExerciseModalContentState();
@@ -32,6 +45,7 @@ class _ExerciseModalContent extends StatefulWidget {
 
 class _ExerciseModalContentState extends State<_ExerciseModalContent> {
   late _ExerciseTab _selectedTab;
+  late final Future<Map<String, String>> _animatedFuture;
 
   @override
   void initState() {
@@ -40,6 +54,7 @@ class _ExerciseModalContentState extends State<_ExerciseModalContent> {
     _selectedTab = widget.exercise.cues.isNotEmpty
         ? _ExerciseTab.cues
         : _ExerciseTab.instructions;
+    _animatedFuture = widget.playerService.animatedExercises();
   }
 
   static bool _isValidImageUrl(String? url) {
@@ -83,40 +98,23 @@ class _ExerciseModalContentState extends State<_ExerciseModalContent> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (_isValidImageUrl(exercise.reference))
-                Image.network(
-                  _proxyImageUrl(exercise.reference),
-                  fit: BoxFit.contain,
-                  // frameBuilder works reliably on all platforms (unlike
-                  // loadingBuilder which may not fire on android for proxied GIFs)
-                  frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                    if (wasSynchronouslyLoaded || frame != null) return child;
-                    return Container(
-                      height: 200,
-                      color: VigorColors.stone.withValues(alpha: 0.1),
-                      child: Center(
-                        child: Icon(
-                          Icons.fitness_center,
-                          size: 200 * 0.4,
-                          color: VigorColors.stone.withValues(alpha: 0.5),
-                        ),
-                      ),
+              FutureBuilder<Map<String, String>>(
+                future: _animatedFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return _placeholderBox();
+                  }
+                  final still = snapshot.data?[exercise.id];
+                  if (still != null) {
+                    return ExercisePlayerView(
+                      exercise: exercise,
+                      playerService: widget.playerService,
+                      fallback: _buildGifImage(exercise),
                     );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      height: 200,
-                      color: VigorColors.stone.withValues(alpha: 0.1),
-                      child: Center(
-                        child: Icon(
-                          Icons.fitness_center,
-                          size: 200 * 0.4,
-                          color: VigorColors.stone.withValues(alpha: 0.5),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                  }
+                  return _buildGifImage(exercise);
+                },
+              ),
               Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
@@ -185,6 +183,39 @@ class _ExerciseModalContentState extends State<_ExerciseModalContent> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _placeholderBox() {
+    return Container(
+      height: 200,
+      color: VigorColors.stone.withValues(alpha: 0.1),
+      child: Center(
+        child: Icon(
+          Icons.fitness_center,
+          size: 200 * 0.4,
+          color: VigorColors.stone.withValues(alpha: 0.5),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGifImage(Exercise exercise) {
+    if (!_isValidImageUrl(exercise.reference)) {
+      return const SizedBox.shrink();
+    }
+    return Image.network(
+      _proxyImageUrl(exercise.reference),
+      fit: BoxFit.contain,
+      // frameBuilder works reliably on all platforms (unlike
+      // loadingBuilder which may not fire on android for proxied GIFs)
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+        if (wasSynchronouslyLoaded || frame != null) return child;
+        return _placeholderBox();
+      },
+      errorBuilder: (context, error, stackTrace) {
+        return _placeholderBox();
+      },
     );
   }
 

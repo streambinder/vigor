@@ -36,6 +36,7 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
   google_sign_in_platform_interface: ^3.1.0
+  webview_flutter: ^4.14.1
 
 dev_dependencies:
   flutter_test:
@@ -52,6 +53,7 @@ flutter:
     - assets/fonts/
     - assets/icons/
     - assets/audio/
+    - assets/player/
     - assets/body_front.svg
     - assets/body_back.svg
     - assets/body_front_female.svg
