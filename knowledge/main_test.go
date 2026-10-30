@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/json"
 	"net"
 	"net/http"
@@ -348,5 +349,267 @@ func TestBootstrapAnimationsStoreErrorCoverage(t *testing.T) {
 	server.failOn = "INSERT INTO"
 	if err := bootstrapAnimations(db); err == nil {
 		t.Fatal("bootstrapAnimations must fail when inserts fail")
+	}
+}
+
+// testMannequinManifest is the manifest the models tests use: the real
+// mannequin GLB and licence file, copied from the repository.
+const testMannequinManifest = `{"models":[{"id":"quaternius-mannequin","displayName":"Quaternius Mannequin","licence":"CC0 1.0 Universal","source":"Universal Animation Library [Standard] (Quaternius)","file":"quaternius-mannequin.glb","licenceFile":"LICENSE-quaternius.txt"}]}`
+
+// writeModels fills the models folder of the scratch directory
+// chdirFeatures prepared with the given manifest and files.
+func writeModels(t *testing.T, dir, manifest string, files map[string][]byte) {
+	t.Helper()
+	modelsDir := filepath.Join(dir, "features", "models")
+	if err := os.MkdirAll(modelsDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(modelsDir, "manifest.json"), []byte(manifest), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	for name, content := range files {
+		if err := os.WriteFile(filepath.Join(modelsDir, name), content, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+// readPackageModel reads a committed file from features/models.
+func readPackageModel(t *testing.T, name string) []byte {
+	t.Helper()
+	raw, err := os.ReadFile(filepath.Join(packageDir, "features", "models", name))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return raw
+}
+
+// buildTestGLB frames the given node names as a minimal GLB file.
+func buildTestGLB(t *testing.T, nodeNames []string) []byte {
+	t.Helper()
+	nodes := make([]map[string]string, 0, len(nodeNames))
+	for _, name := range nodeNames {
+		nodes = append(nodes, map[string]string{"name": name})
+	}
+	doc, err := json.Marshal(map[string]any{"asset": map[string]string{"version": "2.0"}, "nodes": nodes})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for len(doc)%4 != 0 {
+		doc = append(doc, ' ')
+	}
+	out := make([]byte, 0, 20+len(doc))
+	out = append(out, []byte("glTF")...)
+	version := make([]byte, 4)
+	binary.LittleEndian.PutUint32(version, 2)
+	out = append(out, version...)
+	total := make([]byte, 4)
+	binary.LittleEndian.PutUint32(total, uint32(20+len(doc)))
+	out = append(out, total...)
+	chunkLen := make([]byte, 4)
+	binary.LittleEndian.PutUint32(chunkLen, uint32(len(doc)))
+	out = append(out, chunkLen...)
+	out = append(out, 0x4A, 0x53, 0x4F, 0x4E)
+	out = append(out, doc...)
+	return out
+}
+
+// writeStills fills the stills folder of the scratch directory
+// chdirFeatures prepared with the given files.
+func writeStills(t *testing.T, dir string, files map[string]string) {
+	t.Helper()
+	if err := os.MkdirAll(filepath.Join(dir, "stills"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for name, content := range files {
+		if err := os.WriteFile(filepath.Join(dir, "stills", name), []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+func TestBootstrapModelsCoverage(t *testing.T) {
+	db, server := openKnowledgeDB(t)
+	dir := chdirFeatures(t, map[string]string{})
+	writeModels(t, dir, testMannequinManifest, map[string][]byte{
+		"quaternius-mannequin.glb": readPackageModel(t, "quaternius-mannequin.glb"),
+		"LICENSE-quaternius.txt":   readPackageModel(t, "LICENSE-quaternius.txt"),
+	})
+	if err := bootstrapModels(db); err != nil {
+		t.Fatalf("bootstrapModels: %v", err)
+	}
+	if !server.saw(`insert into "exercise_models"`) {
+		t.Fatal("no model inserts recorded")
+	}
+}
+
+func TestBootstrapModelsMissingDirCoverage(t *testing.T) {
+	db, server := openKnowledgeDB(t)
+	chdirFeatures(t, map[string]string{})
+	if err := bootstrapModels(db); err != nil {
+		t.Fatalf("bootstrapModels without manifest: %v", err)
+	}
+	if server.saw(`insert into "exercise_models"`) {
+		t.Fatal("model inserts recorded without a manifest")
+	}
+}
+
+func TestBootstrapModelsBadManifestCoverage(t *testing.T) {
+	db, _ := openKnowledgeDB(t)
+	dir := chdirFeatures(t, map[string]string{})
+	writeModels(t, dir, "{bad", map[string][]byte{})
+	if err := bootstrapModels(db); err == nil {
+		t.Fatal("bootstrapModels must fail on a malformed manifest")
+	}
+}
+
+func TestBootstrapModelsEntryErrorCoverage(t *testing.T) {
+	db, _ := openKnowledgeDB(t)
+	dir := chdirFeatures(t, map[string]string{})
+	writeModels(t, dir, `{"models":[{"id":"model-a"}]}`, map[string][]byte{})
+	if err := bootstrapModels(db); err == nil {
+		t.Fatal("bootstrapModels must fail on a manifest entry without a file")
+	}
+	dir = chdirFeatures(t, map[string]string{})
+	writeModels(t, dir, `{"models":[{"file":"model-a.glb"}]}`, map[string][]byte{})
+	if err := bootstrapModels(db); err == nil {
+		t.Fatal("bootstrapModels must fail on a manifest entry without an id")
+	}
+}
+
+func TestBootstrapModelsLicenceMissingCoverage(t *testing.T) {
+	db, _ := openKnowledgeDB(t)
+	dir := chdirFeatures(t, map[string]string{})
+	writeModels(t, dir, testMannequinManifest, map[string][]byte{
+		"quaternius-mannequin.glb": readPackageModel(t, "quaternius-mannequin.glb"),
+	})
+	if err := bootstrapModels(db); err == nil {
+		t.Fatal("bootstrapModels must fail when the licence file is missing")
+	}
+}
+
+func TestBootstrapModelsFileMissingCoverage(t *testing.T) {
+	db, _ := openKnowledgeDB(t)
+	dir := chdirFeatures(t, map[string]string{})
+	writeModels(t, dir, testMannequinManifest, map[string][]byte{
+		"LICENSE-quaternius.txt": readPackageModel(t, "LICENSE-quaternius.txt"),
+	})
+	if err := bootstrapModels(db); err == nil {
+		t.Fatal("bootstrapModels must fail when the GLB file is missing")
+	}
+}
+
+func TestBootstrapModelsMissingJointCoverage(t *testing.T) {
+	db, _ := openKnowledgeDB(t)
+	dir := chdirFeatures(t, map[string]string{})
+	writeModels(t, dir, `{"models":[{"id":"stub","file":"stub.glb"}]}`, map[string][]byte{
+		"stub.glb": buildTestGLB(t, []string{"pelvis", "spine_01"}),
+	})
+	if err := bootstrapModels(db); err == nil {
+		t.Fatal("bootstrapModels must fail on a model missing a required joint")
+	}
+}
+
+func TestBootstrapModelsBadGLBCoverage(t *testing.T) {
+	db, _ := openKnowledgeDB(t)
+	dir := chdirFeatures(t, map[string]string{})
+	writeModels(t, dir, `{"models":[{"id":"stub","file":"stub.glb"}]}`, map[string][]byte{
+		"stub.glb": []byte("not a glb"),
+	})
+	if err := bootstrapModels(db); err == nil {
+		t.Fatal("bootstrapModels must fail on a malformed GLB")
+	}
+}
+
+func TestBootstrapModelsStoreErrorCoverage(t *testing.T) {
+	db, server := openKnowledgeDB(t)
+	dir := chdirFeatures(t, map[string]string{})
+	writeModels(t, dir, testMannequinManifest, map[string][]byte{
+		"quaternius-mannequin.glb": readPackageModel(t, "quaternius-mannequin.glb"),
+		"LICENSE-quaternius.txt":   readPackageModel(t, "LICENSE-quaternius.txt"),
+	})
+	server.failOn = "INSERT INTO"
+	if err := bootstrapModels(db); err == nil {
+		t.Fatal("bootstrapModels must fail when inserts fail")
+	}
+}
+
+func TestGLBNodeNamesCoverage(t *testing.T) {
+	names, err := glbNodeNames(buildTestGLB(t, []string{"pelvis", "Head"}))
+	if err != nil {
+		t.Fatalf("glbNodeNames: %v", err)
+	}
+	if len(names) != 2 || names[0] != "pelvis" || names[1] != "Head" {
+		t.Fatalf("glbNodeNames = %v", names)
+	}
+	for name, data := range map[string][]byte{
+		"short":       []byte("glTF"),
+		"bad magic":   []byte("XXXX00000000000000000000"),
+		"bad json":    append(append([]byte("glTF"), 2, 0, 0, 0, 24, 0, 0, 0, 4, 0, 0, 0, 0x4A, 0x53, 0x4F, 0x4E), []byte("{bad")...),
+		"overrun":     append(append([]byte("glTF"), 2, 0, 0, 0, 24, 0, 0, 0, 255, 255, 0, 0, 0x4A, 0x53, 0x4F, 0x4E), []byte("{}")...),
+		"wrong chunk": append(append([]byte("glTF"), 2, 0, 0, 0, 24, 0, 0, 0, 2, 0, 0, 0, 0x4E, 0x49, 0x42, 0x00), []byte("{}")...),
+	} {
+		if _, err := glbNodeNames(data); err == nil {
+			t.Fatalf("glbNodeNames must fail on %s", name)
+		}
+	}
+}
+
+func TestBootstrapStillsCoverage(t *testing.T) {
+	db, server := openKnowledgeDB(t)
+	dir := chdirFeatures(t, map[string]string{})
+	writeStills(t, dir, map[string]string{
+		"barbell-full-squat.svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"></svg>`,
+		"notes.txt":              "not a still",
+	})
+	if err := os.MkdirAll(filepath.Join(dir, "stills", "sub"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := bootstrapStills(db); err != nil {
+		t.Fatalf("bootstrapStills: %v", err)
+	}
+	if !server.saw(`insert into "exercise_stills"`) {
+		t.Fatal("no still inserts recorded")
+	}
+}
+
+func TestBootstrapStillsMissingDirCoverage(t *testing.T) {
+	db, server := openKnowledgeDB(t)
+	chdirFeatures(t, map[string]string{})
+	if err := bootstrapStills(db); err != nil {
+		t.Fatalf("bootstrapStills without directory: %v", err)
+	}
+	if server.saw(`insert into "exercise_stills"`) {
+		t.Fatal("still inserts recorded without a directory")
+	}
+}
+
+func TestBootstrapStillsBadXMLCoverage(t *testing.T) {
+	db, _ := openKnowledgeDB(t)
+	dir := chdirFeatures(t, map[string]string{})
+	writeStills(t, dir, map[string]string{"burpee.svg": "not xml at all"})
+	if err := bootstrapStills(db); err == nil {
+		t.Fatal("bootstrapStills must fail on a malformed SVG")
+	}
+}
+
+func TestBootstrapStillsWrongRootCoverage(t *testing.T) {
+	db, _ := openKnowledgeDB(t)
+	dir := chdirFeatures(t, map[string]string{})
+	writeStills(t, dir, map[string]string{"burpee.svg": "<html></html>"})
+	if err := bootstrapStills(db); err == nil {
+		t.Fatal("bootstrapStills must fail on a non-SVG root element")
+	}
+}
+
+func TestBootstrapStillsStoreErrorCoverage(t *testing.T) {
+	db, server := openKnowledgeDB(t)
+	dir := chdirFeatures(t, map[string]string{})
+	writeStills(t, dir, map[string]string{
+		"burpee.svg": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"></svg>`,
+	})
+	server.failOn = "INSERT INTO"
+	if err := bootstrapStills(db); err == nil {
+		t.Fatal("bootstrapStills must fail when inserts fail")
 	}
 }
