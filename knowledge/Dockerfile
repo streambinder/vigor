@@ -18,7 +18,9 @@ WORKDIR /build
 RUN pip install --no-cache-dir numpy==1.26.4 scipy==1.17.1
 COPY knowledge/features/exercises.json features/exercises.json
 COPY knowledge/features/animations features/animations
-RUN python features/animations/generate.py animations-out
+COPY knowledge/features/models features/models
+RUN python features/animations/generate.py animations-out && \
+  python features/animations/generate_stills.py animations-out stills-out features/models/quaternius-mannequin.glb
 
 FROM pgvector/pgvector:0.8.7-pg18 AS data-builder
 ARG OPENROUTER_EMBEDDING_MODELS
@@ -29,6 +31,7 @@ WORKDIR /build
 COPY --from=bootstrap-builder /build/knowledge/bootstrap /usr/local/bin/bootstrap
 COPY knowledge/features features
 COPY --from=animations-builder /build/animations-out animations
+COPY --from=animations-builder /build/stills-out stills
 RUN --mount=type=secret,id=openrouter_api_key,uid=999 initdb -D /tmp/pgdata && \
   pg_ctl -D /tmp/pgdata -o "-k /tmp" start && \
   pg_isready -t 30 -h /tmp && \

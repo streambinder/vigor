@@ -1,0 +1,12 @@
+{
+  "models": [
+    {
+      "displayName": "Quaternius Mannequin",
+      "file": "quaternius-mannequin.glb",
+      "id": "quaternius-mannequin",
+      "licence": "CC0 1.0 Universal",
+      "licenceFile": "LICENSE-quaternius.txt",
+      "source": "Universal Animation Library [Standard] (Quaternius)"
+    }
+  ]
+}
