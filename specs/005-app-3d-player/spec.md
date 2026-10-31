@@ -116,10 +116,12 @@ deployed it. This cycle consumes it.
   the animation documents, one SVG per animated exercise,
   into `knowledge/features/stills/`. Each still draws the
   animation's peak frame (the keyframe with maximum total
-  joint rotation from rest) as a capsule figure in 3/4
-  orthographic projection, the same framing as the gallery
-  default camera, plus the document's prop as simple
-  geometry. Bootstrap stores the stills, mirroring the
+  joint rotation from rest) as a filled black silhouette of
+  the skinned mannequin in the player's perspective camera
+  (fov 38, ~20° yaw, framed on the whole animation's bounds),
+  with the test-model cuts (hands and toe fronts removed)
+  applied, plus the document's prop as solid geometry, its
+  borders lightly smoothed. Bootstrap stores the stills, mirroring the
   animations step; a malformed SVG fails bootstrap. The
   backend serves the animated exercises with their stills in
   one endpoint (ID plus SVG), fetched once by the app and

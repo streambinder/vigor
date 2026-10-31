@@ -25,7 +25,7 @@ import '../timer/workout_timer_notifier.dart';
 import '../utils/knowledge_labels.dart';
 import '../utils/workout_summary.dart';
 import '../widgets/adaptive/adaptive.dart';
-import '../widgets/cached_exercise_image.dart';
+import '../widgets/exercise_thumbnail.dart';
 import '../widgets/marquee_text.dart';
 import '../widgets/user_select_dialog.dart';
 import '../utils/exercise_modal.dart';
@@ -1618,7 +1618,6 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
 
   Widget _buildActivityRow(Activity activity, bool isDark, {bool isFirstInBlock = false}) {
     final exercise = _parseExercise(activity.detail);
-    final hasValidImage = exercise != null && CachedExerciseImage.isValidUrl(exercise.reference);
     final actual = _userFeedback?.actualsByActivityId[activity.id];
 
     return Row(
@@ -1632,23 +1631,13 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // thumbnail
-                SizedBox(
+                ExerciseThumbnail(
+                  exercise: exercise,
+                  playerService:
+                      context.read<ServiceLocator>().exercisePlayerService,
                   width: 72,
                   height: 72,
-                  child: hasValidImage
-                      ? CachedExerciseImage(
-                          imageUrl: exercise.reference,
-                          width: 72,
-                          height: 72,
-                          borderRadius: VigorRadius.radiusMd,
-                        )
-                      : Container(
-                          decoration: BoxDecoration(
-                            color: VigorColors.stone.withValues(alpha: 0.1),
-                            borderRadius: VigorRadius.radiusMd,
-                          ),
-                          child: Center(child: Icon(Icons.fitness_center, size: 72 * 0.4, color: VigorColors.stone.withValues(alpha: 0.5))),
-                        ),
+                  borderRadius: VigorRadius.radiusMd,
                 ),
                 const SizedBox(width: VigorSpacing.md),
                 Expanded(

@@ -1,4 +1,5 @@
 out/
 animations-out/
+stills-out/
 __pycache__/
 .coverage
