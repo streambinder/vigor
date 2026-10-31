@@ -621,10 +621,11 @@ def render_still(doc, rig, prims, kept, joint_nodes, ibm):
         parts.append(smooth_closed(pts))
     if not parts:
         raise ValueError(f"{doc.get('exercise')}: empty silhouette")
+    path_data = " ".join(parts)
     svg = (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {VIEW:.0f} {VIEW:.0f}">\n'
         f"  <title>{doc['displayName']}</title>\n"
-        f"  <path d=\"{' '.join(parts)}\" fill=\"#000\" fill-rule=\"evenodd\" />\n</svg>\n"
+        f'  <path d="{path_data}" fill="#000" fill-rule="evenodd" />\n</svg>\n'
     )
     return svg, frame, total_pts, fill
 
