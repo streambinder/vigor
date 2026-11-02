@@ -15,8 +15,9 @@ RUN CGO_ENABLED=0 go build -o bootstrap main.go
 
 FROM python:3.15.0-slim-bookworm AS animations-builder
 WORKDIR /build
-# numpy 1.26.4 and scipy 1.17.1 have no cp315 wheels, so pip builds them from source and needs C and Fortran toolchains
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential=12.9 gcc=4:12.2.0-3 gfortran=4:12.2.0-3 && rm -rf /var/lib/apt/lists/*
+# numpy 1.26.4 and scipy 1.17.1 have no cp315 wheels, so pip builds them from source and needs C and Fortran toolchains, plus pkg-config and OpenBLAS headers for the scipy OpenBLAS lookup
+# hadolint ignore=DL3008
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential=12.9 gcc=4:12.2.0-3 gfortran=4:12.2.0-3 pkg-config libopenblas-dev && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir numpy==1.26.4 scipy==1.17.1
 COPY knowledge/features/exercises.json features/exercises.json
 COPY knowledge/features/animations features/animations
