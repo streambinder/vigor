@@ -6,7 +6,7 @@ require (
 	github.com/Tangerg/typesafe-sdk-go v0.1.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-shiori/go-readability v0.0.0-20251205110129-5db1dc9836f0
-	github.com/gofiber/fiber/v2 v2.52.15
+	github.com/gofiber/fiber/v2 v2.52.16
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/lib/pq v1.12.3
 	github.com/openai/openai-go v1.12.0
@@ -16,7 +16,7 @@ require (
 	go.uber.org/goleak v1.3.0
 	golang.org/x/crypto v0.58.0
 	golang.org/x/net v0.62.0
-	google.golang.org/api v0.304.0
+	google.golang.org/api v0.308.0
 	gorm.io/driver/postgres v1.6.3
 	gorm.io/gorm v1.31.2
 )
@@ -55,7 +55,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.45.0 // indirect
 	go.opentelemetry.io/otel/trace v1.45.0 // indirect
 	golang.org/x/oauth2 v0.37.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20261005182115-fad411399dd8 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261019180522-ce908d29299b // indirect
 	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gorm.io/driver/mysql v1.6.0 // indirect
