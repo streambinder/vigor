@@ -13,7 +13,7 @@ COPY backend ../backend/
 COPY knowledge/main.go ./
 RUN CGO_ENABLED=0 go build -o bootstrap main.go
 
-FROM python:3.12.12-slim-bookworm AS animations-builder
+FROM python:3.15.0-slim-bookworm AS animations-builder
 WORKDIR /build
 RUN pip install --no-cache-dir numpy==1.26.4 scipy==1.17.1
 COPY knowledge/features/exercises.json features/exercises.json
