@@ -246,15 +246,14 @@
           const skinWeight = geo.getAttribute("skinWeight");
           if (!index || !skinIndex || !skinWeight) return;
           const fingerJoints = {};
-          for (let j = 0; j < o.skeleton.joints.length; j++) {
-            if (isFingerJoint(o.skeleton.joints[j].name))
-              fingerJoints[j] = true;
+          for (let j = 0; j < o.skeleton.bones.length; j++) {
+            if (isFingerJoint(o.skeleton.bones[j].name)) fingerJoints[j] = true;
           }
           function vertexIsFinger(v) {
             for (let k = 0; k < 4; k++) {
               if (
-                fingerJoints[skinIndex.getX(v * 4 + k)] &&
-                skinWeight.getX(v * 4 + k) > 0
+                fingerJoints[skinIndex.array[v * 4 + k]] &&
+                skinWeight.array[v * 4 + k] > 0
               )
                 return true;
             }
