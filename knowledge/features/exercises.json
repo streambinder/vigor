@@ -6832,7 +6832,7 @@
       "バーベル ピン プレス",
       "바벨 핀 프레스"
     ],
-    "equipment": ["barbell"],
+    "equipment": ["barbell", "power rack"],
     "muscles": ["chest", "arms"],
     "reference": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pin_Presses/0.jpg",
     "instructions": [
@@ -6851,7 +6851,7 @@
     "id": "barbell-pin-presses",
     "name": "Barbell Pin Presses",
     "aliases": ["bilanciere pin spinte"],
-    "equipment": ["barbell"],
+    "equipment": ["barbell", "power rack"],
     "muscles": ["shoulders", "arms"],
     "reference": "https://static.exercisedb.dev/media/bndCa3Q.gif",
     "instructions": [
@@ -7107,7 +7107,7 @@
       "バーベル ラック プル",
       "바벨 랙 풀"
     ],
-    "equipment": ["barbell"],
+    "equipment": ["barbell", "power rack"],
     "muscles": ["glutes", "legs"],
     "reference": "https://static.exercisedb.dev/media/za9Ni4z.gif",
     "instructions": [
@@ -27651,7 +27651,7 @@
       "インバーテッド ロウ",
       "인버티드 로우"
     ],
-    "equipment": ["pull-up bar"],
+    "equipment": ["pull-up bar", "power rack"],
     "muscles": ["back", "arms"],
     "reference": "https://static.exercisedb.dev/media/bZGHsAZ.gif",
     "instructions": [
@@ -27686,7 +27686,7 @@
       "インバーテッド ロウ ベント ニーズ",
       "인버티드 로우 벤트 니"
     ],
-    "equipment": ["pull-up bar"],
+    "equipment": ["pull-up bar", "power rack"],
     "muscles": ["back", "arms"],
     "reference": "https://static.exercisedb.dev/media/VPPtusI.gif",
     "instructions": [
