@@ -591,7 +591,7 @@
     "reference": "https://doi.org/10.1007/s40279-024-02123-z",
     "area": "programming",
     "tags": ["volume", "older-adults", "hypertrophy", "strength"],
-    "content": "In older adults, moderate resistance training volumes optimize both lean body mass and lower-body strength. Excessive volume may not yield additional benefits and can impair recovery in aging populations."
+    "content": "In older adults, low resistance training volumes best improve physical function, lean body mass and hypertrophy, while higher volumes are needed for maximal lower-body strength gains. More volume is not always better with age."
   },
   {
     "reference": "https://doi.org/10.1055/a-0905-3103",
@@ -621,7 +621,7 @@
     "reference": "https://doi.org/10.1177/2165079916685568",
     "area": "conditioning",
     "tags": ["CrossFit", "functional-training", "injury-rate", "fitness"],
-    "content": "CrossFit injury rates are comparable to other high-intensity training modalities like Olympic weightlifting and powerlifting. Benefits include improved cardiovascular fitness and body composition. Pre-existing injuries are the main risk factor."
+    "content": "CrossFit injury rates are comparable to other high-intensity training modalities like Olympic weightlifting and powerlifting. Benefits include improved cardiovascular fitness and body composition. Screen for previous injuries before starting."
   },
   {
     "reference": "https://doi.org/10.1007/s40279-025-02225-2",
@@ -651,7 +651,7 @@
     "reference": "https://doi.org/10.3390/jfmk11010080",
     "area": "technique",
     "tags": ["rest-pause", "advanced-techniques", "strength"],
-    "content": "Advanced methods (rest-pause, drop sets, cluster sets) show a small significant advantage for strength over traditional training but negligible hypertrophy benefit. Rest-pause shows the most promise for modest hypertrophic advantage among advanced techniques."
+    "content": "Advanced methods (rest-pause, drop sets, cluster sets) show a moderate significant advantage for strength over traditional training but negligible hypertrophy benefit. Rest-pause shows the most promise for modest hypertrophic advantage among advanced techniques."
   },
   {
     "reference": "https://doi.org/10.1111/cpf.12622",
@@ -663,7 +663,7 @@
     "reference": "https://doi.org/10.52082/jssm.2024.156",
     "area": "mobility",
     "tags": ["warm-up", "static-stretching", "dynamic-stretching"],
-    "content": "Static stretching before training does not impair lower-limb power when kept under 60 seconds per muscle. Dynamic stretching and post-activation potentiation protocols are superior for enhancing explosive performance in warm-ups."
+    "content": "In gymnasts, static stretching in the warm-up does not impair lower-limb power or technical performance. Dynamic stretching and vibration platforms better enhance power-related performance, so match the warm-up to the goal."
   },
   {
     "reference": "https://doi.org/10.1249/MSS.0000000000002706",
@@ -705,7 +705,7 @@
     "reference": "https://doi.org/10.1002/jcsm.70162",
     "area": "physiology",
     "tags": ["sarcopenia", "older-adults", "resistance-training"],
-    "content": "Resistance training is the most effective intervention for improving muscle mass and function in sarcopenic older adults. Training 2-3 times per week at moderate-to-high intensity produces the most consistent outcomes."
+    "content": "Resistance training alone significantly improves muscle mass in sarcopenic older adults, but manipulating frequency, intensity, volume or periodization yields no greater gains. Age is the main moderator of the response."
   },
   {
     "reference": "https://doi.org/10.1249/MSS.0000000000002773",
@@ -717,7 +717,7 @@
     "reference": "https://doi.org/10.1080/07420528.2019.1567524",
     "area": "performance",
     "tags": ["time-of-day", "hypertrophy", "strength", "circadian"],
-    "content": "Training consistently at the same time of day produces the best adaptations regardless of morning or evening scheduling. If forced to choose, evening training shows a slight edge for strength and hypertrophy due to circadian hormone profiles."
+    "content": "Strength and hypertrophy gains are similar whether resistance training is done in the morning or evening. Training consistently at the same time of day adapts strength to that time, raising morning strength to evening levels."
   },
   {
     "reference": "https://doi.org/10.1016/j.jbmt.2025.08.003",
@@ -747,7 +747,7 @@
     "reference": "https://doi.org/10.1186/s40798-022-00421-2",
     "area": "recovery",
     "tags": ["vibration-foam-roller", "recovery", "flexibility"],
-    "content": "Vibration foam rollers show small additional benefits over standard foam rollers for flexibility and pain reduction. The vibration component does not significantly improve strength or power recovery beyond regular foam rolling."
+    "content": "Vibration foam rollers show no significant benefit for jump or strength performance. Recovery markers may improve, but evidence for any advantage over standard foam rolling remains limited and inconclusive."
   },
   {
     "reference": "https://doi.org/10.1097/MD.0000000000046781",
@@ -759,13 +759,13 @@
     "reference": "https://doi.org/10.3390/ijerph20021439",
     "area": "mobility",
     "tags": ["PNF", "foam-rolling", "hamstring", "flexibility"],
-    "content": "PNF stretching produces greater acute hamstring flexibility gains than foam rolling in amateur athletes. For maximum ROM improvements, PNF (contract-relax) remains the gold standard stretching technique, superior to static and dynamic methods."
+    "content": "PNF stretching produces greater acute hamstring flexibility gains than foam rolling in amateur athletes. Use contract-relax PNF when rapid range-of-motion gains are the goal."
   },
   {
-    "reference": "https://doi.org/10.1186/s12889-020-09355-4",
+    "reference": "https://doi.org/10.1007/s00421-025-05757-7",
     "area": "programming",
     "tags": ["calisthenics", "bodyweight", "progressive-overload"],
-    "content": "Daily bodyweight calisthenics programs of just a few minutes can produce measurable strength adaptations when progressively overloaded through leverage changes, tempo manipulation, and unilateral variations. Consistency matters more than session duration."
+    "content": "Five minutes of daily bodyweight eccentric exercise — chair squats, reclines, wall push-ups and heel drops — significantly improved strength, flexibility and mental health in sedentary adults over four weeks."
   },
   {
     "reference": "https://doi.org/10.1080/02701367.2024.2410394",
@@ -1899,5 +1899,108 @@
     "area": "nutrition",
     "tags": ["iron", "endurance", "deficiency"],
     "content": "Iron deficiency is common in athletes, particularly endurance athletes with high oxygen demands, and chronic inflammation contributes to depleted iron reserves."
+  },
+  {
+    "reference": "https://doi.org/10.1249/MSS.0000000000003897",
+    "area": "programming",
+    "tags": [
+      "resistance-training",
+      "hypertrophy",
+      "strength",
+      "ACSM",
+      "position-stand"
+    ],
+    "content": "Train each major muscle group at least twice weekly, using loads from 30–100% of 1RM with sufficient effort, and accumulate at least 10 sets per muscle group weekly for hypertrophy."
+  },
+  {
+    "reference": "https://doi.org/10.1080/15502783.2026.2740266",
+    "area": "nutrition",
+    "tags": [
+      "weight-loss",
+      "protein",
+      "body-composition",
+      "ISSN",
+      "position-stand"
+    ],
+    "content": "During a weight-loss diet, eat 1.9–3.2 g/kg/day of protein alongside resistance training to maximize lean mass retention in the deficit. Protein intake matters more than meal frequency."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s13102-026-01861-z",
+    "area": "programming",
+    "tags": [
+      "training-to-failure",
+      "proximity-to-failure",
+      "strength",
+      "hypertrophy"
+    ],
+    "content": "Stopping sets short of failure builds strength and muscle as effectively as training to failure, with a small advantage for dynamic strength and less fatigue."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fphys.2026.1812707",
+    "area": "programming",
+    "tags": [
+      "blood-flow-restriction",
+      "hypertrophy",
+      "strength",
+      "team-sports"
+    ],
+    "content": "Adding blood flow restriction to resistance training gives team athletes small extra gains in muscle size and strength, but no extra benefit for jump or sprint performance."
+  },
+  {
+    "reference": "https://doi.org/10.1186/s40798-026-01087-w",
+    "area": "injury",
+    "tags": [
+      "FIFA-11-plus",
+      "hamstring",
+      "injury-prevention",
+      "football",
+      "warm-up"
+    ],
+    "content": "In football, the FIFA 11+ warm-up cuts hamstring injury incidence by about 45% versus usual training, ranking above Nordic hamstring exercise alone in a network meta-analysis."
+  },
+  {
+    "reference": "https://doi.org/10.1136/ip-2025-045632",
+    "area": "injury",
+    "tags": ["injury-prevention", "adherence", "neuromuscular-training"],
+    "content": "Complete at least 84% of prescribed injury-prevention sessions: high adherence cut injury rates by about half, while low adherence showed no significant protection."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fspor.2026.1764338",
+    "area": "biomechanics",
+    "tags": ["running-shoes", "carbon-plate", "biomechanics"],
+    "content": "Carbon-plated shoes do not consistently change leg stiffness or joint power versus standard shoes, so expect economy gains without a systematic shift in lower-limb mechanics."
+  },
+  {
+    "reference": "https://doi.org/10.1055/a-2637-7283",
+    "area": "equipment",
+    "tags": [
+      "running-shoes",
+      "advanced-footwear-technology",
+      "running-economy"
+    ],
+    "content": "Advanced footwear technology lowers oxygen cost and energy cost of running and improves time-trial performance, with larger economy gains at faster speeds."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fphys.2026.1881773",
+    "area": "mobility",
+    "tags": [
+      "stretching",
+      "static-stretching",
+      "dynamic-stretching",
+      "flexibility"
+    ],
+    "content": "Static holds over 60 seconds produce large flexibility gains (about 6%) but slightly impair performance. Use long holds when range of motion is the goal, not before maximal efforts."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fpsyg.2026.1842687",
+    "area": "psychology",
+    "tags": ["anxiety", "sport-psychology", "cognitive-behavioural-therapy"],
+    "content": "Use structured psychological skills training during the regular training period to cut competitive anxiety, with cognitive-behavioural approaches showing the strongest effect across interventions."
+  },
+  {
+    "reference": "https://doi.org/10.1113/JP290089",
+    "area": "physiology",
+    "tags": ["heat-acclimation", "endurance", "thermoregulation"],
+    "content": "Acclimate to heat in either dry or humid conditions for about eight days: both expand plasma volume, lower heart rate and core temperature, and transfer benefits across heat types."
   }
 ]
