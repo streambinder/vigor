@@ -69,6 +69,16 @@ class KnowledgeLabels {
 
   // -- training types --
 
+  /// the five catalog Types in vocabulary order; 'mixed' is the
+  /// request-level default and never a catalog Type
+  static const trainingTypes = [
+    'free_weights',
+    'machines_cables',
+    'bodyweight',
+    'bands',
+    'special',
+  ];
+
   static String typeLabel(String id, AppLocalizations l10n) {
     return switch (id) {
       'mixed' => l10n.trainingTypeMixed,
