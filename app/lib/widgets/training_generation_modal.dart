@@ -189,17 +189,19 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   }
 
   Future<void> _loadAvailableTypes() async {
+    // flush the list and reset the Type to mixed before the fresh
+    // lookup: no stale availability stays visible while the
+    // equipment context changes
+    setState(() {
+      _availableTypes = [];
+      _type = null;
+    });
     final gymService = context.read<ServiceLocator>().gymService;
     final response = await gymService.getAvailableTypes(_currentEquipment());
     if (!mounted) return;
     if (response.isSuccess && response.data != null) {
       setState(() {
         _availableTypes = response.data!;
-        // a previously selected Type may no longer be servable with
-        // the current equipment: fall back to mixed
-        if (_type != null && !_availableTypes.any((t) => t.id == _type)) {
-          _type = null;
-        }
       });
     }
   }
@@ -719,9 +721,6 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
   Widget _buildTypeSection() {
     final l10n = AppLocalizations.of(context);
-    if (_availableTypes.isEmpty) {
-      return const SizedBox.shrink();
-    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -736,16 +735,28 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           spacing: VigorSpacing.sm,
           runSpacing: VigorSpacing.sm,
           children: [
-            _typeChip('mixed', _type == null, l10n),
-            for (final type in _availableTypes)
-              _typeChip(type.id, _type == type.id, l10n),
+            _typeChip('mixed', _type == null, true, l10n),
+            // every Type stays visible: the ones the current
+            // equipment cannot serve are disabled, not hidden
+            for (final type in KnowledgeLabels.trainingTypes)
+              _typeChip(
+                type,
+                _type == type,
+                _availableTypes.any((t) => t.id == type),
+                l10n,
+              ),
           ],
         ),
       ],
     );
   }
 
-  ChoiceChip _typeChip(String type, bool isSelected, AppLocalizations l10n) {
+  ChoiceChip _typeChip(
+    String type,
+    bool isSelected,
+    bool isEnabled,
+    AppLocalizations l10n,
+  ) {
     return ChoiceChip(
       label: Text(
         KnowledgeLabels.typeLabel(type, l10n),
@@ -755,9 +766,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       ),
       selected: isSelected,
       selectedColor: VigorColors.indigo,
-      onSelected: (_) => setState(() {
-        _type = (type == 'mixed' || isSelected) ? null : type;
-      }),
+      onSelected: isEnabled
+          ? (_) => setState(() {
+                _type = (type == 'mixed' || isSelected) ? null : type;
+              })
+          : null,
       showCheckmark: false,
     );
   }
@@ -1025,8 +1038,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
 
           // Training type selection
           _buildTypeSection(),
-          if (_availableTypes.isNotEmpty)
-            const SizedBox(height: VigorSpacing.md),
+          const SizedBox(height: VigorSpacing.md),
 
           // Goals selection
           _buildGoalsSection(),
