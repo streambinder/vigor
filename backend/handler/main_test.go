@@ -242,7 +242,7 @@ func handlerStubResponse(system, all string) string {
 		return `{"name":"Stub Session","description":"A stub generated session."}`
 	case strings.Contains(system, "expert yoga and mobility coach"):
 		text := "A gentle full-body mobility flow that opens the hips and spine."
-		for _, marker := range []string{"STUBFAIL:flow-few", "STUBFAIL:flow-under", "STUBFAIL:flow-over", "STUBFAIL:flow-unknown"} {
+		for _, marker := range []string{"STUBFAIL:flow-few", "STUBFAIL:flow-under", "STUBFAIL:flow-over", "STUBFAIL:flow-unknown", "STUBFAIL:flow-badjson"} {
 			if strings.Contains(all, marker) {
 				return text + " " + marker
 			}
@@ -250,6 +250,8 @@ func handlerStubResponse(system, all string) string {
 		return text
 	case strings.Contains(system, "mobility data extraction assistant"):
 		switch {
+		case strings.Contains(all, "STUBFAIL:flow-badjson"):
+			return `not json at all`
 		case strings.Contains(all, "STUBFAIL:flow-few"):
 			return `{"name":"Stub Flow","poses":[` +
 				`{"exercise_id":"cat-cow","duration":290,"rest":10},` +

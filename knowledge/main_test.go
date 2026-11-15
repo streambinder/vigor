@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"testing"
 
@@ -144,11 +145,18 @@ func TestBootstrapCatalogsCoverage(t *testing.T) {
 	if err := bootstrapModifiers(db); err != nil {
 		t.Fatalf("bootstrapModifiers: %v", err)
 	}
+	if err := bootstrapExerciseTypes(db); err != nil {
+		t.Fatalf("bootstrapExerciseTypes: %v", err)
+	}
+	if err := bootstrapExerciseFlags(db); err != nil {
+		t.Fatalf("bootstrapExerciseFlags: %v", err)
+	}
 	for _, table := range []string{
 		"methodologies", "muscles",
 		"equipment", "equipment_embeddings",
 		"goals", "goal_embeddings",
 		"modifiers", "modifier_embeddings",
+		"exercise_types", "exercise_flags",
 	} {
 		if !server.saw(`insert into "` + table + `"`) {
 			t.Fatalf("no insert into %s recorded", table)
@@ -169,6 +177,39 @@ func TestBootstrapExercisesCoverage(t *testing.T) {
 	}
 	if !server.saw(`insert into "exercise_embeddings"`) {
 		t.Fatal("no exercise embedding inserts recorded")
+	}
+}
+
+// TestBootstrapExercisesTypeRejection guards the bootstrap
+// validation: an exercise with an unknown Type, a missing Type, or
+// an unknown Flag fails the bootstrap instead of shipping.
+func TestBootstrapExercisesTypeRejection(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join(packageDir, "features", "exercises.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog := string(raw)
+	cases := map[string]string{
+		"unknown type": strings.Replace(catalog, `"type": "bodyweight"`, `"type": "nope"`, 1),
+		"missing type": strings.Replace(catalog, `    "type": "bodyweight",`+"\n", "", 1),
+		"unknown flag": strings.Replace(catalog, `"flags": []`, `"flags": ["nope"]`, 1),
+		"request-only": strings.Replace(catalog, `"type": "bodyweight"`, `"type": "mixed"`, 1),
+	}
+	for name, content := range cases {
+		t.Run(name, func(t *testing.T) {
+			if content == catalog {
+				t.Fatal("substitution did not change the catalog")
+			}
+			db, _ := openKnowledgeDB(t)
+			chdirFeatures(t, map[string]string{
+				"types.json":     "",
+				"flags.json":     "",
+				"exercises.json": content,
+			})
+			if err := boostrapExercises(db); err == nil {
+				t.Fatalf("boostrapExercises must fail on %s", name)
+			}
+		})
 	}
 }
 
@@ -197,6 +238,8 @@ func TestBootstrapFileErrorsCoverage(t *testing.T) {
 		"equipment":     bootstrapEquipment,
 		"goals":         bootstrapGoals,
 		"modifiers":     bootstrapModifiers,
+		"exerciseTypes": bootstrapExerciseTypes,
+		"exerciseFlags": bootstrapExerciseFlags,
 		"exercises":     boostrapExercises,
 		"facts":         boostrapFacts,
 	} {
@@ -214,6 +257,8 @@ func TestBootstrapBadJSONCoverage(t *testing.T) {
 		"equipment.json":     "{bad",
 		"goals.json":         "{bad",
 		"modifiers.json":     "{bad",
+		"types.json":         "{bad",
+		"flags.json":         "{bad",
 		"exercises.json":     "{bad",
 		"facts.json":         "{bad",
 	})
@@ -223,6 +268,8 @@ func TestBootstrapBadJSONCoverage(t *testing.T) {
 		"equipment":     bootstrapEquipment,
 		"goals":         bootstrapGoals,
 		"modifiers":     bootstrapModifiers,
+		"exerciseTypes": bootstrapExerciseTypes,
+		"exerciseFlags": bootstrapExerciseFlags,
 		"exercises":     boostrapExercises,
 		"facts":         boostrapFacts,
 	} {

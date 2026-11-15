@@ -386,6 +386,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get methodologyOptional => '方法（可选）';
 
   @override
+  String get trainingTypeOptional => '训练类型（可选）';
+
+  @override
+  String get trainingTypeMixed => '混合';
+
+  @override
+  String get trainingTypeFreeWeights => '自由重量';
+
+  @override
+  String get trainingTypeMachinesCables => '器械和绳索';
+
+  @override
+  String get trainingTypeBodyweight => '自重';
+
+  @override
+  String get trainingTypeBands => '弹力带';
+
+  @override
+  String get trainingTypeSpecial => '其他 / 特殊';
+
+  @override
   String get methodologyAuto => '自动';
 
   @override
@@ -1287,6 +1308,11 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String loadingMsgMethodology(String methodology) {
     return '设计$methodology训练...';
+  }
+
+  @override
+  String loadingMsgType(String type) {
+    return '正在进行$type训练…';
   }
 
   @override

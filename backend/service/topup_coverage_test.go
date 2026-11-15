@@ -22,7 +22,7 @@ func TestGenerateTrainingDeriveErrors(t *testing.T) {
 		useFakeKnowledgeFailing(t, failOn)
 		userID := seedCoverageUser(t, db, "derive@example.com", `{"goals":["build-strength"]}`)
 		if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", "",
-			nil, false, "", nil, nil, []byte("req"), time.UTC, nil); err == nil {
+			nil, false, "", nil, nil, "", nil, []byte("req"), time.UTC, nil); err == nil {
 			t.Fatalf("failOn %s: GenerateTraining must fail", failOn)
 		}
 	}
@@ -62,7 +62,7 @@ func TestGenerationPersistErrors(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", "",
-		nil, false, "", nil, nil, []byte("req"), time.UTC, nil); err == nil {
+		nil, false, "", nil, nil, "", nil, []byte("req"), time.UTC, nil); err == nil {
 		t.Fatal("GenerateTraining must fail when the insert is aborted")
 	}
 

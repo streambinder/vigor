@@ -1,4 +1,5 @@
 import '../models/api_response.dart';
+import '../models/available_exercise_type.dart';
 import '../models/equipment_info.dart';
 import '../models/gym.dart';
 import 'app_event.dart';
@@ -99,6 +100,33 @@ class GymService {
     AppLogger.error('[GymService] Failed to fetch methodologies: ${response.error}');
     return ApiResponse.error(
       response.error ?? 'Failed to fetch methodologies',
+      response.statusCode,
+    );
+  }
+
+  Future<ApiResponse<List<AvailableExerciseType>>> getAvailableTypes(
+    List<String> equipment,
+  ) async {
+    AppLogger.debug('[GymService] Fetching available training types');
+    final query = equipment.isEmpty
+        ? '/exercises/available-types'
+        : '/exercises/available-types?${equipment.map((e) => 'equipment=${Uri.encodeComponent(e)}').join('&')}';
+    final response = await _publicApiService.get(query);
+    if (response.isSuccess && response.data != null) {
+      try {
+        final types = (response.data!['types'] as List)
+            .map((t) => AvailableExerciseType.fromJson(t as Map<String, dynamic>))
+            .toList();
+        AppLogger.info('[GymService] Fetched ${types.length} available types');
+        return ApiResponse.success(types, response.statusCode);
+      } catch (e) {
+        AppLogger.error('[GymService] failed to parse available types', e);
+        return ApiResponse.error('Failed to parse available types', response.statusCode);
+      }
+    }
+    AppLogger.error('[GymService] Failed to fetch available types: ${response.error}');
+    return ApiResponse.error(
+      response.error ?? 'Failed to fetch available types',
       response.statusCode,
     );
   }

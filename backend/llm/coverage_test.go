@@ -403,7 +403,7 @@ func TestNodeRunners(t *testing.T) {
 		result, _, err := runExercisesNode(context.Background(),
 			pipeline.Strategy{Methodology: "strength"}, pipeline.MuscleTargeting{},
 			pipeline.ConstraintExtraction{}, pipeline.HistoryAnalysis{},
-			nil, nil, nil, nil, nil, nil, methodology, true, 45, false, "", "",
+			nil, nil, nil, nil, nil, nil, methodology, true, 45, false, "", nil, "", "",
 		)
 		if err != nil || len(result.Exercises) != 1 || result.Exercises[0].ExerciseID != "squat" {
 			t.Errorf("runExercisesNode = %+v, %v", result, err)
@@ -414,7 +414,7 @@ func TestNodeRunners(t *testing.T) {
 	})
 	t.Run("exercises bad json", func(t *testing.T) {
 		installProviders(t, staticLLM("junk"), nil)
-		if _, _, err := runExercisesNode(context.Background(), pipeline.Strategy{}, pipeline.MuscleTargeting{}, pipeline.ConstraintExtraction{}, pipeline.HistoryAnalysis{}, nil, nil, nil, nil, nil, nil, methodology, false, 45, false, "", ""); err == nil {
+		if _, _, err := runExercisesNode(context.Background(), pipeline.Strategy{}, pipeline.MuscleTargeting{}, pipeline.ConstraintExtraction{}, pipeline.HistoryAnalysis{}, nil, nil, nil, nil, nil, nil, methodology, false, 45, false, "", nil, "", ""); err == nil {
 			t.Error("bad JSON must fail the exercises node")
 		}
 	})
@@ -567,7 +567,7 @@ func TestApplyDerivedParamsAndCandidates(t *testing.T) {
 		Equipment:    []string{"barbell", "bogus"},
 		Movements:    []string{"Squat", "squat", "  ", "Deadlift"},
 		Summarizable: pipeline.Summarizable{Summary: strings.Repeat("s", maxDerivedSummaryLen+500)},
-	}, []model.Methodology{{ID: "strength"}}, []string{"quads"}, []string{"build-muscle"}, []string{"barbell"})
+	}, []model.Methodology{{ID: "strength"}}, []string{"quads"}, []string{"build-muscle"}, []string{"barbell"}, nil, nil)
 	if normalized.Methodology != "strength" || len(normalized.Muscles) != 1 || len(normalized.Goals) != 1 || len(normalized.Equipment) != 1 {
 		t.Errorf("normalizeDerivedParams = %+v", normalized)
 	}
@@ -577,7 +577,7 @@ func TestApplyDerivedParamsAndCandidates(t *testing.T) {
 	if len(normalized.Movements) != 2 {
 		t.Errorf("movements not sanitized: %v", normalized.Movements)
 	}
-	unknown := normalizeDerivedParams(pipeline.DerivedParams{Methodology: "nope"}, nil, nil, nil, nil)
+	unknown := normalizeDerivedParams(pipeline.DerivedParams{Methodology: "nope"}, nil, nil, nil, nil, nil, nil)
 	if unknown.Methodology != "" {
 		t.Errorf("unknown methodology must be dropped, got %q", unknown.Methodology)
 	}

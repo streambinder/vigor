@@ -399,6 +399,27 @@ class AppLocalizationsRu extends AppLocalizations {
   String get methodologyOptional => 'Методология (необязательно)';
 
   @override
+  String get trainingTypeOptional => 'Тип тренировки (необязательно)';
+
+  @override
+  String get trainingTypeMixed => 'Смешанный';
+
+  @override
+  String get trainingTypeFreeWeights => 'Свободные веса';
+
+  @override
+  String get trainingTypeMachinesCables => 'Тренажёры и тросы';
+
+  @override
+  String get trainingTypeBodyweight => 'Собственный вес';
+
+  @override
+  String get trainingTypeBands => 'Эспандеры';
+
+  @override
+  String get trainingTypeSpecial => 'Другое / Специальное';
+
+  @override
   String get methodologyAuto => 'Авто';
 
   @override
@@ -1316,6 +1337,11 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String loadingMsgMethodology(String methodology) {
     return 'Разработка сессии $methodology...';
+  }
+
+  @override
+  String loadingMsgType(String type) {
+    return 'Тренировка: $type...';
   }
 
   @override

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -48,7 +49,22 @@ var (
 	ErrTrainingAlreadyCompleted = errors.New("training already completed")
 	ErrFetchResource            = errors.New("could not fetch linked resource")
 	ErrCalibrationAutoOnly      = errors.New("non-Auto training generation is blocked during calibration")
+	ErrInvalidExerciseType      = errors.New("unknown training type")
+	ErrInvalidExerciseFlag      = errors.New("unknown training flag")
 )
+
+// TypeUnavailableError reports a requested training Type with no
+// servable exercise for the user's equipment, listing the Types
+// that are available instead. The handler maps it to a 400 carrying
+// the message, so the client can offer the available Types.
+type TypeUnavailableError struct {
+	Requested string
+	Available []string
+}
+
+func (e *TypeUnavailableError) Error() string {
+	return fmt.Sprintf("training type %q has no exercise for this equipment; available types: %s", e.Requested, strings.Join(e.Available, ", "))
+}
 
 // promptDerivation holds the result of deriving the tuning parameters of a
 // prompted request upfront, along with the catalogs the DAG needs to apply
@@ -59,6 +75,8 @@ type promptDerivation struct {
 	allGoals       []model.Goal
 	validMuscles   []string
 	validEquipment []string
+	validTypes     []model.ExerciseType
+	validFlags     []model.ExerciseFlag
 }
 
 // derivePromptParams runs the DAG derive params node before pool retrieval,
@@ -80,6 +98,14 @@ func derivePromptParams(ctx context.Context, promptText string, articles []strin
 	if err := database.Knowledge.Find(&allEquipment).Error; err != nil {
 		return nil, err
 	}
+	var allTypes []model.ExerciseType
+	if err := database.Knowledge.Find(&allTypes).Error; err != nil {
+		return nil, err
+	}
+	var allFlags []model.ExerciseFlag
+	if err := database.Knowledge.Find(&allFlags).Error; err != nil {
+		return nil, err
+	}
 	var allExercises []model.Exercise
 	if err := database.Knowledge.Select("name", "aliases").Find(&allExercises).Error; err != nil {
 		return nil, err
@@ -93,6 +119,8 @@ func derivePromptParams(ctx context.Context, promptText string, articles []strin
 		allGoals:       allGoals,
 		validMuscles:   make([]string, len(allMuscles)),
 		validEquipment: make([]string, len(allEquipment)),
+		validTypes:     allTypes,
+		validFlags:     allFlags,
 	}
 	for i, m := range allMuscles {
 		derivation.validMuscles[i] = m.ID
@@ -108,6 +136,8 @@ func derivePromptParams(ctx context.Context, promptText string, articles []strin
 		AllGoals:           allGoals,
 		ValidMuscles:       derivation.validMuscles,
 		ValidEquipment:     derivation.validEquipment,
+		ValidTypes:         derivation.validTypes,
+		ValidFlags:         derivation.validFlags,
 		MovementCandidates: movementCandidates,
 	})
 	if err != nil {
@@ -165,7 +195,7 @@ func isCalibrating(calibration map[string]int, muscles []model.Muscle) bool {
 // allowed during calibration: only Auto generation (no prompt analysis, no
 // explicit methodology) carrying at most partner, duration and gym/equipment
 // tuning.
-func calibrationGenerationAllowed(analyze bool, equipment []string, gymID, prompt, methodology string, goals, muscles []string, skipWarmupCooldown bool) bool {
+func calibrationGenerationAllowed(analyze bool, equipment []string, gymID, prompt, methodology string, goals, muscles []string, skipWarmupCooldown bool, exerciseType string, flags []string) bool {
 	if analyze || strings.TrimSpace(methodology) != "" {
 		return false
 	}
@@ -174,10 +204,52 @@ func calibrationGenerationAllowed(analyze bool, equipment []string, gymID, promp
 	return strings.TrimSpace(prompt) == "" &&
 		len(goals) == 0 &&
 		len(muscles) == 0 &&
-		!skipWarmupCooldown
+		!skipWarmupCooldown &&
+		strings.TrimSpace(exerciseType) == "" &&
+		len(flags) == 0
 }
 
-func GenerateTraining(ctx context.Context, userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string, request []byte, loc *time.Location, onProgress llm.DAGProgressFunc) (*model.Training, error) {
+// validateExerciseType rejects an unknown training Type. Empty and
+// mixed mean no preference and always pass.
+func validateExerciseType(exerciseType string) error {
+	if exerciseType == "" || exerciseType == "mixed" {
+		return nil
+	}
+	var count int64
+	if err := database.Knowledge.Model(&model.ExerciseType{}).Where("id = ?", exerciseType).Count(&count).Error; err != nil {
+		return err
+	}
+	if count == 0 {
+		return ErrInvalidExerciseType
+	}
+	return nil
+}
+
+// validateExerciseFlags rejects unknown training Flags. Duplicates
+// are harmless and collapse before the check.
+func validateExerciseFlags(flags []string) error {
+	if len(flags) == 0 {
+		return nil
+	}
+	seen := make(map[string]bool, len(flags))
+	unique := make([]string, 0, len(flags))
+	for _, flag := range flags {
+		if !seen[flag] {
+			seen[flag] = true
+			unique = append(unique, flag)
+		}
+	}
+	var count int64
+	if err := database.Knowledge.Model(&model.ExerciseFlag{}).Where("id IN ?", unique).Count(&count).Error; err != nil {
+		return err
+	}
+	if count != int64(len(unique)) {
+		return ErrInvalidExerciseFlag
+	}
+	return nil
+}
+
+func GenerateTraining(ctx context.Context, userID uuid.UUID, duration int, equipment []string, gymID, prompt string, partners []string, skipWarmupCooldown bool, methodology string, goals []string, muscles []string, exerciseType string, flags []string, request []byte, loc *time.Location, onProgress llm.DAGProgressFunc) (*model.Training, error) {
 	// a non-empty prompt runs through the analyzer, which fills only the
 	// tuning parameters the user left unset; explicit choices stay
 	// authoritative
@@ -188,7 +260,7 @@ func GenerateTraining(ctx context.Context, userID uuid.UUID, duration int, equip
 	// any expensive work (article fetch, LLM derivation, retrieval) happens.
 	if calibrating, err := isUserCalibrating(userID); err != nil {
 		return nil, err
-	} else if calibrating && !calibrationGenerationAllowed(analyze, equipment, gymID, prompt, methodology, goals, muscles, skipWarmupCooldown) {
+	} else if calibrating && !calibrationGenerationAllowed(analyze, equipment, gymID, prompt, methodology, goals, muscles, skipWarmupCooldown, exerciseType, flags) {
 		return nil, ErrCalibrationAutoOnly
 	}
 
@@ -200,6 +272,15 @@ func GenerateTraining(ctx context.Context, userID uuid.UUID, duration int, equip
 	}
 	if len(prompt) > maxPromptLength {
 		return nil, ErrPromptTooLong
+	}
+
+	// an unknown Type or Flag is a client error, rejected before any
+	// expensive work (article fetch, LLM derivation, retrieval).
+	if err := validateExerciseType(exerciseType); err != nil {
+		return nil, err
+	}
+	if err := validateExerciseFlags(flags); err != nil {
+		return nil, err
 	}
 
 	// prompted requests: fetch any linked articles (hard fetch failures are
@@ -241,6 +322,12 @@ func GenerateTraining(ctx context.Context, userID uuid.UUID, duration int, equip
 		}
 		if methodology == "" && derivation.derived.Methodology != "" {
 			methodology = derivation.derived.Methodology
+		}
+		if exerciseType == "" && derivation.derived.Type != "" && derivation.derived.Type != "mixed" {
+			exerciseType = derivation.derived.Type
+		}
+		if len(flags) == 0 && len(derivation.derived.Flags) > 0 {
+			flags = derivation.derived.Flags
 		}
 		if derivation.derived.SkipWarmupCooldown {
 			skipWarmupCooldown = true
@@ -410,7 +497,37 @@ func GenerateTraining(ctx context.Context, userID uuid.UUID, duration int, equip
 	if explicitProgram {
 		workExercises, pinnedExercises, err = rag.RetrieveExplicitProgramExercises(derivation.derived.Movements)
 	} else {
-		workExercises, err = rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles, prompt, allFavoriteExercises, recentExerciseIDs, calibrationGaps, duration)
+		// a requested Type with no servable exercise for this
+		// equipment fails fast with the available Types, instead of
+		// letting the retrieval return an empty pool downstream.
+		// RetrieveMethodology returns nil with no error when no
+		// methodology was given or derived, so the mobility-only
+		// flag reads through a nil guard.
+		if exerciseType != "" && exerciseType != "mixed" {
+			mobilityOnly := false
+			if methodologyData != nil {
+				mobilityOnly = methodologyData.GetWork().MobilityOnly
+			}
+			available, availErr := rag.AvailableExerciseTypes(equipmentIDs, mobilityOnly)
+			if availErr != nil {
+				return nil, availErr
+			}
+			var availableIDs []string
+			for _, t := range available {
+				availableIDs = append(availableIDs, t.ID)
+			}
+			found := false
+			for _, t := range available {
+				if t.ID == exerciseType {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return nil, &TypeUnavailableError{Requested: exerciseType, Available: availableIDs}
+			}
+		}
+		workExercises, err = rag.RetrieveWorkExercises(profiles, effectiveGoals, equipmentIDs, proficiencies, proficiencyMargin, methodologyData, muscles, exerciseType, flags, prompt, allFavoriteExercises, recentExerciseIDs, calibrationGaps, duration)
 	}
 	if err != nil {
 		return nil, err
@@ -589,6 +706,8 @@ func GenerateTraining(ctx context.Context, userID uuid.UUID, duration int, equip
 		Methodology:          methodologyData,
 		Methodologies:        methodologies,
 		Muscles:              muscles,
+		Type:                 exerciseType,
+		Flags:                flags,
 		UserPrompt:           prompt,
 		Duration:             duration,
 		RecentTrainings:      recentTrainings,
@@ -609,6 +728,8 @@ func GenerateTraining(ctx context.Context, userID uuid.UUID, duration int, equip
 		dagRequest.AllGoals = derivation.allGoals
 		dagRequest.ValidMuscles = derivation.validMuscles
 		dagRequest.ValidEquipment = derivation.validEquipment
+		dagRequest.ValidTypes = derivation.validTypes
+		dagRequest.ValidFlags = derivation.validFlags
 		dagRequest.Derived = &derivation.derived
 		dagRequest.DerivedStep = &derivation.step
 	}

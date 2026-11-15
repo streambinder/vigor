@@ -317,9 +317,11 @@ func TestMatchMovementsNoisyArticle(t *testing.T) {
 func TestDeriveNodeDecision(t *testing.T) {
 	fake := &fakeDecisionClient{answers: map[string]dm.Answer{
 		"methodology":        {Choice: "circuit"},
+		"type":               {Choice: "free_weights"},
 		"goal:hypertrophy":   {Noul: 0.9},
 		"muscle:chest":       {Noul: 0.8},
 		"equipment:dumbbell": {Noul: 0.7},
+		"flag:plyometric":    {Noul: 0.9},
 		"explicit_program":   {Noul: 0.95},
 	}, noul: 0.1}
 	installFakeDecisionClient(t, fake)
@@ -330,6 +332,8 @@ func TestDeriveNodeDecision(t *testing.T) {
 		AllGoals:           []model.Goal{{ID: "hypertrophy", Description: "muscle mass"}, {ID: "endurance", Description: "stamina"}},
 		ValidMuscles:       []string{"chest", "legs"},
 		ValidEquipment:     []string{"dumbbell", "barbell"},
+		ValidTypes:         []model.ExerciseType{{ID: "free_weights", Aliases: []string{"free weights", "pesi liberi"}}, {ID: "bodyweight", Aliases: []string{"bodyweight", "corpo libero"}}},
+		ValidFlags:         []model.ExerciseFlag{{ID: "plyometric", Aliases: []string{"plyometric", "pliometrico"}}, {ID: "ballistic", Aliases: []string{"ballistic", "balistico"}}},
 		MovementCandidates: []MovementCandidate{{Name: "Pull Up"}, {Name: "Push Up"}, {Name: "Squat"}},
 	})
 	if err != nil {
@@ -337,6 +341,12 @@ func TestDeriveNodeDecision(t *testing.T) {
 	}
 	if derived.Methodology != "circuit" {
 		t.Errorf("methodology = %q, want circuit", derived.Methodology)
+	}
+	if derived.Type != "free_weights" {
+		t.Errorf("type = %q, want free_weights", derived.Type)
+	}
+	if len(derived.Flags) != 1 || derived.Flags[0] != "plyometric" {
+		t.Errorf("flags = %v, want [plyometric]", derived.Flags)
 	}
 	if len(derived.Goals) != 1 || derived.Goals[0] != "hypertrophy" {
 		t.Errorf("goals = %v, want [hypertrophy]", derived.Goals)
@@ -352,6 +362,9 @@ func TestDeriveNodeDecision(t *testing.T) {
 	}
 	if !strings.Contains(derived.Summary, "Methodology: circuit") || !strings.Contains(derived.Summary, "pull-up") {
 		t.Errorf("summary = %q, want derivation + request words", derived.Summary)
+	}
+	if !strings.Contains(derived.Summary, "Type: free_weights") || !strings.Contains(derived.Summary, "Flags: plyometric") {
+		t.Errorf("summary = %q, want type and flags", derived.Summary)
 	}
 	if step.Kind != model.StepKindDM {
 		t.Errorf("step kind = %q, want dm", step.Kind)

@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/streambinder/vigor/database"
+	"github.com/streambinder/vigor/model"
 )
 
 const (
@@ -185,4 +186,71 @@ func TestGetExerciseModel(t *testing.T) {
 
 	status, body = doReq(t, app, http.MethodGet, "/exercises/models/nope", nil, auth)
 	expectStatus(t, status, http.StatusNotFound, body)
+}
+
+// TestGetAvailableExerciseTypes checks the public Type-availability
+// endpoint: it lists only the Types servable with the equipment the
+// caller passes, with their work-pool counts, in vocabulary order.
+func TestGetAvailableExerciseTypes(t *testing.T) {
+	app := Init()
+	setupHandlerDB(t)
+	for id, typ := range map[string]string{
+		"squat": "free_weights", "deadlift": "free_weights",
+		"push-up": "bodyweight", "plank": "bodyweight",
+	} {
+		if err := database.Knowledge.Model(&model.Exercise{}).Where("id = ?", id).Update("type", typ).Error; err != nil {
+			t.Fatalf("type exercise %s: %v", id, err)
+		}
+	}
+	if err := database.Knowledge.Create(&model.Equipment{ID: "band"}).Error; err != nil {
+		t.Fatalf("seed equipment band: %v", err)
+	}
+	// the servable predicate reads the exercise_equipment join table,
+	// not the text array: seed both, as the bootstrap does.
+	if err := database.Knowledge.Create(&model.Exercise{
+		ID: "band-pull-apart", Name: "Band Pull Apart", Muscles: []string{"back"},
+		Equipment: []string{"band"}, EquipmentList: []model.Equipment{{ID: "band"}},
+		Mode: "reps", Difficulty: 20, Type: "bands",
+	}).Error; err != nil {
+		t.Fatalf("seed band exercise: %v", err)
+	}
+
+	decode := func(body []byte) map[string]int {
+		t.Helper()
+		var resp struct {
+			Types []struct {
+				ID    string `json:"id"`
+				Count int    `json:"count"`
+			} `json:"types"`
+		}
+		if err := json.Unmarshal(body, &resp); err != nil {
+			t.Fatalf("decode available types: %v", err)
+		}
+		got := make(map[string]int, len(resp.Types))
+		for _, typ := range resp.Types {
+			got[typ.ID] = typ.Count
+		}
+		return got
+	}
+	check := func(path string, want map[string]int) {
+		t.Helper()
+		status, body := doReq(t, app, http.MethodGet, path, nil, nil)
+		expectStatus(t, status, http.StatusOK, body)
+		if got := decode(body); fmt.Sprint(got) != fmt.Sprint(want) {
+			t.Errorf("GET %s = %v, want %v", path, got, want)
+		}
+	}
+
+	// no equipment: only the equipment-free exercises are servable,
+	// so the band Type stays out.
+	check("/exercises/available-types",
+		map[string]int{"free_weights": 2, "bodyweight": 2})
+	// with a band, the band Type joins the list.
+	check("/exercises/available-types?equipment=band",
+		map[string]int{"free_weights": 2, "bodyweight": 2, "bands": 1})
+	// repeated params and comma-separated lists parse the same way.
+	check("/exercises/available-types?equipment=barbell&equipment=band",
+		map[string]int{"free_weights": 2, "bodyweight": 2, "bands": 1})
+	check("/exercises/available-types?equipment=barbell,band",
+		map[string]int{"free_weights": 2, "bodyweight": 2, "bands": 1})
 }

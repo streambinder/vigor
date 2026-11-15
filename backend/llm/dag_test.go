@@ -196,12 +196,16 @@ func TestNormalizeDerivedParams(t *testing.T) {
 	validEquipment := []string{"barbell", "dumbbell"}
 
 	t.Run("invalid ids are dropped", func(t *testing.T) {
+		validTypes := []model.ExerciseType{{ID: "free_weights"}, {ID: "bodyweight"}}
+		validFlags := []model.ExerciseFlag{{ID: "plyometric"}, {ID: "ballistic"}}
 		derived := normalizeDerivedParams(pipeline.DerivedParams{
 			Methodology: "crossfit",
 			Muscles:     []string{"chest", "abs"},
 			Goals:       []string{"strength", "flying"},
 			Equipment:   []string{"barbell", "jetpack"},
-		}, methodologies, validMuscles, validGoals, validEquipment)
+			Type:        "Free_Weights",
+			Flags:       []string{"plyometric", "bogus"},
+		}, methodologies, validMuscles, validGoals, validEquipment, validTypes, validFlags)
 
 		if derived.Methodology != "" {
 			t.Fatalf("unknown methodology should be dropped, got %q", derived.Methodology)
@@ -215,13 +219,33 @@ func TestNormalizeDerivedParams(t *testing.T) {
 		if len(derived.Equipment) != 1 || derived.Equipment[0] != "barbell" {
 			t.Fatalf("unexpected equipment: %v", derived.Equipment)
 		}
+		if derived.Type != "free_weights" {
+			t.Fatalf("expected canonical type id, got %q", derived.Type)
+		}
+		if len(derived.Flags) != 1 || derived.Flags[0] != "plyometric" {
+			t.Fatalf("unexpected flags: %v", derived.Flags)
+		}
+	})
+
+	t.Run("unknown type is dropped", func(t *testing.T) {
+		derived := normalizeDerivedParams(pipeline.DerivedParams{
+			Type:  "nope",
+			Flags: []string{"bogus"},
+		}, methodologies, validMuscles, validGoals, validEquipment, []model.ExerciseType{{ID: "free_weights"}}, []model.ExerciseFlag{{ID: "plyometric"}})
+
+		if derived.Type != "" {
+			t.Fatalf("unknown type should be dropped, got %q", derived.Type)
+		}
+		if len(derived.Flags) != 0 {
+			t.Fatalf("unknown flags should be dropped, got %v", derived.Flags)
+		}
 	})
 
 	t.Run("case-insensitive matches resolve to canonical ids", func(t *testing.T) {
 		derived := normalizeDerivedParams(pipeline.DerivedParams{
 			Methodology: "Strength",
 			Muscles:     []string{"QUADS"},
-		}, methodologies, validMuscles, validGoals, validEquipment)
+		}, methodologies, validMuscles, validGoals, validEquipment, nil, nil)
 
 		if derived.Methodology != "strength" {
 			t.Fatalf("expected canonical methodology id, got %q", derived.Methodology)
@@ -234,7 +258,7 @@ func TestNormalizeDerivedParams(t *testing.T) {
 	t.Run("movements are sanitized but their wording is kept", func(t *testing.T) {
 		derived := normalizeDerivedParams(pipeline.DerivedParams{
 			Movements: []string{" pull-up ", "PULL-UP", "sit-up", ""},
-		}, methodologies, validMuscles, validGoals, validEquipment)
+		}, methodologies, validMuscles, validGoals, validEquipment, nil, nil)
 
 		if len(derived.Movements) != 2 || derived.Movements[0] != "pull-up" || derived.Movements[1] != "sit-up" {
 			t.Fatalf("unexpected movements: %v", derived.Movements)
@@ -248,7 +272,7 @@ func TestNormalizeDerivedParams(t *testing.T) {
 		}
 		derived := normalizeDerivedParams(pipeline.DerivedParams{
 			Movements: movements,
-		}, methodologies, validMuscles, validGoals, validEquipment)
+		}, methodologies, validMuscles, validGoals, validEquipment, nil, nil)
 
 		if len(derived.Movements) != maxDerivedMovements {
 			t.Fatalf("expected movements cap at %d, got %d", maxDerivedMovements, len(derived.Movements))
@@ -258,7 +282,7 @@ func TestNormalizeDerivedParams(t *testing.T) {
 	t.Run("derived summary is capped", func(t *testing.T) {
 		derived := normalizeDerivedParams(pipeline.DerivedParams{
 			Summarizable: pipeline.Summarizable{Summary: strings.Repeat("x", maxDerivedSummaryLen+100)},
-		}, methodologies, validMuscles, validGoals, validEquipment)
+		}, methodologies, validMuscles, validGoals, validEquipment, nil, nil)
 
 		if len(derived.Summary) != maxDerivedSummaryLen {
 			t.Fatalf("expected summary cap at %d, got %d", maxDerivedSummaryLen, len(derived.Summary))
@@ -274,7 +298,7 @@ func TestNormalizeDerivedParams(t *testing.T) {
 			SkipWarmupCooldown: true,
 			Summarizable:       pipeline.Summarizable{Summary: "3 rounds of 5x10"},
 		}
-		derived := normalizeDerivedParams(input, methodologies, validMuscles, validGoals, validEquipment)
+		derived := normalizeDerivedParams(input, methodologies, validMuscles, validGoals, validEquipment, nil, nil)
 		if derived.Methodology != "circuit" || !derived.SkipWarmupCooldown || derived.Summary == "" {
 			t.Fatalf("valid derivation mangled: %+v", derived)
 		}

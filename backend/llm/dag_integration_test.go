@@ -166,6 +166,72 @@ func poolByID(pools ...[]model.Exercise) map[string]model.Exercise {
 	return byID
 }
 
+// integrationTypePool is the integration work pool with the production
+// Type and Flags attached to every exercise, plus the movements the
+// Type trajectories need that the base pool lacks: machines and cables,
+// bands, partner-assisted (special) and plyometric exercises. The base
+// pool is untouched so the pre-Type trajectories keep their exact
+// candidate set.
+func integrationTypePool(t *testing.T) []model.Exercise {
+	t.Helper()
+	work, _, _ := integrationPool()
+	types := map[string]string{
+		"pull-up":                         "bodyweight",
+		"inverted-row":                    "bodyweight",
+		"push-up":                         "bodyweight",
+		"chest-dip":                       "bodyweight",
+		"bench-dip-on-floor":              "bodyweight",
+		"34-sit-up":                       "bodyweight",
+		"bicycle-crunch":                  "bodyweight",
+		"air-squat":                       "bodyweight",
+		"burpee":                          "bodyweight",
+		"front-plank-with-twist":          "bodyweight",
+		"barbell-standing-overhead-press": "free_weights",
+		"barbell-bent-over-row":           "free_weights",
+		"barbell-deadlift":                "free_weights",
+		"dumbbell-bench-press":            "free_weights",
+		"dumbbell-lunge":                  "free_weights",
+	}
+	flags := map[string][]string{
+		"dumbbell-lunge": {"unilateral"},
+	}
+	for i := range work {
+		typ, ok := types[work[i].ID]
+		if !ok || typ == "" {
+			t.Fatalf("integration type pool: no production type for %q", work[i].ID)
+		}
+		work[i].Type = typ
+		work[i].Flags = flags[work[i].ID]
+	}
+	return append(work,
+		// machines and cables
+		model.Exercise{ID: "alternate-lateral-pulldown", Name: "Alternate Lateral Pulldown", Muscles: []string{"back", "arms"}, Equipment: []string{"cable"}, Mode: "reps", Difficulty: 45, Type: "machines_cables"},
+		model.Exercise{ID: "assisted-dip-machine", Name: "Assisted Dip Machine", Muscles: []string{"chest", "arms"}, Equipment: []string{"leverage machine"}, Mode: "reps", Difficulty: 35, Type: "machines_cables"},
+		model.Exercise{ID: "ab-crunch-machine", Name: "Ab Crunch Machine", Muscles: []string{"core"}, Equipment: []string{"leverage machine"}, Mode: "reps", Difficulty: 30, Type: "machines_cables"},
+		model.Exercise{ID: "adductor-machine", Name: "Adductor Machine", Muscles: []string{"legs"}, Equipment: []string{"leverage machine"}, Mode: "either", Difficulty: 25, Type: "machines_cables"},
+		model.Exercise{ID: "assisted-pull-up-machine", Name: "Assisted Pull Up Machine", Muscles: []string{"back"}, Equipment: []string{"leverage machine"}, Mode: "reps", Difficulty: 35, Type: "machines_cables"},
+		// bands
+		model.Exercise{ID: "band-bench-press", Name: "Band Bench Press", Muscles: []string{"shoulders", "chest"}, Equipment: []string{"band"}, Mode: "reps", Difficulty: 45, Type: "bands"},
+		model.Exercise{ID: "band-bent-over-row", Name: "Band Bent Over Row", Muscles: []string{"back"}, Equipment: []string{"band"}, Mode: "reps", Difficulty: 35, Type: "bands"},
+		model.Exercise{ID: "band-chest-fly", Name: "Band Chest Fly", Muscles: []string{"chest"}, Equipment: []string{"band"}, Mode: "reps", Difficulty: 35, Type: "bands"},
+		model.Exercise{ID: "band-bent-over-hip-extension", Name: "Band Bent-Over Hip Extension", Muscles: []string{"glutes", "legs"}, Equipment: []string{"band"}, Mode: "reps", Difficulty: 45, Type: "bands"},
+		model.Exercise{ID: "band-alternating-biceps-curl", Name: "Band Alternating Biceps Curl", Muscles: []string{"arms"}, Equipment: []string{"band"}, Mode: "reps", Difficulty: 35, Type: "bands"},
+		// partner-assisted (special)
+		model.Exercise{ID: "assisted-sit-up", Name: "Assisted Sit-Up", Muscles: []string{"core"}, Equipment: []string{"partner"}, Mode: "reps", Difficulty: 25, Type: "special"},
+		model.Exercise{ID: "assisted-standing-triceps-extension-with-towel", Name: "Assisted Standing Triceps Extension (With Towel)", Muscles: []string{"arms"}, Equipment: []string{"partner"}, Mode: "reps", Difficulty: 25, Type: "special"},
+		model.Exercise{ID: "behind-head-chest-stretch", Name: "Behind Head Chest Stretch", Muscles: []string{"shoulders", "chest"}, Equipment: []string{"partner"}, Mode: "duration", Difficulty: 30, Type: "special"},
+		model.Exercise{ID: "assisted-lying-calf-stretch", Name: "Assisted Lying Calf Stretch", Muscles: []string{"legs"}, Equipment: []string{"partner"}, Mode: "duration", Difficulty: 5, Type: "special"},
+		model.Exercise{ID: "assisted-prone-hamstring", Name: "Assisted Prone Hamstring", Muscles: []string{"glutes", "legs"}, Equipment: []string{"partner"}, Mode: "either", Difficulty: 40, Type: "special"},
+		model.Exercise{ID: "assisted-lying-glutes-stretch", Name: "Assisted Lying Glutes Stretch", Muscles: []string{"glutes", "legs"}, Equipment: []string{"partner"}, Mode: "duration", Difficulty: 5, Type: "special"},
+		// plyometric (bodyweight)
+		model.Exercise{ID: "180-jump", Name: "180 Jump", Muscles: []string{"legs"}, Mode: "reps", Difficulty: 50, Type: "bodyweight", Flags: []string{"plyometric"}},
+		model.Exercise{ID: "360-jump", Name: "360 Jump", Muscles: []string{"legs", "core"}, Mode: "reps", Difficulty: 55, Type: "bodyweight", Flags: []string{"plyometric"}},
+		model.Exercise{ID: "broad-jump", Name: "Broad Jump", Muscles: []string{"legs", "glutes"}, Mode: "reps", Difficulty: 55, Type: "bodyweight", Flags: []string{"plyometric"}},
+		model.Exercise{ID: "bodyweight-drop-jump-squat", Name: "Bodyweight Drop Jump Squat", Muscles: []string{"legs", "glutes"}, Mode: "reps", Difficulty: 45, Type: "bodyweight", Flags: []string{"plyometric"}},
+		model.Exercise{ID: "a-skip", Name: "A-Skip", Muscles: []string{"legs", "core"}, Mode: "either", Difficulty: 45, Type: "bodyweight", Flags: []string{"plyometric"}},
+	)
+}
+
 func exercisesByID(pool []model.Exercise, ids ...string) []model.Exercise {
 	byID := poolByID(pool)
 	var out []model.Exercise
@@ -320,6 +386,70 @@ func workExerciseIDs(training *model.Training) map[string]bool {
 		ids[activity.ExerciseID] = true
 	}
 	return ids
+}
+
+// assertWorkExercises checks that every work exercise of the generated
+// training satisfies the predicate, looked up in the pool the request
+// was built from. It is the Type/Flags counterpart of the grounding
+// check in assertTrajectory.
+func assertWorkExercises(t *testing.T, training *model.Training, pool []model.Exercise, want func(model.Exercise) bool, what string) {
+	t.Helper()
+	byID := poolByID(pool)
+	ids := workExerciseIDs(training)
+	if len(ids) == 0 {
+		t.Fatal("training has no work exercises")
+	}
+	for id := range ids {
+		ex, ok := byID[id]
+		if !ok {
+			t.Errorf("work exercise %q is not in the typed pool", id)
+			continue
+		}
+		if !want(ex) {
+			t.Errorf("work exercise %q does not match the requested %s (type=%q flags=%v)", id, what, ex.Type, ex.Flags)
+		}
+	}
+}
+
+func hasFlag(ex model.Exercise, flag string) bool {
+	for _, f := range ex.Flags {
+		if f == flag {
+			return true
+		}
+	}
+	return false
+}
+
+// filterTypePool applies the production retrieval filter to the typed
+// pool: keep only exercises of the requested Type (empty or mixed
+// means no type constraint) carrying every requested flag. The DAG
+// in production only ever sees this filtered pool, so the Type
+// trajectories hand it the same pool instead of the full one: the
+// SQL filter is the enforcement, and it is covered by the rag and
+// service unit tests. What these trajectories prove is that the
+// Type and Flags fields flow through the DAG end to end and the DAG
+// still builds a valid training from the restricted pool, including
+// the five- and six-candidate pools, without hallucinating exercises
+// outside the candidate list (assertWorkExercises catches those).
+func filterTypePool(pool []model.Exercise, typ string, flags []string) []model.Exercise {
+	filtered := make([]model.Exercise, 0, len(pool))
+	for _, ex := range pool {
+		if typ != "" && typ != "mixed" && ex.Type != typ {
+			continue
+		}
+		matched := true
+		for _, flag := range flags {
+			if !hasFlag(ex, flag) {
+				matched = false
+				break
+			}
+		}
+		if !matched {
+			continue
+		}
+		filtered = append(filtered, ex)
+	}
+	return filtered
 }
 
 // descriptionRestSentence returns the first sentence of the description
@@ -969,5 +1099,91 @@ func TestGenTrainingDAGTrajectories(t *testing.T) {
 		if !progressionFound {
 			t.Error("history step carries no progression question for the too_easy exercise")
 		}
+	})
+
+	// Cycle 006: one trajectory per training Type, one for the
+	// unconstrained default, one for the plyometric flag. The pool
+	// handed to the DAG is the production retrieval pool for the
+	// requested Type or flag (filterTypePool applies the same
+	// predicate as the SQL filter): the model picks from the
+	// restricted pool, the same way it picks from the filtered pool
+	// in production. The SQL filter itself is covered by the rag and
+	// service unit tests; these trajectories prove the fields flow
+	// through the DAG end to end and the DAG still builds a valid
+	// training from the restricted pool, including the five- and
+	// six-candidate pools, without hallucinating exercises outside
+	// the candidate list. Prompt-only enforcement was tried first
+	// with the full pool and failed: the model slipped a bodyweight
+	// exercise into the free_weights session, ignored the special
+	// Type entirely, and picked non-plyometric exercises for the
+	// plyometric flag. That is a property of the prompt, not of the
+	// feature: in production those exercises never reach the DAG.
+	typeTrajectory := func(name, typ string, muscles []string, duration int) {
+		t.Run(name, func(t *testing.T) {
+			req := baseRequest()
+			req.WorkExercises = filterTypePool(integrationTypePool(t), typ, nil)
+			req.Methodology = &strength
+			req.Muscles = muscles
+			req.Duration = duration
+			req.Type = typ
+			req.UserPrompt = "Strength session, " + typ + " exercises only, for " + strings.Join(muscles, ", ") + "."
+
+			training, _ := run(t, req)
+
+			assertWorkExercises(t, training, req.WorkExercises, func(ex model.Exercise) bool {
+				return ex.Type == typ
+			}, "training type "+typ)
+		})
+	}
+
+	typeTrajectory("training type free_weights limits the work pool to free weights",
+		"free_weights", []string{"chest", "back", "shoulders", "legs"}, 45)
+	typeTrajectory("training type machines_cables limits the work pool to machines and cables",
+		"machines_cables", []string{"chest", "back", "core", "legs"}, 45)
+	typeTrajectory("training type bodyweight limits the work pool to bodyweight",
+		"bodyweight", []string{"chest", "back", "legs"}, 45)
+	typeTrajectory("training type bands limits the work pool to bands",
+		"bands", []string{"chest", "back", "arms"}, 45)
+	typeTrajectory("training type special limits the work pool to partner-assisted work",
+		"special", []string{"core", "arms", "legs"}, 30)
+
+	t.Run("default mixed type imposes no type constraint", func(t *testing.T) {
+		req := baseRequest()
+		req.WorkExercises = integrationTypePool(t)
+		req.Methodology = &strength
+		req.Muscles = []string{"chest", "back", "legs"}
+		req.Duration = 45
+		req.UserPrompt = "Strength session for chest, back and legs."
+
+		training, _ := run(t, req)
+
+		// unconstrained means the session may mix types, as the
+		// pre-Type baseline did: bodyweight and free weights in one
+		// session. A single-type result would mean the default path
+		// silently constrains the pool.
+		byID := poolByID(req.WorkExercises)
+		types := map[string]bool{}
+		for id := range workExerciseIDs(training) {
+			types[byID[id].Type] = true
+		}
+		if len(types) < 2 {
+			t.Errorf("unconstrained training uses a single training type %v, want the default to mix types", types)
+		}
+	})
+
+	t.Run("plyometric flag limits the work pool to plyometric exercises", func(t *testing.T) {
+		req := baseRequest()
+		req.WorkExercises = filterTypePool(integrationTypePool(t), "", []string{"plyometric"})
+		req.Methodology = &strength
+		req.Muscles = []string{"legs", "glutes", "core"}
+		req.Duration = 30
+		req.Flags = []string{"plyometric"}
+		req.UserPrompt = "Explosive plyometric session for legs, glutes and core."
+
+		training, _ := run(t, req)
+
+		assertWorkExercises(t, training, req.WorkExercises, func(ex model.Exercise) bool {
+			return hasFlag(ex, "plyometric")
+		}, "flag plyometric")
 	})
 }

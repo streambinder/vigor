@@ -840,6 +840,48 @@ abstract class AppLocalizations {
   /// **'Methodology (optional)'**
   String get methodologyOptional;
 
+  /// No description provided for @trainingTypeOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Training type (optional)'**
+  String get trainingTypeOptional;
+
+  /// No description provided for @trainingTypeMixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed'**
+  String get trainingTypeMixed;
+
+  /// No description provided for @trainingTypeFreeWeights.
+  ///
+  /// In en, this message translates to:
+  /// **'Free weights'**
+  String get trainingTypeFreeWeights;
+
+  /// No description provided for @trainingTypeMachinesCables.
+  ///
+  /// In en, this message translates to:
+  /// **'Machines and cables'**
+  String get trainingTypeMachinesCables;
+
+  /// No description provided for @trainingTypeBodyweight.
+  ///
+  /// In en, this message translates to:
+  /// **'Bodyweight'**
+  String get trainingTypeBodyweight;
+
+  /// No description provided for @trainingTypeBands.
+  ///
+  /// In en, this message translates to:
+  /// **'Resistance bands'**
+  String get trainingTypeBands;
+
+  /// No description provided for @trainingTypeSpecial.
+  ///
+  /// In en, this message translates to:
+  /// **'Other / Special'**
+  String get trainingTypeSpecial;
+
   /// No description provided for @methodologyAuto.
   ///
   /// In en, this message translates to:
@@ -2543,6 +2585,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Designing a {methodology} session...'**
   String loadingMsgMethodology(String methodology);
+
+  /// No description provided for @loadingMsgType.
+  ///
+  /// In en, this message translates to:
+  /// **'Training with {type}...'**
+  String loadingMsgType(String type);
 
   /// No description provided for @loadingMsgPartners.
   ///

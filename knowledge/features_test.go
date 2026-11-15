@@ -128,6 +128,74 @@ func TestExercisePatternVocabulary(t *testing.T) {
 	}
 }
 
+// TestExerciseTypeVocabulary guards the Type and Flags tags the
+// retrieval filter and the derivation rely on: every exercise
+// carries exactly one Type from the vocabulary in types.json (never
+// the request-only value mixed) and only Flags from the vocabulary
+// in flags.json. It also guards the split decision: the special
+// bucket stays small enough that no split is needed.
+func TestExerciseTypeVocabulary(t *testing.T) {
+	type vocabEntry struct {
+		ID          string `json:"id"`
+		RequestOnly bool   `json:"request_only"`
+	}
+	loadVocab := func(path string) map[string]vocabEntry {
+		t.Helper()
+		raw, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("read %s: %v", path, err)
+		}
+		var entries []vocabEntry
+		if err := json.Unmarshal(raw, &entries); err != nil {
+			t.Fatalf("unmarshal %s: %v", path, err)
+		}
+		vocab := make(map[string]vocabEntry, len(entries))
+		for _, entry := range entries {
+			vocab[entry.ID] = entry
+		}
+		return vocab
+	}
+	types := loadVocab("features/types.json")
+	flags := loadVocab("features/flags.json")
+
+	type exerciseEntry struct {
+		ID    string   `json:"id"`
+		Type  string   `json:"type"`
+		Flags []string `json:"flags"`
+	}
+	raw, err := os.ReadFile("features/exercises.json")
+	if err != nil {
+		t.Fatalf("read features/exercises.json: %v", err)
+	}
+	var exercises []exerciseEntry
+	if err := json.Unmarshal(raw, &exercises); err != nil {
+		t.Fatalf("unmarshal features/exercises.json: %v", err)
+	}
+	if len(exercises) == 0 {
+		t.Fatal("exercises catalog is empty")
+	}
+	special := 0
+	for _, exercise := range exercises {
+		entry, ok := types[exercise.Type]
+		if !ok {
+			t.Errorf("exercise %s carries unknown type %q", exercise.ID, exercise.Type)
+		} else if entry.RequestOnly {
+			t.Errorf("exercise %s carries the request-only type %q", exercise.ID, exercise.Type)
+		}
+		if exercise.Type == "special" {
+			special++
+		}
+		for _, flag := range exercise.Flags {
+			if _, ok := flags[flag]; !ok {
+				t.Errorf("exercise %s carries unknown flag %q", exercise.ID, flag)
+			}
+		}
+	}
+	if share := float64(special) / float64(len(exercises)); share >= 0.10 {
+		t.Errorf("special exercises are %.0f%% of the catalog, want under 10%%", share*100)
+	}
+}
+
 // TestExerciseAliasCoverage keeps the exercise catalog broadly reachable by
 // non-english movement names, as explicit-program pins resolve through
 // aliases.

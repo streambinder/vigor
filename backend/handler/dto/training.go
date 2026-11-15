@@ -16,6 +16,14 @@ type PostTrainingRequest struct {
 	Methodology        string   `json:"methodology"`
 	Goals              []string `json:"goals"`
 	Muscles            []string `json:"muscles"`
+	// Type is the requested training Type (free_weights,
+	// machines_cables, bodyweight, bands, special, or mixed for no
+	// preference). Empty means mixed. An unknown value is a 400.
+	Type string `json:"type"`
+	// Flags are the requested transversal traits (plyometric,
+	// ballistic, ...). Every requested flag must be present on the
+	// work exercises. An unknown value is a 400.
+	Flags []string `json:"flags"`
 }
 
 // PostTrainingResponse represents the response for POST /training

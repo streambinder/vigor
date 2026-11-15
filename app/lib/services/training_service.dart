@@ -89,6 +89,7 @@ class TrainingService {
     String? methodology,
     List<String>? goals,
     List<String>? muscles,
+    String? type,
     void Function(int attempt)? onRetry,
     void Function(String step)? onStep,
   }) async {
@@ -104,6 +105,7 @@ class TrainingService {
     if (methodology != null && methodology.isNotEmpty) body['methodology'] = methodology;
     if (goals != null && goals.isNotEmpty) body['goals'] = goals;
     if (muscles != null && muscles.isNotEmpty) body['muscles'] = muscles;
+    if (type != null && type.isNotEmpty && type != 'mixed') body['type'] = type;
     AppLogger.debug('[TrainingService] Generating training: ${body.keys.join(', ')}');
 
     const maxRetries = 2;

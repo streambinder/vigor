@@ -48,6 +48,22 @@ func TestTrainingErrorMappingsFakeCoverage(t *testing.T) {
 		[]byte(`{"duration":30,"partners":["`+uuid.NewString()+`"]}`), auth)
 	expectStatus(t, status, http.StatusUnauthorized, body)
 
+	// an unknown training Type maps to 400
+	status, body = doReq(t, app, http.MethodPost, "/training",
+		[]byte(`{"duration":30,"type":"nope"}`), auth)
+	expectStatus(t, status, http.StatusBadRequest, body)
+	if !strings.Contains(string(body), "unknown training type") {
+		t.Fatalf("unknown type body = %s", body)
+	}
+
+	// an unknown training Flag maps to 400
+	status, body = doReq(t, app, http.MethodPost, "/training",
+		[]byte(`{"duration":30,"flags":["nope"]}`), auth)
+	expectStatus(t, status, http.StatusBadRequest, body)
+	if !strings.Contains(string(body), "unknown training flag") {
+		t.Fatalf("unknown flag body = %s", body)
+	}
+
 	// a load fixture that cannot scale maps to 503
 	status, body = doReq(t, app, http.MethodPost, "/training",
 		[]byte(`{"duration":30,"prompt":"STUBFAIL:load-short"}`), auth)

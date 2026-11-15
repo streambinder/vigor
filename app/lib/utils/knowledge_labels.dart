@@ -67,6 +67,20 @@ class KnowledgeLabels {
     };
   }
 
+  // -- training types --
+
+  static String typeLabel(String id, AppLocalizations l10n) {
+    return switch (id) {
+      'mixed' => l10n.trainingTypeMixed,
+      'free_weights' => l10n.trainingTypeFreeWeights,
+      'machines_cables' => l10n.trainingTypeMachinesCables,
+      'bodyweight' => l10n.trainingTypeBodyweight,
+      'bands' => l10n.trainingTypeBands,
+      'special' => l10n.trainingTypeSpecial,
+      _ => _titleCase(id, ' '),
+    };
+  }
+
   // -- equipment --
 
   static String equipmentLabel(String id, AppLocalizations l10n) {

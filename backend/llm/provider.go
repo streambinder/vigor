@@ -100,6 +100,14 @@ type TrainingGenerationRequest struct {
 	AllGoals       []model.Goal // full goal catalog, to resolve derived goal IDs
 	ValidMuscles   []string     // muscle IDs the derivation may output
 	ValidEquipment []string     // equipment IDs the derivation may output
+	// Type is the requested training Type; empty means mixed.
+	Type string
+	// Flags are the requested transversal traits.
+	Flags []string
+	// ValidTypes and ValidFlags are the Type and Flags vocabularies
+	// the derivation may output.
+	ValidTypes []model.ExerciseType
+	ValidFlags []model.ExerciseFlag
 	// Derived caches the derivation across generator retries: the pre-step
 	// fills it on first run, later attempts reuse it without a new LLM call
 	Derived *pipeline.DerivedParams

@@ -31,6 +31,10 @@ class Exercise {
   final bool isMobility;
   @JsonKey(name: 'mode', defaultValue: '')
   final String mode;
+  @JsonKey(name: 'type', defaultValue: '')
+  final String type;
+  @JsonKey(name: 'flags', defaultValue: [])
+  final List<String> flags;
 
   Exercise({
     required this.id,
@@ -45,6 +49,8 @@ class Exercise {
     required this.difficulty,
     required this.isMobility,
     required this.mode,
+    required this.type,
+    required this.flags,
   });
 
   factory Exercise.fromJson(Map<String, dynamic> json) => _$ExerciseFromJson(json);

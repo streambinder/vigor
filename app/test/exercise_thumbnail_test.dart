@@ -30,6 +30,8 @@ Exercise _exercise({required String id, String reference = ''}) {
     difficulty: 50,
     isMobility: false,
     mode: 'reps',
+    type: 'bodyweight',
+    flags: [],
   );
 }
 

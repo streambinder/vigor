@@ -27,7 +27,7 @@ func TestGenerateTrainingSuccessCoverage(t *testing.T) {
 	// the counter is atomic
 	var progress atomic.Int32
 	training, err := GenerateTraining(context.Background(), userID, 30, nil, "", "",
-		[]string{partnerID.String()}, false, "", nil, nil,
+		[]string{partnerID.String()}, false, "", nil, nil, "", nil,
 		[]byte("raw request"), time.UTC, func(step pipeline.GenerationStep) { progress.Add(1) })
 	if err != nil {
 		t.Fatalf("GenerateTraining: %v", err)
@@ -58,7 +58,7 @@ func TestGenerateTrainingSuccessCoverage(t *testing.T) {
 		gymID.String(), userID.String()).Error; err != nil {
 		t.Fatal(err)
 	}
-	second, err := GenerateTraining(context.Background(), userID, 30, nil, gymID.String(), "", nil, false, "strength", nil, []string{"quads"}, nil, time.UTC, nil)
+	second, err := GenerateTraining(context.Background(), userID, 30, nil, gymID.String(), "", nil, false, "strength", nil, []string{"quads"}, "", nil, nil, time.UTC, nil)
 	if err != nil {
 		t.Fatalf("GenerateTraining gym: %v", err)
 	}
@@ -271,12 +271,12 @@ func TestGenerateTrainingFailureModesCoverage(t *testing.T) {
 
 	// the strategy stage answers garbage: the DAG fails on every
 	// attempt and the error surfaces
-	if _, err := GenerateTraining(context.Background(), fakeDBOwnerID, 30, nil, "", "STUBFAIL:strategy-bad", nil, false, "", nil, nil, nil, time.UTC, nil); err == nil {
+	if _, err := GenerateTraining(context.Background(), fakeDBOwnerID, 30, nil, "", "STUBFAIL:strategy-bad", nil, false, "", nil, nil, "", nil, nil, time.UTC, nil); err == nil {
 		t.Fatalf("strategy failure must surface: %v", err)
 	}
 	// the load stage answers a stub-sized session that cannot scale
 	// to the requested duration: validation rejects every attempt
-	if _, err := GenerateTraining(context.Background(), fakeDBOwnerID, 30, nil, "", "STUBFAIL:load-short", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrMalformedTraining) {
+	if _, err := GenerateTraining(context.Background(), fakeDBOwnerID, 30, nil, "", "STUBFAIL:load-short", nil, false, "", nil, nil, "", nil, nil, time.UTC, nil); !errors.Is(err, ErrMalformedTraining) {
 		t.Fatalf("load-short err = %v", err)
 	}
 }
@@ -294,7 +294,7 @@ func TestGenerateTrainingFailurePersistsTrajectories(t *testing.T) {
 
 	// the strategy stage answers garbage: the DAG fails on every attempt
 	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", "STUBFAIL:strategy-bad",
-		nil, false, "", nil, nil, []byte("raw request"), time.UTC, nil); err == nil {
+		nil, false, "", nil, nil, "", nil, []byte("raw request"), time.UTC, nil); err == nil {
 		t.Fatal("strategy failure must surface")
 	}
 
@@ -369,7 +369,7 @@ func TestGenerateTrainingCancelled(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	if _, err := GenerateTraining(ctx, userID, 30, nil, "", "",
-		nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrGenerationCancelled) {
+		nil, false, "", nil, nil, "", nil, nil, time.UTC, nil); !errors.Is(err, ErrGenerationCancelled) {
 		t.Fatalf("cancelled generation err = %v, want ErrGenerationCancelled", err)
 	}
 }

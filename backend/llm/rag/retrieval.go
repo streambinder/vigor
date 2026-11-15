@@ -3,6 +3,7 @@ package rag
 import (
 	"fmt"
 	"math/rand"
+	"sort"
 	"strings"
 
 	"github.com/lib/pq"
@@ -12,6 +13,7 @@ import (
 	"github.com/streambinder/vigor/llm/embedding"
 	"github.com/streambinder/vigor/model"
 	"github.com/streambinder/vigor/util"
+	"gorm.io/gorm"
 )
 
 const (
@@ -104,6 +106,8 @@ func RetrieveWorkExercises(
 	proficiencyMargin float64,
 	methodology *model.Methodology,
 	muscles []string,
+	exerciseType string,
+	flags []string,
 	prompt string,
 	favoriteIDs []string,
 	excludeIDs []string,
@@ -137,7 +141,100 @@ func RetrieveWorkExercises(
 		}
 	}
 
-	return retrieveBalancedByMuscle(exerciseEmbedding, keywordQuery, methodology, equipment, targetMuscles, work, proficiencies, proficiencyMargin, favoriteIDs, excludeIDs, calibrationGaps, durationMin), nil
+	return retrieveBalancedByMuscle(exerciseEmbedding, keywordQuery, methodology, equipment, targetMuscles, exerciseType, flags, work, proficiencies, proficiencyMargin, favoriteIDs, excludeIDs, calibrationGaps, durationMin), nil
+}
+
+// servableWith scopes a query on exercises to the ones servable with
+// the given equipment: an exercise passes when it needs no equipment
+// or every piece it needs is in the list. It is the one predicate
+// both the work pool and the Type availability share.
+func servableWith(equipment []string) func(*gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		if len(equipment) > 0 {
+			return db.Where(`(
+				NOT EXISTS (
+					SELECT 1 FROM exercise_equipment
+					WHERE exercise_equipment.exercise_id = exercises.id
+				)
+				OR
+				NOT EXISTS (
+					SELECT 1 FROM exercise_equipment ee
+					WHERE ee.exercise_id = exercises.id
+					AND ee.equipment_id NOT IN ?
+				)
+			)`, equipment)
+		}
+		return db.Where(`NOT EXISTS (
+			SELECT 1 FROM exercise_equipment
+			WHERE exercise_equipment.exercise_id = exercises.id
+		)`)
+	}
+}
+
+// TypeAvailability is one training Type with its count of servable
+// work-pool exercises.
+type TypeAvailability struct {
+	ID    string `json:"id"`
+	Count int    `json:"count"`
+}
+
+// AvailableExerciseTypes lists the training Types with their counts
+// of servable work-pool exercises, in vocabulary order (free weights,
+// machines and cables, bodyweight, bands, special). A Type is
+// available when its count is above zero; the caller decides the
+// mobility scope (the mobility methodology's work pool is mobility
+// exercises, every other methodology's is the rest). The counts use
+// the same equipment predicate as the work pool, so a Type listed
+// here is one the retrieval can actually draw from.
+func AvailableExerciseTypes(equipment []string, mobilityOnly bool) ([]TypeAvailability, error) {
+	var rows []struct {
+		Type  string
+		Count int
+	}
+	err := database.Knowledge.
+		Table("exercises").
+		Select(`"exercises"."type", COUNT(*) as count`).
+		Where(`"exercises"."is_mobility" = ?`, mobilityOnly).
+		Scopes(servableWith(equipment)).
+		Group(`"exercises"."type"`).
+		Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+	counts := make(map[string]int, len(rows))
+	for _, row := range rows {
+		counts[row.Type] = row.Count
+	}
+	// vocabulary order, matching knowledge/features/types.json; a
+	// Type outside the known order sorts last, alphabetically.
+	order := []string{"free_weights", "machines_cables", "bodyweight", "bands", "special"}
+	var available []TypeAvailability
+	for _, id := range order {
+		if count, ok := counts[id]; ok && count > 0 {
+			available = append(available, TypeAvailability{ID: id, Count: count})
+		}
+	}
+	var extra []string
+	for id, count := range counts {
+		if count <= 0 {
+			continue
+		}
+		known := false
+		for _, orderedID := range order {
+			if orderedID == id {
+				known = true
+				break
+			}
+		}
+		if !known {
+			extra = append(extra, id)
+		}
+	}
+	sort.Strings(extra)
+	for _, id := range extra {
+		available = append(available, TypeAvailability{ID: id, Count: counts[id]})
+	}
+	return available, nil
 }
 
 // explicitProgramMovementNeighbors caps the semantic neighbors each pinned
@@ -177,7 +274,7 @@ func RetrieveExplicitProgramExercises(movements []string) (pool []model.Exercise
 		pool = append(pool, ex)
 	}
 	for i, vector := range vectors {
-		neighbors, err := retrieveBySimilarity(vector, movements[i], nil, nil, model.MethodologyWork{}, nil, explicitProgramMovementNeighbors, true)
+		neighbors, err := retrieveBySimilarity(vector, movements[i], nil, nil, "", nil, model.MethodologyWork{}, nil, explicitProgramMovementNeighbors, true)
 		if err != nil {
 			log.Warn().Err(err).Str("movement", movements[i]).Msg("explicit program: neighbor retrieval failed")
 			continue
@@ -387,6 +484,8 @@ func retrieveBalancedByMuscle(
 	methodology *model.Methodology,
 	equipment []string,
 	muscles []string,
+	exerciseType string,
+	flags []string,
 	work model.MethodologyWork,
 	proficiencies map[string]float64,
 	proficiencyMargin float64,
@@ -413,7 +512,7 @@ func retrieveBalancedByMuscle(
 	var buckets [][]model.Exercise
 
 	for _, muscle := range muscles {
-		candidates, err := retrieveBySimilarity(exerciseEmbedding, keywordQuery, equipment, []string{muscle}, work, excludeIDs, maxWork, false)
+		candidates, err := retrieveBySimilarity(exerciseEmbedding, keywordQuery, equipment, []string{muscle}, exerciseType, flags, work, excludeIDs, maxWork, false)
 		if err != nil {
 			log.Warn().Err(err).Str("muscle", muscle).Msg("failed to retrieve exercises for muscle group")
 			continue
@@ -511,7 +610,7 @@ func filterByProficiencyPerMuscle(exercises []model.Exercise, proficiencies map[
 // retrieveBySimilarity performs hybrid search combining embedding cosine similarity
 // with full-text keyword relevance. When keywordQuery is non-empty, scores are fused
 // (0.7 vector + 0.3 keyword) to surface both semantically and lexically relevant exercises.
-func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equipment []string, muscles []string, work model.MethodologyWork, excludeIDs []string, maxWork int, unfiltered bool) ([]model.Exercise, error) {
+func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equipment []string, muscles []string, exerciseType string, flags []string, work model.MethodologyWork, excludeIDs []string, maxWork int, unfiltered bool) ([]model.Exercise, error) {
 	var results []struct {
 		ExerciseID string
 		Text       string
@@ -560,25 +659,19 @@ func retrieveBySimilarity(exerciseEmbedding []float32, keywordQuery string, equi
 			query = query.Where("exercises.is_mobility = ?", false)
 		}
 
-		// filter by user equipment
-		if len(equipment) > 0 {
-			query = query.Where(`(
-				NOT EXISTS (
-					SELECT 1 FROM exercise_equipment
-					WHERE exercise_equipment.exercise_id = exercises.id
-				)
-				OR
-				NOT EXISTS (
-					SELECT 1 FROM exercise_equipment ee
-					WHERE ee.exercise_id = exercises.id
-					AND ee.equipment_id NOT IN ?
-				)
-			)`, equipment)
-		} else {
-			query = query.Where(`NOT EXISTS (
-				SELECT 1 FROM exercise_equipment
-				WHERE exercise_equipment.exercise_id = exercises.id
-			)`)
+		// filter by user equipment, through the one predicate the
+		// work pool and the Type availability share
+		query = query.Scopes(servableWith(equipment))
+
+		// filter by requested training Type and Flags: the Type
+		// narrows the pool to one modality, every requested Flag
+		// must be present on the exercise. An empty Type means
+		// mixed: no Type filter.
+		if exerciseType != "" && exerciseType != "mixed" {
+			query = query.Where(`"exercises"."type" = ?`, exerciseType)
+		}
+		if len(flags) > 0 {
+			query = query.Where(`"exercises"."flags" @> ?`, pq.Array(flags))
 		}
 
 		// filter by target muscles if specified (primary muscle only - first element)

@@ -202,6 +202,10 @@ func exerciseAnnotations(ex model.Exercise, recentSet map[string]bool) string {
 	} else if ex.Mode == "reps" {
 		parts = append(parts, "reps-only")
 	}
+	if ex.Type != "" {
+		parts = append(parts, "type:"+ex.Type)
+	}
+	parts = append(parts, ex.Flags...)
 	if recentSet[ex.ID] {
 		parts = append(parts, "recent")
 	}

@@ -386,6 +386,27 @@ class AppLocalizationsJa extends AppLocalizations {
   String get methodologyOptional => 'メソッド（任意）';
 
   @override
+  String get trainingTypeOptional => 'トレーニングタイプ（任意）';
+
+  @override
+  String get trainingTypeMixed => 'ミックス';
+
+  @override
+  String get trainingTypeFreeWeights => 'フリーウェイト';
+
+  @override
+  String get trainingTypeMachinesCables => 'マシンとケーブル';
+
+  @override
+  String get trainingTypeBodyweight => '自重';
+
+  @override
+  String get trainingTypeBands => 'レジスタンスバンド';
+
+  @override
+  String get trainingTypeSpecial => 'その他 / 特殊';
+
+  @override
   String get methodologyAuto => '自動';
 
   @override
@@ -1290,6 +1311,11 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String loadingMsgMethodology(String methodology) {
     return '$methodologyセッションを設計中...';
+  }
+
+  @override
+  String loadingMsgType(String type) {
+    return '$typeでトレーニング中…';
   }
 
   @override
