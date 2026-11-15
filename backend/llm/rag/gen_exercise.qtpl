@@ -8,6 +8,8 @@
 
 {%s exercise.Name %}.
 {% if len(exercise.Equipment) > 0 %}Equipment: {%s strings.Join(exercise.Equipment, ", ") %}.{% endif %}
+Type: {%s exercise.Type %}.
+{% if len(exercise.Flags) > 0 %}Flags: {%s strings.Join(exercise.Flags, ", ") %}.{% endif %}
 Muscles: {%s strings.Join(exercise.Muscles, ", ") %}.
 {% if len(exercise.Instructions) > 0 %}{% for i, instruction := range exercise.Instructions %}{%d i+1 %}. {%s instruction %} {% endfor %}{% endif %}
 

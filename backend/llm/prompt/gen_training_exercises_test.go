@@ -8,24 +8,46 @@ import (
 )
 
 func TestNodeExercisesSystemExplicitPins(t *testing.T) {
-	out := NodeExercisesSystem(false, 5, 8, true, "pyramid 10-1")
+	out := NodeExercisesSystem(false, 5, 8, true, "pyramid 10-1", "", nil)
 	if !strings.Contains(out, "never swap one for a different exercise for recency or variety") {
 		t.Fatalf("explicit program missing pin-mandatory rule:\n%s", out)
 	}
 
-	out = NodeExercisesSystem(false, 5, 8, false, "")
+	out = NodeExercisesSystem(false, 5, 8, false, "", "", nil)
 	if strings.Contains(out, "never swap one for a different exercise") {
 		t.Fatalf("explicit pin rule leaked into non-explicit prompt:\n%s", out)
 	}
 }
 
+func TestNodeExercisesSystemTypeRule(t *testing.T) {
+	out := NodeExercisesSystem(false, 5, 8, false, "", "free_weights", []string{"plyometric"})
+	for _, want := range []string{
+		"The requested training type is free_weights",
+		"the work pool already contains only free_weights exercises",
+		"The requested flags are plyometric",
+		"the work pool already contains only exercises carrying them",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("type rule missing %q in:\n%s", want, out)
+		}
+	}
+
+	out = NodeExercisesSystem(false, 5, 8, false, "", "mixed", nil)
+	if strings.Contains(out, "The requested training type is") {
+		t.Errorf("mixed type leaked a reinforcement line:\n%s", out)
+	}
+	if strings.Contains(out, "The requested flags are") {
+		t.Errorf("empty flags leaked a reinforcement line:\n%s", out)
+	}
+}
+
 func TestNodeExercisesSystemSkipWarmupCooldown(t *testing.T) {
-	out := NodeExercisesSystem(true, 5, 8, false, "")
+	out := NodeExercisesSystem(true, 5, 8, false, "", "", nil)
 	if !strings.Contains(out, `every exercise must have phase "work"`) {
 		t.Fatalf("skip_warmup_cooldown missing work-only rule:\n%s", out)
 	}
 
-	out = NodeExercisesSystem(false, 5, 8, false, "")
+	out = NodeExercisesSystem(false, 5, 8, false, "", "", nil)
 	if strings.Contains(out, `every exercise must have phase "work"`) {
 		t.Fatalf("work-only rule leaked into warmup/cooldown prompt:\n%s", out)
 	}
@@ -57,6 +79,7 @@ func TestNodeExercisesUserCandidateMetadata(t *testing.T) {
 		ID: "barbell-bench-press", Muscles: []string{"chest"},
 		Equipment: []string{"barbell", "bench"}, Difficulty: 55,
 		Cues: []string{"touch chest", "pause briefly"}, Mode: "reps",
+		Type: "free_weights", Flags: []string{"unilateral"},
 	}
 	partial := model.Exercise{ID: "push-up", Muscles: []string{"chest"}, Difficulty: 30}
 	bare := model.Exercise{ID: "burpee", Muscles: []string{"full body"}}
@@ -78,7 +101,7 @@ func TestNodeExercisesUserCandidateMetadata(t *testing.T) {
 	)
 
 	for _, want := range []string{
-		"barbell-bench-press (weighted, reps-only · d55 · barbell, bench · cues: touch chest; pause briefly)",
+		"barbell-bench-press (weighted, reps-only, type:free_weights, unilateral · d55 · barbell, bench · cues: touch chest; pause briefly)",
 		"push-up (d30)",
 		"arm-circles (shoulders · d10 · cues: small circles)",
 		"chest-stretch (chest · d5)",
@@ -93,7 +116,7 @@ func TestNodeExercisesUserCandidateMetadata(t *testing.T) {
 }
 
 func TestNodeExercisesSystemMetadataRule(t *testing.T) {
-	out := NodeExercisesSystem(false, 5, 8, false, "")
+	out := NodeExercisesSystem(false, 5, 8, false, "", "", nil)
 	if !strings.Contains(out, "a d-prefixed difficulty (d0 easiest, d100 hardest)") {
 		t.Fatalf("metadata line missing from exercises system prompt:\n%s", out)
 	}
@@ -103,7 +126,7 @@ func TestNodeExercisesSystemMetadataRule(t *testing.T) {
 }
 
 func TestNodeExercisesSystemFactsRule(t *testing.T) {
-	out := NodeExercisesSystem(false, 3, 4, false, "")
+	out := NodeExercisesSystem(false, 3, 4, false, "", "", nil)
 	if !strings.Contains(out, "push-to-pull balance fact governs the mix") {
 		t.Fatalf("facts rule missing from exercises system prompt: %q", out)
 	}

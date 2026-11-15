@@ -40,6 +40,17 @@ type Exercise struct {
 	// "either": works either way (e.g. squats prescribed as reps or as time-under-tension) — default
 	Mode string `gorm:"type:varchar(16);not null;default:'either'" json:"mode"`
 
+	// Type is the exercise modality: the resistance source the
+	// exercise trains with (free_weights, machines_cables,
+	// bodyweight, bands, special). Every catalog exercise carries
+	// exactly one; the request-only value mixed never appears here.
+	Type string `gorm:"type:varchar(32);not null" json:"type"`
+
+	// Flags are the transversal traits of the exercise (plyometric,
+	// ballistic, isometric, ...). Zero or more; the vocabulary lives
+	// in knowledge/features/flags.json.
+	Flags pq.StringArray `gorm:"type:text[]" json:"flags"`
+
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
 

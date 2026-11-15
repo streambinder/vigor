@@ -4,10 +4,12 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/streambinder/vigor/database"
 	"github.com/streambinder/vigor/handler/middleware"
+	"github.com/streambinder/vigor/llm/rag"
 	"gorm.io/gorm"
 )
 
@@ -68,8 +70,33 @@ type exerciseModelMeta struct {
 func initExerciseAnimations(app *fiber.App) {
 	app.Get("/exercises/:id/animation", middleware.Authorized(), getExerciseAnimation)
 	app.Get("/exercises/animated", middleware.Authorized(), getAnimatedExercises)
+	app.Get("/exercises/available-types", getAvailableExerciseTypes)
 	app.Get("/exercises/models", middleware.Authorized(), getExerciseModels)
 	app.Get("/exercises/models/:id", middleware.Authorized(), getExerciseModel)
+}
+
+// getAvailableExerciseTypes lists the training Types servable with
+// the equipment the caller passes (?equipment=a&equipment=b, or a
+// comma-separated list), with their work-pool exercise counts, in
+// vocabulary order. The app shows only the listed Types in its Type
+// selector; an empty equipment list means bodyweight only.
+func getAvailableExerciseTypes(c *fiber.Ctx) error {
+	var equipment []string
+	for _, raw := range c.Context().QueryArgs().PeekMulti("equipment") {
+		for _, id := range strings.Split(string(raw), ",") {
+			if id = strings.TrimSpace(id); id != "" {
+				equipment = append(equipment, id)
+			}
+		}
+	}
+	types, err := rag.AvailableExerciseTypes(equipment, false)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	if types == nil {
+		types = []rag.TypeAvailability{}
+	}
+	return c.JSON(fiber.Map{"types": types})
 }
 
 func getExerciseAnimation(c *fiber.Ctx) error {

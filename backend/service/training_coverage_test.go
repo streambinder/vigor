@@ -287,28 +287,28 @@ func TestCalibrationGatesCoverage(t *testing.T) {
 	if !isCalibrating(map[string]int{}, []model.Muscle{{ID: "quads"}}) {
 		t.Fatal("empty calibration must be calibrating")
 	}
-	if !calibrationGenerationAllowed(false, nil, "", "", "", nil, nil, false) {
+	if !calibrationGenerationAllowed(false, nil, "", "", "", nil, nil, false, "", nil) {
 		t.Fatal("pure auto generation must be allowed")
 	}
-	if calibrationGenerationAllowed(true, nil, "", "", "", nil, nil, false) {
+	if calibrationGenerationAllowed(true, nil, "", "", "", nil, nil, false, "", nil) {
 		t.Fatal("analyze must be blocked")
 	}
-	if calibrationGenerationAllowed(false, nil, "", "", "strength", nil, nil, false) {
+	if calibrationGenerationAllowed(false, nil, "", "", "strength", nil, nil, false, "", nil) {
 		t.Fatal("methodology must be blocked")
 	}
-	if calibrationGenerationAllowed(false, nil, "", "prompt", "", nil, nil, false) {
+	if calibrationGenerationAllowed(false, nil, "", "prompt", "", nil, nil, false, "", nil) {
 		t.Fatal("prompt must be blocked")
 	}
-	if calibrationGenerationAllowed(false, nil, "", "", "", []string{"g"}, nil, false) {
+	if calibrationGenerationAllowed(false, nil, "", "", "", []string{"g"}, nil, false, "", nil) {
 		t.Fatal("goals must be blocked")
 	}
-	if calibrationGenerationAllowed(false, nil, "", "", "", nil, []string{"quads"}, false) {
+	if calibrationGenerationAllowed(false, nil, "", "", "", nil, []string{"quads"}, false, "", nil) {
 		t.Fatal("muscles must be blocked")
 	}
-	if calibrationGenerationAllowed(false, nil, "", "", "", nil, nil, true) {
+	if calibrationGenerationAllowed(false, nil, "", "", "", nil, nil, true, "", nil) {
 		t.Fatal("skip warmup must be blocked")
 	}
-	if !calibrationGenerationAllowed(false, []string{"dumbbell"}, "gym-id", "", "", nil, nil, false) {
+	if !calibrationGenerationAllowed(false, []string{"dumbbell"}, "gym-id", "", "", nil, nil, false, "", nil) {
 		t.Fatal("gym and equipment tuning must be allowed")
 	}
 	_ = db
@@ -319,44 +319,44 @@ func TestGenerateTrainingValidationCoverage(t *testing.T) {
 	userID := seedCoverageUser(t, db, "gen@example.com", `{"goals":["build-strength"]}`)
 
 	// fresh users are calibrating: anything beyond Auto is rejected
-	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", "a prompt", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrCalibrationAutoOnly) {
+	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", "a prompt", nil, false, "", nil, nil, "", nil, nil, time.UTC, nil); !errors.Is(err, ErrCalibrationAutoOnly) {
 		t.Fatalf("calibration gate err = %v", err)
 	}
-	if _, err := GenerateTraining(context.Background(), userID, 0, nil, "", "", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrDurationRequired) {
+	if _, err := GenerateTraining(context.Background(), userID, 0, nil, "", "", nil, false, "", nil, nil, "", nil, nil, time.UTC, nil); !errors.Is(err, ErrDurationRequired) {
 		t.Fatalf("duration required err = %v", err)
 	}
-	if _, err := GenerateTraining(context.Background(), userID, 5, nil, "", "", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrDurationOutOfRange) {
+	if _, err := GenerateTraining(context.Background(), userID, 5, nil, "", "", nil, false, "", nil, nil, "", nil, nil, time.UTC, nil); !errors.Is(err, ErrDurationOutOfRange) {
 		t.Fatalf("duration range err = %v", err)
 	}
-	if _, err := GenerateTraining(context.Background(), userID, 500, nil, "", "", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrDurationOutOfRange) {
+	if _, err := GenerateTraining(context.Background(), userID, 500, nil, "", "", nil, false, "", nil, nil, "", nil, nil, time.UTC, nil); !errors.Is(err, ErrDurationOutOfRange) {
 		t.Fatalf("duration range high err = %v", err)
 	}
 	longPrompt := make([]byte, maxPromptLength+1)
 	for i := range longPrompt {
 		longPrompt[i] = 'x'
 	}
-	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", string(longPrompt), nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrCalibrationAutoOnly) {
+	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", string(longPrompt), nil, false, "", nil, nil, "", nil, nil, time.UTC, nil); !errors.Is(err, ErrCalibrationAutoOnly) {
 		// calibration rejects the analyze request before the length check
 		t.Fatalf("long prompt during calibration err = %v", err)
 	}
-	if _, err := GenerateTraining(context.Background(), uuid.New(), 30, nil, "", "", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrUserNotFound) {
+	if _, err := GenerateTraining(context.Background(), uuid.New(), 30, nil, "", "", nil, false, "", nil, nil, "", nil, nil, time.UTC, nil); !errors.Is(err, ErrUserNotFound) {
 		t.Fatalf("unknown user err = %v", err)
 	}
-	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", "", []string{"not-a-uuid"}, false, "", nil, nil, nil, time.UTC, nil); err == nil {
+	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", "", []string{"not-a-uuid"}, false, "", nil, nil, "", nil, nil, time.UTC, nil); err == nil {
 		t.Fatal("bad partner id must fail")
 	}
-	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", "", []string{uuid.NewString()}, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrUserNotFound) {
+	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "", "", []string{uuid.NewString()}, false, "", nil, nil, "", nil, nil, time.UTC, nil); !errors.Is(err, ErrUserNotFound) {
 		t.Fatalf("missing partner err = %v", err)
 	}
-	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "not-a-uuid", "", nil, false, "", nil, nil, nil, time.UTC, nil); err == nil {
+	if _, err := GenerateTraining(context.Background(), userID, 30, nil, "not-a-uuid", "", nil, false, "", nil, nil, "", nil, nil, time.UTC, nil); err == nil {
 		t.Fatal("bad gym id must fail")
 	}
-	if _, err := GenerateTraining(context.Background(), userID, 30, nil, uuid.NewString(), "", nil, false, "", nil, nil, nil, time.UTC, nil); !errors.Is(err, ErrInvalidGym) {
+	if _, err := GenerateTraining(context.Background(), userID, 30, nil, uuid.NewString(), "", nil, false, "", nil, nil, "", nil, nil, time.UTC, nil); !errors.Is(err, ErrInvalidGym) {
 		t.Fatalf("missing gym err = %v", err)
 	}
 	// with sqlite knowledge the pipeline reaches fact retrieval, whose
 	// pgvector SQL sqlite cannot run: the error surfaces from there
-	_, err := GenerateTraining(context.Background(), userID, 30, nil, "", "", nil, false, "", nil, nil, nil, time.UTC, nil)
+	_, err := GenerateTraining(context.Background(), userID, 30, nil, "", "", nil, false, "", nil, nil, "", nil, nil, time.UTC, nil)
 	if err == nil {
 		t.Fatal("sqlite knowledge must fail at the pgvector retrieval step")
 	}
@@ -373,7 +373,7 @@ func TestGenerateTrainingPromptFetchCoverage(t *testing.T) {
 		}
 	}
 	// the prompt links an unreachable article: the fetch failure is fatal
-	_, err := GenerateTraining(context.Background(), userID, 30, nil, "", "follow https://example.invalid/article please", nil, false, "", nil, nil, nil, time.UTC, nil)
+	_, err := GenerateTraining(context.Background(), userID, 30, nil, "", "follow https://example.invalid/article please", nil, false, "", nil, nil, "", nil, nil, time.UTC, nil)
 	if !errors.Is(err, ErrFetchResource) {
 		t.Fatalf("fetch err = %v", err)
 	}

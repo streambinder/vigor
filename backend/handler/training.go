@@ -59,6 +59,7 @@ func postTrainingJSON(c *fiber.Ctx) error {
 		c.Locals("userID").(uuid.UUID),
 		req.Duration, req.Equipment, req.Gym, req.Prompt, req.Partners,
 		req.SkipWarmupCooldown, req.Methodology, req.Goals, req.Muscles,
+		req.Type, req.Flags,
 		rawRequest, loc, nil,
 	)
 	if err != nil {
@@ -167,6 +168,7 @@ func postTrainingSSE(c *fiber.Ctx) error {
 			ctx, userID,
 			req.Duration, req.Equipment, req.Gym, req.Prompt, req.Partners,
 			req.SkipWarmupCooldown, req.Methodology, req.Goals, req.Muscles,
+			req.Type, req.Flags,
 			rawRequest, loc, onProgress,
 		)
 		stopHeartbeat()
@@ -186,7 +188,14 @@ func postTrainingSSE(c *fiber.Ctx) error {
 
 // trainingError returns the appropriate HTTP error for a generation failure.
 func trainingError(c *fiber.Ctx, err error) error {
+	var typeUnavailable *service.TypeUnavailableError
 	switch {
+	case errors.As(err, &typeUnavailable):
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": typeUnavailable.Error()})
+	case errors.Is(err, service.ErrInvalidExerciseType):
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "unknown training type"})
+	case errors.Is(err, service.ErrInvalidExerciseFlag):
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "unknown training flag"})
 	case errors.Is(err, service.ErrGenerationCancelled):
 		return c.Status(499).JSON(fiber.Map{"error": "generation cancelled"})
 	case errors.Is(err, service.ErrDurationRequired):
@@ -217,7 +226,14 @@ func trainingError(c *fiber.Ctx, err error) error {
 // codes; deterministic client-side rejections carry their own code so a retry
 // is never attempted. Empty means unknown (legacy behavior: retry).
 func trainingErrorCode(err error) string {
+	var typeUnavailable *service.TypeUnavailableError
 	switch {
+	case errors.As(err, &typeUnavailable):
+		return "type_unavailable"
+	case errors.Is(err, service.ErrInvalidExerciseType):
+		return "invalid_exercise_type"
+	case errors.Is(err, service.ErrInvalidExerciseFlag):
+		return "invalid_exercise_flag"
 	case errors.Is(err, service.ErrGenerationCancelled):
 		return "cancelled"
 	case errors.Is(err, service.ErrCalibrationAutoOnly):
@@ -231,7 +247,14 @@ func trainingErrorCode(err error) string {
 
 // trainingErrorMessage extracts a user-facing error message from a generation error.
 func trainingErrorMessage(err error) string {
+	var typeUnavailable *service.TypeUnavailableError
 	switch {
+	case errors.As(err, &typeUnavailable):
+		return typeUnavailable.Error()
+	case errors.Is(err, service.ErrInvalidExerciseType):
+		return "unknown training type"
+	case errors.Is(err, service.ErrInvalidExerciseFlag):
+		return "unknown training flag"
 	case errors.Is(err, service.ErrGenerationCancelled):
 		return "generation cancelled"
 	case errors.Is(err, service.ErrFetchResource):

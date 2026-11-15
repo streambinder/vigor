@@ -256,7 +256,7 @@ func GenTrainingDAG(ctx context.Context, req TrainingGenerationRequest, onProgre
 		req.WorkExercises, req.WarmupExercises, req.CooldownExercises,
 		req.FavoriteExercises, req.RecentExerciseIDs, req.Facts,
 		resolvedMethodology, req.SkipWarmupCooldown, req.Duration,
-		explicitProgram, derivedSummary, req.RetryFeedback,
+		explicitProgram, req.Type, req.Flags, derivedSummary, req.RetryFeedback,
 	)
 	nodes[pipeline.StepSelectExercises] = exerciseStep
 	if err != nil {
@@ -439,6 +439,10 @@ type DeriveRequest struct {
 	AllGoals           []model.Goal
 	ValidMuscles       []string
 	ValidEquipment     []string
+	// ValidTypes and ValidFlags are the Type and Flags vocabularies
+	// the derivation may output.
+	ValidTypes []model.ExerciseType
+	ValidFlags []model.ExerciseFlag
 }
 
 // DeriveFreeTextParams executes the prompt param derivation node: from
@@ -469,6 +473,15 @@ func DeriveFreeTextParams(ctx context.Context, req DeriveRequest) (pipeline.Deri
 		methodologyOptions[m.ID] = m.Name + ": " + truncateText(m.Description, 160)
 	}
 
+	// the Type options carry the formal vocabulary: the English
+	// phrase first, then the Italian one, so the derivation maps
+	// both "only weights" and "solo pesi" to the same ID.
+	typeOptions := make(map[string]string, len(req.ValidTypes)+1)
+	for _, t := range req.ValidTypes {
+		typeOptions[t.ID] = vocabLabel(t.Aliases)
+	}
+	typeOptions["mixed"] = "No specific training type: the request does not point at one in particular"
+
 	questions := make([]dm.Question, 0, 3+len(req.AllGoals)+len(req.ValidMuscles)+len(req.ValidEquipment))
 	questions = append(questions, dm.Question{
 		ID:           "methodology",
@@ -476,6 +489,17 @@ func DeriveFreeTextParams(ctx context.Context, req DeriveRequest) (pipeline.Deri
 		Instructions: "Which training methodology does the request best fit?",
 		Options:      methodologyOptions,
 	})
+	// a choice question needs at least two options: with an empty
+	// vocabulary (only the mixed fallback) the request says nothing
+	// about the Type and the question is skipped.
+	if len(typeOptions) > 1 {
+		questions = append(questions, dm.Question{
+			ID:           "type",
+			Kind:         dm.KindChoice,
+			Instructions: "Which training type does the request best fit? The type is the exercise modality: the resistance source the session trains with.",
+			Options:      typeOptions,
+		})
+	}
 	if len(programs) > 1 {
 		options := make(map[string]string, len(programs))
 		for i, p := range programs {
@@ -513,6 +537,13 @@ func DeriveFreeTextParams(ctx context.Context, req DeriveRequest) (pipeline.Deri
 			Instructions: fmt.Sprintf("The program calls for the equipment %q.", equipment),
 		})
 	}
+	for _, flag := range req.ValidFlags {
+		questions = append(questions, dm.Question{
+			ID:           "flag:" + flag.ID,
+			Kind:         dm.KindNoul,
+			Instructions: fmt.Sprintf("The request calls for %s exercises.", vocabLabel(flag.Aliases)),
+		})
+	}
 	questions = append(questions,
 		dm.Question{
 			ID:           "skip_warmup_cooldown",
@@ -534,6 +565,14 @@ func DeriveFreeTextParams(ctx context.Context, req DeriveRequest) (pipeline.Deri
 	var result pipeline.DerivedParams
 	if choice := answers["methodology"].Choice; choice != "" && choice != "auto" {
 		result.Methodology = choice
+	}
+	if choice := answers["type"].Choice; choice != "" && choice != "mixed" {
+		result.Type = choice
+	}
+	for _, flag := range req.ValidFlags {
+		if decided(answers["flag:"+flag.ID]) {
+			result.Flags = append(result.Flags, flag.ID)
+		}
 	}
 	for _, g := range req.AllGoals {
 		if decided(answers["goal:"+g.ID]) {
@@ -571,7 +610,21 @@ func DeriveFreeTextParams(ctx context.Context, req DeriveRequest) (pipeline.Deri
 	}
 	result.ExplicitProgram = decided(answers["explicit_program"]) && len(result.Movements) > 0
 	result.Summary = deriveSummary(result, req.FreeText, articles)
-	return normalizeDerivedParams(result, req.Methodologies, req.ValidMuscles, validGoals, req.ValidEquipment), step, nil
+	return normalizeDerivedParams(result, req.Methodologies, req.ValidMuscles, validGoals, req.ValidEquipment, req.ValidTypes, req.ValidFlags), step, nil
+}
+
+// vocabLabel renders a vocabulary entry's aliases as a derivation
+// option legend: the English phrase first, then the Italian one in
+// parentheses, so both "only weights" and "solo pesi" map to the
+// same ID.
+func vocabLabel(aliases []string) string {
+	if len(aliases) >= 2 {
+		return aliases[0] + " (" + aliases[1] + ")"
+	}
+	if len(aliases) == 1 {
+		return aliases[0]
+	}
+	return ""
 }
 
 // programOptionID keys the candidate programs of a derive program
@@ -1128,6 +1181,12 @@ func deriveSummary(result pipeline.DerivedParams, freeText string, articles []st
 	if len(result.Equipment) > 0 {
 		lines = append(lines, "Equipment: "+strings.Join(result.Equipment, ", "))
 	}
+	if result.Type != "" {
+		lines = append(lines, "Type: "+result.Type)
+	}
+	if len(result.Flags) > 0 {
+		lines = append(lines, "Flags: "+strings.Join(result.Flags, ", "))
+	}
 	if result.SkipWarmupCooldown {
 		lines = append(lines, "Work only: no warmup or cooldown")
 	}
@@ -1172,6 +1231,12 @@ func applyDerivedParams(req *TrainingGenerationRequest) {
 	if len(derived.Equipment) > 0 && len(req.EquipmentIDs) == 0 {
 		req.EquipmentIDs = derived.Equipment
 	}
+	if derived.Type != "" && derived.Type != "mixed" && req.Type == "" {
+		req.Type = derived.Type
+	}
+	if len(derived.Flags) > 0 && len(req.Flags) == 0 {
+		req.Flags = derived.Flags
+	}
 	if derived.SkipWarmupCooldown {
 		req.SkipWarmupCooldown = true
 	}
@@ -1210,6 +1275,8 @@ func normalizeDerivedParams(
 	derived pipeline.DerivedParams,
 	methodologies []model.Methodology,
 	validMuscles, validGoals, validEquipment []string,
+	validTypes []model.ExerciseType,
+	validFlags []model.ExerciseFlag,
 ) pipeline.DerivedParams {
 	known := false
 	for _, m := range methodologies {
@@ -1222,6 +1289,24 @@ func normalizeDerivedParams(
 	if !known {
 		derived.Methodology = ""
 	}
+
+	knownType := false
+	for _, t := range validTypes {
+		if strings.EqualFold(t.ID, derived.Type) {
+			derived.Type = t.ID
+			knownType = true
+			break
+		}
+	}
+	if !knownType {
+		derived.Type = ""
+	}
+
+	validFlagIDs := make([]string, 0, len(validFlags))
+	for _, f := range validFlags {
+		validFlagIDs = append(validFlagIDs, f.ID)
+	}
+	derived.Flags = util.FilterToValidIDs(derived.Flags, validFlagIDs)
 
 	derived.Muscles = util.FilterToValidIDs(derived.Muscles, validMuscles)
 	derived.Goals = util.FilterToValidIDs(derived.Goals, validGoals)
@@ -2151,12 +2236,14 @@ func runExercisesNode(
 	skipWarmupCooldown bool,
 	duration int,
 	explicitProgram bool,
+	exerciseType string,
+	flags []string,
 	derivedSummary string,
 	retryFeedback string,
 ) (pipeline.ExerciseSelection, model.ModelStep, error) {
 	minExercises, maxExercises := exerciseCountBand(methodology, duration)
 	p := model.LLMPrompt{
-		System: prompt.NodeExercisesSystem(skipWarmupCooldown, minExercises, maxExercises, explicitProgram, derivedSummary),
+		System: prompt.NodeExercisesSystem(skipWarmupCooldown, minExercises, maxExercises, explicitProgram, derivedSummary, exerciseType, flags),
 		User: prompt.NodeExercisesUser(
 			strategy.Methodology,
 			targeting.PrimaryMuscles, targeting.SecondaryMuscles, targeting.AvoidMuscles,

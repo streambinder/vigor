@@ -47,6 +47,8 @@ func main() {
 		&model.EquipmentEmbedding{},
 		&model.Exercise{},
 		&model.ExerciseEmbedding{},
+		&model.ExerciseType{},
+		&model.ExerciseFlag{},
 		&exerciseAnimation{},
 		&exerciseModel{},
 		&exerciseStill{},
@@ -81,6 +83,12 @@ func main() {
 	if err := bootstrapEquipment(gormDB); err != nil {
 		log.Fatalf("Failed to inject equipment: %s", err)
 	}
+	if err := bootstrapExerciseTypes(gormDB); err != nil {
+		log.Fatalf("Failed to inject exercise types: %s", err)
+	}
+	if err := bootstrapExerciseFlags(gormDB); err != nil {
+		log.Fatalf("Failed to inject exercise flags: %s", err)
+	}
 	if err := boostrapExercises(gormDB); err != nil {
 		log.Fatalf("Failed to inject exercises: %s", err)
 	}
@@ -112,6 +120,51 @@ func boostrapExercises(gormDB *gorm.DB) error {
 		return err
 	}
 
+	// The Type and Flags vocabularies are files, like the catalog:
+	// a row carrying an unknown or missing Type, or an unknown
+	// Flag, fails the bootstrap instead of shipping an
+	// unclassifiable exercise. The request-only value mixed is not
+	// a valid exercise Type. The database seed of the same files
+	// runs before this step in main; the check here guards the
+	// catalog at its source.
+	type vocabEntry struct {
+		ID          string `json:"id"`
+		RequestOnly bool   `json:"request_only"`
+	}
+	loadVocab := func(name string) (map[string]vocabEntry, error) {
+		raw, err := os.ReadFile(filepath.Join("features", name))
+		if err != nil {
+			return nil, err
+		}
+		var entries []vocabEntry
+		if err := json.Unmarshal(raw, &entries); err != nil {
+			return nil, err
+		}
+		vocab := make(map[string]vocabEntry, len(entries))
+		for _, entry := range entries {
+			vocab[entry.ID] = entry
+		}
+		return vocab, nil
+	}
+	types, err := loadVocab("types.json")
+	if err != nil {
+		return err
+	}
+	flags, err := loadVocab("flags.json")
+	if err != nil {
+		return err
+	}
+	validTypes := make(map[string]bool, len(types))
+	for _, t := range types {
+		if !t.RequestOnly {
+			validTypes[t.ID] = true
+		}
+	}
+	validFlags := make(map[string]bool, len(flags))
+	for _, f := range flags {
+		validFlags[f.ID] = true
+	}
+
 	// first pass: insert all rows, collect texts for embedding
 	type embeddingEntry struct {
 		exerciseID string
@@ -121,6 +174,14 @@ func boostrapExercises(gormDB *gorm.DB) error {
 	var texts []string
 
 	for _, row := range rows {
+		if !validTypes[row.Type] {
+			return fmt.Errorf("exercise %s carries unknown or missing type %q", row.ID, row.Type)
+		}
+		for _, flag := range row.Flags {
+			if !validFlags[flag] {
+				return fmt.Errorf("exercise %s carries unknown flag %q", row.ID, flag)
+			}
+		}
 		if err := gormDB.Save(&row).Error; err != nil {
 			return err
 		}
@@ -653,6 +714,46 @@ func bootstrapMethodologies(gormDB *gorm.DB) error {
 			return err
 		}
 		if err := gormDB.Save(&methodology).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func bootstrapExerciseTypes(gormDB *gorm.DB) error {
+	bytes, err := os.ReadFile(filepath.Join("features", "types.json"))
+	if err != nil {
+		return err
+	}
+
+	var rows []model.ExerciseType
+	if err := json.Unmarshal(bytes, &rows); err != nil {
+		return err
+	}
+
+	for _, row := range rows {
+		if err := gormDB.Save(&row).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func bootstrapExerciseFlags(gormDB *gorm.DB) error {
+	bytes, err := os.ReadFile(filepath.Join("features", "flags.json"))
+	if err != nil {
+		return err
+	}
+
+	var rows []model.ExerciseFlag
+	if err := json.Unmarshal(bytes, &rows); err != nil {
+		return err
+	}
+
+	for _, row := range rows {
+		if err := gormDB.Save(&row).Error; err != nil {
 			return err
 		}
 	}

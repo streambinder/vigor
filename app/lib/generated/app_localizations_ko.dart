@@ -386,6 +386,27 @@ class AppLocalizationsKo extends AppLocalizations {
   String get methodologyOptional => '방법론 (선택사항)';
 
   @override
+  String get trainingTypeOptional => '운동 유형 (선택 사항)';
+
+  @override
+  String get trainingTypeMixed => '혼합';
+
+  @override
+  String get trainingTypeFreeWeights => '프리 웨이트';
+
+  @override
+  String get trainingTypeMachinesCables => '머신과 케이블';
+
+  @override
+  String get trainingTypeBodyweight => '맨몸';
+
+  @override
+  String get trainingTypeBands => '저항 밴드';
+
+  @override
+  String get trainingTypeSpecial => '기타 / 특수';
+
+  @override
   String get methodologyAuto => '자동';
 
   @override
@@ -1290,6 +1311,11 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String loadingMsgMethodology(String methodology) {
     return '$methodology 세션 설계 중...';
+  }
+
+  @override
+  String loadingMsgType(String type) {
+    return '$type 운동 중…';
   }
 
   @override

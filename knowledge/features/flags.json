@@ -1,0 +1,134 @@
+[
+  {
+    "id": "plyometric",
+    "aliases": [
+      "plyometric",
+      "pliometrico",
+      "pliométrico",
+      "pliometria",
+      "pliométrie",
+      "plyometrisch",
+      "плиометрика",
+      "plyo",
+      "jumps",
+      "salti"
+    ]
+  },
+  {
+    "id": "ballistic",
+    "aliases": [
+      "ballistic",
+      "balistico",
+      "balístico",
+      "balistique",
+      "ballistisch",
+      "баллистический",
+      "throws",
+      "lanci"
+    ]
+  },
+  {
+    "id": "isometric",
+    "aliases": [
+      "isometric",
+      "isometrico",
+      "isométrico",
+      "isométrique",
+      "isometrisch",
+      "изометрический",
+      "holds",
+      "tenute"
+    ]
+  },
+  {
+    "id": "eccentric_emphasis",
+    "aliases": [
+      "eccentric",
+      "eccentrico",
+      "excéntrico",
+      "excentrique",
+      "exzentrisch",
+      "excêntrico",
+      "эксцентрический",
+      "negatives",
+      "negative"
+    ]
+  },
+  {
+    "id": "olympic_weightlifting",
+    "aliases": [
+      "olympic weightlifting",
+      "sollevamento pesi olimpico",
+      "halterofilia olímpica",
+      "haltérophilie olympique",
+      "olympisches Gewichtheben",
+      "levantamento olímpico",
+      "олимпийская тяжёлая атлетика",
+      "clean and jerk",
+      "snatch",
+      "strappo",
+      "slancio"
+    ]
+  },
+  {
+    "id": "bfr",
+    "aliases": [
+      "bfr",
+      "blood flow restriction",
+      "occlusione",
+      "restrizione del flusso sanguigno",
+      "restricción del flujo sanguíneo",
+      "restriction du flux sanguin",
+      "Blutflussrestriktion",
+      "restrição de fluxo sanguíneo",
+      "окклюзия",
+      "occlusion"
+    ]
+  },
+  {
+    "id": "variable_resistance",
+    "aliases": [
+      "variable resistance",
+      "resistenza variabile",
+      "resistencia variable",
+      "résistance variable",
+      "variabler Widerstand",
+      "resistência variável",
+      "переменное сопротивление",
+      "chains",
+      "catene",
+      "accommodating resistance"
+    ]
+  },
+  {
+    "id": "unstable_surface",
+    "aliases": [
+      "unstable surface",
+      "superficie instabile",
+      "superficie inestable",
+      "surface instable",
+      "instabile Oberfläche",
+      "superfície instável",
+      "нестабильная поверхность",
+      "bosu",
+      "stability ball",
+      "palla di stabilità"
+    ]
+  },
+  {
+    "id": "unilateral",
+    "aliases": [
+      "unilateral",
+      "unilaterale",
+      "unilatéral",
+      "einseitig",
+      "односторонний",
+      "single-leg",
+      "single-arm",
+      "una gamba",
+      "un braccio",
+      "one arm",
+      "one leg"
+    ]
+  }
+]

@@ -403,6 +403,27 @@ class AppLocalizationsIt extends AppLocalizations {
   String get methodologyOptional => 'Metodologia (opzionale)';
 
   @override
+  String get trainingTypeOptional => 'Tipo di allenamento (opzionale)';
+
+  @override
+  String get trainingTypeMixed => 'Misto';
+
+  @override
+  String get trainingTypeFreeWeights => 'Pesi liberi';
+
+  @override
+  String get trainingTypeMachinesCables => 'Macchine e cavi';
+
+  @override
+  String get trainingTypeBodyweight => 'Corpo libero';
+
+  @override
+  String get trainingTypeBands => 'Bande elastiche';
+
+  @override
+  String get trainingTypeSpecial => 'Altro / Speciale';
+
+  @override
   String get methodologyAuto => 'Auto';
 
   @override
@@ -1327,6 +1348,11 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String loadingMsgMethodology(String methodology) {
     return 'Progettazione sessione $methodology...';
+  }
+
+  @override
+  String loadingMsgType(String type) {
+    return 'Allenamento con $type...';
   }
 
   @override

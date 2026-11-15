@@ -170,6 +170,13 @@
   "workoutTypeMobility": "Mobility",
   "workoutTypeMobilityDescription": "Improve range of motion and joint health",
   "methodologyOptional": "Methodology (optional)",
+  "trainingTypeOptional": "Training type (optional)",
+  "trainingTypeMixed": "Mixed",
+  "trainingTypeFreeWeights": "Free weights",
+  "trainingTypeMachinesCables": "Machines and cables",
+  "trainingTypeBodyweight": "Bodyweight",
+  "trainingTypeBands": "Resistance bands",
+  "trainingTypeSpecial": "Other / Special",
   "methodologyAuto": "Auto",
   "goalsOptional": "Goals (optional)",
   "musclesOptional": "Muscles (optional)",
@@ -640,9 +647,17 @@
   "loadingMsgFavorites": "Prioritizing your favorite exercises...",
   "loadingMsgConditions": "Adapting for your conditions...",
   "loadingMsgMethodology": "Designing a {methodology} session...",
+  "loadingMsgType": "Training with {type}...",
   "@loadingMsgMethodology": {
     "placeholders": {
       "methodology": {
+        "type": "String"
+      }
+    }
+  },
+  "@loadingMsgType": {
+    "placeholders": {
+      "type": {
         "type": "String"
       }
     }

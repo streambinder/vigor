@@ -341,7 +341,7 @@ func TestSimpleRetrieverErrors(t *testing.T) {
 		t.Error("RetrieveCooldownExercises must surface the muscle listing error")
 	}
 	if _, err := RetrieveWorkExercises(
-		[]model.Profile{{}}, nil, nil, nil, 20, nil, nil, "", nil, nil, nil, 30,
+		[]model.Profile{{}}, nil, nil, nil, 20, nil, nil, "", nil, "", nil, nil, nil, 30,
 	); err == nil {
 		t.Error("RetrieveWorkExercises must surface the muscle listing error")
 	}
@@ -356,7 +356,7 @@ func TestSimilarityRetrievalOnFakePostgres(t *testing.T) {
 		profiles, []string{"build-muscle"}, []string{"barbell"},
 		map[string]float64{"quads": 60}, 25,
 		&model.Methodology{ID: "strength"},
-		[]string{"quads"}, "hard session",
+		[]string{"quads"}, "", nil, "hard session",
 		[]string{"squat"}, nil, nil, 45,
 	)
 	if err != nil || len(work) == 0 {
@@ -396,10 +396,10 @@ func TestSimilarityRetrievalErrors(t *testing.T) {
 	requireEmbeddingStub(t)
 	useKnowledge(t, fakeKnowledge(t, &fakeKnowledgeConnector{failOn: "embeddings"}))
 
-	if _, err := retrieveBySimilarity([]float32{1, 2}, "", nil, []string{"quads"}, model.MethodologyWork{}, nil, 10, false); err == nil {
+	if _, err := retrieveBySimilarity([]float32{1, 2}, "", nil, []string{"quads"}, "", nil, model.MethodologyWork{}, nil, 10, false); err == nil {
 		t.Error("retrieveBySimilarity must surface query errors")
 	}
-	if _, err := retrieveBySimilarity([]float32{1, 2}, "squat quads", []string{"barbell"}, nil, model.MethodologyWork{MobilityOnly: true}, []string{"x"}, 10, false); err == nil {
+	if _, err := retrieveBySimilarity([]float32{1, 2}, "squat quads", []string{"barbell"}, nil, "", nil, model.MethodologyWork{MobilityOnly: true}, []string{"x"}, 10, false); err == nil {
 		t.Error("retrieveBySimilarity with keywords must surface query errors")
 	}
 	if _, err := RetrieveUserFacts([]model.Profile{{}}, []string{"g"}, ""); err == nil {
@@ -414,11 +414,11 @@ func TestSimilarityRetrievalErrors(t *testing.T) {
 	}
 
 	// balanced retrieval tolerates per-muscle failures.
-	got := retrieveBalancedByMuscle([]float32{1}, "", nil, nil, []string{"quads"}, model.MethodologyWork{}, nil, 20, nil, nil, nil, 30)
+	got := retrieveBalancedByMuscle([]float32{1}, "", nil, nil, []string{"quads"}, "", nil, model.MethodologyWork{}, nil, 20, nil, nil, nil, 30)
 	if len(got) != 0 {
 		t.Errorf("retrieveBalancedByMuscle with failing queries = %v", got)
 	}
-	if got := retrieveBalancedByMuscle(nil, "", nil, nil, nil, model.MethodologyWork{}, nil, 20, nil, nil, nil, 30); got != nil {
+	if got := retrieveBalancedByMuscle(nil, "", nil, nil, nil, "", nil, model.MethodologyWork{}, nil, 20, nil, nil, nil, 30); got != nil {
 		t.Errorf("retrieveBalancedByMuscle without muscles = %v", got)
 	}
 }
@@ -433,7 +433,7 @@ func TestWorkExercisesMusclesFromDB(t *testing.T) {
 	// lookup fails and the balanced retrieval degrades to an empty pool
 	// with no error.
 	exercises, err := RetrieveWorkExercises(
-		[]model.Profile{{}}, nil, nil, nil, 20, nil, nil, "", nil, nil, nil, 30,
+		[]model.Profile{{}}, nil, nil, nil, 20, nil, nil, "", nil, "", nil, nil, nil, 30,
 	)
 	if err != nil || len(exercises) != 0 {
 		t.Errorf("RetrieveWorkExercises on sqlite = %d, %v", len(exercises), err)

@@ -87,6 +87,7 @@ func TestCalibrationGenerationAllowed(t *testing.T) {
 			got := calibrationGenerationAllowed(
 				tt.analyze, tt.equipment, tt.gymID, tt.prompt,
 				tt.methodology, tt.goals, tt.muscles, tt.skipWarmupCooldown,
+				"", nil,
 			)
 			if got != tt.want {
 				t.Errorf("calibrationGenerationAllowed() = %v, want %v", got, tt.want)

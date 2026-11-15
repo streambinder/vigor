@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../design/tokens.dart';
 import '../generated/app_localizations.dart';
+import '../models/available_exercise_type.dart';
 import '../models/flow_session.dart';
 import '../models/gym.dart';
 import '../models/profile_data.dart' as profile_models;
@@ -65,6 +66,8 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   List<String> _availableMuscles = [];
   final Set<String> _selectedMuscles = {};
   List<String> _availableMethodologies = [];
+  String? _type;
+  List<AvailableExerciseType> _availableTypes = [];
   bool _advancedExpanded = false;
   List<int>? _recommendedDurationRange;
   late bool _useRecommendedDuration;
@@ -99,6 +102,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     _loadGoals();
     _loadMuscles();
     _loadMethodologies();
+    _loadAvailableTypes();
     _loadRecommendedDuration();
     _isCalibrating =
         context.read<ServiceLocator>().isCalibratingNotifier.value;
@@ -114,6 +118,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
     _selectedGym = null;
     _equipment = [];
     _methodology = null;
+    _type = null;
     _selectedGoals.clear();
     _selectedMuscles.clear();
     _promptController.clear();
@@ -180,6 +185,35 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       setState(() {
         _availableMethodologies = response.data!;
       });
+    }
+  }
+
+  Future<void> _loadAvailableTypes() async {
+    final gymService = context.read<ServiceLocator>().gymService;
+    final response = await gymService.getAvailableTypes(_currentEquipment());
+    if (!mounted) return;
+    if (response.isSuccess && response.data != null) {
+      setState(() {
+        _availableTypes = response.data!;
+        // a previously selected Type may no longer be servable with
+        // the current equipment: fall back to mixed
+        if (_type != null && !_availableTypes.any((t) => t.id == _type)) {
+          _type = null;
+        }
+      });
+    }
+  }
+
+  /// the equipment the availability lookup runs on: the selected
+  /// gym's equipment, the custom list, or nothing for bodyweight.
+  List<String> _currentEquipment() {
+    switch (_equipmentMode) {
+      case EquipmentMode.bodyweight:
+        return const [];
+      case EquipmentMode.gym:
+        return _selectedGym?.equipment ?? const [];
+      case EquipmentMode.custom:
+        return _equipment;
     }
   }
 
@@ -275,6 +309,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
         l10n.loadingMsgMethodology(
           KnowledgeLabels.methodologyLabel(_methodology!, l10n),
         ),
+      );
+    }
+    if (_type != null) {
+      messages.add(
+        l10n.loadingMsgType(KnowledgeLabels.typeLabel(_type!, l10n)),
       );
     }
     if (_partners.isNotEmpty) messages.add(l10n.loadingMsgPartners);
@@ -441,6 +480,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
                   setState(() {
                     _equipmentMode = selected.first;
                   });
+                  _loadAvailableTypes();
                 },
                 showSelectedIcon: false,
               ),
@@ -474,9 +514,12 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       ),
       selected: isSelected,
       selectedColor: VigorColors.indigo,
-      onSelected: (_) => setState(() {
-        _equipmentMode = mode;
-      }),
+      onSelected: (_) {
+        setState(() {
+          _equipmentMode = mode;
+        });
+        _loadAvailableTypes();
+      },
       showCheckmark: false,
     );
   }
@@ -545,6 +588,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
             setState(() {
               _selectedGym = value;
             });
+            _loadAvailableTypes();
             // persist the selected gym as default
             if (value != null) {
               context.read<PreferencesService>().setDefaultGymId(value.id);
@@ -558,7 +602,10 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
   Widget _buildCustomEquipmentInput() {
     return EquipmentSelector(
       selected: _equipment,
-      onChanged: (updated) => setState(() => _equipment = updated),
+      onChanged: (updated) {
+        setState(() => _equipment = updated);
+        _loadAvailableTypes();
+      },
     );
   }
 
@@ -667,6 +714,51 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTypeSection() {
+    final l10n = AppLocalizations.of(context);
+    if (_availableTypes.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.trainingTypeOptional,
+          style: VigorTypography.caption.copyWith(
+            color: VigorColors.textSecondary(context),
+          ),
+        ),
+        const SizedBox(height: VigorSpacing.sm),
+        Wrap(
+          spacing: VigorSpacing.sm,
+          runSpacing: VigorSpacing.sm,
+          children: [
+            _typeChip('mixed', _type == null, l10n),
+            for (final type in _availableTypes)
+              _typeChip(type.id, _type == type.id, l10n),
+          ],
+        ),
+      ],
+    );
+  }
+
+  ChoiceChip _typeChip(String type, bool isSelected, AppLocalizations l10n) {
+    return ChoiceChip(
+      label: Text(
+        KnowledgeLabels.typeLabel(type, l10n),
+        style: VigorTypography.caption.copyWith(
+          color: isSelected ? Colors.white : VigorColors.textPrimary(context),
+        ),
+      ),
+      selected: isSelected,
+      selectedColor: VigorColors.indigo,
+      onSelected: (_) => setState(() {
+        _type = (type == 'mixed' || isSelected) ? null : type;
+      }),
+      showCheckmark: false,
     );
   }
 
@@ -929,6 +1021,11 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
           // Methodology selection
           _buildMethodologySection(),
           if (_availableMethodologies.isNotEmpty)
+            const SizedBox(height: VigorSpacing.md),
+
+          // Training type selection
+          _buildTypeSection(),
+          if (_availableTypes.isNotEmpty)
             const SizedBox(height: VigorSpacing.md),
 
           // Goals selection
@@ -1241,6 +1338,7 @@ class _TrainingGenerationModalState extends State<TrainingGenerationModal> {
       muscles: _isCalibrating
           ? null
           : (_selectedMuscles.isEmpty ? null : _selectedMuscles.toList()),
+      type: _isCalibrating ? null : _type,
       onStep: _stepHandler(),
       onRetry: _retryHandler(),
     );

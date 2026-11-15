@@ -41,7 +41,14 @@ type DerivedParams struct {
 	Muscles            []string `json:"muscles"`
 	Equipment          []string `json:"equipment"`
 	SkipWarmupCooldown bool     `json:"skip_warmup_cooldown"`
-	ExplicitProgram    bool     `json:"explicit_program"`
+	// Type is the deduced training Type, one of the vocabulary IDs
+	// in knowledge/features/types.json, or mixed for no preference.
+	// Empty means the request says nothing about the Type.
+	Type string `json:"type"`
+	// Flags are the deduced transversal traits, vocabulary IDs from
+	// knowledge/features/flags.json.
+	Flags           []string `json:"flags"`
+	ExplicitProgram bool     `json:"explicit_program"`
 	// Movements are the program's exercises in the request's own vocabulary
 	// ("pull-up", "push-up"); populated only when the request pins a concrete
 	// set, and matched against the exercise catalog downstream — never IDs

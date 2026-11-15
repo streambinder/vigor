@@ -18,7 +18,7 @@ var (
 	_ = qt422016.AcquireByteBuffer
 )
 
-func StreamNodeExercisesSystem(qw422016 *qt422016.Writer, skipWarmupCooldown bool, minWork int, maxWork int, explicitProgram bool, requestSchema string) {
+func StreamNodeExercisesSystem(qw422016 *qt422016.Writer, skipWarmupCooldown bool, minWork int, maxWork int, explicitProgram bool, requestSchema string, exerciseType string, flags []string) {
 	qw422016.N().S(`You are an exercise selection specialist. Pick exercises from the provided pools for a training session.
 
 Output a JSON object with:
@@ -28,9 +28,24 @@ Output a JSON object with:
 
 Rules:
 - Use only exercise IDs from the provided lists — never invent IDs
-- Annotations in parentheses are metadata, not part of the ID: weighted, timer-only, reps-only, recent, a d-prefixed difficulty (d0 easiest, d100 hardest), equipment, and form cues where present
+- Annotations in parentheses are metadata, not part of the ID: weighted, timer-only, reps-only, recent, type and flags, a d-prefixed difficulty (d0 easiest, d100 hardest), equipment, and form cues where present
 - Difficulty bounds and equipment availability are already enforced before the pool reaches you — use the metadata to judge fit between near-equal options
-- For work exercises: cover the primary muscles with higher count, secondary muscles with 1-2 exercises
+`)
+	if exerciseType != "" && exerciseType != "mixed" {
+		qw422016.N().S(`- The requested training type is `)
+		qw422016.E().S(exerciseType)
+		qw422016.N().S(`: the work pool already contains only `)
+		qw422016.E().S(exerciseType)
+		qw422016.N().S(` exercises — pick from it, do not substitute another type
+`)
+	}
+	if len(flags) > 0 {
+		qw422016.N().S(`- The requested flags are `)
+		qw422016.E().S(strings.Join(flags, ", "))
+		qw422016.N().S(`: the work pool already contains only exercises carrying them — pick from it
+`)
+	}
+	qw422016.N().S(`- For work exercises: cover the primary muscles with higher count, secondary muscles with 1-2 exercises
 - If muscles to rest are listed, never pick exercises from their groups
 `)
 	if !explicitProgram {
@@ -71,15 +86,15 @@ Rules:
 `)
 }
 
-func WriteNodeExercisesSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool, minWork int, maxWork int, explicitProgram bool, requestSchema string) {
+func WriteNodeExercisesSystem(qq422016 qtio422016.Writer, skipWarmupCooldown bool, minWork int, maxWork int, explicitProgram bool, requestSchema string, exerciseType string, flags []string) {
 	qw422016 := qt422016.AcquireWriter(qq422016)
-	StreamNodeExercisesSystem(qw422016, skipWarmupCooldown, minWork, maxWork, explicitProgram, requestSchema)
+	StreamNodeExercisesSystem(qw422016, skipWarmupCooldown, minWork, maxWork, explicitProgram, requestSchema, exerciseType, flags)
 	qt422016.ReleaseWriter(qw422016)
 }
 
-func NodeExercisesSystem(skipWarmupCooldown bool, minWork int, maxWork int, explicitProgram bool, requestSchema string) string {
+func NodeExercisesSystem(skipWarmupCooldown bool, minWork int, maxWork int, explicitProgram bool, requestSchema string, exerciseType string, flags []string) string {
 	qb422016 := qt422016.AcquireByteBuffer()
-	WriteNodeExercisesSystem(qb422016, skipWarmupCooldown, minWork, maxWork, explicitProgram, requestSchema)
+	WriteNodeExercisesSystem(qb422016, skipWarmupCooldown, minWork, maxWork, explicitProgram, requestSchema, exerciseType, flags)
 	qs422016 := string(qb422016.B)
 	qt422016.ReleaseByteBuffer(qb422016)
 	return qs422016

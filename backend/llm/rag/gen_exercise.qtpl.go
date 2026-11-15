@@ -27,6 +27,14 @@ func StreamGenExercise(qw422016 *qt422016.Writer, exercise model.Exercise) {
 		qw422016.E().S(strings.Join(exercise.Equipment, ", "))
 		qw422016.N().S(`.`)
 	}
+	qw422016.N().S(` Type: `)
+	qw422016.E().S(exercise.Type)
+	qw422016.N().S(`. `)
+	if len(exercise.Flags) > 0 {
+		qw422016.N().S(`Flags: `)
+		qw422016.E().S(strings.Join(exercise.Flags, ", "))
+		qw422016.N().S(`.`)
+	}
 	qw422016.N().S(` Muscles: `)
 	qw422016.E().S(strings.Join(exercise.Muscles, ", "))
 	qw422016.N().S(`. `)

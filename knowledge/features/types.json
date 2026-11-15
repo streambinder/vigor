@@ -1,0 +1,96 @@
+[
+  {
+    "id": "free_weights",
+    "aliases": [
+      "free weights",
+      "pesi liberi",
+      "pesos libres",
+      "poids libres",
+      "Freihanteln",
+      "pesos livres",
+      "свободные веса",
+      "weights",
+      "pesi",
+      "pesas",
+      "poids",
+      "Gewichte",
+      "pesos",
+      "веса"
+    ]
+  },
+  {
+    "id": "machines_cables",
+    "aliases": [
+      "machines and cables",
+      "macchine e cavi",
+      "máquinas y cables",
+      "machines et câbles",
+      "Maschinen und Kabel",
+      "máquinas e cabos",
+      "тренажёры и тросы",
+      "machines",
+      "macchine",
+      "máquinas",
+      "cables",
+      "cavi"
+    ]
+  },
+  {
+    "id": "bodyweight",
+    "aliases": [
+      "bodyweight",
+      "corpo libero",
+      "calisthenics",
+      "peso corporal",
+      "poids du corps",
+      "calistenia",
+      "Körpergewicht",
+      "вес тела",
+      "body weight",
+      "a corpo libero"
+    ]
+  },
+  {
+    "id": "bands",
+    "aliases": [
+      "bands",
+      "bande elastiche",
+      "elastic bands",
+      "bandas elásticas",
+      "bandes élastiques",
+      "Widerstandsbänder",
+      "резинки",
+      "эспандеры",
+      "elastic",
+      "elastici"
+    ]
+  },
+  {
+    "id": "special",
+    "aliases": [
+      "special",
+      "speciale",
+      "altro",
+      "especial",
+      "spécial",
+      "speziell",
+      "специальное",
+      "other"
+    ]
+  },
+  {
+    "id": "mixed",
+    "request_only": true,
+    "aliases": [
+      "mixed",
+      "misto",
+      "mixto",
+      "mixte",
+      "gemischt",
+      "смешанный",
+      "any",
+      "qualsiasi",
+      "tutto"
+    ]
+  }
+]
