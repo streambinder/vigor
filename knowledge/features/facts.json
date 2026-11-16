@@ -777,91 +777,91 @@
     "reference": "https://doi.org/10.7717/peerj.14412",
     "area": "psychology",
     "tags": ["motor-imagery", "muscle-contraction", "visualization"],
-    "content": "Motor imagery training improves skeletal muscle contractile properties even without physical movement. Regular mental rehearsal of exercises enhances neuromuscular efficiency, making it a viable supplement to physical training."
+    "content": "In a 4-week trial, motor imagery of maximal isometric contractions did not significantly improve strength or tensiomyography contractile properties, while physical practice raised maximal strength about 6%. Mental rehearsal alone is not a substitute for lifting."
   },
   {
     "reference": "https://doi.org/10.3389/fphys.2025.1617104",
     "area": "performance",
     "tags": ["core-training", "upper-body", "power", "sport-specific"],
-    "content": "Heavy-resistance core training transfers to improved upper-body strength and power output in junior athletes. Core stability is a force transmission link—weak core limits extremity power expression regardless of limb strength."
+    "content": "Eight weeks of heavy-resistance core training improved upper-body power output about 12% in national-level junior athletes, but maximal isokinetic strength did not change. Core work transfers to power, not to maximal strength."
   },
   {
     "reference": "https://doi.org/10.1016/j.ejrad.2019.01.033",
     "area": "injury",
     "tags": ["knee-health", "patellar", "ACL", "prevention"],
-    "content": "Patellar alignment and trochlear morphology influence long-term knee joint health after ACL reconstruction. Targeted VMO strengthening and balanced quad/hamstring ratios help preserve patellofemoral joint integrity."
+    "content": "Greater lateral patellar displacement and adverse trochlear morphology at one year after ACL reconstruction raise the risk of worsening patellofemoral cartilage and bone lesions by five years. Monitor alignment to protect long-term knee health."
   },
   {
     "reference": "https://doi.org/10.1136/bjsports-2022-105496",
     "area": "injury",
     "tags": ["knee", "osteoarthritis", "injury", "prevention"],
-    "content": "Traumatic knee injury significantly increases lifetime osteoarthritis risk. Meniscal and ACL injuries carry the highest risk. Prehabilitation through neuromuscular training and avoiding excessive joint loading during early rehabilitation reduces long-term joint degeneration."
+    "content": "Traumatic knee injury significantly increases lifetime osteoarthritis risk. Meniscal and ACL injuries carry the highest risk, with combined ACL plus meniscectomy showing the largest odds. Protect injured knees with graded, progressive loading."
   },
   {
     "reference": "https://doi.org/10.1519/JSC.0b013e31827de07d",
     "area": "technique",
     "tags": ["valsalva", "bracing", "intra-abdominal-pressure"],
-    "content": "The Valsalva maneuver significantly increases intra-abdominal pressure and spinal stability during heavy lifts. It is not contraindicated in healthy trained individuals. Proper bracing technique is essential for spine protection under heavy loads."
+    "content": "The Valsalva maneuver significantly increases intra-abdominal pressure and spinal stability during heavy lifts. Health risks during resistance exercise remain unconfirmed, so brace deliberately and breathe out between reps rather than holding breath throughout a set."
   },
   {
-    "reference": "https://doi.org/10.3389/fphys.2025.1560453",
+    "reference": "https://doi.org/10.3389/fendo.2025.1560453",
     "area": "conditioning",
     "tags": ["HIIT", "Tabata", "metabolic", "obesity"],
-    "content": "High-intensity Tabata-style training modulates hepatokines and metabolic markers more effectively than moderate-intensity continuous training in individuals with obesity. Short intense protocols drive systemic metabolic improvements beyond what steady-state achieves."
+    "content": "In men with obesity, 12 weeks of Tabata or high-intensity interval training reduced hepatokines (fetuin-B, FGF-21, FGL-1, selenoprotein P) and body fat more than continuous aerobic training. Short intense bouts drive larger metabolic improvements."
   },
   {
     "reference": "https://doi.org/10.1007/s40279-023-01879-0",
     "area": "performance",
     "tags": ["morning-training", "evening-training", "metabolic"],
-    "content": "Morning exercise produces greater improvements in fat oxidation and insulin sensitivity. Evening exercise favors strength and power output due to higher core temperature and circadian hormone peaks. Choose training time based on primary goal."
+    "content": "Morning training shows no superior metabolic effect over afternoon training. Afternoon exercise reduces triglycerides more, and possibly fasting glucose. Schedule sessions by preference and adherence, not by time-of-day metabolic claims."
   },
   {
-    "reference": "https://doi.org/10.1007/s40279-016-0508-7",
+    "reference": "https://doi.org/10.1007/s40279-013-0071-8",
     "area": "recovery",
     "tags": ["HRV", "RMSSD", "recovery", "autonomic"],
-    "content": "HRV RMSSD below 15ms in adults represents a significant recovery concern regardless of age. Values in this range indicate suppressed parasympathetic activity and warrant reduced training intensity."
+    "content": "Heart rate variability has no universal cutoff: a low RMSSD reading alone is not a recovery verdict. Track HRV against your own longitudinal baseline, since both rises and falls can signal adaptation or fatigue depending on the individual."
   },
   {
-    "reference": "https://doi.org/10.1007/s40279-017-0729-6",
+    "reference": "https://doi.org/10.3390/jcm14217606",
     "area": "recovery",
     "tags": ["sleep", "recovery", "motor-learning", "strength"],
-    "content": "Sleep under 5 hours impairs motor learning and strength recovery. Sleep restriction reduces next-day voluntary force output by 5-20% and degrades neuromuscular coordination."
+    "content": "Insufficient sleep impairs muscular strength, power and endurance and disrupts endocrine balance, raising cortisol while lowering testosterone and growth hormone. Protect sleep duration and quality as a core recovery tool, not an afterthought."
   },
   {
-    "reference": "https://doi.org/10.1249/MSS.0000000000001764",
+    "reference": "https://doi.org/10.1007/s40279-014-0253-z",
     "area": "recovery",
     "tags": ["resting-heart-rate", "recovery", "overtraining"],
-    "content": "Elevated resting heart rate above personal baseline indicates incomplete parasympathetic recovery. A sustained rise of 5+ bpm over baseline is a reliable marker of accumulated training stress."
+    "content": "Resting heart rate is one internal-load marker among several: a rise above your personal baseline suggests incomplete recovery, but no single marker is definitive. Compare external load with internal response to judge fatigue."
   },
   {
     "reference": "https://doi.org/10.1007/s00421-017-3725-7",
     "area": "recovery",
     "tags": ["DOMS", "fatigue", "external-load"],
-    "content": "After resistance training, especially to failure or with unfamiliar/eccentric work, neuromuscular performance can remain depressed for 24-48 hours, and muscle soreness (DOMS) typically peaks at 24-72 hours. Do not train the same muscle group hard again within this window."
+    "content": "After resistance training, especially to failure or with unfamiliar or eccentric work, neuromuscular performance can remain depressed for 24-48 hours. Avoid training the same muscle group hard again within this window."
   },
   {
-    "reference": "https://doi.org/10.1007/s40279-017-0688-y",
+    "reference": "https://doi.org/10.1001/jama.284.7.861",
     "area": "recovery",
     "tags": ["deep-sleep", "recovery", "growth-hormone"],
-    "content": "Deep sleep duration correlates more strongly with physical recovery than total sleep time. Growth hormone release concentrates in deep sleep phases, directly supporting tissue repair and adaptation."
+    "content": "Growth hormone secretion is closely tied to slow-wave (deep) sleep, which falls from about 19% to 3% of sleep between early adulthood and midlife, paralleling the decline in growth hormone. Deep sleep is the hormonal recovery window."
   },
   {
-    "reference": "https://doi.org/10.1007/s40279-014-0271-5",
+    "reference": "https://doi.org/10.1249/mss.0000000000003671",
     "area": "recovery",
     "tags": ["HRV", "training-load", "monitoring"],
-    "content": "HRV-guided training adjustments outperform fixed programming for endurance and strength outcomes. Reducing load when HRV trends downward prevents overreaching and accelerates adaptation."
+    "content": "Heart rate variability-guided training does not outperform fixed race-pace or heart-rate prescription: all approaches improved VO2max, economy and time-trial performance equally over six weeks. HRV-guided prescription only reduced between-athlete response variation."
   },
   {
     "reference": "https://doi.org/10.3389/fphys.2024.1358191",
     "area": "conditioning",
     "tags": ["EMOM", "AMRAP", "for-time", "velocity", "fatigue"],
-    "content": "At identical volume, EMOM produces the highest mean propulsive velocity and least intra-set velocity loss of EMOM/AMRAP/for-time formats. Mandatory minute-long partial recovery is the mechanism — faster reps leave more rest, preserving movement quality. EMOM is the most technically conservative CrossFit-style format."
+    "content": "At identical volume, EMOM shows the least intra-set velocity loss of EMOM/AMRAP/for-time formats, while AMRAP produces the lowest mean propulsive velocity and for-time the greatest velocity loss. Mandatory minute-long partial recovery preserves movement quality."
   },
   {
     "reference": "https://doi.org/10.5114/biolsport.2021.102928",
     "area": "conditioning",
     "tags": ["AMRAP", "for-time", "lactate", "energy-systems"],
-    "content": "AMRAP workouts produce lower blood lactate (~9.3 mmol/L) than rounds-for-time workouts (~15.8 mmol/L) at matched exercise content. AMRAP favors the oxidative pathway and aerobic base development; for-time drives greater glycolytic and lactate threshold demand."
+    "content": "Two different CrossFit workouts produced different lactate responses: AMRAP 'Cindy' reached about 9.3 mmol/L, rounds-for-time 'Open 18.4' about 15.8 mmol/L. For-time formats drive greater glycolytic demand than AMRAP at similar effort."
   },
   {
     "reference": "https://doi.org/10.1007/s42978-020-00092-z",
@@ -879,13 +879,13 @@
     "reference": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8439678/",
     "area": "conditioning",
     "tags": ["EPOC", "fat-oxidation", "HIIT", "caloric-expenditure"],
-    "content": "Excess post-exercise oxygen consumption (EPOC) is significant for approximately 14 hours after high-intensity exercise, not 24-48 hours as commonly claimed. Estimated additional caloric expenditure through this window is ~168 kcal. EPOC contributes roughly 6-15% of session energy expenditure — meaningful but not a primary fat-loss mechanism."
+    "content": "In trained women, resting metabolism stayed elevated 14 hours after resistance training or HIIT, but not at 24 hours. The extra burn was small (about 3 kcal per 30 minutes), so EPOC is not a major fat-loss driver."
   },
   {
-    "reference": "https://doi.org/10.1519/JSC.0000000000003555",
+    "reference": "https://doi.org/10.1519/JSC.0000000000003454",
     "area": "programming",
     "tags": ["failure", "RIR", "load", "hypertrophy", "motor-unit-recruitment"],
-    "content": "Training to failure is necessary at low loads (<=50% 1RM) to recruit high-threshold motor units and maximize hypertrophy stimulus. At high loads (>=70% 1RM), stopping 1-3 reps short of failure produces equivalent hypertrophy with less fatigue and lower injury risk. Adjust failure proximity based on load, not habit."
+    "content": "Training to failure boosts hypertrophy at low loads (30% 1RM) but adds nothing at high loads (80% 1RM), where stopping short of failure builds equal muscle. Take light sets to failure; heavy sets can stop short."
   },
   {
     "reference": "https://link.springer.com/article/10.1007/s40279-024-02149-3",
@@ -897,13 +897,13 @@
       "mitochondria",
       "fat-oxidation"
     ],
-    "content": "Zone 2 training (60-70% HRmax, 1.0-2.0 mmol/L blood lactate, conversational pace) drives mitochondrial biogenesis and fat oxidation capacity. Six weeks produces ~55% increase in mitochondrial size and ~44% increase in citrate synthase activity. Elite endurance athletes distribute ~80% of volume in Zone 2 and ~20% at high intensity, minimizing moderate-intensity threshold work."
+    "content": "A network meta-analysis of individual-participant data found no difference in VO2max or time-trial gains between polarized and pyramidal intensity distributions. Competitive athletes may gain more from polarized, recreational athletes from pyramidal training."
   },
   {
-    "reference": "https://www.highnorth.co.uk/articles/zone-2-training-inigo-san-millan",
+    "reference": "https://doi.org/10.1152/japplphysiol.00361.2026",
     "area": "conditioning",
-    "tags": ["zone-2", "lactate", "fat-oxidation", "intensity-control"],
-    "content": "A single lactate spike above Zone 2 during an endurance session suppresses fat oxidation for approximately 30 minutes, compromising the mitochondrial adaptation stimulus. Zone 2 sessions must maintain strict intensity discipline; any surge into higher intensity zones resets the fat-oxidation clock for the remainder of that period."
+    "tags": ["lactate", "fat-oxidation", "lipolysis", "intensity-control"],
+    "content": "Raising blood lactate to high-intensity levels blunted exercise-stimulated lipolysis by about 25%, but fat oxidation during moderate exercise was unchanged in healthy adults. A lactate spike alone does not shut down fat burning."
   },
   {
     "reference": "https://doi.org/10.1186/s40798-023-00633-0",
@@ -915,42 +915,31 @@
       "neural-adaptation",
       "strength-retention"
     ],
-    "content": "During a deload, maintaining training intensity (load on the bar) is more critical than maintaining volume for preserving strength. Volume reduction is the primary fatigue management tool; reducing intensity causes neural adaptation loss. Reduce sets by 40-50%, keep loads at or near pre-deload working weights."
+    "content": "During a deload, expert consensus is to keep training intensity high and cut volume by reducing sets, repetitions or training days. Cut volume first; keep loads at or near pre-deload working weights."
   },
   {
     "reference": "https://doi.org/10.3389/fnut.2024.1388986",
     "area": "nutrition",
     "tags": ["leucine", "older-adults", "MPS", "mTOR", "protein-quality"],
-    "content": "Adults over 60 require ~2.8-3.0g of leucine per meal (~30g of total protein) to activate mTORC1 and trigger muscle protein synthesis, due to anabolic resistance. Younger adults show a near-linear MPS response with no hard leucine threshold. Fast-digesting whey (~10-11% leucine) is more effective than slow-digesting sources for meeting this threshold post-exercise in older populations."
+    "content": "Adults over 60 require about 2.8-3.0 g of leucine per meal (around 30 g protein) to activate mTORC1 and trigger muscle protein synthesis, due to anabolic resistance. Younger adults show a near-linear MPS response with no hard leucine threshold."
   },
   {
     "reference": "https://doi.org/10.3389/fspor.2022.1035190",
     "area": "technique",
-    "tags": [
-      "lengthened-position",
-      "stretch-mediated-hypertrophy",
-      "mTOR",
-      "exercise-selection"
-    ],
-    "content": "Training muscles at their lengthened position produces approximately 3x greater hypertrophy than training at shortened positions, across a 26-study meta-analysis. Mechanism: passive tension in stretched sarcomeres activates costamere mechanosensors and mTOR signaling. Prioritize exercises that load at full stretch: deficit calf raises, incline curls, seated leg curls, Romanian deadlifts."
+    "tags": ["inter-set-stretch", "hypertrophy", "time-efficient", "stretch"],
+    "content": "Adding stretches between sets may enhance hypertrophy without lengthening the session: passive stretch activates anabolic signalling through muscle force sensors. Inter-set stretch is a time-efficient option, though long-term evidence is still limited."
   },
   {
     "reference": "https://doi.org/10.3389/fmed.2025.1635219",
     "area": "performance",
-    "tags": [
-      "concurrent-training",
-      "AMPK",
-      "mTOR",
-      "interference",
-      "intensity"
-    ],
-    "content": "Concurrent training interference is caused by high-intensity endurance activating AMPK, which suppresses mTOR signaling -- not by aerobic exercise in general. Moderate-intensity endurance (<=70% HRmax) does not meaningfully activate AMPK. AMPK normalizes within 3 hours after high-intensity cardio, making 3-hour session separation the practical minimum to avoid molecular interference with resistance training adaptations."
+    "tags": ["concurrent-training", "mTOR", "mitochondria", "adaptation"],
+    "content": "The supposed competition between mTOR (growth) and PGC-1alpha (mitochondrial) signalling may not exist in living muscle: resistance training raises both, and mTOR also supports mitochondrial biogenesis. Combined training need not cancel either adaptation."
   },
   {
     "reference": "https://doi.org/10.3389/fspor.2024.1507957",
     "area": "conditioning",
     "tags": ["VO2max", "intervals", "HIIT", "endurance", "protocol"],
-    "content": "4 x 3-minute intervals at 95% vVO2max produce 38% more time above 90% VO2max than 24 x 30-second sprints at 100% intensity, at the same session duration. Longer intervals (3-4 min) are superior to short sprints for VO2max development because they sustain the aerobic system near its ceiling long enough to drive adaptation."
+    "content": "4 x 3-minute intervals at 95% vVO2max produce about 63% more time above 90% VO2max than 24 x 30-second sprints at 100% intensity, at the same session duration. Longer intervals (3-4 min) are superior to short sprints for VO2max development."
   },
   {
     "reference": "https://doi.org/10.3389/fphys.2021.732654",
@@ -980,7 +969,7 @@
     "reference": "https://doi.org/10.1519/JSC.0b013e31819df407",
     "area": "programming",
     "tags": ["youth", "adolescents", "safety", "position stand"],
-    "content": "NSCA position stand: supervised, technique-focused youth resistance training is safe, does not damage growth plates, and typically raises strength about 30% in 8-20 weeks. Prescribe 1-3 sets of 6-15 repetitions, 2-3 non-consecutive days weekly."
+    "content": "NSCA position stand: supervised, technique-focused youth resistance training is safe, does not damage growth plates, and typically raises strength 13-30% in 8-20 weeks. Prescribe 1-3 sets of 8-15 repetitions, 2-3 non-consecutive days weekly."
   },
   {
     "reference": "https://doi.org/10.1136/bjsports-2024-109123",
@@ -2002,5 +1991,63 @@
     "area": "physiology",
     "tags": ["heat-acclimation", "endurance", "thermoregulation"],
     "content": "Acclimate to heat in either dry or humid conditions for about eight days: both expand plasma volume, lower heart rate and core temperature, and transfer benefits across heat types."
+  },
+  {
+    "area": "mobility",
+    "content": "Keep doing some flexibility work after a stretching block: range-of-motion gains stay above baseline after stopping, but decline slightly within two to six weeks without any maintenance stretching.",
+    "reference": "https://doi.org/10.1186/s40798-025-00935-5",
+    "tags": ["stretching", "detraining", "range-of-motion", "flexibility"]
+  },
+  {
+    "area": "mobility",
+    "content": "Expect chronic static stretching to improve range of motion mainly through lower tissue stiffness and higher stretch tolerance, not longer muscle fascicles, since fascicle length did not change after training.",
+    "reference": "https://doi.org/10.1007/s40279-025-02204-7",
+    "tags": [
+      "static-stretching",
+      "range-of-motion",
+      "stiffness",
+      "stretch-tolerance"
+    ]
+  },
+  {
+    "area": "psychology",
+    "content": "Train psychological skills alongside physical training: a meta-analysis of 127 studies links motivation, self-efficacy, conscientiousness and extraversion to better sport performance, with an overall moderate association.",
+    "reference": "https://doi.org/10.1371/journal.pone.0330862",
+    "tags": ["psychology", "motivation", "self-efficacy", "performance"]
+  },
+  {
+    "area": "psychology",
+    "content": "Consider biofeedback or neurofeedback training for athletes seeking a performance edge: a Bayesian meta-analysis of 41 trials found a large average benefit for athletic performance, with a standardised mean difference of 0.88.",
+    "reference": "https://doi.org/10.3389/fpsyg.2025.1662868",
+    "tags": ["biofeedback", "neurofeedback", "performance", "mental-training"]
+  },
+  {
+    "area": "injury",
+    "content": "Add strength training to injury-prevention programmes in contact sports: pooled injury risk fell 30%, with single-component programmes cutting hamstring injuries most and multicomponent programmes cutting knee and ankle injuries.",
+    "reference": "https://doi.org/10.1177/23259671251331134",
+    "tags": [
+      "injury-prevention",
+      "strength-training",
+      "contact-sports",
+      "hamstring"
+    ]
+  },
+  {
+    "area": "conditioning",
+    "content": "To raise VO2max in athletes, use running-based high-intensity intervals of about 140 seconds work and 165 seconds recovery, three times weekly for three to six weeks.",
+    "reference": "https://doi.org/10.1186/s13102-025-01191-6",
+    "tags": ["VO2max", "intervals", "HIIT", "endurance", "protocol"]
+  },
+  {
+    "area": "nutrition",
+    "content": "Do not worry about taking protein immediately before versus after training: direct comparisons found no important difference in lean-mass gains, so prioritise total daily protein instead.",
+    "reference": "https://doi.org/10.3390/nu17132070",
+    "tags": ["protein-timing", "lean-mass", "protein-intake", "nutrition"]
+  },
+  {
+    "area": "recovery",
+    "content": "For delayed-onset muscle soreness, use contrast therapy immediately after exercise, massage at 24 hours, and compression or contrast therapy at 48 hours, matching the treatment to the time since exercise.",
+    "reference": "https://doi.org/10.1007/s40279-025-02187-5",
+    "tags": ["DOMS", "contrast-therapy", "massage", "recovery"]
   }
 ]
