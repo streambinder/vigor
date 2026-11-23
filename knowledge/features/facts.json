@@ -1016,7 +1016,7 @@
     "reference": "https://doi.org/10.2165/11530760-000000000-00000",
     "area": "nutrition",
     "tags": ["glycerol", "hyperhydration", "hydration", "endurance"],
-    "content": "Glycerol hyperhydration: 1.2 g/kg glycerol in 26 mL/kg fluid over 60 minutes, ending 30 minutes before exercise, can raise body water by 1 L or more. Side effects are rare: nausea, headache, GI discomfort."
+    "content": "Glycerol hyperhydration: 1.2 g/kg glycerol in 26 mL/kg fluid over 60 minutes, ending 30 minutes before exercise, can raise body water by 1 L or more. Side effects are rare: nausea, light-headedness, GI discomfort."
   },
   {
     "reference": "https://doi.org/10.1186/s12970-021-00458-w",
@@ -1033,7 +1033,7 @@
     "reference": "https://doi.org/10.1007/s40279-016-0617-7",
     "area": "nutrition",
     "tags": ["nitrates", "beetroot", "endurance", "supplements"],
-    "content": "Dietary nitrate (beetroot juice) modestly improves endurance exercise performance in healthy adults, mainly time-to-exhaustion tests. Effects are smaller or absent in elite athletes and in time trials. Dose 2-3 hours pre-exercise."
+    "content": "Dietary nitrate (beetroot juice) modestly improves endurance exercise capacity, mainly time-to-exhaustion tests (small-to-moderate effect); time-trial effects were trivial and non-significant, and optimal dosing and who benefits most remain unclear."
   },
   {
     "reference": "https://doi.org/10.1042/CS20100597",
@@ -1045,7 +1045,7 @@
     "reference": "https://doi.org/10.1007/s40279-014-0267-6",
     "area": "nutrition",
     "tags": ["vitamin D", "deficiency", "screening", "athletes"],
-    "content": "Vitamin D inadequacy is highly prevalent in athletes, especially indoor-sport and winter-training athletes. Test serum 25(OH)D and supplement vitamin D3 to correct deficiency; extra vitamin D does not boost performance when status is already sufficient."
+    "content": "Vitamin D inadequacy is highly prevalent in athletes, especially indoor-sport and winter-training athletes. Test serum 25(OH)D and supplement vitamin D3 to correct deficiency."
   },
   {
     "reference": "https://doi.org/10.1007/s00421-019-04157-y",
@@ -2049,5 +2049,93 @@
     "content": "For delayed-onset muscle soreness, use contrast therapy immediately after exercise, massage at 24 hours, and compression or contrast therapy at 48 hours, matching the treatment to the time since exercise.",
     "reference": "https://doi.org/10.1007/s40279-025-02187-5",
     "tags": ["DOMS", "contrast-therapy", "massage", "recovery"]
+  },
+  {
+    "reference": "https://doi.org/10.1007/s00421-024-05700-2",
+    "area": "equipment",
+    "tags": ["NMES", "electrical stimulation", "strength", "hypertrophy"],
+    "content": "Superimposing neuromuscular electrical stimulation on resistance training adds small strength and muscle-mass gains over training alone: 13 trials, 374 participants, SMD 0.31 for strength and 0.26 for mass, with larger mass gains over 8–16 weeks."
+  },
+  {
+    "reference": "https://doi.org/10.1080/1750984x.2021.1944271",
+    "area": "psychology",
+    "tags": ["pre-performance routine", "pressure", "performance"],
+    "content": "Use a consistent pre-performance routine before each attempt: a meta-analysis of 112 effect sizes found small-to-moderate performance gains, larger in experimental designs and under pressure, for both extensive and stand-alone routines."
+  },
+  {
+    "reference": "https://doi.org/10.5114/biolsport.2022.106149",
+    "area": "assessment",
+    "tags": [
+      "isometric mid-thigh pull",
+      "reliability",
+      "maximal strength",
+      "testing"
+    ],
+    "content": "Use the isometric mid-thigh pull to track maximal strength reliably: across 16 studies, test-retest ICCs ranged 0.73–0.99 with a median of 0.96, and typical variation was about 5%, for bilateral and unilateral pulls alike."
+  },
+  {
+    "reference": "https://doi.org/10.1038/s41598-026-46144-2",
+    "area": "programming",
+    "tags": ["SAQ training", "change of direction", "sprint", "youth athletes"],
+    "content": "Add speed-agility-quickness training to improve change-of-direction speed and sprinting in young team-sport athletes: 22 trials showed moderate-to-large gains, SMD −0.71 for change of direction and −0.90 for linear sprint."
+  },
+  {
+    "reference": "https://doi.org/10.52082/jssm.2026.772",
+    "area": "injury",
+    "tags": ["ACL", "return to sport", "hop test", "limb symmetry"],
+    "content": "After ACL reconstruction, reaching at least 90% limb symmetry on the single-leg hop for distance raises the odds of returning to sport, but hop performance alone is insufficient to predict reinjury, so do not clear athletes on hops alone."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-024-02143-9",
+    "area": "mobility",
+    "tags": ["static stretching", "flexibility", "dose", "volume"],
+    "content": "Cap static stretching at about 4 minutes per muscle per session and 10 minutes per week: flexibility gains plateau beyond those volumes, and stretching intensity does not change the gain, so favour consistency over harder stretching."
+  },
+  {
+    "reference": "https://doi.org/10.1016/j.gaitpost.2025.110009",
+    "area": "biomechanics",
+    "tags": ["gait retraining", "step rate", "cadence", "running"],
+    "content": "To raise running step rate, use gait retraining: acute protocols add about 16 steps per minute and multi-session programmes about 12, regardless of modality, cue magnitude or programme length."
+  },
+  {
+    "reference": "https://doi.org/10.1053/j.jrn.2026.04.010",
+    "area": "nutrition",
+    "tags": ["creatine", "kidney-function", "blood-markers"],
+    "content": "Creatine raises serum creatinine by about 0.13 mg/dL without changing urea or estimated kidney filtration, so do not mistake the rise for kidney damage."
+  },
+  {
+    "reference": "https://doi.org/10.3390/jfmk11010130",
+    "area": "nutrition",
+    "tags": ["collagen", "tendon", "vitamin-c", "resistance-training"],
+    "content": "Take 15-30 g of collagen with at least 50 mg of vitamin C alongside heavy resistance training (70% of maximum or more) to increase tendon cross-sectional area and stiffness."
+  },
+  {
+    "reference": "https://doi.org/10.1093/nutrit/nuae200",
+    "area": "nutrition",
+    "tags": [
+      "protein-source",
+      "plant-protein",
+      "animal-protein",
+      "muscle-mass"
+    ],
+    "content": "Animal protein gives a small muscle-mass edge over plant protein (effect size -0.20), but strength gains are equal; soy protein matches milk protein, and the gap is driven by non-soy plant proteins."
+  },
+  {
+    "reference": "https://doi.org/10.1096/fj.202504783R",
+    "area": "recovery",
+    "tags": ["omega-3", "inflammation", "muscle-soreness", "recovery"],
+    "content": "Take at least 2 g per day of combined EPA and DHA omega-3 for six weeks or more to moderately reduce soreness, creatine kinase and inflammatory markers after hard training."
+  },
+  {
+    "reference": "https://doi.org/10.3389/fspor.2025.1641379",
+    "area": "performance",
+    "tags": ["repeated-sprint-training", "hypoxia", "repeated-sprint-ability"],
+    "content": "Do repeated sprints in hypoxia rather than normal air to gain a moderate extra improvement in repeated-sprint ability (effect size 0.61), with smaller gains in aerobic and anaerobic capacity."
+  },
+  {
+    "reference": "https://doi.org/10.1007/s40279-026-02468-7",
+    "area": "conditioning",
+    "tags": ["repeated-sprint-training", "change-of-direction", "team-sports"],
+    "content": "For team-sport athletes, non-linear repeated sprints with changes of direction show a moderate edge over straight-line sprints for repeated-sprint ability (SMDC 1.21), with favourable but non-significant trends for sprint times and change of direction."
   }
 ]
