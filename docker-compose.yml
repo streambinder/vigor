@@ -14,7 +14,7 @@ services:
     networks:
       - default
   embedding:
-    image: michaelf34/infinity:0.0.79
+    image: michaelf34/infinity:0.0.80
     command:
       - v2
       - --model-id
