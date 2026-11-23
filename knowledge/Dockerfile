@@ -13,7 +13,7 @@ COPY backend ../backend/
 COPY knowledge/main.go ./
 RUN CGO_ENABLED=0 go build -o bootstrap main.go
 
-FROM python:3.15.0-slim-bookworm AS animations-builder
+FROM python:3.15.2-slim-bookworm AS animations-builder
 WORKDIR /build
 # numpy 1.26.4 and scipy 1.17.1 have no cp315 wheels, so pip builds them from source and needs C and Fortran toolchains, plus pkg-config and OpenBLAS headers for the scipy OpenBLAS lookup
 # scipy is built with pythran disabled: pythran's gast-based dead-code elimination crashes on the Python 3.15 AST, and nothing in the animation builder imports scipy, so the pythran kernels are not needed here
