@@ -1,5 +1,5 @@
 # hadolint ignore=DL3006
-FROM ghcr.io/adrianjagielak/flutter:3.50.0 AS builder
+FROM ghcr.io/adrianjagielak/flutter:3.50.1 AS builder
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ COPY . .
 RUN dart run build_runner build --delete-conflicting-outputs \
     && flutter build web --release
 
-FROM nginx:1.31.7-alpine
+FROM nginx:1.31.8-alpine
 
 COPY --from=builder /app/build/web /usr/share/nginx/html
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
