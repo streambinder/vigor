@@ -244,6 +244,8 @@ class _TrainingDetailsScreenState extends State<TrainingDetailsScreen> with AppE
       _training.id,
       feedback: result.feedback,
       activityFeedback: result.activityFeedback,
+      activityActuals: result.activityActuals,
+      activityReports: result.activityReports,
       completedIn: result.completedIn,
     );
     if (!response.isSuccess && mounted) {
